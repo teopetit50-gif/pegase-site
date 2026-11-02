@@ -44,6 +44,7 @@ import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { useDaliro } from "./donnees";
 import { PRIX_PLUS, accordExemple, canalAccord } from "./exemplesReglages";
+import { exporterCsv } from "./navigateur";
 import "./dal-reglages.css";
 
 const BASE = `${RACINE}/daliro`;
@@ -51,7 +52,8 @@ const BASE = `${RACINE}/daliro`;
 type Tri = "designation" | "origine" | "unite" | "prix" | "statut" | "date";
 type Filtre = "tous" | "valide" | "propose";
 type Form =
-  | { type: "poser"; designation?: string; unite?: string }
+  | { type: "poser"; designation?: string; unite?: string; corps?: string; groupe?: boolean }
+  | { type: "valider-tous"; prix: Prix[] }
   | { type: "valider"; prix: Prix }
   | { type: "donner" }
   | { type: "activer" }
@@ -105,13 +107,18 @@ export default function Reglages() {
   const tri: Tri = (["designation", "origine", "unite", "prix", "statut", "date"] as Tri[]).find((t) => t === params.get("tri")) ?? "designation";
   const sens = params.get("sens") === "desc" ? "desc" : "asc";
   const groupes = params.get("groupes") === "corps";
+  /* les deux pages de réglages (Labels, Templates chez Linear) : ?page=organisation */
+  const page: "bibliotheque" | "organisation" = params.get("page") === "organisation" ? "organisation" : "bibliotheque";
+  /* les colonnes masquées (Display options) : ?masquees=desc,unite,prix,statut,date */
+  const masquees = (params.get("masquees") ?? "").split(",").filter(Boolean);
+  const vue = (c: string) => !masquees.includes(c);
   const adresse = (changes: Record<string, string | null>) => {
     const p = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(changes)) {
       if (v) p.set(k, v);
       else p.delete(k);
     }
-    const s = p.toString();
+    const s = p.toString().replace(/%2C/gi, ",");
     return s ? `${chemin}?${s}` : chemin;
   };
   const [saisie, setSaisie] = useState(q);
@@ -208,7 +215,7 @@ export default function Reglages() {
   const poseChamp = (k: string, v: string) => setChamps((p) => ({ ...p, [k]: v }));
   const ouvrir = (f: Form) => {
     setErreur(null);
-    setChamps(f?.type === "poser" ? { designation: f.designation ?? "", unite: f.unite ?? "u", pu: "" } : {});
+    setChamps(f?.type === "poser" ? { designation: f.designation ?? "", unite: f.unite ?? "u", pu: "", corps: f.corps ?? "" } : {});
     setForm(f);
   };
 
@@ -241,19 +248,32 @@ export default function Reglages() {
       (t) => ({ ...t, bibliotheque: t.bibliotheque.map((x) => (x.id === p.id ? { ...x, statut: "valide" as const } : memePrix(x, p.designation, p.unite) && x.statut === "valide" ? { ...x, statut: "retire" as const } : x)) }),
       `« ${p.designation} » vaut ${montant(p.prix_unitaire_ht)} / ${libelleUnite(p.unite)} : les avenants peuvent s'en servir.`,
     );
+  /* valider plusieurs prix proposés d'un coup (la sélection) : la même porte, prix après prix */
+  const faireValiderTous = (l: Prix[]) =>
+    agir(
+      async () => {
+        for (const p of l) await validerPrix(p.id, null);
+      },
+      (t) => ({
+        ...t,
+        bibliotheque: t.bibliotheque.map((x) => (l.some((p) => p.id === x.id) ? { ...x, statut: "valide" as const } : l.some((p) => memePrix(x, p.designation, p.unite) && p.id !== x.id) && x.statut === "valide" ? { ...x, statut: "retire" as const } : x)),
+      }),
+      `${l.length} prix validé${l.length > 1 ? "s" : ""} : les avenants peuvent s'en servir.`,
+    ).then(() => setSelection([]));
   const fairePoser = () => {
     const designation = ch("designation").trim();
     const unite = ch("unite") || "u";
     const pu = nombre(ch("pu"));
+    const corps = ch("corps").trim().toLowerCase() || null;
     const id = nid();
     const clientId = premier?.chantier.client_id ?? client?.client_id ?? "";
     return agir(
-      () => poserPrix(clientId, designation, unite, pu, null),
+      () => poserPrix(clientId, designation, unite, pu, corps),
       (t) => ({
         ...t,
         bibliotheque: [
           ...t.bibliotheque.map((x) => (memePrix(x, designation, unite) && x.statut === "valide" ? { ...x, statut: "retire" as const } : x)),
-          { id, designation, unite, corps_etat: null, origine: "saisie" as const, ligne_marche_id: null, date_prix: aujourdhui(), statut: "valide" as const, prix_unitaire_ht: pu },
+          { id, designation, unite, corps_etat: corps, origine: "saisie" as const, ligne_marche_id: null, date_prix: aujourdhui(), statut: "valide" as const, prix_unitaire_ht: pu },
         ],
       }),
       "Le prix est posé et validé dans la bibliothèque.",
@@ -339,18 +359,64 @@ export default function Reglages() {
   ];
   const nbLignesOrga = (dirige ? canaux.length : 1) + controlesOrga.length;
 
+  /* ——— la sélection (cases à cocher de Linear) et ses gestes groupés ——— */
+  const [selection, setSelection] = useState<string[]>([]);
+  const choisis = visibles.filter((p) => selection.includes(p.id));
+  const aValider = choisis.filter((p) => p.statut === "propose");
+  const cocher = (id: string) => setSelection((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
+  const toutCoche = visibles.length > 0 && visibles.every((p) => selection.includes(p.id));
+  const exporter = (l: Prix[]) =>
+    exporterCsv(
+      "bibliotheque-de-prix",
+      ["Désignation", "Corps d'état", "Origine", "Unité", "PU HT", "Statut", "Date"],
+      l.map((p) => [p.designation, p.corps_etat ?? "", p.origine === "marche" ? "Marché vérifié" : "Saisi", libelleUnite(p.unite), voitPrix ? (p.prix_unitaire_ht ?? "") : "", p.statut === "valide" ? "Validé" : "Proposé", p.date_prix]),
+    );
+  const corpsConnus = [...new Set(bibliotheque.map((p) => p.corps_etat).filter((c): c is string => !!c))].sort((a, b) => a.localeCompare(b, "fr"));
+  const COLONNES_AFFICHABLES: { cle: string; libelle: string }[] = [
+    { cle: "desc", libelle: "Description" },
+    { cle: "unite", libelle: "Unité" },
+    { cle: "prix", libelle: "PU HT" },
+    { cle: "statut", libelle: "Statut" },
+    { cle: "date", libelle: "Date" },
+  ];
+  const grille = `60px minmax(0, 2fr) ${vue("desc") ? "minmax(0, 3fr) " : ""}${vue("unite") ? "75px " : ""}${vue("prix") ? "75px " : ""}${vue("statut") ? "102px " : ""}${vue("date") ? "82px " : ""}28px 32px`;
+  const affichageModifie = groupes || masquees.length > 0 || tri !== "designation" || sens !== "asc";
+
+  useEffect(() => {
+    if (!selection.length) return;
+    const echap = (e: KeyboardEvent) => e.key === "Escape" && !document.querySelector("[role='dialog']") && setSelection([]);
+    window.addEventListener("keydown", echap);
+    return () => window.removeEventListener("keydown", echap);
+  }, [selection.length]);
+
+  /* l'interrupteur des deux pages de réglages (la barre latérale des réglages de Linear) */
+  const interrupteur = (
+    <nav className="dal-rg-pages" aria-label="Réglages">
+      <Link href={adresse({ page: null })} scroll={false} className="dal-rg-page-lien" aria-current={page === "bibliotheque" ? "page" : undefined}>
+        <DalIcone nom="Label" taille={14} />
+        <span>Bibliothèque de prix</span>
+      </Link>
+      <Link href={adresse({ page: "organisation" })} scroll={false} className="dal-rg-page-lien" aria-current={page === "organisation" ? "page" : undefined}>
+        <DalIcone nom="NotePad" taille={14} />
+        <span>Organisation</span>
+      </Link>
+    </nav>
+  );
+
   return (
     <DalCarte className="dal-rg-page">
       <h1 className="v2-sr">Réglages</h1>
       <div className="dal-defile dal-rg-defile">
         {/* ——— la bibliothèque de prix : Settings › Issue labels ——— */}
-        <div className="dal-rg-bande" aria-hidden="true" />
+        <div className="dal-rg-bande">{interrupteur}</div>
+        {page === "bibliotheque" ? (
+        <>
         <div className="dal-rg-titre">
           <h2 className="dal-rg-h2">Bibliothèque de prix</h2>
           <div className="dal-rg-boutons">
-            <Link href={`${BASE}/annuaire`} className="dal-rg-btn">
-              Annuaire
-            </Link>
+            <button type="button" className="dal-rg-btn" onClick={() => ouvrir({ type: "poser", groupe: true })} disabled={enLecture || sansChantier} title="Un corps d'état est un groupe de prix : nommez-le et posez son premier prix">
+              Nouveau corps d&apos;état
+            </button>
             <button type="button" className="dal-rg-btn dal-rg-btn--plein" onClick={() => ouvrir({ type: "poser" })} disabled={enLecture || sansChantier}>
               Poser un prix
             </button>
@@ -395,6 +461,7 @@ export default function Reglages() {
             <div className="dal-rg-pop" data-dal-rg-pop="">
               <button type="button" className="dal-rond dal-rond--plein" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={menu === "affichage"} onClick={() => setMenu(menu === "affichage" ? null : "affichage")}>
                 <DalIcone nom="Affichage" />
+                {affichageModifie ? <span className="dal-rg-point" /> : null}
               </button>
               {menu === "affichage" ? (
                 <div className="dal-menu dal-rg-menu" role="menu" aria-label="Options d'affichage">
@@ -403,21 +470,67 @@ export default function Reglages() {
                     <span className="dal-pousse">Regrouper par corps d&apos;état</span>
                     {groupes ? <DalIcone nom="IssueStatusDone" /> : null}
                   </Link>
+                  <div className="dal-menu-sep" role="separator" />
+                  <p className="dal-rg-menu-titre">Trier par</p>
+                  {(
+                    [
+                      ["designation", "Désignation"],
+                      ["prix", "PU HT"],
+                      ["date", "Date"],
+                      ["statut", "Statut"],
+                    ] as const
+                  ).map(([cle, libelle]) => (
+                    <Link key={cle} href={adresse({ tri: cle === "designation" ? null : cle, sens: null })} scroll={false} replace role="menuitemradio" aria-checked={tri === cle} className="dal-menu-option">
+                      <DalIcone nom={cle === "prix" ? "Euro" : cle === "date" ? "Calendar" : cle === "statut" ? "IssueStatusDone" : "Label"} />
+                      <span className="dal-pousse">{libelle}</span>
+                      {tri === cle ? <FlecheTri bas={sens === "asc"} /> : null}
+                    </Link>
+                  ))}
+                  <div className="dal-menu-sep" role="separator" />
+                  <p className="dal-rg-menu-titre">Colonnes affichées</p>
+                  {COLONNES_AFFICHABLES.map((c) => (
+                    <Link
+                      key={c.cle}
+                      href={adresse({ masquees: (vue(c.cle) ? [...masquees, c.cle] : masquees.filter((x) => x !== c.cle)).join(",") || null })}
+                      scroll={false}
+                      replace
+                      role="menuitemcheckbox"
+                      aria-checked={vue(c.cle)}
+                      className="dal-menu-option"
+                    >
+                      <span className="dal-pousse">{c.libelle}</span>
+                      {vue(c.cle) ? <DalIcone nom="IssueStatusDone" /> : null}
+                    </Link>
+                  ))}
+                  <div className="dal-menu-sep" role="separator" />
+                  <button type="button" role="menuitem" className="dal-menu-option" onClick={() => (setMenu(null), exporter(visibles))} disabled={!visibles.length}>
+                    <DalIcone nom="Spreadsheet" />
+                    <span className="dal-pousse">Exporter la liste (CSV)</span>
+                    <span className="dal-rg-menu-compte">{visibles.length}</span>
+                  </button>
+                  {affichageModifie ? (
+                    <Link href={adresse({ groupes: null, masquees: null, tri: null, sens: null })} scroll={false} replace role="menuitem" className="dal-menu-option" onClick={() => setMenu(null)}>
+                      <DalIcone nom="Refresh" />
+                      <span>Revenir à l&apos;affichage par défaut</span>
+                    </Link>
+                  ) : null}
                 </div>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="dal-rg-tableau" role="table" aria-label="Bibliothèque de prix">
+        <div className="dal-rg-tableau" role="table" aria-label="Bibliothèque de prix" data-selection={selection.length ? "" : undefined} style={{ "--dal-rg-grille-voulue": grille } as React.CSSProperties}>
           <div className="dal-rg-entete" role="row">
-            <span aria-hidden="true" />
+            <span className="dal-rg-c-indent" role="columnheader">
+              <Case coche={toutCoche} partiel={!toutCoche && choisis.length > 0} libelle={toutCoche ? "Tout désélectionner" : "Tout sélectionner"} onChange={() => setSelection(toutCoche ? [] : visibles.map((p) => p.id))} />
+            </span>
             {enTete("designation", "Désignation")}
-            {enTete("origine", "Description", "dal-rg-c-desc")}
-            {enTete("unite", "Unité", "dal-rg-c-unite")}
-            {enTete("prix", "PU HT", "dal-rg-c-prix")}
-            {enTete("statut", "Statut", "dal-rg-c-statut")}
-            {enTete("date", "Date", "dal-rg-c-date")}
+            {vue("desc") ? enTete("origine", "Description", "dal-rg-c-desc") : null}
+            {vue("unite") ? enTete("unite", "Unité", "dal-rg-c-unite") : null}
+            {vue("prix") ? enTete("prix", "PU HT", "dal-rg-c-prix") : null}
+            {vue("statut") ? enTete("statut", "Statut", "dal-rg-c-statut") : null}
+            {vue("date") ? enTete("date", "Date", "dal-rg-c-date") : null}
             <span aria-hidden="true" />
             <span aria-hidden="true" />
           </div>
@@ -438,10 +551,17 @@ export default function Reglages() {
               {rangees.map(({ p, groupe, enfant, dernier }) => {
                 if (!p && groupe) {
                   const replie = replies.includes(groupe);
-                  const n = visibles.filter((x) => x.corps_etat === groupe).length;
+                  const enfants = visibles.filter((x) => x.corps_etat === groupe).map((x) => x.id);
+                  const n = enfants.length;
                   return (
                     <div key={`g:${groupe}`} className="dal-rg-ligne dal-rg-groupe" role="row">
                       <span className="dal-rg-c-indent" role="cell">
+                        <Case
+                          coche={enfants.length > 0 && enfants.every((x) => selection.includes(x))}
+                          partiel={enfants.some((x) => selection.includes(x)) && !enfants.every((x) => selection.includes(x))}
+                          libelle={`Sélectionner les prix de ${groupe}`}
+                          onChange={() => setSelection((l) => (enfants.every((x) => l.includes(x)) ? l.filter((x) => !enfants.includes(x)) : [...new Set([...l, ...enfants])]))}
+                        />
                         <button type="button" className="dal-rg-chevron" aria-expanded={!replie} aria-label={replie ? `Déplier ${groupe}` : `Replier ${groupe}`} onClick={() => setReplies((l) => (replie ? l.filter((x) => x !== groupe) : [...l, groupe]))}>
                           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
                             <path d="M4.5 6h7L8 10.5z" fill="currentColor" />
@@ -452,13 +572,15 @@ export default function Reglages() {
                         <IconeGroupe />
                         <span className="dal-rg-nom">{majuscule(groupe)}</span>
                       </span>
-                      <span className="dal-rg-c-desc dal-rg-desc" role="cell">
-                        {n} prix
-                      </span>
-                      <span className="dal-rg-c-unite" role="cell" />
-                      <span className="dal-rg-c-prix" role="cell" />
-                      <span className="dal-rg-c-statut" role="cell" />
-                      <span className="dal-rg-c-date" role="cell" />
+                      {vue("desc") ? (
+                        <span className="dal-rg-c-desc dal-rg-desc" role="cell">
+                          {n} prix
+                        </span>
+                      ) : null}
+                      {vue("unite") ? <span className="dal-rg-c-unite" role="cell" /> : null}
+                      {vue("prix") ? <span className="dal-rg-c-prix" role="cell" /> : null}
+                      {vue("statut") ? <span className="dal-rg-c-statut" role="cell" /> : null}
+                      {vue("date") ? <span className="dal-rg-c-date" role="cell" /> : null}
                       <span role="cell" />
                       <span role="cell" />
                     </div>
@@ -469,39 +591,51 @@ export default function Reglages() {
                 const libelleStatut = statut === "valide" ? "Validé" : "Proposé";
                 const description = `${p.corps_etat && !enfant ? `${majuscule(p.corps_etat)} · ` : ""}${p.origine === "marche" ? "prix d'un marché vérifié" : "prix saisi"}`;
                 return (
-                  <div key={p.id} className="dal-rg-ligne" data-enfant={enfant ? "" : undefined} data-dernier={dernier ? "" : undefined} role="row">
-                    <span className="dal-rg-c-indent" role="cell" aria-hidden="true">
-                      {enfant ? <span className="dal-rg-lien" /> : null}
+                  <div key={p.id} className="dal-rg-ligne" data-enfant={enfant ? "" : undefined} data-dernier={dernier ? "" : undefined} data-coche={selection.includes(p.id) ? "" : undefined} role="row">
+                    <span className="dal-rg-c-indent" role="cell">
+                      <Case coche={selection.includes(p.id)} libelle={`Sélectionner « ${p.designation} »`} onChange={() => cocher(p.id)} />
+                      {enfant ? <span className="dal-rg-lien" aria-hidden="true" /> : null}
                     </span>
                     <span className="dal-rg-c-nom" role="cell">
                       <span className="dal-rg-pastille-boite" title={libelleStatut}>
                         <span className="dal-rg-pastille" style={{ background: COULEUR_STATUT[statut] }} />
                       </span>
-                      <button type="button" className="dal-rg-edit" title="Modifier : poser un nouveau prix pour cette désignation" onClick={() => ouvrir({ type: "poser", designation: p.designation, unite: p.unite })}>
+                      <button type="button" className="dal-rg-edit" title="Modifier : poser un nouveau prix pour cette désignation" onClick={() => ouvrir({ type: "poser", designation: p.designation, unite: p.unite, corps: p.corps_etat ?? "" })}>
                         <span className="dal-rg-nom">{p.designation}</span>
                       </button>
                     </span>
-                    <span className="dal-rg-c-desc" role="cell">
-                      <span className="dal-rg-desc">{majuscule(description)}</span>
-                    </span>
-                    <span className="dal-rg-c-unite dal-rg-meta" role="cell" title={libelleUnite(p.unite)}>
-                      {uniteCourte(p.unite)}
-                    </span>
-                    <span className="dal-rg-c-prix dal-rg-meta" role="cell">
-                      {voitPrix ? montant(p.prix_unitaire_ht) : "—"}
-                    </span>
-                    <span className="dal-rg-c-statut dal-rg-meta" role="cell">
-                      {libelleStatut}
-                    </span>
-                    <span className="dal-rg-c-date dal-rg-meta" role="cell" title={dateCourte(p.date_prix)}>
-                      {moisJour(p.date_prix)}
-                    </span>
+                    {vue("desc") ? (
+                      <span className="dal-rg-c-desc" role="cell">
+                        <span className="dal-rg-desc">{majuscule(description)}</span>
+                      </span>
+                    ) : null}
+                    {vue("unite") ? (
+                      <span className="dal-rg-c-unite dal-rg-meta" role="cell" title={libelleUnite(p.unite)}>
+                        {uniteCourte(p.unite)}
+                      </span>
+                    ) : null}
+                    {vue("prix") ? (
+                      <span className="dal-rg-c-prix dal-rg-meta" role="cell">
+                        {voitPrix ? montant(p.prix_unitaire_ht) : "—"}
+                      </span>
+                    ) : null}
+                    {vue("statut") ? (
+                      <span className="dal-rg-c-statut dal-rg-meta" role="cell">
+                        {libelleStatut}
+                      </span>
+                    ) : null}
+                    {vue("date") ? (
+                      <span className="dal-rg-c-date dal-rg-meta" role="cell" title={dateCourte(p.date_prix)}>
+                        {moisJour(p.date_prix)}
+                      </span>
+                    ) : null}
                     <span className="dal-rg-c-menu" role="cell">
                       <MenuLigne
                         titre={`Actions sur « ${p.designation} »`}
                         options={[
                           ...(statut === "propose" ? [{ libelle: "Valider ce prix…", icone: "IssueStatusDone" as NomDalIcone, action: () => ouvrir({ type: "valider", prix: p }) }] : []),
-                          { libelle: "Poser un nouveau prix…", icone: "Euro" as NomDalIcone, action: () => ouvrir({ type: "poser", designation: p.designation, unite: p.unite }) },
+                          { libelle: "Poser un nouveau prix…", icone: "Euro" as NomDalIcone, action: () => ouvrir({ type: "poser", designation: p.designation, unite: p.unite, corps: p.corps_etat ?? "" }) },
+                          { libelle: selection.includes(p.id) ? "Retirer de la sélection" : "Sélectionner", icone: "Checklist" as NomDalIcone, action: () => cocher(p.id) },
                         ]}
                       />
                     </span>
@@ -513,8 +647,28 @@ export default function Reglages() {
           )}
         </div>
 
-        {/* ——— l'organisation : Settings › Issue templates ——— */}
-        <div className="dal-rg-bande" aria-hidden="true" />
+        {selection.length ? (
+          <div className="dal-rg-barre" role="toolbar" aria-label="Prix sélectionnés">
+            <span className="dal-rg-barre-compte">
+              {choisis.length} sélectionné{choisis.length > 1 ? "s" : ""}
+              <button type="button" className="dal-rond dal-rg-barre-x" aria-label="Tout désélectionner" title="Tout désélectionner (Échap)" onClick={() => setSelection([])}>
+                <DalIcone nom="StatusCanceled" />
+              </button>
+            </span>
+            <span className="dal-rg-barre-sep" aria-hidden="true" />
+            <button type="button" className="dal-rg-barre-btn" disabled={!aValider.length || envoi} onClick={() => ouvrir({ type: "valider-tous", prix: aValider })}>
+              <DalIcone nom="IssueStatusDone" taille={14} />
+              Valider{aValider.length ? ` (${aValider.length})` : ""}
+            </button>
+            <button type="button" className="dal-rg-barre-btn" disabled={!choisis.length} onClick={() => exporter(choisis)}>
+              <DalIcone nom="Spreadsheet" taille={14} />
+              Exporter en CSV
+            </button>
+          </div>
+        ) : null}
+        </>
+        ) : (
+        /* ——— l'organisation : Settings › Issue templates ——— */
         <section className="dal-rg-colonne" aria-labelledby="dal-rg-orga">
           <div className="dal-rg-colonne-tete">
             <h2 id="dal-rg-orga" className="dal-rg-h2">
@@ -581,6 +735,7 @@ export default function Reglages() {
             </p>
           ) : null}
         </section>
+        )}
       </div>
 
       {/* ——— les fenêtres ——— */}
@@ -592,11 +747,24 @@ export default function Reglages() {
                 <DialogIcone>
                   <DalIcone nom="Euro" taille={18} />
                 </DialogIcone>
-                <DialogTitle>Poser un prix dans la bibliothèque</DialogTitle>
-                <DialogDescription>Réservé à qui a le droit de valider les prix. Un nouveau prix validé pour la même désignation retire l&apos;ancien.</DialogDescription>
+                <DialogTitle>{form.groupe ? "Nouveau corps d'état" : "Poser un prix dans la bibliothèque"}</DialogTitle>
+                <DialogDescription>
+                  {form.groupe
+                    ? "Un corps d'état range les prix en groupe (Regrouper par corps d'état). Nommez-le et posez son premier prix : réservé à qui a le droit de valider les prix."
+                    : "Réservé à qui a le droit de valider les prix. Un nouveau prix validé pour la même désignation retire l'ancien."}
+                </DialogDescription>
               </DialogHeader>
               <DialogBody>
                 <div className="esp-form">
+                  <label className="rv-libelle">
+                    Corps d&apos;état {form.groupe ? <span className="esp-obligatoire">(obligatoire)</span> : null}
+                    <input className="rv-champ" list="dal-rg-corps" value={ch("corps")} placeholder="menuiserie, plâtrerie, électricité…" onChange={(e) => poseChamp("corps", e.target.value)} />
+                    <datalist id="dal-rg-corps">
+                      {corpsConnus.map((c) => (
+                        <option key={c} value={c} />
+                      ))}
+                    </datalist>
+                  </label>
                   <label className="rv-libelle">
                     Désignation <span className="esp-obligatoire">(obligatoire)</span>
                     <input className="rv-champ" value={ch("designation")} onChange={(e) => poseChamp("designation", e.target.value)} />
@@ -625,7 +793,7 @@ export default function Reglages() {
                 </div>
               </DialogBody>
               <DialogFooter>
-                <button type="button" className="r-btn r-btn--noir" disabled={!ch("designation").trim() || !nombre(ch("pu")) || envoi} onClick={() => void fairePoser()}>
+                <button type="button" className="r-btn r-btn--noir" disabled={!ch("designation").trim() || !nombre(ch("pu")) || (!!form.groupe && !ch("corps").trim()) || envoi} onClick={() => void fairePoser()}>
                   {envoi ? <Loader variant="spin" /> : null} Poser et valider
                 </button>
               </DialogFooter>
@@ -655,6 +823,42 @@ export default function Reglages() {
                 </button>
                 <button type="button" className="r-btn r-btn--noir" onClick={() => void faireValider(form.prix)} disabled={envoi}>
                   {envoi ? <Loader variant="spin" /> : null} Valider le prix
+                </button>
+              </DialogFooter>
+            </>
+          ) : null}
+          {form?.type === "valider-tous" ? (
+            <>
+              <DialogHeader>
+                <DialogIcone>
+                  <DalIcone nom="IssueStatusDone" taille={18} />
+                </DialogIcone>
+                <DialogTitle>
+                  Valider {form.prix.length} prix proposé{form.prix.length > 1 ? "s" : ""}
+                </DialogTitle>
+                <DialogDescription>Une fois validés, les avenants peuvent s&apos;en servir ; un prix déjà validé pour la même désignation et la même unité est retiré.</DialogDescription>
+              </DialogHeader>
+              <DialogBody>
+                <ul className="dal-rg-liste-valider">
+                  {form.prix.map((p) => (
+                    <li key={p.id}>
+                      {p.designation}
+                      {voitPrix ? ` — ${montant(p.prix_unitaire_ht)} / ${libelleUnite(p.unite)}` : ""}
+                    </li>
+                  ))}
+                </ul>
+                {erreur ? (
+                  <Avis teinte="rouge" role="alert">
+                    {erreur}
+                  </Avis>
+                ) : null}
+              </DialogBody>
+              <DialogFooter>
+                <button type="button" className="r-btn r-btn--fil" onClick={() => setForm(null)} disabled={envoi}>
+                  Annuler
+                </button>
+                <button type="button" className="r-btn r-btn--noir" onClick={() => void faireValiderTous(form.prix)} disabled={envoi}>
+                  {envoi ? <Loader variant="spin" /> : null} Valider les {form.prix.length} prix
                 </button>
               </DialogFooter>
             </>
@@ -721,6 +925,34 @@ export default function Reglages() {
         </DialogContent>
       </Dialog>
     </DalCarte>
+  );
+}
+
+/* la case « Select label » de Linear : 14 × 14, bord 1, r 3 ; visible au survol, cochée ou quand une sélection existe */
+function Case({ coche, partiel, libelle, onChange }: { coche: boolean; partiel?: boolean; libelle: string; onChange: () => void }) {
+  return (
+    <label className="dal-rg-case" data-coche={coche || partiel ? "" : undefined} title={libelle}>
+      <input
+        type="checkbox"
+        checked={coche}
+        aria-label={libelle}
+        ref={(el) => {
+          if (el) el.indeterminate = !!partiel;
+        }}
+        onChange={onChange}
+      />
+      <span aria-hidden="true">
+        {coche ? (
+          <svg width="10" height="10" viewBox="0 0 10 10">
+            <path d="M2 5.2 4.1 7.2 8 2.8" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : partiel ? (
+          <svg width="10" height="10" viewBox="0 0 10 10">
+            <path d="M2.5 5h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        ) : null}
+      </span>
+    </label>
   );
 }
 

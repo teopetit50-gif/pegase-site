@@ -48,6 +48,7 @@ import { jourLocal, qui, quand, resume, type TeinteClair } from "./enClair";
 import { DalCarte } from "./DalCadre";
 import { DalIcone } from "./DalIcone";
 import { IconePriorite, IconeSante, IconeStatut, NOM_PRIORITE } from "./IconesProjet";
+import { COULEUR_LOT, STATUT_LOT, lignesLots, type LigneLot } from "./ApercuChantier";
 import "../lin/lin.css";
 import "./dal-timeline.css";
 
@@ -107,7 +108,10 @@ const initialesDe = (nom: string) =>
 /* un jalon glissé : on suit le pointeur, et au lâcher on pose le nouveau jour */
 type Glisse = { id: string; x0: number; dx: number; etirer: boolean; bouge: boolean };
 
-export default function Chantiers() {
+/* lotsDe : la frise montée dans la fiche d'un chantier (onglet « Projets » de l'Initiative de
+   Linear, 02/11/2026) — une ligne par lot du chantier, sa barre du premier au dernier passage,
+   ses passages en jalons (mêmes gestes : glisser, Maj pour étirer, ouvrir) ; sans l'en-tête */
+export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
   const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture } = useDaliro();
   const toast = useToast();
   const params = useSearchParams();
@@ -207,6 +211,11 @@ export default function Chantiers() {
   const recherche = q.trim().toLocaleLowerCase("fr");
   const visibles = tries.filter((c) => (!filtre || famille(c) === filtre) && (!recherche || `${c.nom} ${c.commune} ${c.code_postal} ${c.reference ?? ""}`.toLocaleLowerCase("fr").includes(recherche)));
 
+  const tLots = lotsDe ? tableau(lotsDe) : null;
+  const filtreLots = params.get("lots");
+  const lots = useMemo(() => (tLots ? lignesLots(tLots).filter((x) => !filtreLots || x.lot.statut === filtreLots).sort((a, b) => a.lot.rang - b.lot.rang) : []), [tLots, filtreLots]);
+  const nbLignes = lotsDe ? lots.length : visibles.length;
+
   /* ——— la frise : un an et demi autour d'aujourd'hui ——— */
   const debutFrise = auj - 300;
   const finFrise = auj + 420;
@@ -279,6 +288,100 @@ export default function Chantiers() {
     };
   }, [menu]);
 
+  const jalons = (passages: Passage[]) =>
+    passages.map((p) => {
+              const g = glisse?.id === p.id ? glisse : null;
+              const x = xJour(versJour(p.debut)) + zoom.px / 2 + (g && !g.etirer ? g.dx : 0);
+              const etat = p.statut === "fait" ? "MilestoneStatusDone" : versJour(p.debut) <= auj && versJour(p.fin) >= auj ? "MilestoneStatusStarted" : "MilestoneStatusPlanned";
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="dal-tl-jalon"
+                  data-choisi={p.id === passageOuvert?.id ? "" : undefined}
+                  data-glisse={g?.bouge ? "" : undefined}
+                  style={{ left: x - 8 }}
+                  title={`${quand(p.debut, aujourdhui)} · ${qui(p)}${p.tache ? ` · ${p.tache}` : ""}${g ? ` → ${g.dx >= 0 ? "+" : ""}${Math.round(g.dx / zoom.px)} j` : " — glissez pour déplacer, Maj + glisser pour étirer"}`}
+                  aria-label={`Passage ${p.tache ?? ""} ${quand(p.debut, aujourdhui)}, ${qui(p)}`}
+                  disabled={p.statut === "fait"}
+                  onPointerDown={(e) => {
+                    if (e.button !== 0) return;
+                    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                    setGlisse({ id: p.id, x0: e.clientX, dx: 0, etirer: e.shiftKey, bouge: false });
+                  }}
+                  onPointerMove={(e) => {
+                    if (!g) return;
+                    const dx = e.clientX - g.x0;
+                    setGlisse({ ...g, dx, bouge: g.bouge || Math.abs(dx) > 3 });
+                  }}
+                  onPointerUp={() => g && lacher(p, g)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      ouvrir({ passage: p.id, apercu: null });
+                    }
+                  }}
+                >
+                  <DalIcone nom={etat} />
+                </button>
+              );
+            });
+
+  /* une ligne de lot (frise de la fiche) : mêmes briques que la ligne d'un chantier */
+  const ligneLot = (x: LigneLot, i: number) => {
+    const l = x.lot;
+    const y = 32 + i * LIGNE;
+    const passages = (tLots?.passages ?? []).filter((p) => p.lot_id === l.id && p.statut !== "annule");
+    const d0 = passages.length ? Math.min(...passages.map((p) => versJour(p.debut))) : null;
+    const d1 = passages.length ? Math.max(...passages.map((p) => versJour(p.fin))) : null;
+    const xa = d0 !== null ? xJour(d0) : 0;
+    const xb = d1 !== null ? xJour(d1 + 1) : 0;
+    const nom = `${l.code} ${l.libelle}`;
+    return (
+      <div key={l.id} className="dal-tl-ligne" style={{ top: y }}>
+        <div className="dal-tl-cellule">
+          <div className="dal-tl-cellule-bloc">
+            <Link href={`${chemin}?onglet=argent&partie=lots`} className="dal-tl-nom" title={`${nom} — lots et déboursé`}>
+              <span className="dal-tl-icone" style={{ color: COULEUR_LOT[l.statut] }}>
+                <DalIcone nom="Project" />
+              </span>
+              <span className="dal-tl-nom-texte">{nom}</span>
+            </Link>
+            <span className="dal-tl-rond" role="img" aria-label={x.santeTexte} title={x.santeTexte}>
+              <IconeSante etat={x.sante} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={`Avancement ${x.pct ?? 0} %`} title={x.pct === null ? "Avancement non mesuré" : `Avancement ${x.pct} %`}>
+              <IconeStatut statut={STATUT_LOT[l.statut]} pct={x.pct ?? 0} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={`Priorité : ${NOM_PRIORITE[x.prio]}`} title={x.prioTexte}>
+              <IconePriorite n={x.prio} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={x.qui ?? "Exécutant à désigner"} title={x.qui ?? "Exécutant à désigner"}>
+              {x.qui ? <span className="dal-tl-avatar">{initialesDe(x.qui) || "?"}</span> : <DalIcone nom="UnassignedCircle" />}
+            </span>
+          </div>
+        </div>
+        {d0 !== null && d1 !== null && xb < vu + GAUCHE ? (
+          <button type="button" className="dal-tl-avant" style={{ left: vu + GAUCHE + 18 }} title={`${nom} : fini avant cette partie de la frise — y aller`} onClick={() => zone.current?.scrollTo({ left: Math.max(0, xa - GAUCHE - 40), behavior: "smooth" })}>
+            <span aria-hidden="true">←</span>
+            <span className="dal-tl-avant-date">{jourCourt(d1)}</span>
+          </button>
+        ) : null}
+        {d0 !== null && d1 !== null ? (
+          <>
+            <span className="dal-tl-libelle-voie" style={{ left: xa, width: Math.max(8, xb - xa), visibility: xb < vu + GAUCHE ? "hidden" : undefined }}>
+              <span className="dal-tl-libelle" style={{ left: GAUCHE + 13 }}>
+                {nom}
+              </span>
+            </span>
+            <button type="button" className="dal-tl-barre" style={{ left: xa, width: Math.max(8, xb - xa) }} title={`${nom} : passages du ${jourCourt(d0)} au ${jourCourt(d1)}`} aria-label={`${nom} : ouvrir le volet`} onClick={() => ouvrir({ apercu: lotsDe ?? null, passage: null })} />
+            {jalons(passages)}
+          </>
+        ) : null}
+      </div>
+    );
+  };
+
   const ligne = (c: Chantier, i: number) => {
     const fa = famille(c);
     const t = tableau(c.id);
@@ -349,51 +452,16 @@ export default function Chantiers() {
               aria-label={`${c.nom} : ouvrir le volet`}
               onClick={() => ouvrir({ apercu: c.id, passage: null })}
             />
-            {passages.map((p) => {
-              const g = glisse?.id === p.id ? glisse : null;
-              const x = xJour(versJour(p.debut)) + zoom.px / 2 + (g && !g.etirer ? g.dx : 0);
-              const etat = p.statut === "fait" ? "MilestoneStatusDone" : versJour(p.debut) <= auj && versJour(p.fin) >= auj ? "MilestoneStatusStarted" : "MilestoneStatusPlanned";
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  className="dal-tl-jalon"
-                  data-choisi={p.id === passageOuvert?.id ? "" : undefined}
-                  data-glisse={g?.bouge ? "" : undefined}
-                  style={{ left: x - 8 }}
-                  title={`${quand(p.debut, aujourdhui)} · ${qui(p)}${p.tache ? ` · ${p.tache}` : ""}${g ? ` → ${g.dx >= 0 ? "+" : ""}${Math.round(g.dx / zoom.px)} j` : " — glissez pour déplacer, Maj + glisser pour étirer"}`}
-                  aria-label={`Passage ${p.tache ?? ""} ${quand(p.debut, aujourdhui)}, ${qui(p)}`}
-                  disabled={p.statut === "fait"}
-                  onPointerDown={(e) => {
-                    if (e.button !== 0) return;
-                    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-                    setGlisse({ id: p.id, x0: e.clientX, dx: 0, etirer: e.shiftKey, bouge: false });
-                  }}
-                  onPointerMove={(e) => {
-                    if (!g) return;
-                    const dx = e.clientX - g.x0;
-                    setGlisse({ ...g, dx, bouge: g.bouge || Math.abs(dx) > 3 });
-                  }}
-                  onPointerUp={() => g && lacher(p, g)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      ouvrir({ passage: p.id, apercu: null });
-                    }
-                  }}
-                >
-                  <DalIcone nom={etat} />
-                </button>
-              );
-            })}
+            {jalons(passages)}
           </>
         ) : null}
       </div>
     );
   };
 
-  return (
-    <DalCarte className="dal-tl-page">
+  const cadreSeul = !!lotsDe;
+  const entete = cadreSeul ? null : (
+    <>
       <h1 className="v2-sr">Chantiers</h1>
       <header className="dal-tete">
         <div className="dal-ligne1">
@@ -479,12 +547,18 @@ export default function Chantiers() {
         </p>
       ) : null}
 
+    </>
+  );
+  const corps = (
+    <>
       <div className="dal-tl-cadre">
         <div className="dal-tl-principal">
         <div className="dal-tl-zone" ref={zone} onScroll={suivreDefilement}>
           {!pret ? (
             <p className="dal-tl-vide">Lecture des chantiers…</p>
-          ) : visibles.length === 0 ? (
+          ) : lotsDe && !lots.length ? (
+            <p className="dal-tl-vide">Aucun lot sur ce chantier : le planning se pose lot par lot.</p>
+          ) : !lotsDe && visibles.length === 0 ? (
             <p className="dal-tl-vide">
               {liste.length === 0 ? (
                 <>
@@ -501,7 +575,7 @@ export default function Chantiers() {
               )}
             </p>
           ) : (
-            <div className="dal-tl-toile" style={{ width: GAUCHE + largeur, height: 32 + visibles.length * LIGNE }}>
+            <div className="dal-tl-toile" style={{ width: GAUCHE + largeur, height: 32 + nbLignes * LIGNE }}>
               {mois.map((m) => (
                 <span key={m.j} className="dal-tl-mois-trait" style={{ left: xJour(m.j) - 1 }} />
               ))}
@@ -521,11 +595,11 @@ export default function Chantiers() {
                   {new Date(auj * JOUR).getUTCDate()} {MOIS[new Date(auj * JOUR).getUTCMonth()].replace(".", "")}
                 </span>
               </div>
-              {visibles.map(ligne)}
+              {lotsDe ? lots.map(ligneLot) : visibles.map(ligne)}
             </div>
           )}
         </div>
-        {pret && visibles.length ? (
+        {pret && nbLignes ? (
           <div className="dal-tl-commandes">
             <button type="button" className="dal-tl-commande" onClick={allerAujourdhui}>
               Aujourd&apos;hui
@@ -647,6 +721,14 @@ export default function Chantiers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+  return cadreSeul ? (
+    corps
+  ) : (
+    <DalCarte className="dal-tl-page">
+      {entete}
+      {corps}
     </DalCarte>
   );
 }

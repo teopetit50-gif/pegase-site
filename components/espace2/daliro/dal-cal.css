@@ -427,6 +427,27 @@ html[data-v2-theme="light"] .v2 .dcal {
   margin-left: 12px;
   color: var(--c-second);
 }
+.v2 .dcal-crayon:hover {
+  color: var(--c-fort);
+}
+/* le nom en champ (« Set as default » et le crayon, relevé : input sans bord, même police) */
+.v2 .dcal-fiche-champ {
+  border: 0;
+  outline: none;
+  background: transparent;
+  padding: 0;
+  min-width: 0;
+  width: 360px;
+  font-family: inherit;
+}
+.v2 .dcal-defaut {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--c-fort);
+  white-space: nowrap;
+}
 .v2 .dcal-fiche-actions {
   display: flex;
   align-items: center;
@@ -654,7 +675,7 @@ html[data-v2-theme="light"] .v2 .dcal {
 .v2 .dcal-exception {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   padding: 16px 24px;
   border-bottom: 1px solid var(--c-filet);
 }

@@ -33,6 +33,8 @@
   --dal-rg-survol-li: lch(13.861 1.043 272);
   --dal-rg-lien: lch(20.032 1.93 272);
   --dal-rg-case: lch(39.452 1.425 272);
+  --dal-rg-lien-nav: lch(60.621 1.2 272);
+  --dal-rg-lien-actif: lch(13.845 1.3 272);
 }
 html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
   --dal-rg-primaire: lch(53 52.26 286.91);
@@ -43,6 +45,8 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
   --dal-rg-survol-li: lch(94.44 0.5 282);
   --dal-rg-lien: lch(86.5 0 282);
   --dal-rg-case: lch(52.04 0 282);
+  --dal-rg-lien-nav: lch(37.776 1.25 282);
+  --dal-rg-lien-actif: lch(89.54 0.5 282);
 }
 @media (prefers-color-scheme: light) {
   html:not([data-v2-theme="dark"]) .v2 .dal.dal-rg-page {
@@ -54,6 +58,8 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
     --dal-rg-survol-li: lch(94.44 0.5 282);
     --dal-rg-lien: lch(86.5 0 282);
     --dal-rg-case: lch(52.04 0 282);
+    --dal-rg-lien-nav: lch(37.776 1.25 282);
+    --dal-rg-lien-actif: lch(89.54 0.5 282);
   }
 }
 
@@ -62,7 +68,38 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
   scrollbar-width: thin;
 }
 .v2 .dal .dal-rg-bande {
+  position: relative;
   height: 64px;
+}
+
+/* les deux pages de réglages : les entrées « Labels » et « Templates » de la barre latérale des
+   réglages de Linear (13/500, 28 de haut, r 8 ; active : fond et texte primaire), posées dans
+   la bande vide puisque la barre latérale de l'espace 2 tient leur place */
+.v2 .dal .dal-rg-pages {
+  position: absolute;
+  left: 50px;
+  top: 18px;
+  display: flex;
+  gap: 2px;
+}
+.v2 .dal .dal-rg-page-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 9px 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-rg-lien-nav);
+  white-space: nowrap;
+}
+.v2 .dal .dal-rg-page-lien:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-rg-page-lien[aria-current="page"] {
+  background: var(--dal-rg-lien-actif);
+  color: var(--dal-t1);
 }
 
 /* ——— titre et boutons ——— */
@@ -193,7 +230,118 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
 
 /* ——— le tableau ——— */
 .v2 .dal .dal-rg-tableau {
-  --dal-rg-grille: 60px minmax(0, 2fr) minmax(0, 3fr) 75px 75px 102px 82px 28px 32px;
+  --dal-rg-grille: var(--dal-rg-grille-voulue, 60px minmax(0, 2fr) minmax(0, 3fr) 75px 75px 102px 82px 28px 32px);
+}
+
+/* la case « Select label » : 14 × 14 à x 19, bord 1 r 3 ; au survol, cochée, ou dès qu'une sélection existe */
+.v2 .dal .dal-rg-case {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  z-index: 1;
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  opacity: 0;
+  cursor: pointer;
+}
+.v2 .dal .dal-rg-case input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.v2 .dal .dal-rg-case span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 1px;
+  border: 1px solid var(--dal-rg-case);
+  border-radius: 3px;
+  color: #fff;
+  pointer-events: none;
+}
+.v2 .dal .dal-rg-case[data-coche] span {
+  border-color: var(--dal-rg-primaire);
+  background: var(--dal-rg-primaire);
+}
+.v2 .dal .dal-rg-case:focus-within span {
+  outline: 2px solid var(--dal-violet);
+  outline-offset: 1px;
+}
+.v2 .dal .dal-rg-ligne:hover .dal-rg-case,
+.v2 .dal .dal-rg-entete:hover .dal-rg-case,
+.v2 .dal .dal-rg-case[data-coche],
+.v2 .dal .dal-rg-case:focus-within,
+.v2 .dal .dal-rg-tableau[data-selection] .dal-rg-case {
+  opacity: 1;
+}
+.v2 .dal .dal-rg-ligne[data-coche]::before {
+  background: var(--dal-survol);
+}
+
+/* la barre des gestes groupés (sélection) : flottante en bas, au centre */
+.v2 .dal .dal-rg-barre {
+  position: sticky;
+  bottom: 16px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  height: 40px;
+  margin: 16px auto 0;
+  padding: 0 6px 0 12px;
+  border: 0.5px solid var(--dal-menu-bord);
+  border-radius: 12px;
+  background: var(--dal-menu);
+  box-shadow: var(--dal-menu-ombre);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-menu-texte);
+}
+.v2 .dal .dal-rg-barre-compte {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .dal .dal-rg-barre-x {
+  width: 24px;
+  height: 24px;
+}
+.v2 .dal .dal-rg-barre-sep {
+  width: 0.5px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--dal-menu-bord);
+}
+.v2 .dal .dal-rg-barre-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+}
+.v2 .dal .dal-rg-barre-btn svg {
+  color: var(--dal-menu-icone);
+}
+.v2 .dal .dal-rg-barre-btn:hover:not(:disabled) {
+  background: var(--dal-menu-survol);
+}
+.v2 .dal .dal-rg-barre-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .dal .dal-rg-menu-titre {
+  padding: 4px 14px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
 }
 .v2 .dal .dal-rg-entete,
 .v2 .dal .dal-rg-ligne {
@@ -350,6 +498,16 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
 .v2 .dal .dal-rg-pop[data-ouvert] .dal-rg-points,
 .v2 .dal .dal-rg-points:focus-visible {
   opacity: 1;
+}
+.v2 .dal .dal-rg-menu .dal-menu-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.dlg-panneau .dal-rg-liste-valider {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 20px;
 }
 .v2 .dal .dal-rg-c-menu .dal-rg-menu {
   min-width: 240px;
@@ -578,6 +736,18 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
   }
   .v2 .dal .dal-rg-chevron {
     margin-left: 53px;
+  }
+  .v2 .dal .dal-rg-case {
+    left: 22px;
+    opacity: 1;
+  }
+  .v2 .dal .dal-rg-pages {
+    position: static;
+    padding: 0 16px;
+  }
+  .v2 .dal .dal-rg-bande:has(.dal-rg-pages) {
+    height: auto;
+    padding: 8px 0;
   }
   .v2 .dal .dal-rg-lien {
     left: 82px;

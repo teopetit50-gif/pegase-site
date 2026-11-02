@@ -13,13 +13,20 @@
   --dal-ill-muted: var(--dal-t3);
   --dal-ill-fond: var(--dal-carte);
   --dal-ill-bord: var(--dal-puce-bord);
+  /* boîte de réponse : sombre mesuré sur 1440-sombre-element-ouvert.png (rgb 26) ; clair relevé (lch 100, bord 91.9) */
+  --dal-tr-boite: lch(9.345 0.85 272);
+  --dal-tr-boite-bord: var(--dal-carte-bord);
 }
 html[data-v2-theme="light"] .v2 .dal.dal-tr-page {
   --dal-tr-choisi: lch(92.94 0.5 282);
+  --dal-tr-boite: lch(100 0 282);
+  --dal-tr-boite-bord: lch(91.9 0 282);
 }
 @media (prefers-color-scheme: light) {
   html:not([data-v2-theme="dark"]) .v2 .dal.dal-tr-page {
     --dal-tr-choisi: lch(92.94 0.5 282);
+    --dal-tr-boite: lch(100 0 282);
+    --dal-tr-boite-bord: lch(91.9 0 282);
   }
 }
 
@@ -422,6 +429,180 @@ html[data-v2-theme="light"] .v2 .dal.dal-tr-page {
 }
 .v2 .dal .dal-tr-point {
   font-weight: 600;
+}
+
+/* ——— ajouts du 02/11 (soir) : chaque bouton de la référence dessiné et utile ——— */
+.v2 .dal .dal-tr-marque {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.v2 .dal .dal-tr-triage {
+  /* état Triage de Linear (relevé My issues : #ff7336) */
+  color: #ff7336;
+}
+.v2 .dal .dal-tr-pilule--icone {
+  justify-content: center;
+  width: 32px;
+  padding: 0;
+}
+.v2 .dal .dal-tr-double {
+  display: inline-flex;
+  height: 28px;
+}
+.v2 .dal .dal-tr-double .dal-tr-menu-boite {
+  display: inline-flex;
+}
+.v2 .dal .dal-tr-double-g,
+.v2 .dal .dal-tr-double-d {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border: 0.5px solid transparent;
+  background: var(--dal-bouton);
+  color: var(--dal-t3);
+  transition: background-color 0.15s;
+}
+.v2 .dal .dal-tr-double-g {
+  width: 32px;
+  padding-left: 2px;
+  border-radius: 9999px 0 0 9999px;
+}
+.v2 .dal .dal-tr-double-d {
+  width: 25px;
+  padding-right: 3px;
+  border-radius: 0 9999px 9999px 0;
+  border-left: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-tr-double-g:hover,
+.v2 .dal .dal-tr-double-d:hover,
+.v2 .dal .dal-tr-double-d[aria-expanded="true"] {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tr-ronds-corps {
+  display: flex;
+  gap: 4px;
+  margin-left: -6px;
+  padding-bottom: 8px;
+}
+.v2 .dal .dal-tr-ronds-corps .dal-rond {
+  background: transparent;
+}
+.v2 .dal .dal-tr-ronds-corps .dal-rond:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tr-sous {
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+.v2 .dal .dal-tr-sous-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 12px 0 6px;
+  margin-left: -6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  transition: background-color 0.15s;
+}
+.v2 .dal .dal-tr-sous-bouton:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tr-activite-tete {
+  gap: 6px;
+}
+.v2 .dal .dal-tr-suivre {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  transition: background-color 0.15s;
+}
+.v2 .dal .dal-tr-suivre:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tr-abonnes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+.v2 .dal .dal-tr-reponse {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 20px -8px 0;
+  padding: 12px 16px;
+  border: 0.5px solid var(--dal-tr-boite-bord);
+  border-radius: 8px;
+  background: var(--dal-tr-boite);
+  box-shadow: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+}
+.v2 .dal .dal-tr-reponse textarea {
+  width: 100%;
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  resize: none;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tr-reponse textarea::placeholder {
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-tr-reponse-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.v2 .dal .dal-tr-reponse-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  color: var(--dal-t3);
+  transition: background-color 0.15s;
+}
+.v2 .dal .dal-tr-reponse-rond:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tr-reponse-envoyer {
+  border-radius: 12px;
+  background: var(--dal-bouton);
+}
+.v2 .dal .dal-tr-reponse-envoyer:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+:is(.v2, .v2-jetons) .dal-tr-citation {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-left: 2px solid currentColor;
+  white-space: pre-wrap;
+  opacity: 0.8;
 }
 
 /* ——— 1024 : la liste passe à 386 (relevé, palier 1024) ——— */

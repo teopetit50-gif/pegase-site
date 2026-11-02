@@ -51,8 +51,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, BookUser, CalendarOff, ChevronsUpDown, Copy, Ellipsis, Globe, Info, Pencil, Plus, Trash, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { ArrowLeft, BookUser, CalendarOff, ChevronsUpDown, Copy, Ellipsis, EyeOff, Globe, Info, Pencil, Plus, Star, Trash, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { RACINE } from "@/components/espace2/modules";
@@ -63,6 +63,7 @@ import type { Confirmation, Disponibilite, Passage, Tableau } from "@/components
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
 import { useDeplacer } from "./deplacer";
+import { copier } from "./navigateur";
 import "@/components/espace/espace.css";
 import "./dal-cal.css";
 
@@ -131,6 +132,68 @@ function plageLongue(du: string, au: string): string {
 const heures = (hd: string | null, hf: string | null) => (hd && hf ? `${hd} - ${hf}` : null);
 const libellePassage = (p: PassageVu) => `${p.tache ?? "Passage"}, ${p.chantier}`;
 
+/* ——— ce que ce navigateur retient pour la page (02/11/2026, « trouve une utilité aux boutons ») :
+   l'intervenant par défaut (« Set as default »), les intervenants retirés de la liste (la poubelle),
+   le nom affiché d'une de nos équipes (le crayon). Rien n'est envoyé au serveur. ——— */
+const CLE_DEFAUT = "espace2:daliro:equipes:defaut";
+const CLE_RETIRES = "espace2:daliro:equipes:retires";
+const CLE_NOMS = "espace2:daliro:equipes:noms";
+const lireLocal = (cle: string) => {
+  try {
+    return localStorage.getItem(cle) ?? "";
+  } catch {
+    return "";
+  }
+};
+const ecrireLocal = (cle: string, valeur: unknown) => {
+  try {
+    if (valeur === null) localStorage.removeItem(cle);
+    else localStorage.setItem(cle, JSON.stringify(valeur));
+  } catch {
+    /* stockage indisponible : le réglage vaut pour cette visite */
+  }
+  window.dispatchEvent(new Event(cle));
+};
+const analyses = new Map<string, unknown>();
+function useLocal<T>(cle: string, defaut: T): T {
+  const brut = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener(cle, cb);
+      window.addEventListener("storage", cb);
+      return () => {
+        window.removeEventListener(cle, cb);
+        window.removeEventListener("storage", cb);
+      };
+    },
+    () => lireLocal(cle),
+    () => "",
+  );
+  if (!brut) return defaut;
+  const k = `${cle}|${brut}`;
+  if (!analyses.has(k)) {
+    try {
+      analyses.set(k, JSON.parse(brut) as T);
+    } catch {
+      analyses.set(k, defaut);
+    }
+  }
+  return analyses.get(k) as T;
+}
+const AUCUN: string[] = [];
+const AUCUN_NOM: Record<string, string> = {};
+
+/* le planning d'un intervenant en clair, pour le presse-papier (« Duplicate » de Cal.com) */
+function resume(iv: Intervenant, du: string, au: string): string {
+  const passages = iv.passages.filter((p) => chevauche(p, { du, au }));
+  const absences = iv.absences.filter((a) => a.au >= du && a.du <= au);
+  return [
+    `${iv.nom} (${iv.lieu})`,
+    ...passages.map((p) => `- ${jours(p.debut, p.fin)}${heures(p.hd, p.hf) ? `, ${heures(p.hd, p.hf)}` : ""} : ${libellePassage(p)}`),
+    ...absences.map((a) => `- ${jours(a.du, a.au)} : absent${a.motif ? ` (${a.motif})` : ""}`),
+    ...(!passages.length && !absences.length ? ["- aucun passage sur 30 jours"] : []),
+  ].join("\n");
+}
+
 export default function Equipes() {
   const { source, pret, erreur, client, liste, tableau, demanderTous } = useDaliro();
   const params = useSearchParams();
@@ -169,6 +232,10 @@ export default function Equipes() {
   const tableaux = liste.map((c) => tableau(c.id)).filter((t): t is Tableau => !!t);
   const enLecture = source === "reelle" && tableaux.length < liste.length;
 
+  const defaut = useLocal<string | null>(CLE_DEFAUT, null);
+  const retires = useLocal<string[]>(CLE_RETIRES, AUCUN);
+  const noms = useLocal<Record<string, string>>(CLE_NOMS, AUCUN_NOM);
+
   /* recalculé à chaque rendu : les tableaux arrivent un à un en base réelle */
   const intervenants = (() => {
     const m = new Map<string, Intervenant>();
@@ -202,8 +269,13 @@ export default function Equipes() {
         for (const p of d.passages) if (!vus.has(p.passage)) iv.passages.push({ id: p.passage, chantierId: liste.find((c) => c.nom === p.chantier)?.id ?? null, chantier: p.chantier, tache: p.tache, debut: jj(p.debut), fin: jj(p.fin), hd: null, hf: null, confirmation: null, p: null });
       }
     else for (const iv of m.values()) if (iv.tiers) iv.absences = locales[iv.tiers] ?? [];
-    for (const iv of m.values()) iv.passages.sort((a, b) => a.debut.localeCompare(b.debut));
-    return [...m.values()].sort((a, b) => RANG[a.genre] - RANG[b.genre] || a.nom.localeCompare(b.nom, "fr"));
+    for (const iv of m.values()) {
+      iv.passages.sort((a, b) => a.debut.localeCompare(b.debut));
+      /* le nom affiché d'une de nos équipes, choisi dans ce navigateur (le crayon) */
+      if (iv.genre !== "tiers" && noms[iv.cle]) iv.nom = noms[iv.cle];
+    }
+    /* l'intervenant par défaut en tête, comme l'horaire « Default » de Cal.com */
+    return [...m.values()].sort((a, b) => Number(b.cle === defaut) - Number(a.cle === defaut) || RANG[a.genre] - RANG[b.genre] || a.nom.localeCompare(b.nom, "fr"));
   })();
 
   const lien = (modif: Record<string, string | null>) => {
@@ -221,12 +293,19 @@ export default function Equipes() {
   const choisi = intervenants.find((i) => i.cle === params.get("intervenant")) ?? null;
 
   /* ——— G61 : noter une absence ——— */
-  const [form, setForm] = useState<{ tiers: string; du: string; au: string; motif: string } | null>(null);
+  const [form, setForm] = useState<{ tiers: string; du: string; au: string; motif: string; remplace?: Absence } | null>(null);
   const [envoi, setEnvoi] = useState(false);
   const [erreurGeste, setErreurGeste] = useState<string | null>(null);
   const ouvrirNoter = (tiers?: string) => {
     setErreurGeste(null);
-    setForm({ tiers: tiers ?? sousTraitants[0]?.tiers ?? "", du, au: du, motif: "" });
+    const parDefaut = intervenants.find((i) => i.cle === defaut)?.tiers;
+    setForm({ tiers: tiers ?? parDefaut ?? sousTraitants[0]?.tiers ?? "", du, au: du, motif: "" });
+  };
+  /* le crayon d'une absence : la base n'a pas de porte pour la modifier ; on note la nouvelle,
+     puis on annule l'ancienne (btp_noter_indisponibilite, btp_annuler_indisponibilite) */
+  const ouvrirModifier = (tiers: string, a: Absence) => {
+    setErreurGeste(null);
+    setForm({ tiers, du: a.du, au: a.au, motif: a.motif ?? "", remplace: a });
   };
   const noter = async () => {
     if (!form) return;
@@ -236,12 +315,14 @@ export default function Equipes() {
       if (!form.tiers) throw new Error("Choisissez le sous-traitant absent.");
       if (form.au < form.du) throw new Error("Une absence a un premier et un dernier jour, dans cet ordre.");
       const motif = form.motif.trim() || null;
+      const ancienne = form.remplace;
       if (source === "reelle") {
         await noterIndisponibilite(form.tiers, form.du, form.au, motif);
+        if (ancienne) await annulerIndisponibilite(ancienne.id);
         await lire();
-      } else setLocales((a) => ({ ...a, [form.tiers]: [...(a[form.tiers] ?? []), { id: nid(), du: form.du, au: form.au, motif }] }));
+      } else setLocales((a) => ({ ...a, [form.tiers]: [...(a[form.tiers] ?? []).filter((x) => x.id !== ancienne?.id), { id: nid(), du: form.du, au: form.au, motif }] }));
       const nom = intervenants.find((i) => i.tiers === form.tiers)?.nom ?? "Le sous-traitant";
-      toast(`Absence notée : ${nom}, ${periode(form.du, form.au)}.`, "vert");
+      toast(`${ancienne ? "Absence modifiée" : "Absence notée"} : ${nom}, ${periode(form.du, form.au)}.`, "vert");
       setForm(null);
     } catch (e) {
       setErreurGeste(e instanceof Error ? e.message : "La base a refusé l'absence.");
@@ -273,6 +354,33 @@ export default function Equipes() {
     } finally {
       setEnvoi(false);
     }
+  };
+
+  /* « Set as default » : l'intervenant par défaut passe en tête de liste et se propose dans « Noter une absence » */
+  const basculerDefaut = (iv: Intervenant) => {
+    const devient = defaut === iv.cle ? null : iv.cle;
+    ecrireLocal(CLE_DEFAUT, devient);
+    toast(devient ? `${iv.nom} est l'intervenant par défaut.` : `${iv.nom} n'est plus l'intervenant par défaut.`, "vert");
+  };
+  /* « Duplicate » : son planning en clair dans le presse-papier */
+  const copierPlanning = async (iv: Intervenant) => {
+    const ok = await copier(resume(iv, du, au));
+    toast(ok ? `Planning de ${iv.nom} copié.` : "Le presse-papier n'a pas répondu.", ok ? "vert" : "rouge");
+  };
+  /* la poubelle : retirer de la liste (ce navigateur), après confirmation ; « Les remettre » au pied de la liste */
+  const [aRetirer, setARetirer] = useState<Intervenant | null>(null);
+  const retirer = (iv: Intervenant) => {
+    ecrireLocal(CLE_RETIRES, [...retires.filter((c) => c !== iv.cle), iv.cle]);
+    if (defaut === iv.cle) ecrireLocal(CLE_DEFAUT, null);
+    setARetirer(null);
+    toast(`${iv.nom} est retiré de la liste.`, "vert");
+    if (choisi?.cle === iv.cle) routeur.push(lien({ intervenant: null, semaine: null }), { scroll: false });
+  };
+  const nbRetires = intervenants.filter((i) => retires.includes(i.cle)).length;
+  /* le crayon d'une de nos équipes : son nom affiché dans ce navigateur */
+  const renommer = (iv: Intervenant, nom: string) => {
+    const propre = nom.trim();
+    ecrireLocal(CLE_NOMS, { ...noms, [iv.cle]: propre || undefined });
   };
 
   const avis = (
@@ -311,6 +419,11 @@ export default function Equipes() {
             onSemaine={(s) => routeur.replace(lien({ semaine: s }), { scroll: false })}
             onNoter={() => ouvrirNoter(choisi.tiers ?? undefined)}
             onAnnuler={(a) => ouvrirAnnuler(choisi, a)}
+            onModifier={(a) => ouvrirModifier(choisi.tiers ?? "", a)}
+            parDefaut={defaut === choisi.cle}
+            onDefaut={() => basculerDefaut(choisi)}
+            onRetirer={() => setARetirer(choisi)}
+            onRenommer={(n) => renommer(choisi, n)}
           />
         ) : (
           <>
@@ -342,7 +455,7 @@ export default function Equipes() {
                   <li className="dcal-vide">Lecture des intervenants…</li>
                 ) : (
                   (() => {
-                    const vus = intervenants.filter((i) => (type === "sous-traitants" ? !!i.tiers : type === "equipes" ? i.genre === "equipe" : true));
+                    const vus = intervenants.filter((i) => !retires.includes(i.cle) && (type === "sous-traitants" ? !!i.tiers : type === "equipes" ? i.genre === "equipe" : true));
                     if (!vus.length)
                       return (
                         <li className="dcal-vide">
@@ -352,7 +465,21 @@ export default function Equipes() {
                           </Link>
                         </li>
                       );
-                    return vus.map((iv) => <LigneIntervenant key={iv.cle} iv={iv} du={du} au={au} href={lien({ intervenant: iv.cle })} onNoter={() => ouvrirNoter(iv.tiers ?? undefined)} onAnnuler={(a) => ouvrirAnnuler(iv, a)} />);
+                    return vus.map((iv) => (
+                      <LigneIntervenant
+                        key={iv.cle}
+                        iv={iv}
+                        du={du}
+                        au={au}
+                        href={lien({ intervenant: iv.cle })}
+                        parDefaut={defaut === iv.cle}
+                        onDefaut={() => basculerDefaut(iv)}
+                        onCopier={() => void copierPlanning(iv)}
+                        onNoter={() => ouvrirNoter(iv.tiers ?? undefined)}
+                        onAnnuler={(a) => ouvrirAnnuler(iv, a)}
+                        onRetirer={() => setARetirer(iv)}
+                      />
+                    ));
                   })()
                 )}
               </ul>
@@ -361,6 +488,15 @@ export default function Equipes() {
                 <button type="button" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
                   Noter une absence
                 </button>
+                {nbRetires ? (
+                  <>
+                    {" "}
+                    · {pluriel(nbRetires, "intervenant")} retiré{nbRetires > 1 ? "s" : ""} de la liste :{" "}
+                    <button type="button" onClick={() => ecrireLocal(CLE_RETIRES, null)}>
+                      les remettre
+                    </button>
+                  </>
+                ) : null}
               </p>
             </div>
             <button type="button" className="dcal-flottant" aria-label="Noter une absence" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
@@ -376,8 +512,12 @@ export default function Equipes() {
             <DialogIcone>
               <CalendarOff width={18} height={18} aria-hidden="true" />
             </DialogIcone>
-            <DialogTitle>Noter une absence</DialogTitle>
-            <DialogDescription>Les jours notés ne sont plus proposés pour ce sous-traitant : ni pour un passage, ni comme remplaçant.</DialogDescription>
+            <DialogTitle>{form?.remplace ? "Modifier l'absence" : "Noter une absence"}</DialogTitle>
+            <DialogDescription>
+              {form?.remplace
+                ? `L'absence ${periode(form.remplace.du, form.remplace.au)} est remplacée par les jours choisis : la nouvelle est notée, puis l'ancienne annulée.`
+                : "Les jours notés ne sont plus proposés pour ce sous-traitant : ni pour un passage, ni comme remplaçant."}
+            </DialogDescription>
           </DialogHeader>
           <DialogBody>
             {form ? (
@@ -421,7 +561,7 @@ export default function Equipes() {
           </DialogBody>
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={envoi || !form?.tiers || !form?.du || !form?.au} onClick={() => void noter()}>
-              {envoi ? <Loader variant="spin" /> : null} Noter l&apos;absence
+              {envoi ? <Loader variant="spin" /> : null} {form?.remplace ? "Remplacer l'absence" : "Noter l'absence"}
             </button>
           </DialogFooter>
         </DialogContent>
@@ -453,6 +593,26 @@ export default function Equipes() {
             </button>
             <button type="button" className="r-btn r-btn--fil" onClick={() => setAAnnuler(null)}>
               Garder l&apos;absence
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!aRetirer} onOpenChange={(o) => !o && setARetirer(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone>
+              <EyeOff width={18} height={18} aria-hidden="true" />
+            </DialogIcone>
+            <DialogTitle>Retirer {aRetirer?.nom ?? "cet intervenant"} de la liste ?</DialogTitle>
+            <DialogDescription>Il ne s&apos;affiche plus dans Équipes sur ce navigateur ; ses passages et ses absences restent tels quels. « Les remettre », au pied de la liste, le fait revenir.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" onClick={() => aRetirer && retirer(aRetirer)}>
+              Retirer de la liste
+            </button>
+            <button type="button" className="r-btn r-btn--fil" onClick={() => setARetirer(null)}>
+              Garder
             </button>
           </DialogFooter>
         </DialogContent>
@@ -525,14 +685,40 @@ function MenuPoints({ libelle, options, petit }: { libelle: string; options: Opt
 
 const ico = (I: typeof Plus) => <I width={16} height={16} aria-hidden="true" />;
 
-function LigneIntervenant({ iv, du, au, href, onNoter, onAnnuler }: { iv: Intervenant; du: string; au: string; href: string; onNoter: () => void; onAnnuler: (a: Absence) => void }) {
+function LigneIntervenant({
+  iv,
+  du,
+  au,
+  href,
+  parDefaut,
+  onDefaut,
+  onCopier,
+  onNoter,
+  onAnnuler,
+  onRetirer,
+}: {
+  iv: Intervenant;
+  du: string;
+  au: string;
+  href: string;
+  parDefaut: boolean;
+  onDefaut: () => void;
+  onCopier: () => void;
+  onNoter: () => void;
+  onAnnuler: (a: Absence) => void;
+  onRetirer: () => void;
+}) {
   const passages = iv.passages.filter((p) => chevauche(p, { du, au }));
   const absences = iv.absences.filter((a) => a.au >= du && a.du <= au);
+  /* le menu de Cal.com (« Set as default », « Duplicate », « Delete »), puis les gestes de l'intervenant */
   const options: Option[] = [
+    { libelle: parDefaut ? "Ne plus être par défaut" : "Définir par défaut", icone: ico(Star), action: onDefaut },
+    { libelle: "Copier le planning", icone: ico(Copy), action: onCopier },
     { libelle: "Noter une absence", icone: ico(CalendarOff), action: onNoter, desactive: !iv.tiers },
-    ...absences.map((a) => ({ libelle: `Annuler l'absence ${jours(a.du, a.au)}`, icone: ico(Trash), action: () => onAnnuler(a), rouge: true })),
   ];
   if (iv.tiers) options.push({ libelle: "Ouvrir dans l'annuaire", icone: ico(BookUser), href: `${BASE}/annuaire?entreprise=${encodeURIComponent(iv.tiers)}` });
+  for (const a of absences) options.push({ libelle: `Annuler l'absence ${jours(a.du, a.au)}`, icone: ico(Trash), action: () => onAnnuler(a), rouge: true });
+  options.push({ libelle: "Retirer de la liste", icone: ico(Trash), action: onRetirer, rouge: true });
   return (
     <li className="dcal-ligne">
       <div className="dcal-ligne-corps">
@@ -540,7 +726,7 @@ function LigneIntervenant({ iv, du, au, href, onNoter, onAnnuler }: { iv: Interv
           <Link href={href} scroll={false} className="dcal-ligne-lien">
             {iv.nom}
           </Link>
-          {iv.genre === "equipe" ? <span className="dcal-badge">Équipe</span> : null}
+          {parDefaut ? <span className="dcal-badge">Par défaut</span> : null}
         </div>
         <div className="dcal-plages">
           {passages.map((p) => (
@@ -576,6 +762,11 @@ function FicheIntervenant({
   onSemaine,
   onNoter,
   onAnnuler,
+  onModifier,
+  parDefaut,
+  onDefaut,
+  onRetirer,
+  onRenommer,
 }: {
   iv: Intervenant;
   du: string;
@@ -585,7 +776,13 @@ function FicheIntervenant({
   onSemaine: (s: string) => void;
   onNoter: () => void;
   onAnnuler: (a: Absence) => void;
+  onModifier: (a: Absence) => void;
+  parDefaut: boolean;
+  onDefaut: () => void;
+  onRetirer: () => void;
+  onRenommer: (nom: string) => void;
 }) {
+  const [renomme, setRenomme] = useState<string | null>(null);
   const { poser } = useDeplacer(du);
   const [brouillon, setBrouillon] = useState<Brouillon>({});
   const [envoi, setEnvoi] = useState(false);
@@ -633,15 +830,49 @@ function FicheIntervenant({
         <Link href={retour} scroll={false} className="dcal-retour" aria-label="Retour aux équipes" title="Retour aux équipes">
           <ArrowLeft width={16} height={16} aria-hidden="true" />
         </Link>
-        <p className="dcal-fiche-nom" aria-hidden="true">
-          {iv.nom}
-        </p>
+        {renomme !== null ? (
+          /* le nom éditable de Cal.com : le nom affiché de l'équipe, dans ce navigateur (Entrée garde, Échap annule) */
+          <input
+            className="dcal-fiche-nom dcal-fiche-champ"
+            aria-label="Nom affiché de l'équipe"
+            value={renomme}
+            autoFocus
+            maxLength={80}
+            onChange={(e) => setRenomme(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                onRenommer(renomme);
+                setRenomme(null);
+              }
+              if (e.key === "Escape") setRenomme(null);
+            }}
+            onBlur={() => {
+              onRenommer(renomme);
+              setRenomme(null);
+            }}
+          />
+        ) : (
+          <p className="dcal-fiche-nom" aria-hidden="true">
+            {iv.nom}
+          </p>
+        )}
         {iv.tiers ? (
           <Link href={`${BASE}/annuaire?entreprise=${encodeURIComponent(iv.tiers)}`} className="dcal-crayon" aria-label="Modifier dans l'annuaire" title="Modifier dans l'annuaire">
             <Pencil width={16} height={16} aria-hidden="true" />
           </Link>
-        ) : null}
+        ) : (
+          <button type="button" className="dcal-crayon" aria-label="Renommer l'équipe" title="Renommer l'équipe (nom affiché dans ce navigateur)" onClick={() => setRenomme(iv.nom)}>
+            <Pencil width={16} height={16} aria-hidden="true" />
+          </button>
+        )}
         <div className="dcal-fiche-actions">
+          <span className="dcal-defaut">
+            <span className="dcal-txt-large">Par défaut</span>
+            <button type="button" role="switch" className="dcal-inter" aria-checked={parDefaut} aria-label="Intervenant par défaut" title="L'intervenant par défaut passe en tête de liste et se propose pour une absence" onClick={onDefaut} />
+          </span>
+          <button type="button" className="dcal-carre dcal-carre--rouge" aria-label="Retirer de la liste" title="Retirer de la liste" onClick={onRetirer}>
+            <Trash width={16} height={16} aria-hidden="true" />
+          </button>
           <button type="button" className="dcal-plein" disabled={!nbModifs || envoi} onClick={() => void enregistrer()}>
             {envoi ? <Loader variant="spin" /> : null}
             Enregistrer
@@ -765,6 +996,9 @@ function FicheIntervenant({
                       <p className="dcal-exception-date">{plageLongue(a.du, a.au)}</p>
                       <p className="dcal-exception-plage">{a.motif ?? "Absent toute la journée"}</p>
                     </div>
+                    <button type="button" className="dcal-carre dcal-carre--petit" aria-label="Modifier l'absence" title="Modifier l'absence" onClick={() => onModifier(a)}>
+                      <Pencil width={16} height={16} aria-hidden="true" />
+                    </button>
                     <button type="button" className="dcal-carre dcal-carre--petit dcal-carre--rouge" aria-label="Annuler l'absence" title="Annuler l'absence" onClick={() => onAnnuler(a)}>
                       <Trash width={16} height={16} aria-hidden="true" />
                     </button>

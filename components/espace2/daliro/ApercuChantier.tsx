@@ -39,8 +39,8 @@ type Sante = "on" | "risk" | "off" | null;
 const SANTE_LIBELLE: Record<Exclude<Sante, null>, string> = { on: "En bonne voie", risk: "À risque", off: "Bloqué" };
 const PRIORITE: Record<TeinteClair, 0 | 1 | 2 | 3 | 4> = { rouge: 1, ambre: 2, bleu: 3, gris: 4, vert: 0 };
 /* couleur de l'icône de projet (couleurs relevées sur les icônes de projet de Linear) */
-const COULEUR_LOT: Record<Lot["statut"], string> = { a_venir: "#f0bf00", en_cours: "#4cb782", termine: "#5e6ad2" };
-const STATUT_LOT: Record<Lot["statut"], StatutChantier> = { a_venir: "preparation", en_cours: "ouvert", termine: "receptionne" };
+export const COULEUR_LOT: Record<Lot["statut"], string> = { a_venir: "#f0bf00", en_cours: "#4cb782", termine: "#5e6ad2" };
+export const STATUT_LOT: Record<Lot["statut"], StatutChantier> = { a_venir: "preparation", en_cours: "ouvert", termine: "receptionne" };
 const GROUPES: { cle: Lot["statut"]; libelle: string }[] = [
   { cle: "en_cours", libelle: "En cours" },
   { cle: "a_venir", libelle: "À venir" },
@@ -134,8 +134,8 @@ function avancements(t: Tableau): Map<string, number> {
 }
 
 /* ——— ce que chaque lot montre dans le tableau et dans « Progress » ——— */
-type LigneLot = { lot: Lot; sante: Sante; santeTexte: string; prio: 0 | 1 | 2 | 3 | 4; prioTexte: string; qui: string | null; fin: string | null; pct: number | null };
-function lignesLots(t: Tableau): LigneLot[] {
+export type LigneLot = { lot: Lot; sante: Sante; santeTexte: string; prio: 0 | 1 | 2 | 3 | 4; prioTexte: string; qui: string | null; fin: string | null; pct: number | null };
+export function lignesLots(t: Tableau): LigneLot[] {
   const avance = avancements(t);
   const prix = t.voit_prix;
   return t.lots.map((l) => {
@@ -322,6 +322,17 @@ export function ApercuChantier({ t, c, ici, ouvrirVolet, demander }: { t: Tablea
   );
 }
 
+/* la flèche de tri de Linear (AnimatedArrowUpDownIcon du paquet public, static.linear.app,
+   relue le 02/11/2026 ; sens descendant), 12×12 */
+function FlecheTri() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path d="M11.5361 10.2745C11.8024 10.0029 11.8249 9.56807 11.5762 9.26961C11.3275 8.97139 10.8961 8.91526 10.5811 9.12801L10.5195 9.17391L8.00001 11.2735L5.48048 9.17391L5.41895 9.12801C5.10388 8.91526 4.67252 8.97139 4.42384 9.26961C4.17512 9.56807 4.19758 10.0029 4.46387 10.2745L4.51954 10.3263L7.51954 12.8263C7.79767 13.058 8.20234 13.058 8.48048 12.8263L11.4805 10.3263L11.5361 10.2745Z" />
+      <path d="M8.75 12.25C8.75 12.6642 8.41421 13 8 13C7.58579 13 7.25 12.6642 7.25 12.25L7.25 3.75C7.25 3.33579 7.58579 3 8 3C8.41421 3 8.75 3.33579 8.75 3.75V12.25Z" />
+    </svg>
+  );
+}
+
 /* ═════════ « Projects » : les lots du chantier ═════════ */
 type Tri = "nom" | "sante" | "priorite" | "fin" | "statut";
 function LotsChantier({ t, ici }: { t: Tableau; ici: string }) {
@@ -345,7 +356,7 @@ function LotsChantier({ t, ici }: { t: Tableau; ici: string }) {
   const entete = (cle: Tri, libelle: string, col?: string) => (
     <button type="button" className="dal-ini-tri" data-col={col} aria-pressed={tri === cle} onClick={() => setTri(cle)} title={`Trier par ${libelle.toLowerCase()}`}>
       {libelle}
-      {tri === cle ? <span aria-hidden="true">↓</span> : null}
+      {tri === cle ? <FlecheTri /> : null}
     </button>
   );
   const lienLots = `${ici}?onglet=argent&partie=lots`;

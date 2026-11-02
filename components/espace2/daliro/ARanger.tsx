@@ -44,6 +44,9 @@ import { useDaliro } from "./donnees";
 import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { messagesExemple } from "./exemplesARanger";
+import { IconeLinear } from "./IconesLinear";
+import { EtoilePleine } from "./IconesProjet";
+import { copier, useFavoris, useReportes, useSuivis } from "./navigateur";
 import { ILLUSTRATION_TRIAGE } from "./illustrationTriage";
 import "./dal-triage.css";
 
@@ -53,13 +56,6 @@ const CANAUX: Record<MessageChantier["canal"], string> = { whatsapp: "WhatsApp",
 const ICONE_CANAL: Record<MessageChantier["canal"], NomDalIcone> = { whatsapp: "Chat", sms: "Phone", email: "Email" };
 const MOTIF_MAX = 300;
 
-/* les deux icônes de la barre Triage, hors sprite : tracés du paquet public de Linear
-   (startup-root.DQ-fTRWK.js, composants fh « Accept issue… » et X$n « Decline issue… »), 02/11/2026 */
-const ACCEPTER =
-  '<path d="M1 10.75A4.25 4.25 0 0 0 5.25 15h1a.75.75 0 0 0 0-1.5h-1a2.75 2.75 0 0 1-2.75-2.75v-5.5A2.75 2.75 0 0 1 5.25 2.5h5.5a2.75 2.75 0 0 1 2.75 2.75v.997a.75.75 0 0 0 1.5 0V5.25A4.25 4.25 0 0 0 10.75 1h-5.5A4.25 4.25 0 0 0 1 5.25z"/><path d="M10.75 14.25a.75.75 0 0 0 1.5 0v-2h2a.75.75 0 0 0 0-1.5h-2v-2a.75.75 0 0 0-1.5 0v2h-2a.75.75 0 0 0 0 1.5h2z"/>';
-const REFUSER =
-  '<path d="M1 11.25C1 13.3211 2.67893 15 4.75 15L5 15C5.41421 15 5.75 14.6642 5.75 14.25C5.75 13.8358 5.41421 13.5 5 13.5L4.75 13.5C3.50736 13.5 2.5 12.4926 2.5 11.25L2.5 4.75C2.5 3.50736 3.50736 2.5 4.75 2.5L11.25 2.5C12.4926 2.5 13.5 3.50736 13.5 4.75V5C13.5 5.41421 13.8358 5.75 14.25 5.75C14.6642 5.75 15 5.41421 15 5V4.75C15 2.67893 13.3211 1 11.25 1L4.75 1C2.67893 1 1 2.67893 1 4.75L1 11.25Z"/><path d="M9.53033 8.46967L11.5 10.4393L13.4697 8.46967C13.7626 8.17678 14.2374 8.17678 14.5303 8.46967C14.8232 8.76256 14.8232 9.23744 14.5303 9.53033L12.5607 11.5L14.5303 13.4697C14.8232 13.7626 14.8232 14.2374 14.5303 14.5303C14.2374 14.8232 13.7626 14.8232 13.4697 14.5303L11.5 12.5607L9.53033 14.5303C9.23744 14.8232 8.76256 14.8232 8.46967 14.5303C8.17678 14.2374 8.17678 13.7626 8.46967 13.4697L10.4393 11.5L8.46967 9.53033C8.17678 9.23744 8.17678 8.76256 8.46967 8.46967C8.76256 8.17678 9.23744 8.17678 9.53033 8.46967Z"/>';
-const Trace = ({ d }: { d: string }) => <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" dangerouslySetInnerHTML={{ __html: d }} />;
 
 /* la photo dessinée de l'exemple (la même que le fil, FilCarte.tsx) : rien n'est lu dans un vrai dépôt */
 const PHOTO_EXEMPLE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200"><rect width="320" height="200" fill="#e9e6df"/><rect x="40" y="50" width="110" height="120" fill="#c9c3b6"/><rect x="58" y="68" width="74" height="84" fill="#9fb4c7"/><rect x="180" y="40" width="100" height="130" fill="#d8d2c4"/><text x="160" y="190" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#555">Photo d\'exemple</text></svg>')}`;
@@ -85,6 +81,9 @@ const initiales = (nom: string) =>
 /* les couleurs d'avatar de Linear (relevé des étiquettes, linear-my-issues.md) */
 const COULEURS = ["rgb(235, 87, 87)", "rgb(38, 181, 206)", "rgb(76, 183, 130)", "lch(48 59.31 288.43)", "lch(67.969 19.321 31.72)"];
 const couleurDe = (s: string) => COULEURS[[...s].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
+
+const MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+const jourMois = (iso: string) => (iso ? `${Number(iso.slice(8, 10))} ${MOIS[Number(iso.slice(5, 7)) - 1]}` : "");
 
 /* « il y a 1 h », comme le « 1h ago » de Linear */
 function depuis(iso: string, maintenant: number | null): string {
@@ -219,6 +218,48 @@ function Piece({ piece, reelle, auteur, recu }: { piece: PieceMessage; reelle: b
 type Canal = MessageChantier["canal"];
 const estCanal = (v: string | null): v is Canal => v === "whatsapp" || v === "sms" || v === "email";
 
+/* dates du report (Snooze) : AAAA-MM-JJ locales */
+const isoJour = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const dansJours = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return isoJour(d);
+};
+const lundiProchain = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + (((8 - d.getDay()) % 7) || 7));
+  return isoJour(d);
+};
+const jourClair = (iso: string) => new Intl.DateTimeFormat("fr-FR", { weekday: "long", day: "numeric", month: "long" }).format(new Date(`${iso}T12:00:00`));
+
+/* l'expéditeur suivi (cloche « Subscribe ») : sa fiche d'annuaire, sinon son adresse */
+const cleExpediteur = (m: MessageChantier) => m.tiers_id ?? m.intervenant_id ?? m.de_adresse ?? m.de_nom ?? m.id;
+
+/* répondre par le canal du message, depuis l'application de l'utilisateur : rien ne part d'ici */
+function lienReponse(m: MessageChantier, texte: string): string | null {
+  const adresse = m.de_adresse?.trim() ?? "";
+  if (!adresse || adresse.includes("•")) return null;
+  if (m.canal === "email") return adresse.includes("@") ? `mailto:${adresse}?subject=${encodeURIComponent("Votre message")}&body=${encodeURIComponent(texte)}` : null;
+  const chiffres = adresse.replace(/[^\d+]/g, "");
+  if (chiffres.replace(/\D/g, "").length < 9) return null;
+  return m.canal === "whatsapp" ? `https://wa.me/${chiffres.replace(/\D/g, "")}?text=${encodeURIComponent(texte)}` : `sms:${chiffres}?&body=${encodeURIComponent(texte)}`;
+}
+
+/* « Copy as prompt » : le message en clair, pour un assistant */
+function resumeDe(m: MessageChantier, url: string): string {
+  const lignes = [
+    `Message reçu par ${CANAUX[m.canal]} le ${dateHeure(m.recu_le)}, de ${auteurDe(m)}${m.de_nom && m.de_adresse ? ` (${m.de_adresse})` : ""}.`,
+    `Il n'est rattaché à aucun chantier (DALIRO, file « À ranger »).`,
+    "",
+    `Texte : ${m.texte?.trim() || "(sans texte)"}`,
+  ];
+  if (m.pieces.length) lignes.push(`Pièces : ${piecesDe(m)}.`);
+  if (m.lecture?.resume) lignes.push(`Lu par le système : ${m.lecture.resume}`);
+  for (const x of m.lecture?.medias ?? []) if (x.transcription) lignes.push(`Transcription du vocal : « ${x.transcription} »`);
+  lignes.push("", "Dites à quel chantier il se rapporte, s'il signale un travail en plus (avenant), ou s'il est à écarter.", `Lien : ${url}`);
+  return lignes.join("\n");
+}
+
 export default function ARanger() {
   const d = useDaliro();
   const { source, liste, onLocal, tableau, relire, relireChantier } = d;
@@ -231,6 +272,10 @@ export default function ARanger() {
   const id = params.get("id");
   const canalFiltre = estCanal(params.get("canal")) ? (params.get("canal") as Canal) : null;
   const ancienD = params.get("ordre") === "ancien";
+  const voirReportes = params.get("reportes") === "1";
+  const favoris = useFavoris();
+  const suivis = useSuivis();
+  const reportes = useReportes();
 
   const [reel, setReel] = useState<MessageChantier[] | null>(null);
   const [erreurLecture, setErreurLecture] = useState<string | null>(null);
@@ -245,6 +290,15 @@ export default function ARanger() {
   const [objet, setObjet] = useState("");
   const [avenantOuvert, setAvenantOuvert] = useState<Chantier | null>(null);
   const [erreurFenetre, setErreurFenetre] = useState<string | null>(null);
+  /* Marquer comme doublon : le message d'origine, puis Écarter avec ce motif */
+  const [aDoublon, setADoublon] = useState<MessageChantier | null>(null);
+  const [origine, setOrigine] = useState("");
+  /* Reporter : la date choisie à la main */
+  const [aReporter, setAReporter] = useState<MessageChantier | null>(null);
+  const [dateReport, setDateReport] = useState("");
+  /* Répondre : le texte de la boîte, puis la confirmation */
+  const [reponse, setReponse] = useState("");
+  const [aRepondre, setARepondre] = useState<MessageChantier | null>(null);
   const listeRef = useRef<HTMLUListElement>(null);
 
   const lire = useCallback(async () => {
@@ -264,10 +318,16 @@ export default function ARanger() {
     return () => window.clearTimeout(t);
   }, [reelle, lire]);
 
+  const { estSuivi } = suivis;
+  const { estReporte } = reportes;
+  const suiviDe = useCallback((m: MessageChantier) => estSuivi("expediteur", cleExpediteur(m)) || (!!m.chantier_id && estSuivi("btp_chantiers", m.chantier_id)), [estSuivi]);
+  const tousMessages = useMemo(() => [...(reelle ? (reel ?? []) : local)], [reelle, reel, local]);
+  const nbReportes = tousMessages.filter((m) => estReporte("message", m.id)).length;
   const messages = useMemo(() => {
-    const tous = [...(reelle ? (reel ?? []) : local)].filter((m) => !canalFiltre || m.canal === canalFiltre);
-    return tous.sort((a, b) => (ancienD ? a.recu_le.localeCompare(b.recu_le) : b.recu_le.localeCompare(a.recu_le)));
-  }, [reelle, reel, local, canalFiltre, ancienD]);
+    const tous = tousMessages.filter((m) => (!canalFiltre || m.canal === canalFiltre) && (voirReportes || !estReporte("message", m.id)));
+    /* les messages suivis d'abord (cloche « Subscribe »), puis l'ordre choisi */
+    return tous.sort((a, b) => Number(suiviDe(b)) - Number(suiviDe(a)) || (ancienD ? a.recu_le.localeCompare(b.recu_le) : b.recu_le.localeCompare(a.recu_le)));
+  }, [tousMessages, canalFiltre, ancienD, voirReportes, estReporte, suiviDe]);
   /* en base réelle : la liste des chantiers, puis les messages ; sans compte rattaché, rien à lire */
   const chargement = reelle && (!d.pret || (!!clientId && reel === null));
   const sansCompte = reelle && d.pret && !clientId;
@@ -295,7 +355,7 @@ export default function ARanger() {
   };
 
   /* ↑/↓ changent de message, Échap referme (pas quand un menu, un champ ou une fenêtre a la main) */
-  const fenetreOuverte = !!aEcarter || !!aAvenant;
+  const fenetreOuverte = !!aEcarter || !!aAvenant || !!aDoublon || !!aReporter || !!aRepondre;
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || fenetreOuverte) return;
@@ -319,11 +379,75 @@ export default function ARanger() {
     listeRef.current?.querySelector("[aria-current]")?.scrollIntoView({ block: "nearest" });
   }, [id]);
 
-  const copierLien = () => {
-    void navigator.clipboard?.writeText(window.location.href).then(
-      () => toast("Lien copié.", "vert"),
-      () => toast("Le lien n'a pas pu être copié.", "rouge"),
-    );
+  const copierTexte = (texte: string, ok: string) => void copier(texte).then((r) => toast(r ? ok : "Le presse-papier a refusé la copie.", r ? "vert" : "rouge"));
+  const copierLien = () => copierTexte(window.location.href, "Lien copié.");
+  const lienAbsolu = (m: MessageChantier) => `${window.location.origin}${CHEMIN}?id=${encodeURIComponent(m.id)}`;
+
+  /* ——— Reporter (Snooze) : le message quitte la file jusqu'à la date choisie ——— */
+  const reporterMessage = (m: MessageChantier, jusqu: string) => {
+    const suivant = suivantDe(m);
+    reportes.reporter("message", m.id, jusqu);
+    toast(`Message reporté au ${jourClair(jusqu)} : il revient dans la file ce jour-là.`, "vert");
+    if (!voirReportes && id === m.id) routeur.replace(lienId(suivant), { scroll: false });
+  };
+  const optionsReport = (m: MessageChantier): OptionTr[] => [
+    { cle: "demain", libelle: "Demain", meta: jourClair(dansJours(1)), icone: "Clock", action: () => reporterMessage(m, dansJours(1)) },
+    { cle: "3j", libelle: "Dans 3 jours", meta: jourClair(dansJours(3)), icone: "Clock", action: () => reporterMessage(m, dansJours(3)) },
+    { cle: "lundi", libelle: "Lundi prochain", meta: jourClair(lundiProchain()), icone: "Calendar", action: () => reporterMessage(m, lundiProchain()) },
+    { cle: "semaine", libelle: "Dans une semaine", meta: jourClair(dansJours(7)), icone: "Calendar", action: () => reporterMessage(m, dansJours(7)) },
+    {
+      cle: "date",
+      libelle: "Choisir une date…",
+      icone: "FromDate",
+      action: () => {
+        setDateReport(dansJours(1));
+        setAReporter(m);
+      },
+    },
+    ...(estReporte("message", m.id)
+      ? [{ cle: "annuler", libelle: "Annuler le report", icone: "Refresh" as NomDalIcone, action: () => { reportes.annuler("message", m.id); toast("Report annulé : le message est de retour dans la file.", "vert"); } }]
+      : []),
+  ];
+
+  /* ——— Marquer comme doublon : Écarter (G06) avec le message d'origine pour motif ——— */
+  const motifDoublon = (o: MessageChantier) => `Doublon du message de ${auteurDe(o)} reçu le ${dateHeure(o.recu_le)} : « ${titreDe(o).slice(0, 120)} »`.slice(0, MOTIF_MAX);
+  const marquerDoublon = async () => {
+    const m = aDoublon;
+    const o = messages.find((x) => x.id === origine) ?? tousMessages.find((x) => x.id === origine);
+    if (!m || !o || envoi) return;
+    const suivant = suivantDe(m);
+    setEnvoi(true);
+    setErreurFenetre(null);
+    try {
+      if (reelle) {
+        await ecarterMessage(m.id, motifDoublon(o));
+        await lire();
+      } else {
+        setLocal((l) => l.filter((x) => x.id !== m.id));
+      }
+      setADoublon(null);
+      toast(`Message écarté comme doublon de celui de ${auteurDe(o)}.`, "vert");
+      routeur.replace(lienId(suivant), { scroll: false });
+    } catch (e) {
+      setErreurFenetre(e instanceof Error ? e.message : "La base a refusé l'action.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+
+  /* ——— Répondre (boîte de commentaire) : par le canal du message, depuis votre application ——— */
+  const repondre = () => {
+    const m = aRepondre;
+    if (!m) return;
+    const lien = lienReponse(m, reponse.trim());
+    if (lien) {
+      window.open(lien, m.canal === "whatsapp" ? "_blank" : "_self", "noopener");
+      toast(`Réponse ouverte dans ${m.canal === "email" ? "votre messagerie" : m.canal === "sms" ? "vos SMS" : "WhatsApp"} : envoyez-la de là.`, "vert");
+    } else {
+      copierTexte(reponse.trim(), "Réponse copiée : collez-la dans votre conversation avec l'expéditeur.");
+    }
+    setReponse("");
+    setARepondre(null);
   };
 
   /* ——— Ranger (G05) : le chantier choisi dans le menu, la porte rangerMessage ——— */
@@ -464,6 +588,16 @@ export default function ARanger() {
     <section className="dal-tr-liste" aria-label="Messages à ranger">
       <header className="dal-tr-tete">
         <h2 className="dal-tr-titre">À ranger</h2>
+        <button
+          type="button"
+          className="dal-rond dal-tr-etoile"
+          aria-pressed={favoris.estEpingle("vue", "daliro-a-ranger")}
+          aria-label={favoris.estEpingle("vue", "daliro-a-ranger") ? "Retirer la page des épinglés" : "Épingler la page"}
+          title={favoris.estEpingle("vue", "daliro-a-ranger") ? "Retirer des épinglés de la vue d'ensemble" : "Épingler dans la vue d'ensemble"}
+          onClick={() => favoris.basculer({ type: "vue", id: "daliro-a-ranger", titre: "À ranger", href: CHEMIN })}
+        >
+          {favoris.estEpingle("vue", "daliro-a-ranger") ? <EtoilePleine /> : <DalIcone nom="Etoile" />}
+        </button>
         <span className="dal-pousse" />
         <MenuTr
           libelle="Filtrer"
@@ -485,6 +619,7 @@ export default function ARanger() {
           options={[
             { cle: "recent", libelle: "Le plus récent d'abord", icone: "Updated", meta: ancienD ? undefined : "✓", action: () => routeur.replace(lienAvec("ordre", null), { scroll: false }) },
             { cle: "ancien", libelle: "Le plus ancien d'abord", icone: "Created", meta: ancienD ? "✓" : undefined, action: () => routeur.replace(lienAvec("ordre", "ancien"), { scroll: false }) },
+            { cle: "reportes", libelle: `Afficher les reportés (${nbReportes})`, icone: "Clock", meta: voirReportes ? "✓" : undefined, action: () => routeur.replace(lienAvec("reportes", voirReportes ? null : "1"), { scroll: false }) },
           ]}
         />
       </header>
@@ -521,6 +656,18 @@ export default function ARanger() {
                         <Avatar m={m} />
                         <span className="dal-tr-nom">{auteurDe(m)}</span>
                       </span>
+                      {suiviDe(m) ? (
+                        <span className="dal-tr-marque" title="Vous suivez cet expéditeur">
+                          <DalIcone nom="Subscribe" taille={14} />
+                          suivi
+                        </span>
+                      ) : null}
+                      {estReporte("message", m.id) ? (
+                        <span className="dal-tr-marque" title="Reporté">
+                          <DalIcone nom="Clock" taille={14} />
+                          {jourMois(reportes.reportes.find((x) => x.type === "message" && x.id === m.id)?.jusqu ?? "")}
+                        </span>
+                      ) : null}
                       <span className="dal-tr-quand">{depuis(m.recu_le, maintenant)}</span>
                     </span>
                   </span>
@@ -567,6 +714,23 @@ export default function ARanger() {
     const recu = dateHeure(m.recu_le);
     const demandes = m.lecture?.demandes ?? [];
     const transcriptions = (m.lecture?.medias ?? []).filter((x) => x.transcription);
+    const epingle = favoris.estEpingle("btp_messages", m.id);
+    const suivi = suivis.estSuivi("expediteur", cleExpediteur(m));
+    const report = reportes.reportes.find((x) => x.type === "message" && x.id === m.id && estReporte("message", m.id));
+    const optionsPieces: OptionTr[] = m.pieces.length
+      ? m.pieces.map((p, i) => ({
+          cle: p.chemin,
+          libelle: p.vocal ? `Vocal ${i + 1}` : (p.mime ?? "").startsWith("image/") ? `Photo ${i + 1}` : p.nom,
+          icone: p.vocal ? "Mic" : (p.mime ?? "").startsWith("image/") ? "Image" : "Attachment",
+          action: () => document.getElementById("dal-tr-pieces")?.scrollIntoView({ behavior: "smooth", block: "center" }),
+        }))
+      : [{ cle: "aucune", libelle: "Aucune pièce : texte seul", icone: "Attachment", action: () => copierTexte(m.texte ?? "", "Texte du message copié.") }];
+    const optionsCopie: OptionTr[] = [
+      { cle: "prompt", libelle: "Copier pour l'assistant", icone: "Agent", action: () => copierTexte(resumeDe(m, lienAbsolu(m)), "Résumé copié : collez-le dans votre assistant.") },
+      { cle: "texte", libelle: "Copier le texte du message", icone: "Page", action: () => copierTexte(m.texte ?? "", "Texte du message copié.") },
+      { cle: "lien", libelle: "Copier le lien", icone: "Link", action: copierLien },
+    ];
+    const lienRep = lienReponse(m, "x");
     return (
       <section className="dal-tr-droite" aria-label={`Message de ${auteur}`}>
         <header className="dal-tr-tete dal-tr-tete--detail">
@@ -578,6 +742,16 @@ export default function ARanger() {
               <span className="dal-tr-fil-id">{CANAUX[m.canal]}</span> {titreDe(m)}
             </h2>
           </Link>
+          <button
+            type="button"
+            className="dal-rond"
+            aria-pressed={epingle}
+            aria-label={epingle ? "Retirer des épinglés" : "Épingler le message"}
+            title={epingle ? "Retirer des épinglés de la vue d'ensemble" : "Épingler dans la vue d'ensemble"}
+            onClick={() => favoris.basculer({ type: "btp_messages", id: m.id, titre: `${CANAUX[m.canal]} de ${auteur} : ${titreDe(m)}`, href: `${CHEMIN}?id=${encodeURIComponent(m.id)}` })}
+          >
+            {epingle ? <EtoilePleine /> : <DalIcone nom="Etoile" />}
+          </button>
           <MenuTr
             libelle="Actions du message"
             classe="dal-rond"
@@ -585,21 +759,66 @@ export default function ARanger() {
             declencheur={<DalIcone nom="Points" />}
             options={[
               { cle: "avenant", libelle: "Ouvrir un avenant…", icone: "Signature", action: () => ouvrirAvenantFenetre(m) },
+              { cle: "suivre", libelle: suivi ? "Ne plus suivre l'expéditeur" : "Suivre l'expéditeur", icone: suivi ? "Notified" : "Subscribe", action: () => suivis.basculer({ type: "expediteur", id: cleExpediteur(m), titre: auteur, href: CHEMIN }) },
               { cle: "lien", libelle: "Copier le lien", icone: "Link", action: copierLien },
             ]}
           />
           <span className="dal-pousse" />
           <div className="dal-tr-barre" role="group" aria-label="Triage">
-            <MenuTr libelle="Ranger dans un chantier…" classe="dal-rond" droite largeur={280} declencheur={<Trace d={ACCEPTER} />} options={optionsChantiers(m)} />
+            <MenuTr libelle="Ranger dans un chantier…" classe="dal-rond" droite largeur={280} declencheur={<IconeLinear nom="accepter" />} options={optionsChantiers(m)} />
             <button type="button" className="dal-rond" aria-label="Écarter le message…" title="Écarter le message…" disabled={envoi} onClick={() => ouvrirEcarter(m)}>
-              <Trace d={REFUSER} />
+              <IconeLinear nom="refuser" />
             </button>
+            <button
+              type="button"
+              className="dal-rond"
+              aria-label="Marquer comme doublon de…"
+              title="Marquer comme doublon de…"
+              disabled={envoi}
+              onClick={() => {
+                setErreurFenetre(null);
+                setOrigine(messages.find((x) => x.id !== m.id)?.id ?? "");
+                setADoublon(m);
+              }}
+            >
+              <IconeLinear nom="doublon" />
+            </button>
+            <MenuTr libelle="Reporter…" classe="dal-rond" droite largeur={300} declencheur={<IconeLinear nom="reporter" />} options={optionsReport(m)} />
           </div>
         </header>
         <div className="dal-tr-flottante">
           <button type="button" className="dal-rond dal-rond--plein" aria-label="Copier le lien" title="Copier le lien" onClick={copierLien}>
             <DalIcone nom="LienUrl" />
           </button>
+          <button
+            type="button"
+            className="dal-rond dal-rond--plein"
+            aria-label="Copier la référence du message"
+            title="Copier la référence du message"
+            onClick={() => copierTexte(`${CANAUX[m.canal]} de ${auteur}, reçu le ${recu}`, "Référence copiée.")}
+          >
+            <IconeLinear nom="copierId" />
+          </button>
+          <button type="button" className="dal-rond dal-rond--plein" aria-label="Copier le texte du message" title="Copier le texte du message" onClick={() => copierTexte(m.texte ?? "", "Texte du message copié.")}>
+            <IconeLinear nom="branche" />
+          </button>
+          <div className="dal-tr-double">
+            <button type="button" className="dal-tr-double-g" aria-label="Copier pour l'assistant" title="Copier pour l'assistant : le message en clair, prêt à coller" onClick={() => copierTexte(resumeDe(m, lienAbsolu(m)), "Résumé copié : collez-le dans votre assistant.")}>
+              <IconeLinear nom="prompt" />
+            </button>
+            <MenuTr
+              libelle="Choisir quoi copier"
+              classe="dal-tr-double-d"
+              droite
+              largeur={240}
+              declencheur={
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M3.47 5.97a.75.75 0 0 1 1.06 0L8 9.44l3.47-3.47a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-1.06 0l-4-4a.75.75 0 0 1 0-1.06" />
+                </svg>
+              }
+              options={optionsCopie}
+            />
+          </div>
         </div>
 
         <div className="dal-tr-corps">
@@ -607,6 +826,18 @@ export default function ARanger() {
             <h3 className="dal-tr-grand-titre">{titreDe(m)}</h3>
 
             <div className="dal-tr-pilules">
+              <MenuTr
+                libelle="État : à ranger"
+                classe="dal-tr-pilule"
+                largeur={280}
+                declencheur={
+                  <>
+                    <DalIcone nom="IssueStatusTriage" taille={14} className="dal-tr-triage" />
+                    <span>À ranger</span>
+                  </>
+                }
+                options={[...optionsChantiers(m), { cle: "ecarter", libelle: "Écarter…", icone: "StatusCanceled", action: () => ouvrirEcarter(m) }]}
+              />
               <span className="dal-tr-pilule" title="Canal">
                 <DalIcone nom={ICONE_CANAL[m.canal]} taille={14} />
                 <span>{CANAUX[m.canal]}</span>
@@ -614,14 +845,6 @@ export default function ARanger() {
               <span className="dal-tr-pilule" title="Expéditeur">
                 <Avatar m={m} taille={14} />
                 <span>{auteur}</span>
-              </span>
-              <span className="dal-tr-pilule" title="Reçu le">
-                <DalIcone nom="Clock" taille={14} />
-                <span>{recu}</span>
-              </span>
-              <span className="dal-tr-pilule" title="Pièces" data-vide={m.pieces.length ? undefined : ""}>
-                <DalIcone nom="Attachment" taille={14} />
-                <span>{piecesDe(m)}</span>
               </span>
               <MenuTr
                 libelle="Chantier : à choisir"
@@ -634,6 +857,22 @@ export default function ARanger() {
                   </>
                 }
                 options={optionsChantiers(m)}
+              />
+              <span className="dal-tr-pilule" title="Pièces" data-vide={m.pieces.length ? undefined : ""}>
+                <DalIcone nom="Attachment" taille={14} />
+                <span>{piecesDe(m)}</span>
+              </span>
+              <MenuTr
+                libelle={report ? `Reporté au ${jourClair(report.jusqu)}` : "Reporter…"}
+                classe={`dal-tr-pilule${report ? "" : " dal-tr-pilule--icone"}`}
+                largeur={300}
+                declencheur={
+                  <>
+                    <DalIcone nom="Cycle" taille={14} />
+                    {report ? <span>{jourMois(report.jusqu)}</span> : null}
+                  </>
+                }
+                options={optionsReport(m)}
               />
             </div>
 
@@ -664,15 +903,41 @@ export default function ARanger() {
             </div>
 
             {m.pieces.length ? (
-              <div className="dal-tr-pieces">
+              <div className="dal-tr-pieces" id="dal-tr-pieces">
                 {m.pieces.map((p) => (
                   <Piece key={p.chemin} piece={p} reelle={reelle} auteur={auteur} recu={recu} />
                 ))}
               </div>
             ) : null}
 
+            <div className="dal-tr-ronds-corps">
+              <button type="button" className="dal-rond dal-rond--plein" aria-label="Copier le texte du message" title="Copier le texte du message" onClick={() => copierTexte(m.texte ?? "", "Texte du message copié.")}>
+                <DalIcone nom="Page" taille={14} />
+              </button>
+              <MenuTr libelle={`Pièces reçues (${m.pieces.length})`} classe="dal-rond dal-rond--plein" largeur={220} declencheur={<DalIcone nom="Attachment" taille={14} />} options={optionsPieces} />
+            </div>
+            <div className="dal-tr-sous">
+              <button type="button" className="dal-tr-sous-bouton" disabled={envoi} onClick={() => ouvrirAvenantFenetre(m)}>
+                <DalIcone nom="Plus" taille={14} />
+                Ajouter un avenant
+              </button>
+            </div>
+
             <div className="dal-tr-activite-tete">
               <h3 className="dal-tr-activite">Activité</h3>
+              <span className="dal-pousse" />
+              <button
+                type="button"
+                className="dal-tr-suivre"
+                aria-pressed={suivi}
+                title={suivi ? "Ses prochains messages ne passeront plus en tête de la file" : "Ses prochains messages passeront en tête de la file, marqués « suivi »"}
+                onClick={() => suivis.basculer({ type: "expediteur", id: cleExpediteur(m), titre: auteur, href: CHEMIN })}
+              >
+                {suivi ? "Ne plus suivre" : "Suivre"}
+              </button>
+              <span className="dal-tr-abonnes" aria-hidden="true">
+                <Avatar m={m} taille={20} />
+              </span>
             </div>
             <ul className="dal-tr-evenements">
               <li>
@@ -693,7 +958,39 @@ export default function ARanger() {
                 <DalIcone nom="IssueStatusTriage" taille={14} />
                 <span>Aucun chantier rattaché : en attente de rangement</span>
               </li>
+              {report ? (
+                <li>
+                  <DalIcone nom="Clock" taille={14} />
+                  <span>Reporté dans ce navigateur jusqu&apos;au {jourClair(report.jusqu)}</span>
+                </li>
+              ) : null}
             </ul>
+
+            <form
+              className="dal-tr-reponse"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (reponse.trim()) setARepondre(m);
+              }}
+            >
+              <textarea rows={reponse.includes("\n") || reponse.length > 80 ? 3 : 1} value={reponse} onChange={(e) => setReponse(e.target.value)} placeholder={`Répondre à ${auteur}…`} aria-label={`Répondre à ${auteur}`} maxLength={2000} />
+              <div className="dal-tr-reponse-pied">
+                <button
+                  type="button"
+                  className="dal-tr-reponse-rond"
+                  aria-label="Joindre le lien de ce message"
+                  title="Joindre le lien de ce message"
+                  onClick={() => setReponse((r) => `${r}${r && !r.endsWith(" ") ? " " : ""}${lienAbsolu(m)}`)}
+                >
+                  <DalIcone nom="Attachment" taille={14} />
+                </button>
+                <button type="submit" className="dal-tr-reponse-rond dal-tr-reponse-envoyer" aria-label={lienRep ? `Répondre par ${CANAUX[m.canal]}` : "Copier la réponse"} title={lienRep ? `Répondre par ${CANAUX[m.canal]}` : "Copier la réponse"} disabled={!reponse.trim()}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M8 2a.75.75 0 0 1 .53.22l4.5 4.5a.75.75 0 0 1-1.06 1.06L8.75 4.56v8.69a.75.75 0 0 1-1.5 0V4.56L4.03 7.78a.75.75 0 0 1-1.06-1.06l4.5-4.5A.75.75 0 0 1 8 2" />
+                  </svg>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </section>
@@ -818,6 +1115,113 @@ export default function ARanger() {
                 </div>
               </form>
             )}
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+      {/* Marquer comme doublon : choisir le message d'origine, puis écarter celui-ci (G06) avec ce motif */}
+      <ModalOverlay isOpen={!!aDoublon} onOpenChange={(o) => !o && !envoi && setADoublon(null)} isDismissable={!envoi} className="v2-jetons v2-voile">
+        <Modal className="v2-modale">
+          <Dialog className="v2-modale-dialogue">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void marquerDoublon();
+              }}
+            >
+              <div className="v2-modale-corps">
+                <Heading slot="title">Marquer comme doublon de…</Heading>
+                <p>Le message de {aDoublon ? auteurDe(aDoublon) : ""} est écarté de la file ; le motif garde le message d&apos;origine, qui reste à ranger.</p>
+                <label className="v2-libelle">
+                  Message d&apos;origine
+                  <span className="v2-champ">
+                    <select value={origine} onChange={(e) => setOrigine(e.target.value)} required>
+                      <option value="">Choisir le message</option>
+                      {tousMessages
+                        .filter((x) => x.id !== aDoublon?.id)
+                        .map((x) => (
+                          <option key={x.id} value={x.id}>
+                            {auteurDe(x)} · {dateHeure(x.recu_le)} · {titreDe(x).slice(0, 60)}
+                          </option>
+                        ))}
+                    </select>
+                  </span>
+                </label>
+                {erreurFenetre ? (
+                  <Note teinte="rouge" role="alert">
+                    <strong>Refusé par la base.</strong> {erreurFenetre}
+                  </Note>
+                ) : null}
+              </div>
+              <div className="v2-modale-pied">
+                <Button className="v2-btn v2-btn--petit" slot="close" isDisabled={envoi}>
+                  Annuler
+                </Button>
+                <button type="submit" className="v2-btn v2-btn--petit v2-btn--primaire" disabled={envoi || !origine}>
+                  {envoi ? "Enregistrement…" : "Écarter comme doublon"}
+                </button>
+              </div>
+            </form>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+
+      {/* Reporter à une date choisie (Snooze) : dans ce navigateur */}
+      <ModalOverlay isOpen={!!aReporter} onOpenChange={(o) => !o && setAReporter(null)} isDismissable className="v2-jetons v2-voile">
+        <Modal className="v2-modale">
+          <Dialog className="v2-modale-dialogue">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (aReporter && dateReport > isoJour(new Date())) {
+                  reporterMessage(aReporter, dateReport);
+                  setAReporter(null);
+                }
+              }}
+            >
+              <div className="v2-modale-corps">
+                <Heading slot="title">Reporter jusqu&apos;au…</Heading>
+                <p>Le message quitte la file jusqu&apos;à ce jour, puis il y revient. Le report vaut pour ce navigateur ; rien n&apos;est changé en base.</p>
+                <label className="v2-libelle">
+                  Date
+                  <span className="v2-champ">
+                    <input type="date" value={dateReport} min={dansJours(1)} onChange={(e) => setDateReport(e.target.value)} required />
+                  </span>
+                </label>
+              </div>
+              <div className="v2-modale-pied">
+                <Button className="v2-btn v2-btn--petit" slot="close">
+                  Annuler
+                </Button>
+                <button type="submit" className="v2-btn v2-btn--petit v2-btn--primaire" disabled={!dateReport || dateReport <= isoJour(new Date())}>
+                  Reporter
+                </button>
+              </div>
+            </form>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+
+      {/* Répondre : la confirmation (la réponse part de votre application, par le canal du message) */}
+      <ModalOverlay isOpen={!!aRepondre} onOpenChange={(o) => !o && setARepondre(null)} isDismissable className="v2-jetons v2-voile">
+        <Modal className="v2-modale">
+          <Dialog className="v2-modale-dialogue">
+            <div className="v2-modale-corps">
+              <Heading slot="title">{aRepondre && lienReponse(aRepondre, "x") ? `Répondre par ${CANAUX[aRepondre.canal]} ?` : "Copier la réponse ?"}</Heading>
+              <p>
+                {aRepondre && lienReponse(aRepondre, "x")
+                  ? `Votre ${aRepondre.canal === "email" ? "messagerie" : aRepondre.canal === "sms" ? "application SMS" : "application WhatsApp"} s'ouvre avec ce texte, adressé à ${auteurDe(aRepondre)} (${aRepondre.de_adresse}). Le message part quand vous l'envoyez de là.`
+                  : `L'adresse de ${aRepondre ? auteurDe(aRepondre) : "l'expéditeur"} n'est pas utilisable ici : le texte est copié, collez-le dans votre conversation avec lui.`}
+              </p>
+              <blockquote className="dal-tr-citation">{reponse}</blockquote>
+            </div>
+            <div className="v2-modale-pied">
+              <Button className="v2-btn v2-btn--petit" slot="close">
+                Annuler
+              </Button>
+              <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire" onClick={repondre}>
+                {aRepondre && lienReponse(aRepondre, "x") ? `Ouvrir ${aRepondre.canal === "email" ? "la messagerie" : aRepondre.canal === "sms" ? "les SMS" : "WhatsApp"}` : "Copier la réponse"}
+              </button>
+            </div>
           </Dialog>
         </Modal>
       </ModalOverlay>

@@ -109,6 +109,18 @@ export default function QuestionsCarte({ tableau, source, aujourdhui }: Props) {
   }
 
 
+  /* 02/11/2026 — une question écrite dans le composeur de l'onglet Activité de la fiche arrive par
+     ?question= : elle est posée une fois, puis retirée de l'adresse */
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    const q = p.get("question");
+    if (!q) return;
+    p.delete("question");
+    window.history.replaceState(null, "", `${window.location.pathname}${p.toString() ? `?${p}` : ""}${window.location.hash}`);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- une question venue de l'adresse, posée une seule fois à l'arrivée
+    void poser(q);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   /* 30/10/2026 — dans la fiche de l'espace 2 : les questions proposées en pastilles, le champ, puis
      une question par ligne ; la réponse et ce qu'elle a lu dans le volet (../../espace2/lin/Volet.tsx) */
   if (volet) {
