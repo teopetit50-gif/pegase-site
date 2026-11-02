@@ -977,6 +977,7 @@ html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-p-pile {
   }
   .v2 .var.var--plain .var-p-actions {
     width: 100%;
+    flex-wrap: wrap;
   }
   .v2 .var.var--plain .var-p-recherche {
     width: 143px;
