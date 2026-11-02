@@ -469,3 +469,15 @@ html[data-v2-theme="light"] .v2 .tav.tav--plain {
     padding-top: 16px;
   }
 }
+
+/* 390 : le segment et le filtre d'agence passent sur deux rangées plutôt que de sortir de la carte */
+@media (max-width: 480px) {
+  .v2 .tav.tav--plain .tav-p-onglets {
+    flex-wrap: wrap;
+    height: auto;
+    row-gap: 8px;
+  }
+  .v2 .tav.tav--plain .tav-p-onglets > .tav-pousse {
+    display: none;
+  }
+}
