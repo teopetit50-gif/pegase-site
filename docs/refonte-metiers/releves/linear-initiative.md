@@ -169,3 +169,51 @@ Repère de lecture à gauche (table des matières) : 3 traits horizontaux à x 2
 2. Au centre, colonne étroite : tuile d'icône bleu pâle, titre 24px gras, résumé gris, rangées « Properties » (pastille jaune Active, No priority, Owner, date) et « Resources ».
 3. Carte bordée « Latest update » : vert « On track », avatar, auteur, date, paragraphe en 15px, deux petits boutons ronds.
 4. « Description » sans cadre, puis « Projects » en 18px et un tableau large sans bordures : en-têtes gris 12px, groupes « In Progress » / « Planned » en 11px suivis d'un filet, lignes de 36px avec icône, nom, pastilles et « 0% ».
+
+---
+
+# Complément du 01/11/2026 (page remplie, sombre + clair)
+
+## Ce qui a été créé
+
+- Projets rattachés à l'initiative (projets créés par moi, voir `linear-projects.md`) : « Villa Bellevue — extension » (In Progress, On track) et « Immeuble Les Alizés — 12 logements » (Planned, At risk). L'initiative montre désormais **5 projets en 2 groupes** (In Progress : Villa Bellevue, Maison Rolland, Local commercial Part-Dieu ; Planned : Immeuble Les Alizés, Groupe scolaire Jean-Moulin) et la santé varie (On track, At risk, sans mise à jour).
+- Ressource ajoutée : lien « Plans d'exécution indice C » → https://example.com/tilleuls/plans-execution.
+- Rien d'autre n'a été modifié sur l'initiative (statut, description, mise à jour de Wizyy inchangés).
+
+## Ajouts au relevé
+
+- **Ligne de groupe** dans la liste des projets de l'initiative : div flex 997×32, gap 6px ; libellé « In Progress » / « Planned » 11px / 450, c lch(61.803 1.2 272) (sombre) ; chevron de repli à gauche (x 186 en capture).
+- **Volet de détails** (bouton "Open Initiative details", raccourci **⌘ I**, à droite de la ligne d'onglets) : colonne 396×768 à x 1036 (1440), contient 3 cartes empilées :
+  - « Properties ▾ » (Status, Priority, Owner, Target date, Labels) — libellés 12px/450 c lch(63.304 1.425 272), valeurs 12px/450 c lch(100 0 272) avec m-left 8px après l'icône ; bouton « Add labels » 13px/500, r 9999px, p 0 10px 0 6px, h 28.
+  - « Progress ▾ » : segmenté **Health | Status | Leads** (boutons 12px/500, r 9999px, p 4px 12px, m 2px, gap 6px, h 28, actif bg lch(13.861 1.043 272)) puis lignes 363×42 (bg lch(9.232 0.85 272), r 8px, p 0 10px) : « Update missing 2 », « No update expected 1 », « On track 1 », « At risk 1 » (13px/450, nombre à droite).
+  - « Activity ▾ » + « See all » : événements 12px/450/16.8px c lch(63.304 1.425 272) (« Wizyy posted an update · Oct 29 », « Wizyy created the initiative · Oct 29 »).
+  - En-têtes de section repliables : div r 8px p 0 8px m-left −8px gap 3px h 28, titre 13px/500 c lch(63.304 1.425 272).
+  - Le volet reste ouvert d'un onglet à l'autre (Overview, Projects, Activity) ; à 1440 la colonne de contenu se décale à gauche (x 163 au lieu de 242 en capture).
+- **Menu « + » des ressources** : « Create new document… », « Add a link… » (raccourci Ctrl L) ; boîte « Add link to initiative » : champs URL (`https://…`) et « Title (optional) », boutons « Cancel » / « Add link ».
+- **Menu « + » de la section Projects** : « Create new project… », « Add existing projects… » (liste filtrable « Find projects… », les projets clos n'y figurent pas).
+- **Onglet Activity** : composeur « Comment | Update » en haut (zone « Leave a comment… », bouton « Comment »), puis regroupement par mois (« October », 18px environ), carte de mise à jour (pastille de santé, auteur, date, texte, réactions), événement « created the initiative ».
+
+## Palette (sombre ⇄ clair, même rôle)
+
+| Rôle | Sombre | Clair |
+|---|---|---|
+| Fond de carte | lch(5.52 0.4 272) | lch(97.94 0.5 282) |
+| Cartes du volet / carte « Latest update » | lch(12.72 0.85 272) ombre `lch(0 0 0/.125) 0 3px 8px 0, … 0 2px 5px 0, … 0 1px 1px 0` | lch(100 0 282) ombre `lch(0 0 0/.02) 0 6px 18px 0, lch(0 0 0/.04) 0 3px 9px 0, lch(0 0 0/.04) 0 1px 1px 0` |
+| Bordure des cartes | 0.5px lch(25.68 1.93 272) / lch(27.12 1.48 272) | 0.5px lch(91.9 0 282) / lch(84.44 0 282) |
+| Texte primaire | lch(100 0 272) | lch(9.794 0 282) / lch(10 0 282) dans le volet |
+| Texte secondaire | lch(90.451 1.2 272) | lch(19.588 1.25 282) |
+| Texte tertiaire / libellés | lch(61.803 1.2 272), volet lch(63.304 1.425 272) | lch(39.176 1.25 282), volet lch(40 1 282) |
+| Pastille d'icône de l'initiative | lch(67.5 38.933 217.444 / 0.175) | / 0.125 |
+| Santé On track | lch(67.2 64.37 141.95) | lch(60 64.37 141.95) |
+
+## Paliers
+
+- 1440 : volet de détails en colonne à droite (poussant le contenu).
+- 390×844 : barre latérale en tiroir ; fil d'Ariane tronqué « Initi… › Résidence Les… » ; onglets Overview / Activity / Projects en pilules 32px ; propriétés en ligne qui passe à la ligne (Active · No priority · Owner / Mar 31st, 2027 · …) ; carte « Latest update » pleine largeur (marges 28px) ; le volet de détails s'ouvre **par-dessus** le contenu (cartes flottantes 336px de large, à 44px du bord gauche).
+
+## Captures (`captures/linear-initiative/`)
+
+- `1440-sombre-overview.png`, `1440-sombre-overview-projets.png` (bloc Projects groupé)
+- `1440-sombre-volet-details.png`, `1440-clair-volet-details.png`
+- `1440-sombre-onglet-projects-volet.png`, `1440-sombre-onglet-activity-volet.png`
+- `390-sombre.png`, `390-clair.png`, `390-clair-volet-details.png`
