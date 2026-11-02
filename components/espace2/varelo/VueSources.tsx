@@ -383,7 +383,7 @@ function PageSociete({ s, br, codes, onDepot, peutDeposer, confirmer }: { s: Soc
         <section className="var-g-bloc">
           <div className="var-g-bloc-tete" style={{ flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
             <h3>Exports attendus</h3>
-            <p>Les jeux que le logiciel sort ; ils se choisissent au branchement.</p>
+            <p>Les jeux que le logiciel sort ; un interrupteur ouvre leur choix, envoyé à la DSI.</p>
           </div>
           <ul className="var-g-liste">
             {jeuxDe(actif?.logiciel ?? s.logiciel ?? "tableur").map((j) => {
@@ -394,7 +394,20 @@ function PageSociete({ s, br, codes, onDepot, peutDeposer, confirmer }: { s: Soc
                     <span className="var-g-liste-titre">{j.libelle}</span>
                     <span className="var-g-liste-aide">{on ? "Lu à chaque export" : "Pas lu"}</span>
                   </span>
-                  <span className="var-g-interrupteur" role="switch" aria-checked={on} aria-readonly="true" aria-label={j.libelle} data-on={on ? "" : undefined} data-inactif={actif ? undefined : ""} />
+                  {br.peutBrancher && !demande ? (
+                    <button
+                      type="button"
+                      className="var-g-interrupteur"
+                      role="switch"
+                      aria-checked={on}
+                      aria-label={`${j.libelle} : choisir les exports lus (demande à la DSI)`}
+                      title="Choisir les exports lus : la demande part à la DSI"
+                      data-on={on ? "" : undefined}
+                      onClick={() => br.setCible(s)}
+                    />
+                  ) : (
+                    <span className="var-g-interrupteur" role="switch" aria-checked={on} aria-readonly="true" aria-label={j.libelle} data-on={on ? "" : undefined} data-inactif="" />
+                  )}
                 </li>
               );
             })}
