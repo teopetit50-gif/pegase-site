@@ -505,3 +505,25 @@ html[data-v2-theme="light"] .v2 .tir.tir-mi {
 .v2 .tir-mi .tir-mi-lot-bouton:hover {
   background: var(--tir-menu-survol);
 }
+
+/* ——— 1024 et moins (relevé) : les puces se compriment et se tronquent sans « … », l'avatar reste ; rien ne déborde ——— */
+.v2 .tir-mi .tir-mi-puces {
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+.v2 .tir-mi .tir-mi-puces .tir-avatar,
+.v2 .tir-mi .tir-mi-puces .tir-avatar-vide {
+  flex: none;
+}
+.v2 .tir-mi .tir-mi-titre {
+  flex: 1 1 auto;
+}
+@media (max-width: 1024px) {
+  .v2 .tir-mi .tir-mi-titre {
+    flex: 0 1 auto;
+    min-width: 120px;
+  }
+  .v2 .tir-mi .tir-mi-puces {
+    margin-right: 2px;
+  }
+}
