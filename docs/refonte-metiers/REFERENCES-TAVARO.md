@@ -27,6 +27,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | Amendes, péages, contestations | `/espace2/tavaro/amendes` | Linear, Triage | `linear-triage.md` | `amendes-1440-{sombre,clair}-{cote,diff,fusion}.png`, `amendes-ouvert-1440-sombre.png` | superposé : lignes de 59, titre et référence, 2ᵉ ligne (sujet, date, priorité, âge), en-tête alignés ; écarts ci-dessous |
 | Incidents | `/espace2/tavaro/incidents` | Plain, Tasks | `plain-tasks.md`, `plain-commun.md` (relevés Plain) | `incidents-1440-{sombre,clair}-{cote,diff,fusion}.png` (`--ref-origine 353,8`), `incidents-390-*.png` | superposé : titre, contrôle segmenté, ligne d'ajout, lignes de 49 alignés ; écarts ci-dessous |
 | Réseau et flotte | `/espace2/tavaro/reseau` | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `reseau-1440-{sombre,clair}-{cote,diff,fusion}.png`, `reseau-390-*.png` | superposé : lignes de 57, icône, nom et résumé, en-tête de colonnes alignés ; colonnes de droite décalées de 59 px (carte plus étroite, colonne titre variable comme chez Linear) |
+| Réglages | `/espace2/tavaro/reglages` (Barème), `?vue=regles` | Linear, Settings › Labels et Templates | `linear-labels-templates.md` | `reglages-1440-{sombre,clair}-*` (Labels), `reglages-regles-1440-{sombre,clair}-*` (Templates, `--dx -30`), `reglages-390-*` | superposé : titre, boutons, filtre, en-tête, lignes de 44 ; colonne, en-tête, carte et lignes de 64 alignés ; écarts ci-dessous |
 | Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
@@ -147,6 +148,34 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
   2027 s'ouvrent dans la fenêtre de l'espace 2.
 - **G26, G46, G60, G63** : demandent désormais une confirmation (G28 se décide dans la fenêtre de la tournée).
 
+### Réglages
+
+- **Choix de la page** (Barème / Règles et responsables) en onglets dans la bande vide de 64 px du haut : Linear le
+  range dans sa barre latérale de réglages, que la coquille d'espace 2 n'a pas.
+- **Barème** : chaque barème est un groupe (chevron, icône de dossier) et ses postes en sont les enfants, avec le
+  trait de liaison ; les colonnes Used in / Issues / Last applied / Created → Catégorie / TVA / Prix / Effet ; pas
+  de case à cocher ni de « … » (aucun geste par poste). « New group » → Retirer le barème (F32), « New label » →
+  Publier un barème (F31).
+- **Règles et responsables** : trois cartes-listes au lieu d'une ; la carte des responsables porte un choix
+  (G13) à la place du « … » ; la carte des règles du loueur donne enfin un écran à `loc_reglages`
+  (`poserReglages`, porte existante, sans migration).
+- **B26 (Crit'Air et contrôle technique)** : gardé au Parc et atelier, pas répété ici.
+
+## Entrées (aiguillage, `components/espace2/aiguillage.ts`)
+
+| objet_type ou lien | Page |
+|---|---|
+| `loc_contrats` | `/espace2/tavaro/contrats/<id>` |
+| `loc_propositions`, `loc_factures`, `loc_avoirs` (demandes à valider) | Retours à facturer, contrat ouvert (`?proposition=`, `?facture=`, `?avoir=`) |
+| `loc_remises`, `loc_immobilisations`, `loc_entretiens`, `loc_rappels_vehicules` | Parc et atelier, carte visée (`?remise=`…) |
+| `loc_vehicules` (lien `/espace2`, contrôle technique) | Parc et atelier (`?vehicule=`) |
+| `loc_vehicules` (lien `/espace`, véhicule inactif), `loc_reservations` | Vue d'ensemble, ancres `#tavaro-inactifs`, `#tavaro-reservations-risque` |
+| `loc_avis_contravention`, `loc_contestations`, `loc_passages_peage` | Amendes, élément ouvert (`?element=avis:<id>`…) |
+| `loc_sinistres` | Incidents, onglet Sinistres, élément ouvert |
+| `/tavaro/facturation`, `/tavaro/factures`, `/tavaro/avoirs` (socle, E13-E19) | Retours à facturer (À valider), Retours à facturer, file « À valider » |
+
+`node outils/verifier-aiguillage.mjs /tmp/releve-prod/omega/prod/migrations` : « Chaque repère a sa page. »
+
 ## Inventaire : où va chaque bloc (au fil des sous-pages)
 
 | Bloc / geste | Sous-page | Place dans la référence |
@@ -183,4 +212,9 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | B43, B44 plan de flotte, G57, F27 | Réseau et flotte | onglet Plan de flotte |
 | B45, B46 flotte, G58-G63, F28-F30 | Réseau et flotte | onglet Flotte |
 | B47 préparation 2027 | Réseau et flotte | onglet Audit et 2027 |
+| B19 responsables des remises, G13 | Réglages, Règles et responsables | carte-liste, choix |
+| B31 grille d'assistance, G39 | Réglages, Règles et responsables | carte-liste, « + », « … » |
+| B48 barème, G64, G65, F31, F32 | Réglages, Barème | tableau des étiquettes, boutons « New label / New group » |
+| `loc_reglages` (sans écran jusqu'ici) | Réglages, Règles et responsables | carte-liste, « … » |
+| B23 carte « Opérations » et ses 6 onglets | dissoute : ses sujets vont au Parc (départ et rappels), aux Amendes (péages), aux Incidents (sinistres, assistance, caution), au Réseau (transferts) ; le compteur « péages hors délai » est dans le menu « … » des Amendes | — |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |

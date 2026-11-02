@@ -103,6 +103,8 @@ export const REGLES: Record<string, Regle> = {
   loc_propositions: (id) => `${RACINE}/tavaro/retours?proposition=${q(id)}`,
   loc_factures: (id) => `${RACINE}/tavaro/retours?facture=${q(id)}`,
   loc_avoirs: (id) => `${RACINE}/tavaro/retours?avoir=${q(id)}`,
+  /* le courrier de recours d'un sinistre (demande « envoi.email », b2_12) : son dossier dans les Incidents */
+  loc_sinistres: (id) => `${RACINE}/tavaro/incidents?onglet=sinistres&element=${q(id)}`,
   loc_reservations: () => `${RACINE}/tavaro#tavaro-reservations-risque`,
   /* le même véhicule, deux cartes : le contrôle technique (b2_18, lien /espace2) est au parc,
      le véhicule inactif (b3t_04, lien /espace) dans les analyses de la vue d'ensemble */

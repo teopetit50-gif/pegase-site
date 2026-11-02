@@ -31,8 +31,8 @@ import { useTempsReel } from "@/components/espace/tempsReel";
 import { chiffrerLocal } from "@/components/espace/tavaro/calcul";
 import { famille, resteDu, type Famille } from "@/components/espace/tavaro/etats";
 import { AGENCES_EXEMPLE, AVIS_EXEMPLE, CONTESTATIONS_EXEMPLE, FLOTTE_EXEMPLE, PARC_EXEMPLE, BAREME_EXEMPLE, BAREME_RETIRE_EXEMPLE, CATEGORIES_EXEMPLE, DOSSIERS_EXEMPLE, LIGNES_BAREME_EXEMPLE, REGLAGES_EXEMPLE, nomPersonneTavaro } from "@/components/espace/tavaro/exemples";
-import { poserResponsableRemise, amenderContrat, annulerSortie, assignerRemise, conclureSortie, deciderSortie, poserEconomie, proposerSortie, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "@/components/espace/tavaro/portes";
-import type { AvisContravention, Avoir, Contestation, Creneau, SortieFlotte, Entretien, Immobilisation, Parc, Remise, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "@/components/espace/tavaro/types";
+import { poserReglages, poserResponsableRemise, amenderContrat, annulerSortie, assignerRemise, conclureSortie, deciderSortie, poserEconomie, proposerSortie, avoirElectronique, chargerMonde, creneauxEntretien, entretienFait, envoyerDossier, etapeRemise, immobiliser, leverImmobilisation, planifierEntretien, prevoirEntretien, signalerAnomalie, traiterAnomalie, issueContestation, lienDossier, ouvrirContestation, produireDossier, chiffrerRetour, classerAvis, completerContrat, completerLocataire, constaterRefus, factureElectronique, preparation2027, refacturerAvis, etablirEtat, leverCaution, signerEtat, demanderAvoir, deposerPhoto, designerConducteur, enregistrerAvis, marquerLitige, marquerReglee, monCompte, publierBareme, rattacherAvis, relancerFacture, retirerBareme, type Moi, type Monde } from "@/components/espace/tavaro/portes";
+import type { Reglages, AvisContravention, Avoir, Contestation, Creneau, SortieFlotte, Entretien, Immobilisation, Parc, Remise, Bareme, EtatDesLieux, Dossier, Facture, LigneBareme, LigneJournal, Retour, Role } from "@/components/espace/tavaro/types";
 import type { Gestes } from "@/components/espace/tavaro/DossierContrat";
 import type { GestesEtats } from "@/components/espace/tavaro/EtatsDesLieux";
 import { appliquerEtats, empreinte } from "@/components/espace/tavaro/edl";
@@ -96,6 +96,8 @@ export type ContexteTavaro = {
   preparation: Preparation | null;
   /* départ et rappels, transferts, péages, sinistres, assistance, caution (./operations) */
   operations: EtatOperations;
+  /* les règles du loueur (loc_reglages) : porte poserReglages, sans écran jusqu'ici (inventaire § 8.3-9) */
+  reglerLoueur: (r: Partial<Reglages>) => Promise<void>;
 };
 
 const Contexte = createContext<ContexteTavaro | null>(null);
@@ -757,10 +759,21 @@ export default function DonneesTavaro({ children }: { children: React.ReactNode 
 
   const operations = useOperationsEtat({ source, role, dossiers: tous, vehicules: monde?.parc.vehicules ?? [], nomAgence: nomAgenceDe });
 
+  const reglerLoueur = useCallback(async (r: Partial<Reglages>) => {
+    if (source === "reelle") {
+      if (!moi) throw new Error("Aucun compte rattaché à cette session.");
+      await poserReglages(moi.client_id, r);
+      await relire();
+      return;
+    }
+    await new Promise((x) => setTimeout(x, 350));
+    setLocal((prev) => ({ ...prev, reglages: { ...(prev.reglages ?? REGLAGES_EXEMPLE), ...r } }));
+  }, [source, moi, relire]);
+
   const valeur: ContexteTavaro = {
     source, monde, pret: source === "exemple" || reel !== null, erreur, moi, role, moiId, nommer, nomAgenceDe, agences,
     agence, setAgence, tous, dossiers, compteurs, actif, setActif, dossier, relire,
-    gestes, gestesEtats, gestesAvis, gestesContestations, gestesParc, gestesFlotte, publier, retirer, preparation, operations,
+    gestes, gestesEtats, gestesAvis, gestesContestations, gestesParc, gestesFlotte, publier, retirer, preparation, operations, reglerLoueur,
   };
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }
