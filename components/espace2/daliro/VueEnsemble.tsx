@@ -21,21 +21,20 @@
        validation, puis useDaliro().creer et la fiche du chantier.
    Les données : components/espace2/daliro/donnees (exemple ou base réelle).
 
-   30/10/2026 — plus simple à lire (Teo : « on a du mal à comprendre ») :
-     · la page montre les chantiers eux-mêmes, chacun avec sa phrase la plus
-       pressée (./enClair), les plus urgents d'abord ; les quatre familles
-       restent en pastilles au-dessus (B03, même filtre de la liste) ;
-     · les sept liens « Aller à », en double avec le menu de gauche, laissent
-       la colonne droite à « Cette semaine » : qui passe sur quel chantier,
-       jour par jour ; un clic ouvre le passage dans la frise (Chantiers) ;
-     · « Nouveau chantier » n'a plus sa section : le + de la barre et une
-       rangée en bas de la liste.
+   01/11/2026 — copie 1:1 (règles de Teo, docs/refonte-metiers/REGLES.md) :
+   le cadre et les mesures sont ceux de linear-home.md, styles ./dal.css et
+   ./dal-home.css (préfixes dal-, dal-h-), icônes du sprite de Linear
+   (./DalIcone). Les chantiers en cours sont les rangées de « Team
+   resources » (les plus pressés d'abord) ; les quatre familles (B03) sont
+   les premiers liens « Aller à » de la colonne droite, avec leur compte ;
+   « Nouveau chantier » (F01) est le « + » de la section et une entrée du
+   menu « … » ; le point du mois (B06) est le deuxième onglet.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, CalendarClock, Copy, FileSignature, HardHat, OctagonAlert, Plus } from "lucide-react";
+import { HardHat } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
@@ -47,10 +46,10 @@ import { HabilleSb } from "../Habille";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
-import { CONFIRMATION_CLAIRE, ecartJours, jourLocal, phrasesChantier, qui, quand, resume, type TeinteClair } from "./enClair";
-import { STATUTS_CHANTIER } from "@/components/espace/daliro/etats";
-import "../lin/lin.css";
-import "../lin/linear-home.css";
+import { jourLocal, resume, type TeinteClair } from "./enClair";
+import { DalCarte, DalMenu } from "./DalCadre";
+import { DalIcone, type NomDalIcone } from "./DalIcone";
+import "./dal-home.css";
 
 const BASE = `${RACINE}/daliro`;
 
@@ -66,17 +65,9 @@ const PLACES = [
 ];
 const VIDE: NouveauChantier = { nom: "", reference: "", adresse: "", code_postal: "", commune: "", maitre_ouvrage_type: "professionnel", place_client: "titulaire", maitre_ouvrage_id: "" };
 
-/* la teinte d'une famille (etats.ts) dans les jetons du gabarit */
-const TEINTES: Record<Famille, string> = { bloque: "var(--lin-rouge)", a_signer: "var(--lin-jaune)", a_confirmer: "var(--lin-fait)", ouvert: "var(--lin-vert)" };
-const TEINTE_CLAIRE: Record<TeinteClair, string> = { rouge: "var(--lin-rouge)", ambre: "var(--lin-jaune)", bleu: "var(--lin-fait)", vert: "var(--lin-vert)", gris: "var(--lin-second)" };
 const FAMILLE_CLAIRE: Record<Famille, string> = { bloque: "Bloqués", a_signer: "Avenant à faire signer", a_confirmer: "Intervenant à relancer", ouvert: "En cours" };
 const URGENCE: Record<TeinteClair, number> = { rouge: 0, ambre: 1, bleu: 2, gris: 3, vert: 4 };
-const ICONES: Record<Famille, React.ReactNode> = {
-  bloque: <OctagonAlert aria-hidden="true" />,
-  a_signer: <FileSignature aria-hidden="true" />,
-  a_confirmer: <CalendarClock aria-hidden="true" />,
-  ouvert: <HardHat aria-hidden="true" />,
-};
+const ICONES: Record<Famille, NomDalIcone> = { bloque: "Alert", a_signer: "Signature", a_confirmer: "Calendar", ouvert: "Crane" };
 
 export default function VueEnsemble() {
   const { source, pret, erreur, client, liste, tableau, premier, demander, demanderTous, maitresOuvrage, creer } = useDaliro();
@@ -116,24 +107,10 @@ export default function VueEnsemble() {
     () =>
       liste
         .filter((c) => c.statut !== "clos" && c.statut !== "annule")
-        .map((c) => ({ c, r: resume(c, tableau(c.id), auj), n: phrasesChantier(c, tableau(c.id), auj).length }))
+        .map((c) => ({ c, r: resume(c, tableau(c.id), auj) }))
         .sort((a, b) => URGENCE[a.r.teinte] - URGENCE[b.r.teinte] || a.c.nom.localeCompare(b.c.nom, "fr")),
     [liste, tableau, auj],
   );
-  /* cette semaine : les passages prévus des sept jours qui viennent, tous chantiers, jour par jour */
-  const semaine = useMemo(() => {
-    const jours = new Map<string, { id: string; chantier: string; qui: string; tache: string | null; teinte: TeinteClair; court: string }[]>();
-    for (const c of liste)
-      for (const p of tableau(c.id)?.passages ?? []) {
-        const n = ecartJours(p.debut, auj);
-        if (p.statut !== "prevu" || n < 0 || n > 6) continue;
-        const j = p.debut.slice(0, 10);
-        const conf = CONFIRMATION_CLAIRE[p.confirmation];
-        jours.set(j, [...(jours.get(j) ?? []), { id: p.id, chantier: c.nom, qui: qui(p), tache: p.tache, teinte: conf.teinte, court: conf.court }]);
-      }
-    return [...jours.entries()].sort(([a], [b]) => a.localeCompare(b));
-  }, [liste, tableau, auj]);
-
   /* ——— F01 : nouveau chantier ——— */
   const [nouveau, setNouveau] = useState(false);
   const [envoi, setEnvoi] = useState(false);
@@ -168,183 +145,171 @@ export default function VueEnsemble() {
   };
 
   /* B06 : la carte se masque sans le droit de voir les prix, ou sans compte en base réelle */
+  /* l'avatar de « Membres » : les initiales du compte (VO en exemple) */
+  const initiales = (client?.email ?? "vous").replace(/@.*/, "").split(/[._-]/).filter(Boolean).map((m) => m[0]).join("").slice(0, 2).toUpperCase() || "VO";
   const voitPrix = premier ? premier.voit_prix : true;
   const pointVisible = voitPrix && (source === "exemple" || !!client);
 
-  return (
-    <div className="lin lh">
-      <h1 className="v2-sr">Chantiers</h1>
+  const aller: { cle: string; libelle: string; icone: NomDalIcone; href: string; compte?: number }[] = [
+    ...FAMILLES.map((fa) => ({ cle: fa.cle, libelle: FAMILLE_CLAIRE[fa.cle], icone: ICONES[fa.cle], href: `${BASE}/chantiers?famille=${fa.cle}`, compte: comptes[fa.cle] })),
+    { cle: "a-ranger", libelle: "À ranger", icone: "Triage" as const, href: `${BASE}/a-ranger` },
+    { cle: "a-faire", libelle: "À faire", icone: "Issues" as const, href: `${BASE}/a-faire` },
+    { cle: "reglages", libelle: "Réglages", icone: "Roue" as const, href: `${BASE}/reglages` },
+  ];
+  const pilules = (avecChevron: boolean) =>
+    aller.map((a) => (
+      <Link key={a.cle} href={a.href} className="dal-h-pilule">
+        <span className="dal-h-pilule-icone">
+          <DalIcone nom={a.icone} />
+        </span>
+        <span>{a.libelle}</span>
+        {a.compte !== undefined ? <span className="dal-h-pilule-compte">{a.compte}</span> : null}
+        {avecChevron ? <DalIcone nom="Chevron" className="dal-h-chevron" /> : null}
+      </Link>
+    ));
 
-      <header className="lh-titre">
-        <nav aria-label="Fil d'Ariane">
-          <Link href={BASE} className="lh-fil" aria-current="page">
-            <HardHat aria-hidden="true" />
+  return (
+    <DalCarte>
+      <h1 className="v2-sr">Chantiers</h1>
+      <header className="dal-tete">
+        <div className="dal-ligne1">
+          <Link href={BASE} className="dal-fil" aria-current="page">
+            <DalIcone nom="Crane" style={{ color: "var(--dal-equipe)" }} />
             <span>Chantiers</span>
           </Link>
-        </nav>
-        <div className="lh-titre-droite">
-          <button type="button" className="lh-rond" aria-label="Nouveau chantier" title="Nouveau chantier" onClick={ouvrirNouveau}>
-            <Plus aria-hidden="true" />
-          </button>
-          <button type="button" className="lh-rond" aria-label="Copier le lien de la page" title="Copier le lien de la page" onClick={copierLien}>
-            <Copy aria-hidden="true" />
+          <DalMenu
+            libelle="Actions sur les chantiers"
+            options={[
+              { libelle: "Nouveau chantier", icone: "Plus", action: ouvrirNouveau },
+              { libelle: "Réglages", icone: "Roue", href: `${BASE}/reglages` },
+            ]}
+          />
+          <span className="dal-pousse" />
+          <button type="button" className="dal-rond" aria-label="Copier le lien de la page" title="Copier le lien de la page" onClick={copierLien}>
+            <DalIcone nom="LienUrl" />
           </button>
         </div>
+        <nav className="dal-ligne2" aria-label="Vues">
+          <Link href={BASE} scroll={false} className="dal-onglet" aria-current={vue === "ensemble" ? "page" : undefined}>
+            Vue d&apos;ensemble
+          </Link>
+          <Link href={`${BASE}?vue=point`} scroll={false} className="dal-onglet" aria-current={vue === "point" ? "page" : undefined}>
+            Point du mois
+          </Link>
+          <Link href={`${BASE}/equipes`} className="dal-onglet">
+            Équipes
+          </Link>
+          <Link href={`${BASE}/annuaire`} className="dal-onglet">
+            Annuaire
+          </Link>
+        </nav>
       </header>
 
-      <nav className="lh-onglets" aria-label="Vues">
-        <Link href={BASE} scroll={false} className="lh-onglet" aria-current={vue === "ensemble" ? "page" : undefined}>
-          Vue d&apos;ensemble
-        </Link>
-        <Link href={`${BASE}?vue=point`} scroll={false} className="lh-onglet" aria-current={vue === "point" ? "page" : undefined}>
-          Point du mois
-        </Link>
-      </nav>
-
-      <div className="lh-corps">
+      <div className="dal-defile">
         {vue === "point" ? (
-          <div className="lh-principal lh-principal--large">
-            <section className="lh-section lh-point" aria-labelledby="lh-point-titre">
-              <div className="lh-section-tete">
-                <h2 id="lh-point-titre" className="lh-section-titre">
-                  Point du mois
-                </h2>
-              </div>
-              <p className="lh-aide">Les travaux repérés sur le terrain, ceux qui sont signés, ce qui reste à relancer et à facturer, chantier par chantier.</p>
-              {!pret ? (
-                <p className="lh-aide">Lecture des chantiers…</p>
-              ) : pointVisible ? (
-                <div className="lh-point-carte">
-                  <HabilleSb>
-                    <PointMensuelCarte
-                      key={`point-${source}:${client?.client_id ?? ""}`}
-                      source={source}
-                      client={source === "reelle" ? (client?.client_id ?? null) : null}
-                      tableaux={liste.map((c) => tableau(c.id)).filter((t): t is Tableau => t !== null)}
-                    />
-                  </HabilleSb>
+          <div className="dal-h-corps">
+            <div className="dal-h-principal">
+              <section className="dal-h-section" aria-labelledby="dal-h-point">
+                <div className="dal-h-section-tete">
+                  <h2 id="dal-h-point" className="dal-h-section-titre">
+                    Point du mois
+                  </h2>
                 </div>
-              ) : (
-                <p className="lh-aide">Le point du mois montre des montants : il est réservé aux comptes qui voient les prix.</p>
-              )}
-            </section>
+                <p className="dal-h-aide">Les travaux repérés sur le terrain, ceux qui sont signés, ce qui reste à relancer et à facturer, chantier par chantier.</p>
+                {!pret ? (
+                  <p className="dal-h-aide">Lecture des chantiers…</p>
+                ) : pointVisible ? (
+                  <div style={{ marginTop: 16 }}>
+                    <HabilleSb>
+                      <PointMensuelCarte
+                        key={`point-${source}:${client?.client_id ?? ""}`}
+                        source={source}
+                        client={source === "reelle" ? (client?.client_id ?? null) : null}
+                        tableaux={liste.map((c) => tableau(c.id)).filter((t): t is Tableau => t !== null)}
+                      />
+                    </HabilleSb>
+                  </div>
+                ) : (
+                  <p className="dal-h-aide">Le point du mois montre des montants : il est réservé aux comptes qui voient les prix.</p>
+                )}
+              </section>
+            </div>
           </div>
         ) : (
-          <>
-            <div className="lh-principal">
-              <div className="lh-entete">
-                <span className="lh-tuile" aria-hidden="true">
-                  <HardHat />
+          <div className="dal-h-corps">
+            <div className="dal-h-principal">
+              <div className="dal-h-titre">
+                <span className="dal-h-tuile" aria-hidden="true">
+                  <DalIcone nom="Crane" taille={24} />
                 </span>
-                <p className="lh-nom">Chantiers</p>
+                <p className="dal-h-nom">Chantiers</p>
               </div>
-              <div className="lh-description">
-                <p>Ce qui coince sur vos chantiers, et qui passe cette semaine.</p>
+              <div className="dal-h-description">
+                <p>Les chantiers de l&apos;entreprise : le planning, les passages à confirmer, les avenants à signer et les situations de fin de mois.</p>
               </div>
+              <nav className="dal-h-replis" aria-label="Aller à">
+                {pilules(false)}
+              </nav>
 
-              <section className="lh-section" aria-labelledby="lh-regarder">
-                <div className="lh-section-tete">
-                  <h2 id="lh-regarder" className="lh-section-titre">
+              <section className="dal-h-section" aria-labelledby="dal-h-chantiers">
+                <div className="dal-h-section-tete">
+                  <h2 id="dal-h-chantiers" className="dal-h-section-titre">
                     Vos chantiers
                   </h2>
-                  <div className="lh-section-boutons">
-                    <Link href={`${BASE}/chantiers`} className="lh-rond lh-rond--plein" aria-label="Voir la frise des chantiers" title="Voir la frise des chantiers">
-                      <ArrowUpRight aria-hidden="true" />
-                    </Link>
-                  </div>
+                  <button type="button" className="dal-rond" aria-label="Nouveau chantier" title="Nouveau chantier" onClick={ouvrirNouveau}>
+                    <DalIcone nom="Plus" />
+                  </button>
+                  <Link href={`${BASE}/chantiers`} className="dal-rond" aria-label="Voir tous les chantiers" title="Voir tous les chantiers">
+                    <DalIcone nom="Section" />
+                  </Link>
                 </div>
-                {pret && !erreur ? (
-                  <nav className="lh-familles" aria-label="Familles de chantiers">
-                    {FAMILLES.filter((fa) => comptes[fa.cle] > 0).map((fa) => (
-                      <Link key={fa.cle} href={`${BASE}/chantiers?famille=${fa.cle}`} className="lh-famille" style={{ "--lin-teinte": TEINTES[fa.cle] } as React.CSSProperties}>
-                        {ICONES[fa.cle]}
-                        {FAMILLE_CLAIRE[fa.cle]}
-                        <span>{comptes[fa.cle]}</span>
-                      </Link>
-                    ))}
-                  </nav>
-                ) : null}
                 {erreur ? (
-                  <p className="lh-aide" data-erreur="" role="alert">
+                  <p className="dal-h-aide" role="alert">
                     La base réelle n&apos;a pas répondu. {erreur}
                   </p>
                 ) : !pret ? (
-                  <p className="lh-aide">Lecture des chantiers…</p>
+                  <p className="dal-h-aide">Lecture des chantiers…</p>
+                ) : chantiers.length === 0 ? (
+                  <p className="dal-h-aide">Aucun chantier en cours. Créez le premier : nom, code postal et commune suffisent.</p>
                 ) : (
-                  <ul className="lh-rangees">
-                    {chantiers.map(({ c, r, n }) => (
+                  <ul className="dal-h-liste">
+                    {chantiers.map(({ c }) => (
                       <li key={c.id}>
-                        <Link href={`${BASE}/chantiers/${encodeURIComponent(c.id)}`} className="lh-rangee lh-rangee--chantier" style={{ "--lin-teinte": TEINTE_CLAIRE[r.teinte] } as React.CSSProperties}>
-                          <span className="lh-rangee-icone">
-                            <HardHat aria-hidden="true" />
-                          </span>
-                          <span className="lh-rangee-texte">
-                            <span className="lh-rangee-nom">{c.nom}</span>
-                            <span className="lh-rangee-meta">
-                              {STATUTS_CHANTIER[c.statut].libelle} · {c.commune}
-                            </span>
-                            <span className="lh-rangee-phrase">{r.texte}</span>
-                            {n > 1 ? (
-                              <span className="lh-rangee-autres">
-                                et {n - 1} autre{n > 2 ? "s" : ""} chose{n > 2 ? "s" : ""} à faire
-                              </span>
-                            ) : null}
-                          </span>
-                          <ArrowUpRight className="lh-rangee-fleche" aria-hidden="true" />
+                        <Link href={`${BASE}/chantiers/${encodeURIComponent(c.id)}`} className="dal-h-rangee">
+                          <DalIcone nom="Page" />
+                          <span className="dal-h-rangee-texte">{c.nom}</span>
+                          <DalIcone nom="Fleche" className="dal-h-fleche" />
                         </Link>
                       </li>
                     ))}
-                    <li>
-                      <button type="button" className="lh-rangee" onClick={ouvrirNouveau}>
-                        <span className="lh-rangee-icone">
-                          <Plus aria-hidden="true" />
-                        </span>
-                        <span className="lh-rangee-texte">
-                          <span className="lh-rangee-nom">Nouveau chantier</span>
-                          <span className="lh-rangee-meta">nom, code postal et commune suffisent</span>
-                        </span>
-                      </button>
-                    </li>
                   </ul>
                 )}
               </section>
             </div>
 
-            <aside className="lh-droite lh-droite--semaine" aria-label="Cette semaine">
-              <div className="lh-droite-bloc">
-                <section className="lh-droite-section">
-                  <h2 className="lh-droite-titre">Cette semaine</h2>
-                  {!pret ? null : semaine.length ? (
-                    <ol className="lh-semaine">
-                      {semaine.map(([jour, passages]) => (
-                        <li key={jour}>
-                          <span className="lh-semaine-jour">{quand(jour, auj)}</span>
-                          <ul>
-                            {passages.map((p) => (
-                              <li key={p.id}>
-                                <Link href={`${BASE}/chantiers?passage=${encodeURIComponent(p.id)}`} className="lh-semaine-passage" style={{ "--lin-teinte": TEINTE_CLAIRE[p.teinte] } as React.CSSProperties} title={`${p.qui} · ${p.tache ?? ""} · ${p.court}`}>
-                                  <span className="lh-semaine-qui">{p.qui}</span>
-                                  <span className="lh-semaine-meta">
-                                    {p.chantier} · {p.court}
-                                  </span>
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      ))}
-                    </ol>
-                  ) : (
-                    <p className="lh-semaine-vide">Personne n&apos;est prévu sur vos chantiers ces sept jours.</p>
-                  )}
-                  <Link href={`${BASE}/chantiers`} className="lh-lien" style={{ marginLeft: -7 }}>
-                    <CalendarClock aria-hidden="true" />
-                    Ouvrir la frise
-                  </Link>
+            <aside className="dal-h-droite" aria-label="Équipe et raccourcis">
+              <div className="dal-h-droite-bloc">
+                <section className="dal-h-droite-section">
+                  <h2 className="dal-h-libelle">Membres</h2>
+                  <div className="dal-h-membres">
+                    <Link href={`${BASE}/equipes`} className="dal-h-membre" title="Vos équipes">
+                      <span className="dal-h-avatar">{initiales}</span>
+                      <DalIcone nom="Chevron" taille={14} />
+                    </Link>
+                    <Link href={`${BASE}/annuaire`} className="dal-rond" aria-label="Ajouter un intervenant" title="Ajouter un intervenant">
+                      <DalIcone nom="Plus" />
+                    </Link>
+                  </div>
+                </section>
+                <section className="dal-h-droite-section">
+                  <h2 className="dal-h-libelle">Aller à</h2>
+                  <nav className="dal-h-aller" aria-label="Aller à">
+                    {pilules(true)}
+                  </nav>
                 </section>
               </div>
             </aside>
-          </>
+          </div>
         )}
       </div>
 
@@ -428,6 +393,6 @@ export default function VueEnsemble() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </DalCarte>
   );
 }

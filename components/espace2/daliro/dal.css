@@ -1,0 +1,317 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO — le socle des copies 1:1 de Linear (01/11/2026, règles de Teo :
+   docs/refonte-metiers/REGLES.md). Préfixe dal-, propre à Daliro : le
+   gabarit partagé components/espace2/lin n'est pas touché.
+
+   Jetons : les couleurs calculées de Linear, thème sombre et clair, telles
+   que relevées (docs/refonte-metiers/releves/linear-*.md, session
+   références du 01/11). Aucune n'est estimée ; là où un relevé ne donne
+   qu'un thème, la ligne le dit.
+
+   Cadre : la carte `main` de Linear (linear-home.md) — marges 8 8 8 0,
+   rayon 12, bordure 0.5, ombre double en clair, simple en sombre. Elle se
+   pose dans le <main> de la coquille d'espace2 (barre du haut 48, barres
+   latérales 304) : c'est l'équivalent de la barre latérale de Linear
+   (244), qui n'appartient pas à la page copiée. Sans barre « Agent » chez
+   nous, la marge du bas est 8 (36 chez Linear).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal {
+  /* sombre */
+  --dal-app: lch(2.595 0.4 272);
+  --dal-carte: lch(5.52 0.4 272);
+  --dal-carte-bord: lch(13.08 1.48 272);
+  --dal-carte-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --dal-t1: lch(100 0 272);
+  --dal-t2: lch(90.451 1.2 272);
+  --dal-t3: lch(61.803 1.2 272);
+  --dal-t4: lch(39.452 1.425 272);
+  --dal-actif: lch(16.706 0.979 272);
+  --dal-inactif: lch(10.149 0.593 272);
+  --dal-bouton: lch(10.149 0.689 272);
+  --dal-survol: lch(9.345 0.85 272);
+  --dal-survol-onglet: lch(13.861 1.043 272);
+  --dal-groupe: lch(9.232 0.85 272);
+  --dal-puce-bord: lch(16.32 1.48 272);
+  --dal-menu: lch(12.72 0.85 272);
+  --dal-menu-bord: lch(25.68 1.93 272);
+  --dal-menu-ombre: lch(0 0 0 / 0.125) 0 3px 8px 0, lch(0 0 0 / 0.125) 0 2px 5px 0, lch(0 0 0 / 0.125) 0 1px 1px 0;
+  --dal-menu-texte: lch(91.178 1.425 272);
+  --dal-menu-icone: lch(64.714 1.425 272);
+  --dal-menu-survol: lch(20.032 1.93 272);
+  --dal-equipe: lch(60.135 63.97 86.502);
+  --dal-equipe-fond: lch(60.135 63.97 86.502 / 0.175);
+  --dal-rouge: lch(58% 73 29);
+  --dal-violet: #6d78d5;
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--dal-app);
+  color: var(--dal-t1);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-v2-theme="light"] .v2 .dal {
+  --dal-app: lch(94.44 0.5 282);
+  --dal-carte: lch(97.94 0.5 282);
+  --dal-carte-bord: lch(89.84 0 282);
+  --dal-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --dal-t1: lch(9.794 0 282);
+  --dal-t2: lch(19.588 1.25 282);
+  --dal-t3: lch(39.176 1.25 282);
+  --dal-t4: lch(64.64 1.25 282);
+  --dal-actif: lch(93.483 0.5 282);
+  --dal-inactif: lch(99.997 0.5 282);
+  --dal-bouton: lch(99.997 0.5 282);
+  --dal-survol: lch(94.44 0.5 282);
+  --dal-survol-onglet: lch(94.854 0.5 282);
+  --dal-groupe: lch(94.44 0.5 282);
+  --dal-puce-bord: lch(86.5 0 282);
+  --dal-menu: lch(100 0 282);
+  --dal-menu-bord: lch(86.5 0 282);
+  --dal-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+  --dal-menu-texte: lch(9.794 0 282);
+  --dal-menu-icone: lch(39.176 1.25 282);
+  --dal-menu-survol: lch(94.854 0.5 282);
+  --dal-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal {
+    --dal-app: lch(94.44 0.5 282);
+    --dal-carte: lch(97.94 0.5 282);
+    --dal-carte-bord: lch(89.84 0 282);
+    --dal-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --dal-t1: lch(9.794 0 282);
+    --dal-t2: lch(19.588 1.25 282);
+    --dal-t3: lch(39.176 1.25 282);
+    --dal-t4: lch(64.64 1.25 282);
+    --dal-actif: lch(93.483 0.5 282);
+    --dal-inactif: lch(99.997 0.5 282);
+    --dal-bouton: lch(99.997 0.5 282);
+    --dal-survol: lch(94.44 0.5 282);
+    --dal-survol-onglet: lch(94.854 0.5 282);
+    --dal-groupe: lch(94.44 0.5 282);
+    --dal-puce-bord: lch(86.5 0 282);
+    --dal-menu: lch(100 0 282);
+    --dal-menu-bord: lch(86.5 0 282);
+    --dal-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+    --dal-menu-texte: lch(9.794 0 282);
+    --dal-menu-icone: lch(39.176 1.25 282);
+    --dal-menu-survol: lch(94.854 0.5 282);
+    --dal-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+  }
+}
+
+.v2 .dal *,
+.v2 .dal *::before,
+.v2 .dal *::after {
+  box-sizing: border-box;
+}
+.v2 .dal :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.v2 .dal :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .dal :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ——— la carte ——— */
+.v2 .dal-carte {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 48px - 16px);
+  background: var(--dal-carte);
+  border: 0.5px solid var(--dal-carte-bord);
+  border-radius: 12px;
+  box-shadow: var(--dal-carte-ombre);
+  overflow: hidden;
+}
+.v2 .dal-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ——— l'en-tête : ligne du titre (44, filet bas) puis ligne des onglets (44) ——— */
+.v2 .dal-tete {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal-ligne1 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal-ligne2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 43.5px;
+  padding: 0 8px;
+}
+.v2 .dal-fil {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--dal-t1);
+  white-space: nowrap;
+}
+.v2 .dal-fil svg {
+  flex: none;
+}
+.v2 .dal-pousse {
+  flex: 1;
+}
+.v2 .dal-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0 2px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .dal-rond svg {
+  width: 14px;
+  height: 14px;
+  color: var(--dal-t3);
+}
+.v2 .dal-rond:hover,
+.v2 .dal-rond[aria-expanded="true"] {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal-rond--plein {
+  background: var(--dal-bouton);
+}
+.v2 .dal-onglet {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--dal-inactif);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .dal-onglet:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal-onglet[aria-current="page"],
+.v2 .dal-onglet[aria-selected="true"] {
+  background: var(--dal-actif);
+  color: var(--dal-t1);
+}
+.v2 .dal :focus-visible {
+  outline: 2px solid var(--dal-violet);
+  outline-offset: -1px;
+}
+
+/* ——— le menu « … » (Team actions, linear-home.md) ——— */
+.v2 .dal-menu {
+  position: absolute;
+  z-index: 40;
+  min-width: 175px;
+  padding: 6px 0;
+  background: var(--dal-menu);
+  border: 0.5px solid var(--dal-menu-bord);
+  border-radius: 12px;
+  box-shadow: var(--dal-menu-ombre);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: var(--dal-menu-texte);
+}
+.v2 .dal-menu-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 32px;
+  padding: 0 18px 0 14px;
+  font-weight: 450;
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .dal-menu-option::before {
+  content: "";
+  position: absolute;
+  inset: 0 6px;
+  border-radius: 8px;
+  z-index: -1;
+}
+.v2 .dal-menu-option:hover::before,
+.v2 .dal-menu-option:focus-visible::before {
+  background: var(--dal-menu-survol);
+}
+.v2 .dal-menu-option {
+  isolation: isolate;
+}
+.v2 .dal-menu-option svg {
+  flex: none;
+  color: var(--dal-menu-icone);
+}
+.v2 .dal-menu-sep {
+  height: 0.5px;
+  margin: 6px 0;
+  background: var(--dal-menu-bord);
+}
+
+/* ——— 768 et moins : la carte s'efface (Linear la pose plein écran) ——— */
+@media (max-width: 768px) {
+  .v2 .dal {
+    padding: 0;
+    background: var(--dal-carte);
+  }
+  .v2 .dal-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .v2 .dal-defile {
+    overflow: visible;
+  }
+  .v2 .dal-rond,
+  .v2 .dal-onglet {
+    height: 32px;
+  }
+  .v2 .dal-rond {
+    width: 32px;
+  }
+}
