@@ -131,3 +131,32 @@ Contenu : « Avenant à chiffrer », « Confirmation J-2 d'un passage… ».
 1. Labels : grand titre « Issue labels » à gauche, bouton blanc « New group » et bouton violet « New label » à droite ; champ de recherche arrondi en dessous.
 2. Tableau sans bordures : en-têtes gris 12px (Name, Description, Used in, Issues, Last applied, Created), 7 lignes de 44px avec pastille colorée + nom, description grise, date « Oct 28/29 » ; la ligne survolée prend un fond gris arrondi avec case à cocher et « … ».
 3. Templates : titre + texte d'aide centrés sur 640px, puis une carte blanche aux coins 10px contenant « 2 issue templates » et deux lignes (vignette grise 32px, nom, « Created by Wizyy… »).
+
+---
+
+# Complément du 01/11/2026 (pages remplies, sombre + clair)
+
+## Ce qui a été créé
+
+- **Étiquettes** (8, à moi) : Peinture, Carrelage, Administratif, Sécurité, Réserve, Facture, Client, Urgent chantier (couleurs attribuées automatiquement), et un **groupe** « Origine » avec 3 étiquettes enfants : Courriel, Appel, Photo. Les 7 étiquettes de Teo (Bug, Électricité, Feature, Gros œuvre, Improvement, Menuiserie, Plomberie) sont inchangées. Total : 19 lignes (16 étiquettes + groupe + 3 enfants), colonnes « Issues » et « Last applied » remplies par les tickets créés.
+- **Modèles de tickets** (3, à moi, type « Standard ») : « Réserve à lever », « Facture fournisseur à rapprocher », « Incident de sécurité » (nom, description, titre et corps préremplis). Les 2 modèles de Teo (« Avenant à chiffrer », « Confirmation J-2 d'un passage ») sont inchangés → « 5 issue templates ».
+
+## Labels — ajouts
+
+- Ligne : div grid 1187×44 (r 8px), case « Select label » 14×22 à gauche (x 263), puis nom (pastille de couleur 9×9 + nom 13px/500) @305 293px, description @598 440px (« Add label description… » 13px/500 c lch(36.975 1.2 272), **opacity 0 hors survol**), « Used in » 75px, « Issues » 75px, « Last applied » 102px (« 23min ago »), « Created » 82px (« Nov 1 » 12px/450 tertiaire, info-bulle « Created by Wizyy »), bouton « Open menu » 32×32 (opacity 0 hors survol).
+- Champs éditables en place (nom et description) : bouton « Edit text » r 7px, p 6px 10px 6px 6px, h 28.5, bd 0.5px transparent (au clic devient un champ).
+- **Groupe** : même ligne (bg = fond de carte lch(5.52 0.4 272) en sombre) avec chevron ▾ 16×16 à x 283 et icône de groupe (4 points) au lieu de la pastille ; enfants indentés de 27px (pastille à x 326) avec un **trait de liaison** vertical + coude à gauche (voir captures).
+- Création : « New label » ouvre une ligne d'édition en tête (« Label name »), Entrée enregistre et rouvre une ligne vide ; « New group » ouvre « Group name » puis enchaîne sur une ligne enfant « Label name ».
+
+## Templates — ajouts
+
+- Carte de liste 356px de large (bg plus clair, r 8px) : en-tête « 5 issue templates » + « + » (« Create new issue template ») ; lignes 36px : icône de modèle 24×24 dans un carré arrondi, nom 13px/500, « Created by Wizyy 1 minute ago » 12px/450 tertiaire ; au survol, poignée de glisser (⋮⋮) à gauche et « … » à droite.
+- « + » → choix du type : **Standard** (« Basic template with title, description, and default attributes ») ou **Custom Form** (« Define structured fields and inputs. Ideal for Asks ») ; Standard ouvre la page `/settings/templates/issue/new` : champs « Template name », « Template description », puis un aperçu de ticket (« Issue title », « Issue description », pilules équipe / priorité / assigné / projet / étiquettes / « … »), boutons « Cancel » / « Create ».
+
+## Paliers
+
+390×844 : la barre latérale des réglages devient un tiroir (bouton ◧ + « ‹ Settings » en tête) ; titre « Issue labels » 2 lignes possibles, « New group » / « New label » à droite ; tableau réduit à case + nom (les autres colonnes disparaissent).
+
+## Captures (`captures/linear-labels-templates/`)
+
+`1440-sombre-labels.png`, `1440-clair-labels.png`, `1440-sombre-templates-survol.png`, `1440-clair-templates-survol.png`, `390-sombre-labels.png`, `390-clair-labels.png`.
