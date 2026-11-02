@@ -1,379 +1,320 @@
 /* ══════════════════════════════════════════════════════════════════════
-   Réseau Omega › Opportunités (02/11/2026) — opportunites-vue.tsx
+   Réseau Omega › Opportunités — reprise du 02/11/2026 (soir)
 
-   La composition d'Attio (kanban et records d'attio.com, relevés au style
-   calculé à 1440 px) : colonnes de 272 px au moins, 16 px entre elles,
-   8 px de marge intérieure, en-tête de 32 px (pastille, titre 14/600,
-   compteur 11 px), cartes empilées à 8 px, lignes d'attribut de 32 px
-   (icône 16 px, 8 px, valeur 14 px), pied d'actions, âge en 12 px.
-   L'habillage n'emprunte RIEN à Attio : seulement les jetons --v2-* de
-   espace2.css (clair, doux et sombre suivent d'eux-mêmes), rayons de 6 px
-   (cartes) et 8 px (colonnes), filets sans ombre portée. Tout est préfixé
-   `op-` et rangé sous `.v2`.
+   La DA des cinq moteurs : tout le gabarit vient de ../lin/lin.css (barre
+   du titre, barre d'outils, « tableau en colonnes », cartes de Linear,
+   menus) et de CarteCentrale (la carte ouverte au milieu). Ce fichier ne
+   pose que les retouches propres à la page, comme
+   ../offload/tableau-affaires.css le fait pour OFFLOAD › Affaires :
+     · la carte : la ligne de référence, le titre-bouton, la pastille d'un
+       membre (lien vers sa fiche), la jauge d'un achat groupé, les gestes ;
+     · « Colonnes masquées » et le menu « Filtrer » ;
+     · la vue « Ce que le réseau vous a apporté » : l'entonnoir et les
+       records, sur les mesures de la liste de Linear (32 / 48) ;
+     · dans la carte ouverte (hors de .lin : elle vit dans le voile) : les
+       lots, les badges, la jauge, en jetons --v2-*.
+   Sombre et clair suivent les jetons --lin-* et --v2-* ; aucune couleur en
+   dur.
    ══════════════════════════════════════════════════════════════════════ */
 
-.v2 .op-page {
-  max-width: none;
-  padding: 16px 16px 48px;
-  display: grid;
-  gap: 24px;
-}
-@media (min-width: 1024px) {
-  .v2 .op-page {
-    padding: 24px 24px 64px;
-  }
+/* ——— l'état vide de la base réelle, sous la barre du titre ——— */
+.v2 .lin.op .op-vide {
+  padding: 24px 22px;
 }
 
-/* ——— l'en-tête ——— */
-.v2 .op-tete {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
+/* ——— la barre d'outils ——— */
+.v2 .lin.op .op-filtre {
+  gap: 6px;
 }
-/* 02/11/2026, intégration : l'en-tête est celui de Membres (membres.css,
-   .rm-etiquette / .rm-titre / .rm-intro) — même surtitre « Réseau Omega »,
-   même titre 22/29, même chapeau — pour que les pages de la rubrique se
-   ressemblent. Avant, 20/28 et pas de surtitre. */
-.v2 .op-etiquette {
-  margin: 0 0 4px;
-  font-family: var(--v2-code);
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 450;
-  text-transform: uppercase;
-  color: var(--v2-gray-600);
+.v2 .lin.op .op-vous {
+  white-space: nowrap;
 }
-.v2 .op-titre {
-  margin: 0;
-  font-family: var(--v2-titre);
-  font-size: 22px;
-  line-height: 29px;
-  letter-spacing: -0.55px;
-  font-weight: 600;
-  color: var(--v2-gray-1000);
-}
-.v2 .op-sous {
-  margin: 6px 0 0;
-  max-width: 680px;
-  color: var(--v2-gray-900);
-}
-
-.op-section {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
-}
-.op-barre {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 12px;
-  min-height: 32px;
-}
-.op-barre .v2-h2 {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-.op-barre-note {
-  font-size: 13px;
-}
-.op-gris {
-  color: var(--v2-gray-900);
-}
-.op-compte {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 4px;
-  font-size: 11px;
-  line-height: 1;
+.v2 .lin.op .op-vous b {
   font-weight: 500;
-  letter-spacing: 0;
-  color: var(--v2-gray-900);
-  background: var(--v2-a-200);
-  font-variant-numeric: tabular-nums;
-}
-
-/* ——— « Ce que le réseau vous a apporté » : l'entonnoir puis les records ——— */
-.op-apports {
-  overflow: hidden;
-}
-.op-entonnoir {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  background: var(--v2-a-400);
-  border-bottom: 1px solid var(--v2-a-400);
-}
-@container principale (min-width: 640px) {
-  .op-entonnoir {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-.op-etape {
-  display: grid;
-  gap: 4px;
-  align-content: start;
-  padding: 16px;
-  background: var(--v2-bg-100);
-  min-width: 0;
-}
-.op-etape .v2-stat-sous {
-  white-space: normal;
-}
-.op-records {
-  position: relative;
-}
-.op-records .v2-tableau th {
-  background: var(--v2-bg-200);
-}
-.op-records .v2-tableau td {
-  vertical-align: middle;
-}
-
-/* ——— le kanban ——— */
-.op-kanban {
-  /* bloc conteneur des libellés v2-sr (position absolue) : sans lui, ceux des colonnes hors champ élargissent la page */
-  position: relative;
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(300px, 1fr);
-  gap: 16px;
-  align-items: start;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  scroll-padding-inline: 0;
-  padding-bottom: 8px;
+  color: var(--lin-texte);
 }
 @container principale (max-width: 640px) {
-  .op-kanban {
-    grid-auto-columns: calc(100% - 40px);
-    gap: 12px;
+  .v2 .lin.op .lin-outils {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .v2 .lin.op .lin-outils-droite {
+    margin-left: 0;
+    padding-left: 2px;
   }
 }
-.op-colonne {
-  display: grid;
-  gap: 8px;
-  align-content: start;
+
+/* ——— le menu « Filtrer » ——— */
+.v2 .lin.op .op-menu {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  padding-bottom: 4px;
+}
+.v2 .lin.op .op-menu-titre {
+  margin: 0;
+  padding: 10px 16px 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin.op .op-coche {
+  margin-left: auto;
+  color: var(--lin-second);
+}
+.v2 .lin.op .op-reglage {
+  cursor: pointer;
+}
+.v2 .lin.op .op-reglage input {
+  accent-color: var(--lin-graph-bleu);
+}
+
+/* ——— les colonnes ——— */
+.v2 .lin.op .lin-tableau-page,
+.v2 .lin.op .lin-tableau-page > .lin-tableau {
+  /* le tableau défile seul en largeur : la page, jamais */
   min-width: 0;
-  padding: 8px;
-  border-radius: 8px;
-  background: var(--v2-a-100);
-  box-shadow: inset 0 0 0 1px var(--v2-a-300);
-  scroll-snap-align: start;
 }
-.op-colonne-tete {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  height: 32px;
-  padding: 0 8px;
+.v2 .lin.op .op-tableau {
+  /* bloc conteneur des libellés .v2-sr (position absolue) des colonnes hors champ */
+  position: relative;
 }
-.op-colonne-point {
-  width: 8px;
-  height: 8px;
-}
-.op-colonne-icone {
+.v2 .lin.op .op-colonne-icone {
   display: inline-flex;
-  color: var(--v2-gray-900);
+  color: var(--lin-second);
 }
-.v2 .op-colonne-titre {
-  margin: 0;
-  min-width: 0;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  letter-spacing: -0.14px;
+.v2 .lin.op .op-colonne-icone svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .lin.op .op-colonne-meta {
+  font-weight: 450;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.op-colonne-corps {
-  display: grid;
-  gap: 8px;
-}
-.op-colonne-vide {
-  margin: 0;
-  padding: 24px 12px;
-  border-radius: 6px;
-  border: 1px dashed var(--v2-a-500);
-  color: var(--v2-gray-900);
-  font-size: 13px;
-  line-height: 18px;
-  text-align: center;
-}
-.op-colonne-pied {
+.v2 .lin.op .op-colonne-pied {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
-  height: 32px;
+  height: 28px;
   padding: 0 8px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--v2-gray-900);
-  font: inherit;
-  font-size: 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
 }
-.op-colonne-pied:hover {
-  background: var(--v2-a-200);
-  color: var(--v2-gray-1000);
+.v2 .lin.op .op-colonne-pied:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
 }
 
-/* ——— la carte-record ——— */
-.op-carte {
-  display: grid;
-  min-width: 0;
-  padding-top: 6px;
-  border-radius: 6px;
-  background: var(--v2-bg-100);
-  box-shadow: var(--v2-ombre-bord);
-  transition: box-shadow 0.15s, opacity 0.15s;
+/* « Colonnes masquées » : comme sur OFFLOAD, une colonne étroite, des rangées de 36 */
+.v2 .lin.op .op-masquees {
+  flex-basis: 260px;
 }
-.op-carte:hover {
-  box-shadow: 0 0 0 1px var(--v2-a-500);
+.v2 .lin.op .op-masquees .lin-colonne-nom {
+  color: var(--lin-second);
 }
-.op-carte[data-etat="de-cote"] {
+.v2 .lin.op .op-masquees-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px 12px 24px;
+}
+.v2 .lin.op .op-masquee {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin.op .op-masquee:hover {
+  background: var(--lin-survol);
+}
+
+/* ——— la carte ——— */
+.v2 .lin.op .op-carte[data-etape="de_cote"] {
   opacity: 0.6;
 }
-.op-carte-titre {
-  margin: 6px 12px 4px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  letter-spacing: -0.14px;
-  text-wrap: pretty;
-}
-.op-carte-phrase {
-  margin: 0 12px 4px;
-  color: var(--v2-gray-900);
-  font-size: 13px;
-  line-height: 18px;
-  text-wrap: pretty;
-}
-.op-attrs {
-  margin: 0;
-  padding: 0 4px;
-  display: grid;
-}
-.op-attr {
-  display: grid;
-  grid-template-columns: 16px minmax(0, 1fr);
-  gap: 8px;
-  align-items: start;
-  min-height: 32px;
-  padding: 6px 8px;
-}
-.op-attr-icone {
-  display: flex;
-  margin-top: 2px;
-  color: var(--v2-gray-600);
-}
-.op-attr-valeur {
-  margin: 0;
+.v2 .lin.op .op-ref {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
-  font-size: 14px;
-  line-height: 20px;
+  font-variant-numeric: tabular-nums;
 }
-.op-raison {
-  display: block;
-  color: var(--v2-gray-900);
-  font-size: 13px;
-  line-height: 20px;
-  text-wrap: pretty;
+.v2 .lin.op .op-ref .lin-boite-point {
+  width: 7px;
+  height: 7px;
 }
-.op-tronque {
-  display: block;
+.v2 .lin.op .op-carte-titre {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .lin.op .op-carte-titre .lin-ic,
+.v2 .lin.op .op-carte-titre > svg {
+  color: var(--lin-second);
+}
+.v2 .lin.op .lin-carte-pastille {
+  max-width: 100%;
   overflow: hidden;
-  white-space: nowrap;
   text-overflow: ellipsis;
 }
-.op-membre {
-  display: inline-flex;
+.v2 .lin.op .op-pastille-membre {
+  color: var(--lin-texte);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.v2 .lin.op .op-pastille-membre:hover {
+  background: var(--lin-survol);
+}
+.v2 .lin.op .op-initiales,
+.op-initiales {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--lin-pastille-active, var(--v2-a-300));
+  color: var(--lin-texte, var(--v2-gray-1000));
+  font-size: 7.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.v2 .lin.op .op-carte-pied {
+  display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 6px;
-  min-width: 0;
+  gap: 4px 8px;
+  font-variant-numeric: tabular-nums;
 }
-.op-initiales {
-  width: 20px;
-  height: 20px;
-  font-size: 9px;
-  line-height: 1;
+.v2 .lin.op .op-carte-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 2px 2px;
+  cursor: default;
 }
-.op-initiales--vous {
-  background: var(--v2-blue-200);
-  color: var(--v2-blue-900);
-  box-shadow: none;
+.v2 .lin.op .op-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
 }
-.v2 .op-lien {
+.v2 .lin.op .op-btn svg {
+  width: 14px;
+  height: 14px;
+}
+.op-fait {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  font-size: 12px;
   font-weight: 500;
-  color: var(--v2-gray-1000);
+  color: var(--lin-second, var(--v2-gray-900));
+}
+.op-fait svg {
+  color: var(--lin-vert, var(--v2-green-900));
+}
+
+/* la jauge d'un achat groupé : inscrits sur le seuil */
+.op-jauge {
+  display: inline-block;
+  width: 56px;
+  height: 4px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--lin-trait, var(--v2-gray-300));
+  vertical-align: middle;
+}
+.op-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--lin-graph-bleu, var(--v2-blue-700));
+}
+.op-jauge[data-atteint] > span {
+  background: var(--lin-vert, var(--v2-green-700));
+}
+
+/* l'action principale d'une carte : le texte en blanc (clair : en noir), le cadre du bouton du dashboard */
+.v2 .lin.op .op-carte-actions .v2-btn--primaire {
+  color: var(--lin-titre);
+  box-shadow: 0 0 0 1px var(--v2-a-600);
+}
+
+/* ——— la carte ouverte (CarteCentrale, dans le voile : jetons --v2-*) ——— */
+.op-lien,
+.v2-val-carte .v2-det-fiche .op-lien {
   text-decoration: underline;
   text-decoration-color: var(--v2-a-500);
   text-underline-offset: 3px;
-  transition: text-decoration-color 0.15s;
+  font-weight: 500;
 }
-.v2 .op-lien:hover {
+.op-lien:hover {
   text-decoration-color: currentColor;
 }
 .op-badges {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 4px;
+  vertical-align: middle;
 }
-
-/* les lots d'un groupement : qui tient quoi */
+.op-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--v2-gray-900);
+  white-space: nowrap;
+}
+.op-badge svg {
+  color: var(--v2-green-900);
+}
 .op-lots {
   list-style: none;
-  margin: 4px 12px 0;
+  margin: 0;
   padding: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   box-shadow: inset 0 0 0 1px var(--v2-a-400);
 }
 .op-lot {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 4px 8px;
+  gap: 4px 10px;
   align-items: baseline;
-  padding: 8px 10px;
+  padding: 10px 12px;
+  font-size: 13px;
 }
 .op-lot + .op-lot {
   border-top: 1px solid var(--v2-a-400);
 }
 .op-lot[data-vous] {
-  background: var(--v2-blue-100);
+  background: var(--v2-a-100);
 }
 .op-lot:first-child {
-  border-radius: 6px 6px 0 0;
+  border-radius: 8px 8px 0 0;
 }
 .op-lot:last-child {
-  border-radius: 0 0 6px 6px;
-}
-.op-lot-numero {
-  font-family: var(--v2-code);
-  font-size: 11px;
-  line-height: 20px;
-  color: var(--v2-gray-900);
-  white-space: nowrap;
+  border-radius: 0 0 8px 8px;
 }
 .op-lot-intitule {
-  font-size: 13px;
-  line-height: 20px;
   font-weight: 500;
 }
 .op-lot-qui {
@@ -382,96 +323,180 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 8px;
-  font-size: 13px;
+}
+.op-lot-qui b {
+  font-weight: 500;
+}
+.op-seuil {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* l'achat groupé : inscrits et seuil */
-.op-seuil {
+/* ══ « Ce que le réseau vous a apporté » ══════════════════════════════ */
+.v2 .lin.op .op-apports {
+  display: grid;
+  gap: 20px;
+  padding: 4px 14px 32px;
+  min-width: 0;
+}
+/* l'entonnoir (« Funnel Steps » d'Attio) : une tuile par étape, la barre rapportée aux intros */
+.v2 .lin.op .op-entonnoir {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0 8px;
+}
+@container principale (min-width: 760px) {
+  .v2 .lin.op .op-entonnoir {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2 .lin.op .op-etape {
   display: grid;
   gap: 6px;
-  margin: 4px 12px 0;
+  align-content: start;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-carte);
 }
-.op-seuil-ligne {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 4px 12px;
-  font-size: 13px;
-  line-height: 18px;
+.v2 .lin.op .op-etape-libelle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
 }
-.op-jauge {
+.v2 .lin.op .op-etape-valeur {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  color: var(--lin-titre);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2 .lin.op .op-etape-barre {
+  display: block;
   height: 6px;
-  border-radius: 999px;
-  background: var(--v2-gray-300);
+  border-radius: 9999px;
+  background: var(--lin-survol);
   overflow: hidden;
 }
-.op-jauge > span {
+.v2 .lin.op .op-etape-barre > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--v2-blue-700);
-  transition: width 0.3s var(--v2-doux);
+  background: var(--lin-graph-bleu);
 }
-.op-jauge[data-atteint] > span {
-  background: var(--v2-green-700);
+.v2 .lin.op .op-etape-barre--vide {
+  background: transparent;
+}
+.v2 .lin.op .op-etape-sous {
+  white-space: normal;
+  line-height: 16px;
 }
 
-/* le pied : les actions à gauche, l'âge à droite */
-.op-carte-pied {
+/* les records : en-tête de 32, lignes de 48, survol en retrait de 8 (la liste de Linear) */
+.v2 .lin.op .op-rec-tete,
+.v2 .lin.op .op-rec-ligne {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(0, 2fr) 72px 84px 96px 140px;
+  column-gap: 12px;
+  align-items: center;
+  padding: 0 14px 0 16px;
+}
+.v2 .lin.op .op-rec-tete {
+  height: 32px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  border-bottom: 0.5px solid var(--lin-trait);
+}
+.v2 .lin.op .op-rec-ligne {
+  position: relative;
+  min-height: 48px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+}
+.v2 .lin.op .op-rec-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  border-radius: 8px;
+  background: transparent;
+}
+.v2 .lin.op .op-rec-ligne:hover::before {
+  background: var(--lin-survol);
+}
+.v2 .lin.op .op-rec-ligne > * {
+  position: relative;
+  min-width: 0;
+}
+.v2 .lin.op .op-rec-membre {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  margin-top: 8px;
-  padding: 8px 12px;
-  border-top: 1px solid var(--v2-a-300);
-}
-.op-actions {
-  display: inline-flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-.op-carte-pied .v2-btn--petit {
-  height: 28px;
   font-size: 13px;
 }
-.op-age {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  color: var(--v2-gray-900);
-  font-size: 12px;
-  line-height: 16px;
+.v2 .lin.op .op-rec-membre .op-lien {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--lin-titre);
+  text-decoration-color: var(--lin-trait);
+}
+.v2 .lin.op .op-rec-objet {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.v2 .lin.op .op-num {
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
-.op-fait {
+.v2 .lin.op .op-rec-montant {
+  color: var(--lin-titre);
+}
+.v2 .lin.op .op-rec-etat {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 28px;
-  font-size: 13px;
-  color: var(--v2-gray-900);
+  gap: 8px;
+  white-space: nowrap;
 }
-.op-fait .v2-point {
-  width: 8px;
-  height: 8px;
+.v2 .lin.op .op-rec-etat .lin-ic,
+.v2 .lin.op .op-rec-etat svg {
+  color: var(--lin-second);
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .op-jauge > span,
-  .op-carte {
-    transition: none;
+/* étroit : une ligne devient une fiche sur deux rangs, sans en-tête */
+@container principale (max-width: 760px) {
+  .v2 .lin.op .op-rec-tete {
+    display: none;
   }
-}
-
-/* le pied du suivi : le détail se déplie à la demande, pour laisser le kanban à portée */
-.op-apports .op-apports-pied {
-  flex-wrap: wrap;
-  border-top: 0;
-}
-.op-apports .op-records + .op-apports-pied {
-  border-top: 1px solid var(--v2-a-400);
+  .v2 .lin.op .op-rec-ligne {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 4px;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid var(--lin-trait);
+  }
+  .v2 .lin.op .op-rec-ligne::before {
+    inset: 2px 4px;
+  }
+  .v2 .lin.op .op-rec-objet {
+    grid-column: 1 / -1;
+    white-space: normal;
+    color: var(--lin-second);
+  }
+  .v2 .lin.op .op-rec-ligne > [data-etiquette] {
+    display: none;
+  }
+  .v2 .lin.op .op-rec-montant {
+    grid-row: 1;
+    grid-column: 2;
+  }
+  .v2 .lin.op .op-rec-etat {
+    grid-column: 1 / -1;
+  }
 }
