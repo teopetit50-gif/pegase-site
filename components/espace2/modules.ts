@@ -104,7 +104,15 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Honoraires et temps", href: `${RACINE}/lorani/honoraires` },
     { libelle: "Réglages", href: `${RACINE}/lorani/reglages` },
   ]),
-  m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
+  /* 02/11/2026 — refonte : une page par usage (docs/refonte-metiers/cloud/TIROMA.md) */
+  m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile, [
+    { libelle: "Aujourd'hui", href: `${RACINE}/tiroma`, exact: true },
+    { libelle: "Créneaux et appels", href: `${RACINE}/tiroma/creneaux` },
+    { libelle: "Fauteuils", href: `${RACINE}/tiroma/fauteuils` },
+    { libelle: "Plans et devis", href: `${RACINE}/tiroma/plans` },
+    { libelle: "Pilotage", href: `${RACINE}/tiroma/pilotage` },
+    { libelle: "Réglages", href: `${RACINE}/tiroma/reglages` },
+  ]),
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat, [

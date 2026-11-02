@@ -1,0 +1,405 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA — le socle des copies 1:1 de Linear (02/11/2026, repris du socle de Daliro, règles de Teo :
+   docs/refonte-metiers/REGLES.md). Préfixe tir-, propre à Tiroma : le
+   gabarit partagé components/espace2/lin n'est pas touché.
+
+   Jetons : les couleurs calculées de Linear, thème sombre et clair, telles
+   que relevées (docs/refonte-metiers/releves/linear-*.md, session
+   références du 01/11). Aucune n'est estimée ; là où un relevé ne donne
+   qu'un thème, la ligne le dit.
+
+   Cadre : la carte `main` de Linear (linear-home.md) — marges 8 8 8 0,
+   rayon 12, bordure 0.5, ombre double en clair, simple en sombre. Elle se
+   pose dans le <main> de la coquille d'espace2 (barre du haut 48, barres
+   latérales 304) : c'est l'équivalent de la barre latérale de Linear
+   (244), qui n'appartient pas à la page copiée. Sans barre « Agent » chez
+   nous, la marge du bas est 8 (36 chez Linear).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tir {
+  /* sombre */
+  --tir-app: lch(2.595 0.4 272);
+  --tir-carte: lch(5.52 0.4 272);
+  --tir-carte-bord: lch(13.08 1.48 272);
+  --tir-carte-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tir-t1: lch(100 0 272);
+  --tir-t2: lch(90.451 1.2 272);
+  --tir-t3: lch(61.803 1.2 272);
+  --tir-t4: lch(39.452 1.425 272);
+  --tir-actif: lch(16.706 0.979 272);
+  --tir-inactif: lch(10.149 0.593 272);
+  --tir-bouton: lch(10.149 0.689 272);
+  --tir-survol: lch(9.345 0.85 272);
+  --tir-survol-onglet: lch(13.861 1.043 272);
+  --tir-groupe: lch(9.232 0.85 272);
+  --tir-puce-bord: lch(16.32 1.48 272);
+  --tir-menu: lch(12.72 0.85 272);
+  --tir-menu-bord: lch(25.68 1.93 272);
+  --tir-menu-ombre: lch(0 0 0 / 0.125) 0 3px 8px 0, lch(0 0 0 / 0.125) 0 2px 5px 0, lch(0 0 0 / 0.125) 0 1px 1px 0;
+  --tir-menu-texte: lch(91.178 1.425 272);
+  --tir-menu-icone: lch(64.714 1.425 272);
+  --tir-menu-survol: lch(20.032 1.93 272);
+  --tir-equipe: lch(60.135 63.97 86.502);
+  --tir-equipe-fond: lch(60.135 63.97 86.502 / 0.175);
+  --tir-rouge: lch(58% 73 29);
+  --tir-violet: #6d78d5;
+  /* compléments Tiroma (linear-my-issues.md, complément du 01/11) */
+  --tir-groupe-texte: lch(90.826 1.425 272);
+  --tir-groupe-compte: lch(63.304 1.425 272);
+  --tir-groupe-dates: lch(39.452 1.425 272);
+  --tir-puce-bord-mi: lch(16.32 1.48 272);
+  --tir-priorite: var(--tir-t3);
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--tir-app);
+  color: var(--tir-t1);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-v2-theme="light"] .v2 .tir {
+  --tir-app: lch(94.44 0.5 282);
+  --tir-carte: lch(97.94 0.5 282);
+  --tir-carte-bord: lch(89.84 0 282);
+  --tir-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tir-t1: lch(9.794 0 282);
+  --tir-t2: lch(19.588 1.25 282);
+  --tir-t3: lch(39.176 1.25 282);
+  --tir-t4: lch(64.64 1.25 282);
+  --tir-actif: lch(93.483 0.5 282);
+  --tir-inactif: lch(99.997 0.5 282);
+  --tir-bouton: lch(99.997 0.5 282);
+  --tir-survol: lch(94.44 0.5 282);
+  --tir-survol-onglet: lch(94.854 0.5 282);
+  --tir-groupe: lch(94.44 0.5 282);
+  --tir-puce-bord: lch(86.5 0 282);
+  --tir-menu: lch(100 0 282);
+  --tir-menu-bord: lch(86.5 0 282);
+  --tir-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+  --tir-menu-texte: lch(9.794 0 282);
+  --tir-menu-icone: lch(39.176 1.25 282);
+  --tir-menu-survol: lch(94.854 0.5 282);
+  --tir-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+  --tir-groupe-texte: lch(18.888 1.25 282);
+  --tir-groupe-compte: lch(37.776 1.25 282);
+  --tir-groupe-dates: lch(62.33 1.25 282);
+  --tir-puce-bord-mi: lch(84.44 0 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tir {
+    --tir-app: lch(94.44 0.5 282);
+    --tir-carte: lch(97.94 0.5 282);
+    --tir-carte-bord: lch(89.84 0 282);
+    --tir-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tir-t1: lch(9.794 0 282);
+    --tir-t2: lch(19.588 1.25 282);
+    --tir-t3: lch(39.176 1.25 282);
+    --tir-t4: lch(64.64 1.25 282);
+    --tir-actif: lch(93.483 0.5 282);
+    --tir-inactif: lch(99.997 0.5 282);
+    --tir-bouton: lch(99.997 0.5 282);
+    --tir-survol: lch(94.44 0.5 282);
+    --tir-survol-onglet: lch(94.854 0.5 282);
+    --tir-groupe: lch(94.44 0.5 282);
+    --tir-puce-bord: lch(86.5 0 282);
+    --tir-menu: lch(100 0 282);
+    --tir-menu-bord: lch(86.5 0 282);
+    --tir-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+    --tir-menu-texte: lch(9.794 0 282);
+    --tir-menu-icone: lch(39.176 1.25 282);
+    --tir-menu-survol: lch(94.854 0.5 282);
+    --tir-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+  --tir-groupe-texte: lch(18.888 1.25 282);
+  --tir-groupe-compte: lch(37.776 1.25 282);
+  --tir-groupe-dates: lch(62.33 1.25 282);
+  --tir-puce-bord-mi: lch(84.44 0 282);
+  }
+}
+
+.v2 .tir *,
+.v2 .tir *::before,
+.v2 .tir *::after {
+  box-sizing: border-box;
+}
+.v2 .tir :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.v2 .tir :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .tir :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ——— la carte ——— */
+.v2 .tir .tir-carte {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 48px - 16px);
+  background: var(--tir-carte);
+  border: 0.5px solid var(--tir-carte-bord);
+  border-radius: 12px;
+  box-shadow: var(--tir-carte-ombre);
+  overflow: hidden;
+}
+.v2 .tir .tir-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ——— l'en-tête : ligne du titre (44, filet bas) puis ligne des onglets (44) ——— */
+.v2 .tir .tir-tete {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tir .tir-ligne1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  height: 44px;
+  padding: 7px 8px 0;
+  border-bottom: 0.5px solid var(--tir-carte-bord);
+}
+.v2 .tir .tir-ligne2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  height: 43.5px;
+  padding: 7px 8px 0;
+}
+.v2 .tir .tir-fil {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tir-t1);
+  white-space: nowrap;
+}
+.v2 .tir .tir-fil svg {
+  flex: none;
+}
+.v2 .tir .tir-pousse {
+  flex: 1;
+}
+.v2 .tir .tir-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0 2px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t2);
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .tir .tir-rond svg {
+  width: 14px;
+  height: 14px;
+  color: var(--tir-t3);
+}
+.v2 .tir .tir-rond:hover,
+.v2 .tir .tir-rond[aria-expanded="true"] {
+  background: var(--tir-survol-onglet);
+}
+.v2 .tir .tir-rond--plein {
+  background: var(--tir-bouton);
+}
+.v2 .tir .tir-onglet {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tir-inactif);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t3);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .tir .tir-onglet:hover {
+  background: var(--tir-survol-onglet);
+  color: var(--tir-t2);
+}
+.v2 .tir .tir-onglet[aria-current="page"],
+.v2 .tir .tir-onglet[aria-selected="true"] {
+  background: var(--tir-actif);
+  color: var(--tir-t1);
+}
+.v2 .tir :focus-visible {
+  outline: 2px solid var(--tir-violet);
+  outline-offset: -1px;
+}
+
+/* ——— le menu « … » (Team actions, linear-home.md) ——— */
+.v2 .tir .tir-menu {
+  position: absolute;
+  z-index: 40;
+  min-width: 175px;
+  padding: 6px 0;
+  background: var(--tir-menu);
+  border: 0.5px solid var(--tir-menu-bord);
+  border-radius: 12px;
+  box-shadow: var(--tir-menu-ombre);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: var(--tir-menu-texte);
+}
+.v2 .tir .tir-menu-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 32px;
+  padding: 0 18px 0 14px;
+  font-weight: 450;
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .tir .tir-menu-option::before {
+  content: "";
+  position: absolute;
+  inset: 0 6px;
+  border-radius: 8px;
+  z-index: -1;
+}
+.v2 .tir .tir-menu-option:hover::before,
+.v2 .tir .tir-menu-option:focus-visible::before {
+  background: var(--tir-menu-survol);
+}
+.v2 .tir .tir-menu-option {
+  isolation: isolate;
+}
+.v2 .tir .tir-menu-option svg {
+  flex: none;
+  color: var(--tir-menu-icone);
+}
+.v2 .tir .tir-menu-sep {
+  height: 0.5px;
+  margin: 6px 0;
+  background: var(--tir-menu-bord);
+}
+
+/* ——— 768 et moins : la carte s'efface (Linear la pose plein écran) ——— */
+@media (max-width: 768px) {
+  .v2 .tir {
+    padding: 0;
+    background: var(--tir-carte);
+  }
+  .v2 .tir .tir-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .v2 .tir .tir-defile {
+    overflow: visible;
+  }
+  .v2 .tir .tir-rond,
+  .v2 .tir .tir-onglet {
+    height: 32px;
+  }
+  .v2 .tir .tir-rond {
+    width: 32px;
+  }
+}
+
+
+/* ——— compléments Tiroma : ancre et sous-menus du menu de Linear, cases, avatar ——— */
+.v2 .tir .tir-menu-ancre {
+  position: relative;
+  display: inline-flex;
+}
+.v2 .tir .tir-menu-sousbloc {
+  position: relative;
+}
+.v2 .tir .tir-menu--sous {
+  top: -6px;
+  left: calc(100% - 4px);
+}
+.v2 .tir .tir-menu-option[data-actif]::before {
+  background: var(--tir-menu-survol);
+}
+.v2 .tir .tir-menu-option[data-danger] {
+  color: var(--tir-rouge);
+}
+.v2 .tir .tir-menu-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .tir .tir-menu-libelle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tir .tir-menu-fleche {
+  margin-right: -8px;
+}
+.v2 .tir .tir-menu-titre {
+  padding: 6px 14px 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-menu-icone);
+}
+.v2 .tir .tir-menu-kbd {
+  font: inherit;
+  font-size: 12px;
+  color: var(--tir-menu-icone);
+}
+.v2 .tir .tir-menu-case {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--tir-menu-icone);
+  border-radius: 3px;
+  color: #fff;
+}
+.v2 .tir .tir-menu-case[data-coche] {
+  background: var(--tir-violet);
+  border-color: var(--tir-violet);
+}
+.v2 .tir .tir-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+  user-select: none;
+}
+.v2 .tir .tir-avatar-vide {
+  flex: none;
+  color: var(--tir-t3);
+}
