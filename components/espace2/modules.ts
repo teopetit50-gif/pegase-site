@@ -105,7 +105,15 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Réglages", href: `${RACINE}/lorani/reglages` },
   ]),
   m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
-  m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
+  /* 30/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
+  m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/tamila`, exact: true },
+    { libelle: "Arrivées", href: `${RACINE}/tamila/arrivees` },
+    { libelle: "Honoraires du cabinet", href: `${RACINE}/tamila/honoraires` },
+    { libelle: "Pilotage", href: `${RACINE}/tamila/pilotage` },
+    { libelle: "Conformité du cabinet", href: `${RACINE}/tamila/conformite` },
+    { libelle: "Réglages", href: `${RACINE}/tamila/reglages` },
+  ]),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat, [
     { libelle: "Vue d'ensemble", href: `${RACINE}/daliro`, exact: true },
