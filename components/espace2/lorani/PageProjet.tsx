@@ -46,7 +46,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProjetCarte, { type PartieProjet } from "@/components/espace/lorani/ProjetCarte";
 import Formulaires, { type Form } from "@/components/espace/lorani/Formulaires";
-import { dossierDate } from "@/components/espace/lorani/dossier-date";
+import { dossierDate, lignesDossier } from "@/components/espace/lorani/dossier-date";
+import { bordereauVisas } from "./bordereau-visas";
 import { ETATS, FAMILLES, NATURES_PROJET, PHASES, ROLES_PROJET, prochaineDate, titrePermis, type Famille } from "@/components/espace/lorani/etats";
 import { bordereau } from "@/components/espace/lorani/pieces-exigees";
 import type { Permis, Projet } from "@/components/espace/lorani/types";
@@ -396,6 +397,15 @@ export default function PageProjet({ id }: { id: string }) {
   for (const x of dossier.pieces.filter((x) => x.objet_id === projet.id)) evenements.push({ cle: `pi-${x.id}`, quand: x.cree_le ?? projet.cree_le, qui: x.source === "courriel" ? "Guichet" : "Lorani", quoi: `a reçu ${x.nom_fichier}` });
   evenements.sort((a, b) => b.quand.localeCompare(a.quand));
 
+  const registre = params.get("vue") === "registre";
+  const lignesRegistre = cle === "activite" && registre ? lignesDossier(projet, dossier, nommer) : [];
+  /* le chantier : la formule de révision de chaque marché (b5_34, lue avec le marché) et le bordereau des visas */
+  const marchesProjet = dossier.marches.filter((m) => m.projet_id === projet.id && m.actif) as ((typeof dossier.marches)[number] & { revision_idbank?: string | null; revision_mois_zero?: string | null; revision_partie_fixe?: number | null })[];
+  const imprimerBordereau = () => {
+    const b = bordereauVisas(projet, dossier);
+    telecharger(b.nom, b.octets, "application/pdf");
+    toast(`Bordereau des visas : ${pluriel(b.nombre, "document")}.`);
+  };
   const permisTries = [...permis].sort((a, b) => (prochaineDate(a) ?? "9").localeCompare(prochaineDate(b) ?? "9"));
   const tableau = (
     <div className="lor-in-tableau" role="table" aria-label="Permis du projet">
@@ -899,6 +909,57 @@ export default function PageProjet({ id }: { id: string }) {
               </div>
             ) : cle === "activite" ? (
               <div className="lor-in-colonne lor-in-colonne--activite">
+                {/* deux vues de l'onglet : le fil d'activité, ou le registre daté (dossier-date.ts) — « ?vue=registre » */}
+                <div className="lor-in-vues-activite" role="tablist" aria-label="Vues de l'activité">
+                  <Link role="tab" aria-selected={!registre} href={lien("activite")} scroll={false} className="lor-vue" data-actif={!registre ? "" : undefined}>
+                    Fil d&apos;activité
+                  </Link>
+                  <Link role="tab" aria-selected={registre} href={`${lien("activite")}&vue=registre`} scroll={false} className="lor-vue" data-actif={registre ? "" : undefined}>
+                    Registre daté
+                  </Link>
+                </div>
+                {registre ? (
+                  <>
+                    <div className="lor-in-registre-tete">
+                      <p className="lor-in-sourd">
+                        {pluriel(lignesRegistre.length, "ligne")} : contrôles et constats décidés, visas, situations, décennales, ordres de service, réserves, comptes rendus diffusés, offres. Chaque date est celle que la base a enregistrée au moment des faits.
+                      </p>
+                      <button type="button" className="lor-texte-btn" onClick={exporter} title="Registre PDF et Excel (une feuille par lot), dans une archive : le dossier de défense décennale">
+                        <IconeSprite nom="Folder" />
+                        Exporter le dossier daté
+                      </button>
+                    </div>
+                    {[...new Set(lignesRegistre.map((x) => (x.date ?? "sans date").slice(0, 7)))].reverse().map((mois) => (
+                      <section key={mois} className="lor-in-mois" aria-label={mois === "sans date" ? "Sans date" : fmtMois.format(midi(`${mois}-15`))}>
+                        <h3>{mois === "sans date" ? "Sans date" : fmtMois.format(midi(`${mois}-15`))}</h3>
+                        <ul>
+                          {lignesRegistre
+                            .filter((x) => (x.date ?? "sans date").startsWith(mois))
+                            .reverse()
+                            .map((x, i) => (
+                              <li key={`${mois}-${i}`} className="lor-in-ev lor-in-registre">
+                                <span className="lor-in-rubrique">{x.rubrique}</span>
+                                <span>
+                                  <span className="lor-in-ev-qui">{x.objet}</span>
+                                  {x.lot ? ` · lot ${x.lot}` : ""} · {x.etat}
+                                  {x.par ? ` (${x.par})` : ""}
+                                  {x.piece ? ` · pièce : ${x.piece}` : ""}
+                                  {x.date ? (
+                                    <>
+                                      {" "}
+                                      · <time dateTime={x.date}>{court(x.date)}</time>
+                                    </>
+                                  ) : null}
+                                </span>
+                              </li>
+                            ))}
+                        </ul>
+                      </section>
+                    ))}
+                    {!lignesRegistre.length ? <p className="lor-in-vide">Aucune décision n&apos;est encore enregistrée sur ce projet : le registre se remplit avec les contrôles, les visas, les situations, les ordres de service, les réserves et les comptes rendus diffusés.</p> : null}
+                  </>
+                ) : (
+                <>
                 <button type="button" className="lor-in-composeur" disabled={gris} onClick={() => setForm({ type: "courrier", projet: projet.id })}>
                   <span className="lor-in-segmente" aria-hidden="true">
                     <span data-actif="">Courrier</span>
@@ -929,6 +990,8 @@ export default function PageProjet({ id }: { id: string }) {
                     </ul>
                   </section>
                 ))}
+                </>
+                )}
               </div>
             ) : cle === "permis" ? (
               <div className="lor-in-large">
@@ -944,6 +1007,36 @@ export default function PageProjet({ id }: { id: string }) {
               </div>
             ) : (
               <div className="lor-in-large lor-in-vue">
+                {cle === "chantier" ? (
+                  <section className="lor-in-chantier-tete" aria-label="Bordereau et révision des prix">
+                    <div className="lor-in-projets-tete">
+                      <h3>Visas et révision des prix</h3>
+                      <div className="lor-in-projets-outils">
+                        <button type="button" className="lor-texte-btn" onClick={imprimerBordereau} title="Bordereau VSO · VAO · refus, imprimable (PDF fabriqué dans le navigateur)">
+                          <IconeSprite nom="PdfFile" />
+                          Bordereau des visas
+                        </button>
+                      </div>
+                    </div>
+                    <ul className="lor-in-revisions">
+                      {marchesProjet.map((m) => {
+                        const l = dossier.lots.find((x) => x.id === m.lot_id);
+                        return (
+                          <li key={m.id} className="lor-in-ev">
+                            <span className="lor-in-rubrique">{l ? `Lot ${l.numero}` : "Lot"}</span>
+                            <span>
+                              <span className="lor-in-ev-qui">{m.titulaire}</span> ·{" "}
+                              {m.revision_idbank
+                                ? `révision C = a + (1 − a) × In / I0 sur l'index INSEE ${m.revision_idbank}${m.revision_mois_zero ? `, I0 de ${fmtMois.format(midi(m.revision_mois_zero))}` : ""}, partie fixe a = ${(m.revision_partie_fixe ?? 0.15).toLocaleString("fr-FR")} ; la révision de chaque situation est calculée en base`
+                                : "aucune formule de révision saisie : prix fermes pour Lorani"}
+                            </span>
+                          </li>
+                        );
+                      })}
+                      {!marchesProjet.length ? <li className="lor-in-vide">Aucun marché de travaux : la révision se règle par marché.</li> : null}
+                    </ul>
+                  </section>
+                ) : null}
                 <Habille>
                   <div className="lin lor-in-pont">
                     <ProjetCarte key={`${cle}-${projet.id}`} projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={setForm} agir={agir} parties={ong.parties} confirmerEnvois />
