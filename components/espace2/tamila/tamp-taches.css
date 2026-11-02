@@ -159,6 +159,10 @@
 }
 .v2 .tamp .tamp-tcase {
   display: flex;
+  border-radius: 4px;
+}
+.v2 .tamp .tamp-tcase[aria-pressed="true"] {
+  color: var(--p-bleu-icone-1);
 }
 .v2 .tamp .tamp-ttitre {
   display: flex;

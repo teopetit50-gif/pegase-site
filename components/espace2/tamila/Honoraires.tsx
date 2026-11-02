@@ -31,6 +31,7 @@ import { RACINE } from "@/components/espace2/modules";
 import { PlainCarte, useOuvert } from "./TamCadre";
 import { PlainIcone, TamIcone, type NomPlainIcone, type NomTamIcone } from "./TamIcone";
 import { useTamila } from "./donnees";
+import { useMemoire } from "./navigateur";
 import "./tamp-comptes.css";
 
 const euros = (cents: number) => (cents / 100).toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: cents % 100 ? 2 : 0 });
@@ -111,7 +112,8 @@ export default function Honoraires() {
   const [sens, setSens] = useState<1 | -1>(-1);
   const [masquees, setMasquees] = useState<Set<Cle>>(() => new Set(COLONNES.filter((c) => c.plus).map((c) => c.cle)));
   const [recherche, setRecherche] = useState("");
-  const [favori, setFavori] = useState(false);
+  const favoris = useMemoire("favoris");
+  const favori = favoris.a("page:honoraires");
   const { ouvert: filtresOuvert, setOuvert: ouvrirFiltres, boite: boiteFiltres } = useOuvert<HTMLDivElement>();
   const { ouvert: affichageOuvert, setOuvert: ouvrirAffichage, boite: boiteAffichage } = useOuvert<HTMLDivElement>();
   const [maintenant] = useState(() => Date.now());
@@ -269,7 +271,7 @@ export default function Honoraires() {
             <h1 className="tamp-titre">Honoraires du cabinet</h1>
           </div>
           <div className="tamp-tete-actions">
-            <button type="button" className="tamp-icone" aria-pressed={favori} aria-label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} onClick={() => setFavori(!favori)}>
+            <button type="button" className="tamp-icone" aria-pressed={favori} aria-label={favori ? "Désépingler la page" : "Épingler en tête de la vue d'ensemble"} title={favori ? "Désépingler la page" : "Épingler en tête de la vue d'ensemble"} onClick={() => favoris.basculer("page:honoraires")}>
               <PlainIcone nom="Etoile" style={favori ? { color: "var(--p-jaune-icone-1)" } : undefined} />
             </button>
             <div ref={boiteFiltres} style={{ position: "relative" }}>
