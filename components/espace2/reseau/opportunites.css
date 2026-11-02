@@ -1,0 +1,465 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Réseau Omega › Opportunités (02/11/2026) — opportunites-vue.tsx
+
+   La composition d'Attio (kanban et records d'attio.com, relevés au style
+   calculé à 1440 px) : colonnes de 272 px au moins, 16 px entre elles,
+   8 px de marge intérieure, en-tête de 32 px (pastille, titre 14/600,
+   compteur 11 px), cartes empilées à 8 px, lignes d'attribut de 32 px
+   (icône 16 px, 8 px, valeur 14 px), pied d'actions, âge en 12 px.
+   L'habillage n'emprunte RIEN à Attio : seulement les jetons --v2-* de
+   espace2.css (clair, doux et sombre suivent d'eux-mêmes), rayons de 6 px
+   (cartes) et 8 px (colonnes), filets sans ombre portée. Tout est préfixé
+   `op-` et rangé sous `.v2`.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .op-page {
+  max-width: none;
+  padding: 16px 16px 48px;
+  display: grid;
+  gap: 24px;
+}
+@media (min-width: 1024px) {
+  .v2 .op-page {
+    padding: 24px 24px 64px;
+  }
+}
+
+/* ——— l'en-tête ——— */
+.op-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v2 .op-titre {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.4px;
+  font-weight: 600;
+}
+.op-sous {
+  margin: 4px 0 0;
+  max-width: 640px;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.op-section {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.op-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  min-height: 32px;
+}
+.op-barre .v2-h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.op-barre-note {
+  font-size: 13px;
+}
+.op-gris {
+  color: var(--v2-gray-900);
+}
+.op-compte {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--v2-gray-900);
+  background: var(--v2-a-200);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— « Ce que le réseau vous a apporté » : l'entonnoir puis les records ——— */
+.op-apports {
+  overflow: hidden;
+}
+.op-entonnoir {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--v2-a-400);
+  border-bottom: 1px solid var(--v2-a-400);
+}
+@container principale (min-width: 640px) {
+  .op-entonnoir {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.op-etape {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  padding: 16px;
+  background: var(--v2-bg-100);
+  min-width: 0;
+}
+.op-etape .v2-stat-sous {
+  white-space: normal;
+}
+.op-records {
+  position: relative;
+}
+.op-records .v2-tableau th {
+  background: var(--v2-bg-200);
+}
+.op-records .v2-tableau td {
+  vertical-align: middle;
+}
+
+/* ——— le kanban ——— */
+.op-kanban {
+  /* bloc conteneur des libellés v2-sr (position absolue) : sans lui, ceux des colonnes hors champ élargissent la page */
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(300px, 1fr);
+  gap: 16px;
+  align-items: start;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0;
+  padding-bottom: 8px;
+}
+@container principale (max-width: 640px) {
+  .op-kanban {
+    grid-auto-columns: calc(100% - 40px);
+    gap: 12px;
+  }
+}
+.op-colonne {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  min-width: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--v2-a-100);
+  box-shadow: inset 0 0 0 1px var(--v2-a-300);
+  scroll-snap-align: start;
+}
+.op-colonne-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+}
+.op-colonne-point {
+  width: 8px;
+  height: 8px;
+}
+.op-colonne-icone {
+  display: inline-flex;
+  color: var(--v2-gray-900);
+}
+.v2 .op-colonne-titre {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.op-colonne-corps {
+  display: grid;
+  gap: 8px;
+}
+.op-colonne-vide {
+  margin: 0;
+  padding: 24px 12px;
+  border-radius: 6px;
+  border: 1px dashed var(--v2-a-500);
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 18px;
+  text-align: center;
+}
+.op-colonne-pied {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--v2-gray-900);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.op-colonne-pied:hover {
+  background: var(--v2-a-200);
+  color: var(--v2-gray-1000);
+}
+
+/* ——— la carte-record ——— */
+.op-carte {
+  display: grid;
+  min-width: 0;
+  padding-top: 6px;
+  border-radius: 6px;
+  background: var(--v2-bg-100);
+  box-shadow: var(--v2-ombre-bord);
+  transition: box-shadow 0.15s, opacity 0.15s;
+}
+.op-carte:hover {
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+}
+.op-carte[data-etat="de-cote"] {
+  opacity: 0.6;
+}
+.op-carte-titre {
+  margin: 6px 12px 4px;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.14px;
+  text-wrap: pretty;
+}
+.op-carte-phrase {
+  margin: 0 12px 4px;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 18px;
+  text-wrap: pretty;
+}
+.op-attrs {
+  margin: 0;
+  padding: 0 4px;
+  display: grid;
+}
+.op-attr {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  min-height: 32px;
+  padding: 6px 8px;
+}
+.op-attr-icone {
+  display: flex;
+  margin-top: 2px;
+  color: var(--v2-gray-600);
+}
+.op-attr-valeur {
+  margin: 0;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 20px;
+}
+.op-raison {
+  display: block;
+  color: var(--v2-gray-900);
+  font-size: 13px;
+  line-height: 20px;
+  text-wrap: pretty;
+}
+.op-tronque {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.op-membre {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-width: 0;
+}
+.op-initiales {
+  width: 20px;
+  height: 20px;
+  font-size: 9px;
+  line-height: 1;
+}
+.op-initiales--vous {
+  background: var(--v2-blue-200);
+  color: var(--v2-blue-900);
+  box-shadow: none;
+}
+.v2 .op-lien {
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+  text-decoration: underline;
+  text-decoration-color: var(--v2-a-500);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s;
+}
+.v2 .op-lien:hover {
+  text-decoration-color: currentColor;
+}
+.op-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* les lots d'un groupement : qui tient quoi */
+.op-lots {
+  list-style: none;
+  margin: 4px 12px 0;
+  padding: 0;
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+}
+.op-lot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 8px;
+  align-items: baseline;
+  padding: 8px 10px;
+}
+.op-lot + .op-lot {
+  border-top: 1px solid var(--v2-a-400);
+}
+.op-lot[data-vous] {
+  background: var(--v2-blue-100);
+}
+.op-lot:first-child {
+  border-radius: 6px 6px 0 0;
+}
+.op-lot:last-child {
+  border-radius: 0 0 6px 6px;
+}
+.op-lot-numero {
+  font-family: var(--v2-code);
+  font-size: 11px;
+  line-height: 20px;
+  color: var(--v2-gray-900);
+  white-space: nowrap;
+}
+.op-lot-intitule {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+}
+.op-lot-qui {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 13px;
+}
+
+/* l'achat groupé : inscrits et seuil */
+.op-seuil {
+  display: grid;
+  gap: 6px;
+  margin: 4px 12px 0;
+}
+.op-seuil-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.op-jauge {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--v2-gray-300);
+  overflow: hidden;
+}
+.op-jauge > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--v2-blue-700);
+  transition: width 0.3s var(--v2-doux);
+}
+.op-jauge[data-atteint] > span {
+  background: var(--v2-green-700);
+}
+
+/* le pied : les actions à gauche, l'âge à droite */
+.op-carte-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--v2-a-300);
+}
+.op-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.op-carte-pied .v2-btn--petit {
+  height: 28px;
+  font-size: 13px;
+}
+.op-age {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  color: var(--v2-gray-900);
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.op-fait {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.op-fait .v2-point {
+  width: 8px;
+  height: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .op-jauge > span,
+  .op-carte {
+    transition: none;
+  }
+}
+
+/* le pied du suivi : le détail se déplie à la demande, pour laisser le kanban à portée */
+.op-apports .op-apports-pied {
+  flex-wrap: wrap;
+  border-top: 0;
+}
+.op-apports .op-records + .op-apports-pied {
+  border-top: 1px solid var(--v2-a-400);
+}
