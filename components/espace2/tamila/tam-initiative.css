@@ -89,7 +89,19 @@ html[data-v2-theme="light"] .v2 .tam {
 }
 .v2 .tam .tam-ini-onglets {
   display: flex;
+  flex: 0 1 auto;
   gap: 4px;
+  min-width: 0;
+  /* trop étroit pour les cinq onglets (768, 390) : la rangée défile en elle-même, comme celle de Linear à 390
+     (« Overview · Activity · P… », le bouton du volet reste à droite) ; la page, elle, ne défile plus de côté */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .tam .tam-ini-onglets::-webkit-scrollbar {
+  display: none;
+}
+.v2 .tam .tam-ini-onglets > * {
+  flex: none;
 }
 
 .v2 .tam .tam-ini-corps {
