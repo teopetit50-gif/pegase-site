@@ -1,0 +1,41 @@
+First name,Last name,Email addresses,Company,Job title,City,Phone numbers,Tags
+Marie,Durand,marie.durand@example.com,Bâtir Antilles,Gérant,Baie-Mahault,+590 690 00 10 10,Client;Chantier en cours
+Jean,Bernard,jean.bernard@example.com,Menuiserie Caraïbe,Conducteur de travaux,Le Lamentin,+596 696 00 11 47,Prospect
+Sophie,Petit,sophie.petit@example.com,Solaris Énergie,Chef de chantier,Le Gosier,+590 590 00 12 84,Fournisseur;Client
+Lucas,Robert,lucas.robert@example.com,Karukera Plomberie,Assistante de direction,Pointe-à-Pitre,+590 690 00 13 31,Partenaire
+Camille,Richard,camille.richard@example.com,Atlantique Toitures,Responsable administratif,Fort-de-France,+596 696 00 14 68,Chantier en cours;Relance
+Thomas,Moreau,thomas.moreau@example.com,Habitat Créole,Comptable,Sainte-Anne,+590 590 00 15 15,Devis envoyé
+Léa,Laurent,lea.laurent@example.com,Électricité du Nord,Directeur technique,Le Moule,+590 690 00 16 52,Relance;Fournisseur
+Nicolas,Simon,nicolas.simon@example.com,Basse-Terre Rénovation,Commercial,Basse-Terre,+590 690 00 17 89,VIP
+Chloé,Michel,chloe.michel@example.com,Clim Service 971,Chargée d'affaires,Les Abymes,+590 590 00 18 36,Ancien client
+Julien,Lefebvre,julien.lefebvre@example.com,Maçonnerie Gosier,Métreur,Le Gosier,+590 690 00 19 73,Sous-traitant
+Manon,Leroy,manon.leroy@example.com,Vitrerie Jarry,Dessinateur-projeteur,Baie-Mahault,+590 690 00 20 20,Client;Chantier en cours
+Antoine,Roux,antoine.roux@example.com,Terrassement Sud,Responsable achats,Saint-François,+590 590 00 21 57,Prospect
+Emma,David,emma.david@example.com,Carrelage Marie-Galante,Secrétaire,Grand-Bourg,+590 690 00 22 94,Fournisseur;Client
+Hugo,Bertrand,hugo.bertrand@example.com,Piscines du Moule,Chef d'équipe,Le Moule,+590 690 00 23 41,Partenaire
+Inès,Morel,ines.morel@example.com,Isolation Tropicale,Ingénieur structure,Ducos,+596 596 00 24 78,Chantier en cours;Relance
+Maxime,Fournier,maxime.fournier@example.com,Bâtir Antilles,Responsable qualité,Baie-Mahault,+590 690 00 25 25,Devis envoyé
+Sarah,Girard,sarah.girard@example.com,Menuiserie Caraïbe,Technicien SAV,Le Lamentin,+596 696 00 26 62,Relance;Fournisseur
+Romain,Bonnet,romain.bonnet@example.com,Solaris Énergie,Directrice,Le Gosier,+590 590 00 27 99,VIP
+Clara,Dupont,clara.dupont@example.com,Karukera Plomberie,Associé,Pointe-à-Pitre,+590 690 00 28 46,Ancien client
+Mathieu,Lambert,mathieu.lambert@example.com,Atlantique Toitures,Économiste de la construction,Fort-de-France,+596 696 00 29 83,Sous-traitant
+Laura,Fontaine,laura.fontaine@example.com,Habitat Créole,Gérant,Sainte-Anne,+590 590 00 30 30,Client;Chantier en cours
+Kévin,Rousseau,kevin.rousseau@example.com,Électricité du Nord,Conducteur de travaux,Le Moule,+590 690 00 31 67,Prospect
+Anaïs,Vincent,anais.vincent@example.com,Basse-Terre Rénovation,Chef de chantier,Basse-Terre,+590 690 00 32 14,Fournisseur;Client
+Olivier,Muller,olivier.muller@example.com,Clim Service 971,Assistante de direction,Les Abymes,+590 590 00 33 51,Partenaire
+Pauline,Lefèvre,pauline.lefevre@example.com,Maçonnerie Gosier,Responsable administratif,Le Gosier,+590 690 00 34 88,Chantier en cours;Relance
+Damien,Faure,damien.faure@example.com,Vitrerie Jarry,Comptable,Baie-Mahault,+590 690 00 35 35,Devis envoyé
+Élodie,André,elodie.andre@example.com,Terrassement Sud,Directeur technique,Saint-François,+590 590 00 36 72,Relance;Fournisseur
+Yannick,Mercier,yannick.mercier@example.com,Carrelage Marie-Galante,Commercial,Grand-Bourg,+590 690 00 37 19,VIP
+Mélissa,Blanc,melissa.blanc@example.com,Piscines du Moule,Chargée d'affaires,Le Moule,+590 690 00 38 56,Ancien client
+Fabrice,Guérin,fabrice.guerin@example.com,Isolation Tropicale,Métreur,Ducos,+596 596 00 39 93,Sous-traitant
+Nadia,Boyer,nadia.boyer@example.com,Bâtir Antilles,Dessinateur-projeteur,Baie-Mahault,+590 690 00 40 40,Client;Chantier en cours
+Cédric,Garnier,cedric.garnier@example.com,Menuiserie Caraïbe,Responsable achats,Le Lamentin,+596 696 00 41 77,Prospect
+Stéphane,François,stephane.francois@example.com,Solaris Énergie,Secrétaire,Le Gosier,+590 590 00 42 24,Fournisseur;Client
+Laetitia,Legrand,laetitia.legrand@example.com,Karukera Plomberie,Chef d'équipe,Pointe-à-Pitre,+590 690 00 43 61,Partenaire
+Rodrigue,Gauthier,rodrigue.gauthier@example.com,Atlantique Toitures,Ingénieur structure,Fort-de-France,+596 696 00 44 98,Chantier en cours;Relance
+Johanna,Garcia,johanna.garcia@example.com,Habitat Créole,Responsable qualité,Sainte-Anne,+590 590 00 45 45,Devis envoyé
+Murielle,Jean-Baptiste,murielle.jean-baptiste@example.com,Électricité du Nord,Technicien SAV,Le Moule,+590 690 00 46 82,Relance;Fournisseur
+Gaël,Céleste,gael.celeste@example.com,Basse-Terre Rénovation,Directrice,Basse-Terre,+590 690 00 47 29,VIP
+Rose,Alexis,rose.alexis@example.com,Clim Service 971,Associé,Les Abymes,+590 590 00 48 66,Ancien client
+Didier,Saint-Louis,didier.saint-louis@example.com,Maçonnerie Gosier,Économiste de la construction,Le Gosier,+590 690 00 49 13,Sous-traitant
