@@ -42,7 +42,9 @@ type Props = { source: Source; contexte: Contexte | null; client_id: string; soc
 const pct = (v: number | null) => (v === null ? "—" : `${v > 0 ? "+" : ""}${v.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`);
 const signe = (v: number | null) => (v === null ? "—" : `${v > 0 ? "+" : ""}${montant(v)}`);
 
-export default function GroupePage({ source, contexte, client_id, societes, onFait }: Props) {
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useGroupePage({ source, contexte, client_id }: Omit<Props, "societes" | "onFait">) {
   const [bases, setBases] = useState<BaseExemple[]>(BASES_EXEMPLE);
   const [reelles, setReelles] = useState<PageSociete[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -129,6 +131,11 @@ export default function GroupePage({ source, contexte, client_id, societes, onFa
     [source, client_id, charger],
   );
 
+  return { bases, setBases, reelles, setReelles, erreur, setErreur, charger, lignes, total, role, peutDeposer, peutObjectif, depot, setDepot, objectif, setObjectif, deposer, regler };
+}
+
+export default function GroupePage({ source, contexte, client_id, societes, onFait }: Props) {
+  const { reelles, erreur, lignes, total, peutDeposer, peutObjectif, depot, setDepot, objectif, setObjectif, deposer, regler } = useGroupePage({ source, contexte, client_id });
   return (
     <section id="vrl-groupe" className="esp-carte" aria-label="Le groupe sur une page" style={{ marginBottom: 16 }}>
       <div className="esp-carte-tete">
@@ -207,7 +214,7 @@ export default function GroupePage({ source, contexte, client_id, societes, onFa
   );
 }
 
-function DialogueObjectif({ l, onFermer, regler, onFait }: { l: PageSociete; onFermer: () => void; regler: (l: PageSociete, v: number | null, p: number | null, m: string) => Promise<void>; onFait: (m: string) => void }) {
+export function DialogueObjectif({ l, onFermer, regler, onFait }: { l: PageSociete; onFermer: () => void; regler: (l: PageSociete, v: number | null, p: number | null, m: string) => Promise<void>; onFait: (m: string) => void }) {
   const [ventes, setVentes] = useState(l.ventes_objectif !== null ? String(l.ventes_objectif).replace(".", ",") : "");
   const [plancher, setPlancher] = useState(l.tresorerie_plancher !== null ? String(l.tresorerie_plancher).replace(".", ",") : "");
   const [motif, setMotif] = useState("");
@@ -262,7 +269,7 @@ function DialogueObjectif({ l, onFermer, regler, onFait }: { l: PageSociete; onF
   );
 }
 
-function DialogueBalanceGenerale({ ouvert, onFermer, societes, deposer, onFait }: {
+export function DialogueBalanceGenerale({ ouvert, onFermer, societes, deposer, onFait }: {
   ouvert: boolean;
   onFermer: () => void;
   societes: Societe[];
