@@ -138,3 +138,19 @@ Restent : sur Réglages, la bascule Bibliothèque / Organisation est posée dans
 réglages de Linear est la place de celle de l'espace 2) ; sur À faire à 390, la case à cocher est masquée (Linear
 lui donne une largeur nulle) ; couleur de la case cochée (violet de l'espace) et du champ de commentaire en sombre
 prises hors relevé.
+
+## Sections ajoutées après l'audit des promesses (02/11/2026, `PAGES-MANQUANTES.md`)
+
+Accord de Teo (« oui fais-les »). Portes existantes seulement, aucune migration ; chaque ajout prend une brique de la
+page de référence, sans dessin inventé.
+
+| Page | Ajout | Brique de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|---|
+| Vue d'ensemble | « Météo de la semaine » (`MeteoSemaine.tsx`) | une section de ressources de l'accueil d'équipe (comme « Vos chantiers ») | une ligne par échange proposé pour toute l'entreprise : passage extérieur menacé (pluie, rafales, gel) contre un passage intérieur de la même équipe un jour sec ; un clic ouvre la confirmation, puis l'échange | portes `ordreMeteo(client)` (`btp_ordre_meteo`), `echangerPassages` (`btp_echanger_passages`) ; en exemple, la règle de la carte Météo |
+| À faire | tâches de commande et de livraison | lignes de My issues (même grille, puces « Commande », « Livraison », « Matériel à rendre ») | motifs E07 à E12 du point du matin : commander (en retard ou bientôt), livraison attendue ou tardive, matériel à rendre, manque au bon de livraison ; le geste mène à la fiche, Terrain › Approvisionnement | porte `chargerAppro` (`btp_appro_chantier`) par chantier ouvert, échéances de `btp_echeances_commande` (reprises de la carte Appro) |
+| Réglages, Organisation | « Journal des validations » | une ligne de modèle (Issue templates) | ouvre l'activité de l'espace filtrée sur Daliro (avenants, situations, prix demandés, validés ou refusés) | adresse `/espace2/activite?modules=daliro` |
+| Fiche, planning | « Affecter ce remplaçant » | — | **manque** : aucune porte ne change l'intervenant d'un passage (`btp_proposer_remplacants` ne fait que lister les candidats ; aucune fonction `btp_*` n'écrit `btp_passages.tiers_id`). La fenêtre « Remplaçants possibles » reste une liste avec téléphone et courriel. À décider par Teo : une porte `btp_affecter_remplacant` (migration) | — |
+
+Exemple : Villa Duret reçoit deux passages de l'Équipe A (« Lames de rive », dehors le jour de l'averse ; « Habillage du
+local technique », dedans un jour sec) pour que la météo de la semaine ait un échange à proposer ; les tâches de
+commande d'exemple sont celles de la carte Appro, écrites pour les Tilleuls.
