@@ -42,9 +42,12 @@ import { useVarelo } from "./donnees";
 import { VarCarte } from "./VarCadre";
 import { VarIcone, type NomVarIcone } from "./VarIcone";
 import { Confirmer, type Demande } from "./Confirmer";
+import { copier, useFavoris, useSuivis } from "./local";
+import { useToast } from "../Toasts";
 import "./var-board.css";
 
 const BASE = `${RACINE}/varelo`;
+const ICI = `${BASE}/operations`;
 
 type Col = "retard" | "avenir" | "semaine" | "urgent" | "faits" | "classes";
 const COLONNES: { cle: Col; libelle: string; icone: NomVarIcone; couleur: string }[] = [
@@ -83,8 +86,20 @@ export default function VueOperations() {
   const objets = useMemo(() => v.donnees?.objets ?? [], [v.donnees]);
   const rs = useReservesGroupe({ source: v.source, contexte: v.contexte, client_id: v.client_id, objets, onFait: v.setFait });
   const rp = useReportingsGroupe({ source: v.source, contexte: v.contexte, client_id: v.client_id, onFait: v.setFait });
-  const [onglet, setOnglet] = useState<"tout" | "reserves" | "reportings">("tout");
-  const [societe, setSociete] = useState<string | null>(null);
+  /* la vue (onglet, société) se lit dans l'adresse : l'icône des vues en copie le lien */
+  const vueAdresse = params.get("vue");
+  const [onglet, setOnglet] = useState<"tout" | "reserves" | "reportings">(vueAdresse === "reserves" || vueAdresse === "reportings" ? vueAdresse : "tout");
+  const [societe, setSociete] = useState<string | null>(params.get("societe"));
+  const favoris = useFavoris();
+  const suivis = useSuivis();
+  const toast = useToast();
+  /* la cloche : ne montrer que les cartes suivies */
+  const [suivisSeuls, setSuivisSeuls] = useState(false);
+  /* « Open details » : le volet de la carte choisie, à droite du tableau */
+  const [details, setDetails] = useState(false);
+  const [choisi, setChoisi] = useState<string | null>(null);
+  /* « + » d'une section de Ce matin : ?nouveau=livraison|reporting ouvre la fenêtre une fois */
+  const [nouveauVu, setNouveauVu] = useState(false);
   const [masquees, setMasquees] = useState<Col[]>([]);
   const [menu, setMenu] = useState<string | null>(null);
   const [toutFaits, setToutFaits] = useState(false);
@@ -118,19 +133,57 @@ export default function VueOperations() {
     };
   }, [menu]);
 
+  const idDe = (e: Element) => (e.genre === "reserve" ? `r:${e.r.id}` : `d:${e.d.id}`);
   const elements = useMemo(() => {
     const l: Element[] = [];
     if (onglet !== "reportings") for (const r of rs.toutes) l.push({ genre: "reserve", r, col: colonneReserve(r), date: r.echeance });
     if (onglet !== "reserves") for (const d of rp.tous) l.push({ genre: "reporting", d, col: colonneReporting(d), date: d.echeance });
-    return l.filter((e) => !societe || (e.genre === "reserve" ? e.r.entite_id : e.d.entite_id) === societe);
-  }, [rs.toutes, rp.tous, onglet, societe]);
+    return l.filter((e) => (!societe || (e.genre === "reserve" ? e.r.entite_id : e.d.entite_id) === societe) && (!suivisSeuls || suivis.estSuivi(e.genre === "reserve" ? `r:${e.r.id}` : `d:${e.d.id}`)));
+  }, [rs.toutes, rp.tous, onglet, societe, suivisSeuls, suivis]);
   const parColonne = useMemo(() => {
     const m = new Map<Col, Element[]>();
     for (const c of COLONNES) m.set(c.cle, []);
     for (const e of elements) m.get(e.col)!.push(e);
-    for (const [k, l] of m) l.sort((a, b) => (k === "faits" || k === "classes" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
+    /* les cartes suivies passent en tête de leur colonne */
+    const rang = (e: Element) => (suivis.estSuivi(e.genre === "reserve" ? `r:${e.r.id}` : `d:${e.d.id}`) ? 0 : 1);
+    for (const [k, l] of m) l.sort((a, b) => rang(a) - rang(b) || (k === "faits" || k === "classes" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
     return m;
-  }, [elements]);
+  }, [elements, suivis]);
+
+  if (!nouveauVu && (params.get("nouveau") === "livraison" || params.get("nouveau") === "reporting")) {
+    setNouveauVu(true);
+    if (params.get("nouveau") === "livraison" && rs.peutSaisir) rs.setAjout(true);
+    if (params.get("nouveau") === "reporting" && rp.peutSaisir) rp.setAjout(true);
+  }
+
+  /* les gestes d'une carte (menu de la carte et volet « Open details ») */
+  type Option = { libelle: string; icone: NomVarIcone; faire: () => void };
+  const optionsDe = (e: Element): Option[] => {
+    const id = idDe(e);
+    const suivre: Option = { libelle: suivis.estSuivi(id) ? "Arrêter de suivre la carte" : "Suivre la carte", icone: "Subscribe", faire: () => suivis.basculer(id) };
+    if (e.genre === "reserve") {
+      const r = e.r;
+      const dec = rs.decisionDe("protester_reception", r.id);
+      return [
+        ...(r.statut === "a_examiner" ? [{ libelle: "Lettre de protestation", icone: "Page" as const, faire: () => void rs.ouvrirLettre(r) }] : []),
+        ...(r.statut === "a_examiner" && rs.peutSaisir && !dec ? [{ libelle: "Faire valider", icone: "Send" as const, faire: () => demanderValidation(r) }] : []),
+        ...(r.statut === "a_examiner" && rs.peutDecider ? [{ libelle: "Suite…", icone: "IssueStatusDone" as const, faire: () => rs.setSuite(r) }] : []),
+        { libelle: `Photos du constat (${r.photos.length})`, icone: "Image" as const, faire: () => rs.setPhotos(r.id) },
+        ...(r.objet_id ? [{ libelle: "Ouvrir l'expéditeur dans le référentiel", icone: "Users" as const, faire: () => routeur.push(`${BASE}/referentiel?objet=${encodeURIComponent(r.objet_id as string)}&nature=fournisseur`) }] : []),
+        suivre,
+      ];
+    }
+    const d = e.d;
+    return [
+      ...(d.statut === "a_faire" && rp.peutMarquer(d) ? [{ libelle: "Envoyé…", icone: "Send" as const, faire: () => rp.setCible(d) }] : []),
+      ...(rp.peutArreter ? [{ libelle: "Ne plus suivre", icone: "Archive" as const, faire: () => demanderArret(d) }] : []),
+      suivre,
+    ];
+  };
+  const cliquer = (id: string) => {
+    if (details) setChoisi(id);
+    else setMenu(menu === id ? null : id);
+  };
 
   const demanderValidation = (r: Reserve) =>
     setConfirmer({
@@ -173,16 +226,10 @@ export default function VueOperations() {
       const r = e.r;
       const dec = rs.decisionDe("protester_reception", r.id);
       const enRetard = r.statut === "a_examiner" && r.etat === "depasse";
-      const options: { libelle: string; icone: NomVarIcone; faire: () => void }[] = [
-        ...(r.statut === "a_examiner" ? [{ libelle: "Lettre de protestation", icone: "Page" as const, faire: () => void rs.ouvrirLettre(r) }] : []),
-        ...(r.statut === "a_examiner" && rs.peutSaisir && !dec ? [{ libelle: "Faire valider", icone: "Send" as const, faire: () => demanderValidation(r) }] : []),
-        ...(r.statut === "a_examiner" && rs.peutDecider ? [{ libelle: "Suite…", icone: "IssueStatusDone" as const, faire: () => rs.setSuite(r) }] : []),
-        { libelle: `Photos du constat (${r.photos.length})`, icone: "Image" as const, faire: () => rs.setPhotos(r.id) },
-        ...(r.objet_id ? [{ libelle: "Ouvrir l'expéditeur dans le référentiel", icone: "Users" as const, faire: () => routeur.push(`${BASE}/referentiel?objet=${encodeURIComponent(r.objet_id as string)}&nature=fournisseur`) }] : []),
-      ];
+      const options = optionsDe(e);
       return (
         <div key={id} id={`var-b-${id}`} style={{ position: "relative" }} data-var-menu="">
-          <button type="button" className="var-b-carte" aria-haspopup="menu" aria-expanded={ouvert} onClick={() => setMenu(ouvert ? null : id)} onContextMenu={(ev) => { ev.preventDefault(); setMenu(id); }}>
+          <button type="button" className="var-b-carte" data-choisi={details && choisi === id ? "" : undefined} aria-haspopup="menu" aria-expanded={ouvert} onClick={() => cliquer(id)} onContextMenu={(ev) => { ev.preventDefault(); setMenu(id); }}>
             <span className="var-b-l1">
               <span>Réserve · {REGLES[r.mode].libelle}</span>
               <span className="var-pousse" />
@@ -198,6 +245,12 @@ export default function VueOperations() {
               </span>
             </span>
             <span className="var-b-puces">
+              {suivis.estSuivi(id) ? (
+                <span className="var-b-puce" title="Vous suivez cette carte : elle reste en tête de sa colonne">
+                  <VarIcone nom="Subscribe" />
+                  Suivi
+                </span>
+              ) : null}
               <span className="var-b-puce var-b-puce--carre" title={LIBELLE_ETAT_RESERVE[r.etat].libelle}>
                 <VarIcone nom={r.statut !== "a_examiner" ? "Priority0" : enRetard || r.etat === "aujourdhui" || r.etat === "demain" ? "Priority1" : "Priority2"} style={{ color: enRetard || r.etat === "aujourdhui" || r.etat === "demain" ? "rgb(243, 127, 88)" : undefined }} />
               </span>
@@ -256,13 +309,10 @@ export default function VueOperations() {
     const d = e.d;
     const aMoi = d.responsable_id && d.responsable_id === rp.moi;
     const enRetard = d.etat === "en_retard";
-    const options: { libelle: string; icone: NomVarIcone; faire: () => void }[] = [
-      ...(d.statut === "a_faire" && rp.peutMarquer(d) ? [{ libelle: "Envoyé…", icone: "Send" as const, faire: () => rp.setCible(d) }] : []),
-      ...(rp.peutArreter ? [{ libelle: "Ne plus suivre", icone: "Archive" as const, faire: () => demanderArret(d) }] : []),
-    ];
+    const options = optionsDe(e);
     return (
       <div key={id} id={`var-b-${id}`} style={{ position: "relative" }} data-var-menu="">
-        <button type="button" className="var-b-carte" aria-haspopup="menu" aria-expanded={ouvert} onClick={() => setMenu(ouvert ? null : id)} onContextMenu={(ev) => { ev.preventDefault(); setMenu(id); }}>
+        <button type="button" className="var-b-carte" data-choisi={details && choisi === id ? "" : undefined} aria-haspopup="menu" aria-expanded={ouvert} onClick={() => cliquer(id)} onContextMenu={(ev) => { ev.preventDefault(); setMenu(id); }}>
           <span className="var-b-l1">
             <span>Reporting · {LIBELLE_PERIODICITE[d.periodicite]}</span>
             <span className="var-pousse" />
@@ -283,6 +333,12 @@ export default function VueOperations() {
             </span>
           </span>
           <span className="var-b-puces">
+            {suivis.estSuivi(id) ? (
+              <span className="var-b-puce" title="Vous suivez cette carte : elle reste en tête de sa colonne">
+                <VarIcone nom="Subscribe" />
+                Suivi
+              </span>
+            ) : null}
             <span className="var-b-puce var-b-puce--carre" title={LIBELLE_ETAT_DU[d.etat].libelle}>
               <VarIcone nom={d.statut !== "a_faire" ? "Priority0" : enRetard || d.etat === "aujourdhui" ? "Priority1" : d.etat === "semaine" ? "Priority2" : "Priority4"} style={{ color: enRetard || d.etat === "aujourdhui" ? "rgb(243, 127, 88)" : undefined }} />
             </span>
@@ -336,11 +392,31 @@ export default function VueOperations() {
           <span className="var-fil" style={{ paddingLeft: 4 }} aria-current="page">
             Opérations
           </span>
+          <button
+            type="button"
+            className="var-rond"
+            aria-pressed={favoris.estEpingle("vue:operations")}
+            aria-label={favoris.estEpingle("vue:operations") ? "Retirer Opérations des épinglés" : "Épingler Opérations dans Ce matin"}
+            title={favoris.estEpingle("vue:operations") ? "Retirer des épinglés" : "Épingler dans Ce matin"}
+            onClick={() => favoris.basculer({ cle: "vue:operations", libelle: "Réserves et reportings", href: ICI, genre: "vue" })}
+          >
+            <VarIcone nom="Etoile" style={favoris.estEpingle("vue:operations") ? { color: "#f2c94c" } : undefined} />
+          </button>
           <span className="var-pousse" />
+          <button
+            type="button"
+            className="var-rond"
+            aria-pressed={suivisSeuls}
+            aria-label={suivisSeuls ? "Montrer toutes les cartes" : `Ne montrer que les cartes suivies (${suivis.liste.length})`}
+            title={suivisSeuls ? "Montrer toutes les cartes" : `Ne montrer que les cartes suivies (${suivis.liste.length})`}
+            onClick={() => setSuivisSeuls((x) => !x)}
+          >
+            <VarIcone nom="Notified" style={suivisSeuls ? { color: "var(--var-t1)" } : undefined} />
+          </button>
           <div style={{ position: "relative" }} data-var-menu="">
             <button type="button" className="var-b-nouveau" aria-haspopup="menu" aria-expanded={menu === "nouveau"} onClick={() => setMenu(menu === "nouveau" ? null : "nouveau")} disabled={!rs.peutSaisir && !rp.peutSaisir}>
               <VarIcone nom="Plus" />
-              Nouveau
+              <span className="var-b-nouveau-texte">Nouveau</span>
             </button>
             {nouveau("nouveau", { top: 32, right: 0 })}
           </div>
@@ -358,6 +434,20 @@ export default function VueOperations() {
                 {l}
               </button>
             ))}
+            <button
+              type="button"
+              className="var-rond"
+              aria-label="Copier le lien de cette vue"
+              title="Copier le lien de cette vue (onglet et société)"
+              onClick={() => {
+                const q = new URLSearchParams();
+                if (onglet !== "tout") q.set("vue", onglet);
+                if (societe) q.set("societe", societe);
+                void copier(`${window.location.origin}${ICI}${q.size ? `?${q}` : ""}`).then((ok) => toast(ok ? "Lien de la vue copié" : "Le lien n'a pas pu être copié.", ok ? "neutre" : "rouge"));
+              }}
+            >
+              <VarIcone nom="CustomView" />
+            </button>
           </div>
           <div className="var-b-outils">
             <div style={{ position: "relative" }} data-var-menu="">
@@ -400,6 +490,9 @@ export default function VueOperations() {
                 </div>
               ) : null}
             </div>
+            <button type="button" className="var-rond" aria-pressed={details} aria-label={details ? "Fermer le volet des détails" : "Ouvrir le volet des détails"} title={details ? "Fermer le volet des détails" : "Ouvrir le volet des détails : un clic sur une carte y montre ses champs et ses gestes"} onClick={() => setDetails((x) => !x)}>
+              <VarIcone nom="Volet" />
+            </button>
           </div>
         </div>
       </header>
@@ -413,6 +506,7 @@ export default function VueOperations() {
         {chargement ? (
           <p className="var-b-plus">Lecture des réserves et des reportings…</p>
         ) : (
+<div className="var-b-cadre">
           <div className="var-b-plateau" aria-label="Opérations par état">
             {COLONNES.filter((c) => !masquees.includes(c.cle)).map((c) => {
               const l = parColonne.get(c.cle) ?? [];
@@ -460,6 +554,8 @@ export default function VueOperations() {
               );
             })}
           </div>
+            {details ? <VoletCarte e={elements.find((x) => idDe(x) === choisi) ?? null} options={(() => { const e = elements.find((x) => idDe(x) === choisi); return e ? optionsDe(e) : []; })()} suivi={!!choisi && suivis.estSuivi(choisi)} /> : null}
+          </div>
         )}
       </div>
 
@@ -471,5 +567,64 @@ export default function VueOperations() {
       {rp.cible ? <DialogueMarquer d={rp.cible} onFermer={() => rp.setCible(null)} marquer={rp.marquer} onFait={v.setFait} /> : null}
       <Confirmer demande={confirmer} onFermer={() => setConfirmer(null)} />
     </VarCarte>
+  );
+}
+
+/* le volet « Open details » de Linear : la carte choisie, ses champs et ses gestes */
+function VoletCarte({ e, options, suivi }: { e: Element | null; options: { libelle: string; icone: NomVarIcone; faire: () => void }[]; suivi: boolean }) {
+  if (!e) {
+    return (
+      <aside className="var-b-volet" aria-label="Détails">
+        <p className="var-b-volet-vide">Choisissez une carte : ses champs et ses gestes s&apos;affichent ici.</p>
+      </aside>
+    );
+  }
+  const champs: [string, string][] =
+    e.genre === "reserve"
+      ? [
+          ["État", LIBELLE_ETAT_RESERVE[e.r.etat].libelle],
+          ["Protester avant le", dateCourte(e.r.echeance)],
+          ["Règle", `${REGLES[e.r.mode].libelle}${e.r.calcul_detail ? ` : ${e.r.calcul_detail}` : ""}`],
+          ["Société", e.r.societe],
+          ["Reçue le", dateCourte(e.r.date_reception)],
+          ["Document", e.r.document_transport ?? "–"],
+          ["Expéditeur", e.r.expediteur ?? "–"],
+          ["Colis", e.r.colis_attendus !== null ? `${e.r.colis_recus ?? "?"} reçus sur ${e.r.colis_attendus}` : "–"],
+          ["Constat", [e.r.avarie ? "avarie" : "", e.r.manquant ? "manquant" : "", e.r.constat ?? ""].filter(Boolean).join(", ") || "–"],
+          ["Préjudice estimé", e.r.montant_estime !== null ? montant(e.r.montant_estime) : "–"],
+          ["Photos", String(e.r.photos.length)],
+        ]
+      : [
+          ["État", LIBELLE_ETAT_DU[e.d.etat].libelle],
+          ["Échéance", dateCourte(e.d.echeance)],
+          ["Destinataire", e.d.destinataire],
+          ["Société", e.d.societe],
+          ["Période", `du ${dateCourte(e.d.periode_debut)} au ${dateCourte(e.d.periode_fin)}`],
+          ["Périodicité", LIBELLE_PERIODICITE[e.d.periodicite]],
+          ["Canal", LIBELLE_CANAL[e.d.canal]],
+          ["Fait le", e.d.fait_le ? dateCourte(e.d.fait_le) : "–"],
+          ["Note", e.d.note ?? "–"],
+        ];
+  return (
+    <aside className="var-b-volet" aria-label="Détails de la carte">
+      <p className="var-b-volet-titre">{e.genre === "reserve" ? `Protestation à ${e.r.transporteur}` : `${e.d.intitule} pour ${e.d.destinataire}`}</p>
+      {suivi ? <p className="var-b-volet-suivi">Suivie : elle reste en tête de sa colonne.</p> : null}
+      <dl className="var-b-volet-champs">
+        {champs.map(([k, v]) => (
+          <div key={k}>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="var-b-volet-gestes">
+        {options.map((o) => (
+          <button key={o.libelle} type="button" className="var-menu-option" onClick={o.faire}>
+            <VarIcone nom={o.icone} />
+            <span>{o.libelle}</span>
+          </button>
+        ))}
+      </div>
+    </aside>
   );
 }

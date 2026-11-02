@@ -295,3 +295,69 @@
     display: none;
   }
 }
+
+/* ——— cases à cocher, actions groupées, volet des totaux (02/11 au soir) ——— */
+.v2 .var .var-i-cadre {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.v2 .var .var-i-cadre > .var-defile {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .var .var-i-li {
+  position: relative;
+}
+.v2 .var .var-i-coche {
+  position: absolute;
+  z-index: 1;
+  left: 11px;
+  top: 21.5px;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--var-violet);
+  opacity: 0;
+  cursor: pointer;
+}
+.v2 .var .var-i-li:hover .var-i-coche,
+.v2 .var .var-i-coche:focus-visible,
+.v2 .var .var-i-coche:checked,
+.v2 .var .var-i-coche[data-visible] {
+  opacity: 1;
+}
+.v2 .var .var-i-barre {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 4px 14px;
+  border: 0.5px solid var(--var-menu-bord);
+  border-radius: 12px;
+  background: var(--var-menu);
+  box-shadow: var(--var-menu-ombre);
+  font-size: 13px;
+  color: var(--var-menu-texte);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.v2 .var .var-i-barre .var-menu-option {
+  width: auto;
+  padding: 0 10px;
+}
+.v2 .var .var-i-barre .var-menu-option::before {
+  inset: 0;
+}
+@media (max-width: 480px) {
+  .v2 .var .var-i-coche {
+    display: none;
+  }
+}
+
+.v2 .var .var-carte {
+  position: relative;
+}

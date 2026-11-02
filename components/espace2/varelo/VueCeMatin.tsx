@@ -27,6 +27,8 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { ecrireStockage, useStockage } from "../Collection";
+import { useFavoris } from "./local";
 import { BLOCS_MATIN, useCeMatin } from "@/components/espace/varelo/CeMatin";
 import type { Ligne, Matin } from "@/components/espace/varelo/matin";
 import { aiguiller } from "../aiguillage";
@@ -49,6 +51,18 @@ const PAGE_DU_BLOC: Record<keyof Matin, string> = {
   encours: `${BASE}/finance`,
   reciproques: `${BASE}/finance`,
 };
+/* le « + » d'une section ouvre la fenêtre de création du métier qui va avec (?nouveau=…) */
+const NOUVEAU_DU_BLOC: Record<keyof Matin, { href: string; libelle: string }> = {
+  decisions: { href: `${RACINE}/validations`, libelle: "Ouvrir la file de validation" },
+  groupe: { href: `${BASE}/groupe?nouveau=balance`, libelle: "Déposer une balance générale" },
+  reserves: { href: `${BASE}/operations?nouveau=livraison`, libelle: "Enregistrer une livraison" },
+  reportings: { href: `${BASE}/operations?nouveau=reporting`, libelle: "Ajouter un reporting" },
+  contrats: { href: `${BASE}/contrats?nouveau=1`, libelle: "Ajouter un contrat" },
+  encours: { href: `${BASE}/finance?nouveau=balance`, libelle: "Déposer une balance âgée" },
+  reciproques: { href: `${BASE}/finance?nouveau=balance`, libelle: "Déposer une balance âgée" },
+};
+const CLE_EPINGLES_EN_TETE = "espace2:varelo:epingles-en-tete";
+
 const ICONE_GRAVITE: Record<Ligne["gravite"], NomVarIcone> = { critique: "Priority1", attention: "Priority2", info: "Priority4" };
 const LIBELLE_GRAVITE: Record<Ligne["gravite"], string> = { critique: "Critique", attention: "À regarder", info: "Pour information" };
 
@@ -76,6 +90,9 @@ export function OngletsVarelo({ actif }: { actif: "matin" | "groupe" | "referent
 export default function VueCeMatin() {
   const v = useVarelo();
   const toast = useToast();
+  const favoris = useFavoris();
+  /* l'étoile de l'en-tête : montrer ou non les épinglés en tête de la page (montrés par défaut) */
+  const masques = useStockage(CLE_EPINGLES_EN_TETE) === "non";
   const { matin, erreur } = useCeMatin(v.source, v.client_id, !!v.reel?.installation, v.donnees?.codes ?? [], v.donnees?.objets ?? []);
   const nonInstalle = v.source === "reelle" && !!v.reel && !v.reel.installation;
   const total = matin ? Object.values(matin).reduce((s, l) => s + l.length, 0) : 0;
@@ -125,6 +142,16 @@ export default function VueCeMatin() {
             <VarIcone nom="Factory" style={{ color: "var(--var-equipe)" }} />
             <span>Référentiel du groupe</span>
           </Link>
+          <button
+            type="button"
+            className="var-rond"
+            aria-pressed={!masques}
+            aria-label={masques ? "Montrer les épinglés en tête" : "Masquer les épinglés"}
+            title={masques ? "Montrer les épinglés en tête" : "Masquer les épinglés"}
+            onClick={() => ecrireStockage(CLE_EPINGLES_EN_TETE, masques ? "oui" : "non")}
+          >
+            <VarIcone nom="Etoile" style={!masques && favoris.liste.length ? { color: "#f2c94c" } : undefined} />
+          </button>
           <VarMenu
             libelle="Actions sur le groupe"
             options={[
@@ -170,6 +197,32 @@ export default function VueCeMatin() {
               {pilules(false)}
             </nav>
 
+            {!masques && favoris.liste.length ? (
+              <section className="var-h-section" aria-labelledby="var-h-epingles">
+                <div className="var-h-section-tete">
+                  <h2 id="var-h-epingles" className="var-h-section-titre">
+                    Épinglés
+                  </h2>
+                </div>
+                <ul className="var-h-liste">
+                  {favoris.liste.map((e) => (
+                    <li key={e.cle} className="var-h-epingle">
+                      <Link href={e.href} className="var-h-rangee">
+                        <VarIcone nom="Etoile" style={{ color: "#f2c94c" }} />
+                        <span className="var-h-rangee-texte">
+                          {e.libelle}
+                          <span className="var-h-genre"> · {e.genre}</span>
+                        </span>
+                      </Link>
+                      <button type="button" className="var-rond var-h-desepingler" aria-label={`Retirer « ${e.libelle} » des épinglés`} title="Retirer des épinglés" onClick={() => favoris.basculer(e)}>
+                        <VarIcone nom="Etoile" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
             {matin
               ? BLOCS_MATIN.map((b) => {
                   const lignes = matin[b.cle] as LigneReelle[];
@@ -180,6 +233,9 @@ export default function VueCeMatin() {
                         <h2 id={`var-h-${b.cle}`} className="var-h-section-titre">
                           {b.titre}
                         </h2>
+                        <Link href={NOUVEAU_DU_BLOC[b.cle].href} className="var-rond" aria-label={NOUVEAU_DU_BLOC[b.cle].libelle} title={NOUVEAU_DU_BLOC[b.cle].libelle}>
+                          <VarIcone nom="Plus" />
+                        </Link>
                         <Link href={page} className="var-rond" aria-label={`Ouvrir : ${b.titre}`} title={`Ouvrir : ${b.titre}`}>
                           <VarIcone nom="Section" />
                         </Link>
@@ -222,6 +278,9 @@ export default function VueCeMatin() {
                 <div className="var-h-membres">
                   <Link href={`${BASE}/sources`} className="var-h-membre" title="Vous">
                     <span className="var-h-avatar">VO</span>
+                  </Link>
+                  <Link href={`${RACINE}/equipe`} className="var-rond" aria-label="Inviter un membre de l'équipe" title="Inviter un membre de l'équipe">
+                    <VarIcone nom="Plus" />
                   </Link>
                 </div>
               </section>

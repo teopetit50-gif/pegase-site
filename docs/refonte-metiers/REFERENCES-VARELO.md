@@ -54,7 +54,6 @@ liens « Aller à » repliés sous la description avec l'avatar en tête, comme 
   n'existe pas ici.
 - Icône de rangée : la gravité de la ligne (critique, à regarder, pour information) prend l'icône de priorité de
   Linear (urgent, haute, basse) au lieu de l'icône de document ; la gravité est une information du métier.
-- Pas d'étoile (« Add to favorites ») dans le fil : pas de favoris dans l'espace.
 - « Members » montre la personne connectée (initiales) : pas d'équipe nommée dans Varelo.
 
 ### Contrats → Plain, Accounts (`plain-tenants.md`, `plain-tenant.md`, `plain-commun.md`)
@@ -74,7 +73,6 @@ le volet de 360 de la fiche) :
   feuille plein écran avec le rappel du titre, comme Plain.
 
 Écarts restants, expliqués :
-- Pas d'étoile (favori) ni de badge « Syncing » : l'espace n'a pas de favoris, la lecture n'est pas une synchro.
 - Colonnes : celles du métier (jours restants, catégorie, reconduction, société, montant, échéance, dénoncé,
   décision) dans les briques des colonnes de Plain (cercle d'« Open threads », pastille de Tier, texte à icône de
   Source, texte gris, nombre aligné à droite, booléen, pastille de Modules). Le cercle prend la couleur de l'état du
@@ -106,8 +104,6 @@ contenu (nombre de puces : la société d'un groupe est plus longue qu'un projet
   icônes d'état de Linear (Triage, Backlog, Todo, In Progress, Done, Canceled), dans le même ordre.
 - Identifiant de carte : « Réserve · mode de transport » ou « Reporting · périodicité » (pas de numéro de ticket).
 - Pied : la date de réception ou la période (pas de « Created … »).
-- Pas de cloche (notifications) ni de bouton « Open details » : pas de volet de ticket ; un clic sur une carte ouvre ses
-  gestes (le menu contextuel de Linear, aussi au clic droit), car une réserve ou un reporting n'a pas de page.
 - Puces du métier : avarie, manquant, photos, préjudice, décision, canal (pastille 9×9 comme une étiquette).
 - La colonne « Faits » montre les 20 plus récents, puis « … et N de plus » (les reportings faits s'accumulent).
 
@@ -130,8 +126,6 @@ de carte en moins). 390 : plus d'en-tête, titre et santé seulement, comme Line
   des projets actifs). Les libellés d'état sont courts pour tenir dans les 100 px de Linear ; leur sens complet est
   dans l'info-bulle.
 - Première ligne « Tout le groupe » : les totaux de l'écran d'avant, dans la même brique (Linear n'a pas de total).
-- Pas de troisième rond (« Open details ») : pas de volet de détail pour une société ; une ligne ouvre les objectifs.
-- Pas de case à cocher au survol : pas de geste groupé sur les sociétés.
 
 ### Sources et structure → Linear, Settings › Integrations (`linear-integrations.md`)
 
@@ -153,7 +147,6 @@ capture à taille réelle de cette page. 390 : plus de carrousel, chaque section
 - Les logos des cartes sont les initiales de la société (pas de logo d'éditeur).
 - Pas de barre latérale des réglages de Linear : la navigation de l'espace la remplace.
 - « Débrancher » demande une confirmation ; « Installer Varelo » aussi (consigne commune).
-- Les interrupteurs des exports attendus sont en lecture seule : les jeux se choisissent dans la fenêtre « Brancher ».
 
 ### Finance → Plain, Insights (`plain-insights.md`)
 
@@ -170,7 +163,6 @@ colonne de cartes, comme Plain.
 Écarts restants, expliqués :
 - Boutons de la barre : Filtre (société), Déposer (balance âgée, ventes de caisse), Nature (clients ou fournisseurs),
   Export (CSV des réciproques), dans les briques Filter, Group by, Timeframe et Granularity.
-- Pas de bouton « Ask Agent » sur les cartes ni de pied « Customers helped » : rien de tel dans le métier.
 - Le rapport (tableau) est posé sous ses répartitions dans la même page : chez Plain il est une page voisine
   (Accounts, Tiers…) ; ici chaque section a le sien, avec les gestes en bout de ligne (Plafond, Proposer, Justifier).
 - Graphiques dessinés en SVG, une barre par société, objet ou magasin (pas de série par jour : les données sont des
@@ -200,7 +192,6 @@ grille et la fiche défilent à l'horizontale, comme ici.
 - Les lots et les dernières décisions sont deux vues du sélecteur de vue (Attio range ainsi ses listes), dans la même
   grille ; « Écarter » et « Décider dans la file » en bout de ligne.
 - Icônes : Attio n'a pas de tracés au relevé ; celles de Linear (sprite relevé) sont reprises, à la même taille (16).
-- Pas d'« Ask Attio », de partage ni d'étoile : « File de validation » à leur place dans l'en-tête.
 - Onglets de la fiche : Vue d'ensemble, Codes, Propositions, puis Encours et Contrats qui mènent aux sous-pages.
 - « Lancer un passage » (le bouton bleu « New Person ») passe par une confirmation, comme la fenêtre d'avant.
 
@@ -211,3 +202,55 @@ grille et la fiche défilent à l'horizontale, comme ici.
 Ancien écran : `/espace2/varelo?ancien=1` (et `/espace/varelo`, renvoyé vers l'espace 2) rend `EcranVarelo`, qui
 utilise les mêmes crochets. Les sept `objet_type` des repères (`?objet=` sur la racine) mènent chacun à sa sous-page,
 vérifié au navigateur.
+
+## Boutons de la référence et leur utilité (02/11/2026, soir)
+
+Décision de Teo, relayée par la session coordinatrice et vérifiée dans son fil (« oui vasi je donne mon accord »,
+20 h 21 UTC) : chaque bouton de la référence est dessiné au 1:1 et fait une chose utile au métier. D'abord un geste
+qui existe (portes inchangées, aucune migration), sinon une utilité côté navigateur. Ce qui envoie ou ne se défait pas
+demande une confirmation. Sens commun aux six métiers : `espace2:favoris:varelo` (étoile → « Épinglés » en tête de Ce
+matin), `espace2:suivis:varelo` (cloche → suivi en tête de file). Outils partagés : `components/espace2/varelo/local.ts`.
+
+| Sous-page | Bouton de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|
+| Ce matin | Étoile du fil | Montre ou masque la section « Épinglés » en tête de la page | localStorage `espace2:varelo:epingles-en-tete` |
+| Ce matin | « Épinglés » (rangées de « Team resources ») | Les objets et vues épinglés ailleurs, avec un rond pour les retirer | `espace2:favoris:varelo` |
+| Ce matin | « + » d'une section | Ouvre la fenêtre de création du sujet : balance générale, livraison, reporting, contrat, balance âgée ; la file de validation pour les décisions | adresse `?nouveau=…` lue par Groupe, Opérations, Contrats, Finance |
+| Ce matin | « + » de « Members » | Ouvre la page de l'équipe (inviter) | lien `/espace2/equipe` |
+| Contrats | Étoile (liste) | Épingle la vue Contrats dans Ce matin | `espace2:favoris:varelo` |
+| Contrats | Étoile (fiche) | Épingle le contrat dans Ce matin | `espace2:favoris:varelo` |
+| Contrats | « Show all » du popover Display | Remontre toutes les colonnes | état de la page |
+| Contrats | Rond du pied du popover Display | Rétablit colonnes et tri par défaut | état de la page |
+| Contrats | « × » d'une rangée « Customers » (contrats du tiers) | Archive ce contrat (G28), avec confirmation | `grp_archiver_contrat` |
+| Opérations | Étoile du fil | Épingle la vue Opérations dans Ce matin | `espace2:favoris:varelo` |
+| Opérations | Cloche | Ne montre que les cartes suivies (et leur nombre) | `espace2:suivis:varelo` |
+| Opérations | Menu d'une carte : « Suivre la carte » | La carte passe en tête de sa colonne, puce « Suivi » | `espace2:suivis:varelo` |
+| Opérations | Icône des vues (après les onglets) | Copie le lien de la vue (onglet, société) ; l'adresse `?vue=…&societe=…` la rouvre | presse-papier, adresse |
+| Opérations | « Open details » | Ouvre le volet de droite : un clic sur une carte y montre ses champs et ses gestes | état de la page |
+| Opérations | « + » d'une colonne, « New issue » | Enregistrer une livraison (G19) ou ajouter un reporting (G16) | fenêtres d'avant |
+| Groupe | Cases à cocher | Sélection multiple, barre d'actions : Objectifs… (une société, G14), Exporter en CSV, Épingler dans Ce matin, Effacer | portes d'avant, CSV, `espace2:favoris:varelo` |
+| Groupe | Troisième rond (panneau) | Volet des totaux des sociétés affichées ou choisies (ventes, résultat, trésorerie, sous plancher, écart à l'objectif, balance la plus ancienne) | calcul sur les lignes affichées |
+| Sources et structure | Interrupteurs des exports attendus | Ouvrent « Brancher » pour choisir les jeux lus ; la demande part à la DSI (G36) | `grp_demander_source` |
+| Finance | « Ask Agent » de chaque carte | Copie le résumé chiffré de la carte pour l'assistant | presse-papier |
+| Finance | Recherche et téléchargement d'un rapport | Filtrent le rapport et téléchargent ses lignes affichées en CSV (encours, réciproques, caisses) | CSV dans le navigateur |
+| Finance | Pied « Customers helped » | Compteur à volets des codes locaux rangés sous un nom du groupe | calcul sur le référentiel |
+| Référentiel | « Share » | Copie le lien de la vue ou de la fiche | presse-papier |
+| Référentiel | Icônes de l'en-tête (commentaires, aide) | Notes de l'équipe, formation | liens `/espace2/notes`, `/espace2/formation` |
+| Référentiel | « … » de l'en-tête | File de validation, Sources et structure, ancien écran | liens |
+| Référentiel | « Ask Attio » | Copie pour l'assistant le résumé de la vue ou de la fiche | presse-papier |
+| Référentiel | « View settings » | Colonnes affichées (rattachement, codes, sociétés, mise à jour) | état de la page |
+| Référentiel | « + » de la colonne Person | Dépôt d'un export (Sources et structure) | lien |
+| Référentiel | Cases à cocher | Sélection multiple : Fusionner dans le premier objet (G6 pour chacun, confirmé), Exporter en CSV, Épingler, Effacer | `grp_proposer_fusion`, CSV, `espace2:favoris:varelo` |
+| Référentiel | Crayon et étoile de la fiche | Proposer un nom (G5) ; épingler l'objet dans Ce matin | porte d'avant, `espace2:favoris:varelo` |
+| Référentiel | « View all values » | Ouvre l'onglet Codes | état de la page |
+| Référentiel | « + » d'une section de la fiche | Proposer une correction (nom du groupe, G5) | porte d'avant |
+
+Restent sans équivalent, parce qu'ils ne sont pas des boutons de la page copiée : la barre latérale du SaaS (remplacée
+par la navigation de l'espace), le badge « Syncing » de Plain (un état de chargement), les poignées de redimensionnement
+des colonnes de Plain, la barre « Agent » et l'aide « ? » flottante de Linear (hors de la carte).
+
+Superpositions refaites après ces ajouts (1440, sombre / clair) : Ce matin 7,4 / 7,2 ; Contrats liste 6,7 / 5,6, fiche
+12,2 / 10,9 ; Opérations 12,9 / 13,8 ; Groupe 4,8 / 5,1 ; Sources 48,8 / 9,6 ; Finance 8,6 / 8,3 ; Référentiel liste
+14,0 / 13,9, fiche 8,8 / 9,3. Gestes essayés au navigateur (Playwright) : épingler (seul et en groupe) puis retrouver
+dans Ce matin, suivre une carte, volet de détails, `?nouveau=1`, fusion groupée confirmée, export CSV d'un rapport,
+copie pour l'assistant.
