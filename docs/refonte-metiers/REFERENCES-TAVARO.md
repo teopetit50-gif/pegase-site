@@ -23,6 +23,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 |---|---|---|---|---|---|
 | Vue d'ensemble | `/espace2/tavaro` | Linear, accueil d'une équipe | `linear-home.md` | `vue-1440-{sombre,clair}-{cote,diff,fusion}.png` (contenu, `--dx -30`), `vue-1440-*-entete-*` (en-tête), `vue-390-sombre-cote.png` | superposé ; écarts ci-dessous |
 | Retours à facturer | `/espace2/tavaro/retours` | Linear, Inbox | `linear-inbox.md` | `retours-1440-{sombre,clair}-{cote,diff,fusion}.png`, `retours-ouvert-1440-*.png` (contrat ouvert à droite), `retours-390-sombre-cote.png` | superposé : liste, lignes, avatars, pastilles, icônes de statut, en-tête alignés au pixel ; écarts ci-dessous |
+| Parc et atelier | `/espace2/tavaro/parc` | Linear, Board | `linear-board.md` | `parc-1440-{sombre,clair}-{cote,diff,fusion}.png`, `parc-390-sombre-cote.png` | superposé : colonnes (x, pas de 348), en-têtes de colonne, cartes (id, statut, titre, puces, pied) alignés ; écarts ci-dessous |
 | Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
@@ -77,6 +78,25 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 - **G12 Lever la caution** : demande désormais une confirmation (DECOUPAGES.md, règle 5).
 - **Fenêtres** F01-F09 : celles de l'écran d'avant (`components/ui/dialog`), code repris ligne pour ligne.
 
+### Parc et atelier
+
+- **Fond de colonne** : le relevé le dit transparent en sombre ; la capture montre un fond un peu plus sombre que la
+  carte (rgb 15 contre 18) sur 340 px de large, 8 px de marge : valeur prise au pixel (lch(4.6 0.4 272) ; clair
+  lch(96.6 0.5 282)).
+- **Colonnes** : une par état du véhicule (À remettre en location, Immobilisés, Entretien à planifier, Entretien
+  planifié, Rappels du constructeur, Crit'Air et contrôle technique) au lieu des statuts de ticket ; « Hidden rows »
+  n'a pas d'équivalent.
+- **Puces** : délai, étapes de la remise (cliquables : G14), anomalies, échéances, durée, « Fait » (G22) ; Linear n'a
+  pas de puce cliquable sur une carte : ces gestes du métier n'ont pas d'autre place sur la carte.
+- **Avatar** : la personne à qui la remise est confiée (initiales) ; personne : l'icône « non assigné » de Linear.
+- **Chiffres du parc (B18)** : comptes des colonnes et menu « … » de la première colonne (médiane, prêtes à temps).
+- **Onglets** : Remises, Atelier, Tout le parc (Active, Backlog, All issues) ; à droite Filtre = agences, le rond
+  « Open details » = contrôle avant de donner les clés (B24) ; pas de rond « Display options ».
+- **En-tête** : « Location › Parc et atelier », menu « … » (immobiliser, prévoir un entretien, enregistrer un rappel,
+  contrôle au départ, responsables des remises → Réglages) ; la cloche mène aux amendes ; « New issue » → « Prévoir
+  un entretien ».
+- **G24 Rappel fait** : demande désormais une confirmation (règle 5).
+
 ## Inventaire : où va chaque bloc (au fil des sous-pages)
 
 | Bloc / geste | Sous-page | Place dans la référence |
@@ -95,4 +115,11 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | B14 factures, G04-G08, F04-F07, F09, L3-L5 | Contrat | bloc « Sub-issues », rangée dépliée |
 | B15 avoirs, L4 | Contrat | bloc « Sub-issues » |
 | B16 journal opposable | Contrat | « Activity » |
+| B17 parc, B18 chiffres | Parc et atelier | tableau, comptes de colonne, menu « … » |
+| B20 remises, G14-G17, F10 | Parc et atelier | colonne « À remettre en location », fenêtre de la remise |
+| B21 immobilisations, G18, G19, F11, F12 | Parc et atelier | colonne « Immobilisés », « + » |
+| B22 entretien, G20-G22, F13-F15 | Parc et atelier | colonnes « Entretien à planifier / planifié » |
+| B24 contrôle au départ, L7 | Parc et atelier | rond de la ligne 2, menu « … » |
+| B25 rappels, G23, G24 | Parc et atelier | colonne « Rappels du constructeur », « + » |
+| B26 Crit'Air et CT, G25 | Parc et atelier | colonne « Crit'Air et contrôle technique » |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |

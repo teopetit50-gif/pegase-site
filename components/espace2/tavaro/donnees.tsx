@@ -41,6 +41,7 @@ import type { GestesContestations } from "@/components/espace/tavaro/Contestatio
 import type { GestesParc } from "@/components/espace/tavaro/ParcVue";
 import type { GestesFlotte } from "@/components/espace/tavaro/FlotteVue";
 import { forcesLocales } from "@/components/espace/tavaro/contestations";
+import { useOperationsEtat, type EtatOperations } from "@/components/espace2/tavaro/operations";
 import type { Preparation } from "@/components/espace/tavaro/FactureElectronique";
 import { controler, docAvoir, docFacture, formeLocale, sirenValide } from "@/components/espace/tavaro/cii";
 
@@ -93,6 +94,8 @@ export type ContexteTavaro = {
   publier: (libelle: string, date_effet: string, lignes: Record<string, unknown>[]) => Promise<void>;
   retirer: (b: Bareme, motif: string) => Promise<void>;
   preparation: Preparation | null;
+  /* départ et rappels, transferts, péages, sinistres, assistance, caution (./operations) */
+  operations: EtatOperations;
 };
 
 const Contexte = createContext<ContexteTavaro | null>(null);
@@ -752,10 +755,12 @@ export default function DonneesTavaro({ children }: { children: React.ReactNode 
   const agences = useMemo(() => monde?.agences ?? [], [monde]);
   const nomAgenceDe = useCallback((entite_id: string) => agences.find((a) => a.entite_id === entite_id)?.nom ?? agences.find((a) => a.entite_id === entite_id)?.code ?? entite_id.slice(0, 8), [agences]);
 
+  const operations = useOperationsEtat({ source, role, dossiers: tous, vehicules: monde?.parc.vehicules ?? [], nomAgence: nomAgenceDe });
+
   const valeur: ContexteTavaro = {
     source, monde, pret: source === "exemple" || reel !== null, erreur, moi, role, moiId, nommer, nomAgenceDe, agences,
     agence, setAgence, tous, dossiers, compteurs, actif, setActif, dossier, relire,
-    gestes, gestesEtats, gestesAvis, gestesContestations, gestesParc, gestesFlotte, publier, retirer, preparation,
+    gestes, gestesEtats, gestesAvis, gestesContestations, gestesParc, gestesFlotte, publier, retirer, preparation, operations,
   };
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }
