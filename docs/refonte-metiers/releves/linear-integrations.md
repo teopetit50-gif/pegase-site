@@ -146,3 +146,22 @@ MAIN identique ; bandeau haut 1187×80 en dégradé `linear-gradient(#f9f9fa 40p
 2. Au centre d'une grande carte gris très clair, une colonne étroite de 640px : « Integrations » en 24px, une phrase grise, un long champ de recherche bordé.
 3. Un grand visuel 640×384 aux coins à peine arrondis, pastille blanche « ESSENTIALS » en haut à gauche, et en bas, sur un bandeau flouté, le logo Slack, son nom en gras et sa phrase ; sous le visuel, une rangée de noms d'intégrations avec petits logos, l'actif plein, les autres atténués.
 4. Puis des sections en petites capitales grises (ESSENTIALS, AGENTS…) suivies de grilles de 3 cartes blanches de 156px : logo carré arrondi, nom en 13px, description grise sur 4 lignes max ; la dernière carte de chaque section est une mosaïque de logos avec un pavé « Show all ».
+
+---
+
+# Complément du 01/11/2026 (sombre + clair, 390)
+
+## Remplissage
+
+Aucune intégration branchée (consigne) : la page est relevée telle quelle — elle est déjà pleine (catalogue d'une quarantaine de cartes).
+
+## Ajouts au relevé
+
+- En-tête : « Integrations » (titre de page), sous-titre « Enhance your Linear experience with a wide variety of add-ons and integrations », champ « Search integrations » pleine largeur (r 8px), puis un **carrousel** de mise en avant (image 640×≈260, r 8px, étiquette « ESSENTIALS » en pastille blanche, bloc logo + nom + phrase en bas à gauche, chevron ›) avec onglets dessous : Linear Asks for Slack · Slack · GitHub · Figma · Intercom… et flèches ‹ ›.
+- Catalogue par sections (« ESSENTIALS », « AGENTS », …, 11px en capitales, tertiaire) en grille de **3 colonnes** de cartes 203×156 (écart 18px environ) : carte bg lch(9.232 0.85 272) (clair lch(100 0 282)), r 8px, p 16px, ombre `lch(100 0 0/.083) 0 0 0 .5px, lch(0 0 0/.3) 0 .5px 1px 1px` (clair `lch(0 0 0/.088) 0 0 0 .5px, …`) ; logo 24×24 dans un carré arrondi + nom 13px/500 primaire ; description 12px/450 (sombre lch(63.304 1.425 272)) sur 2–4 lignes, tronquée « … ».
+- Survol d'une carte : fond légèrement plus clair (voir « Google Sheets » sur les captures, carte survolée).
+- 390×844 : barre des réglages en tiroir ; le carrousel disparaît ; chaque section devient **une liste** dans une carte (lignes 68px : logo 36×36 + nom 13px/500, filets entre lignes) limitée à 3 éléments + « View 5 more » centré ; carte 346px de large.
+
+## Captures (`captures/linear-integrations/`)
+
+`1440-sombre-haut.png` (carrousel), `1440-sombre-catalogue.png`, `1440-clair-catalogue.png`, `390-sombre.png`, `390-clair.png`.
