@@ -75,10 +75,15 @@ const ZOOMS: { cle: Zoom; libelle: string; px: number; pas: number }[] = [
 ];
 const MOIS = ["JANV.", "FÉVR.", "MARS", "AVR.", "MAI", "JUIN", "JUIL.", "AOÛT", "SEPT.", "OCT.", "NOV.", "DÉC."];
 const JOUR = 86_400_000;
+const jourCourt = (j: number) => {
+  const d = new Date(j * JOUR);
+  return `${d.getUTCDate()} ${MOIS[d.getUTCMonth()].toLowerCase()}`;
+};
 const versJour = (iso: string) => Math.floor(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) / JOUR);
-/* la colonne gauche et la ligne d'aujourd'hui (relevé : 320 ; aujourd'hui à 595 du bord de la carte) */
+/* la colonne gauche (relevé : 320) ; la ligne d'aujourd'hui au milieu de la carte, à 1,5 px près
+   (captures de Linear : 595 sur une carte de 1187, 387,7 sur 772, 386,4 sur 768, 197 sur 390) */
 const GAUCHE = 320;
-const AUJ_X = 595;
+const AUJ_DECALAGE = 1.5;
 const LIGNE = 72;
 
 /* couleur de l'icône de projet, par statut (couleurs relevées sur les icônes de projet de Linear) */
@@ -290,10 +295,19 @@ export default function Chantiers() {
 
   const zone = useRef<HTMLDivElement>(null);
   const allerAujourdhui = () => {
-    if (zone.current) zone.current.scrollLeft = xJour(auj) - AUJ_X;
+    const z = zone.current;
+    if (z) z.scrollLeft = xJour(auj) + zoom.px / 2 - (z.clientWidth / 2 + AUJ_DECALAGE);
   };
   useLayoutEffect(allerAujourdhui, [zoom.cle]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* le défilement de la frise : un chantier fini avant la partie visible montre « ← date »
+     au bord gauche de la frise (capture 390-sombre-timeline de Linear : flèche à 19 du bord
+     de la colonne gauche, date en texte quaternaire) ; un clic ramène sa barre en vue */
+  const [vu, setVu] = useState(0);
+  const suivreDefilement = () => {
+    const z = zone.current;
+    if (z && Math.abs(z.scrollLeft - vu) >= 1) setVu(z.scrollLeft);
+  };
   const [glisse, setGlisse] = useState<Glisse | null>(null);
   const lacher = (p: Passage, g: Glisse) => {
     const jours = Math.round(g.dx / zoom.px);
@@ -357,10 +371,28 @@ export default function Chantiers() {
             </span>
           </div>
         </div>
+        {(d0 !== null || d1 !== null) && xb < vu + GAUCHE ? (
+          <button
+            type="button"
+            className="dal-tl-avant"
+            style={{ left: vu + GAUCHE + 18 }}
+            title={`${c.nom} : fini avant cette partie de la frise — y aller`}
+            onClick={() => zone.current?.scrollTo({ left: Math.max(0, xa - GAUCHE - 40), behavior: "smooth" })}
+          >
+            <span aria-hidden="true">←</span>
+            <span className="dal-tl-avant-date">{jourCourt((d1 ?? d0) as number)}</span>
+          </button>
+        ) : null}
         {d0 !== null || d1 !== null ? (
           <>
-            <span className="dal-tl-libelle" style={{ left: Math.max(xa, 0) }}>
-              {c.nom}
+            {/* libellé posé sur le début de la barre ; si la barre commence avant la partie
+                visible, il colle à 13 du bord de la frise sans dépasser la fin de la barre
+                (captures de Linear : 577 pour un bord à 564 à 1440 ; à 390, « Maison Rolland »
+                finit avec sa barre, sous la colonne) */}
+            <span className="dal-tl-libelle-voie" style={{ left: xa, width: Math.max(8, xb - xa), visibility: xb < vu + GAUCHE ? "hidden" : undefined }}>
+              <span className="dal-tl-libelle" style={{ left: GAUCHE + 13 }}>
+                {c.nom}
+              </span>
             </span>
             <button
               type="button"
@@ -504,7 +536,7 @@ export default function Chantiers() {
 
       <div className="dal-tl-cadre">
         <div className="dal-tl-principal">
-        <div className="dal-tl-zone" ref={zone}>
+        <div className="dal-tl-zone" ref={zone} onScroll={suivreDefilement}>
           {!pret ? (
             <p className="dal-tl-vide">Lecture des chantiers…</p>
           ) : visibles.length === 0 ? (

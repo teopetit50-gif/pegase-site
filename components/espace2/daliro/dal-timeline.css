@@ -174,8 +174,11 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   color: var(--dal-t1);
   text-decoration: underline;
 }
+/* les traits des mois et du jour descendent jusqu'au bas de la carte, comme chez
+   Linear (768 de haut), même quand les lignes s'arrêtent plus tôt */
 .v2 .dal .dal-tl-toile {
   position: relative;
+  min-height: 100%;
 }
 .v2 .dal .dal-tl-regle {
   position: sticky;
@@ -238,21 +241,39 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   right: 0;
   height: 72px;
 }
+.v2 .dal .dal-tl-avant {
+  position: absolute;
+  top: 28px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 16px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--dal-t1);
+  white-space: nowrap;
+}
+.v2 .dal .dal-tl-avant-date {
+  color: var(--dal-t4);
+}
 .v2 .dal .dal-tl-cellule {
   position: sticky;
   left: 0;
   z-index: 2;
   width: 320px;
   height: 72px;
-  padding-left: 8px;
   background: var(--dal-carte);
 }
+/* capture de Linear (1440, sombre) : icône du projet à 13 du bord de la carte, nom à 45,
+   premier bouton rond à 173 ; le bloc du nom fait 166 */
 .v2 .dal .dal-tl-cellule-bloc {
   display: flex;
   align-items: center;
   gap: 6px;
   height: 72px;
-  padding-right: 10px;
+  padding-right: 18px;
 }
 .v2 .dal .dal-tl-nom {
   display: flex;
@@ -260,7 +281,7 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   gap: 4px;
   flex: 1;
   min-width: 0;
-  padding: 2px 0;
+  padding: 2px 0 2px 12px;
 }
 .v2 .dal .dal-tl-icone {
   display: inline-flex;
@@ -306,9 +327,16 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   font-size: 8px;
   font-weight: 600;
 }
-.v2 .dal .dal-tl-libelle {
+.v2 .dal .dal-tl-libelle-voie {
   position: absolute;
   top: 5px;
+  display: flex;
+  height: 16px;
+  pointer-events: none;
+}
+.v2 .dal .dal-tl-libelle {
+  position: sticky;
+  flex: none;
   font-size: 13px;
   font-weight: 500;
   line-height: 16px;
@@ -394,36 +422,19 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   border-left: 0.5px solid var(--dal-carte-bord);
 }
 
-/* ——— 640 et moins : Linear quitte la frise pour une liste ——— */
+/* ——— 640 et moins (capture 390-sombre-timeline de Linear, 01/11) : la frise reste, la
+   colonne gauche de 320 la couvre ; boutons de 32, « Nouveau chantier » réduit à « + » ——— */
 @media (max-width: 640px) {
-  .v2 .dal .dal-tl-toile {
-    width: auto !important;
-    height: auto !important;
-  }
-  .v2 .dal .dal-tl-regle,
-  .v2 .dal .dal-tl-mois-trait,
-  .v2 .dal .dal-tl-auj-trait,
-  .v2 .dal .dal-tl-libelle,
-  .v2 .dal .dal-tl-barre,
-  .v2 .dal .dal-tl-jalon,
-  .v2 .dal .dal-tl-commandes,
   .v2 .dal .dal-tl-quota,
-  .v2 .dal .dal-tl-nouveau span {
+  .v2 .dal .dal-tl-nouveau span,
+  .v2 .dal .dal-tl-commandes > .dal-tl-pop {
     display: none;
   }
-  .v2 .dal .dal-tl-ligne {
-    position: relative;
-    top: auto !important;
-    height: 48px;
-  }
-  .v2 .dal .dal-tl-cellule,
-  .v2 .dal .dal-tl-cellule-bloc {
-    width: auto;
-    height: 48px;
-  }
-  .v2 .dal .dal-tl-cellule-bloc > .dal-tl-rond:nth-of-type(3),
-  .v2 .dal .dal-tl-cellule-bloc > .dal-tl-rond:nth-of-type(4) {
-    display: none;
+  .v2 .dal .dal-tl-nouveau {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
   }
   .v2 .dal .dal-tl-volet {
     position: fixed;

@@ -314,6 +314,11 @@ html[data-v2-theme="light"] .v2 .dal {
   .v2 .dal .dal-rond {
     width: 32px;
   }
+  /* boutons de 32 dans une ligne de 44 : titre et boutons centrés (capture 390 de Linear) */
+  .v2 .dal .dal-ligne1 {
+    align-items: center;
+    padding-top: 0;
+  }
 }
 
 /* ——— le pont : un gabarit `lin` (../lin, partagé, non touché) monté dans une page Daliro
