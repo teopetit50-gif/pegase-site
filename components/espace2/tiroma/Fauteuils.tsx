@@ -25,11 +25,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Cal_Sans } from "next/font/google";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { CAPACITES } from "@/components/espace/tiroma/libelles";
 import type { Dossier, MotifAbsenceMembre } from "@/components/espace/tiroma/types";
 import { RACINE } from "../modules";
 import { useTiroma } from "./donnees";
+import { copier, exporterCSV, useFavoris, useVues } from "./navigateur";
 import "./tir-cal.css";
 
 /* Cal Sans (OFL) : la police de toute la page chez Cal.com (calcom-availability.md) */
@@ -73,6 +74,9 @@ type Ligne = {
   detail: { titre: string; lignes: { libelle: string; valeur: string }[] }[];
   action?: { libelle: string; confirmer: string; faire: () => Promise<void> };
   liens?: { libelle: string; href: string }[];
+  /* la valeur filtrée par « Filter » (fauteuil, praticien, membre) et la place dans la vue calendrier */
+  filtre?: string;
+  jours?: { jour: string; moment: "matin" | "apres_midi" | "journee" }[];
 };
 type Groupe = { libelle: string | null; lignes: Ligne[] };
 
@@ -105,6 +109,8 @@ function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>
       const vide = f.journee.vide ? "Journée vide" : f.matin.vide ? "Matinée vide" : f.apres_midi.vide ? "Après-midi vide" : null;
       return {
         cle: f.fauteuil_id,
+        filtre: f.nom,
+        jours: [{ jour: c.jour, moment: "journee" as const }],
         date: f.nom,
         heures: `${pct(f.matin.taux)} / ${pct(f.apres_midi.taux)}`,
         pastille: vide ? { texte: vide, teinte: "orange" } : { texte: `${pct(f.journee.taux)} prévu` },
@@ -136,6 +142,8 @@ function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>
     const auj = jourISO(new Date());
     const ls: Ligne[] = dj.demi_journees.map((x) => ({
       cle: `${x.praticien_id}-${x.jour}-${x.moment}`,
+      filtre: x.praticien,
+      jours: [{ jour: x.jour, moment: x.moment }],
       date: jourCourt(x.jour),
       heures: x.moment === "matin" ? "Matin" : "Après-midi",
       pastille: x.jour === auj ? { texte: "Aujourd'hui", teinte: "rouge" } : x.jour === enJours(auj, 1) ? { texte: "Demain", teinte: "orange" } : undefined,
@@ -162,6 +170,12 @@ function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>
       libelle: null,
       lignes: eq.map((a) => ({
         cle: a.absence_id,
+        filtre: a.membre,
+        jours: (() => {
+          const js: { jour: string; moment: "journee" }[] = [];
+          for (let t0 = new Date(a.debut); t0 < new Date(a.fin) && js.length < 31; t0 = new Date(t0.getTime() + 864e5)) js.push({ jour: jourISO(t0), moment: "journee" });
+          return js;
+        })(),
         date: `${jourCourt(a.debut)}`,
         heures: `au ${jourCourt(new Date(new Date(a.fin).getTime() - 1).toISOString())}`,
         pastille: { texte: MOTIFS[a.motif], teinte: "orange" as const },
@@ -185,6 +199,8 @@ function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>
       libelle: null,
       lignes: s.demi_journees.map((x) => ({
         cle: `${x.fauteuil_id}-${x.jour}-${x.moment}`,
+        filtre: x.fauteuil,
+        jours: [{ jour: x.jour, moment: x.moment }],
         date: jourCourt(x.jour),
         heures: x.moment === "matin" ? "Matin" : "Après-midi",
         pastille: x.libere ? { texte: "Peut se libérer", teinte: "vert" as const } : { texte: "Un soin reste sans place", teinte: "rouge" as const },
@@ -205,6 +221,8 @@ function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>
     libelle: null,
     lignes: sl.map((x) => ({
       cle: x.rendez_vous_id,
+      filtre: x.fauteuil ?? "Sans fauteuil",
+      jours: [{ jour: jourISO(new Date(x.debut)), moment: new Date(x.debut).getHours() < 13 ? ("matin" as const) : ("apres_midi" as const) }],
       date: jourCourt(x.debut),
       heures: `${heure(x.debut)} - ${heure(x.fin)}`,
       pastille: { texte: `${x.minutes} min`, teinte: x.raisons.length > 1 ? "rouge" as const : "orange" as const },
@@ -290,9 +308,55 @@ function Absence({ fermer }: { fermer: () => void }) {
   );
 }
 
+/* vue calendrier (?view=calendar de Cal.com) : la semaine, une colonne par jour, matin / après-midi ; ‹ › et « Aujourd'hui » */
+function Calendrier({ lignes: ls, semaine, setSemaine, ouvrir }: { lignes: Ligne[]; semaine: number; setSemaine: (n: number) => void; ouvrir: (cle: string) => void }) {
+  const lundi = new Date();
+  lundi.setHours(12, 0, 0, 0);
+  lundi.setDate(lundi.getDate() - ((lundi.getDay() + 6) % 7) + 7 * semaine);
+  const jours = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(lundi);
+    d.setDate(d.getDate() + i);
+    return jourISO(d);
+  });
+  const auj = jourISO(new Date());
+  const dans = (j: string, m: "matin" | "apres_midi") => ls.filter((l) => (l.jours ?? []).some((x) => x.jour === j && (x.moment === m || x.moment === "journee")));
+  return (
+    <div className="cal-calendrier">
+      <div className="cal-cal-barre">
+        <button type="button" className="cal-icone-bouton cal-icone-bouton--bord" aria-label="Semaine précédente" onClick={() => setSemaine(semaine - 1)}><Icone d={'<path d="m15 18-6-6 6-6"/>'} /></button>
+        <button type="button" className="cal-icone-bouton cal-icone-bouton--bord" aria-label="Semaine suivante" onClick={() => setSemaine(semaine + 1)}><Icone d={'<path d="m9 18 6-6-6-6"/>'} /></button>
+        <button type="button" className="cal-bouton" onClick={() => setSemaine(0)}>Aujourd&apos;hui</button>
+        <span className="cal-cal-mois">{enDate(jours[0]).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</span>
+      </div>
+      <div className="cal-cal-grille">
+        <span className="cal-cal-coin">AST</span>
+        {jours.map((j) => (
+          <span key={j} className="cal-cal-jour">
+            {enDate(j).toLocaleDateString("fr-FR", { weekday: "short" })}
+            <span className={`cal-cal-num${j === auj ? " cal-cal-num--auj" : ""}`}>{enDate(j).getDate()}</span>
+          </span>
+        ))}
+        {(["matin", "apres_midi"] as const).map((m) => (
+          <div key={m} className="cal-cal-rangee">
+            <span className="cal-cal-heure">{m === "matin" ? "Matin" : "Après-midi"}</span>
+            {jours.map((j) => (
+              <div key={j} className="cal-cal-case">
+                {dans(j, m).map((l) => (
+                  <button key={l.cle} type="button" className={`cal-cal-evt${l.pastille?.teinte ? ` cal-cal-evt--${l.pastille.teinte}` : ""}`} onClick={() => ouvrir(l.cle)} title={l.titre}>
+                    {l.titre}
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Fauteuils() {
   const t = useTiroma();
-  const router = useRouter();
   const params = useSearchParams();
   const d = t.dossier;
   const fauteuilVise = params.get("fauteuil");
@@ -300,8 +364,29 @@ export default function Fauteuils() {
   const [ouverte, setOuverte] = useState<string | null>(fauteuilVise);
   const [menu, setMenu] = useState<string | null>(null);
   const [confirme, setConfirme] = useState<string | null>(null);
-  const [absence, setAbsence] = useState(false);
-  const [vueCal, setVueCal] = useState<"liste" | "calendrier">("liste");
+  const [absence, setAbsence] = useState(params.get("absence") === "1");
+  const vueCal = params.get("affichage") === "calendrier" ? "calendrier" : "liste";
+  const filtreVal = params.get("filtre");
+  const [choisies, setChoisies] = useState<Set<string>>(new Set());
+  const [avis, setAvis] = useState<string | null>(null);
+  const [confirmeLot, setConfirmeLot] = useState(false);
+  const [semaine, setSemaine] = useState(0);
+  const [favoris, poserFavori] = useFavoris();
+  const [vues, poserVue] = useVues();
+  const annoncer = (texte: string) => {
+    setAvis(texte);
+    window.setTimeout(() => setAvis(null), 4000);
+  };
+  const adresse = (modif: Record<string, string | null>) => {
+    const q = new URLSearchParams(params.toString());
+    for (const [k, v] of Object.entries(modif)) {
+      if (v === null) q.delete(k);
+      else q.set(k, v);
+    }
+    q.delete("fauteuil");
+    q.delete("absence");
+    return q.toString() ? `${BASE}?${q.toString()}` : BASE;
+  };
 
   useEffect(() => {
     if (!menu) return;
@@ -310,8 +395,22 @@ export default function Fauteuils() {
     return () => window.removeEventListener("click", fermer);
   }, [menu]);
 
-  const groupes = d ? lignes(d, onglet, (id) => { const a = d.equipe?.find((x) => x.absence_id === id); return a ? t.cloreAbsence(a) : Promise.resolve(); }) : [];
+  const groupesBruts = d ? lignes(d, onglet, (id) => { const a = d.equipe?.find((x) => x.absence_id === id); return a ? t.cloreAbsence(a) : Promise.resolve(); }) : [];
+  const valeursFiltre = [...new Set(groupesBruts.flatMap((g) => g.lignes.map((l) => l.filtre).filter((x): x is string => !!x)))];
+  const groupes = groupesBruts.map((g) => ({ ...g, lignes: g.lignes.filter((l) => !filtreVal || l.filtre === filtreVal) })).filter((g) => g.lignes.length);
   const toutes = groupes.flatMap((g) => g.lignes);
+  const choisiesL = toutes.filter((l) => choisies.has(l.cle));
+  const resumeL = (l: Ligne) => [l.titre, `${l.date} · ${l.heures}`, l.qui, l.mention, l.sous, l.note].filter(Boolean).join("\n");
+  const exporter = (ls: Ligne[]) => {
+    exporterCSV(`tiroma-fauteuils-${onglet}`, ["Date ou fauteuil", "Horaire ou taux", "État", "Titre", "Qui", "Mention", "Détail", "Note"], ls.map((l) => [l.date, l.heures, l.pastille?.texte ?? "", l.titre, l.qui, l.mention ?? "", (l.sous ?? "").replace(/\n/g, " / "), l.note ?? ""]));
+    annoncer("Liste exportée en CSV.");
+  };
+  const epingler = (l: Ligne) => {
+    const k = `fauteuils-${onglet}-${l.cle}`;
+    const oui = !favoris[k];
+    poserFavori(k, oui ? { titre: l.titre, href: `${BASE}?${onglet === "charge" ? `fauteuil=${encodeURIComponent(l.cle)}` : `vue=${onglet}`}`, type: ONGLETS.find((o) => o.cle === onglet)?.libelle ?? "Fauteuils", depuis: new Date().toISOString() } : null);
+    annoncer(oui ? "Épinglé en tête d'Aujourd'hui." : "Désépinglé.");
+  };
   const detail = ouverte ? toutes.find((l) => l.cle === ouverte) ?? null : null;
   const i = detail ? toutes.indexOf(detail) : -1;
   const peutAbsence = !!d && (d.profil === "titulaire" || d.profil === "assistante") && d.membres.some((m) => m.actif);
@@ -333,24 +432,57 @@ export default function Fauteuils() {
                 <Link key={o.cle} href={o.cle === "charge" ? BASE : `${BASE}?vue=${o.cle}`} className="cal-segment-item" aria-current={onglet === o.cle ? "page" : undefined} onClick={() => setOuverte(null)}>{o.libelle}</Link>
               ))}
             </nav>
-            <button type="button" className="cal-bouton cal-filtre" onClick={() => router.push(`${RACINE}/tiroma/reglages?section=fauteuils`)} title="Les fauteuils, dans les réglages">
-              <Icone d={L.filtre} />Fauteuils
-            </button>
+            <span className="cal-ancre">
+              <button type="button" className="cal-bouton cal-filtre" aria-expanded={menu === "filtre"} onClick={(e) => { e.stopPropagation(); setMenu((m) => (m === "filtre" ? null : "filtre")); }}>
+                <Icone d={L.filtre} />Filter{filtreVal ? <span className="cal-filtre-val">: {filtreVal}</span> : null}
+              </button>
+              {menu === "filtre" ? (
+                <div className="cal-menu cal-menu--gauche" role="menu" onClick={(e) => e.stopPropagation()}>
+                  <div className="cal-menu-titre">{onglet === "vides" ? "Praticien" : onglet === "equipe" ? "Membre de l'équipe" : "Fauteuil"}</div>
+                  {valeursFiltre.map((v) => (
+                    <Link key={v} href={adresse({ filtre: filtreVal === v ? null : v })} role="menuitemradio" aria-checked={filtreVal === v} className="cal-menu-item" onClick={() => setMenu(null)}>{v}</Link>
+                  ))}
+                  {!valeursFiltre.length ? <span className="cal-menu-item cal-menu-item--vide">Rien à filtrer</span> : null}
+                  {filtreVal ? <Link href={adresse({ filtre: null })} role="menuitem" className="cal-menu-item" onClick={() => setMenu(null)}>Retirer le filtre</Link> : null}
+                </div>
+              ) : null}
+            </span>
             <span className="cal-pousse" />
+            {avis ? <span className="cal-avis" role="status">{avis}</span> : null}
             {peutAbsence ? (
               <button type="button" className="cal-bouton cal-bouton--plein" onClick={() => { setAbsence(true); setOuverte(null); }}>
                 <Icone d={L.plus} />Noter une absence
               </button>
             ) : null}
+            <span className="cal-ancre">
+              <button type="button" className="cal-bouton cal-vues" aria-expanded={menu === "vues"} onClick={(e) => { e.stopPropagation(); setMenu((m) => (m === "vues" ? null : "vues")); }}>
+                Vues enregistrées<Icone d={L.tri} />
+              </button>
+              {menu === "vues" ? (
+                <div className="cal-menu" role="menu" onClick={(e) => e.stopPropagation()}>
+                  {Object.entries(vues).map(([k, v]) => (
+                    <span key={k} className="cal-menu-ligne">
+                      <Link href={v.href} role="menuitem" className="cal-menu-item" onClick={() => setMenu(null)}>{v.nom}</Link>
+                      <button type="button" className="cal-icone-bouton" aria-label={`Supprimer ${v.nom}`} onClick={() => poserVue(k, null)}><Icone d={L.croix} taille={14} /></button>
+                    </span>
+                  ))}
+                  {Object.keys(vues).length ? <div className="cal-menu-sep" /> : null}
+                  <button type="button" role="menuitem" className="cal-menu-item" onClick={() => { const nom = `${ONGLETS.find((o) => o.cle === onglet)?.libelle}${filtreVal ? ` · ${filtreVal}` : ""}${vueCal === "calendrier" ? " · calendrier" : ""}`; poserVue(nom, { nom, href: adresse({}) }); setMenu(null); annoncer(`Vue « ${nom} » enregistrée.`); }}>Enregistrer cette vue</button>
+                </div>
+              ) : null}
+            </span>
             <div className="cal-segment cal-segment--icones" role="radiogroup" aria-label="Vue">
-              <button type="button" role="radio" aria-checked={vueCal === "liste"} className="cal-segment-item" aria-label="Liste" onClick={() => setVueCal("liste")}><Icone d={L.menu} /></button>
-              <button type="button" role="radio" aria-checked={vueCal === "calendrier"} className="cal-segment-item" aria-label="Pilotage" onClick={() => router.push(`${RACINE}/tiroma/pilotage`)}><Icone d={L.calendrier} /></button>
+              <Link href={adresse({ affichage: null })} role="radio" aria-checked={vueCal === "liste"} className="cal-segment-item" aria-label="Liste"><Icone d={L.menu} /></Link>
+              <Link href={adresse({ affichage: "calendrier" })} role="radio" aria-checked={vueCal === "calendrier"} className="cal-segment-item" aria-label="Calendrier"><Icone d={L.calendrier} /></Link>
             </div>
           </div>
 
           {etat ? <div className="cal-etat">{etat}</div> : null}
           {!etat && !groupes.length ? <Vide titre={VIDES[onglet][0]} texte={VIDES[onglet][1]} /> : null}
-          {!etat && groupes.length ? (
+          {!etat && groupes.length && vueCal === "calendrier" ? (
+            <Calendrier lignes={toutes} semaine={semaine} setSemaine={setSemaine} ouvrir={(cle) => { setOuverte(cle); setAbsence(false); }} />
+          ) : null}
+          {!etat && groupes.length && vueCal === "liste" ? (
             <div className="cal-liste">
               {groupes.map((g, gi) => (
                 <div key={gi} className="cal-groupe">
@@ -358,7 +490,20 @@ export default function Fauteuils() {
                   <div className="cal-panneau-int">
                     {g.lignes.map((l) => (
                       <div key={l.cle} className="cal-ligne" data-ouverte={ouverte === l.cle ? "" : undefined} onClick={() => { setOuverte(l.cle); setAbsence(false); }} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter") setOuverte(l.cle); }}>
-                        <span className="cal-case" aria-hidden="true" />
+                        <span
+                          className="cal-case"
+                          role="checkbox"
+                          aria-checked={choisies.has(l.cle)}
+                          aria-label="Choisir la ligne"
+                          tabIndex={0}
+                          data-coche={choisies.has(l.cle) ? "" : undefined}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setChoisies((c) => { const n = new Set(c); if (n.has(l.cle)) n.delete(l.cle); else n.add(l.cle); return n; });
+                          }}
+                        >
+                          {choisies.has(l.cle) ? <Icone d={'<path d="M20 6 9 17l-5-5"/>'} taille={12} /> : null}
+                        </span>
                         <div className="cal-date">
                           <span className="cal-date-jour">{l.date}</span>
                           <span className="cal-date-heures">{l.heures}</span>
@@ -387,6 +532,8 @@ export default function Fauteuils() {
                             {menu === l.cle ? (
                               <div className="cal-menu" role="menu">
                                 <button type="button" role="menuitem" className="cal-menu-item" onClick={() => setOuverte(l.cle)}>Ouvrir le détail</button>
+                                <button type="button" role="menuitem" className="cal-menu-item" onClick={() => epingler(l)}>{favoris[`fauteuils-${onglet}-${l.cle}`] ? "Désépingler" : "Épingler dans Aujourd'hui"}</button>
+                                <button type="button" role="menuitem" className="cal-menu-item" onClick={() => void copier(resumeL(l)).then((ok) => annoncer(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie."))}>Copier pour l&apos;assistant</button>
                                 {(l.liens ?? []).map((k) => <Link key={k.href} href={k.href} role="menuitem" className="cal-menu-item">{k.libelle}</Link>)}
                                 {l.action ? <button type="button" role="menuitem" className="cal-menu-item cal-menu-item--rouge" onClick={() => setConfirme(l.cle)}>{l.action.libelle}</button> : null}
                               </div>
@@ -401,6 +548,26 @@ export default function Fauteuils() {
             </div>
           ) : null}
         </div>
+        {choisiesL.length ? (
+          <div className="cal-lot" role="toolbar" aria-label="Actions sur la sélection">
+            {confirmeLot ? (
+              <>
+                <span className="cal-lot-compte">Clore {choisiesL.filter((l) => l.action).length} absence(s) ? Elles restent dans l&apos;historique.</span>
+                <button type="button" className="cal-bouton cal-bouton--petit" onClick={() => setConfirmeLot(false)}>Annuler</button>
+                <button type="button" className="cal-bouton cal-bouton--petit cal-bouton--plein" onClick={() => { const ls = choisiesL.filter((l) => l.action); void Promise.all(ls.map((l) => l.action?.faire())).then(() => { setConfirmeLot(false); setChoisies(new Set()); annoncer(`${ls.length} absence(s) close(s).`); }); }}>Confirmer</button>
+              </>
+            ) : (
+              <>
+                <span className="cal-lot-compte">{choisiesL.length} choisie{choisiesL.length > 1 ? "s" : ""}</span>
+                {choisiesL.some((l) => l.action) ? <button type="button" className="cal-bouton cal-bouton--petit" onClick={() => setConfirmeLot(true)}>Clore les absences</button> : null}
+                <button type="button" className="cal-bouton cal-bouton--petit" onClick={() => { choisiesL.forEach(epingler); setChoisies(new Set()); }}>Épingler</button>
+                <button type="button" className="cal-bouton cal-bouton--petit" onClick={() => void copier(choisiesL.map(resumeL).join("\n\n")).then((ok) => { setChoisies(new Set()); annoncer(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie."); })}>Copier pour l&apos;assistant</button>
+                <button type="button" className="cal-bouton cal-bouton--petit" onClick={() => { exporter(choisiesL); setChoisies(new Set()); }}>Exporter en CSV</button>
+                <button type="button" className="cal-icone-bouton" aria-label="Tout désélectionner" onClick={() => setChoisies(new Set())}><Icone d={L.croix} taille={14} /></button>
+              </>
+            )}
+          </div>
+        ) : null}
         {detail ? (
           <aside className="cal-panneau" aria-label={detail.titre}>
             <div className="cal-panneau-tete">
@@ -422,8 +589,29 @@ export default function Fauteuils() {
               ))}
             </div>
             <div className="cal-panneau-pied">
-              {(detail.liens ?? []).slice(0, 1).map((k) => <Link key={k.href} href={k.href} className="cal-bouton">{k.libelle}</Link>)}
-              {detail.action ? <button type="button" className="cal-bouton cal-bouton--plein" onClick={() => setConfirme(detail.cle)}>{detail.action.libelle}</button> : null}
+              <span className="cal-groupe-boutons">
+                {(detail.liens ?? []).slice(0, 1).map((k) => <Link key={k.href} href={k.href} className="cal-bouton cal-bouton--groupe-g">{k.libelle}</Link>)}
+                <button type="button" className={`cal-bouton ${(detail.liens ?? []).length ? "cal-bouton--groupe-d" : ""}`} aria-label="Copier pour l'assistant" title="Copier pour l'assistant" onClick={() => void copier(resumeL(detail)).then((ok) => annoncer(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie."))}>
+                  <Icone d={'<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>'} />
+                </button>
+              </span>
+              <span className="cal-pousse" />
+              {detail.action ? (confirme === detail.cle ? (
+                <>
+                  <button type="button" className="cal-bouton" onClick={() => setConfirme(null)}>Annuler</button>
+                  <button type="button" className="cal-bouton cal-bouton--plein" onClick={() => { setConfirme(null); void detail.action?.faire().then(() => setOuverte(null)); }}>Confirmer</button>
+                </>
+              ) : <button type="button" className="cal-bouton cal-bouton--plein" onClick={() => setConfirme(detail.cle)}>{detail.action.libelle}</button>) : null}
+              <span className="cal-ancre">
+                <button type="button" className="cal-icone-bouton cal-icone-bouton--bord" aria-label="Plus" aria-expanded={menu === "detail"} onClick={(e) => { e.stopPropagation(); setMenu((m) => (m === "detail" ? null : "detail")); }}><Icone d={L.points} /></button>
+                {menu === "detail" ? (
+                  <div className="cal-menu cal-menu--haut" role="menu">
+                    <button type="button" role="menuitem" className="cal-menu-item" onClick={() => epingler(detail)}>{favoris[`fauteuils-${onglet}-${detail.cle}`] ? "Désépingler" : "Épingler dans Aujourd'hui"}</button>
+                    {(detail.liens ?? []).map((k) => <Link key={k.href} href={k.href} role="menuitem" className="cal-menu-item">{k.libelle}</Link>)}
+                    <button type="button" role="menuitem" className="cal-menu-item" onClick={() => exporter([detail])}>Exporter en CSV</button>
+                  </div>
+                ) : null}
+              </span>
             </div>
           </aside>
         ) : absence ? <Absence fermer={() => setAbsence(false)} /> : null}
