@@ -33,6 +33,8 @@ export type Repere = {
   objet_id?: string | null;
   /* le payload d'une demande (FILED : le fournisseur d'un IBAN) */
   payload?: Record<string, unknown> | null;
+  /* le texte d'une ligne du point du matin (DALIRO : une ligne d'approvisionnement nomme son chantier) */
+  texte?: string | null;
 };
 
 type Regle = (id: string, r: Repere) => string | null;
@@ -55,6 +57,9 @@ const PREFIXES: [string, string][] = [
   ["grp_", "varelo"],
 ];
 
+
+/* les phrases des lignes d'approvisionnement du point du matin (omega/modules/daliro/migrations/b6_23_appro_suite.sql) */
+const APPRO = /devait être commandé avant le|: commandez « | n'est pas noté reçu|» promis le .* où il le faut|devait repartir le|au bon de livraison : relancez/;
 
 /* objet_type → page. Une ligne par objet_type écrit par un moteur. */
 export const REGLES: Record<string, Regle> = {
@@ -88,7 +93,9 @@ export const REGLES: Record<string, Regle> = {
 
   /* TAVARO, TAMILA, TIROMA, VARELO — « ?objet= », lu par les pages refaites */
   /* DALIRO, refait le 29/10/2026 : la fiche du chantier, la page des avenants et situations, la page À faire */
-  btp_chantiers: (id) => `${RACINE}/daliro/chantiers/${q(id)}`,
+  /* les lignes d'approvisionnement du point du matin (b6_23, E07 à E12) nomment le chantier de la
+     commande : elles mènent à l'Approvisionnement filtré sur lui (02/11/2026) ; les autres à sa fiche */
+  btp_chantiers: (id, r) => (r.texte && APPRO.test(r.texte) ? `${RACINE}/daliro/approvisionnement?chantier=${q(id)}` : `${RACINE}/daliro/chantiers/${q(id)}`),
   btp_avenants: (id) => `${RACINE}/daliro/avenants?avenant=${q(id)}`,
   btp_avenant: (id) => `${RACINE}/daliro/avenants?avenant=${q(id)}`,
   btp_situations: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,

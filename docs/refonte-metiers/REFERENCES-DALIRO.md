@@ -138,3 +138,62 @@ Restent : sur Réglages, la bascule Bibliothèque / Organisation est posée dans
 réglages de Linear est la place de celle de l'espace 2) ; sur À faire à 390, la case à cocher est masquée (Linear
 lui donne une largeur nulle) ; couleur de la case cochée (violet de l'espace) et du champ de commentaire en sombre
 prises hors relevé.
+
+## Approvisionnement — `/espace2/daliro/approvisionnement` (page nouvelle, 02/11/2026)
+
+Lot « pages manquantes » (`PAGES-MANQUANTES.md`), branche `claude/pages-daliro` tirée de `main`. Choix faits en autonomie
+(Teo absent), à valider.
+
+- **Référence** : Plain, Tasks (liste + détail), comme proposé par le plan ; DALIRO ne l'avait pas encore prise.
+  **Relevés** : `plain-tasks.md`, `plain-commun.md`. Captures `plain-tasks/1440-reel-{sombre,clair}.png`, `1440-sombre-detail.png`,
+  `390-{sombre,clair}.png`. Aucun nouveau relevé.
+- **Code** : `components/espace2/daliro/Approvisionnement.tsx`, `approvisionnement.ts` (échéances et exemple), `DalPlainIcone.tsx`,
+  `dalp.css` (préfixe `dalp-` : le socle Plain déjà superposé pour TAMILA, `tamp.css` + `tamp-taches.css`, recopié sous le
+  préfixe de DALIRO pour ne dépendre d'aucun fichier d'un autre métier), `app/espace2/daliro/approvisionnement/page.tsx`.
+  Entrée de menu après « Avenants et situations » (`components/espace2/modules.ts`).
+- **Correspondance** : My tasks · Todo · Done → **À commander · À livrer · Reçu** (les annulées, comme les CANCELLED de Plain,
+  ne sont dans aucun onglet). TASK-n → la phrase d'échéance (« En retard depuis le 22 oct. », « Commander avant le 3 nov. »,
+  « Promise le 4 déc., à décaler », « Manque 25 m² au bon », « À rendre depuis le 1 nov. ») ; titre → l'objet ; pastille du
+  compte → le chantier ; avatar carré → le fournisseur. Last updated · Priority → **Échéance · Urgence** (+ « Exporter la liste
+  (CSV) » sous un séparateur). Add new task T → **Nouvelle commande T** (chantier, objet, quantité, délai, fournisseur, passage
+  ou date de besoin, matériel à rendre) ; dans la fenêtre, « Préparer la liste depuis le devis » (`preparerListe`, si la formule
+  l'ouvre). Dans Reçu, la case est cochée (vert) quand plus rien n'est à faire, bleue s'il reste un retour ou un écart de bon.
+- **Volet** (`?commande=`) : en-tête n° de commande (ou lot) + ⋯ + × ; case « To do » → l'étape suivante (Noter commandée
+  `noterCommande`, Noter reçue `recevoir` ou `noterLivraison` selon la formule, Noter rendu `noterRetour`), chacune dans sa
+  fenêtre ; « Assigned to me » → le fournisseur, choisi dans l'annuaire (`ecrireCommande`) ; « Handle with Agent » → **Copier pour
+  l'assistant** (résumé de la commande et question, dans le presse-papier) ; titre et description → objet et note, modifiables
+  tant que la commande n'est ni livrée ni annulée (`ecrireCommande`, à la sortie du champ) ; « Created … » → commandée le / à
+  commander avant le / reçue le ; Account · Threads · Knowledge gap → Chantier (lien vers la fiche, Terrain › Appro), Passage,
+  Quantité, Échéance, Commander, Livrer, Livraisons (bons, quantités, écart), Retour. Menu ⋯ : Reporter la livraison
+  (`noterCommande` avec la nouvelle date promise), Reporter le retour (`noterRetour` avec `retour_prevu`), Ouvrir la fiche du
+  chantier, Copier le lien, **Annuler la commande…** (motif obligatoire, confirmé : geste irréversible).
+- **Données** : `chargerAppro` (`btp_appro_chantier`) pour chaque chantier en préparation, ouvert, suspendu ou réceptionné ;
+  échéances calculées par la base. Exemple : 24 commandes sur les chantiers d'exemple (`approvisionnement.ts`), modifiées en
+  mémoire, mêmes règles que `ApproCarte` (recopiées : la carte n'exporte pas ses fonctions et n'a pas été touchée).
+  Portes inchangées, aucune migration, `portes.ts` intact.
+- **Aiguillage** : les lignes d'approvisionnement du point du matin (b6_23, E07 à E12) portent `objet_type = btp_chantiers` ;
+  elles mènent désormais à `/espace2/daliro/approvisionnement?chantier=<id>` (reconnues à leur texte, nouveau champ facultatif
+  `texte` du repère, que `Point.tsx` passe déjà), les autres lignes du chantier à sa fiche. `?chantier=` filtre la page et
+  s'affiche en pastille avec sa croix dans la barre d'onglets. `verifier-aiguillage.mjs` : « Chaque repère a sa page. »
+- **Comparaisons** (`docs/refonte-metiers/comparaisons/daliro/`) : `appro-1440-{sombre,clair}.png`, `appro-{sombre,clair}-{cote,diff,fusion}.png`
+  (`--ref-origine 353,8`) : 9.6 · 5.9 % / 8.5 · 5.8 % ; `appro-droite-*` (`--dx 49`, contenu calé à droite : carte de 1128 contre 1079)
+  9.1 · 5.7 % / 8.0 · 5.7 % ; `appro-390-{sombre,clair}-{cote,diff,fusion}.png` (`--nous-origine 0,48`) 12.5 · 8.2 % / 13.3 · 8.9 % ;
+  `appro-volet-1440-{sombre,clair}.png` et `appro-volet-sombre-cote.png` (côte à côte, référence agrandie depuis 800×500).
+  Titre, barre d'onglets (49), ligne d'ajout (48), lignes de 49 tombent sur celles de Plain ; ce qui reste est du texte différent.
+- **Recette** : pas de défilement de côté à 390, 768, 1024, 1440, 1700 (liste et volet ouvert) ; gestes joués sur l'exemple
+  (commander, copier, annuler refusé sans motif puis accepté, export CSV, touche T), sans erreur de page.
+
+Écarts restants :
+- Motif admis (geste du métier) : pastille du chantier filtré dans la barre d'onglets ; lignes Passage, Quantité, Échéance,
+  Commander, Livrer, Livraisons, Retour dans le volet (Plain en a trois) ; « Exporter la liste (CSV) » dans le menu de tri ;
+  le statut « To do » porte l'état de la commande (« Livraison attendue »…).
+- La pastille de présence verte de l'avatar est gardée (dessin de la référence) mais ne dit rien d'un fournisseur.
+- Le plan proposait des groupes (à commander, en retard, livraisons de la semaine, à décaler, bons avec écart, matériel à
+  rendre) : Plain Tasks n'a pas de groupes. Ces états sont dans la phrase d'échéance et le tri « Urgence » ; « Quoi livrer cette
+  semaine ? » se lit dans À livrer trié par échéance.
+- Non dessinés, faute de place dans la référence : sélection et actions groupées (Plain Tasks n'a ni cases de sélection ni
+  barre d'actions).
+- Sans back-end, non maquettés : aucun (toutes les fonctions du plan ont leur porte). La pièce jointe du bon (`p_piece`) n'est
+  pas proposée : aucun envoi de fichier n'existe pour elle côté écran (même choix que la carte du chantier).
+- Les rangées de Plain à 390 ont leur avatar sur la rangée du titre : repris ; à 390 Plain montre « Syncing » en haut à droite,
+  propre à son application.
