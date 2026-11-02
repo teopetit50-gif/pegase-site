@@ -1045,3 +1045,39 @@ html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-p-pile {
 .v2 .var.var--plain .var-p-table td > .var-p-pastille {
   margin-top: 2.5px;
 }
+
+/* ——— boutons de la référence rendus utiles (02/11 au soir) ——— */
+.v2 .var.var--plain .var-p-pop-lien {
+  font-size: 10px;
+  font-weight: 550;
+  line-height: 12px;
+  color: #4a52d1;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-p-pop-lien {
+  color: #9dafff;
+}
+.v2 .var.var--plain .var-p-pop-lien:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.v2 .var.var--plain .var-p-pop-pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 2px 0 8px;
+  border-top: 1px solid var(--p-b1);
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain li:has(> .var-p-rangee-retirer) {
+  position: relative;
+}
+.v2 .var.var--plain .var-p-rangee-retirer {
+  position: absolute;
+  top: 16px;
+  right: 24px;
+  color: var(--p-t2);
+}
