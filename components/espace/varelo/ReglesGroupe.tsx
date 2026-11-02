@@ -24,7 +24,11 @@ type Regles = { preavis_valeur: number | null; preavis_unite: "jours" | "mois" |
 const EXEMPLE: Regles = { preavis_valeur: 3, preavis_unite: "mois", contrat_jours_decision: 15, plafond_defaut: null, reserve_jours: null };
 const VIDE: Regles = { preavis_valeur: null, preavis_unite: null, contrat_jours_decision: 15, plafond_defaut: null, reserve_jours: null };
 
-export default function ReglesGroupe({ source, contexte, client_id, onFait }: { source: Source; contexte: Contexte | null; client_id: string; onFait: (m: string) => void }) {
+type Props = { source: Source; contexte: Contexte | null; client_id: string; onFait: (m: string) => void };
+
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useReglesGroupe({ source, contexte, client_id, onFait }: Props) {
   const [locales, setLocales] = useState<Regles>(EXEMPLE);
   const [reelles, setReelles] = useState<Regles | null>(null);
   const charger = useCallback(async () => {
@@ -53,6 +57,11 @@ export default function ReglesGroupe({ source, contexte, client_id, onFait }: { 
     onFait("Les règles du groupe sont posées : elles s'appliquent dans chaque société, et le changement est inscrit au journal.");
   };
 
+  return { locales, setLocales, reelles, setReelles, charger, r, peutRegler, ouvert, setOuvert, regler };
+}
+
+export default function ReglesGroupe({ source, contexte, client_id, onFait }: Props) {
+  const { r, peutRegler, ouvert, setOuvert, regler } = useReglesGroupe({ source, contexte, client_id, onFait });
   return (
     <section id="vrl-regles" className="esp-carte" aria-label="Règles du groupe" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
@@ -75,7 +84,7 @@ export default function ReglesGroupe({ source, contexte, client_id, onFait }: { 
   );
 }
 
-function DialogueRegles({ r, onFermer, regler }: { r: Regles; onFermer: () => void; regler: (n: Regles) => Promise<void> }) {
+export function DialogueRegles({ r, onFermer, regler }: { r: Regles; onFermer: () => void; regler: (n: Regles) => Promise<void> }) {
   const [preavis, setPreavis] = useState(r.preavis_valeur !== null ? String(r.preavis_valeur) : "");
   const [unite, setUnite] = useState<"jours" | "mois">(r.preavis_unite ?? "mois");
   const [jours, setJours] = useState(String(r.contrat_jours_decision));
