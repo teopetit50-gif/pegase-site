@@ -528,3 +528,39 @@ html[data-v2-theme="light"] .v2 .tam {
     grid-template-columns: 1fr;
   }
 }
+
+/* ——— la barre des actions groupées (sélection multiple : cases à cocher de Linear) ——— */
+.v2 .tam .tam-barre-selection {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 12px;
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 12px;
+  background: var(--tam-menu);
+  box-shadow: var(--tam-menu-ombre);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-menu-texte);
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.v2 .tam .tam-barre-selection > span {
+  margin-right: 6px;
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-case[aria-pressed="true"] {
+  opacity: 1;
+  border-color: var(--tam-violet);
+  background: var(--tam-violet);
+}
+.v2 .tam .tam-selection .tam-case {
+  opacity: 1;
+}
+.v2 .tam button.tam-case {
+  cursor: pointer;
+}

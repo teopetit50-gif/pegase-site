@@ -29,6 +29,7 @@ import { PlainCarte, useOuvert } from "./TamCadre";
 import { PlainIcone, TamIcone, type NomTamIcone } from "./TamIcone";
 import { useTamila } from "./donnees";
 import { dateCourte } from "./echeances";
+import { copier } from "./navigateur";
 import "./tamp-pilotage.css";
 
 const JOUR = 86_400_000;
@@ -228,6 +229,20 @@ function Carte({ titre, aide, valeur, suffixe, signal, children }: { titre: stri
           </svg>
         </span>
         {signal}
+        {/* « Ask Agent » de Plain : copier la carte pour l'assistant */}
+        <button
+          type="button"
+          className="tamp-icone tamp-agent"
+          style={{ marginLeft: signal ? 0 : "auto", width: 26, height: 26, padding: 5 }}
+          aria-label={`Copier « ${titre} » pour l'assistant`}
+          title="Copier pour l'assistant : la valeur de la carte et ce qu'elle mesure"
+          onClick={(e) => {
+            const carte = (e.currentTarget.closest(".tamp-rcarte") as HTMLElement | null)?.innerText ?? "";
+            void copier(`${titre} : ${valeur} ${suffixe}\n${aide}\n${carte.split("\n").slice(2).join("\n")}`);
+          }}
+        >
+          <TamIcone nom="Comment" taille={14} />
+        </button>
       </div>
       <div className="tamp-rvaleur">
         {valeur} <span>{suffixe}</span>

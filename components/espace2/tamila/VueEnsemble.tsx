@@ -31,6 +31,7 @@ import { TamIcone, type NomTamIcone } from "./TamIcone";
 import { dateCourte, echeancesDe, prioriteDe, type Echeance } from "./echeances";
 import { FILTRES, dansFiltre, trier, useTamila, type Filtre, type Ligne } from "./donnees";
 import NouveauDossier from "./NouveauDossier";
+import { copier, exporterCsv, useMemoire } from "./navigateur";
 import Phrase from "./Phrase";
 import "./tam-liste.css";
 
@@ -47,6 +48,9 @@ const COULEURS = { rouge: "rgb(235, 87, 87)", rose: "rgb(247, 200, 193)", bleu: 
 const COULEUR_GENRE: Record<Echeance["genre"], string> = { delai: COULEURS.rouge, audience: COULEURS.violet, expertise: COULEURS.bleu, relance: COULEURS.beige };
 const PALETTE = [COULEURS.vert, COULEURS.bleu, COULEURS.rose, COULEURS.violet, COULEURS.beige];
 const couleurMatiere = (m: string | null) => PALETTE[[...(m ?? "")].reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTE.length];
+
+/* les pages qu'une étoile d'en-tête épingle (Arrivées, Honoraires…) */
+const PAGES: Record<string, string> = { arrivees: "Arrivées", honoraires: "Honoraires du cabinet", conformite: "Conformité du cabinet", pilotage: "Pilotage du cabinet", reglages: "Réglages du cabinet" };
 
 const ICONE_STATUT: Record<Dossier["statut"], NomTamIcone> = { attente: "IssueStatusTriage", ouvert: "IssueStatusStarted", audit: "IssueStatusReview", clos: "IssueStatusDone", efface: "StatusCanceled", refuse: "StatusCanceled" };
 
@@ -101,6 +105,23 @@ export default function VueEnsemble() {
   const [volet, setVolet] = useState(false);
   const [nouveau, setNouveau] = useState(false);
   const [phrase, setPhrase] = useState(false);
+  /* les cases à cocher de Linear : sélection multiple, puis la barre des actions groupées */
+  const [selection, setSelection] = useState<Set<string>>(() => new Set());
+  const [message, setMessage] = useState<string | null>(null);
+  const favoris = useMemoire("favoris");
+  const cocher = (cle: string) => (ev: React.MouseEvent) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setSelection((x) => {
+      const n = new Set(x);
+      if (n.has(cle)) n.delete(cle);
+      else n.add(cle);
+      return n;
+    });
+  };
+  const caseDe = (cle: string, libelle: string) => (
+    <button type="button" className="tam-case" aria-pressed={selection.has(cle)} aria-label={`Sélectionner ${libelle}`} onClick={cocher(cle)} />
+  );
   const { lireAnnexes } = t;
   useEffect(() => lireAnnexes(), [lireAnnexes]);
 
@@ -135,7 +156,7 @@ export default function VueEnsemble() {
     const j = joursAvant(e.date);
     return (
       <Link key={e.cle} href={lienDossier(e.dossier)} className="tam-ligne">
-        <span className="tam-case" aria-hidden="true" />
+        {caseDe(`e:${e.cle}`, e.titre)}
         <span className="tam-priorite" data-p={p.icone} title={`Priorité : ${p.libelle}`}>
           <TamIcone nom={p.icone} />
         </span>
@@ -168,7 +189,7 @@ export default function VueEnsemble() {
     const efface = l.dossier.effacement_prevu_le;
     return (
       <Link key={l.dossier.id} href={lienDossier(l.dossier.id)} className="tam-ligne">
-        <span className="tam-case" aria-hidden="true" />
+        {caseDe(`d:${l.dossier.id}`, l.clair?.reference ?? "le dossier")}
         <span className="tam-priorite" data-p={p.icone} title={`Priorité : ${p.libelle}`}>
           <TamIcone nom={p.icone} />
         </span>
@@ -224,6 +245,31 @@ export default function VueEnsemble() {
         </Groupe>
       ));
   };
+
+  /* les dossiers épinglés (étoile de la page d'un dossier) remontent en tête de la vue d'ensemble */
+  const epingles = t.lignes.filter((l) => favoris.a(`dossier:${l.dossier.id}`));
+  const pagesEpinglees = Object.keys(favoris.valeur).filter((k) => k.startsWith("page:"));
+  const dossiersChoisis = [...new Set([...selection].map((k) => (k.startsWith("d:") ? k.slice(2) : (echeances.find((x) => `e:${x.cle}` === k)?.dossier ?? ""))).filter(Boolean))];
+  const echeancesChoisies = echeances.filter((x) => selection.has(`e:${x.cle}`));
+  const resume = () =>
+    [
+      ...echeancesChoisies.map((x) => `- ${refDe(x.dossier)} · ${x.titre} · échéance le ${dateCourte(x.date)}`),
+      ...[...selection].filter((k) => k.startsWith("d:")).map((k) => {
+        const l = parDossier.get(k.slice(2));
+        return `- ${l?.clair?.reference ?? "Dossier chiffré"} · ${l?.clair?.intitule ?? ""} · ${l ? STATUTS_DOSSIER[l.dossier.statut].libelle : ""}${l?.prochaine ? ` · prochaine échéance le ${dateCourte(l.prochaine)}` : ""}`;
+      }),
+    ].join("\n");
+  const exporter = () =>
+    exporterCsv("tamila-selection", [
+      ["Référence", "Intitulé", "Échéance", "Date", "Responsable"],
+      ...echeancesChoisies.map((x) => [refDe(x.dossier), parDossier.get(x.dossier)?.clair?.intitule ?? "", x.titre, x.date.slice(0, 10), x.responsable ? t.nomDe(x.responsable) : ""]),
+      ...[...selection]
+        .filter((k) => k.startsWith("d:"))
+        .map((k) => {
+          const l = parDossier.get(k.slice(2));
+          return [l?.clair?.reference ?? "", l?.clair?.intitule ?? "", l ? STATUTS_DOSSIER[l.dossier.statut].libelle : "", l?.prochaine ?? "", l?.responsable ? t.nomDe(l.responsable) : ""];
+        }),
+    ]);
 
   const titreFiltre = filtre ? FILTRES.find((f) => f.cle === filtre)!.libelle : null;
 
@@ -318,8 +364,28 @@ export default function VueEnsemble() {
               {t.erreur}
             </p>
           ) : null}
-          <div className="tam-liste" role="list">
+          <div className={`tam-liste${selection.size ? " tam-selection" : ""}`} role="list">
             {!t.pret ? <p className="tam-vide-liste">Lecture des dossiers…</p> : null}
+            {t.pret && vue === "echeances" && epingles.length + pagesEpinglees.length ? (
+              <Groupe libelle="Épinglés" compte={epingles.length + pagesEpinglees.length} icone="Favorite">
+                {pagesEpinglees.map((k) => (
+                  <Link key={k} href={`${RACINE}/tamila/${k.slice(5)}`} className="tam-ligne">
+                    <span className="tam-priorite" data-p="Priority0">
+                      <TamIcone nom="Priority0" />
+                    </span>
+                    <span className="tam-identifiant">Page</span>
+                    <span className="tam-statut">
+                      <TamIcone nom="Inbox" taille={14} />
+                    </span>
+                    <span className="tam-titre">
+                      <span className="tam-titre-texte">{PAGES[k.slice(5)] ?? k.slice(5)}</span>
+                    </span>
+                    <span className="tam-date">{dateCourte(favoris.valeur[k])}</span>
+                  </Link>
+                ))}
+                {epingles.map(ligneDossier)}
+              </Groupe>
+            ) : null}
             {t.pret && vue === "echeances" ? (
               <>
                 {aConfirmer.length ? (
@@ -355,7 +421,7 @@ export default function VueEnsemble() {
                 <Groupe libelle="Décisions en attente" compte={demandes.length} icone="IssueStatusTriage">
                   {demandes.map((d) => (
                     <Link key={d.id} href={lienDossier(d.objet_id ?? "")} className="tam-ligne">
-                      <span className="tam-case" aria-hidden="true" />
+                      {caseDe(`d:${d.objet_id ?? ""}`, d.resume)}
                       <span className="tam-priorite" data-p="Priority2">
                         <TamIcone nom="Priority2" />
                       </span>
@@ -394,6 +460,41 @@ export default function VueEnsemble() {
           </aside>
         ) : null}
       </div>
+      {selection.size ? (
+        <div className="tam-barre-selection" role="toolbar" aria-label="Actions sur la sélection">
+          <span>
+            {selection.size} sélectionné{selection.size > 1 ? "s" : ""}
+          </span>
+          <button
+            type="button"
+            className="tam-bouton"
+            onClick={() => {
+              const tous = dossiersChoisis.every((id) => favoris.a(`dossier:${id}`));
+              for (const id of dossiersChoisis) favoris.poser(`dossier:${id}`, tous ? null : new Date().toISOString());
+              setMessage(tous ? "Dossiers retirés des épinglés." : "Dossiers épinglés en tête de la vue d'ensemble.");
+            }}
+          >
+            {dossiersChoisis.length && dossiersChoisis.every((id) => favoris.a(`dossier:${id}`)) ? "Désépingler" : "Épingler les dossiers"}
+          </button>
+          <button type="button" className="tam-bouton" onClick={() => void copier(resume()).then((ok) => setMessage(ok ? "Résumé copié pour l'assistant." : "Le presse-papier a refusé la copie."))}>
+            Copier pour l&apos;assistant
+          </button>
+          <button type="button" className="tam-bouton" onClick={exporter}>
+            Exporter (CSV)
+          </button>
+          <button type="button" className="tam-rond" aria-label="Tout désélectionner" onClick={() => setSelection(new Set())}>
+            <TamIcone nom="StatusCanceled" />
+          </button>
+        </div>
+      ) : null}
+      {message ? (
+        <p className="tam-barre-selection" role="status" style={{ bottom: selection.size ? 76 : 24 }} onAnimationEnd={() => setMessage(null)}>
+          {message}
+          <button type="button" className="tam-rond" aria-label="Fermer" onClick={() => setMessage(null)}>
+            <TamIcone nom="StatusCanceled" />
+          </button>
+        </p>
+      ) : null}
       <NouveauDossier ouverte={nouveau} fermer={() => setNouveau(false)} />
       <Phrase ouverte={phrase} fermer={() => setPhrase(false)} />
     </TamCarte>

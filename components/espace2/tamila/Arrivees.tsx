@@ -32,13 +32,15 @@ import { Champ, TamFenetre } from "./TamFenetre";
 import { dateCourte, dateLongue, ilYaCourt } from "./echeances";
 import { useTamila } from "./donnees";
 import { AVIS_ENTRANTS_PLUS } from "./exemplesPlus";
+import { copier, estReporte, exporterCsv, useMemoire } from "./navigateur";
+import NouveauDossier from "./NouveauDossier";
 import "./tam-liste.css";
 import "./tam-triage.css";
 
 const ICI = `${RACINE}/tamila/arrivees`;
 const normaliserRg = (rg: string) => rg.replace(/[^0-9/]/g, "");
 type Tri = "recents" | "expiration";
-type Vue = "tous" | "proposes" | "sans";
+type Vue = "tous" | "proposes" | "sans" | "reportes";
 
 /* la priorité de Linear, lue dans le temps qui reste avant l'effacement de la copie en clair */
 const prioriteEffacement = (iso: string): NomTamIcone => {
@@ -54,7 +56,12 @@ export default function Arrivees() {
   const [avis, setAvis] = useState<portes.AvisEntrant[] | null | undefined>(() => (t.source === "exemple" ? AVIS_ENTRANTS_PLUS : undefined));
   const [tri, setTri] = useState<Tri>("recents");
   const [vue, setVue] = useState<Vue>("tous");
-  const [favori, setFavori] = useState(false);
+  const favoris = useMemoire("favoris");
+  const suivis = useMemoire("suivis");
+  const reportes = useMemoire("reportes");
+  const favori = favoris.a("page:arrivees");
+  const [reporter, setReporter] = useState<{ avis: portes.AvisEntrant; jusqu: string } | null>(null);
+  const [nouveau, setNouveau] = useState(false);
   const [choix, setChoix] = useState<{ dossier: string; type: string } | null>(null);
   const [ecart, setEcart] = useState<{ avis: portes.AvisEntrant; motif: string } | null>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -73,16 +80,6 @@ export default function Arrivees() {
       window.clearTimeout(h);
     };
   }, [t.source]);
-  useEffect(() => {
-    const h = window.setTimeout(() => {
-      try {
-        setFavori(localStorage.getItem("tamila.arrivees.favori") === "1");
-      } catch {
-        /* stockage indisponible : l'étoile reste éteinte */
-      }
-    }, 0);
-    return () => window.clearTimeout(h);
-  }, []);
 
   /* les dossiers où l'on peut rattacher : vivants, avec leur clair s'il est connu (E:661) */
   const vivants = useMemo(() => t.lignes.filter((l) => ["attente", "ouvert", "audit"].includes(l.dossier.statut)), [t.lignes]);
@@ -98,9 +95,13 @@ export default function Arrivees() {
   }, [avis, vivants]);
   const refDe = (id: string) => t.lignes.find((x) => x.dossier.id === id)?.clair?.reference ?? "dossier chiffré";
 
+  /* « suivi » : l'avis vise un dossier suivi (cloche de la page du dossier) ; il passe en tête */
+  const suiviDe = (x: portes.AvisEntrant) => !!proposes[x.id] && suivis.a(`dossier:${proposes[x.id]}`);
   const liste = (avis ?? [])
+    .filter((a) => (vue === "reportes" ? estReporte(reportes.valeur, a.id) : !estReporte(reportes.valeur, a.id)))
     .filter((a) => (vue === "proposes" ? !!proposes[a.id] : vue === "sans" ? !proposes[a.id] : true))
-    .sort((a, b) => (tri === "recents" ? (a.recu_le < b.recu_le ? 1 : -1) : a.expire_le < b.expire_le ? -1 : 1));
+    .sort((a, b) => (tri === "recents" ? (a.recu_le < b.recu_le ? 1 : -1) : a.expire_le < b.expire_le ? -1 : 1))
+    .sort((a, b) => Number(suiviDe(b)) - Number(suiviDe(a)));
   const a = (avis ?? []).find((x) => x.id === choisi) ?? null;
 
   const ouvrir = (id: string | null) => {
@@ -182,16 +183,9 @@ export default function Arrivees() {
               type="button"
               className="tam-rond"
               aria-pressed={favori}
-              aria-label={favori ? "Retirer des favoris" : "Ajouter aux favoris"}
-              title={favori ? "Retirer des favoris" : "Ajouter aux favoris"}
-              onClick={() => {
-                setFavori(!favori);
-                try {
-                  localStorage.setItem("tamila.arrivees.favori", favori ? "0" : "1");
-                } catch {
-                  /* rien à garder */
-                }
-              }}
+              aria-label={favori ? "Désépingler les Arrivées" : "Épingler les Arrivées"}
+              title={favori ? "Désépingler (quitte « Épinglés » de la vue d'ensemble)" : "Épingler en tête de la vue d'ensemble"}
+              onClick={() => favoris.basculer("page:arrivees")}
             >
               <TamIcone nom={favori ? "Favorite" : "Etoile"} />
             </button>
@@ -204,6 +198,7 @@ export default function Arrivees() {
                 { libelle: `Tous les avis${vue === "tous" ? " ✓" : ""}`, icone: "Inbox", action: () => setVue("tous") },
                 { libelle: `Dossier proposé (même n° RG)${vue === "proposes" ? " ✓" : ""}`, icone: "Project", action: () => setVue("proposes") },
                 { libelle: `Sans dossier lisible${vue === "sans" ? " ✓" : ""}`, icone: "Alert", action: () => setVue("sans") },
+                { libelle: `Reportés${vue === "reportes" ? " ✓" : ""}`, icone: "AlarmClock", action: () => setVue("reportes") },
               ]}
             />
             <TamMenu
@@ -213,6 +208,8 @@ export default function Arrivees() {
               options={[
                 { libelle: `Les plus récents d'abord${tri === "recents" ? " ✓" : ""}`, icone: "Created", action: () => setTri("recents") },
                 { libelle: `Effacés le plus tôt d'abord${tri === "expiration" ? " ✓" : ""}`, icone: "Calendar", action: () => setTri("expiration") },
+                "sep",
+                { libelle: "Exporter la file affichée (CSV)", icone: "Spreadsheet", action: () => exporterCsv("tamila-arrivees", [["Reçu le", "Sujet", "N° RG", "Type supposé", "Dossier proposé", "Pièces", "Effacé le"], ...liste.map((x) => [x.recu_le.slice(0, 16).replace("T", " "), x.reception?.sujet ?? "", rgDe(x) ?? "", x.type_suppose ?? "", proposes[x.id] ? refDe(proposes[x.id]) : "", x.nb_pieces, x.expire_le.slice(0, 10)])]) },
               ]}
             />
           </div>
@@ -244,6 +241,13 @@ export default function Arrivees() {
                     <span className="tam-tri-prio" data-p={p}>
                       <TamIcone nom={p} />
                     </span>
+                    {suiviDe(x) ? (
+                      <span className="tam-puce" title="Le dossier proposé est suivi">
+                        <TamIcone nom="Subscribe" taille={14} />
+                        <span>suivi</span>
+                      </span>
+                    ) : null}
+                    {estReporte(reportes.valeur, x.id) ? <span className="tam-tri-quand">reporté au {dateCourte(reportes.valeur[x.id])}</span> : null}
                     <span className="tam-tri-quand">{ilYaCourt(x.recu_le)}</span>
                   </span>
                 </Link>
@@ -284,7 +288,13 @@ export default function Arrivees() {
                     <button type="button" className="tam-rond" aria-label="Écarter comme doublon" title="Écarter comme doublon" onClick={() => setEcart({ avis: a, motif: "doublon" })}>
                       <TamIcone nom="StatusDuplicate" />
                     </button>
-                    <button type="button" className="tam-rond" aria-label="Écarter : déjà saisi à la main" title="Écarter : déjà saisi à la main" onClick={() => setEcart({ avis: a, motif: "deja_saisi" })}>
+                    <button
+                      type="button"
+                      className="tam-rond"
+                      aria-label={estReporte(reportes.valeur, a.id) ? "Ne plus reporter" : "Reporter"}
+                      title={estReporte(reportes.valeur, a.id) ? `Reporté au ${dateCourte(reportes.valeur[a.id])} : le remettre dans la file` : "Reporter : l'avis quitte la file jusqu'à la date choisie (avant son effacement)"}
+                      onClick={() => (estReporte(reportes.valeur, a.id) ? reportes.poser(a.id, null) : setReporter({ avis: a, jusqu: new Date(Date.now() + 2 * 86_400_000).toISOString().slice(0, 10) }))}
+                    >
                       <TamIcone nom="AlarmClock" />
                     </button>
                   </>
@@ -298,11 +308,38 @@ export default function Arrivees() {
                   <TamIcone nom="Project" />
                 </Link>
               ) : null}
-              {rgDe(a) ? (
-                <button type="button" className="tam-rond tam-rond--plein" aria-label="Copier le n° RG" title="Copier le n° RG" onClick={() => void navigator.clipboard?.writeText(rgDe(a)!)}>
-                  <TamIcone nom="LienUrl" />
+              <button type="button" className="tam-rond tam-rond--plein" aria-label="Copier l'adresse de l'avis" title="Copier l'adresse de l'avis" onClick={() => void copier(window.location.href)}>
+                <TamIcone nom="LienUrl" />
+              </button>
+              {/* « Copy as prompt | Choose coding tool » de Linear : copier pour l'assistant, et le menu des autres copies */}
+              <span style={{ display: "inline-flex" }}>
+                <button
+                  type="button"
+                  className="tam-bouton"
+                  style={{ borderRadius: "9999px 0 0 9999px", borderRight: 0 }}
+                  title="Copier pour l'assistant : un résumé en clair de l'avis"
+                  onClick={() =>
+                    void copier(
+                      [`Avis RPVA reçu ${ilYaCourt(a.recu_le)} de ${a.reception?.de_nom ?? "e-barreau"}`, a.reception?.sujet ?? "", rgDe(a) ? `N° RG : ${rgDe(a)}` : "", proposes[a.id] ? `Dossier proposé : ${refDe(proposes[a.id])}` : "", a.type_suppose ? `Type supposé : ${TYPES_AVIS[a.type_suppose as keyof typeof TYPES_AVIS] ?? a.type_suppose}` : "", "", a.reception?.corps ?? ""]
+                        .filter((x, i) => x || i === 5)
+                        .join("\n"),
+                    )
+                  }
+                >
+                  Copier pour l&apos;assistant
                 </button>
-              ) : null}
+                <TamMenu
+                  libelle="Autres copies"
+                  icone="Chevron"
+                  alignement="droite"
+                  classe="tam-bouton"
+                  options={[
+                    { libelle: "Copier le texte du courriel", icone: "Email", action: () => void copier(a.reception?.corps ?? "") },
+                    { libelle: "Copier le n° RG", icone: "LienUrl", action: () => void copier(rgDe(a) ?? ""), desactive: !rgDe(a) },
+                    { libelle: "Copier le sujet", icone: "Page", action: () => void copier(a.reception?.sujet ?? "") },
+                  ]}
+                />
+              </span>
             </div>
             <div className="tam-tri-corps">
               <div className="tam-tri-colonne">
@@ -332,7 +369,16 @@ export default function Arrivees() {
                   </span>
                 </div>
                 <p className="tam-tri-texte">{(a.reception?.corps ?? "").slice(0, 600) || "Le courriel n'a pas de texte."}</p>
-                <h3 className="tam-tri-h3">Activité</h3>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 24 }}>
+                  <h3 className="tam-tri-h3" style={{ marginTop: 0 }}>
+                    Activité
+                  </h3>
+                  {proposes[a.id] ? (
+                    <button type="button" className="tam-nouveau" onClick={() => suivis.basculer(`dossier:${proposes[a.id]}`)} title="Les avis du dossier suivi passent en tête de la file">
+                      {suivis.a(`dossier:${proposes[a.id]}`) ? "Ne plus suivre le dossier" : "Suivre le dossier"}
+                    </button>
+                  ) : null}
+                </div>
                 <p className="tam-evenement">
                   <Avatar nom={a.reception?.de_nom ?? "e-barreau"} taille={14} />
                   <b>{a.reception?.de_nom ?? "e-barreau"}</b> a envoyé l&apos;avis{a.reception?.de_adresse ? ` (${a.reception.de_adresse})` : ""} <b>·</b> {ilYaCourt(a.recu_le)}
@@ -393,10 +439,10 @@ export default function Arrivees() {
             <span>
               {nb} avis à rattacher
             </span>
-            <Link className="tam-pilule" href={`${RACINE}/tamila`}>
-              <TamIcone nom="Inbox" />
-              Revenir aux échéances
-            </Link>
+            <button type="button" className="tam-pilule" onClick={() => setNouveau(true)} disabled={t.source === "reelle" && (!t.installe || t.moi?.role === "lecteur")}>
+              <TamIcone nom="Plus" />
+              Nouveau dossier
+            </button>
           </div>
         )}
       </div>
@@ -427,6 +473,33 @@ export default function Arrivees() {
           </p>
         ) : null}
       </TamFenetre>
+      <TamFenetre
+        titre="Reporter l'avis"
+        sous="L'avis quitte la file de ce navigateur jusqu'à la date choisie ; rien n'est écrit en base. Sa copie en clair reste effacée à sept jours s'il n'est pas rattaché."
+        ouverte={!!reporter}
+        fermer={() => setReporter(null)}
+        pied={
+          <button
+            type="button"
+            className="tam-bouton tam-bouton--principal"
+            disabled={!reporter?.jusqu}
+            onClick={() => {
+              if (!reporter) return;
+              reportes.poser(reporter.avis.id, reporter.jusqu);
+              setFait(`Avis reporté au ${dateCourte(reporter.jusqu)}.`);
+              ouvrir(null);
+              setReporter(null);
+            }}
+          >
+            Reporter
+          </button>
+        }
+      >
+        <Champ libelle="Jusqu'au" aide={reporter ? `Effacement de la copie en clair le ${dateLongue(reporter.avis.expire_le)}.` : undefined}>
+          <input type="date" min={new Date().toISOString().slice(0, 10)} max={reporter?.avis.expire_le.slice(0, 10)} value={reporter?.jusqu ?? ""} onChange={(e) => reporter && setReporter({ ...reporter, jusqu: e.target.value })} />
+        </Champ>
+      </TamFenetre>
+      <NouveauDossier ouverte={nouveau} fermer={() => setNouveau(false)} />
     </TamCarte>
   );
 }

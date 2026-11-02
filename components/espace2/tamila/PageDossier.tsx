@@ -51,6 +51,7 @@ import { Avatar, TamCarte, TamMenu, type OptionMenu } from "./TamCadre";
 import { TamIcone, type NomTamIcone } from "./TamIcone";
 import { TamFenetre } from "./TamFenetre";
 import { dateCourte, dateLongue, prioriteDe } from "./echeances";
+import { copier, exporterCsv, useMemoire } from "./navigateur";
 import { useTamila } from "./donnees";
 import "./tam-liste.css";
 import "./tam-initiative.css";
@@ -88,30 +89,48 @@ const ROUGE = "lch(58% 73 29)";
 const JAUNE = "lch(80 90 85)";
 
 /* ——— le tableau « Projects » de Linear ——— */
-function Tableau({ section, choix, choisir, avecTete }: { section: Section; choix: string | null; choisir: (cle: string) => void; avecTete: boolean }) {
+/* les en-têtes de colonne de Linear trient les lignes de chaque groupe (tri gardé dans l'adresse : ?tri=) */
+type Tri = "nom" | "sante" | "priorite" | "lead" | "date" | "statut";
+const TRIS: { cle: Tri; libelle: string; col: string }[] = [
+  { cle: "nom", libelle: "Nom", col: "titre" },
+  { cle: "sante", libelle: "État", col: "sante" },
+  { cle: "priorite", libelle: "Priorité", col: "priorite" },
+  { cle: "lead", libelle: "Qui", col: "lead" },
+  { cle: "date", libelle: "Date", col: "date" },
+  { cle: "statut", libelle: "Statut", col: "statut" },
+];
+const valeurTri = (l: Ligne, tri: Tri): string => {
+  switch (tri) {
+    case "nom":
+      return l.nom.toLowerCase();
+    case "sante":
+      return l.sante?.titre ?? "~";
+    case "priorite":
+      return l.priorite === "Priority0" || !l.priorite ? "9" : l.priorite.slice(-1);
+    case "lead":
+      return l.lead ?? "~";
+    case "date":
+      return l.date?.texte ?? "~";
+    default:
+      return l.statut?.texte ?? "~";
+  }
+};
+function trier(lignes: Ligne[], tri: Tri | null) {
+  return tri ? [...lignes].sort((a, b) => valeurTri(a, tri).localeCompare(valeurTri(b, tri), "fr", { numeric: true })) : lignes;
+}
+
+function Tableau({ section, choix, choisir, avecTete, tri, poserTri, selection, cocher }: { section: Section; choix: string | null; choisir: (cle: string) => void; avecTete: boolean; tri: Tri | null; poserTri: (t: Tri | null) => void; selection: Set<string>; cocher: (cle: string) => void }) {
   const [replies, setReplies] = useState<Record<string, boolean>>({});
   return (
-    <div className="tam-table" role="table" aria-label={section.titre}>
+    <div className={`tam-table${selection.size ? " tam-selection" : ""}`} role="table" aria-label={section.titre}>
       {avecTete ? (
         <div className="tam-table-tete" role="row">
-          <span className="tam-tri" style={{ gridColumn: "titre" }}>
-            Nom
-          </span>
-          <span className="tam-tri" style={{ gridColumn: "sante" }}>
-            État
-          </span>
-          <span className="tam-tri" data-col="priorite" style={{ gridColumn: "priorite" }}>
-            Priorité
-          </span>
-          <span className="tam-tri" data-col="lead" style={{ gridColumn: "lead" }}>
-            Qui
-          </span>
-          <span className="tam-tri" data-col="date" style={{ gridColumn: "date" }}>
-            Date
-          </span>
-          <span className="tam-tri" style={{ gridColumn: "statut" }}>
-            Statut
-          </span>
+          {TRIS.map((x) => (
+            <button key={x.cle} type="button" className="tam-tri" data-col={x.col} style={{ gridColumn: x.col }} aria-pressed={tri === x.cle} title={`Trier par ${x.libelle.toLowerCase()}`} onClick={() => poserTri(tri === x.cle ? null : x.cle)}>
+              {x.libelle}
+              {tri === x.cle ? <TamIcone nom="Chevron" taille={12} style={{ transform: "rotate(90deg)" }} /> : null}
+            </button>
+          ))}
         </div>
       ) : null}
       {section.groupes.map((g) => (
@@ -136,9 +155,19 @@ function Tableau({ section, choix, choisir, avecTete }: { section: Section; choi
             </div>
           </div>
           {replies[g.cle] ? null : g.lignes.length ? (
-            g.lignes.map((l) => (
-              <button key={l.cle} type="button" role="row" className="tam-table-ligne" aria-current={choix === l.cle} onClick={() => choisir(l.cle)}>
-                <span className="tam-case" aria-hidden="true" />
+            trier(g.lignes, tri).map((l) => (
+              <div key={l.cle} role="row" tabIndex={0} className="tam-table-ligne" aria-current={choix === l.cle} onClick={() => choisir(l.cle)} onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), choisir(l.cle))}>
+                <button
+                  type="button"
+                  className="tam-case"
+                  aria-pressed={selection.has(l.cle)}
+                  aria-label={`Sélectionner ${l.nom}`}
+                  style={{ gridColumn: "case" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cocher(l.cle);
+                  }}
+                />
                 <span className="tam-table-nom">
                   <span className="tam-table-icone" style={l.couleur ? { color: l.couleur } : undefined}>
                     <TamIcone nom={l.icone} />
@@ -174,7 +203,7 @@ function Tableau({ section, choix, choisir, avecTete }: { section: Section; choi
                     </span>
                   ) : null}
                 </span>
-              </button>
+              </div>
             ))
           ) : (
             <p className="tam-table-vide">{g.vide ?? "Rien pour l'instant."}</p>
@@ -193,7 +222,26 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
   const router = useRouter();
   const [volet, setVolet] = useState<boolean | null>(null);
   const [confirme, setConfirme] = useState<Geste | null>(null);
-  const [favori, setFavori] = useState(false);
+  const favoris = useMemoire("favoris");
+  const suivis = useMemoire("suivis");
+  const [selection, setSelection] = useState<Set<string>>(() => new Set());
+  const [message, setMessage] = useState<string | null>(null);
+  const tri = (TRIS.find((x) => x.cle === params.get("tri"))?.cle ?? null) as Tri | null;
+  const poserTri = (x: Tri | null) => {
+    const q = new URLSearchParams(params.toString());
+    if (x) q.set("tri", x);
+    else q.delete("tri");
+    router.replace(`${chemin}${q.size ? `?${q}` : ""}`, { scroll: false });
+  };
+  const cocher = (cle: string) =>
+    setSelection((x) => {
+      const n = new Set(x);
+      if (n.has(cle)) n.delete(cle);
+      else n.add(cle);
+      return n;
+    });
+  const favori = favoris.a(`dossier:${complet.dossier.id}`);
+  const suivi = suivis.a(`dossier:${complet.dossier.id}`);
   const choix = params.get("choix");
   const d = complet.dossier;
   const clair = complet.clair;
@@ -204,6 +252,8 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
     const q = new URLSearchParams();
     if (o !== "apercu") q.set("onglet", o);
     if (c) q.set("choix", c);
+    const t0 = params.get("tri");
+    if (t0) q.set("tri", t0);
     router.replace(`${chemin}${q.size ? `?${q}` : ""}`, { scroll: false });
   };
   useEffect(() => {
@@ -251,7 +301,7 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
               <h2>{clair ? `${clair.reference} · ${clair.intitule}` : "Dossier chiffré"}</h2>
             </span>
           </nav>
-          <button type="button" className="tam-rond" aria-pressed={favori} aria-label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} title={favori ? "Retirer des favoris" : "Ajouter aux favoris"} onClick={() => setFavori(!favori)}>
+          <button type="button" className="tam-rond" aria-pressed={favori} aria-label={favori ? "Désépingler le dossier" : "Épingler le dossier"} title={favori ? "Désépingler (le dossier quitte « Épinglés » de la vue d'ensemble)" : "Épingler en tête de la vue d'ensemble"} onClick={() => favoris.basculer(`dossier:${d.id}`)}>
             <TamIcone nom={favori ? "Favorite" : "Etoile"} />
           </button>
           <TamMenu libelle="Actions du dossier" options={actions} />
@@ -260,7 +310,7 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
             <button type="button" className="tam-rond tam-rond--petit" aria-label="Copier l'adresse de la page" title="Copier l'adresse de la page" onClick={() => void navigator.clipboard?.writeText(window.location.href)}>
               <TamIcone nom="LienUrl" />
             </button>
-            <button type="button" className="tam-rond" aria-label="Journal des accès" title="Journal des accès" onClick={() => aller("conformite", "journal")}>
+            <button type="button" className="tam-rond" aria-pressed={suivi} aria-label={suivi ? "Ne plus suivre le dossier" : "Suivre le dossier"} title={suivi ? "Ne plus suivre (ses avis ne remontent plus en tête des Arrivées)" : "Suivre : ses avis reçus passent en tête des Arrivées, marqués « suivi »"} onClick={() => suivis.basculer(`dossier:${d.id}`)} style={suivi ? { color: "var(--tam-violet)" } : undefined}>
               <TamIcone nom="Subscribe" />
             </button>
             <TamMenu libelle="Ajouter" icone="Plus" alignement="droite" options={menuPlus} />
@@ -300,8 +350,25 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
                     {a.libelle}
                   </button>
                 ))}
+                {i === 0 ? (
+                  <>
+                    <TamMenu
+                      libelle="Affichage"
+                      icone="Affichage"
+                      alignement="droite"
+                      classe="tam-rond tam-rond--plein"
+                      options={[
+                        ...TRIS.map((x) => ({ libelle: `Trier par ${x.libelle.toLowerCase()}${tri === x.cle ? " ✓" : ""}`, icone: "Affichage" as NomTamIcone, action: () => poserTri(x.cle) })),
+                        "sep" as const,
+                        { libelle: "Ordre d'origine", icone: "Refresh" as NomTamIcone, action: () => poserTri(null), desactive: !tri },
+                        { libelle: "Exporter le tableau (CSV)", icone: "Spreadsheet" as NomTamIcone, action: () => exporterCsv(`dossier-${sec.cle}`, [["Groupe", "Nom", "État", "Qui", "Date", "Statut"], ...sec.groupes.flatMap((g) => g.lignes.map((l) => [g.titre, l.nom, l.sante?.titre ?? "", l.lead ?? "", l.date?.texte ?? "", l.statut?.texte ?? ""]))]) },
+                      ]}
+                    />
+                    <TamMenu libelle="Ajouter" icone="Plus" alignement="droite" classe="tam-rond tam-rond--plein" options={menuPlus} />
+                  </>
+                ) : null}
               </div>
-              <Tableau section={sec} choix={choix} choisir={(c) => aller(onglet, c === choix ? null : c)} avecTete={i === 0} />
+              <Tableau section={sec} choix={choix} choisir={(c) => aller(onglet, c === choix ? null : c)} avecTete={i === 0} tri={tri} poserTri={poserTri} selection={selection} cocher={cocher} />
             </section>
           ))}
         </div>
@@ -400,6 +467,41 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
           </aside>
         ) : null}
       </div>
+      {selection.size ? (
+        <div className="tam-barre-selection" role="toolbar" aria-label="Actions sur la sélection">
+          <span>
+            {selection.size} sélectionnée{selection.size > 1 ? "s" : ""}
+          </span>
+          <button
+            type="button"
+            className="tam-bouton"
+            onClick={() =>
+              void copier(
+                lignes
+                  .filter((l) => selection.has(l.cle))
+                  .map((l) => `- ${l.nom}${l.date ? ` · ${l.date.texte}` : ""}${l.statut ? ` · ${l.statut.texte}` : ""}`)
+                  .join("\n"),
+              ).then((ok) => setMessage(ok ? "Sélection copiée pour l'assistant." : "Le presse-papier a refusé la copie."))
+            }
+          >
+            Copier pour l&apos;assistant
+          </button>
+          <button type="button" className="tam-bouton" onClick={() => exporterCsv(`dossier-${clair?.reference ?? "selection"}`, [["Nom", "État", "Qui", "Date", "Statut"], ...lignes.filter((l) => selection.has(l.cle)).map((l) => [l.nom, l.sante?.titre ?? "", l.lead ?? "", l.date?.texte ?? "", l.statut?.texte ?? ""])])}>
+            Exporter (CSV)
+          </button>
+          <button type="button" className="tam-rond" aria-label="Tout désélectionner" onClick={() => setSelection(new Set())}>
+            <TamIcone nom="StatusCanceled" />
+          </button>
+        </div>
+      ) : null}
+      {message ? (
+        <p className="tam-barre-selection" role="status" style={{ bottom: selection.size ? 76 : 24 }}>
+          {message}
+          <button type="button" className="tam-rond" aria-label="Fermer" onClick={() => setMessage(null)}>
+            <TamIcone nom="StatusCanceled" />
+          </button>
+        </p>
+      ) : null}
       <TamFenetre
         titre={confirme?.libelle ?? ""}
         sous={confirme?.confirmer}
@@ -668,6 +770,29 @@ export default function PageDossier({ id }: { id: string }) {
                   {decisions.map((x) => `\nDécision en attente : ${x.resume}.`).join("")}
                 </p>
                 <div className="tam-ini-actions">
+                  {/* les deux boutons de la carte « Latest update » de Linear (commentaires, réaction) */}
+                  <button
+                    type="button"
+                    className="tam-ini-bulle"
+                    title="Copier pour l'assistant : un résumé en clair du dossier"
+                    aria-label="Copier pour l'assistant"
+                    onClick={() =>
+                      void copier(
+                        [
+                          `Dossier ${complet.clair?.reference ?? ""} — ${complet.clair?.intitule ?? ""}`,
+                          [complet.clair?.numero_rg ? `RG ${complet.clair.numero_rg}` : null, libelleMatiere(d.matiere), d.juridiction].filter(Boolean).join(" · "),
+                          `Statut : ${STATUTS_DOSSIER[d.statut].libelle} ; responsable : ${t.nomDe(d.responsable_id)}`,
+                          ...delais.filter(delaiCourt).map((x) => `Délai : ${ACTES[x.acte]} avant le ${dateLongue(x.echeance_retenue)} (${STATUTS_DELAI[x.statut].libelle})`),
+                          ...audiences.filter((a) => a.statut === "prevue").map((a) => `Audience : ${NATURES_AUDIENCE[a.nature]} le ${dateLongue(a.date_heure)}`),
+                        ].join("\n"),
+                      )
+                    }
+                  >
+                    <TamIcone nom="Comment" />
+                  </button>
+                  <button type="button" className="tam-rond" title="Copier l'adresse de cette page" aria-label="Copier l'adresse de cette page" onClick={() => void copier(window.location.href)}>
+                    <TamIcone nom="LienUrl" />
+                  </button>
                   {prochain && prochain.statut === "a_confirmer" ? (() => {
                     const dem = complet.demandes.find((y) => y.id === prochain.demande_id) ?? null;
                     return dem ? (
