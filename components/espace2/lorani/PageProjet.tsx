@@ -55,10 +55,13 @@ import { RACINE } from "@/components/espace2/modules";
 import { VoletContexte, useVoletPage } from "../lin/Volet";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { copier as copierTexte, datesReport, exporterCsv, useMarques, useReports } from "./lor-local";
+import { BarreSelection, BoutonEtoile, useSelection } from "./lor-selection";
 import {
   IconeAffichage,
   IconeCalendrierLor,
   IconeLin,
+  IconeNouvelleVue,
   IconePlus,
   IconePoints,
   IconePrioriteLor,
@@ -225,7 +228,8 @@ export default function PageProjet({ id }: { id: string }) {
   const chemin = usePathname();
   const router = useRouter();
   /* « ?deposer=1 » (la page d'un permis y mène) : la fenêtre du courrier s'ouvre d'emblée */
-  const [form, setForm] = useState<Form>(() => (params.get("deposer") ? { type: "courrier", projet: id } : null));
+  /* « ?deposer=1 » (la page d'un permis y mène) : la fenêtre du courrier s'ouvre d'emblée ; « ?nouveau=permis » (Dupliquer, sur la page d'un permis) : celle d'un nouveau permis */
+  const [form, setForm] = useState<Form>(() => (params.get("deposer") ? { type: "courrier", projet: id } : params.get("nouveau") === "permis" ? { type: "permis", projet: id } : null));
   const [envoi, setEnvoi] = useState(false);
   const [details, setDetails] = useState(false);
   const [onglet, setOngletProgres] = useState<"sante" | "etat" | "chefs">("sante");
@@ -235,6 +239,12 @@ export default function PageProjet({ id }: { id: string }) {
   const [groupes, setGroupes] = useState(true);
   const [ouvertAff, setOuvertAff, menuAffRef] = useMenu();
   const [replies, setReplies] = useState<Record<string, boolean>>({});
+  /* 02/11 : étoile (épingler), cloche (suivre), cases (sélection), Add new view — ./lor-local.ts */
+  const favoris = useMarques("favoris");
+  const suivis = useMarques("suivis");
+  const reports = useReports();
+  const selection = useSelection();
+  const [ouvertVue, setOuvertVue, menuVueRef] = useMenu();
 
   const p = params.get("partie");
   const cle: Cle = estCle(p) ? p : "projet";
@@ -444,9 +454,31 @@ export default function PageProjet({ id }: { id: string }) {
                   const urg: 0 | 1 | 2 | 3 | 4 = ecart === null ? 0 : ecart < 0 ? 1 : ecart <= 7 ? 2 : ecart <= 30 ? 3 : 4;
                   const n = proposeesPar[x.id] ?? 0;
                   return (
-                    <Link key={x.id} href={`${BASE}/permis/${encodeURIComponent(x.id)}`} className="lor-in-grille lor-in-ligne" role="row">
-                      <span className="lor-in-c-case" aria-hidden="true">
-                        <span className="lor-in-case" />
+                    <Link
+                      key={x.id}
+                      href={`${BASE}/permis/${encodeURIComponent(x.id)}`}
+                      className="lor-in-grille lor-in-ligne"
+                      role="row"
+                      data-coche={selection.a(`permis:${x.id}`) ? "" : undefined}
+                      onKeyDown={(e) => {
+                        if (e.key === "x" && !e.metaKey && !e.ctrlKey) {
+                          e.preventDefault();
+                          selection.basculer(`permis:${x.id}`);
+                        }
+                      }}
+                    >
+                      <span
+                        className="lor-in-c-case"
+                        role="checkbox"
+                        aria-checked={selection.a(`permis:${x.id}`)}
+                        aria-label="Sélectionner"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          selection.basculer(`permis:${x.id}`);
+                        }}
+                      >
+                        <span className="lor-in-case lor-coche" aria-checked={selection.a(`permis:${x.id}`)} />
                       </span>
                       <span className="lor-in-c-titre lor-in-nom" role="cell">
                         <span className="lor-in-icone-ligne" aria-hidden="true">
@@ -615,6 +647,7 @@ export default function PageProjet({ id }: { id: string }) {
                   </h2>
                 </Link>
               </nav>
+              <BoutonEtoile cle={`projet:${projet.id}`} nom={projet.nom} />
               <div className="lor-in-ancre" ref={menuPointsRef}>
                 <button type="button" className="lor-rond" aria-label="Options du projet" title="Options du projet" aria-expanded={ouvertPoints} onClick={() => setOuvertPoints((o) => !o)}>
                   <IconePoints />
@@ -625,6 +658,16 @@ export default function PageProjet({ id }: { id: string }) {
             <div className="lor-in-l1-droite">
               <button type="button" className="lor-rond lor-in-rond-24" aria-label="Copier le lien du projet" title="Copier le lien du projet" onClick={copier}>
                 <IconeLin nom="copierLien" />
+              </button>
+              <button
+                type="button"
+                className="lor-rond"
+                aria-pressed={suivis.a(`projet:${projet.id}`)}
+                aria-label={suivis.a(`projet:${projet.id}`) ? "Ne plus suivre le projet" : "Suivre le projet"}
+                title={suivis.a(`projet:${projet.id}`) ? "Ne plus suivre : ses courriers reprennent leur place dans le Courrier" : "Suivre : les courriers du projet passent en tête du Courrier, marqués « suivi » (gardé dans ce navigateur)"}
+                onClick={() => suivis.basculer(`projet:${projet.id}`)}
+              >
+                <IconeSprite nom="Subscribe" />
               </button>
               <div className="lor-in-ancre" ref={menuPlusRef}>
                 <button type="button" className="lor-rond" aria-label="Ajouter au projet" title="Ajouter au projet" aria-expanded={ouvertPlus} disabled={!peutEcrire} onClick={() => setOuvertPlus((o) => !o)}>
@@ -644,6 +687,24 @@ export default function PageProjet({ id }: { id: string }) {
               <Link href={`${BASE}/honoraires?projet=${encodeURIComponent(projet.id)}`} className="lor-vue">
                 Honoraires
               </Link>
+              <div className="lor-in-ancre" ref={menuVueRef}>
+                <button type="button" className="lor-rond lor-rond--sourd" aria-label="Nouvelle vue" title="Nouvelle vue : les permis d'une santé dans la vue d'ensemble" aria-expanded={ouvertVue} onClick={() => setOuvertVue((o) => !o)}>
+                  <IconeNouvelleVue />
+                </button>
+                {ouvertVue ? (
+                  <div className="lor-menu lor-in-menu" role="menu" aria-label="Nouvelle vue" style={{ left: 0, top: 34 }}>
+                    <div className="lor-menu-liste">
+                      {FAMILLES.map((f) => (
+                        <Link key={f.cle} role="menuitem" href={`${BASE}?famille=${f.cle}`} className="lor-option" onClick={() => setOuvertVue(false)} title={f.sous}>
+                          <IconeSanteLor etat={SANTE[f.cle]} />
+                          <span className="lor-option-libelle">Vue « {f.libelle} »</span>
+                          <span className="lor-option-droite">{dossier.permis.filter((x) => familleDe(x) === f.cle).length}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </nav>
             <button type="button" className="lor-rond lor-in-details-btn" aria-label={details ? "Fermer les détails du projet" : "Ouvrir les détails du projet"} title={`${details ? "Fermer" : "Ouvrir"} les détails du projet  ⌘ I`} aria-expanded={details} onClick={() => setDetails((d) => !d)}>
               <IconeVolet ouvert={details} />
@@ -780,6 +841,15 @@ export default function PageProjet({ id }: { id: string }) {
                       <p className="lor-in-maj-texte lor-in-sourd">Aucun permis ni compte rendu : saisissez le permis, ou déposez le récépissé de la mairie.</p>
                     )}
                     <div className="lor-in-maj-actions">
+                      <button
+                        type="button"
+                        className="lor-rond"
+                        aria-label="Copier ce point"
+                        title="Copier ce point (pour un courriel ou l'assistant)"
+                        onClick={async () => toast((await copierTexte(`${projet.nom} — ${(document.querySelector(".lor-in-maj-texte")?.textContent ?? "").trim()}`)) ? "Point copié." : "La copie a été refusée par le navigateur.")}
+                      >
+                        <IconeLin nom="reaction" />
+                      </button>
                       <Link href={lien("chantier")} className="lor-in-com" title={`${pluriel(pointsOuverts, "point")} en suspens au chantier`} aria-label={`${pluriel(pointsOuverts, "point")} en suspens`}>
                         <IconeSprite nom="Comment" />
                         {pointsOuverts ? <span>{pointsOuverts}</span> : null}
@@ -896,6 +966,25 @@ export default function PageProjet({ id }: { id: string }) {
             <div ref={setCible} className="lvp-cible" hidden />
           )}
         </div>
+        <BarreSelection
+          nombre={selection.cles.length}
+          vider={selection.vider}
+          actions={[
+            { cle: "epingler", libelle: "Épingler", faire: () => favoris.poser(selection.cles, true) },
+            { cle: "suivre", libelle: "Suivre", faire: () => suivis.poser(selection.cles, true) },
+            ...datesReport()
+              .slice(0, 2)
+              .map((d) => ({ cle: `rep-${d.cle}`, libelle: `Reporter · ${d.libelle.toLowerCase()}`, faire: () => { selection.cles.forEach((k) => reports.reporter(k, d.date)); selection.vider(); } })),
+            {
+              cle: "csv",
+              libelle: "Exporter en CSV",
+              faire: () => {
+                const choisis = permis.filter((x) => selection.a(`permis:${x.id}`));
+                exporterCsv(`permis-${projet.nom}`, ["Permis", "Numéro", "État", "Prochaine date", "Chef de projet"], choisis.map((x) => [titrePermis(x, projet.nom), x.numero ?? "", ETATS[x.etat]?.libelle ?? x.etat, prochaineDate(x) ?? "", chef ?? ""]));
+              },
+            },
+          ]}
+        />
         {formulaires}
       </div>
     </VoletContexte.Provider>

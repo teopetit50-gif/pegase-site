@@ -283,3 +283,7 @@ html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, va
 /* l'habit de l'écran repris (Habille) ne pose ni marge ni fond dans une vue du dossier : la section commence sous les onglets */
 .v2 .lor-in-vue .v2-page:has(> #ecran.resa) { max-width: none; padding: 0; }
 .v2 .lor-in-vue #ecran.resa { padding: 0; margin: 0; max-width: none; width: auto; background: transparent; border: 0; box-shadow: none; }
+/* 02/11 : une ligne cochée garde sa case ; sa case est cliquable */
+.v2 .lor-in-ligne[data-coche] .lor-in-c-case { opacity: 1; }
+.v2 .lor-in-ligne[data-coche]::before { background: var(--lor-survol); }
+.v2 .lor-in-maj-actions .lor-rond svg { width: 16px; height: 16px; }
