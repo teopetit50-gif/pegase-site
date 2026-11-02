@@ -216,3 +216,21 @@ Un geste qui écrit en base ou qui ne se défait pas demande une confirmation.
 Superpositions refaites après ces ajouts (mêmes fichiers `comparaisons/tiroma/*`) : Aujourd'hui 9,5, Créneaux 12,9, fil
 ouvert 9,1, Plans 12,7, Pilotage 9,3, Fauteuils 9,2 (/255) ; la barre du fil retrouve ses trois groupes (statut ·
 Noter l'appel, Note, Plus · Copier pour l'assistant, ⟳).
+
+## Réglages › Accès et rôles, Journal des accès (02/11/2026, soir)
+
+Accord de Teo (dans cette session). Promesses du site : « Droits d'accès par rôle », « Les accès sont journalisés ».
+Lecture seule sur les tables existantes (`components/espace2/tiroma/acces.ts`) : aucune porte nouvelle, aucune écriture,
+aucune migration. Placement : un bloc « Accès » de la page Settings › Team, deux rangées menant à leur sous-page, au
+gabarit des autres sous-pages (cartes de rangées de 65).
+
+| Sous-page | Ce qu'elle montre | Source et droits |
+|---|---|---|
+| `?section=acces` Accès et rôles | Profils : personne (praticien ou membre lié ; sinon « Compte xxxxxxxx », les comptes n'ont pas de nom en base), centre, rôle dans l'organisation, depuis quand, profil. Droits par profil : ce que voit chaque profil (conditions des portes et de la RLS) et combien de personnes l'ont. | `tiroma_profils` (RLS : le gérant voit les profils de ses entités, chacun voit le sien) ; `comptes` (rôle ; gérants et admins lisent ceux de l'organisation) |
+| `?section=journal` Journal des accès | Les 300 dernières entrées Tiroma du journal opposable : action en clair (actions « tiroma.* » des portes, traces des tables « tiroma_* »), acteur, objet, centre, date ; recherche ; export CSV (navigateur). | `journal_opposable` (RLS : gérants et administrateurs ; pour les autres, « Journal réservé ») |
+
+Manque écrit tel quel, non maquetté : **l'attribution d'un profil n'a pas de porte**. L'installation (G1) donne le profil
+titulaire au gérant ; les autres profils se posent avec Omega (rangée verrouillée « Avec Omega »). La RLS autoriserait
+le gérant à écrire dans `tiroma_profils`, mais aucun geste de l'espace ne le fait : rien n'est écrit d'ici.
+En exemple : cinq profils et treize entrées de journal fictifs (`exempleAcces`). Superposition de la page Réglages
+inchangée (3,3/255 : le bloc « Accès » est sous les trois premières cartes) ; aucun défilement de côté aux cinq largeurs.

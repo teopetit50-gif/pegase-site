@@ -34,6 +34,8 @@ import { RACINE } from "../modules";
 import { useTiroma, type Action } from "./donnees";
 import { TirCarte } from "./TirCadre";
 import { TirIcone, type NomTirIcone } from "./TirIcone";
+import { PROFILS, actionEnClair, exempleAcces, lireJournalTiroma, lireProfils, roleEnClair, type EntreeJournal, type ProfilLu } from "./acces";
+import { exporterCSV } from "./navigateur";
 import "./tir-reglages.css";
 
 const BASE = `${RACINE}/tiroma/reglages`;
@@ -43,7 +45,7 @@ const pct = (x: number | null | undefined) => (x === null || x === undefined ? "
 const SOURCES: Record<ContactPatient["source"], string> = { oral: "Accord oral, au cabinet", ecrit: "Accord écrit (fiche signée)", formulaire: "Formulaire" };
 
 type Section =
-  | "general" | "equipe" | "fauteuils" | "horaires" | "fermetures" | "vocabulaire" | "releves" | "regles" | "communes" | "rappels" | "donnees" | "installer";
+  | "general" | "equipe" | "fauteuils" | "horaires" | "fermetures" | "vocabulaire" | "releves" | "regles" | "communes" | "rappels" | "donnees" | "installer" | "acces" | "journal";
 
 /* ——— briques de la page (linear-team-settings.md) ——— */
 function Rangee({ icone, titre, description, valeur, href, onClick, verrou, enfant }: { icone?: NomTirIcone; titre: string; description?: string; valeur?: React.ReactNode; href?: string; onClick?: () => void; verrou?: string; enfant?: React.ReactNode }) {
@@ -215,6 +217,8 @@ function SousPage({ section, d }: { section: Section; d: Dossier }) {
     setAssist(ty.exige_assistante);
     setDuree(ty.duree_defaut_min ? String(ty.duree_defaut_min) : "");
   };
+
+  if (section === "acces" || section === "journal") return <AccesJournal section={section} d={d} />;
 
   if (section === "general") {
     const s = STATUTS_CABINET[cabinet.statut];
@@ -546,6 +550,93 @@ function Installer() {
   );
 }
 
+/* Accès et rôles · Journal des accès : lecture seule (./acces.ts) ; en exemple, des profils et un journal fictifs */
+function useAcces(d: Dossier) {
+  const t = useTiroma();
+  const client = t.reel?.compte?.client_id ?? null;
+  const [lu, setLu] = useState<{ profils: ProfilLu[]; journal: EntreeJournal[]; lisible: boolean; erreur: string | null } | null>(null);
+  useEffect(() => {
+    if (t.source !== "reelle" || !client) return;
+    let actif = true;
+    void Promise.all([lireProfils(client).catch((e: unknown) => ({ erreur: e instanceof Error ? e.message : "La base n'a pas répondu." })), lireJournalTiroma(client)]).then(([pr, jr]) => {
+      if (!actif) return;
+      setLu(Array.isArray(pr) ? { profils: pr, journal: jr.entrees, lisible: jr.lisible, erreur: null } : { profils: [], journal: jr.entrees, lisible: jr.lisible, erreur: pr.erreur });
+    });
+    return () => {
+      actif = false;
+    };
+  }, [t.source, client]);
+  if (t.source === "exemple") {
+    const ex = exempleAcces(d.cabinet.entite_id, { praticiens: d.praticiens.map((p) => ({ id: p.id, nom: p.nom_affiche })), membres: d.membres.map((m) => ({ id: m.id, nom: m.prenom })) });
+    return { ...ex, lisible: true, erreur: null, moi: ex.profils[0]?.user_id ?? null, gerant: true, charge: false };
+  }
+  return { profils: lu?.profils ?? [], journal: lu?.journal ?? [], lisible: lu?.lisible ?? false, erreur: lu?.erreur ?? null, moi: t.reel?.compte?.user_id ?? null, gerant: t.reel?.compte?.role === "gerant" || t.reel?.compte?.role === "admin", charge: !lu };
+}
+
+function AccesJournal({ section, d }: { section: "acces" | "journal"; d: Dossier }) {
+  const t = useTiroma();
+  const a = useAcces(d);
+  const [cherche, setCherche] = useState("");
+  const nomDe = (user_id: string | null, praticien_id?: string | null, membre_id?: string | null) => {
+    if (user_id && user_id === a.moi && t.source === "reelle") return "Vous";
+    const pr = praticien_id ? d.praticiens.find((x) => x.id === praticien_id)?.nom_affiche : null;
+    const me = membre_id ? d.membres.find((x) => x.id === membre_id)?.prenom : null;
+    const lie = a.profils.find((x) => x.user_id === user_id);
+    const pr2 = lie?.praticien_id ? d.praticiens.find((x) => x.id === lie.praticien_id)?.nom_affiche : null;
+    const me2 = lie?.membre_id ? d.membres.find((x) => x.id === lie.membre_id)?.prenom : null;
+    return pr ?? me ?? pr2 ?? me2 ?? lie?.libelle ?? (user_id ? `Compte ${user_id.slice(0, 8)}` : "—");
+  };
+  const centre = (entite_id: string | null) => (entite_id ? (t.reel?.compte?.entites.find((e) => e.id === entite_id)?.nom ?? d.cabinet.entite_nom ?? "Centre") : "Organisation");
+  if (a.charge) return <p className="tir-rg-aide">Lecture…</p>;
+
+  if (section === "acces") {
+    const parProfil = (Object.keys(PROFILS) as (keyof typeof PROFILS)[]).map((k) => ({ k, n: a.profils.filter((x) => x.profil === k).length }));
+    return (
+      <>
+        {a.erreur ? <p className="tir-rg-erreur" role="alert">{a.erreur}</p> : null}
+        <Bloc titre="Profils" aide={a.gerant ? "Chaque personne a un profil par centre ; il décide de ce qu'elle voit dans Tiroma." : "Vous voyez votre profil ; le gérant voit ceux de tout le cabinet."}>
+          {a.profils.length
+            ? a.profils.map((x) => (
+                <Rangee key={x.id} icone={x.profil === "titulaire" ? "Creator" : x.profil === "direction" ? "Briefcase" : "Members"} titre={nomDe(x.user_id, x.praticien_id, x.membre_id)} description={`${centre(x.entite_id)} · ${roleEnClair(x.role_organisation)} de l'organisation · depuis le ${complet(x.cree_le)}`} valeur={PROFILS[x.profil].libelle} />
+              ))
+            : <Rangee titre="Aucun profil lisible" description="Sans profil Tiroma, une personne voit la liste d'attente en lecture seule." />}
+        </Bloc>
+        <Bloc titre="Droits par profil" aide="Les conditions sont celles de la base (RLS) et des portes : un profil ne reçoit que ce que la base lui donne.">
+          {parProfil.map(({ k, n }) => <Rangee key={k} icone="Lock" titre={PROFILS[k].libelle} description={PROFILS[k].voit} valeur={`${n} personne${n > 1 ? "s" : ""}`} />)}
+        </Bloc>
+        <Bloc titre="Attribuer un profil">
+          <Rangee icone="Lock" titre="Pas encore de geste dans l'espace" description="L'installation donne le profil titulaire au gérant ; les autres profils se posent avec Omega. Aucune porte d'attribution n'existe : rien n'est écrit d'ici." verrou="Avec Omega" />
+        </Bloc>
+      </>
+    );
+  }
+
+  const filtres = a.journal.filter((e) => !cherche || `${actionEnClair(e)} ${e.acteur_libelle ?? ""} ${e.objet_type}`.toLowerCase().includes(cherche.toLowerCase()));
+  return (
+    <>
+      {!a.lisible ? (
+        <Bloc><Rangee icone="Lock" titre="Journal réservé" description="Le journal opposable est lisible des gérants et des administrateurs de l'organisation." verrou="Gérants et administrateurs" /></Bloc>
+      ) : (
+        <>
+          <Bloc aide="Le journal opposable du socle : chaque entrée cite l'empreinte de la précédente et ne peut être ni modifiée ni effacée. Ici, ce qui touche Tiroma (300 dernières entrées).">
+            <div className="tir-rg-rangee tir-rg-rangee--outils">
+              <input className="tir-rg-input tir-rg-cherche" value={cherche} onChange={(e) => setCherche(e.target.value)} placeholder="Chercher une action, une personne…" aria-label="Chercher dans le journal" />
+              <button type="button" className="tir-rg-bouton" disabled={!filtres.length} onClick={() => exporterCSV("tiroma-journal", ["n°", "survenu le", "acteur", "type d'acteur", "action", "action (code)", "objet", "objet_id", "centre"], filtres.map((e) => [e.id, e.survenu_le, e.acteur_libelle ?? nomDe(e.acteur_id), e.acteur_type, actionEnClair(e), e.action, e.objet_type, e.objet_id, centre(e.entite_id)]))}>Exporter en CSV</button>
+            </div>
+          </Bloc>
+          <Bloc titre={`${filtres.length} entrée${filtres.length > 1 ? "s" : ""}`}>
+            {filtres.length
+              ? filtres.map((e) => (
+                  <Rangee key={e.id} icone={e.acteur_type === "systeme" ? "Refresh" : "Creator"} titre={actionEnClair(e)} description={`${e.acteur_libelle ?? (e.acteur_type === "systeme" ? "Omega" : nomDe(e.acteur_id))} · ${e.objet_type}${e.objet_id ? ` ${e.objet_id.slice(0, 8)}` : ""} · ${centre(e.entite_id)}`} valeur={complet(e.survenu_le)} />
+                ))
+              : <Rangee titre="Aucune entrée" description={cherche ? "Rien ne correspond à cette recherche." : "Rien n'a encore été journalisé pour Tiroma."} />}
+          </Bloc>
+        </>
+      )}
+    </>
+  );
+}
+
 const SECTIONS: Record<Section, { titre: string; sous: string }> = {
   general: { titre: "Général", sous: "Entité, logiciel, point du matin, mode et état" },
   equipe: { titre: "Praticiens et équipe", sous: "Les praticiens et les assistantes du cabinet" },
@@ -559,6 +650,8 @@ const SECTIONS: Record<Section, { titre: string; sous: string }> = {
   rappels: { titre: "Rappels aux patients", sous: "Moyens de contact, réponses et derniers rappels" },
   donnees: { titre: "Vos données", sous: "Télécharger les données du cabinet" },
   installer: { titre: "Installer le cabinet", sous: "Le logiciel et l'entité du cabinet" },
+  acces: { titre: "Accès et rôles", sous: "Qui a quel profil, et ce que chaque profil voit" },
+  journal: { titre: "Journal des accès", sous: "Ce qui a été fait dans Tiroma, par qui et quand" },
 };
 
 export default function Reglages() {
@@ -638,6 +731,10 @@ export default function Reglages() {
             <Bloc titre="Patients">
               <Rangee icone="Send" titre="Rappels aux patients" description="Moyens de contact, réponses et derniers rappels" valeur={d.rappels ? (d.rappels.reglage?.mode === "essai" ? "Essai" : d.rappels.reglage?.mode === "reel" ? "En service" : d.rappels.reglage?.mode === "coupe" ? "Coupés" : "Non réglés") : undefined} href={d.rappels ? `${BASE}?section=rappels` : undefined} verrou={d.rappels ? undefined : "Profils du cabinet"} />
               <Rangee icone="Email" titre="Moyens de contact" description="Les courriels notés avec l'accord des patients" valeur={d.rappels ? `${d.rappels.contacts.length} patient${d.rappels.contacts.length > 1 ? "s" : ""}` : undefined} href={d.rappels ? `${BASE}?section=rappels` : undefined} verrou={d.rappels ? undefined : "Profils du cabinet"} />
+            </Bloc>
+            <Bloc titre="Accès">
+              <Rangee icone="Users" titre="Accès et rôles" description="Qui a quel profil, et ce que chaque profil voit" href={`${BASE}?section=acces`} />
+              <Rangee icone="Policy" titre="Journal des accès" description="Ce qui a été fait dans Tiroma, par qui et quand" href={`${BASE}?section=journal`} />
             </Bloc>
             <Bloc titre="Données" aide={<>Tiroma lit l&apos;agenda, les plans et les devis du logiciel du cabinet, sans y écrire. <Link href={`${RACINE}/tiroma?ancien=1`} className="tir-rg-lien">Ancien écran</Link></>}>
               <Rangee icone="Spreadsheet" titre="Vos données" description="Télécharger les données du cabinet (fichier JSON)" href={titulaire ? `${BASE}?section=donnees` : undefined} verrou={verrou(titulaire)} />
