@@ -44,7 +44,10 @@ Variantes par onglet :
   « 1-3 of 3 » + ‹ › 28×28.
 - **Recurring** : sous la note, « ↻ 4 events remaining » 12/400/16 #696969 (icône refresh-ccw 16, gap 4) ; pagination « 1-8 of 8 ».
 - **Canceled** : titre **barré** (line-through #262626), lignes de 68 sans mention de temps ; drapeau + ⋯ à droite.
-- **Past** : voir plus bas.
+- **Past** (après 22 h, le premier appel rapide) : pas de tête de groupe ; date au format long **« 1 November 2026 »** (14/500/20 #262626)
+  au lieu de « Sun, 1 Nov » ; pas de mention « in N minutes » ; « Join Cal Video » conservé ; pagination « 1-10 » avec ‹ › à **opacité 0,64**
+  (désactivés). La barre latérale garde le compteur « 3 » (pastille 18×18 bg #fff, 12/500, pour les non confirmées).
+  À 1024 de large la bascule liste/calendrier passe sous les onglets (2e ligne).
 
 ## Détail d'une réservation (clic sur une ligne → `?uid=…`)
 
@@ -108,5 +111,10 @@ texte #818181, pastille d'icône sombre.
 
 ## Captures (`captures/calcom-bookings/`)
 
-`1440-clair-upcoming-vide.png` · `1440-sombre-past-vide.png` · `1440-clair-vue-calendrier.png`.
-Non capturé (page vide) : lignes de réservation, menus d'une réservation, volet de détail, 390.
+`1440-clair-upcoming.png` · `1440-sombre-upcoming.png` · `390-clair-upcoming.png` · `1440-clair-unconfirmed.png` · `1440-clair-recurring.png` ·
+`1440-clair-canceled.png` · `1000-clair-past.png` (fenêtre réelle du panneau, 1024×768) · `1440-clair-detail-reservation.png` ·
+`1440-clair-detail-menu.png` · `1440-clair-menu-filter.png` · `1440-clair-vue-calendrier.png` · `1440-clair-upcoming-vide.png` · `1440-sombre-past-vide.png`.
+
+Limite des captures : l'outil de capture du navigateur intégré rend toute page en 800 px de large (1440 → ×0,556 ; 1024 → ×0,78) ;
+`zoom` à `scale: 1` renvoie les mêmes pixels réduits (vérifié : région 200×150 → 200×150 px), donc un recollage par tuiles ne donne pas
+de 1440 réel. Les mesures, elles, sont toutes au style calculé.
