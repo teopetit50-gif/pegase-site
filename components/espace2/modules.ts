@@ -114,6 +114,7 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Amendes, péages, contestations", href: `${RACINE}/tavaro/amendes` },
     { libelle: "Incidents", href: `${RACINE}/tavaro/incidents` },
     { libelle: "Réseau et flotte", href: `${RACINE}/tavaro/reseau` },
+    { libelle: "Pilotage", href: `${RACINE}/tavaro/pilotage` },
     { libelle: "Réglages", href: `${RACINE}/tavaro/reglages` },
   ]),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */

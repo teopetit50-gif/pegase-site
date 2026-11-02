@@ -29,6 +29,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | Réseau et flotte | `/espace2/tavaro/reseau` | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `reseau-1440-{sombre,clair}-{cote,diff,fusion}.png`, `reseau-390-*.png` | superposé : lignes de 57, icône, nom et résumé, en-tête de colonnes alignés ; colonnes de droite décalées de 59 px (carte plus étroite, colonne titre variable comme chez Linear) |
 | Réglages | `/espace2/tavaro/reglages` (Barème), `?vue=regles` | Linear, Settings › Labels et Templates | `linear-labels-templates.md` | `reglages-1440-{sombre,clair}-*` (Labels), `reglages-regles-1440-{sombre,clair}-*` (Templates, `--dx -30`), `reglages-390-*` | superposé : titre, boutons, filtre, en-tête, lignes de 44 ; colonne, en-tête, carte et lignes de 64 alignés ; écarts ci-dessous |
 | Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
+| Pilotage (page nouvelle, 02/11) | `/espace2/tavaro/pilotage` | Plain, Insights › Reporting | `plain-insights.md`, `plain-commun.md` | `pilotage-1440-{sombre,clair}-{cote,diff,fusion}.png` (`--ref-origine 353,8`), `pilotage-390-{sombre,clair}-cote.png` | superposé : barre de titre, boutons, titres de section, en-têtes de carte, valeurs, cadres des graphiques et axes alignés ; écart moyen 7,7 (sombre) et 7,0 (clair) /255 ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
 
@@ -218,3 +219,81 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | `loc_reglages` (sans écran jusqu'ici) | Réglages, Règles et responsables | carte-liste, « … » |
 | B23 carte « Opérations » et ses 6 onglets | dissoute : ses sujets vont au Parc (départ et rappels), aux Amendes (péages), aux Incidents (sinistres, assistance, caution), au Réseau (transferts) ; le compteur « péages hors délai » est dans le menu « … » des Amendes | — |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |
+
+## Pilotage (page nouvelle, 02/11/2026, branche `claude/pages-tavaro`)
+
+Plan : `docs/refonte-metiers/PAGES-MANQUANTES.md` (promesse du site « Quatre indicateurs suivis : la part facturée
+des retours, le délai de remise en location, celui de la dépanneuse et les véhicules à sortir »). Référence proposée
+par le plan et gardée : **Plain, Insights › Reporting** — c'est la page d'indicateurs des SaaS relevés, et aucune
+autre sous-page de Tavaro ne la prend (Incidents a Plain, Tasks). Tiroma et Tamila l'ont prise pour leur propre
+Pilotage : autre métier, la règle « une référence par sous-page dans un même métier » est tenue.
+
+Fichiers (nouveaux) : `app/espace2/tavaro/pilotage/page.tsx`, `components/espace2/tavaro/Pilotage.tsx`,
+`components/espace2/tavaro/tav-insights.css` (socle Plain et Insights recopiés de `tir-plain.css` / `tir-insights.css`
+sous le préfixe `tav-pi`, pour que les deux métiers évoluent séparément), `components/espace2/tavaro/TavPlainIcone.tsx`
+(les sept tracés de Plain utiles, repris de `tiroma/PlainIcone.tsx`). Menu : « Pilotage » entre Réseau et flotte et
+Réglages (`components/espace2/modules.ts`). Aucune page existante de Tavaro n'est modifiée.
+
+### D'où vient chaque chiffre (aucune migration, `portes.ts` inchangé)
+
+| Indicateur | Source | Calcul |
+|---|---|---|
+| Part facturée | contrats, propositions, factures du layout (`chargerMonde`) | retours (retour réel) des 30 derniers jours facturés ou « rien à facturer », sur les retours ; courbe cumulée par jour ou par semaine |
+| Facturé pour 100 retours | rpc `loc_indicateur_mois` via `chargerAudits()` (direction et valideurs) ; même calcul que `AuditVue` sur l'exemple | € TTC facturés, avoirs déduits, pour 100 retours du mois ; « Avant Tavaro » = l'audit clos, badge d'évolution |
+| Délai de remise | `loc_remises` (parc du layout) | médiane prete_le − retour_le (calcul de `ParcAtelier.tsx`) ; prêtes à temps (prete_le ≤ limite_le) |
+| Délai de la dépanneuse | `loc_incidents` et `loc_grille_assistance` (`chargerOperations`, déjà lus) — **aucune rpc** | calculé dans le navigateur : médiane arrivee_estimee_le − recu_le des incidents « dépanneuse » ; comparé au `delai_cible_min` de la grille. **L'heure d'arrivée réelle n'existe pas en base** : c'est le délai annoncé, dit dans l'aide de la carte |
+| Véhicules à sortir | rpc `loc_fiches_flotte` (`monde.flotte`, direction large) | fiches à l'avis « sortir » ; marge, utilisation, km, canal |
+
+Le filtre d'agence est celui de toutes les sous-pages ; **la fiche de flotte et l'indicateur du mois ne portent pas
+d'agence en base** : ils restent sur toute l'entreprise (dit dans l'aide et le suffixe « toutes agences »).
+
+### Les boutons de la référence et leur utilité
+
+| Bouton de Plain | Ici | Effet |
+|---|---|---|
+| Filter | Filtre : agence | filtre partagé de Tavaro (`setAgence`) |
+| Group by | Grouper par : Agence / Catégorie de véhicule | regroupe les répartitions « Part facturée par… » et « Remise par… » |
+| Timeframe | Période : 30 derniers jours (plage datée) ; Mois en cours (mène à la carte de l'indicateur) | les horizons sont ceux des données (30 jours ; mois de la rpc) |
+| Granularity | Pas : Quotidien / Hebdomadaire (Mensuel grisé) | 30 seaux d'un jour ou 5 semaines pour les courbes et les barres |
+| titre de section ⌄ | replie la section | — |
+| Ask Agent (chaque carte) | Copier pour l'assistant | le chiffre et sa série dans le presse-papier |
+| Investigate this spike | « 3 à facturer », « N en retard », « N hors délai », « N mises en vente ouvertes » | liens vers Retours (`?famille=a_chiffrer`), Parc (`?vue=remises`), Incidents (`?onglet=assistance`), Réseau (`?onglet=flotte`) |
+| (ajout) étoile | Épingler une carte, une agence ou un véhicule | section « Épinglés » en haut de la page (`espace2:epingles:tavaro-pilotage`, navigateur) |
+| Search … + téléchargement | Chercher une agence / un véhicule ; CSV | filtre les lignes ; télécharge le tableau filtré |
+| (rapports) | cases à cocher du tableau « Véhicules à sortir » | barre : Épingler, Copier pour l'assistant, Exporter en CSV, Vider |
+| Ask Sidekick Agent (B), ⟳, ≫ | Copier pour l'assistant le résumé des quatre indicateurs ; relire ; replier | presse-papier, `relire()` |
+| nom d'une ligne de rapport | agence : filtre la page sur l'agence ; véhicule : Réseau et flotte | — |
+| Customers helped (pied) | « Retours facturés », depuis le début | compteur à volets |
+
+Aucun geste de cette page n'envoie ni n'efface quoi que ce soit en base : aucune confirmation n'est donc nécessaire
+(les épingles se retirent d'un clic).
+
+### Écarts restants, avec leur raison
+
+- **Cartes** : leur contenu est celui de Tavaro ; la 2ᵉ carte de « Retours et facturation » est une répartition
+  (facturé, avoirs, avant Tavaro) là où Plain a des barres « Threads re-opened » : l'indicateur du mois n'a qu'une
+  valeur par mois. Les sections suivent l'ordre de Plain (Vue d'ensemble, volume, répartitions sur 3 colonnes,
+  rapports en tableau, pied « Customers helped »).
+- **Étoile d'épingle** dans l'en-tête de carte, à gauche de « Ask Agent » (même rond 26) : geste demandé, sans place
+  dans la référence.
+- **Données d'exemple** : peu de retours, deux remises finies, une dépanneuse : les graphiques sont plus creux que la
+  référence remplie ; aucun historique fictif n'est ajouté.
+- **Police des titres** : Whyte (licence payante) remplacée par Inter 400 à la même taille, comme Incidents.
+- **Carte** de 1128 (coquille) contre 1079 chez Plain : éléments calés à droite décalés de 49 px.
+- **390** : les seules captures 390 de Plain montrent le chargement (flou) ; comparaison côte à côte sur la barre de
+  titre et les boutons (deux lignes alignées à droite), la grille à une colonne.
+- **Cotes corrigées** sur la superposition (dans `tav-insights.css`, pas chez Tiroma) : en-tête de carte −4 px,
+  valeur −4 px de plus, pour tomber sur 1440-reel-*.png.
+
+### Ce qui n'a pas pu être fait
+
+- **Délai réel de la dépanneuse** : pas d'heure d'arrivée en base ; seul le délai annoncé est mesuré.
+- **Flotte et indicateur par agence** : pas d'agence dans `loc_fiches_flotte` ni dans `loc_indicateur_mois`.
+- **Historique de l'indicateur mois par mois** : la rpc prend `p_mois`, mais `chargerAudits()` ne lit que le mois
+  courant et `portes.ts` reste inchangé.
+- **Aiguillage** : aucun repère en base ne vise ces indicateurs ; aucune règle ajoutée, `verifier-aiguillage` vert.
+  À signaler à la session Refonte : les lignes de journal `loc_incidents` (b2_12 à b2_16) tombent encore sur
+  `/espace2/tavaro?objet=` faute de règle vers Incidents › Assistance.
+
+Recette : aucun défilement de côté à 390, 768, 1024, 1440, 1700 (sombre et clair) ; gestes passés au navigateur
+(menus, pas, regroupement, filtre, épingles, sélection, CSV, copie, B, relire, replier), aucune erreur console.
