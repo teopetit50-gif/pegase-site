@@ -135,3 +135,36 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
 - **Écarts restants** : graphiques en SVG dessinés ici aux couleurs et mesures relevées (barres 15 rx 2, #8a94ed / #4252e1 / #d2d6f8, grille
   bord-2, moyenne pointillée) plutôt que Recharts ; pas de bouton « Ask Agent » sur les cartes (aucun agent dans Tamila) ; à 390, les
   quatre boutons passent sur trois lignes (libellés plus longs) ; le deuxième titre de section tombe 6 px plus haut.
+
+## Dossier — `/espace2/tamila/dossiers/[id]`
+
+- **Référence** : Linear, page d'une Initiative (Overview, Projects, volet « Initiative details »). **Relevé** : `linear-initiative.md`.
+  Captures `linear-initiative/1440-reel-*.png`, `1440-sombre-volet-details.png`, `1440-sombre-onglet-projects-volet.png`, `390-*.png`.
+- **Correspondance** : fil « Initiatives › nom » → « Dossiers › référence · intitulé » ; étoile ; « … » = gestes du dossier (exporter G10,
+  clôturer G11, annuler la clôture G12, convertir l'audit G13, membre G62, muraille G63, agenda L11, bordereau L12, journal L17) ; copier
+  l'adresse ; notifications → journal des accès ; « + » = ajouter (partie G14, appel G17, délai G18, date fixée G19, audience G25, avis
+  G61, pièce G43, et selon l'onglet pièce attendue G27, temps G44). Onglets Overview · Activity · Projects (+ vue) → Vue d'ensemble ·
+  Procédure · Pièces · Honoraires · Conformité (+ agenda .ics) ; « Open Initiative details » (⌘ I) → volet : la ligne choisie (propriétés
+  et gestes), Propriétés du dossier (B18), Activité (journal, B38).
+  Vue d'ensemble : tuile, intitulé, résumé (RG, matière, mode, juridiction), Properties (statut, priorité tirée de la prochaine échéance,
+  responsable, date clé), Resources (archives prêtes, G66 ; « + » = exporter), Latest update → « Prochaine échéance » (santé : dans les
+  temps / à confirmer / en retard ; décisions en attente avec Approuver / Refuser, G9 ; Confirmer G20 ; Acte déposé G23), Description →
+  Parties (B19), Projects → Échéances (délais B20 et audiences B21 dans le tableau de Linear).
+  Procédure : Appel, Délais (Confirmer, Corriger, Interrompre, Acte déposé, Annuler : G20-G24), Audiences (G26), Avis RPVA (B35),
+  Expertise (B24 : dates G31-G32, étapes G33-G36). Pièces : pièces (B28), pièces attendues (B22 : G27-G30), lectures (B26 : G37-G41
+  avec confirmation, Lire L13 → la fenêtre B27 avec Word/PDF L14 et « Réclamer au confrère » G42), bordereau (B29). Honoraires : B30-B32
+  (convention, proposé à la saisie, temps, provisions, factures ; G44-G55, impression L16). Conformité : conflits et vigilance en
+  premier (B33-B34, G57-G60), parties (G14-G16), qui voit le dossier et murailles (B36, G62-G65), exports (B37, G66), journal (B38, L17).
+- **Comment** : les composants de l'écran d'avant (`DossierTamila`, `HonorairesTamila`, `ConformiteTamila`, `AttentesTamila`,
+  `ExpertiseTamila`, `AnalysesTamila`) prennent un `rendu` : avec lui, ils ne rendent plus leurs cartes, seulement leurs fenêtres, et
+  donnent leurs données et leurs gestes au dessin de l'espace 2. Sans `rendu`, rien ne change (`/espace/tamila`, `?ancien=1`). Les gestes
+  sans fenêtre qui écrivent (retirer une partie ou un membre, demander une levée, annuler une clôture, convertir un audit, noter une étape
+  d'expertise ou une pièce attendue, ignorer une proposition, annuler un temps, demander une lecture) passent par une confirmation.
+- **Comparaisons** : `dossier-1440-{sombre,clair}-{cote,diff,fusion}.png` (`--dx -31` : colonne de 805 centrée dans une carte plus
+  étroite), `dossier-1440-sombre-volet-cote.png` (ligne choisie et volet, à côté de `1440-sombre-volet-details.png`),
+  `dossier-1440-sombre-procedure-cote.png` (tableau, à côté de `1440-sombre-onglet-projects-volet.png`), `dossier-390-{sombre,clair}-cote.png`.
+  Mesures : tuile 152, titre 200, résumé 232 (texte 236), Propriétés 279 (pilules à +81), Ressources 319, carte « Latest update » 363
+  (méta 412, texte 448, actions 512, fin 557), Description 569, section suivante 92 plus bas — celles du relevé.
+- **Écarts restants** : les fenêtres des gestes (B39, B31, B34, B23, B25, B27) gardent l'habillage de l'écran d'avant (Linear n'a pas
+  ces formulaires) ; l'onglet Projects de Linear est une frise (Timeline) — ici, Procédure est le tableau de la vue d'ensemble, que
+  Linear montre lui-même à 390 à la place de la frise ; pas de réactions ni de commentaires sous la carte (rien de tel dans le métier).
