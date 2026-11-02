@@ -165,17 +165,17 @@ côte juraient. **On harmonise** :
 
 ### Ce qui jure encore
 
-*Mis à jour le 02/11 au soir, après la réintégration d'Opportunités
-(59835427), de Membres (a4f27808) et de Messages (bcb9e135). Le Fil est
-encore en cours de reprise ; cette liste se refera une fois les quatre
-réintégrées.*
+*Mis à jour le 02/11 au soir, après la réintégration des quatre
+reprises : Opportunités (59835427), Membres (a4f27808), Messages
+(bcb9e135) et Fil (94f944b4). Mis en ligne sur omegaai.fr le même soir,
+avec l'accord de Teo.*
 
-- Opportunités, Membres et Messages ont la DA des moteurs (kit `lin/`).
-  Le Fil garde encore l'habillage d'avant : la rubrique ne sera homogène
-  qu'après sa reprise.
-- Messages ne s'appuie plus sur Slack mais sur les pages publiques de
-  Zulip : une conversation est un sujet dans un salon, ou un message
-  privé ; plus de fils de réponse.
+- Les quatre pages ont la DA des moteurs (kit `lin/`, barre du titre de
+  44 px, panneau de droite) et s'appuient sur des pages publiques de leur
+  référence : Circle (Fil), pappers.be (Membres), Zulip (Messages, à la
+  place de Slack), Attio (Opportunités).
+- Dans le Fil, « X peut aider » nomme des membres sans lien vers leur
+  fiche ; les auteurs et le panneau de droite y mènent.
 - Dans « Conversations récentes » (Messages), les participants ne mènent
   pas à la fiche ; une fois la conversation ouverte, l'interlocuteur y
   mène.
@@ -189,10 +189,8 @@ rechargement (vu aussi sur `/espace2/contacts`). La cause : la copie de
 (`components/espace2/theme.ts`), dont le nettoyage retire le thème au
 démontage. Non corrigé ici, puisque ce n'est pas un raccord du réseau.
 
-### Avant une mise en production (décision de Teo)
+### Après la mise en ligne (02/11 au soir)
 
-- Relire la prévisualisation Vercel de la PR, en particulier en sombre à
-  390.
 - Décider du défaut de thème du tiroir ci-dessus (il touche tout Espace
   2).
 - Le réseau n'a encore aucune table. En production, un client connecté en
