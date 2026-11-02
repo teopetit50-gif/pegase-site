@@ -97,3 +97,23 @@ CARTE 245,9 1187×855 (bg #f9f9fa, bd 0.5px #e2e2e2, r 12px) — display flex, o
 1. Carte blanc cassé coupée en deux : à gauche la liste « Triage » de 5 éléments (titre gras tronqué + OME-xx à droite, auteur et « 18min ago » en dessous), le premier surligné gris.
 2. À droite, en-tête avec le fil « OME-19 Facture fournisseur… » et quatre petites icônes d'action (valider, refuser, doublon, reporter) à l'extrême droite.
 3. Grand titre 24px en gras, rangée de pilules blanches (Triage, Priority, Assignee, Project, Labels), description en 15px, section « Activity » et boîte de commentaire blanche arrondie.
+
+---
+
+# Complément du 01/11/2026 (Triage rempli, sombre + clair)
+
+## Ce qui a été créé
+
+Tickets en Triage créés par moi (équipe OME, aucune action Accept/Decline faite) : OME-49 « Courriel de Mme Rolland : fissure sur l'enduit côté jardin » (High, Client + Réserve), OME-50 « Bon de livraison Lafarge non signé — 12 m³ de béton » (Medium, Facture), OME-51 « Appel du voisin : bruit du chantier avant 7 h » (Low, Sécurité), OME-52 « Photo du conducteur : échafaudage sans plinthe au R+2 » (Urgent, Sécurité + Urgent chantier), OME-53 « Relance URSSAF : attestation de vigilance à fournir » (Medium, Administratif), OME-54 « Devis plâtrier reçu : doublage du local technique » (sans priorité, Facture), plus les 5 sous-tickets d'OME-19 (OME-55 à OME-59, nés en Triage). Les 5 éléments de Teo (OME-15 à OME-19) sont inchangés. Compteur : **16** (« Triage (16) » dans le titre de l'onglet, « 16 » dans la barre latérale).
+
+## Ajouts au relevé
+
+- Liste : 16 lignes `a` 384×59 (r 8px, transition color 0.15s) ; quand le ticket a une priorité, son icône 16×16 apparaît **entre l'auteur et l'heure** sur la 2ᵉ ligne (barres grises ; Urgent = carré orange lch(66 80 48) avec « ! »).
+- Sans élément ouvert, la moitié droite affiche l'état vide : illustration SVG 132×84 (≈ 20 Ko, traits fins, voir capture `1440-sombre-liste-vide-a-droite.png`), libellé « 16 issues to triage » 13px/500 c secondaire (sombre lch(90.451 1.2 272)), bouton « + Create triage issue » (12px/500, bg lch(10.149 0.689 272) en sombre, r 9999px, p 0 8px 0 6px, m-top 8px, h 24).
+- Ligne survolée/active (sombre) : `::before` lch(9.345 0.85 272) au survol ; l'élément ouvert garde un fond plus soutenu (voir capture `1440-sombre-element-ouvert.png`, ligne OME-19).
+- Sombre, couleurs : titre de ligne lch(100 0 272) ; « OME-59 », auteur, heure lch(61.803 1.2 272) ; en-tête « Triage » lch(90.451 1.2 272) ; fond de carte lch(5.52 0.4 272) ; filet sous l'en-tête 0.5px lch(13.08 1.48 272).
+- À 390×844 : la liste prend toute la largeur (lignes 390×59, marges 8px), titre tronqué « … » avant l'identifiant ; ouvrir un élément remplace la liste (pas de vue partagée).
+
+## Captures (`captures/linear-triage/`)
+
+`1440-sombre-liste-vide-a-droite.png`, `1440-sombre-element-ouvert.png`, `1440-clair-element-ouvert.png`, `390-sombre.png`, `390-clair.png`.
