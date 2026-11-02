@@ -31,7 +31,8 @@
 
 /* ——— corps : liste et volet ——— */
 .v2 .lor-pj-corps { flex: 1; display: flex; min-height: 0; }
-.v2 .lor-pj-liste { flex: 1; min-width: 0; container-type: inline-size; padding-bottom: 8px; }
+.v2 .lor-pj-liste { flex: 1; min-width: 0; container-type: inline-size; padding-bottom: 8px; overflow-x: clip; }
+/* 1024 : comme Linear, le libellé « Statut » plus large que sa colonne de 28 est rogné au bord de la liste (capture 1024-sombre-liste), la page ne défile pas de côté */
 
 /* la grille commune à l'en-tête de colonnes et aux lignes */
 .v2 .lor-pj-grille {
