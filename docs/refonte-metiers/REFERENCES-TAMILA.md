@@ -5,6 +5,21 @@ Code : `app/espace2/tamila/*`, `components/espace2/tamila/*` (préfixes `tam-` p
 Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-tenants`) et
 `claude/refs-plain-attio-cal-a3a72b` (`plain-commun`, `plain-insights`, `plain-tasks`, `plain-tenants`).
 
+## En bref (sous-page → référence → relevé → superposition 1440, écart moyen sombre / clair)
+
+| Sous-page | Référence | Relevé | Superposition |
+|---|---|---|---|
+| Vue d'ensemble `/espace2/tamila` | Linear, My issues | `linear-my-issues.md` | 11,6 / 12,1 sur 255 (contenu) ; géométrie au pixel |
+| Arrivées `/arrivees` | Linear, Triage | `linear-triage.md` | 6,0 / 6,0 |
+| Dossier `/dossiers/[id]` | Linear, Initiative | `linear-initiative.md` | 5,9 / 6,0 |
+| Honoraires du cabinet `/honoraires` | Plain, Accounts | `plain-tenants.md` | 9,2 / 8,2 |
+| Pilotage `/pilotage` | Plain, Insights | `plain-insights.md` | 9,5 / 9,5 |
+| Conformité du cabinet `/conformite` | Plain, Tasks | `plain-tasks.md` | 9,2 / 8,0 |
+| Réglages `/reglages` | Linear, Settings › Team | `linear-team-settings.md` | 3,6 / 4,1 |
+
+Ce qui reste dans l'écart moyen est le contenu (textes, nombres, longueurs) : les positions, tailles, couleurs et rayons mesurés
+(`tam-mesure.mjs`) tombent sur ceux des relevés, à 1 px près, sauf les écarts écrits page par page ci-dessous.
+
 ## Outils de preuve
 
 - `outils/tam-capture.mjs <url> <largeur> <sombre|clair> <sortie>` : Playwright, `deviceScaleFactor: 1`, 1440×900 ou 390×844,
