@@ -57,7 +57,9 @@ type Props = {
 type Filtre = "a_surveiller" | "denonces" | "tous";
 const nouvelId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-export default function Contrats({ source, contexte, client_id, societes, objets, onOuvrir, onFait }: Props) {
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useContratsGroupe({ source, contexte, client_id, societes, objets, onFait }: Omit<Props, "onOuvrir">) {
   const [bruts, setBruts] = useState<ContratBrut[]>(() => contratsExemple(objets));
   const [reels, setReels] = useState<Contrat[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -188,6 +190,11 @@ export default function Contrats({ source, contexte, client_id, societes, objets
     [source, charger, onFait],
   );
 
+  return { bruts, setBruts, reels, setReels, erreur, setErreur, filtre, setFiltre, charger, exemple, tous, liste, compte, role, peutSaisir, decisionDe, proposer, faireValider, peutDenoncer, peutArchiver, edition, setEdition, enregistrer, denonce, setDenonce, denoncer, archiver };
+}
+
+export default function Contrats({ source, contexte, client_id, societes, objets, onOuvrir, onFait }: Props) {
+  const { reels, erreur, filtre, setFiltre, liste, compte, peutSaisir, decisionDe, faireValider, peutDenoncer, peutArchiver, edition, setEdition, enregistrer, denonce, setDenonce, denoncer, archiver } = useContratsGroupe({ source, contexte, client_id, societes, objets, onFait });
   return (
     <section id="vrl-contrats" className="esp-carte" aria-label="Contrats du groupe à dénoncer" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
@@ -315,7 +322,7 @@ export default function Contrats({ source, contexte, client_id, societes, objets
 }
 
 /* ——— ajouter ou corriger un contrat ——— */
-function DialogueContrat({ contrat, societes, objets, onFermer, enregistrer, onFait }: {
+export function DialogueContrat({ contrat, societes, objets, onFermer, enregistrer, onFait }: {
   contrat: Contrat | null;
   societes: Societe[];
   objets: Objet[];
@@ -474,7 +481,7 @@ function DialogueContrat({ contrat, societes, objets, onFermer, enregistrer, onF
 }
 
 /* ——— noter la dénonciation partie ——— */
-function DialogueDenonciation({ c, onFermer, denoncer, onFait }: { c: Contrat; onFermer: () => void; denoncer: (c: Contrat, date: string, motif: string) => Promise<boolean>; onFait: (m: string) => void }) {
+export function DialogueDenonciation({ c, onFermer, denoncer, onFait }: { c: Contrat; onFermer: () => void; denoncer: (c: Contrat, date: string, motif: string) => Promise<boolean>; onFait: (m: string) => void }) {
   const jour = aujourdhui();
   const [date, setDate] = useState(jour);
   const [motif, setMotif] = useState("");
