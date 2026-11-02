@@ -129,6 +129,7 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Créneaux et appels", href: `${RACINE}/tiroma/creneaux` },
     { libelle: "Fauteuils", href: `${RACINE}/tiroma/fauteuils` },
     { libelle: "Plans et devis", href: `${RACINE}/tiroma/plans` },
+    { libelle: "Avant les rendez-vous", href: `${RACINE}/tiroma/avant` },
     { libelle: "Pilotage", href: `${RACINE}/tiroma/pilotage` },
     { libelle: "Réglages", href: `${RACINE}/tiroma/reglages` },
   ]),

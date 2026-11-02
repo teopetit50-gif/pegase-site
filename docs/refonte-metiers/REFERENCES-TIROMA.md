@@ -11,6 +11,7 @@ Consigne : `docs/refonte-metiers/cloud/COMMUN.md` et `cloud/TIROMA.md` (branche 
 | Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | faite : en-tête, colonnes de 324 au pas de 348, têtes de 50, cartes (identifiant, titre, puces, pied) superposées ; gestes testés |
 | Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | faite : barre de titre, boutons, titre de section, cartes (titre, valeur, graphique, axes) superposés ; gestes testés |
 | Réglages | `/espace2/tiroma/reglages` | Linear, Settings › Team | `linear-team-settings.md` | `reglages-*` | faite : écart moyen 3,3/255 ; lien retour, titre, cartes, rangées de 65, h3 confondus ; gestes testés |
+| Avant les rendez-vous | `/espace2/tiroma/avant` | Linear, Triage | `linear-triage.md` | `avant-*`, `avant-ouvert-*` | faite (02/11, pages manquantes, branche `claude/pages-tiroma`) : liste de 400, lignes de 59, en-têtes de 44, état vide superposés ; écart moyen 6,3/255 ; gestes testés |
 
 ## Fichiers communs (préfixe `tir-`, propres à Tiroma)
 
@@ -216,3 +217,78 @@ Un geste qui écrit en base ou qui ne se défait pas demande une confirmation.
 Superpositions refaites après ces ajouts (mêmes fichiers `comparaisons/tiroma/*`) : Aujourd'hui 9,5, Créneaux 12,9, fil
 ouvert 9,1, Plans 12,7, Pilotage 9,3, Fauteuils 9,2 (/255) ; la barre du fil retrouve ses trois groupes (statut ·
 Noter l'appel, Note, Plus · Copier pour l'assistant, ⟳).
+
+## Avant les rendez-vous ← Linear, Triage (02/11/2026, page manquante)
+
+Plan : `PAGES-MANQUANTES.md` (ligne TIROMA). Le site vend l'écran « Avant les rendez-vous » (« À J-2 », retour du
+laboratoire, « Implants des chirurgies de la semaine » rapprochés du stock, « Orthodontie : accords et semestres »,
+« Traitement interrompu », devis à échéance) ; jusqu'ici un groupe d'Aujourd'hui dont les lignes sans plan ne menaient
+nulle part. Référence proposée gardée : Linear Triage n'était pris par aucune autre sous-page de Tiroma (Aujourd'hui =
+My issues, Plans = Board, Réglages = Team) et c'est exactement le geste : une file à examiner, une vérification ouverte à droite.
+
+Fichiers (tous nouveaux, sauf trois lignes) : `app/espace2/tiroma/avant/page.tsx`, `components/espace2/tiroma/AvantRendezVous.tsx`,
+`avant.ts` (lectures), `AvantIcone.tsx` (Resolved, AlarmClock, Face de Linear, absents du sprite de Tiroma), `tir-triage.css`
+(mesures du relevé, identiques à la copie de Tamila « Arrivées », préfixe `tir-av`), `public/espace2/tiroma/avant-vide-*.png`
+(l'illustration de Linear, prise sur les captures). Modifiés : `modules.ts` (onglet « Avant les rendez-vous » après Plans et
+devis), `aiguillage.ts` (`tiroma_travaux_labo` et `tiroma_ententes_odf` → `/espace2/tiroma/avant?verif=<id>` ; avant : Aujourd'hui),
+`Aujourdhui.tsx` (une ligne : le groupe « Avant les rendez-vous » mène à `?verif=` quand la vérification ne porte pas de plan).
+
+Données : aucune migration, `components/espace/tiroma/portes.ts` inchangé. La porte b3_04 `tiroma_avant_rendez_vous` à
+J-2 vient du dossier du layout (`p_jours = null` = `labo_verif_jours`) ; la semaine (`p_jours = 7`) est lue par `avant.ts`.
+Le volet lit, sous RLS et en lecture seule, les fiches nommées : `tiroma_travaux_labo` (laboratoire, travail, envoyé, attendu,
+revenu), `tiroma_ententes_odf` (demande, accord, tacite, début, semestre) et `tiroma_stock` famille implant (référence,
+dimensions, quantité, seuil, péremption : les implants de la chirurgie rapprochés du stock). Profil direction : message, pas
+de noms (la porte refuse ce profil). Exemple : 17 vérifications sur la semaine (16 éléments dans la référence remplie).
+
+Choix tranchés (Teo absent) :
+- **Horizon par défaut : la semaine.** Aujourd'hui montre déjà J-2 ; la promesse des implants porte sur « la semaine ».
+  J-2 reste à un clic (Affichage › Horizon, `?horizon=j2`).
+- **Pas d'onglets par nature** (proposés par le plan) : l'en-tête du Triage de Linear n'en a pas ; la nature et la gravité
+  sont dans le Filtre (`?nature=`), comme Linear range ses filtres.
+- **Identifiants par nature** (LAB-, IMP-, DEV-, MUT-, ODF-, INT-) à la place de OME-n ; titre = le texte de la base ;
+  « auteur » = le patient ; priorité = gravité (critique → Urgent, attention → Haute, sans souci → Basse) ; puce d'échéance
+  (calendrier barré rouge) sur les critiques ; « 1h ago » → « dans 2 j » / « il y a 21 j ».
+- `?verif=` accepte la clé de la page (`nature:id`) ou l'id nu d'une fiche (celui de l'aiguillage). Une vérification
+  d'implant n'a pas d'objet (b3_04) : l'aiguillage la laisse sur Aujourd'hui, la page l'ouvre par sa clé.
+
+Boutons de la référence et leur utilité (rien n'écrit en base ; aucun geste n'envoie ni n'est irréversible, donc pas de
+confirmation ; utilités côté navigateur par `navigateur.ts`, plus deux clés `espace2:verifies:tiroma`, `espace2:ecartes:tiroma`) :
+
+| Bouton de Linear | Ce qu'il fait |
+|---|---|
+| étoile de la liste | Épingler la page dans Aujourd'hui (groupe « Épinglés ») |
+| Filtre | nature (Laboratoire, Implants, Devis et mutuelle, Orthodontie, Traitement interrompu), gravité ; « Retirer les filtres » |
+| Display | horizon J-2 / semaine ; afficher les vérifiées, écartées, reportées ; copier la liste pour l'assistant ; export CSV |
+| étoile du détail | Épingler la vérification dans Aujourd'hui |
+| « … » | copier le lien, copier pour l'assistant, page liée, vérifications du patient, précédente / suivante (↑ ↓) |
+| Accept | « Marquer vérifiée » sur ce poste (réversible), ouvre la suivante |
+| Decline | « Écarter : sans objet » sur ce poste (réversible, Affichage › Les écartées) |
+| Mark as duplicate | les autres vérifications du même patient (`?patient=`) |
+| Snooze | reporter à demain, 3 j, 7 j ; remettre |
+| trois ronds de la barre | copier le lien ; ouvrir la page liée (carte du plan, ou appels à reprendre) ; suivre le patient |
+| Copy as prompt \| Choose | copier pour l'assistant \| choisir : cette vérification, la liste, la liste en CSV |
+| pilules | état, priorité, « Qui s'en charge » (menu de l'équipe, ce poste), nature (filtre), fiche (page liée), date |
+| réactions, pièce jointe | copier le texte ; ouvrir la fiche liée |
+| Add sub-issues | le geste suivant : copier la relance du laboratoire, copier la commande d'implants (références sous le seuil), noter la mutuelle ou l'appel sur la carte du plan, inscrire en liste d'attente (ODF) |
+| Unsubscribe, avatars | suivre / ne plus suivre le patient ; qui s'en charge |
+| boîte de commentaire | note de ce poste (⌘ Entrée), trombone = joindre le lien de la fiche ; notes retirables |
+| Create triage issue | « Inscrire en liste d'attente » (G9, page Créneaux) |
+
+Gestes testés au navigateur (exemple) : ouverture par `?verif=w-3` et `?verif=o-2`, Vérifiée (ouvre la suivante), Reporter,
+note, Qui s'en charge, ↓, filtre Implants, export CSV, Affichage › Les vérifiées, épinglage visible dans Aujourd'hui ; aucune
+erreur de page. Recette sans défilement de côté à 390, 768, 1024, 1440, 1700 (liste, quatre vérifications ouvertes, J-2).
+
+Superposition (carte, fenêtre 1500×920 contre la référence 245,9 1187×855, liste à gauche et moitié droite vide) : écart
+moyen 6,3/255 (sombre) et 6,4/255 (clair) ; filet de 400, en-tête 44, lignes de 59 au pas de 59, colonnes titre / identifiant,
+ligne 2 (avatar, puce, priorité, date) et l'état vide (illustration recalée de 3 px, texte, bouton) confondus. Vue ouverte :
+côte à côte avec `1440-*-element-ouvert.png` (`avant-ouvert-1440-*-cote.png`) et à 390 (`avant-ouvert-390-*.png`) : en-tête,
+barre de triage, barre flottante, titre 24/600, pilules, description 15/24, Activity, boîte de commentaire dans le même ordre.
+Restent, expliqués :
+- 1 px vers le bas dans la carte : le bord de 0,5 de notre carte (même écart qu'à Tamila) ;
+- textes, nombre de lignes et de puces : contenu du cabinet ; avatars : initiales du patient (aucune photo en base) ;
+- vue ouverte : pas de sous-tickets ni de commentaires d'autrui (rien de tel en base) ; les références ouvertes ne sont
+  qu'à l'échelle 0,55 (800×500), d'où une comparaison côte à côte et non pixel à pixel ;
+- le cadre de l'espace 2 (barre du haut, rail, sous-menu) n'appartient pas à la page copiée.
+
+Non fait : aucune promesse de la ligne n'est sans back-end ; rien n'a été laissé de côté. Sélection multiple et actions
+groupées : le Triage de Linear n'a pas de cases ; non ajoutées (règle 1).

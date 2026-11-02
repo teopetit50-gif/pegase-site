@@ -1,0 +1,566 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA, Avant les rendez-vous — le Triage de Linear (02/11/2026)
+   Relevé : releves/linear-triage.md (29/10 et compléments du 01/11),
+   captures 1440-reel-*.png, 1440-*-element-ouvert.png, 390-*.png. Mêmes
+   mesures que la copie de Tamila (Arrivées, tam-triage.css), préfixe tir-av.
+
+   Carte          flex : liste 400 (filet droit 0,5) + détail.
+   Liste          en-tête 44 (filet bas 0,5, p 0 8 : titre 13/500 t2, étoile
+                  28 ; Filtre + Display 28 à droite, gap 4) ; défilement
+                  p 8 0 ; ligne a → 384×59 (marges 8), r 8, p 10 14 ;
+                  colonne gap 6 ; ligne 1 (16) : titre 13/500 t1 tronqué +
+                  identifiant 13/450 −0,26 t3 ; ligne 2 (15, gap 10) : avatar
+                  16 + nom 12/450 t3, à droite puce d'échéance 20 (p 0 6,
+                  r 48, bord 0,5), priorité 16, date 12/450 t3.
+   Détail         en-tête 44 (fil r 6 p 2 4 → h2 13/500 t2 ; étoile, « … » ;
+                  barre de triage : 4 ronds 28, gap 6) ; barre flottante 44
+                  (p 8 12 8 0, ronds pleins + bouton double 57×28) ; corps :
+                  colonne p 21,75 14 ; titre 24/600/32 −0,16 t1 ; pilules 24
+                  (gap 6, p 10 0 ; fond bouton, r 9999, p 0 8 0 6, 12/500,
+                  libellé 12/450) ; description 15/450/24 −0,1 t2 ; deux
+                  ronds 28 ; « Add sub-issues » 24 (p 0 12 0 6, 12/500 t3) ;
+                  « Activity » 15/600/23 ; événement 12/450/16,8 t3 ; boîte de
+                  commentaire (r 8, p 12 16, bord 0,5, ombre).
+   Vide           centré : illustration 132×84, « N … » 13/500 t2, bouton 24
+                  (r 9999, p 0 8 0 6, 12/500), écart 12.
+   1024           liste 386 + moitié droite.  ≤ 768 : liste seule, ouvrir
+                  une vérification la remplace.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tir-av {
+  /* ligne ouverte (clair relevé lch(92.94 0.5 282) ; sombre lu sur 1440-sombre-element-ouvert.png : le pas du survol d'onglet) */
+  --tir-choisi: lch(13.861 1.043 272);
+  --tir-filet-ligne: lch(16.32 1.48 272);
+}
+html[data-v2-theme="light"] .v2 .tir-av {
+  --tir-choisi: lch(92.94 0.5 282);
+  --tir-filet-ligne: lch(84.44 0 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tir-av {
+    --tir-choisi: lch(92.94 0.5 282);
+    --tir-filet-ligne: lch(84.44 0 282);
+  }
+}
+
+.v2 .tir-av .tir-av-triage {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.v2 .tir-av .tir-av-liste {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 400px;
+  border-right: 0.5px solid var(--tir-carte-bord);
+}
+.v2 .tir-av .tir-av-tete {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px;
+  border-bottom: 0.5px solid var(--tir-carte-bord);
+}
+.v2 .tir-av .tir-av-tete h2 {
+  padding: 0 4px 0 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t2);
+  white-space: nowrap;
+}
+.v2 .tir-av .tir-av-defile {
+  flex: 1;
+  min-height: 0;
+  padding: 8px 0;
+  overflow: auto;
+}
+.v2 .tir-av .tir-av-note {
+  margin: 0 8px 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  line-height: 16.8px;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-note a {
+  color: var(--tir-t2);
+  text-decoration: underline;
+}
+.v2 .tir-av .tir-av-ligne {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 59px;
+  margin: 0 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--tir-t1);
+  isolation: isolate;
+  transition: color 0.15s;
+}
+.v2 .tir-av .tir-av-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  z-index: -1;
+}
+@media (any-hover: hover) and (any-pointer: fine) {
+  .v2 .tir-av .tir-av-ligne:hover::before {
+    background: var(--tir-survol);
+  }
+}
+.v2 .tir-av .tir-av-ligne[aria-current="true"]::before {
+  background: var(--tir-choisi);
+}
+.v2 .tir-av .tir-av-ligne[data-etat] .tir-av-titre {
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-ligne[data-etat="ecartee"] .tir-av-titre {
+  text-decoration: line-through;
+}
+.v2 .tir-av .tir-av-l1,
+.v2 .tir-av .tir-av-l2 {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.v2 .tir-av .tir-av-l1 {
+  gap: 6px;
+  height: 16px;
+}
+.v2 .tir-av .tir-av-l2 {
+  gap: 10px;
+  height: 15px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-titre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tir-av .tir-av-id {
+  flex: none;
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-auteur {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.v2 .tir-av .tir-av-auteur > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tir-av .tir-av-l2 .tir-avatar {
+  font-size: 7px;
+}
+/* puce d'échéance (complément « Échéance dépassée ») : 20, r 48, p 0 6, bord 0,5, fond = carte */
+.v2 .tir-av .tir-av-puce {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  height: 20px;
+  margin-right: -4px;
+  padding: 0 6px;
+  border: 0.5px solid var(--tir-filet-ligne);
+  border-radius: 48px;
+  background: var(--tir-carte);
+}
+.v2 .tir-av .tir-av-puce span {
+  margin: 0 1px 0 6px;
+}
+.v2 .tir-av .tir-av-prio {
+  display: flex;
+  flex: none;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-quand {
+  flex: none;
+}
+
+/* ——— le détail ——— */
+.v2 .tir-av .tir-av-detail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .tir-av .tir-av-fil {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0 2px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  color: var(--tir-t2);
+  white-space: nowrap;
+}
+.v2 .tir-av .tir-av-fil h2 {
+  overflow: hidden;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+.v2 .tir-av .tir-av-fil span {
+  letter-spacing: -0.26px;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.v2 .tir-av .tir-rond[aria-pressed="true"] svg {
+  color: var(--tir-t1);
+}
+.v2 .tir-av .tir-rond:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .tir-av .tir-av-barre {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 44px;
+  padding: 8px 12px 8px 0;
+}
+.v2 .tir-av .tir-av-avis {
+  margin-right: auto;
+  padding-left: 14px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-t3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* « Copy as prompt | Choose coding tool » : bouton double 57×28 */
+.v2 .tir-av .tir-av-double {
+  display: inline-flex;
+}
+.v2 .tir-av .tir-av-double-g,
+.v2 .tir-av .tir-av-double-d {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border: 0.5px solid transparent;
+  background: var(--tir-bouton);
+  color: var(--tir-t3);
+  transition: background-color 0.15s;
+}
+.v2 .tir-av .tir-av-double-g {
+  width: 33px;
+  padding: 0 4px 0 6px;
+  border-radius: 9999px 0 0 9999px;
+}
+.v2 .tir-av .tir-av-double-d {
+  width: 24px;
+  padding: 0 6px 0 4px;
+  border-radius: 0 9999px 9999px 0;
+}
+.v2 .tir-av .tir-av-double-g svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .tir-av .tir-av-double-g:hover,
+.v2 .tir-av .tir-av-double-d:hover,
+.v2 .tir-av .tir-av-double-d[aria-expanded="true"] {
+  background: var(--tir-survol-onglet);
+}
+.v2 .tir-av .tir-av-corps {
+  flex: 1;
+  min-height: 0;
+  padding: 0 14px 24px 0;
+  overflow: auto;
+}
+.v2 .tir-av .tir-av-colonne {
+  padding: 9px 0 0 14px;
+}
+.v2 .tir-av .tir-av-grand {
+  margin-bottom: 18px;
+  padding: 6px 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--tir-t1);
+}
+.v2 .tir-av .tir-av-pilules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0;
+}
+.v2 .tir-av .tir-av-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tir-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 12px;
+  color: var(--tir-t3);
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+.v2 .tir-av .tir-av-pilule:hover {
+  background: var(--tir-survol-onglet);
+}
+.v2 .tir-av .tir-av-pilule span {
+  font-weight: 450;
+}
+.v2 .tir-av .tir-av-pilule[data-valeur] span,
+.v2 .tir-av .tir-av-pilules .tir-av-pilule span:not([data-vide]) {
+  color: var(--tir-t2);
+}
+.v2 .tir-av .tir-av-pilule svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.v2 .tir-av .tir-av-texte {
+  margin: 5px -14px 0;
+  padding: 10px 14px 16px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--tir-t2);
+}
+.v2 .tir-av .tir-av-reactions {
+  display: flex;
+  gap: 0;
+  margin-left: -6px;
+}
+.v2 .tir-av .tir-av-sous {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  margin-top: 12px;
+  padding: 0 12px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t3);
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.v2 .tir-av .tir-av-sous:hover {
+  background: var(--tir-survol-onglet);
+  color: var(--tir-t2);
+}
+.v2 .tir-av .tir-av-activite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+.v2 .tir-av .tir-av-h3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--tir-t1);
+}
+.v2 .tir-av .tir-av-suivre {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t3);
+  transition: background-color 0.15s;
+}
+.v2 .tir-av .tir-av-suivre:hover {
+  background: var(--tir-survol-onglet);
+}
+.v2 .tir-av .tir-av-evenement {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 4px 1px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-evenement b {
+  font-weight: 500;
+}
+.v2 .tir-av .tir-av-evenement svg {
+  flex: none;
+}
+.v2 .tir-av .tir-av-note-texte {
+  margin: 2px 0 6px 21px;
+  font-size: 13px;
+  line-height: 19.5px;
+  color: var(--tir-t2);
+  white-space: pre-wrap;
+}
+.v2 .tir-av .tir-av-lien {
+  margin-left: 6px;
+  font-size: 12px;
+  color: var(--tir-t3);
+  text-decoration: underline;
+}
+.v2 .tir-av .tir-av-composeur {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px -8px 0;
+  padding: 12px 16px;
+  border: 0.5px solid var(--tir-menu-bord);
+  border-radius: 8px;
+  background: var(--tir-menu);
+  box-shadow: var(--tir-carte-ombre);
+}
+.v2 .tir-av .tir-av-composeur textarea {
+  width: 100%;
+  min-height: 21px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  line-height: 21px;
+  color: var(--tir-t1);
+  resize: vertical;
+  outline: none;
+}
+.v2 .tir-av .tir-av-composeur textarea::placeholder {
+  color: var(--tir-t4);
+}
+.v2 .tir-av .tir-av-composeur-pied {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.v2 .tir-av .tir-av-composeur-aide {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--tir-t4);
+}
+.v2 .tir-av .tir-av-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  color: var(--tir-t3);
+}
+.v2 .tir-av .tir-av-mini:hover {
+  background: var(--tir-survol-onglet);
+}
+.v2 .tir-av .tir-av-mini--plein {
+  border: 0.5px solid var(--tir-menu-bord);
+  background: var(--tir-bouton);
+}
+.v2 .tir-av .tir-av-mini:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— la moitié droite vide ——— */
+.v2 .tir-av .tir-av-vide {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t2);
+}
+.v2 .tir-av .tir-av-vide p {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-t3);
+}
+/* l'image (136×87, prise sur la capture) porte 3 px de marge autour du dessin de 132×84 : on la recale */
+.v2 .tir-av .tir-av-illu {
+  margin: -6px 0 6px -6px;
+}
+.v2 .tir-av .tir-av-illu--clair,
+html[data-v2-theme="light"] .v2 .tir-av .tir-av-illu--sombre {
+  display: none;
+}
+html[data-v2-theme="light"] .v2 .tir-av .tir-av-illu--clair {
+  display: block;
+}
+.v2 .tir-av .tir-av-vide .tir-av-pilule {
+  margin-top: 8px;
+  color: var(--tir-t2);
+}
+.v2 .tir-av .tir-av-retour {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .v2 .tir-av .tir-av-liste {
+    width: 386px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tir-av .tir-av-triage {
+    display: block;
+  }
+  .v2 .tir-av .tir-av-liste {
+    width: 100%;
+    border-right: 0;
+  }
+  .v2 .tir-av .tir-av-vide {
+    display: none;
+  }
+  .v2 .tir-av .tir-av-triage[data-ouvert="true"] .tir-av-liste {
+    display: none;
+  }
+  .v2 .tir-av .tir-av-tete--detail {
+    padding: 0 12px 0 8px;
+  }
+  .v2 .tir-av .tir-av-retour {
+    display: inline-flex;
+  }
+  .v2 .tir-av .tir-av-pilule {
+    height: 28px;
+  }
+  .v2 .tir-av .tir-av-fil {
+    flex: 1;
+  }
+  .v2 .tir-av .tir-av-avis {
+    display: none;
+  }
+  .v2 .tir-av .tir-av-composeur {
+    margin: 12px -8px 0;
+  }
+}
