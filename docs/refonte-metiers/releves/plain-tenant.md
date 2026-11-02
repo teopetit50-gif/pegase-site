@@ -1,6 +1,63 @@
-# Relevé — Plain, page d'un tenant (« Peintures Giraud SARL »)
+# Relevé — Plain, page d'un tenant (aujourd'hui « account »)
 
-URL : https://app.plain.com/workspace/w_01M625JFBKTE3BWN4ECASYHK2B/threads/tenants/te_01M626AQX8A2GETM0CTVT596T1/?tab=tasks (onglets Threads et Customers ouverts aussi via `?tab=`). Relevé le 29/10/2026 au `getComputedStyle`, fenêtre 1440×900 (px CSS). Rien créé ni modifié.
+Complété le 01/11/2026 sur une fiche **remplie** : « Agence Immobilière Créole »
+https://app.plain.com/workspace/w_01M625JFBKTE3BWN4ECASYHK2B/threads/tenants/te_01M6CTZVR1QD9DA3BBWC61MPTR/ (`?tab=customers|tasks|themes|issues`).
+La première partie (01/11) décrit la fiche pleine ; la suite (29/10, fiche vide « Peintures Giraud SARL ») reste valable pour la
+coque, l'en-tête, le contrôle segmenté et le volet, et est gardée telle quelle. Jetons clair/sombre : `plain-commun.md`.
+
+## 01/11 — ce qui a été créé pour cette fiche
+
+Compte `omega-fx-09` (tier Entreprise, champs Ville / MRR / Renouvellement / Contrat actif / Modules remplis) ; 12 clients rattachés
+(dont « Emily Johnson », client de démonstration de Plain, rattaché par erreur de tri — sans conséquence) ; 4 fils ouverts ; 6 tâches
+(« Envoyer le mandat de gestion signé », « Relancer la facture de syndic d'octobre », … « Clôturer le litige du lot 14 ») + 2 tâches générales.
+
+## 01/11 — la fiche pleine (1440×900, clair)
+
+```
+CARTE 353,8 1079×884
+├─ COLONNE 353,8 719×884
+│  ├─ header 719×109 : « ← Accounts » (a 97×32) ; vignette 24 + nom (input, tronqué « Agence Immobilière Cre ») ;
+│  │   méta « 12min ago by (W) You » 12/400/16 #636370 (« You » 12/550) ; à droite Favori · ⋯ · « Hide sidebar » 32×32
+│  ├─ barre d'onglets 719×72 : segmenté 382×36 (Threads 72 · Customers 90 · Tasks 55 · Themes 70 · Issues 59)
+│  │   + selon l'onglet : « Filters F » 100×34 + « Display V » 106×34 (Threads) · « Add customer + » 121×34 (Customers)
+│  └─ contenu
+│      Threads  : liste de fils, une ligne = 67 px (composant de la liste Threads, voir plain-threads.md) ; la ligne fait 897 px
+│                 de large et déborde de la colonne de 719 (barre de défilement horizontale en bas de la colonne) ;
+│                 liste p-bottom 66px ; filet haut 1px #e7e7ef
+│      Customers: recherche 687×40 « Search customers » (p 12px 16px) puis ul ; ligne li 719×64 → a p 16px 32px gap 10 :
+│                 avatar 24×24 r 6px (::before couleur générée, ex. #149d85, initiale 9,6/550 #bbffed)
+│                 + nom 14/550/20 #1f1f28 + courriel 14/400/20 #636370 (gap ~6, même ligne) + bouton × 32×32 à droite (#636370)
+│      Tasks    : ul ; ligne li 719×81 · bg #fff · bd-top 1px #e7e7ef
+│                 case 18×18 @x 377 (r 6px ; à faire = carré arrondi #448bff, faite = carré plein coché #00ab5f)
+│                 ligne 1 @x 407 : « TASK-43 » 12/475/16 #636370 + titre 14/550/20 #1f1f28
+│                 ligne 2 (y +34) : pastille compte (vignette 18 + nom 12/400/20, r 6px, contour) 
+│                 à droite : avatar assigné 18 dans un bouton 32×32 (pastille d'état 4,5 px)
+│                 Ordre observé : à faire puis faites ; les tâches IN_PROGRESS / CANCELLED n'apparaissent pas dans cet onglet.
+│      Themes   : vide — « No themes for this account » 14/550 · « No current themes related to this account. New themes
+│                 are generated daily. » 14/400 #636370 (384 de large) · bouton « View all themes » 12/550
+│      Issues   : vide — « No issues » · « No issues are currently linked to threads from this account. »
+├─ poignée de redimensionnement 1067,8 10×884 (cursor ew-resize) entre colonne et volet
+└─ VOLET DETAILS 1072,8 360×884 · bg #fff
+    « Details » 14/550/20 ; pile 360×486 bg #e0e0e9 gap 1px :
+    bloc 1 (p 0 16px 16px) — Reference ID « omega-fx-09 » geistMono 12/400/16 · Tier (pastille « Entreprise ») · Slack channels « Add Slack channel + »
+    bloc 2 (p 16px) — « Domains » 12/550 · Primary domain « example.com » · Alternate domains · Auto-link customers « ● Off »
+    bloc 3 (p 16px) — « Account fields » + bouton réglage 24×24 · Ville · MRR (€) · Renouvellement « Dec 31, 2025, 8:00 PM AST » ·
+                      Contrat actif (interrupteur 28×18 r 18px bg #5c67f4 + « Yes ») · Modules « FILED »
+    ligne : libellé 131×28 (p 6px 16px 6px 0, 12/550/16 #1f1f28, icône info 14 #adadb7) + valeur 203×28–32 (p 8px 6px ou 4px 6px, r 8px, 12/400/20)
+```
+
+Sombre : volet #1a191b, pile (filets) #323035, piste du segmenté #232225, onglet choisi #2b292d, textes #eeeef0 / #b5b2bc,
+interrupteur #5c67f4 inchangé.
+
+À 390 : la fiche ouvre le **volet Details en plein écran** par-dessus (sans le titre « Details ») ; le segmenté passe sur
+2 lignes (262×76 : Threads 76 · Customers 90 · Tasks 76 / Themes 125 · Issues 125).
+
+Captures 01/11 (`captures/plain-tenant/`) : `1440-clair.png` (onglet Threads) · `1440-sombre.png` · `1440-clair-onglet-customers.png` ·
+`1440-clair-onglet-tasks.png` · `390-clair.png` · `390-sombre.png`.
+
+## 29/10 — relevé d'origine (fiche vide, toujours valable pour la coque)
+
+URL : https://app.plain.com/workspace/w_01M625JFBKTE3BWN4ECASYHK2B/threads/tenants/te_01M626AQX8A2GETM0CTVT596T1/?tab=tasks. Relevé le 29/10/2026 au `getComputedStyle`, fenêtre 1440×900 (px CSS).
 
 Notation : `fs/fw/lh` taille/graisse/interligne, `c` couleur, `bg` fond, `bd` bordure, `r` rayon, `p` padding. Couleurs Plain directement en hex.
 
