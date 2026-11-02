@@ -55,7 +55,6 @@ const PREFIXES: [string, string][] = [
   ["grp_", "varelo"],
 ];
 
-const tiroma = objet("tiroma");
 const varelo = objet("varelo");
 
 /* objet_type → page. Une ligne par objet_type écrit par un moteur. */
@@ -118,11 +117,14 @@ export const REGLES: Record<string, Regle> = {
   loc_remises: (id) => `${RACINE}/tavaro/parc?remise=${q(id)}`,
   /* TAMILA, refait le 30/10/2026 : la page du dossier (les demandes à valider ; le point du matin ne nomme aucun dossier) */
   tamila_dossier: (id) => `${RACINE}/tamila/dossiers/${q(id)}`,
-  tiroma_evenements_agenda: tiroma("tiroma_evenements_agenda"),
-  tiroma_fauteuils: tiroma("tiroma_fauteuils"),
-  tiroma_plans: tiroma("tiroma_plans"),
+  /* TIROMA, refait le 02/11/2026 (docs/refonte-metiers/cloud/TIROMA.md) : le créneau libéré
+     ouvre son fil (Créneaux et appels), le plan sa carte (Plans et devis), le fauteuil sa
+     journée (Fauteuils) ; un travail de laboratoire reste sur Aujourd'hui (Avant les rendez-vous) */
+  tiroma_evenements_agenda: (id) => `${RACINE}/tiroma/creneaux?creneau=${q(id)}`,
+  tiroma_fauteuils: (id) => `${RACINE}/tiroma/fauteuils?fauteuil=${q(id)}`,
+  tiroma_plans: (id) => `${RACINE}/tiroma/plans?plan=${q(id)}`,
   /* calculé par tiroma_avant_rendez_vous_pour (b3_04), repris par le point du matin (b3_06) */
-  tiroma_travaux_labo: tiroma("tiroma_travaux_labo"),
+  tiroma_travaux_labo: () => `${RACINE}/tiroma`,
   grp_balances_depots: varelo("grp_balances_depots"),
   grp_contrats: varelo("grp_contrats"),
   grp_encours_depots: varelo("grp_encours_depots"),

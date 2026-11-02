@@ -435,8 +435,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       ];
     if (cle === "offload") return [{ libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true }];
     /* 29/10/2026 — DALIRO et LORANI redécoupés : leurs sous-pages viennent de modules.ts */
-    /* 02/11/2026 — TAVARO redécoupé de même (docs/refonte-metiers/cloud/TAVARO.md) */
-    if (cle === "daliro" || cle === "lorani" || cle === "tavaro") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
+    /* 02/11/2026 — TAVARO et TIROMA redécoupés de même (docs/refonte-metiers/cloud/) */
+    if (cle === "daliro" || cle === "lorani" || cle === "tavaro" || cle === "tiroma") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
     return [{ libelle: "Tableau de bord", href: `${RACINE}/${cle}`, exact: true }];
   };
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par

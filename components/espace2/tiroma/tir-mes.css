@@ -1,0 +1,448 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA — Aujourd'hui : « My issues » de Linear au 1:1 (02/11/2026)
+   Relevé : docs/refonte-metiers/releves/linear-my-issues.md (refs-linear).
+   Les cotes entre parenthèses sont celles du relevé, carte à x 245.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tir.tir-mi {
+  /* Todo : cercle contour #a6a6a6 en clair (relevé) ; en sombre, lu sur
+     la capture à taille réelle (1440-reel-sombre.png, anneau à 217) */
+  --tir-statut-todo: rgb(217, 217, 217);
+}
+html[data-v2-theme="light"] .v2 .tir.tir-mi {
+  --tir-statut-todo: #a6a6a6;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tir.tir-mi {
+    --tir-statut-todo: #a6a6a6;
+  }
+}
+
+/* ——— en-tête : ligne 1 (44, filet bas 0.5) — « My issues » h2 13/500 @263 ; « New issue » 98×28 @1325 ——— */
+.v2 .tir-mi .tir-mi-l1 {
+  flex: none;
+  display: flex;
+  align-items: center;
+  /* 43.5 : la bordure de 0.5 de la carte se rend sur 1 px à l'échelle 1 ; la liste reste à 88 du haut de la carte */
+  height: 43.5px;
+  padding: 0 8.5px 0 18px;
+  border-bottom: 0.5px solid var(--tir-carte-bord);
+}
+.v2 .tir-mi .tir-mi-h2 {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t1);
+  white-space: nowrap;
+}
+.v2 .tir-mi .tir-mi-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t2);
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.v2 .tir-mi .tir-mi-nouveau svg {
+  color: var(--tir-t3);
+}
+.v2 .tir-mi .tir-mi-nouveau:hover {
+  background: var(--tir-survol-onglet);
+}
+
+/* ——— ligne 2 (43.5) : onglets pilules 28 gap 8 dès x 253 ; à droite trois ronds 28 gap 6 ——— */
+.v2 .tir-mi .tir-mi-l2 {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 43.5px;
+  padding: 0 8.5px 0 8px;
+}
+.v2 .tir-mi .tir-mi-onglets {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .tir-mi .tir-mi-plus-vues {
+  position: relative;
+  display: none;
+}
+.v2 .tir-mi .tir-mi-plus-vues .tir-onglet {
+  gap: 6px;
+}
+
+/* ——— corps : liste défilante + volet ——— */
+.v2 .tir-mi .tir-mi-corps {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.v2 .tir-mi .tir-mi-liste {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 8px;
+}
+
+/* ——— groupe : en-tête 1171×36 inset 8, bg groupe, r 8, p 0 8 0 0, gap 6 ; groupes espacés de 8 ——— */
+/* relevé : en-tête à 96, lignes à 134 + 44 n (2 px sous l'en-tête), en-tête suivant 2 px sous la dernière ligne */
+.v2 .tir-mi .tir-mi-groupe + .tir-mi-groupe {
+  margin-top: 2px;
+}
+.v2 .tir-mi .tir-mi-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  margin: 0 8px 2px;
+  padding: 0 8px 0 8px;
+  border-radius: 8px;
+  background: var(--tir-groupe);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.v2 .tir-mi .tir-mi-replier {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 9999px;
+  color: var(--tir-t4);
+}
+.v2 .tir-mi .tir-mi-replier:hover {
+  color: var(--tir-t2);
+}
+.v2 .tir-mi .tir-mi-tete > svg {
+  flex: none;
+}
+.v2 .tir-mi .tir-mi-libelle {
+  padding: 0 2px;
+  font-weight: 500;
+  color: var(--tir-groupe-texte);
+}
+.v2 .tir-mi .tir-mi-compteur {
+  font-weight: 450;
+  color: var(--tir-groupe-compte);
+}
+.v2 .tir-mi .tir-mi-dates {
+  margin-left: 2px;
+  font-weight: 450;
+  color: var(--tir-groupe-dates);
+}
+.v2 .tir-mi .tir-mi-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  padding: 0 2px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  color: var(--tir-groupe-texte);
+}
+.v2 .tir-mi .tir-mi-plus:hover {
+  background: var(--tir-survol-onglet);
+}
+
+/* ——— ligne 1187×44, grille de colonnes du relevé (Assigned), gap 0 8 ——— */
+.v2 .tir-mi .tir-mi-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: 8px 18px 16px 55px 16px minmax(0, 1fr) 60px 18px;
+  column-gap: 8px;
+  align-items: center;
+  height: 44px;
+  isolation: isolate;
+  color: var(--tir-t1);
+}
+.v2 .tir-mi .tir-mi-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  border-radius: 8px;
+  z-index: -1;
+}
+.v2 .tir-mi .tir-mi-ligne:hover::before {
+  background: var(--tir-groupe);
+}
+.v2 .tir-mi .tir-mi-ligne[data-sans-lien] {
+  cursor: default;
+}
+.v2 .tir-mi .tir-mi-case-col {
+  grid-column: 2;
+  display: flex;
+  justify-content: center;
+}
+.v2 .tir-mi .tir-mi-case {
+  width: 14px;
+  height: 14px;
+  padding: 2px;
+  border: 1px solid #7c7c7c;
+  border-radius: 3px;
+  opacity: 0;
+}
+.v2 .tir-mi .tir-mi-ligne:hover .tir-mi-case {
+  opacity: 1;
+}
+.v2 .tir-mi .tir-mi-priorite {
+  grid-column: 3;
+  display: flex;
+  color: var(--tir-priorite);
+}
+.v2 .tir-mi .tir-mi-ident {
+  grid-column: 4;
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--tir-t3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tir-mi .tir-mi-statut {
+  grid-column: 5;
+  display: flex;
+  justify-content: center;
+}
+.v2 .tir-mi .tir-mi-titre-col {
+  grid-column: 6;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.v2 .tir-mi .tir-mi-titre {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t1);
+}
+.v2 .tir-mi .tir-mi-puces {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex: 1 0 auto;
+  min-width: 0;
+  margin-left: auto;
+}
+.v2 .tir-mi .tir-mi-puces .tir-avatar,
+.v2 .tir-mi .tir-mi-puces .tir-avatar-vide {
+  margin-left: 4px;
+  /* l'avatar déborde de 2 px la colonne du titre (relevé : colonne finie à 1338, avatar 1322 + 18) */
+  margin-right: -2px;
+}
+.v2 .tir-mi .tir-mi-liste--sans-puces .tir-mi-puce {
+  display: none;
+}
+
+/* puce : 24, r 48, p 0 8, bd 0.5 (sombre lch(16.32 1.48 272), clair lch(84.44 0 282)), fond = carte ; icône 14 ; texte 12/450 tertiaire */
+.v2 .tir-mi .tir-mi-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
+  border: 0.5px solid var(--tir-puce-bord-mi);
+  border-radius: 48px;
+  background: var(--tir-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-t3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tir-mi .tir-mi-puce svg {
+  flex: none;
+}
+.v2 .tir-mi .tir-mi-puce-texte {
+  overflow: hidden;
+}
+.v2 .tir-mi .tir-mi-pastille-boite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.v2 .tir-mi .tir-mi-pastille {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.v2 .tir-mi .tir-mi-cycle {
+  color: #5e6ad2;
+}
+.v2 .tir-mi .tir-mi-date {
+  grid-column: 7;
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-t3);
+  white-space: nowrap;
+}
+.v2 .tir-mi .tir-mi-ligne:has(.tir-mi-date--large) {
+  grid-template-columns: 8px 18px 16px 55px 16px minmax(0, 1fr) 110px 18px;
+}
+
+/* ——— états de la liste (avis, chargement, aucun cabinet) ——— */
+.v2 .tir-mi .tir-mi-avis {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin: 0 8px 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--tir-groupe);
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tir-t2);
+}
+.v2 .tir-mi .tir-mi-vide {
+  padding: 48px 24px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tir-t3);
+}
+.v2 .tir-mi .tir-mi-vide a {
+  color: var(--tir-t1);
+  text-decoration: underline;
+}
+
+/* ——— volet « Détails » (Open details) ——— */
+.v2 .tir-mi .tir-mi-volet {
+  flex: none;
+  width: 340px;
+  padding: 16px;
+  border-left: 0.5px solid var(--tir-carte-bord);
+  overflow: auto;
+}
+.v2 .tir-mi .tir-mi-volet-titre {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t1);
+}
+.v2 .tir-mi .tir-mi-volet-ligne {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-t2);
+}
+.v2 .tir-mi .tir-mi-volet-ligne > span:first-child {
+  color: var(--tir-t3);
+}
+.v2 .tir-mi .tir-mi-select {
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid var(--tir-puce-bord);
+  border-radius: 8px;
+  background: var(--tir-bouton);
+  color: var(--tir-t1);
+  font: inherit;
+}
+.v2 .tir-mi .tir-mi-volet-note {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--tir-t3);
+}
+.v2 .tir-mi .tir-mi-volet-lien {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t1);
+}
+
+/* ——— 1024 et moins : les puces se compriment (relevé : tronquées sans « … ») ; 768 : plus de date ——— */
+@media (max-width: 768px) {
+  .v2 .tir-mi .tir-mi-ligne {
+    grid-template-columns: 8px 18px 16px 55px 16px minmax(0, 1fr) 0 10px;
+  }
+  .v2 .tir-mi .tir-mi-date {
+    display: none;
+  }
+}
+
+/* ——— 390 : grille [indent] 2 [checkbox] 0 [priority] 16 [status] 16 [title] 1fr [end] 13 ; identifiant, puces et date disparaissent ——— */
+@media (max-width: 480px) {
+  .v2 .tir-mi .tir-mi-l1 {
+    padding: 0 6px 0 16px;
+  }
+  .v2 .tir-mi .tir-mi-nouveau {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  .v2 .tir-mi .tir-mi-nouveau span {
+    display: none;
+  }
+  .v2 .tir-mi .tir-mi-l2 {
+    padding: 0 6px 0 8px;
+  }
+  .v2 .tir-mi .tir-onglet[data-rang="2"],
+  .v2 .tir-mi .tir-onglet[data-rang="3"] {
+    display: none;
+  }
+  .v2 .tir-mi .tir-mi-plus-vues {
+    display: inline-flex;
+  }
+  /* nos libellés sont plus longs que « Assigned · Created » : l'onglet le plus long se tronque, les trois ronds restent visibles */
+  .v2 .tir-mi .tir-mi-onglets {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  .v2 .tir-mi .tir-mi-onglets > .tir-onglet {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .v2 .tir-mi .tir-mi-ligne,
+  .v2 .tir-mi .tir-mi-ligne:has(.tir-mi-date--large) {
+    grid-template-columns: 2px 0 16px 0 16px minmax(0, 1fr) 0 5px;
+  }
+  .v2 .tir-mi .tir-mi-case-col,
+  .v2 .tir-mi .tir-mi-ident,
+  .v2 .tir-mi .tir-mi-puce,
+  .v2 .tir-mi .tir-mi-date {
+    display: none;
+  }
+  .v2 .tir-mi .tir-mi-dates {
+    display: none;
+  }
+  .v2 .tir-mi .tir-mi-plus {
+    width: 28px;
+    height: 28px;
+  }
+  .v2 .tir-mi .tir-mi-volet {
+    position: absolute;
+    inset: 88px 0 0 0;
+    width: auto;
+    background: var(--tir-carte);
+    z-index: 5;
+  }
+}
