@@ -7,7 +7,7 @@
 
 import Link from "next/link";
 import { Fragment } from "react";
-import { Hash, Megaphone } from "lucide-react";
+import { Car, HardHat, MapPin, Store, TriangleAlert, UtensilsCrossed, type LucideIcon } from "lucide-react";
 import { couleurDe, initialesDe } from "../lin/ListeFils";
 import { MEMBRES } from "./membres";
 import { VOUS, membre, presenceDe, type Message, type Salon } from "./messages-donnees";
@@ -27,11 +27,21 @@ export function Avatar({ slug, nomVous, taille = 32, presence }: { slug: string;
   );
 }
 
-/* l'icône d'un salon dans un rond teinté, comme l'avatar d'une ligne de boîte */
+/* l'icône d'un salon : ce qu'il est, lisible sans le nom (Teo, 02/11 : les « # » de couleurs
+   tirées au hasard ne disaient rien). Alertes = triangle d'alerte, une île = repère de carte,
+   un secteur = son métier. Rond neutre, le même gris pour tous : la couleur ne porte plus de sens
+   inventé. Un salon inconnu retombe sur le repère (île) ou le magasin (secteur). */
+const ICONES_SALON: Record<string, LucideIcon> = {
+  alertes: TriangleAlert,
+  auto: Car,
+  btp: HardHat,
+  restauration: UtensilsCrossed,
+  commerce: Store,
+};
 export function IconeSalon({ salon, taille = 32 }: { salon: Pick<Salon, "id" | "genre">; taille?: 18 | 24 | 32 }) {
-  const I = salon.genre === "reseau" ? Megaphone : Hash;
+  const I = ICONES_SALON[salon.id] ?? (salon.genre === "ile" ? MapPin : salon.genre === "reseau" ? TriangleAlert : Store);
   return (
-    <span className="ms-avatar ms-avatar--salon" data-taille={taille} style={{ "--ms-teinte": couleurDe(salon.id) } as React.CSSProperties} aria-hidden="true">
+    <span className="ms-avatar ms-avatar--salon" data-taille={taille} data-genre={salon.genre} aria-hidden="true">
       <I strokeWidth={1.8} />
     </span>
   );

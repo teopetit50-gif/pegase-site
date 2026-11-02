@@ -263,6 +263,16 @@
   background: color-mix(in srgb, var(--ms-teinte, var(--lin-second)) 15%, transparent);
   color: var(--ms-teinte, var(--lin-texte));
 }
+/* 02/11 (Teo : « pas clair ») — les salons n'ont plus de couleur tirée au hasard : un rond gris
+   neutre et une icône qui dit ce qu'ils sont ; seules les Alertes gardent une teinte, l'ambre */
+.v2 .ms-avatar--salon {
+  --ms-teinte: var(--lin-second);
+  color: var(--lin-texte);
+}
+.v2 .ms-avatar--salon[data-genre="reseau"] {
+  --ms-teinte: var(--lin-orange, #e2a336);
+  color: var(--ms-teinte);
+}
 .v2 .ms-avatar--vue {
   --ms-teinte: var(--lin-graph-bleu);
 }
@@ -272,7 +282,11 @@
   height: 55%;
 }
 
-/* la présence : rond plein en ligne, anneau creux absent */
+/* la présence : un rond vert plein quand le membre est en ligne ; absent, rien
+   (02/11, Teo : l'anneau gris creux de l'absence ne se comprenait pas) */
+.v2 .ms-presence:not([data-etat="en-ligne"]) {
+  display: none;
+}
 .v2 .ms-presence {
   position: absolute;
   right: -2px;
