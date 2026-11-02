@@ -37,6 +37,7 @@ Inventaire (contrat de la refonte) : `docs/refonte-metiers/varelo.md`. Préfixe 
 | Contrats | `/espace2/varelo/contrats` (`?contrat=<id>`) | Plain, Accounts : liste et fiche | `plain-tenants.md`, `plain-tenant.md` | `contrats-liste-*`, `contrats-fiche-*`, `contrats-fiche-volet-*` | fait |
 | Opérations | `/espace2/varelo/operations` (`?reception=`, `?echeance=`) | Linear, Board | `linear-board.md` | `operations-*` | fait |
 | Groupe | `/espace2/varelo/groupe` (`?societe=`, `?depot=`) | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `groupe-*` | fait |
+| Sources et structure | `/espace2/varelo/sources` (`?societe=`, `?regles=1`) | Linear, Settings › Integrations (catalogue et page d'une intégration) | `linear-integrations.md` | `sources-*` | fait |
 
 ### Ce matin → Linear, accueil d'une équipe (`linear-home.md`)
 
@@ -129,3 +130,25 @@ de carte en moins). 390 : plus d'en-tête, titre et santé seulement, comme Line
 - Première ligne « Tout le groupe » : les totaux de l'écran d'avant, dans la même brique (Linear n'a pas de total).
 - Pas de troisième rond (« Open details ») : pas de volet de détail pour une société ; une ligne ouvre les objectifs.
 - Pas de case à cocher au survol : pas de geste groupé sur les sociétés.
+
+### Sources et structure → Linear, Settings › Integrations (`linear-integrations.md`)
+
+Contenu : blocs 17 (sociétés et pôles, 17.a, 17.b), 18 (règles, 18.a), 19 (branchements, 19.a), 20 (dépôt d'un export,
+une seule entrée), 3 (installation) ; gestes G1, G4, G11, G12, G35, G36, G37.
+
+Preuves 1440 (dx −30, colonne de 640 centrée) : clair 9,6/255 ; sombre 48,8/255, presque tout dans le carrousel (voir
+écarts). Titre 24/500 à 64, sous-titre, champ de recherche de 44, carrousel de 640×384, onglets de 27 à 17 dessous,
+sur-titres en capitales, grille de 3 × 202,66 et cartes de 156 tombent sur la référence. Page d'une société et page des
+règles (`sources-societe-*-nous.png`, `sources-regles-*-nous.png`) : la page d'une intégration du relevé (retour
+« ‹ » collant en dégradé, logo 48 bordé, h2 18/500, carte d'info à méta en capitales et bouton violet « Enable »,
+blocs « Connections » et « Reviews & commits » en listes à filets inset de 16, interrupteurs 30×20) ; Linear n'a pas de
+capture à taille réelle de cette page. 390 : plus de carrousel, chaque section devient une liste de 68 à chevrons.
+
+Écarts restants, expliqués :
+- Carrousel : la vitrine de Linear est une image de produit ; Varelo n'a pas d'image à montrer, la vitrine garde sa
+  boîte, sa pastille, son pied (logo 56, nom, phrase) et ses onglets, sur un fond uni. C'est l'écart dominant en sombre.
+  Ses entrées sont les gestes de structure (déposer un export, inscrire une société, créer un pôle, règles, installer).
+- Les logos des cartes sont les initiales de la société (pas de logo d'éditeur).
+- Pas de barre latérale des réglages de Linear : la navigation de l'espace la remplace.
+- « Débrancher » demande une confirmation ; « Installer Varelo » aussi (consigne commune).
+- Les interrupteurs des exports attendus sont en lecture seule : les jeux se choisissent dans la fenêtre « Brancher ».
