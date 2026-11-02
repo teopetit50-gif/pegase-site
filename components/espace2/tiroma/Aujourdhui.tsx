@@ -36,6 +36,7 @@ import { RACINE } from "../modules";
 import { useTiroma } from "./donnees";
 import { TirAvatar, TirCarte, TirMenu, type OptionMenu } from "./TirCadre";
 import { TirIcone, type NomTirIcone } from "./TirIcone";
+import { copier, dansJours, estReporte, exporterCSV, useFavoris, useReportes } from "./navigateur";
 import "./tir-mes.css";
 
 const BASE = `${RACINE}/tiroma`;
@@ -78,6 +79,7 @@ type Groupe = {
   dates?: string;
   lignes: Ligne[];
   plus?: string;
+  plusTitre?: string;
 };
 
 const jourCourt = (iso: string | null | undefined) => (iso ? new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "");
@@ -231,12 +233,12 @@ function lignesDuJour(d: Dossier) {
   const fin = new Date();
   fin.setDate(fin.getDate() + horizon);
   const groupes: Groupe[] = [
-    { cle: "creneaux", libelle: "Créneaux à sauver", icone: "Cycle", couleurIcone: "lch(48 59.31 288.43)", compteur: creneaux.length, dates: `${jourCourt(jourISO(demain))} → ${jourCourt(jourISO(fin))}`, lignes: creneaux.sort(parPriorite), plus: `${BASE}/creneaux` },
-    { cle: "plans", libelle: "Plans sans rendez-vous", compteur: plans.length, lignes: plans, plus: `${BASE}/plans` },
-    { cle: "avant", libelle: "Avant les rendez-vous", compteur: avant.length, dates: critiques ? `${critiques} critique${critiques > 1 ? "s" : ""}` : `à J-${d.regles?.labo_verif_jours ?? 2}`, lignes: avant.sort(parPriorite) },
-    { cle: "vides", libelle: "Demi-journées vides", compteur: titulaire ? (d.charge?.demi_journees_vides ?? vides.length) : "—", dates: titulaire ? "aujourd'hui, par fauteuil" : "réservé au titulaire", lignes: vides, plus: `${BASE}/fauteuils` },
-    ...(reponses.length ? [{ cle: "reponses", libelle: "Réponses des patients", compteur: reponses.length, lignes: reponses.sort(parPriorite), plus: `${BASE}/creneaux?vue=reponses` }] : []),
-    ...(faits.length ? [{ cle: "faits", libelle: "Faits", icone: "IssueStatusDone" as NomTirIcone, couleurIcone: "var(--tir-t3)", compteur: faits.length, lignes: faits }] : []),
+    { cle: "creneaux", libelle: "Créneaux à sauver", icone: "Cycle", couleurIcone: "lch(48 59.31 288.43)", compteur: creneaux.length, dates: `${jourCourt(jourISO(demain))} → ${jourCourt(jourISO(fin))}`, lignes: creneaux.sort(parPriorite), plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
+    { cle: "plans", libelle: "Plans sans rendez-vous", compteur: plans.length, lignes: plans, plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
+    { cle: "avant", libelle: "Avant les rendez-vous", compteur: avant.length, dates: critiques ? `${critiques} critique${critiques > 1 ? "s" : ""}` : `à J-${d.regles?.labo_verif_jours ?? 2}`, lignes: avant.sort(parPriorite), plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
+    { cle: "vides", libelle: "Demi-journées vides", compteur: titulaire ? (d.charge?.demi_journees_vides ?? vides.length) : "—", dates: titulaire ? "aujourd'hui, par fauteuil" : "réservé au titulaire", lignes: vides, plus: `${BASE}/fauteuils?vue=equipe&absence=1`, plusTitre: "Noter une absence de l'équipe" },
+    ...(reponses.length ? [{ cle: "reponses", libelle: "Réponses des patients", compteur: reponses.length, lignes: reponses.sort(parPriorite), plus: `${BASE}/reglages?section=rappels`, plusTitre: "Ajouter un moyen de contact" }] : []),
+    ...(faits.length ? [{ cle: "faits", libelle: "Faits", icone: "IssueStatusDone" as NomTirIcone, couleurIcone: "var(--tir-t3)", compteur: faits.length, lignes: faits, plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" }] : []),
   ];
   return groupes;
 }
@@ -333,11 +335,34 @@ function PuceVue({ p }: { p: Puce }) {
   );
 }
 
-function LigneVue({ l, activite }: { l: Ligne; activite: boolean }) {
+type Selection = { choisies: Set<string>; basculer: (cle: string) => void };
+
+function LigneVue({ l, activite, sel }: { l: Ligne; activite: boolean; sel: Selection }) {
+  const choisie = sel.choisies.has(l.cle);
   const contenu = (
     <>
       <span className="tir-mi-case-col">
-        <span className="tir-mi-case" aria-hidden="true" />
+        <span
+          className="tir-mi-case"
+          role="checkbox"
+          aria-checked={choisie}
+          aria-label={`Choisir ${l.ident}`}
+          tabIndex={0}
+          data-coche={choisie ? "" : undefined}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            sel.basculer(l.cle);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === " " || e.key === "Enter") {
+              e.preventDefault();
+              sel.basculer(l.cle);
+            }
+          }}
+        >
+          {choisie ? <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 5.2 4.1 7.3 8 2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" /></svg> : null}
+        </span>
       </span>
       <span className="tir-mi-priorite" title={LIBELLES_PRIORITE[l.priorite]}>
         <TirIcone nom={`Priority${l.priorite}` as NomTirIcone} style={l.priorite === 1 ? { color: "lch(66 80 48)" } : undefined} />
@@ -361,17 +386,17 @@ function LigneVue({ l, activite }: { l: Ligne; activite: boolean }) {
     </>
   );
   return l.href ? (
-    <Link href={l.href} className="tir-mi-ligne">
+    <Link href={l.href} className="tir-mi-ligne" data-choisie={choisie ? "" : undefined}>
       {contenu}
     </Link>
   ) : (
-    <div className="tir-mi-ligne" data-sans-lien="">
+    <div className="tir-mi-ligne" data-sans-lien="" data-choisie={choisie ? "" : undefined}>
       {contenu}
     </div>
   );
 }
 
-function GroupeVue({ g, activite }: { g: Groupe; activite: boolean }) {
+function GroupeVue({ g, activite, sel }: { g: Groupe; activite: boolean; sel: Selection }) {
   const [replie, setReplie] = useState(false);
   return (
     <div className="tir-mi-groupe">
@@ -387,12 +412,12 @@ function GroupeVue({ g, activite }: { g: Groupe; activite: boolean }) {
         {g.dates ? <span className="tir-mi-dates">{g.dates}</span> : null}
         <span className="tir-pousse" />
         {g.plus ? (
-          <Link href={g.plus} className="tir-mi-plus" aria-label={`Ouvrir ${g.libelle}`} title={`Ouvrir ${g.libelle}`}>
+          <Link href={g.plus} className="tir-mi-plus" aria-label={g.plusTitre ?? `Ouvrir ${g.libelle}`} title={g.plusTitre ?? `Ouvrir ${g.libelle}`}>
             <TirIcone nom="Plus" taille={14} />
           </Link>
         ) : null}
       </div>
-      {!replie ? g.lignes.map((l) => <LigneVue key={l.cle} l={l} activite={activite} />) : null}
+      {!replie ? g.lignes.map((l) => <LigneVue key={l.cle} l={l} activite={activite} sel={sel} />) : null}
     </div>
   );
 }
@@ -413,6 +438,12 @@ export default function Aujourdhui() {
   const [puces, setPuces] = useState(true);
   const [details, setDetails] = useState(false);
   const [plusOuvert, setPlusOuvert] = useState(false);
+  const [reportesVisibles, setReportesVisibles] = useState(false);
+  const [choisies, setChoisies] = useState<Set<string>>(new Set());
+  const [menuLot, setMenuLot] = useState<null | "reporter">(null);
+  const [avisLot, setAvisLot] = useState<string | null>(null);
+  const [favoris, poserFavori] = useFavoris();
+  const [reportes, poserReporte] = useReportes();
   const d = t.dossier;
 
   const groupes = useMemo(() => {
@@ -422,8 +453,67 @@ export default function Aujourdhui() {
     if (vue === "plans") gs = gs.filter((g) => g.cle === "plans" || g.cle === "avant");
     if (!faitsVisibles) gs = gs.filter((g) => g.cle !== "faits");
     if (praticiens.length) gs = gs.map((g) => ({ ...g, lignes: g.lignes.filter((l) => l.personne && praticiens.includes(l.personne)) }));
-    return gs;
-  }, [d, vue, faitsVisibles, praticiens]);
+    /* reporter (Snooze) : la ligne quitte la liste jusqu'à la date choisie ; Affichage › « Les reportés » les montre à part */
+    const masquees = gs.flatMap((g) => g.lignes.filter((l) => estReporte(reportes, l.cle)).map((l) => ({ ...l, puces: [...l.puces, { type: "echeance" as const, texte: `reporté au ${jourCourt(reportes[l.cle])}`, titre: "Reporté" }] })));
+    gs = gs.map((g) => ({ ...g, lignes: g.lignes.filter((l) => !estReporte(reportes, l.cle)) }));
+    /* épinglés (étoile) : en tête, depuis n'importe quelle sous-page */
+    const epingles: Ligne[] = Object.entries(favoris).map(([cle, f], i) => ({
+      cle: `fav-${cle}`,
+      ident: `ÉP-${i + 1}`,
+      priorite: 0,
+      statut: "todo",
+      titre: f.titre,
+      puces: [{ type: "etiquette", couleur: "lch(60.135 63.97 86.502)", texte: f.type }],
+      personne: null,
+      date: jourCourt(f.depuis),
+      dateTitre: `Épinglé le ${complet(f.depuis)}`,
+      href: f.href,
+    }));
+    return [
+      ...(epingles.length && vue !== "activite" ? [{ cle: "epingles", libelle: "Épinglés", icone: "Etoile" as NomTirIcone, couleurIcone: "lch(60.135 63.97 86.502)", compteur: epingles.length, lignes: epingles }] : []),
+      ...gs,
+      ...(reportesVisibles && masquees.length ? [{ cle: "reportes", libelle: "Reportés", icone: "Clock" as NomTirIcone, couleurIcone: "var(--tir-t3)", compteur: masquees.length, lignes: masquees }] : []),
+    ];
+  }, [d, vue, faitsVisibles, praticiens, favoris, reportes, reportesVisibles]);
+
+  const toutes = groupes.flatMap((g) => g.lignes);
+  const choisiesL = toutes.filter((l) => choisies.has(l.cle));
+  const sel = {
+    choisies,
+    basculer: (cle: string) =>
+      setChoisies((c) => {
+        const n = new Set(c);
+        if (n.has(cle)) n.delete(cle);
+        else n.add(cle);
+        return n;
+      }),
+  };
+  const finir = (avis: string) => {
+    setChoisies(new Set());
+    setMenuLot(null);
+    setAvisLot(avis);
+    window.setTimeout(() => setAvisLot(null), 4000);
+  };
+  const epingler = () => {
+    const ajout = choisiesL.filter((l) => !l.cle.startsWith("fav-"));
+    const retrait = choisiesL.filter((l) => l.cle.startsWith("fav-"));
+    ajout.forEach((l) => poserFavori(l.cle, { titre: `${l.ident} · ${l.titre}`, href: l.href ?? BASE, type: groupes.find((g) => g.lignes.includes(l))?.libelle ?? "Aujourd'hui", depuis: new Date().toISOString() }));
+    retrait.forEach((l) => poserFavori(l.cle.slice(4), null));
+    finir(retrait.length && !ajout.length ? `${retrait.length} désépinglé(s).` : `${ajout.length} épinglé(s) en tête de la page.`);
+  };
+  const reporter = (jours: number | null) => {
+    choisiesL.forEach((l) => poserReporte(l.cle, jours === null ? null : dansJours(jours)));
+    finir(jours === null ? "Remis dans la liste." : `${choisiesL.length} reporté(s) jusqu'au ${jourCourt(dansJours(jours))}.`);
+  };
+  const resume = (ls: Ligne[]) => ls.map((l) => `- ${l.ident} ${l.titre}${l.puces.length ? ` (${l.puces.map((p) => ("texte" in p ? p.texte : "")).filter(Boolean).join(", ")})` : ""}${l.personne ? ` — ${l.personne}` : ""}${l.date ? ` — ${l.dateTitre}` : ""}`).join("\n");
+  const copierLot = async () => {
+    const ok = await copier(`Cabinet ${d?.cabinet.entite_nom ?? ""}, ${new Date().toLocaleDateString("fr-FR", { dateStyle: "full" })} :\n${resume(choisiesL)}`);
+    finir(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie.");
+  };
+  const exporter = () => {
+    exporterCSV("tiroma-aujourdhui", ["Identifiant", "Groupe", "Titre", "Étiquettes", "Personne", "Date"], (choisiesL.length ? choisiesL : toutes).map((l) => [l.ident, groupes.find((g) => g.lignes.includes(l))?.libelle ?? "", l.titre, l.puces.map((p) => ("texte" in p ? p.texte : "")).join(", "), l.personne ?? "", l.dateTitre]));
+    finir("Liste exportée en CSV.");
+  };
 
   const nomsPraticiens = d?.praticiens.map((p) => p.nom_affiche) ?? [];
   const filtre: OptionMenu[] = [
@@ -435,6 +525,9 @@ export default function Aujourdhui() {
     { titre: "Afficher" },
     { libelle: "Les faits", coche: faitsVisibles, action: () => setFaitsVisibles((v) => !v) },
     { libelle: "Les étiquettes", coche: puces, action: () => setPuces((v) => !v) },
+    { libelle: "Les reportés", coche: reportesVisibles, action: () => setReportesVisibles((v) => !v) },
+    "sep",
+    { libelle: "Exporter la liste en CSV", icone: "Spreadsheet", action: exporter },
   ];
 
   const reel = t.reel;
@@ -456,7 +549,7 @@ export default function Aujourdhui() {
         <span className="tir-pousse" />
         <Link href={`${BASE}/creneaux?vue=attente&inscrire=1`} className="tir-mi-nouveau" title="Inscrire un patient en liste d'attente">
           <TirIcone nom="Plus" taille={14} />
-          <span>Liste d&apos;attente</span>
+          <span>Nouvelle inscription</span>
         </Link>
       </div>
       <div className="tir-mi-l2">
@@ -508,12 +601,41 @@ export default function Aujourdhui() {
           ) : (
             groupes.map((g) => (
               <Fragment key={g.cle}>
-                <GroupeVue g={g} activite={vue === "activite"} />
+                <GroupeVue g={g} activite={vue === "activite"} sel={sel} />
               </Fragment>
             ))
           )}
           {!etat && vue === "activite" && !groupes.length ? <div className="tir-mi-vide">Aucun appel noté sur les trente derniers jours.</div> : null}
         </div>
+        {choisiesL.length || avisLot ? (
+          <div className="tir-mi-lot" role="toolbar" aria-label="Actions sur la sélection">
+            {avisLot && !choisiesL.length ? (
+              <span className="tir-mi-lot-compte">{avisLot}</span>
+            ) : (
+              <>
+                <span className="tir-mi-lot-compte">{choisiesL.length} choisie{choisiesL.length > 1 ? "s" : ""}</span>
+                <button type="button" className="tir-mi-lot-bouton" onClick={epingler}><TirIcone nom="Etoile" taille={14} />{choisiesL.every((l) => l.cle.startsWith("fav-")) ? "Désépingler" : "Épingler"}</button>
+                <span className="tir-menu-ancre">
+                  <button type="button" className="tir-mi-lot-bouton" aria-expanded={menuLot === "reporter"} onClick={() => setMenuLot((m) => (m ? null : "reporter"))}><TirIcone nom="Clock" taille={14} />Reporter</button>
+                  {menuLot === "reporter" ? (
+                    <div className="tir-menu" role="menu" style={{ bottom: "calc(100% + 6px)", left: 0 }}>
+                      <button type="button" role="menuitem" className="tir-menu-option" onClick={() => reporter(1)}><span className="tir-menu-libelle">À demain</span></button>
+                      <button type="button" role="menuitem" className="tir-menu-option" onClick={() => reporter(3)}><span className="tir-menu-libelle">Dans 3 jours</span></button>
+                      <button type="button" role="menuitem" className="tir-menu-option" onClick={() => reporter(7)}><span className="tir-menu-libelle">Dans une semaine</span></button>
+                      <div className="tir-menu-sep" />
+                      <button type="button" role="menuitem" className="tir-menu-option" onClick={() => reporter(null)}><span className="tir-menu-libelle">Remettre dans la liste</span></button>
+                    </div>
+                  ) : null}
+                </span>
+                <button type="button" className="tir-mi-lot-bouton" onClick={() => void copierLot()}><TirIcone nom="Agent" taille={14} />Copier pour l&apos;assistant</button>
+                <button type="button" className="tir-mi-lot-bouton" onClick={exporter}><TirIcone nom="Spreadsheet" taille={14} />Exporter en CSV</button>
+                <button type="button" className="tir-mi-lot-bouton" aria-label="Tout désélectionner" onClick={() => setChoisies(new Set())}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.7 3.7a.75.75 0 0 1 1.06 0L8 6.94l3.24-3.24a.75.75 0 1 1 1.06 1.06L9.06 8l3.24 3.24a.75.75 0 1 1-1.06 1.06L8 9.06l-3.24 3.24a.75.75 0 0 1-1.06-1.06L6.94 8 3.7 4.76a.75.75 0 0 1 0-1.06" /></svg>
+                </button>
+              </>
+            )}
+          </div>
+        ) : null}
         {details && d ? (
           <aside className="tir-mi-volet" aria-label="Détails du cabinet">
             <div className="tir-mi-volet-titre">{d.cabinet.entite_nom ?? "Cabinet"}</div>
