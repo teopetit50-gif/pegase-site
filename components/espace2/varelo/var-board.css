@@ -350,3 +350,18 @@ html[data-v2-theme="light"] .v2 .var .var-b-puce {
     border-top: 0.5px solid var(--var-carte-bord);
   }
 }
+
+/* 390 : comme Linear, « New issue » se réduit à « + » (relevé, paliers) et le fil garde l'icône de l'équipe */
+@media (max-width: 480px) {
+  .v2 .var .var-b-nouveau-texte {
+    display: none;
+  }
+  .v2 .var .var-b-nouveau {
+    width: 28px;
+    padding: 0;
+    justify-content: center;
+  }
+  .v2 .var .var-ligne1 .var-fil:first-child span {
+    display: none;
+  }
+}
