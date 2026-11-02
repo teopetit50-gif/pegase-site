@@ -1,134 +1,125 @@
 "use client";
 
-/* Réseau Omega, page Membres — le panneau « Ce que je montre au réseau ».
-   Il parle de « vous », l'organisation connectée d'Espace 2 (son nom vient
-   de la coquille), jamais d'un des membres. Un interrupteur par champ,
-   tous éteints au départ : rien n'est visible sans accord. Dessous,
-   l'aperçu de votre carte telle que les membres la voient.
+/* Réseau Omega, page Membres — le panneau « Ce que je montre au réseau »,
+   dans le panneau Détails de la liste « Projects » de Linear (lin-details :
+   428 de large, onglets en pastilles, lignes de 13/450), comme sur
+   Entreprises. Il parle de « vous », l'organisation connectée d'Espace 2
+   (useOrganisation(), posée par la coquille), jamais d'un des membres.
 
-   Large écran (≥ 1280 px) : une colonne à droite de la liste, toujours
-   ouverte. Plus étroit : un bloc repliable au-dessus de la liste. */
+   Onglet « Champs » : un interrupteur par champ, tous éteints au départ —
+   rien n'est visible sans accord. Onglet « Aperçu » : votre ligne telle
+   que les membres la voient. Sous 1100 px de panneau, le kit le pose sous
+   la liste. */
 
-import { useId, useState, useSyncExternalStore } from "react";
-import { ChevronDown, EyeOff } from "lucide-react";
+import { useState } from "react";
+import { BadgeCheck, Briefcase, EyeOff, Handshake, MapPin, Search, Timer, X } from "lucide-react";
 import { Interrupteur } from "../ui";
 import { useOrganisation } from "../organisation";
-import { Monogramme } from "./membres-ui";
+import { Avatar } from "./membres-ui";
 import { CHAMPS_VISIBLES, VOUS_EXEMPLE, badgesLus, changerVisibilite, toutMasquer, useVisibilite, type ChampVisible } from "./membres-donnees";
-
-const LARGE = "(min-width: 1280px)";
-function useLarge() {
-  return useSyncExternalStore(
-    (e) => {
-      const m = window.matchMedia(LARGE);
-      m.addEventListener("change", e);
-      return () => m.removeEventListener("change", e);
-    },
-    () => window.matchMedia(LARGE).matches,
-    () => false,
-  );
-}
 
 const vous = VOUS_EXEMPLE;
 const [badgePaiement, badgeReponse] = [badgesLus({ bonPayeur: vous.badges.bonPayeur }), badgesLus({ reponseRapide: vous.badges.reponseRapide })].map((l) => l[0]);
 
-const CHAMPS: Record<ChampVisible, { libelle: string; valeur: string; aide?: string }> = {
-  bonPayeur: { libelle: "Badge « Bon payeur »", valeur: badgePaiement.phrase, aide: "Calculé sur vos factures FILED, 12 mois" },
-  reponseRapide: { libelle: "Badge « Réponse rapide »", valeur: badgeReponse.phrase, aide: "Calculé sur vos demandes reçues, 12 mois" },
-  secteur: { libelle: "Secteur", valeur: vous.secteur },
-  commune: { libelle: "Commune", valeur: `${vous.commune}, ${vous.ile}` },
-  propose: { libelle: "Ce que vous proposez", valeur: vous.propose.join(" · ") },
-  cherche: { libelle: "Ce que vous cherchez", valeur: vous.cherche.join(" · ") },
+const I = { width: 16, height: 16, "aria-hidden": true } as const;
+const CHAMPS: Record<ChampVisible, { libelle: string; valeur: string; icone: React.ReactNode; aide?: string }> = {
+  bonPayeur: { libelle: "Badge « Bon payeur »", valeur: badgePaiement.phrase, icone: <BadgeCheck {...I} />, aide: "Calculé sur vos factures FILED, 12 mois" },
+  reponseRapide: { libelle: "Badge « Réponse rapide »", valeur: badgeReponse.phrase, icone: <Timer {...I} />, aide: "Calculé sur vos demandes reçues, 12 mois" },
+  secteur: { libelle: "Secteur", valeur: vous.secteur, icone: <Briefcase {...I} /> },
+  commune: { libelle: "Commune", valeur: `${vous.commune}, ${vous.ile}`, icone: <MapPin {...I} /> },
+  propose: { libelle: "Ce que vous proposez", valeur: vous.propose.join(" · "), icone: <Handshake {...I} /> },
+  cherche: { libelle: "Ce que vous cherchez", valeur: vous.cherche.join(" · "), icone: <Search {...I} /> },
 };
 
-export function PanneauVisibilite() {
+export function PanneauVisibilite({ onFermer }: { onFermer: () => void }) {
   const { nom } = useOrganisation();
   const v = useVisibilite();
-  const large = useLarge();
-  const [ouvert, setOuvert] = useState(false);
-  const idCorps = useId();
+  const [onglet, setOnglet] = useState<"champs" | "apercu">("champs");
   const visibles = CHAMPS_VISIBLES.filter((c) => v[c]).length;
-  const resume = visibles ? `${visibles} champ${visibles > 1 ? "s" : ""} sur ${CHAMPS_VISIBLES.length} visible${visibles > 1 ? "s" : ""}` : "Rien de visible pour l'instant";
-  const deplie = large || ouvert;
 
   return (
-    <section className="v2-carte rm-moi" aria-labelledby={`${idCorps}-titre`}>
-      <header className="rm-moi-tete">
-        {large ? (
-          <div className="rm-moi-titre-bloc">
-            <h2 className="rm-h2" id={`${idCorps}-titre`}>
-              Ce que je montre au réseau
-            </h2>
-            <p className="rm-moi-resume">{resume}</p>
-          </div>
-        ) : (
-          <button type="button" className="rm-moi-bascule" aria-expanded={ouvert} aria-controls={idCorps} onClick={() => setOuvert((o) => !o)}>
-            <span className="rm-moi-titre-bloc">
-              <span className="rm-h2" id={`${idCorps}-titre`}>
-                Ce que je montre au réseau
-              </span>
-              <span className="rm-moi-resume">{resume}</span>
-            </span>
-            <ChevronDown className="rm-moi-chevron" width={16} height={16} aria-hidden="true" />
+    <aside className="lin-details rm-moi" aria-label="Ce que je montre au réseau">
+      <div className="rm-moi-tete">
+        <div className="lin-details-onglets" role="tablist" aria-label="Ce que je montre au réseau">
+          <button type="button" role="tab" className="lin-details-onglet" aria-selected={onglet === "champs"} onClick={() => setOnglet("champs")}>
+            Ce que je montre
           </button>
-        )}
-      </header>
-
-      {deplie ? (
-        <div id={idCorps} className="rm-moi-corps">
-          <p className="rm-moi-intro">
-            Les membres voient toujours le nom <strong>{nom}</strong>. Tout le reste attend votre accord, champ par champ.
-          </p>
-          <ul className="rm-moi-champs">
-            {CHAMPS_VISIBLES.map((c) => (
-              <li key={c} className="rm-moi-champ">
-                <Interrupteur actif={v[c]} onChange={(oui) => changerVisibilite(c, oui)}>
-                  <span className="rm-moi-champ-texte">
-                    <span className="rm-moi-champ-libelle">{CHAMPS[c].libelle}</span>
-                    <span className="rm-moi-champ-valeur">{CHAMPS[c].valeur}</span>
-                    {CHAMPS[c].aide ? <span className="rm-moi-champ-aide">{CHAMPS[c].aide}</span> : null}
-                  </span>
-                </Interrupteur>
-              </li>
-            ))}
-          </ul>
-
-          <div className="rm-apercu">
-            <p className="rm-etiquette">Ce que les membres voient</p>
-            <div className="rm-apercu-carte">
-              <div className="rm-apercu-tete">
-                <Monogramme nom={nom} />
-                <div>
-                  <p className="rm-apercu-nom">{nom}</p>
-                  <p className="rm-apercu-ligne">{[v.secteur ? vous.secteur : null, v.commune ? vous.commune : null].filter(Boolean).join(" · ") || "Secteur et commune masqués"}</p>
-                </div>
-              </div>
-              {v.propose ? <p className="rm-apercu-ligne"><span>Propose :</span> {vous.propose.join(", ")}</p> : null}
-              {v.cherche ? <p className="rm-apercu-ligne"><span>Cherche :</span> {vous.cherche.join(", ")}</p> : null}
-              {v.bonPayeur || v.reponseRapide ? (
-                <p className="rm-apercu-ligne">
-                  <span>Badges :</span> {[v.bonPayeur ? badgePaiement.phrase : null, v.reponseRapide ? badgeReponse.phrase : null].filter(Boolean).join(" · ")}
-                </p>
-              ) : null}
-              {!visibles ? (
-                <p className="rm-apercu-vide">
-                  <EyeOff width={14} height={14} aria-hidden="true" />
-                  Seul votre nom apparaît dans l&apos;annuaire.
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="rm-moi-pied">
-            <span>Vos choix valent pour cette visite : ils ne sont pas encore enregistrés.</span>
-            {visibles ? (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome" onClick={toutMasquer}>
-                Tout masquer
-              </button>
-            ) : null}
-          </div>
+          <button type="button" role="tab" className="lin-details-onglet" aria-selected={onglet === "apercu"} onClick={() => setOnglet("apercu")}>
+            Aperçu
+          </button>
         </div>
-      ) : null}
-    </section>
+        <button type="button" className="lin-rond" aria-label="Fermer le panneau" title="Fermer" onClick={onFermer}>
+          <X aria-hidden="true" />
+        </button>
+      </div>
+
+      <p className="rm-moi-intro">
+        Les membres voient toujours le nom <b>{nom}</b>. Le reste attend votre accord, champ par champ : {visibles ? `${visibles} sur ${CHAMPS_VISIBLES.length} montrés.` : "rien n'est montré pour l'instant."}
+      </p>
+
+      {onglet === "champs" ? (
+        <ul className="rm-moi-champs" role="tabpanel" aria-label="Champs">
+          {CHAMPS_VISIBLES.map((c) => (
+            <li key={c} className="rm-moi-champ" data-montre={v[c] ? "" : undefined}>
+              <span className="rm-moi-icone">{CHAMPS[c].icone}</span>
+              <span className="rm-moi-texte">
+                <span className="rm-moi-libelle">{CHAMPS[c].libelle}</span>
+                <span className="rm-moi-valeur">{CHAMPS[c].valeur}</span>
+                {CHAMPS[c].aide ? <span className="rm-moi-aide">{CHAMPS[c].aide}</span> : null}
+              </span>
+              <Interrupteur actif={v[c]} onChange={(oui) => changerVisibilite(c, oui)}>
+                <span className="rm-masque">{v[c] ? `Masquer : ${CHAMPS[c].libelle}` : `Montrer : ${CHAMPS[c].libelle}`}</span>
+              </Interrupteur>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="rm-apercu" role="tabpanel" aria-label="Aperçu">
+          <div className="rm-apercu-tete">
+            <Avatar nom={nom} taille={24} />
+            <span className="rm-apercu-nom">{nom}</span>
+          </div>
+          <dl className="lin-props">
+            <div>
+              <dt>Activité</dt>
+              <dd className={v.secteur ? undefined : "lin-props-vide"}>{v.secteur ? vous.secteur : "Non montré"}</dd>
+            </div>
+            <div>
+              <dt>Lieu</dt>
+              <dd className={v.commune ? undefined : "lin-props-vide"}>{v.commune ? `${vous.commune}, ${vous.ile}` : "Non montré"}</dd>
+            </div>
+            <div>
+              <dt>Propose</dt>
+              <dd className={v.propose ? "rm-apercu-long" : "lin-props-vide"}>{v.propose ? vous.propose.join(", ") : "Non montré"}</dd>
+            </div>
+            <div>
+              <dt>Cherche</dt>
+              <dd className={v.cherche ? "rm-apercu-long" : "lin-props-vide"}>{v.cherche ? vous.cherche.join(", ") : "Non montré"}</dd>
+            </div>
+            <div>
+              <dt>Badges</dt>
+              <dd className={v.bonPayeur || v.reponseRapide ? "rm-apercu-long" : "lin-props-vide"}>
+                {[v.bonPayeur ? badgePaiement.phrase : null, v.reponseRapide ? badgeReponse.phrase : null].filter(Boolean).join(" · ") || "Aucun montré"}
+              </dd>
+            </div>
+          </dl>
+          {!visibles ? (
+            <p className="rm-apercu-vide">
+              <EyeOff width={14} height={14} aria-hidden="true" />
+              Seul votre nom apparaît dans l&apos;annuaire.
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      <div className="rm-moi-pied">
+        <span>Vos choix valent pour cette visite : ils ne sont pas encore enregistrés.</span>
+        {visibles ? (
+          <button type="button" className="lin-btn lin-btn--texte" onClick={toutMasquer}>
+            Tout masquer
+          </button>
+        ) : null}
+      </div>
+    </aside>
   );
 }
