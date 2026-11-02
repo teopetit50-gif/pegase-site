@@ -1,0 +1,105 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI › Courrier à ranger = Linear, Inbox, au 1:1 (02/11/2026)
+
+   Relevé : releves/linear-inbox.md (01/11, sombre et clair). Repères
+   depuis le bord de la carte (1187 de large à 1440) :
+     liste        400 de large, filet droit 0.5 ; en-tête 44 (titre 13/500 à
+                  x 18, « … » 28 ; à droite archives, filtre, affichage 28,
+                  gap 6) ; lignes de 55 à 8 sous l'en-tête, r 8, fond de
+                  survol en retrait de 8 ; contenu à x 16, 367.5 de large
+     ligne        avatar 32 rond (rappel : fond lch(52.418 61.103 288.421 /
+                  .133), bord 1 à .267, icône 20) ; textes à x 60 (gap 12) :
+                  ligne 1 de 17 (pastille 8, identifiant 13/500 ls −0.26,
+                  titre 13/500, statut 14 à droite), ligne 2 de 16 (12/450
+                  t3, priorité 14, heure à droite) ; lu : titre t3 à .7
+     droite       vide : illustration 105 × 100, 24 au-dessus de « n non
+                  lus » 13/500 t3, centrés ; ouvert : la page d'un ticket
+                  sans sa colonne de propriétés (en-tête 44, titre 24/600,
+                  rangée de pilules, texte 15/450/24)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lor-ib {
+  --lor-ib-violet: lch(52.418 61.103 288.421);
+  --lor-ib-point: lch(47.918 59.303 288.421);
+  display: flex; min-height: calc(100dvh - 48px);
+}
+html[data-v2-theme="light"] .v2 .lor-ib { --lor-ib-point: lch(53 52.26 286.91); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lor-ib { --lor-ib-point: lch(53 52.26 286.91); }
+}
+
+/* ——— la liste ——— */
+.v2 .lor-ib-liste { flex: 0 0 400px; min-width: 0; border-right: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-ib-tete { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 10px 0 8px; }
+.v2 .lor-ib-tete-gauche, .v2 .lor-ib-tete-droite { display: flex; align-items: center; gap: 6px; }
+.v2 .lor-ib-tete-gauche { gap: 4px; }
+.v2 .lor-ib-tete h2 { padding-left: 10px; font-size: 13px; font-weight: 500; color: var(--lor-t2); }
+.v2 .lor-ib-ancre { position: relative; }
+.v2 .lor-ib-menu { min-width: 260px; }
+.v2 .lor-ib-note { padding: 12px 18px; font-size: 12px; color: var(--lor-t3); list-style: none; }
+.v2 .lor-ib-lignes { display: flex; flex-direction: column; padding: 8px 0; }
+.v2 .lor-ib-ligne {
+  position: relative; isolation: isolate; display: flex; align-items: center; gap: 12px; height: 55px; padding: 0 16px;
+  transition: color 0.15s;
+}
+.v2 .lor-ib-ligne::before { content: ""; position: absolute; inset: 0 8px; border-radius: 8px; z-index: -1; }
+.v2 .lor-ib-ligne:hover::before { background: var(--lor-survol); }
+.v2 .lor-ib-ligne[data-choisie]::before { background: var(--lor-onglet-actif); }
+.v2 .lor-ib-avatar {
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%;
+  background: lch(52.418 61.103 288.421 / 0.133); border: 1px solid lch(52.418 61.103 288.421 / 0.267); color: var(--lor-ib-violet);
+}
+.v2 .lor-ib-avatar svg { width: 20px; height: 20px; }
+.v2 .lor-ib-textes { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.v2 .lor-ib-l1 { display: flex; align-items: center; height: 17px; font-size: 13px; font-weight: 500; color: var(--lor-t2); }
+.v2 .lor-ib-point { flex-shrink: 0; width: 8px; height: 8px; margin: 1px 6px 0 0; border-radius: 50%; background: var(--lor-ib-point); }
+.v2 .lor-ib-id { flex-shrink: 0; margin-right: 4px; letter-spacing: -0.26px; white-space: nowrap; }
+.v2 .lor-ib-titre { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-ib-l1 > svg { margin-left: 8px; }
+.v2 .lor-ib-l2 { display: flex; align-items: center; gap: 8px; height: 16px; margin-top: 2px; font-size: 12px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-ib-sous { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-ib-l2 svg { width: 14px; height: 14px; }
+.v2 .lor-ib-quand { flex-shrink: 0; white-space: nowrap; }
+.v2 .lor-ib-ligne[data-lu] .lor-ib-l1 { color: var(--lor-t3); }
+.v2 .lor-ib-ligne[data-lu] .lor-ib-id, .v2 .lor-ib-ligne[data-lu] .lor-ib-titre { opacity: 0.7; }
+
+/* ——— à droite : vide, ou le courrier ouvert ——— */
+.v2 .lor-ib-droite { flex: 1; min-width: 0; display: flex; flex-direction: column; container-type: inline-size; }
+.v2 .lor-ib-vide { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; }
+.v2 .lor-ib-vide p { font-size: 13px; font-weight: 500; color: var(--lor-t3); }
+.v2 .lor-ib-d-tete { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 44px; padding: 0 12px 0 8px; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-ib-d-fil { display: flex; align-items: center; gap: 4px; min-width: 0; padding-left: 6px; }
+.v2 .lor-ib-retour { display: none; }
+.v2 .lor-ib-retour-icone { transform: rotate(90deg); }
+.v2 .lor-ib-d-courant { display: flex; min-width: 0; padding: 2px 4px; border-radius: 6px; }
+.v2 .lor-ib-d-courant:hover { background: var(--lor-onglet-actif); }
+.v2 .lor-ib-d-courant h2 { font-size: 13px; font-weight: 500; line-height: 16px; color: var(--lor-t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-ib-d-id { margin-right: 5.6px; }
+.v2 .lor-ib-d-gestes { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.v2 .lor-ib-texte svg { width: 14px; height: 14px; }
+.v2 .lor-ib-d-corps { padding: 21.75px 14px 64px; }
+.v2 .lor-ib-d-titre { margin: 32px 0 8px; padding: 6px 0; font-size: 24px; font-weight: 600; line-height: 32px; letter-spacing: -0.16px; color: var(--lor-t1); }
+.v2 .lor-ib-d-pilules { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px -6px; }
+.v2 .lor-ib-pilule { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 6px; border-radius: 9999px; background: var(--lor-rond); font-size: 13px; font-weight: 500; color: var(--lor-t2); white-space: nowrap; }
+.v2 .lor-ib-pilule svg { width: 16px; height: 16px; fill: var(--lor-t3); }
+.v2 a.lor-ib-pilule:hover { background: var(--lor-onglet-actif); }
+.v2 .lor-ib-avatar-petit { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--lor-onglet-actif); font-size: 7px; font-weight: 600; color: var(--lor-t2); }
+.v2 .lor-ib-d-texte { margin: 0 -14px; padding: 10px 14px 16px; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-t2); }
+.v2 .lor-ib-d-texte p + p { margin-top: 8px; }
+.v2 .lor-ib-citation { padding-left: 12px; border-left: 2px solid var(--lor-trait-carte); color: var(--lor-t3); }
+.v2 .lor-ib-sourd { color: var(--lor-t3); }
+
+/* 1024 : la liste se resserre à 240 ; 768 et moins : une colonne, le courrier ouvert en plein écran */
+@media (max-width: 1100px) {
+  .v2 .lor-ib-liste { flex-basis: 240px; }
+}
+@media (max-width: 860px) {
+  .v2 .lor-ib-liste { flex: 1; border-right: 0; }
+  .v2 .lor-ib-droite { display: none; }
+  .v2 .lor-ib[data-ouvert] .lor-ib-liste { display: none; }
+  .v2 .lor-ib[data-ouvert] .lor-ib-droite { display: flex; }
+  .v2 .lor-ib-retour { display: inline-flex; }
+  .v2 .lor-ib-texte span { display: none; }
+  .v2 .lor-ib-texte { width: 28px; padding: 0; }
+  .v2 .lor-ib-texte svg { margin-right: 0; }
+}

@@ -21,7 +21,7 @@
    Dialog ; ce qui est obligatoire est dit, et le bouton reste gris sans.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, CalendarCheck, CalendarDays, CalendarPlus, Check, FileSignature, FileText, Gavel, ListChecks, Scale, ScanText, SlidersHorizontal, XCircle } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
@@ -47,6 +47,26 @@ type Props = {
   /* 29/10/2026 — la page d'un permis de l'espace 2 (components/espace2/lorani/PagePermis.tsx) range ces blocs dans
      les étapes de son accordéon ; sans `parties`, tout s'affiche (l'écran de /espace) */
   parties?: PartiePermis[];
+  /* 02/11/2026 — la page d'un permis de l'espace 2 (copie de la page d'un ticket Linear) dessine elle-même le permis :
+     `fenetresSeules` ne rend que les fenêtres de saisie, que la page ouvre par `piloteRef` ; `onFait` reçoit le
+     « C'est fait » d'une écriture (un toast dans la page) */
+  fenetresSeules?: boolean;
+  piloteRef?: React.RefObject<PilotePermis | null>;
+  onFait?: (message: string) => void;
+};
+
+/* ce que la page d'un permis de l'espace 2 peut ouvrir (les mêmes fenêtres que les boutons de l'écran d'avant) */
+export type PilotePermis = {
+  confirmerLue: (d: DateLue) => void;
+  ecarterLue: (d: DateLue) => void;
+  confirmerImplicite: () => void;
+  saisir: (quoi: Quoi) => void;
+  recours: () => void;
+  issue: (r: Recours) => void;
+  regime: () => void;
+  /* les saisies possibles selon l'état du permis (« Saisir ce qui est arrivé ») */
+  boutons: Record<SaisieVisible, boolean>;
+  occupe: boolean;
 };
 
 /* Les blocs de la vue : « entete » est la carte du titre entière, « regime » la même sans le titre (pastilles, bouton
@@ -73,7 +93,7 @@ function appliquerDemande(p: Permis, date: string, pieces: { code: string }[]): 
   return { date_demande_pieces: premiere ? date : p.date_demande_pieces, pieces_demandees: premiere ? unionPieces(pieces, p.pieces_demandees) : unionPieces(p.pieces_demandees, pieces), demandes_pieces: hist, etat: "pieces_demandees" };
 }
 
-type Quoi = "pieces_fournies" | "affichage" | "decision" | "delai" | "depot" | "demande_pieces";
+export type Quoi = "pieces_fournies" | "affichage" | "decision" | "delai" | "depot" | "demande_pieces";
 
 type Form =
   | { type: "confirmer"; date: DateLue }
@@ -125,7 +145,7 @@ function valeursEnClair(nature: DateLue["nature"], v: Record<string, unknown>): 
     });
 }
 
-export default function PermisVue({ permis: p, projet, dossier, source, peutEcrire, nommer, onLocal, relire, parties }: Props) {
+export default function PermisVue({ permis: p, projet, dossier, source, peutEcrire, nommer, onLocal, relire, parties, fenetresSeules, piloteRef, onFait }: Props) {
   /* 30/10/2026 — sur la page d'un permis de l'espace 2 (qui fournit un volet), le calendrier, les échéances, les
      dates lues, les recours et les courriers passent en liste, le détail de l'élément choisi dans le volet ;
      sans volet (l'écran de /espace), le dessin d'avant */
@@ -178,6 +198,7 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       }
       setForm(null);
       setFait(message);
+      onFait?.(message);
       window.setTimeout(() => setFait(null), 6000);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
@@ -988,6 +1009,23 @@ export default function PermisVue({ permis: p, projet, dossier, source, peutEcri
       })}
     </Partie>
   ) : null;
+
+  /* 02/11/2026 — la page d'un permis de l'espace 2 ouvre ces fenêtres elle-même */
+  useEffect(() => {
+    if (!piloteRef) return;
+    piloteRef.current = {
+      confirmerLue: ouvrirConfirmation,
+      ecarterLue: (d) => { setMotif(""); setErreur(null); setForm({ type: "ecarter", date: d }); },
+      confirmerImplicite: () => { setErreur(null); setForm({ type: "implicite" }); },
+      saisir: ouvrirSaisie,
+      recours: () => { setRec((r) => ({ ...r, nature: "gracieux", date: aujourdHuiIso(), auteur: "" })); setErreur(null); setForm({ type: "recours" }); },
+      issue: (r) => { setRec((x) => ({ ...x, issue: "rejete", date_issue: aujourdHuiIso() })); setErreur(null); setForm({ type: "issue", recours: r }); },
+      regime: ouvrirRegime,
+      boutons,
+      occupe: gris,
+    };
+  });
+  if (fenetresSeules) return fenetres;
 
   return (
     <div style={{ display: "grid", gap: 14, gridTemplateColumns: "minmax(0, 1fr)" }}>

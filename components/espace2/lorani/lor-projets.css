@@ -1,0 +1,143 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI › vue d'ensemble = Linear, Projects (liste « All projects »),
+   au 1:1 (02/11/2026)
+
+   Relevé : releves/linear-projects.md (01/11) et mesures reprises au
+   getComputedStyle sur linear.app/omegaaii/projects/all le 02/11
+   (1440 × 900, sombre et clair). Repères depuis le bord de la carte de
+   Linear (1187 de large) :
+     en-tête    ligne 1 : 44 de haut, p 0 8, filet bas 0.5 ; titre 13/500 à x 18.5
+                ligne 2 : 43.5, p 0 8, gap 6 ; pastille de vue 28 ; ronds de 28 à 6 d'écart
+     colonnes   en-tête 32 de haut ; lignes de 48, rayon 8, survol en retrait de 8 (::before)
+                [indent] 8 [checkbox] 18 [title] 1fr [health] 130 [priority] 68 [lead] 48
+                [targetDate] 124 [issues] 49 [status] 120 [end-padding] 8, gap 6
+     1024       [title] 1fr [health] 50 [priority] 68 [lead] 48 [targetDate] 100 [issues] 49
+                [status] 28 : ni case, ni libellé de santé, ni % ni courbe
+     390        [title] 1fr [health] 50 [status] 28 ; en-tête de colonnes masqué ; « + » seul
+     volet      388 de large, p 12, rayon 10, marges 0 8 8 0 ; onglets de 28 ; lignes de 42
+   Les paliers se lisent sur la largeur de la liste (requête de conteneur) :
+   la liste se resserre aussi quand le volet s'ouvre, comme dans Linear.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lor-pj { display: flex; flex-direction: column; min-height: calc(100dvh - 48px); }
+
+/* ——— en-tête ——— */
+.v2 .lor-pj-l1 { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 44px; padding: 0 8px; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-pj-titre { display: flex; align-items: center; min-width: 0; padding: 0 4px 0 10px; }
+.v2 .lor-pj-titre h2 { font-size: 13px; font-weight: 500; line-height: normal; color: var(--lor-t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-pj-l2 { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 43.5px; padding: 0 8px; }
+.v2 .lor-pj-vues { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; }
+.v2 .lor-pj-outils { display: flex; align-items: center; gap: 6px; }
+
+/* ——— corps : liste et volet ——— */
+.v2 .lor-pj-corps { flex: 1; display: flex; min-height: 0; }
+.v2 .lor-pj-liste { flex: 1; min-width: 0; container-type: inline-size; padding-bottom: 8px; }
+
+/* la grille commune à l'en-tête de colonnes et aux lignes */
+.v2 .lor-pj-grille {
+  display: grid; align-items: center; column-gap: 6px;
+  grid-template-columns: [indent] 8px [checkbox] 18px [title] minmax(0, 1fr) [health] 130px [priority] 68px [lead] 48px [targetDate] 124px [issues] 49px [status] 120px [end-padding] 8px;
+}
+.v2 .lor-pj-entetes { height: 32px; }
+.v2 .lor-pj-tri {
+  display: inline-flex; align-items: center; justify-content: center; gap: 2px; height: 24px; padding: 0 6px; border-radius: 9999px;
+  font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap;
+}
+.v2 .lor-pj-tri svg { width: 12px; height: 12px; fill: var(--lor-t2); opacity: 0; }
+.v2 .lor-pj-tri[data-trie] svg { opacity: 1; }
+.v2 .lor-pj-tri:hover { background: var(--lor-onglet-actif); color: var(--lor-t2); }
+.v2 .lor-pj-entete-fixe { padding: 0 12px 0 0; font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; overflow: hidden; }
+.v2 .lor-pj-c-titre { grid-column: title; min-width: 0; }
+.v2 .lor-pj-c-sante { grid-column: health; min-width: 0; }
+.v2 .lor-pj-c-prio { grid-column: priority; }
+.v2 .lor-pj-c-chef { grid-column: lead; min-width: 0; }
+.v2 .lor-pj-c-date { grid-column: targetDate; min-width: 0; }
+.v2 .lor-pj-c-lues { grid-column: issues; display: flex; justify-content: flex-end; }
+.v2 .lor-pj-entetes .lor-pj-c-lues { display: block; }
+.v2 .lor-pj-c-statut { grid-column: status; display: flex; align-items: center; gap: 4px; min-width: 0; }
+.v2 .lor-pj-c-case { grid-column: checkbox; margin-left: 8px; display: flex; align-items: center; height: 22px; opacity: 0; }
+
+/* une ligne */
+.v2 .lor-pj-ligne { position: relative; isolation: isolate; height: 48px; border-radius: 8px; color: var(--lor-t1); transition: color 0.15s; }
+.v2 .lor-pj-ligne::before { content: ""; position: absolute; inset: 0 8px; border-radius: 8px; z-index: -1; pointer-events: none; }
+.v2 .lor-pj-ligne:hover::before { background: var(--lor-survol); }
+.v2 .lor-pj-ligne:hover .lor-pj-c-case, .v2 .lor-pj-ligne:hover .lor-pj-sans-chef { opacity: 1; }
+.v2 .lor-pj-ligne:focus-visible { outline: none; }
+.v2 .lor-pj-ligne:focus-visible::before { box-shadow: inset 0 0 0 1px var(--lor-anneau-clavier); background: var(--lor-survol); }
+.v2 .lor-pj-case { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; margin-left: -3px; padding: 2px; border-radius: 3px; border: 1px solid var(--lor-case); }
+
+.v2 .lor-pj-nom-cell { display: flex; align-items: center; height: 28px; min-width: 0; }
+.v2 .lor-pj-icone { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; padding: 6px; margin-right: 6px; border-radius: 8px; transition: background-color 0.15s, border 0.15s; }
+.v2 .lor-pj-textes { display: flex; align-items: center; gap: 12px; min-width: 0; height: 27px; }
+.v2 .lor-pj-nom { font-size: 13px; font-weight: 500; line-height: normal; color: var(--lor-t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-pj-jalon { display: flex; align-items: center; gap: 4px; height: 27px; padding: 0 4px; border-radius: 48px; overflow: hidden; flex-shrink: 1; min-width: 0; }
+.v2 .lor-pj-jalon span { font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.v2 .lor-pj-sante { display: flex; align-items: center; height: 24px; max-width: 100%; padding: 0 8px; border-radius: 9999px; border: 0.5px solid transparent; overflow: clip; }
+.v2 .lor-pj-sante > span { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.v2 .lor-pj-sante b { font-size: 12px; font-weight: 500; line-height: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-pj-sante b i { font-style: normal; opacity: 0.7; }
+.v2 .lor-pj-sante:hover { background: var(--lor-onglet-actif); }
+
+.v2 .lor-pj-prop { display: flex; align-items: center; height: 28px; padding: 3px 6px; border-radius: 9999px; min-width: 0; }
+.v2 .lor-pj-prop:hover { background: var(--lor-onglet-actif); }
+.v2 .lor-pj-prop > span { margin-left: 8px; font-size: 12px; font-weight: 450; line-height: normal; color: var(--lor-t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-pj-nombre { font-size: 12px; font-weight: 450; color: var(--lor-pur); }
+.v2 .lor-pj-sans-chef { opacity: 0; }
+.v2 .lor-pj-avatar { display: flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: var(--lor-onglet-actif); color: var(--lor-t2); font-size: 8px; font-weight: 600; letter-spacing: -0.2px; }
+
+.v2 .lor-pj-note { margin: 12px 18px; font-size: 13px; color: var(--lor-hors); }
+.v2 .lor-pj-vide { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin: 24px 18px; font-size: 13px; color: var(--lor-t3); }
+.v2 .lor-pj-vide strong { font-size: 13px; font-weight: 500; color: var(--lor-t1); }
+
+/* ——— 1024 (liste de moins de 1000 de large) ——— */
+@container (max-width: 999px) {
+  .v2 .lor-pj-grille { grid-template-columns: [indent] 8px [checkbox] 0px [title] minmax(0, 1fr) [health] 50px [priority] 68px [lead] 48px [targetDate] 100px [issues] 49px [status] 28px [end-padding] 8px; }
+  .v2 .lor-pj-c-case { display: none; }
+  .v2 .lor-pj-sante b, .v2 .lor-pj-c-statut .lor-pj-prop > span, .v2 .lor-pj-courbe { display: none; }
+}
+/* ——— 390 (moins de 600) ——— */
+@container (max-width: 599px) {
+  .v2 .lor-pj-grille { grid-template-columns: [indent] 8px [title] minmax(0, 1fr) [health] 50px [status] 28px [end-padding] 8px; }
+  .v2 .lor-pj-entetes, .v2 .lor-pj-c-prio, .v2 .lor-pj-c-chef, .v2 .lor-pj-c-date, .v2 .lor-pj-c-lues { display: none; }
+}
+@media (max-width: 767px) {
+  .v2 .lor-pj-nouveau span { display: none; }
+  .v2 .lor-pj-nouveau { width: 28px; padding: 0 2px; }
+  .v2 .lor-pj-nouveau svg { margin-right: 0; }
+  .v2 .lor-pj-volet { display: none; }
+}
+
+/* ——— volet de droite (Open sidebar) : la santé, les projets, les chefs ——— */
+.v2 .lor-pj-volet { display: flex; flex-shrink: 0; width: 396px; }
+.v2 .lor-pj-volet-carte {
+  display: flex; flex-direction: column; width: 388px; margin: 0 8px 8px 0; padding: 12px; border-radius: 10px;
+  background: var(--lor-volet); border: 0.5px solid var(--lor-volet-trait); box-shadow: var(--lor-volet-ombre);
+}
+.v2 .lor-pj-volet-onglets { display: flex; gap: 2px; margin: -2px 0 8px; padding: 0; border-radius: 5px; background: var(--lor-volet); }
+.v2 .lor-pj-volet-onglet {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 28px; margin: 2px; padding: 4px 12px;
+  border-radius: 9999px; border: 0.5px solid transparent; background: var(--lor-volet-onglet);
+  font-size: 12px; font-weight: 500; color: var(--lor-volet-onglet-texte); white-space: nowrap;
+}
+.v2 .lor-pj-volet-onglet[aria-selected="true"] { background: var(--lor-volet-onglet-actif); color: var(--lor-volet-texte); }
+.v2 .lor-pj-volet-lignes { display: flex; flex-direction: column; gap: 1px; }
+.v2 .lor-pj-volet-ligne {
+  display: flex; align-items: center; justify-content: space-between; height: 42px; padding: 0 10px; border-radius: 8px;
+  background: var(--lor-volet); font-size: 13px; font-weight: 450; color: var(--lor-volet-texte); text-align: left;
+}
+.v2 .lor-pj-volet-ligne > span { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.v2 .lor-pj-volet-ligne > span span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-pj-volet-ligne:hover, .v2 .lor-pj-volet-ligne[data-actif] { background: var(--lor-menu-survol); }
+
+/* ——— menu Affichage : puces des propriétés (relevé 1440-clair-display-options) ——— */
+.v2 .lor-pj-affichage { width: 336px; padding: 12px 0 8px; }
+.v2 .lor-pj-aff-ligne { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 32px; padding: 0 14px; font-size: 13px; font-weight: 450; color: var(--lor-menu-texte); }
+.v2 .lor-pj-aff-ligne select { height: 24px; padding: 0 8px; border-radius: 9999px; border: 0.5px solid var(--lor-menu-trait); background: var(--lor-menu); font: inherit; font-size: 12px; font-weight: 500; color: var(--lor-menu-fort); }
+.v2 .lor-pj-aff-titre { padding: 8px 14px 6px; font-size: 12px; font-weight: 500; color: var(--lor-menu-gris); }
+.v2 .lor-pj-puces { display: flex; flex-wrap: wrap; padding: 0 14px; }
+.v2 .lor-pj-puce { height: 24px; margin: 0 4px 4px 0; padding: 0 8px; border-radius: 9999px; font-size: 12px; font-weight: 500; background: var(--lor-menu); color: var(--lor-menu-gris); border: 0.5px solid var(--lor-menu-trait); }
+.v2 .lor-pj-puce[aria-pressed="true"] { background: var(--lor-menu-survol); color: var(--lor-menu-fort); border-color: transparent; }
+
+/* la case « Marché public » de F1 (la fenêtre est hors de .lor) */
+.lor-pj-coche { display: flex; align-items: center; gap: 8px; font-size: 13px; }
