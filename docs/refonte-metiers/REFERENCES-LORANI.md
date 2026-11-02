@@ -1,9 +1,9 @@
-# LORANI — sous-pages et pages de référence (en cours, 02/11/2026)
+# LORANI — sous-pages et pages de référence (en cours, 02/11/2026, reprise dans le cloud)
 
 | Sous-page | Route | Référence | Relevé | État |
 |---|---|---|---|---|
 | Vue d'ensemble | `/espace2/lorani` | Linear, Projects (liste) | `linear-projects.md` | écrite (`VueEnsemble.tsx`, `lor-projets.css`) ; superposition 1 faite en sombre : géométrie alignée (en-tête, colonnes, lignes) ; restent : capture avec 13 lignes, clair, 390 |
-| Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | relevé complété en direct (ci-dessous), page pas encore écrite |
+| Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | écrite (`PagePermis.tsx`, `lor-ticket.css`) ; superposée en sombre, clair, 1024 et 390 (`comparaisons/lorani/permis-*`) ; écarts ci-dessous |
 | Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | à faire |
 | Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | à faire |
 | Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | à faire |
@@ -31,3 +31,26 @@ Le cadre de l'espace 2 (barre 48, rail, sous-menu ; `main` à x 304) n'est pas c
 - Formulaire « Leave a comment » : r 8 p 12 16, mêmes fond et bord.
 - Propriétés : p-top 21.75 + 51 ; sections p 0 0 10 4, m-bottom 20 ; h3 13/500 t3 p 0 8 ; liste p 8 2 2, gap 4 ; pilule 28 (r 9999, p 0 10 0 6, gap 6, icône 16 ou 14, 13/500 t2 ; vide = t3).
 - SVG des boutons (étoile, …, Accept, Decline, Duplicate, ClockOutline, lien, ID, branche, prompt, chevron, réaction, trombone, triangle, +) : relevés dans le DOM le 02/11 ; à reprendre de `linear-commun` ou du relevé quand ils y sont.
+
+## Outils de la reprise dans le cloud (02/11)
+
+- `outils/lor-capture.mjs` : capture Playwright (chromium headless, échelle 1, `colorScheme` sombre ou clair). Fenêtre **1492 × 904** : la carte de l'espace 2 (x 304, y 48) a alors la taille de celle de Linear (1188 × 856 à x 244, y 8).
+- `outils/lor-superpose.py` : découpe les deux cartes au même cadre, écrit `<nom>-cote.png` (référence | nôtre) et `<nom>-diff.png` (différence ×3), compte les pixels en écart.
+- `outils/lor-mesure.mjs` : rectangles et styles calculés d'une sous-page, depuis le coin de la carte, pour se lire contre le relevé.
+- `outils/lor-icones-linear.py` + `.json` → `components/espace2/lorani/lor-icones-linear.ts` : les icônes absentes des relevés (Accept, Decline, Copy issue ID, branche, Copy as prompt, chevron, triangle, réaction, flèche d'envoi, statuts d'un ticket), recopiées du bundle public de Linear (static.linear.app) en suivant les import/export depuis le module de la page (`IssueDetailsPaneSidebar`).
+- `outils/lor-sprite.py` : ajoute des symboles du sprite à `lor-sprite.ts` (ClockOutline, Starred).
+
+## Permis → Linear, page d'un ticket (OME-19)
+
+Données : le permis d'exemple « PCMI Maison Lemoine » (5 étapes au calendrier comme les 5 sous-tickets d'OME-19, 3 dates lues à confirmer comme les 3 commentaires).
+Mesures relues au DOM (`lor-mesure.mjs`) contre le relevé : titre à x 62 / y 97.75 de la carte, colonne 668 + propriétés 376 à x 764, gap 48, sous-tickets à x 56 en lignes de 36, filet à 16/18, carte de commentaire à x 54 (m 0 −8), « Properties » à y 116.8 → toutes au demi-pixel du relevé.
+Comparaisons : `permis-1440-sombre-*`, `permis-1440-clair-*`, `permis-390-sombre-*`, `permis-390-clair-*` (cote + diff). Les pixels en écart viennent du contenu (titre, description et étapes plus longs, dates dans les lignes, plus d'événements), pas de la géométrie : zones superposées une à une (en-tête, colonne, sous-tickets, activité, carte de commentaire) au pixel près.
+
+Correspondances : Sub-issues → étapes du calendrier (statut : fait/passé = Done, à venir = Todo, en cours/en retard = In Progress, à confirmer = Triage, en attente = Backlog) ; Accept/Decline → la première chose qui attend un membre (décision implicite : Confirmer / Saisir la décision ; date lue : Confirmer / Écarter) ; Snooze → échéances et rappels ; « … » → Régime, saisies, projet, dépôt de courrier, écran d'avant ; barre d'outils → copier le lien, le numéro, la référence du projet, « Saisir ce qui est arrivé » et son menu ; commentaires → décision implicite et dates lues (pied « Leave a reply… » = Confirmer, Decline = Écarter) ; « Leave a comment… » → déposer un courrier ; Properties → état, urgence, chef de projet, quatre dates ; Labels → régime ; Project → projet ; deux sections du même dessin : Échéances, Recours.
+
+Écarts restants, avec leur raison :
+- Pas d'étoile (Add to favorites) dans l'en-tête : l'espace 2 n'a pas de favoris, un bouton sans effet serait un faux geste.
+- Pas de « Mark as duplicate » : un permis n'a pas de doublon.
+- Lignes de sous-tickets : une date à droite (la date de l'étape) à la place de l'avatar d'assigné ; « Unsubscribe » devient « Rappels au chef de projet » (à qui partent les rappels) : gestes et données du métier.
+- Deux sections de propriétés de plus (Échéances, Recours) : blocs B15 et B16 de l'inventaire, sans place dans la référence.
+- Les fenêtres de saisie (F7-F13) sont celles de l'espace 2 (Dialog commun), pas celles de Linear, qui n'en a pas l'équivalent.

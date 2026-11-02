@@ -1,0 +1,194 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI › la page d'un permis = Linear, page d'un ticket, au 1:1
+   (02/11/2026)
+
+   Relevé : releves/linear-ticket.md (01/11) et mesures prises au
+   getComputedStyle sur linear.app/omegaaii/issue/OME-19 le 02/11
+   (REFERENCES-LORANI.md). Repères depuis le bord de la carte (1187 de
+   large à 1440) :
+     en-tête      44, p 0 12 0 8, filet bas 0.5 ; fil : maillon 24 (r 8,
+                  p 0 5 0 4), « › », lien courant (r 6, p 2 4) → h2 13/500 ;
+                  « … » 28 ; à droite boutons texte 28 et ronds 28, gap 6
+     outils       absolus à top 43.5, 44 de haut, p 8 12 8 0, ronds pleins
+                  de 28 à 6 d'écart + bouton double 56.5
+     corps        grille 1fr minmax(0, 80ch) minmax(0, clamp(280px,
+                  26.087cqw + 66.087px, 400px)) 1fr, gap clamp(16px,
+                  8.696cqw − 55.304px, 56px) → 667.5 + 375.7 à 1187
+     colonne      p-top 21.75, p-left 14 ; titre m 32 0 8, p 6 0,
+                  24/600/32 ls −0.16 ; description p 10 14 16, m 0 −14 10,
+                  15/450/24 ls −0.1 ; ronds 28 (m 0 0 14 −6)
+     sous-tickets m-left −6 ; tête 32 (p 0 8 4 0, m-bottom 4) ; lignes 36,
+                  [indent] 0 [checkbox] 22 [status] 16 [title] 1fr
+                  [end-padding] 6, gap 8
+     activité     filet 0.5 m 16 0 18 ; h3 15/600/23 ; événement r 8 p 5 0,
+                  pastille 36 × 18 (p 2 11) ; carte commentaire m 0 −8,
+                  p-bottom 18, r 8, tête p 16 gap 6, corps 15/450/24
+     propriétés   p-top 21.75 + 51 ; sections p 0 0 10 4, m-bottom 20 ;
+                  h3 13/500 t3 p 0 8 ; liste p 8 2 2 gap 4 ; pilule 28
+                  (r 9999, p 0 10 0 6, gap 6, 13/500)
+   En dessous d'une carte de 1000 de large (1024 et moins), la colonne des
+   propriétés disparaît : elles passent sous le titre en rangée de pilules,
+   comme dans Linear.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lor-tk {
+  --lor-tk-filet: lch(18.48 1.48 272);
+  --lor-tk-com-texte: lch(90.826 1.425 272);
+  --lor-tk-repondre: lch(39.452 1.425 272);
+  position: relative; container-type: inline-size; min-height: calc(100dvh - 48px);
+}
+html[data-v2-theme="light"] .v2 .lor-tk { --lor-tk-filet: lch(89.84 0 282); --lor-tk-com-texte: lch(20 1 282); --lor-tk-repondre: lch(66 1 282); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lor-tk { --lor-tk-filet: lch(89.84 0 282); --lor-tk-com-texte: lch(20 1 282); --lor-tk-repondre: lch(66 1 282); }
+}
+
+/* ——— en-tête ——— */
+.v2 .lor-tk-tete { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 44px; padding: 0 12px 0 8px; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-tk-tete-gauche { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.v2 .lor-tk-tete-droite { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.v2 .lor-tk-fil { display: flex; align-items: center; min-width: 0; padding-left: 6px; font-size: 13px; font-weight: 500; }
+.v2 .lor-tk-maillon { display: inline-flex; align-items: center; height: 24px; padding: 0 5px 0 4px; border-radius: 8px; color: var(--lor-t2); white-space: nowrap; flex-shrink: 0; }
+.v2 .lor-tk-maillon:hover, .v2 .lor-tk-courant:hover { background: var(--lor-onglet-actif); }
+.v2 .lor-tk-sep { margin: -2px 3px 0 4px; color: var(--lor-t3); }
+.v2 .lor-tk-courant { display: flex; min-width: 0; padding: 2px 4px; margin-right: 4px; border-radius: 6px; }
+.v2 .lor-tk-courant h2 { font-size: 13px; font-weight: 500; line-height: 16px; color: var(--lor-t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-tk-id { display: inline-flex; margin-right: 5.6px; color: var(--lor-t2); }
+.v2 .lor-tk-ancre { position: relative; }
+.v2 .lor-tk-texte { gap: 0; }
+.v2 .lor-tk-texte svg { width: 14px; height: 14px; }
+.v2 .lor-tk-menu { min-width: 240px; }
+.v2 .lor-tk-menu .lor-option:disabled { opacity: 0.5; }
+
+/* ——— barre d'outils ——— */
+.v2 .lor-tk-outils { position: absolute; top: 43.5px; right: 0; z-index: 2; display: flex; align-items: center; gap: 6px; height: 44px; padding: 8px 12px 8px 0; }
+.v2 .lor-tk-outils .lor-rond:disabled { opacity: 0.5; }
+.v2 .lor-tk-double { display: flex; align-items: center; height: 28px; border-radius: 9999px; background: var(--lor-rond); }
+.v2 .lor-tk-moitie { width: 28px; padding: 0; background: none; }
+.v2 .lor-tk-moitie:first-child { border-radius: 9999px 0 0 9999px; }
+.v2 .lor-tk-moitie:last-of-type { border-radius: 0 9999px 9999px 0; }
+.v2 .lor-tk-double-sep { width: 0.5px; height: 20px; margin: 4px 0; background: var(--lor-trait-carte); }
+
+/* ——— corps ——— */
+.v2 .lor-tk-corps {
+  display: grid; font-size: 15px;
+  grid-template-columns: 1fr minmax(0, 80ch) minmax(0, clamp(280px, calc(26.087cqw + 66.087px), 400px)) 1fr;
+  column-gap: clamp(16px, calc(8.696cqw - 55.304px), 56px);
+}
+.v2 .lor-tk-principal { grid-column: 2; min-width: 0; padding: 21.75px 0 64px 14px; }
+.v2 .lor-tk-proprietes { grid-column: 3; min-width: 0; padding-top: 72.75px; }
+.v2 .lor-tk-proprietes > * { position: relative; }
+
+.v2 .lor-tk-titre { margin: 32px 0 8px; padding: 6px 0; font-size: 24px; font-weight: 600; line-height: 32px; letter-spacing: -0.16px; color: var(--lor-t1); overflow-wrap: anywhere; }
+.v2 .lor-tk-description { margin: 0 -14px 10px; padding: 10px 14px 16px; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-t2); }
+.v2 .lor-tk-description p + p { margin-top: 8px; }
+.v2 .lor-tk-sourd { color: var(--lor-t3); }
+.v2 .lor-tk-pieces-jointes { display: flex; gap: 0; margin: 0 0 14px -6px; }
+.v2 .lor-tk-rond-petit svg { width: 14px; height: 14px; }
+
+/* ——— sous-tickets : le calendrier ——— */
+.v2 .lor-tk-sous { margin-left: -6px; }
+.v2 .lor-tk-sous-tete { display: flex; align-items: center; justify-content: space-between; height: 32px; padding: 0 8px 4px 0; margin-bottom: 4px; }
+.v2 .lor-tk-sous-gauche, .v2 .lor-tk-sous-droite { display: flex; align-items: center; gap: 8px; }
+.v2 .lor-tk-sous-droite { gap: 6px; }
+.v2 .lor-tk-replier { display: inline-flex; align-items: center; height: 24px; padding: 0 12px 0 6px; border-radius: 9999px; font-size: 12px; font-weight: 500; color: var(--lor-t3); }
+.v2 .lor-tk-replier:hover { background: var(--lor-onglet-actif); color: var(--lor-t2); }
+.v2 .lor-tk-triangle { width: 14px; height: 14px; margin-right: 3px; transition: transform 0.15s; }
+.v2 .lor-tk-replier[aria-expanded="true"] .lor-tk-triangle { transform: rotate(90deg); }
+.v2 .lor-tk-jauge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-tk-sous-droite .lor-rond:disabled { opacity: 0.5; }
+.v2 .lor-tk-coche { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; padding: 0 14px; font-size: 13px; font-weight: 450; color: var(--lor-menu-texte); cursor: default; }
+.v2 .lor-tk-coche input { accent-color: var(--lor-fait); margin: 0; }
+.v2 .lor-tk-lignes { display: flex; flex-direction: column; }
+.v2 .lor-tk-ligne {
+  position: relative; isolation: isolate; display: grid; align-items: center; column-gap: 8px; height: 36px; border-radius: 8px;
+  grid-template-columns: [indent] 0 [checkbox] 22px [status] 16px [title] minmax(0, 1fr) [fin] auto [end-padding] 6px;
+}
+.v2 .lor-tk-ligne::before { content: ""; position: absolute; inset: 0; border-radius: 8px; z-index: -1; }
+.v2 .lor-tk-ligne:hover::before { background: var(--lor-survol); }
+.v2 .lor-tk-l-case { grid-column: checkbox; opacity: 0; }
+.v2 .lor-tk-l-statut { grid-column: status; display: flex; justify-content: center; }
+.v2 .lor-tk-l-titre { grid-column: title; font-size: 13px; font-weight: 500; color: var(--lor-t1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-tk-l-fin { grid-column: fin; display: flex; align-items: center; gap: 8px; margin-right: 3px; }
+.v2 .lor-tk-l-date { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; }
+.v2 .lor-tk-l-date svg { width: 14px; height: 14px; }
+.v2 .lor-tk-vide { padding: 8px 0 8px 6px; font-size: 13px; color: var(--lor-t3); }
+
+.v2 .lor-tk-filet { margin: 16px 0 18px; border-bottom: 0.5px solid var(--lor-tk-filet); }
+
+/* ——— activité ——— */
+.v2 .lor-tk-activite-tete { display: flex; align-items: center; justify-content: space-between; height: 32px; }
+.v2 .lor-tk-activite-tete h3 { font-size: 15px; font-weight: 600; line-height: 23px; color: var(--lor-t1); }
+.v2 .lor-tk-activite-droite { display: flex; align-items: center; gap: 4px; }
+.v2 .lor-tk-abonne { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; color: var(--lor-t3); }
+.v2 .lor-tk-abonnes { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: var(--lor-t3); }
+.v2 .lor-tk-evenements { display: flex; flex-direction: column; margin-top: 16px; padding-bottom: 13px; }
+.v2 .lor-tk-evenement { display: flex; align-items: flex-start; padding: 5px 0; border-radius: 8px; font-size: 12px; font-weight: 450; line-height: 16.8px; color: var(--lor-t3); }
+.v2 .lor-tk-ev-avatar { display: flex; align-items: center; flex-shrink: 0; width: 36px; height: 18px; padding: 2px 11px; margin-top: -0.6px; }
+.v2 .lor-tk-ev-texte { min-width: 0; padding-left: 1px; }
+.v2 .lor-tk-ev-fort { font-weight: 500; }
+.v2 .lor-tk-ev-point { font-weight: 600; }
+
+.v2 .lor-tk-avatar {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 9999px;
+  background: var(--lor-onglet-actif); color: var(--lor-t2); font-weight: 600; letter-spacing: 0; line-height: 1;
+}
+.v2 .lor-tk-avatar[data-systeme] { background: var(--lor-t1); color: var(--lor-carte); }
+
+.v2 .lor-tk-commentaire { margin: 0 -8px; padding-bottom: 18px; }
+.v2 .lor-tk-carte { background: var(--lor-volet); border: 0.5px solid var(--lor-volet-trait); border-radius: 8px; box-shadow: var(--lor-volet-ombre); }
+.v2 .lor-tk-carte-tete { display: flex; align-items: center; gap: 9px; padding: 16px 16px 6px; font-size: 13px; }
+.v2 .lor-tk-auteur { font-weight: 500; color: var(--lor-t1); }
+.v2 .lor-tk-quand { margin-left: -1px; font-weight: 450; color: var(--lor-volet-onglet-texte); }
+.v2 .lor-tk-carte-corps { padding: 0 16px 17px; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-tk-com-texte); }
+.v2 .lor-tk-carte-pied { display: flex; align-items: center; gap: 6px; padding: 11px 16px; border-top: 0.5px solid var(--lor-volet-trait); }
+.v2 .lor-tk-repondre { flex: 1; min-width: 0; display: flex; align-items: center; gap: 9px; height: 24px; text-align: left; font-size: 15px; font-weight: 450; line-height: 24px; color: var(--lor-tk-repondre); }
+.v2 .lor-tk-repondre span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-tk-repondre:hover:not(:disabled) { color: var(--lor-t2); }
+.v2 .lor-tk-rond-24 { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 12px; color: var(--lor-t3); }
+.v2 .lor-tk-rond-24 svg, .v2 .lor-tk-envoyer svg { width: 14px; height: 14px; }
+.v2 .lor-tk-rond-24:hover:not(:disabled) { background: var(--lor-onglet-actif); color: var(--lor-t2); }
+.v2 .lor-tk-envoyer { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 12px; background: var(--lor-volet-onglet); color: var(--lor-t2); }
+.v2 .lor-tk-envoyer:hover:not(:disabled) { background: var(--lor-volet-onglet-actif); }
+.v2 .lor-tk-carte-pied button:disabled { opacity: 0.5; }
+
+.v2 .lor-tk-formulaire {
+  display: flex; flex-direction: column; margin: 0 -8px; padding: 12px 16px; border-radius: 8px;
+  background: var(--lor-volet); border: 0.5px solid var(--lor-volet-trait); box-shadow: var(--lor-volet-ombre);
+}
+.v2 .lor-tk-formulaire-texte { font-size: 15px; font-weight: 450; line-height: 24px; color: var(--lor-tk-repondre); }
+.v2 .lor-tk-formulaire-pied { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
+.v2 .lor-tk-formulaire:hover .lor-tk-formulaire-texte { color: var(--lor-t2); }
+
+/* ——— propriétés ——— */
+.v2 .lor-tk-section { padding: 0 0 10px 4px; margin-bottom: 20px; }
+.v2 .lor-tk-section h3 { height: 20px; padding: 0 8px; font-size: 13px; font-weight: 500; line-height: 20px; color: var(--lor-t3); }
+.v2 .lor-tk-liste { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 2px 2px; }
+.v2 .lor-tk-liste--ligne { flex-direction: row; flex-wrap: wrap; align-items: center; }
+.v2 .lor-tk-pilule {
+  display: inline-flex; align-items: center; gap: 6px; max-width: 100%; height: 28px; padding: 0 10px 0 6px; border-radius: 9999px;
+  border: 0.5px solid transparent; font-size: 13px; font-weight: 500; color: var(--lor-t2); white-space: nowrap; text-align: left;
+  transition: background-color 0.15s, color 0.15s;
+}
+.v2 .lor-tk-pilule > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-tk-pilule svg { width: 16px; height: 16px; fill: var(--lor-t3); }
+.v2 .lor-tk-pilule[data-vide] { color: var(--lor-t3); }
+.v2 a.lor-tk-pilule:hover, .v2 button.lor-tk-pilule:hover:not(:disabled) { background: var(--lor-onglet-actif); }
+.v2 .lor-tk-etiquette { display: inline-flex; align-items: center; gap: 6px; height: 23px; padding: 0 8px; border-radius: 9999px; border: 0.5px solid var(--lor-trait-carte); font-size: 13px; font-weight: 500; color: var(--lor-t2); white-space: nowrap; }
+.v2 .lor-tk-etiquette-point { width: 9px; height: 9px; border-radius: 50%; }
+
+/* la rangée de pilules sous le titre (étroit) */
+.v2 .lor-tk-rangee { display: none; flex-wrap: wrap; gap: 6px; margin: 0 0 4px -6px; }
+.v2 .lor-tk-rangee .lor-tk-pilule { background: var(--lor-rond); }
+
+.v2 .lor-tk-absent { padding: 24px 22px; font-size: 13px; color: var(--lor-t3); }
+.v2 .lor-tk-absent a { color: var(--lor-t2); text-decoration: underline; }
+
+@container (max-width: 999px) {
+  .v2 .lor-tk-corps { grid-template-columns: minmax(0, 1fr); column-gap: 0; padding: 0 0 0 0; }
+  .v2 .lor-tk-principal { grid-column: 1; padding: 21.75px 14px 64px; }
+  .v2 .lor-tk-proprietes { display: none; }
+  .v2 .lor-tk-rangee { display: flex; }
+  .v2 .lor-tk-texte span { display: none; }
+  .v2 .lor-tk-texte { width: 28px; padding: 0; }
+  .v2 .lor-tk-texte svg { margin-right: 0; }
+}

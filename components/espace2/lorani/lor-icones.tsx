@@ -11,6 +11,7 @@
 
 import { useId } from "react";
 import { SPRITE, type NomIcone } from "./lor-sprite";
+import { LIN, type NomLin } from "./lor-icones-linear";
 
 type P = { titre?: string; className?: string };
 const aria = (titre?: string) => (titre ? { role: "img" as const, "aria-label": titre } : { "aria-hidden": true as const });
@@ -220,4 +221,56 @@ export function IconeTri({ montant, className }: P & { montant?: boolean }) {
       <path d="M8.75 12.25C8.75 12.6642 8.41421 13 8 13C7.58579 13 7.25 12.6642 7.25 12.25L7.25 3.75C7.25 3.33579 7.58579 3 8 3C8.41421 3 8.75 3.33579 8.75 3.75V12.25Z" />
     </svg>
   );
+}
+
+/* ——— 02/11/2026 : les icônes de la page d'un ticket, tirées du bundle de Linear (./lor-icones-linear.ts) ——— */
+export function IconeLin({ nom, taille = 16, vue = 16, titre, className, couleur }: P & { nom: NomLin; taille?: number; vue?: number; couleur?: string }) {
+  return (
+    <svg width={taille} height={taille} viewBox={`0 0 ${vue} ${vue}`} fill={couleur ?? "currentColor"} className={className} {...aria(titre)}>
+      {LIN[nom].map(([d, pair], i) => (pair ? <path key={i} d={d} fillRule="evenodd" clipRule="evenodd" /> : <path key={i} d={d} />))}
+    </svg>
+  );
+}
+
+/* l'étoile (Add to favorites) et les points « … » : releves/linear-commun/icones-en-ligne.md */
+export function IconePoints({ titre, className }: P) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className={className} {...aria(titre)}>
+      <path d="M3 6.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm5 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm5 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
+    </svg>
+  );
+}
+
+/* le statut d'un ticket 14 × 14 (Hnt de Linear) : triage, backlog, à faire et en cours (anneau et part), fait, doublon, annulé */
+export type StatutTicket = "triage" | "backlog" | "afaire" | "encours" | "fait" | "doublon" | "annule";
+export const COULEUR_TICKET: Record<StatutTicket, string> = {
+  triage: "#fc7840",
+  backlog: "var(--lor-annule)",
+  afaire: "var(--lor-planifie)",
+  encours: "var(--lor-cours)",
+  fait: "var(--lor-fait)",
+  doublon: "var(--lor-annule)",
+  annule: "var(--lor-annule)",
+};
+export function IconeStatutTicket({ statut, part = 0.5, titre, className }: P & { statut: StatutTicket; part?: number }) {
+  const c = COULEUR_TICKET[statut];
+  if (statut === "afaire" || statut === "encours") {
+    /* ZE : l'anneau 12 × 12 (trait 1,5) et une part de disque de rayon 3,5 */
+    const i = 3.5;
+    const a = 360 * (statut === "afaire" ? 0 : part);
+    const o = a > 180 ? 360 - a : a;
+    const s = (o * Math.PI) / 180;
+    const corde = Math.sqrt(2 * i * i - 2 * i * i * Math.cos(s));
+    const l = o <= 90 ? i * Math.sin(s) : i * Math.sin(((180 - o) * Math.PI) / 180);
+    const u = Math.sqrt(Math.max(0, corde * corde - l * l));
+    const [d, f] = a <= 180 ? [i + l, 0] : [i - l, 1];
+    return (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={className} {...aria(titre)}>
+        <rect x="1" y="1" width="12" height="12" rx="6" stroke={c} strokeWidth="1.5" fill="none" />
+        <path fill={c} stroke="none" d={`M ${i},${i} L${i},0 A${i},${i} 0 ${f},1 ${d}, ${u} z`} transform={`translate(${i},${i})`} />
+      </svg>
+    );
+  }
+  const nom: NomLin = statut === "triage" ? "statutTriage" : statut === "backlog" ? "statutBacklog" : statut === "fait" ? "statutFait" : statut === "doublon" ? "statutDoublon" : "statutAnnule";
+  return <IconeLin nom={nom} taille={14} vue={14} couleur={c} titre={titre} className={className} />;
 }
