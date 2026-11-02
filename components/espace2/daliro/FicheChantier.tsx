@@ -299,14 +299,16 @@ export default function FicheChantier({ id }: { id: string }) {
           </button>
         </div>
         <div className="dal-ligne2 dal-fc-ligne2">
-          {ONGLETS.map((x) => (
-            <Link key={x.cle} href={lienOnglet(x.cle)} scroll={false} className="dal-onglet" aria-current={onglet === x.cle ? "page" : undefined}>
-              {x.libelle}
+          <span className="dal-fc-onglets">
+            {ONGLETS.map((x) => (
+              <Link key={x.cle} href={lienOnglet(x.cle)} scroll={false} className="dal-onglet" aria-current={onglet === x.cle ? "page" : undefined}>
+                {x.libelle}
+              </Link>
+            ))}
+            <Link href={`${BASE}/avenants`} className="dal-rond dal-fc-vue" aria-label="Avenants et situations" title="Avenants et situations">
+              <DalIcone nom="CustomView" />
             </Link>
-          ))}
-          <Link href={`${BASE}/avenants`} className="dal-rond dal-fc-vue" aria-label="Avenants et situations" title="Avenants et situations">
-            <DalIcone nom="CustomView" />
-          </Link>
+          </span>
           <span className="dal-pousse" />
           {onglet === "projets" ? (
             <span className="dal-fc-outils">
