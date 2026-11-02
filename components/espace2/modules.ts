@@ -95,7 +95,16 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Réglages et avis", href: `${RACINE}/reput/reglages` },
     { libelle: "Urgences et escalade", href: `${RACINE}/reput/urgences` },
   ]),
-  m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
+  /* 02/11/2026 — refonte : sept sous-pages, chacune la copie d'une page réelle (docs/refonte-metiers/cloud/VARELO.md) */
+  m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building, [
+    { libelle: "Ce matin", href: `${RACINE}/varelo`, exact: true },
+    { libelle: "Référentiel", href: `${RACINE}/varelo/referentiel` },
+    { libelle: "Finance", href: `${RACINE}/varelo/finance` },
+    { libelle: "Contrats", href: `${RACINE}/varelo/contrats` },
+    { libelle: "Opérations", href: `${RACINE}/varelo/operations` },
+    { libelle: "Groupe", href: `${RACINE}/varelo/groupe` },
+    { libelle: "Sources et structure", href: `${RACINE}/varelo/sources` },
+  ]),
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp, [

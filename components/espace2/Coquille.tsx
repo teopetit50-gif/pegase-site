@@ -435,7 +435,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       ];
     if (cle === "offload") return [{ libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true }];
     /* 29/10/2026 — DALIRO et LORANI redécoupés : leurs sous-pages viennent de modules.ts */
-    if (cle === "daliro" || cle === "lorani") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
+    if (cle === "daliro" || cle === "lorani" || cle === "varelo") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
     return [{ libelle: "Tableau de bord", href: `${RACINE}/${cle}`, exact: true }];
   };
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par
