@@ -19,7 +19,7 @@
 
 import ChiffrageLu from "./ChiffrageLu";
 import { ouverte } from "./fonctions";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen, CheckCircle2, ClipboardCheck, FileSignature, FileText, FileUp, Link2, MessageSquare, PenLine, Plus, RotateCcw, Unlock, Users } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
@@ -52,7 +52,10 @@ export type SectionChantier =
   | "entete" | "controles" | "lots" | "marche" | "questions" | "meteo" | "planning" | "appro"
   | "avenants" | "fil" | "situations" | "heures" | "reception" | "factures" | "annuaire" | "disponibilites";
 
-type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void>; sections?: SectionChantier[] };
+/* demande : une fenêtre à ouvrir depuis la page qui monte la vue (02/11/2026, la fiche d'un chantier
+   de l'espace 2 : le menu « … » de Linear ouvre les gestes de l'en-tête sans le montrer) ; n change
+   à chaque demande */
+type Props = { tableau: Tableau; source: Source; onLocal: (t: Tableau) => void; relire: () => Promise<void>; sections?: SectionChantier[]; demande?: { n: number; form: Form } | null };
 
 export type FormChantier = Form;
 type Form =
@@ -85,7 +88,7 @@ const maintenant = () => new Date().toISOString();
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 
-export default function ChantierVue({ tableau, source, onLocal, relire, sections }: Props) {
+export default function ChantierVue({ tableau, source, onLocal, relire, sections, demande }: Props) {
   const voir = (x: SectionChantier) => !sections || sections.includes(x);
   /* 30/10/2026 — dans une page qui fournit un volet (la fiche de l'espace 2), les parties
      sont des listes dont le détail s'ouvre dans le volet (PartiesChantier, et chaque carte chez elle) */
@@ -132,6 +135,11 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
     }
   };
   const fermer = () => setForm(null);
+  const demandeN = demande?.n;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- une demande venue de la page : ouvrir la fenêtre (et lire ses candidats) une fois par demande
+    if (demande) void ouvrir(demande.form);
+  }, [demandeN]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* une action : en base réelle, la porte puis la relecture ; en exemple, le tableau modifié en mémoire */
   const agir = async (reelle: () => Promise<unknown>, locale: () => Tableau, message: string) => {

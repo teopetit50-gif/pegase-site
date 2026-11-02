@@ -86,3 +86,17 @@
 .v2 .dal .dal-fc-vue svg {
   color: var(--dal-t4);
 }
+
+/* la vue montée pour les seules fenêtres des gestes de l'en-tête : rien d'autre ne s'affiche
+   que l'avis « C'est fait » ou l'erreur, en tête de la zone */
+.v2 .dal .dal-fc-gestes {
+  position: relative;
+  z-index: 6;
+  height: 0;
+}
+.v2 .dal .dal-fc-gestes .esp-dossier:empty {
+  display: none;
+}
+.v2 .dal .dal-fc-gestes .esp-dossier:not(:empty) {
+  padding: 8px 16px 0;
+}

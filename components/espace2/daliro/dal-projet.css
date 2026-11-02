@@ -1,0 +1,22 @@
+/* Couleurs de santé des projets de Linear (linear-projects.md, sombre et clair, 02/11/2026) :
+   On track, Off track, At risk, « No updates » (cercle pointillé). */
+.v2 .dal {
+  --dal-sante-on: lch(67.2 64.37 141.95);
+  --dal-sante-off: lch(65.2 73 29);
+  --dal-sante-risk: lch(87.2 90 85);
+  --dal-sante-vide: lch(36.975 1.2 272);
+}
+html[data-v2-theme="light"] .v2 .dal {
+  --dal-sante-on: lch(60 64.37 141.95);
+  --dal-sante-off: lch(50 73 29);
+  --dal-sante-risk: lch(72 90 85);
+  --dal-sante-vide: lch(64.64 1.25 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal {
+    --dal-sante-on: lch(60 64.37 141.95);
+    --dal-sante-off: lch(50 73 29);
+    --dal-sante-risk: lch(72 90 85);
+    --dal-sante-vide: lch(64.64 1.25 282);
+  }
+}

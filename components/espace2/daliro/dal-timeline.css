@@ -28,10 +28,6 @@
   --dal-barre-survol-bord: lch(100 0 0 / 0.15);
   --dal-mois-trait: lch(9.232 0.85 272);
   --dal-auj-bas: lch(53 52.26 286.91 / 0.15);
-  --dal-sante-on: lch(67.2 64.37 141.95);
-  --dal-sante-off: lch(65.2 73 29);
-  --dal-sante-risk: lch(87.2 90 85);
-  --dal-sante-vide: lch(36.975 1.2 272);
 }
 html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   --dal-barre: lch(100 0.5 282);
@@ -41,10 +37,6 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   --dal-barre-survol-bord: lch(0 0 0 / 0.15);
   --dal-mois-trait: lch(95.24 0 282);
   --dal-auj-bas: color(xyz-d50 0.7447 0.7634 0.7152);
-  --dal-sante-on: lch(60 64.37 141.95);
-  --dal-sante-off: lch(50 73 29);
-  --dal-sante-risk: lch(72 90 85);
-  --dal-sante-vide: lch(64.64 1.25 282);
 }
 @media (prefers-color-scheme: light) {
   html:not([data-v2-theme="dark"]) .v2 .dal.dal-tl-page {
@@ -55,10 +47,6 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
     --dal-barre-survol-bord: lch(0 0 0 / 0.15);
     --dal-mois-trait: lch(95.24 0 282);
     --dal-auj-bas: color(xyz-d50 0.7447 0.7634 0.7152);
-    --dal-sante-on: lch(60 64.37 141.95);
-    --dal-sante-off: lch(50 73 29);
-    --dal-sante-risk: lch(72 90 85);
-    --dal-sante-vide: lch(64.64 1.25 282);
   }
 }
 
