@@ -145,8 +145,8 @@ export default function VueEnsemble() {
   };
 
   /* B06 : la carte se masque sans le droit de voir les prix, ou sans compte en base réelle */
-  /* l'avatar de « Membres » : les initiales du compte (VO en exemple) */
-  const initiales = (client?.email ?? "vous").replace(/@.*/, "").split(/[._-]/).filter(Boolean).map((m) => m[0]).join("").slice(0, 2).toUpperCase() || "VO";
+  /* l'avatar de « Membres » : vous (le compte ne porte pas de nom lisible ici) */
+  const initiales = "VO";
   const voitPrix = premier ? premier.voit_prix : true;
   const pointVisible = voitPrix && (source === "exemple" || !!client);
 
