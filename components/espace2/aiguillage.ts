@@ -80,8 +80,10 @@ export const REGLES: Record<string, Regle> = {
      l'écrit aussi à côté d'un lien « ?permis= » (lorani_ligne_du_point) : ce lien
      nomme le permis de la ligne, il l'emporte sur le projet */
   lorani_projet: (id, r) => (r.lien && /[?&]permis=/.test(r.lien) ? null : `${RACINE}/lorani/projets/${q(id)}`),
-  /* une question restée sans réponse (b5_25) : son lien porte déjà « ?projet= », il l'emporte */
-  lorani_point: () => null,
+  /* une question restée sans réponse (b5_25, point du matin) : elle s'ouvre dans Questions et
+     réponses (02/11/2026 ; avant, son lien « ?projet= » menait au projet, où elle pouvait
+     n'être visible nulle part, O6 de l'inventaire) */
+  lorani_point: (id) => `${RACINE}/lorani/questions?point=${q(id)}`,
 
   /* une décision de Varelo à valider (b1_15) : la page À valider ne sait pas encore ouvrir une demande donnée */
   demandes_validation: () => `${RACINE}/validations`,

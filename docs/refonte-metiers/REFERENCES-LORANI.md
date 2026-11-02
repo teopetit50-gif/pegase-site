@@ -112,3 +112,27 @@ Correspondances : People → éléments de mission du projet ; vue « Recently C
 
 Treize lignes comme la capture de référence : sept projets d'agence en phase d'études, sans permis encore, ajoutés aux données d'exemple (`components/espace/lorani/exemples.ts` : Extension Rolland, Local commercial Part-Dieu, Groupe scolaire Jean-Moulin, Villa Bellevue, Immeuble Les Alizés, Rénovation école Bois-Joli, Hangar Morne-Rouge) ; ils s'affichent comme le prévoyait déjà la page (B5 : lignes à 0 %, « Sans permis · phase »). Ils apparaissent aussi dans l'écran d'avant (`?ancien=1`), dans « Projets sans permis ».
 Comparaisons : `vue-1440-sombre-*`, `vue-1440-clair-*`, `vue-390-sombre-*`, `vue-390-clair-*` : lignes, colonnes, en-têtes et icônes superposés ligne à ligne ; écarts de contenu seulement (noms, jalons, santé « Sans permis » au lieu de « No updates », pas de courbe sur les lignes à 0 %).
+
+## Pages nouvelles du 02/11 (soir) — branche `claude/pages-lorani` (plan `PAGES-MANQUANTES.md`)
+
+| Page | Route | Référence | Relevé | État |
+|---|---|---|---|---|
+| Questions et réponses | `/espace2/lorani/questions` | Plain, Threads (liste « All threads » et fil ouvert) | `plain-threads.md`, `plain-commun.md` | écrite (`Questions.tsx`, `lor-plain.css`) ; superposée en sombre et clair à 1440 (liste et fil ouvert) et à 390 (`comparaisons/lorani/questions-*`) |
+
+Choix tranchés en autonomie (Teo absent, consigne de la coordinatrice) :
+- Référence prise telle que proposée par le plan (Plain, Threads), non encore prise par Lorani : une question = un fil (destinataire, âge, extrait, état).
+- Données : `lorani_points` de nature `question` ou `action` (b5_20, b5_25), tous projets ; portes `ajouterPoints` et `majPoint` seulement, `portes.ts` inchangé, aucune migration.
+- Exemple : le dossier commun n'a que quatre points ; `exemples-suivi.ts` (fichier nouveau) ajoute en mémoire, à l'ouverture de la page sur l'exemple, 13 questions fictives sur les projets d'exemple (7 sans réponse depuis 8 jours, 5 en attente, 2 réponses reçues, 1 soldée) pour un contenu de même longueur que la capture (7 + 6 fils). `exemples.ts` n'est pas touché.
+- Aiguillage : `lorani_point` (ligne « Questions sans réponse » du point du matin, b5_25) mène désormais à `/espace2/lorani/questions?point=<id>` (avant : `null`, le lien `?projet=` menait au projet, où la question pouvait n'être visible nulle part, O6). `verifier-aiguillage.mjs` vert.
+
+Superposition : fenêtre **1391 × 948** (carte de l'espace 2 à x 304, y 56, de la taille de la carte de Plain 1079 × 884 à x 353, y 8 ; `outils/lor-pages-capture.mjs`). Lignes de 67, filets à 0,5, grille 32 · 18 · 300 · 355,5 · 76 · 84 · 113,5 · 94, en-têtes de groupe de 32 espacés de 24, en-tête de 34 à 24 du haut, pastilles de 24 : superposés ligne à ligne (`questions-1440-{sombre,clair}-diff.png`). Fil ouvert : fenêtre 1687 × 948 pour que la carte du fil ait la largeur de celle de Plain (1375) ; volet de détails de 384 au même x (`questions-fil-1440-*`). 390 : cartes de fil comme Plain (`questions-390-*`).
+
+Correspondances : groupes Needs first response / Needs next response / Investigating → « Sans réponse depuis 8 jours » (ce que le point du matin remonte) / « En attente de réponse » / « Réponse reçue, à solder » (+ « Soldées » par Affichage) ; compte → projet ; client → destinataire ; tier → lot (ou rôle du destinataire) ; réf. « T-8 » → compte rendu d'origine (« CR 2 », « Directe », « Action ») ; étiquettes → nature, « Point du matin », « Échéance passée » ; priorité → urgence (échéance passée = Urgent, plus de 15 jours = Haute) ; SLA → échéance ; canal + « 1h ago » → origine + âge ; assigné → chef de projet. Filters (F) → Projet, Destinataire, Nature, Urgence (sous-menus cochables, puces de filtre actif, « Tout effacer ») ; Display (V) → grouper par état ou par projet, soldées, actions, export CSV. Fil ouvert : question, événements (compte rendu, échéance, point du matin), réponse, note interne « Suivi de Lorani » (jaune, comme la note de Plain), bandeau d'état ; barre Y (état) · Réponse reçue R · Solder S · Plus (reporter l'échéance, relancer par courriel dans la messagerie de l'utilisateur, copier le texte de relance, rouvrir, ouvrir le chantier, CSV) ; Sidekick Agent B → « Copier pour l'assistant » B ; volet : Détails, Destinataire (Customer details), Liens.
+
+Écarts restants, avec leur raison :
+- Bouton « Nouvelle question N » dans l'en-tête : Plain crée un fil depuis sa barre latérale (hors page copiée) ; geste G34 hors compte rendu.
+- Barre de sélection (Solder, Reporter, CSV, Copier pour l'assistant) : Plain ne la montre pas dans le relevé ; même dessin que sa barre d'action flottante.
+- Sous-titre du premier groupe (« Elles remontent au point du matin… ») : à la place de celui des « Test threads » de Plain.
+- Pas de « Tasks » ni de « Add link » dans le volet, pas de composeur Reply / Note : Lorani n'envoie rien aux intervenants et n'a ni tâches ni notes sur un point ; « Réponse reçue » note la réponse arrivée ailleurs.
+- La colonne liste de 400 du fil ouvert n'apparaît qu'à partir de 1700 de large : dans le cadre de l'espace 2, elle ne tient pas à 1440 (Plain l'omet aussi quand le fil est ouvert par son adresse, comme ici avec `?point=`).
+- Titre en Inter 400 au lieu de Whyte (licence payante).
