@@ -98,7 +98,12 @@ export const REGLES: Record<string, Regle> = {
   btp_situations: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
   btp_situation: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
   btp_passages: (id) => `${RACINE}/daliro/a-faire?passage=${q(id)}`,
-  loc_contrats: tavaro("loc_contrats"),
+  /* TAVARO, refait le 02/11/2026 : la page d'un contrat ; une proposition, une facture ou un
+     avoir (demandes à valider) ouvre son contrat dans les Retours à facturer, qui le retrouvent */
+  loc_contrats: (id) => `${RACINE}/tavaro/contrats/${q(id)}`,
+  loc_propositions: (id) => `${RACINE}/tavaro/retours?proposition=${q(id)}`,
+  loc_factures: (id) => `${RACINE}/tavaro/retours?facture=${q(id)}`,
+  loc_avoirs: (id) => `${RACINE}/tavaro/retours?avoir=${q(id)}`,
   loc_reservations: tavaro("loc_reservations"),
   loc_vehicules: tavaro("loc_vehicules"),
   /* le point du matin de production (b2_18) */
@@ -133,8 +138,18 @@ export function moduleDeObjet(objet_type: string | null | undefined): string | n
    Le point du matin de Tavaro (lot 2a, omega/SOCLE-EXTRAITS-TAVARO.sql)
    écrit « /tavaro/factures », sans /espace : une route qui n'a jamais
    existé. Un lien qui commence par le nom d'un module mène à sa page. */
+/* les repères historiques du point du matin de Tavaro (E13-E19) : la facturation des retours
+   et les factures mènent aux Retours à facturer, les avoirs à décider à la file « À valider » */
+const TAVARO_SOCLE: Record<string, string> = {
+  "/tavaro/facturation": `${RACINE}/tavaro/retours?famille=a_valider`,
+  "/tavaro/factures": `${RACINE}/tavaro/retours`,
+  "/tavaro/avoirs": `${RACINE}/validations`,
+};
+
 function versEspace2(lien: string): string | null {
   if (lien.startsWith(RACINE)) return lien;
+  const socle = TAVARO_SOCLE[lien.split("?")[0]];
+  if (socle) return socle;
   if (/^\/espace(\/|\?|$)/.test(lien)) return lien.includes("ancien=1") ? lien : lien.replace(/^\/espace/, RACINE);
   const nu = lien.match(/^\/([a-z0-9]+)[^?]*(\?.*)?$/);
   return nu && moduleDe(nu[1]) ? `${RACINE}/${nu[1]}${nu[2] ?? ""}` : null;

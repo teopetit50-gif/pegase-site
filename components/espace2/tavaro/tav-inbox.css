@@ -1,0 +1,207 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, retours à facturer — Linear, Inbox, au 1:1 (02/11/2026).
+   Relevé : docs/refonte-metiers/releves/linear-inbox.md (1440×900 sombre
+   et clair, paliers 1024, 768, 390). Préfixe tav-i-.
+
+   Repères : liste 400 (filet droit 0.5) ; en-tête 44 (titre 13/500, ronds
+   28) ; lignes 55 (r 8, marges 8), contenu à 16 : avatar 32 rond (réveil
+   20 sur lch(52.418 61.103 288.421 / .133), bord 1 / .267), texte à 60 sur
+   2 lignes : 17 (pastille 8, identifiant 13/500 −0.26, titre 13/500,
+   statut 14 à droite) puis 16 (12/450 tertiaire, priorité 14, âge) ; lue :
+   titre tertiaire, opacité 0.7. Volet droit : le reste de la carte.
+   1024 : liste 240. 768 et moins : liste pleine largeur, pas de volet.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  --tav-i-violet: lch(52.418 61.103 288.421);
+  --tav-i-point: lch(47.918 59.303 288.421);
+}
+html[data-v2-theme="light"] .v2 .tav {
+  --tav-i-point: lch(53 52.26 286.91);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav {
+    --tav-i-point: lch(53 52.26 286.91);
+  }
+}
+
+.v2 .tav .tav-i {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.v2 .tav .tav-i-liste {
+  flex: 0 0 400px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 0.5px solid var(--tav-carte-bord);
+}
+.v2 .tav .tav-i-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px 0 18px;
+  border-bottom: 0.5px solid var(--tav-carte-bord);
+}
+.v2 .tav .tav-i-titre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  white-space: nowrap;
+}
+.v2 .tav .tav-i-tete .tav-rond[aria-pressed="true"] {
+  background: var(--tav-actif);
+}
+.v2 .tav .tav-i-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 0;
+}
+.v2 .tav .tav-i-avis {
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-i-lignes {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tav .tav-i-ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 55px;
+  margin: 0 8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  transition: color 0.15s;
+}
+.v2 .tav .tav-i-ligne:hover {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-i-ligne[aria-current="true"] {
+  background: var(--tav-t-selection);
+}
+.v2 .tav .tav-i-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: lch(52.418 61.103 288.421 / 0.133);
+  border: 1px solid lch(52.418 61.103 288.421 / 0.267);
+  color: var(--tav-i-violet);
+}
+.v2 .tav .tav-i-texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tav .tav-i-l1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 17px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-i-point {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--tav-i-point);
+}
+.v2 .tav .tav-i-id {
+  flex: none;
+  letter-spacing: -0.26px;
+}
+.v2 .tav .tav-i-sujet {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tav .tav-i-ligne[data-lu] .tav-i-l1 {
+  color: var(--tav-t3);
+  opacity: 0.7;
+}
+.v2 .tav .tav-i-statut {
+  flex: none;
+  display: inline-flex;
+  margin-left: 4px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-i-statut[data-etat="tri"] {
+  color: var(--tav-t-triage);
+}
+.v2 .tav .tav-i-statut[data-etat="cours"] {
+  color: var(--tav-t-encours);
+}
+.v2 .tav .tav-i-statut[data-etat="fait"] {
+  color: var(--tav-t-fait);
+}
+.v2 .tav .tav-i-l2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 16px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-i-sous {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tav .tav-i-priorite {
+  flex: none;
+  display: inline-flex;
+  color: var(--tav-t-triage);
+}
+.v2 .tav .tav-i-age {
+  flex: none;
+}
+.v2 .tav .tav-i-droite {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tav .tav-i-illustration {
+  color: var(--tav-t3);
+  opacity: 0.6;
+}
+
+@media (max-width: 1024px) {
+  .v2 .tav .tav-i-liste {
+    flex-basis: 240px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tav .tav-i-liste {
+    flex: 1;
+    border-right: 0;
+  }
+  .v2 .tav .tav-i-droite {
+    display: none;
+  }
+}

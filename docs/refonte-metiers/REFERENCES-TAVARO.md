@@ -22,6 +22,8 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | Sous-page | Route | Référence | Relevé | Comparaisons | État |
 |---|---|---|---|---|---|
 | Vue d'ensemble | `/espace2/tavaro` | Linear, accueil d'une équipe | `linear-home.md` | `vue-1440-{sombre,clair}-{cote,diff,fusion}.png` (contenu, `--dx -30`), `vue-1440-*-entete-*` (en-tête), `vue-390-sombre-cote.png` | superposé ; écarts ci-dessous |
+| Retours à facturer | `/espace2/tavaro/retours` | Linear, Inbox | `linear-inbox.md` | `retours-1440-{sombre,clair}-{cote,diff,fusion}.png`, `retours-ouvert-1440-*.png` (contrat ouvert à droite), `retours-390-sombre-cote.png` | superposé : liste, lignes, avatars, pastilles, icônes de statut, en-tête alignés au pixel ; écarts ci-dessous |
+| Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
 
@@ -43,6 +45,38 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 - **Fenêtres** F26 (contrôle des pièces), poser une question (G43) et lire une réponse : la fenêtre de l'espace 2
   (`components/ui/dialog`), Linear n'en a pas sur cette page.
 
+### Retours à facturer
+
+- **Illustration du volet vide** : celle de Linear (boîte de réception, SVG de l'app) n'est pas dans le relevé ;
+  l'icône « Inbox » du sprite de Linear, à 96 px, en tient lieu. Le libellé suit (« N retours à facturer »).
+- **Couleur de la ligne ouverte (sombre)** : le relevé dit « fond plus clair » sans valeur ; prise au pixel sur
+  `1440-sombre-notification-ouverte.png` (≈ rgb 32,32,32, soit lch(12.4 1.2 272)) ; en clair, la valeur relevée
+  sur Triage, lch(92.94 0.5 282).
+- **Avatar** : le réveil des rappels de Linear devient le véhicule (même pastille violette 32, icône 20) ; une
+  notification de Linear est un rappel, une ligne ici est un contrat.
+- **Menus** : Filtre = les quatre familles (B02, `?famille=`), Options d'affichage = les agences (B07), boîte
+  d'archives = « Le reste » ; « … » porte « À encaisser » (B03).
+- **Âge de la 2ᵉ ligne** : l'âge du retour (« 1 j », « 12 j ») ou « retour imminent » pour un contrat en location.
+
+### Contrat
+
+- **Boutons d'en-tête** « Accept / Decline » → « Chiffrer le retour » (G03), « Prolonger » (G02) ; les deux ronds →
+  Compléter les conditions (G01), file « À valider » (L6). Pas de bouton double « Copy as prompt » dans la barre
+  d'outils (aucun geste Tavaro) ; les deux ronds restants copient le lien et le numéro.
+- **Réactions / pièce jointe** (deux ronds sous la description) → faire l'état des lieux (G09) et chiffrer avec
+  photos (F01).
+- **Blocs « Sub-issues »** : États des lieux (B12), Chiffrage du retour (B13), Factures (B14), Avoirs (B15) ; le
+  compteur « 0/5 » devient « 1/2 », « v1 · 173,00 € »… ; la jauge circulaire n'est pas reprise ; le montant prend
+  la place de l'avatar à droite. Une facture se déplie sur son détail (carte de commentaire de Linear) et ses gestes
+  en pilules (G04-G08) : Linear n'a pas de geste sur une rangée de sous-ticket.
+- **Activité** : le journal opposable (B16), un événement par ligne ; pas de « Unsubscribe » ni de champ « Leave a
+  comment… » (Tavaro n'a pas de commentaires) ; la demande devant l'agence (B13) est la seule carte de commentaire.
+- **Propriétés** : statut, chiffrage, franchise, tarif, forfait ; « Labels » → Étiquettes (Hors barème, Litige,
+  Réglé, Impayé, Professionnel) ; « Project » → Agence (agence, véhicule, courriel, source). Cinq pilules au lieu
+  de quatre : la colonne est plus longue.
+- **G12 Lever la caution** : demande désormais une confirmation (DECOUPAGES.md, règle 5).
+- **Fenêtres** F01-F09 : celles de l'écran d'avant (`components/ui/dialog`), code repris ligne pour ligne.
+
 ## Inventaire : où va chaque bloc (au fil des sous-pages)
 
 | Bloc / geste | Sous-page | Place dans la référence |
@@ -53,4 +87,12 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | B07 filtre d'agence | toutes (état partagé) | puce « Members » |
 | B33 Questions, G43 | Vue d'ensemble, onglet Questions | section de ressources, « + » |
 | B38-B42 analyses du matin, G56 / F26 | Vue d'ensemble | sections de ressources |
+| B06, B08 liste des contrats, B09, L1 | Retours à facturer | lignes de l'Inbox, volet vide |
+| B10 « C'est fait » | toutes | toast |
+| B11 en-tête du contrat, G01-G03, F01-F03 | Contrat (et volet des Retours) | fil, titre, description, propriétés, boutons d'en-tête |
+| B12 états des lieux, G09-G12, F08 | Contrat | bloc « Sub-issues », rondes sous la description |
+| B13 chiffrage, L6 | Contrat | bloc « Sub-issues », carte de commentaire |
+| B14 factures, G04-G08, F04-F07, F09, L3-L5 | Contrat | bloc « Sub-issues », rangée dépliée |
+| B15 avoirs, L4 | Contrat | bloc « Sub-issues » |
+| B16 journal opposable | Contrat | « Activity » |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |
