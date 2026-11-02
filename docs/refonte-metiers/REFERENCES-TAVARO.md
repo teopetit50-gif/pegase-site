@@ -24,6 +24,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | Vue d'ensemble | `/espace2/tavaro` | Linear, accueil d'une équipe | `linear-home.md` | `vue-1440-{sombre,clair}-{cote,diff,fusion}.png` (contenu, `--dx -30`), `vue-1440-*-entete-*` (en-tête), `vue-390-sombre-cote.png` | superposé ; écarts ci-dessous |
 | Retours à facturer | `/espace2/tavaro/retours` | Linear, Inbox | `linear-inbox.md` | `retours-1440-{sombre,clair}-{cote,diff,fusion}.png`, `retours-ouvert-1440-*.png` (contrat ouvert à droite), `retours-390-sombre-cote.png` | superposé : liste, lignes, avatars, pastilles, icônes de statut, en-tête alignés au pixel ; écarts ci-dessous |
 | Parc et atelier | `/espace2/tavaro/parc` | Linear, Board | `linear-board.md` | `parc-1440-{sombre,clair}-{cote,diff,fusion}.png`, `parc-390-sombre-cote.png` | superposé : colonnes (x, pas de 348), en-têtes de colonne, cartes (id, statut, titre, puces, pied) alignés ; écarts ci-dessous |
+| Amendes, péages, contestations | `/espace2/tavaro/amendes` | Linear, Triage | `linear-triage.md` | `amendes-1440-{sombre,clair}-{cote,diff,fusion}.png`, `amendes-ouvert-1440-sombre.png` | superposé : lignes de 59, titre et référence, 2ᵉ ligne (sujet, date, priorité, âge), en-tête alignés ; écarts ci-dessous |
 | Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
@@ -97,6 +98,22 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
   un entretien ».
 - **G24 Rappel fait** : demande désormais une confirmation (règle 5).
 
+### Amendes, péages, contestations
+
+- **Une seule file** pour trois sujets (avis B36, contestations B37, péages B28), la plus urgente d'abord ; l'avatar et
+  l'auteur de la 2ᵉ ligne deviennent l'icône du sujet et son statut.
+- **Priorité** : « urgent » (carré orange) sous 3 jours, barres grises sous 10 jours ; Linear l'affiche selon la
+  priorité du ticket.
+- **En-tête de l'élément** : les ronds Accept / Decline / Duplicate / Snooze → les gestes de l'objet (désigner,
+  rattacher, classer ; envoyer, télécharger, refaire, issue ; payer, rattacher, à notre charge, refacturer). Les
+  mêmes gestes sont repris en toutes lettres sous la description : un rond sans libellé ne suffit pas à un geste
+  qui engage l'entreprise. Pas de « Add sub-issues » ni de boîte de commentaire.
+- **Menu « … »** de la liste (l'étoile de Linear) : créer (avis F19, contestation F23, passage G29, import G30) et
+  les chiffres des péages (à payer, hors délai, contrats à refacturer, G31).
+- **Volet vide** : l'icône Triage du sprite à 96 px au lieu de l'illustration de Linear (absente du relevé) ;
+  « Create triage issue » → « Enregistrer un avis ».
+- **G31, G51, G54** : demandent désormais une confirmation (règle 5).
+
 ## Inventaire : où va chaque bloc (au fil des sous-pages)
 
 | Bloc / geste | Sous-page | Place dans la référence |
@@ -122,4 +139,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | B24 contrôle au départ, L7 | Parc et atelier | rond de la ligne 2, menu « … » |
 | B25 rappels, G23, G24 | Parc et atelier | colonne « Rappels du constructeur », « + » |
 | B26 Crit'Air et CT, G25 | Parc et atelier | colonne « Crit'Air et contrôle technique » |
+| B28 péages, G29-G34 | Amendes, péages, contestations | lignes, élément ouvert, menu « … » |
+| B36 avis, G47-G51, F19-F22 | Amendes, péages, contestations | lignes, élément ouvert |
+| B37 contestations, G52-G55, L8, F23-F25 | Amendes, péages, contestations | lignes, élément ouvert |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |

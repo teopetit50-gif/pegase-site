@@ -55,7 +55,6 @@ const PREFIXES: [string, string][] = [
   ["grp_", "varelo"],
 ];
 
-const tavaro = objet("tavaro");
 const tamila = objet("tamila");
 const tiroma = objet("tiroma");
 const varelo = objet("varelo");
@@ -109,11 +108,11 @@ export const REGLES: Record<string, Regle> = {
      le véhicule inactif (b3t_04, lien /espace) dans les analyses de la vue d'ensemble */
   loc_vehicules: (id, r) => (r.lien?.startsWith(RACINE) ? `${RACINE}/tavaro/parc?vehicule=${q(id)}` : `${RACINE}/tavaro#tavaro-inactifs`),
   /* le point du matin de production (b2_18) */
-  loc_avis_contravention: tavaro("loc_avis_contravention"),
-  loc_contestations: tavaro("loc_contestations"),
+  loc_avis_contravention: (id) => `${RACINE}/tavaro/amendes?element=avis:${q(id)}`,
+  loc_contestations: (id) => `${RACINE}/tavaro/amendes?element=contestation:${q(id)}`,
   loc_entretiens: (id) => `${RACINE}/tavaro/parc?entretien=${q(id)}`,
   loc_immobilisations: (id) => `${RACINE}/tavaro/parc?immobilisation=${q(id)}`,
-  loc_passages_peage: tavaro("loc_passages_peage"),
+  loc_passages_peage: (id) => `${RACINE}/tavaro/amendes?element=peage:${q(id)}`,
   loc_rappels_vehicules: (id) => `${RACINE}/tavaro/parc?rappel=${q(id)}`,
   loc_remises: (id) => `${RACINE}/tavaro/parc?remise=${q(id)}`,
   tamila_dossier: tamila("tamila_dossier"),
