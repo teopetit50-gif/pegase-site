@@ -61,7 +61,8 @@ const EQUIPES = [
 const NOMS: Record<string, string> = Object.fromEntries([...TIERS.map((t) => [t.id, t.nom]), ...EQUIPES.map((e) => [e.id, e.nom])]);
 
 type LotDef = { n: number; code: string; libelle: string; corps: string; par: string; equipe?: boolean; statut?: Lot["statut"] };
-type PassDef = { n: number; lot: number; tache: string; du: number; au: number; conf: Confirmation; fait?: boolean; h?: [string, string] };
+/* ext : un passage d'équipe dehors (02/11 : la météo de la semaine de la vue d'ensemble en a besoin) */
+type PassDef = { n: number; lot: number; tache: string; du: number; au: number; conf: Confirmation; fait?: boolean; h?: [string, string]; ext?: boolean };
 
 function chantier(o: {
   n: number; nom: string; ref: string; adresse: string; cp: string; commune: string; mo: string; moType: Chantier["maitre_ouvrage_type"];
@@ -80,7 +81,7 @@ function chantier(o: {
       id: id(p.n), chantier_id: cid, lot_id: id(lot.n), lot_code: lot.code, lot_libelle: lot.libelle,
       equipe_id: lot.equipe ? lot.par : null, tiers_id: lot.equipe ? null : lot.par, intervenant_type: lot.equipe ? "equipe" : "tiers",
       intervenant_lu: NOMS[lot.par], intervenant_nom: NOMS[lot.par], rapprochement: "identique", tache: p.tache,
-      debut: aujourdHui(p.du), fin: aujourdHui(p.au), heure_debut: p.h ? `${p.h[0]}:00` : null, heure_fin: p.h ? `${p.h[1]}:00` : null, exterieur: !lot.equipe, statut: p.fait ? "fait" : "prevu",
+      debut: aujourdHui(p.du), fin: aujourdHui(p.au), heure_debut: p.h ? `${p.h[0]}:00` : null, heure_fin: p.h ? `${p.h[1]}:00` : null, exterieur: p.ext ?? !lot.equipe, statut: p.fait ? "fait" : "prevu",
       confirmation: p.conf, confirmation_le: p.conf === "non_demandee" ? null : quand, source: "saisie", source_ref: null, version: 1, confirmations: [],
     };
   });
@@ -154,9 +155,13 @@ const LISTE: Tableau[] = [
     lots: [
       { n: 41, code: "01", libelle: "Terrasse bois", corps: "menuiserie", par: EQUIPE_A, equipe: true, statut: "en_cours" },
       { n: 42, code: "02", libelle: "Garde-corps de la terrasse", corps: "serrurerie", par: ROCHAT },
+      { n: 47, code: "03", libelle: "Local technique", corps: "menuiserie", par: EQUIPE_A, equipe: true },
     ],
     passages: [
       { n: 43, lot: 41, tache: "Lambourdes et plots", du: -2, au: 1, conf: "confirmee" },
+      /* dehors le jour de l'averse (14 mm à J+2 dans la prévision d'exemple) ; le local technique, dedans, un jour sec */
+      { n: 46, lot: 41, tache: "Lames de rive", du: 2, au: 2, conf: "non_demandee", ext: true },
+      { n: 48, lot: 47, tache: "Habillage du local technique", du: 5, au: 5, conf: "non_demandee" },
       { n: 44, lot: 41, tache: "Lames de terrasse", du: 12, au: 14, conf: "non_demandee" },
       { n: 45, lot: 42, tache: "Pose des garde-corps", du: 15, au: 16, conf: "declinee" },
     ],

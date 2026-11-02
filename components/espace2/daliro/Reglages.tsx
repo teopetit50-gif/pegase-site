@@ -357,7 +357,7 @@ export default function Reglages() {
     ...(peutActiver ? [{ libelle: "Activer moi-même…", icone: "Shield" as NomDalIcone, action: () => ouvrir({ type: "activer" }) }] : []),
     ...(peutRevoquer ? [{ libelle: "Révoquer l'accord…", icone: "StatusCanceled" as NomDalIcone, action: () => ouvrir({ type: "revoquer" }) }] : []),
   ];
-  const nbLignesOrga = (dirige ? canaux.length : 1) + controlesOrga.length;
+  const nbLignesOrga = (dirige ? canaux.length : 1) + 1 + controlesOrga.length;
 
   /* ——— la sélection (cases à cocher de Linear) et ses gestes groupés ——— */
   const [selection, setSelection] = useState<string[]>([]);
@@ -713,6 +713,18 @@ export default function Reglages() {
                   </span>
                 </li>
               )}
+              {/* 02/11/2026 (PAGES-MANQUANTES.md) : le journal des validations de Daliro — avenants, situations,
+                  prix — sur la page Activité de l'espace, filtrée sur le module */}
+              <li className="dal-rg-modele">
+                <Link href={`${RACINE}/activite?modules=daliro`} className="dal-rg-modele-lien" aria-label="Journal des validations — ouvrir l'activité de Daliro" />
+                <span className="dal-rg-vignette" aria-hidden="true">
+                  <DalIcone nom="Checklist" />
+                </span>
+                <span className="dal-rg-modele-texte">
+                  <span className="dal-rg-modele-nom">Journal des validations</span>
+                  <span className="dal-rg-modele-meta">Qui a demandé, validé ou refusé : avenants, situations et prix de Daliro, dans l&apos;activité de l&apos;espace</span>
+                </span>
+              </li>
               {controlesOrga.map((k) => (
                 <li key={`${k.code}-${k.objet_id}`} className="dal-rg-modele">
                   <Link href={`${BASE}/annuaire`} className="dal-rg-modele-lien" aria-label={`${k.message} — ouvrir l'annuaire`} />
