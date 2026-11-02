@@ -168,7 +168,7 @@ function lignesDuJour(d: Dossier) {
       personne: null,
       date: v.quand ? jourCourt(v.quand) : "",
       dateTitre: v.quand ? complet(v.quand) : "",
-      href: plan ? `${BASE}/plans?plan=${encodeURIComponent(plan)}` : undefined,
+      href: plan ? `${BASE}/plans?plan=${encodeURIComponent(plan)}` : `${BASE}/avant?verif=${encodeURIComponent(`${v.nature}:${v.objet_id ?? v.rendez_vous_id ?? v.patient_id ?? ""}`)}`,
     };
     (v.gravite === "info" ? faits : avant).push(l);
   });

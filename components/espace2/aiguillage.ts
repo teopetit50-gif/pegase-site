@@ -118,12 +118,14 @@ export const REGLES: Record<string, Regle> = {
   tamila_dossier: (id) => `${RACINE}/tamila/dossiers/${q(id)}`,
   /* TIROMA, refait le 02/11/2026 (docs/refonte-metiers/cloud/TIROMA.md) : le créneau libéré
      ouvre son fil (Créneaux et appels), le plan sa carte (Plans et devis), le fauteuil sa
-     journée (Fauteuils) ; un travail de laboratoire reste sur Aujourd'hui (Avant les rendez-vous) */
+     journée (Fauteuils) ; un travail de laboratoire et une entente ODF ouvrent leur vérification
+     (Avant les rendez-vous, 02/11/2026, docs/refonte-metiers/PAGES-MANQUANTES.md) */
   tiroma_evenements_agenda: (id) => `${RACINE}/tiroma/creneaux?creneau=${q(id)}`,
   tiroma_fauteuils: (id) => `${RACINE}/tiroma/fauteuils?fauteuil=${q(id)}`,
   tiroma_plans: (id) => `${RACINE}/tiroma/plans?plan=${q(id)}`,
   /* calculé par tiroma_avant_rendez_vous_pour (b3_04), repris par le point du matin (b3_06) */
-  tiroma_travaux_labo: () => `${RACINE}/tiroma`,
+  tiroma_ententes_odf: (id) => `${RACINE}/tiroma/avant?verif=${q(id)}`,
+  tiroma_travaux_labo: (id) => `${RACINE}/tiroma/avant?verif=${q(id)}`,
   grp_balances_depots: (id) => `${RACINE}/varelo/groupe?depot=${q(id)}`,
   /* 02/11/2026 — VARELO redécoupé : chaque objet mène à la sous-page qui le montre */
   grp_contrats: (id) => `${RACINE}/varelo/contrats?contrat=${q(id)}`,
