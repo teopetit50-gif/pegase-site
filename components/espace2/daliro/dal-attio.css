@@ -160,25 +160,92 @@ html:not([data-v2-theme="light"]) .v2 .dat {
   color: var(--a-texte);
   white-space: nowrap;
 }
-.v2 .dat-bouton[data-tri] {
+.v2 .dat-bouton--tri {
   padding: 4px 8px;
   box-shadow: var(--a-tri-ombre);
 }
 .v2 .dat-bouton-faible {
   color: var(--a-second);
 }
-.v2 .dat-bouton[data-filtre] {
+.v2 .dat-bouton--filtre {
   padding: 4px 8px;
   background: var(--a-filtre);
   box-shadow: none;
   color: var(--a-vide);
 }
-.v2 .dat-bouton[data-filtre][data-actif] {
+.v2 .dat-bouton--filtre.dat-actif {
   color: var(--a-texte);
   box-shadow: var(--a-tri-ombre);
 }
-.v2 .dat-bouton svg.dat-chevron {
+.v2 .dat-bouton .dat-chevron {
   color: var(--a-second);
+}
+.v2 .dat-bouton svg,
+.v2 .dat-icone-bouton svg,
+.v2 .dat-th svg,
+.v2 .dat-menu-option svg {
+  color: inherit;
+}
+.v2 .dat-bouton:disabled,
+.v2 .dat-bouton[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* « + New Person » : bleu d'Attio (relevé : bg #266df0, texte #fff) */
+.v2 .dat-bouton-bleu {
+  background: #266df0;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f;
+  padding: 4px 8px 4px 6px;
+}
+.v2 .dat-pousse {
+  flex: 1;
+}
+.v2 .dat-icone-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--a-second);
+}
+.v2 .dat-icone-bouton:hover,
+.v2 .dat-icone-bouton[data-actif] {
+  background: var(--a-actif);
+  color: var(--a-texte);
+}
+.v2 .dat-icone-bouton[data-actif] svg {
+  color: #f5a524;
+}
+.v2 .dat-entete .dat-icone-bouton {
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+}
+/* l'avatar sans photo d'Attio : sa version claire ou sombre */
+.v2 .dat-avatar-ph {
+  display: inline-flex;
+  flex: none;
+}
+.v2 .dat-avatar-ph .dat-sombre {
+  display: none;
+}
+html:not([data-v2-theme="light"]) .v2 .dat-avatar-ph .dat-clair {
+  display: none;
+}
+html:not([data-v2-theme="light"]) .v2 .dat-avatar-ph .dat-sombre {
+  display: inline;
+}
+.v2 .dat-menu-sep {
+  height: 1px;
+  margin: 4px -4px;
+  background: var(--a-filet);
+}
+.v2 .dat-menu-option:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .v2 .dat-vue-icone {
   display: inline-flex;
@@ -289,12 +356,105 @@ html:not([data-v2-theme="light"]) .v2 .dat {
   padding: 0 12px;
   white-space: nowrap;
 }
+/* la case à cocher (16, r 6, bord #000 a0.09) à x 16, la pastille du nom à x 40 */
 .v2 .dat-th:first-child,
 .v2 .dat-td:first-child {
-  padding-left: 40px;
+  padding-left: 16px;
+  gap: 0;
 }
-.v2 .dat-th:first-child {
-  padding-left: 46px;
+.v2 .dat-case {
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0 8px 0 0;
+  border-radius: 6px;
+  border: 1px solid var(--a-case-bord);
+  background: var(--a-fond);
+  cursor: pointer;
+}
+.v2 .dat-th .dat-case {
+  margin-right: 14px;
+}
+.v2 .dat-case:checked {
+  background: #266df0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+  border-color: #266df0;
+}
+.v2 .dat-th-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  color: var(--a-second);
+  opacity: 0.8;
+}
+.v2 .dat-th-bouton:hover,
+.v2 .dat-th-bouton[data-actif] {
+  opacity: 1;
+  background: var(--a-actif);
+  color: var(--a-texte);
+}
+.v2 .dat-th-plus {
+  margin-left: auto;
+}
+.v2 .dat-th-texte + .dat-th-bouton {
+  margin-left: auto;
+}
+.v2 .dat-ajout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: 6px;
+  color: var(--a-vide);
+  white-space: nowrap;
+}
+.v2 .dat-ajout:hover {
+  background: var(--a-actif);
+  color: var(--a-texte);
+}
+.v2 .dat-th-ajout {
+  border-right: 0;
+}
+.v2 .dat-calcul {
+  color: var(--a-texte);
+}
+/* la colonne Entreprise reste à gauche au défilement ; la colonne épinglée juste après (250) */
+.v2 .dat-fige {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.v2 .dat-th.dat-fige {
+  z-index: 3;
+}
+.v2 .dat-fige-2 {
+  left: 250px;
+  box-shadow: 1px 0 0 var(--a-filet);
+}
+.v2 .dat-reste > .dat-fige {
+  background: var(--a-fond);
+}
+.v2 .dat-groupe {
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+  background: var(--a-entete);
+}
+.v2 .dat-groupe-texte {
+  position: sticky;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .dat-td-reste {
+  border-right: 0;
 }
 .v2 .dat-th svg {
   width: 16px;
@@ -366,6 +526,14 @@ html:not([data-v2-theme="light"]) .v2 .dat {
 }
 .v2 .dat-pied {
   display: contents;
+}
+.v2 .dat-pied > div.dat-fige {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+.v2 .dat-pied > div.dat-fige-2 {
+  left: 250px;
 }
 .v2 .dat-pied > div {
   position: sticky;
@@ -491,8 +659,32 @@ html:not([data-v2-theme="light"]) .v2 .dat {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.v2 .dat-detail dd[data-vide] {
+.v2 .dat-detail dd[data-vide],
+.v2 .dat-detail dd[data-vide] .dat-valeur-bouton {
   color: var(--a-vide);
+}
+.v2 .dat-dt-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dat-valeur-bouton {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  color: var(--a-texte);
+}
+.v2 .dat-champ-ligne {
+  width: 100%;
+  height: 28px;
+  padding: 0 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--a-filtre);
+  box-shadow: var(--a-tri-ombre);
+  outline: none;
 }
 .v2 .dat-lien {
   color: var(--a-lien);
@@ -704,26 +896,84 @@ html:not([data-v2-theme="light"]) .v2 .dat-voir {
   flex: none;
 }
 .v2 .dat-rond {
+  appearance: none;
   flex: none;
   width: 16px;
   height: 16px;
-  margin-right: 2px;
+  margin: 0 2px 0 0;
   border-radius: 9999px;
   border: 1px solid var(--a-case-bord);
+  background: var(--a-fond);
+  cursor: pointer;
+}
+.v2 .dat-rond:checked {
+  background: #266df0;
+  border-color: #266df0;
+}
+.v2 .dat-ligne-fin > span {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-}
-.v2 .dat-rond[data-fait] {
-  background: var(--a-texte);
-  border-color: var(--a-texte);
-  color: var(--a-fond);
+  gap: 4px;
 }
 .v2 .dat-echeance {
   color: var(--a-echeance);
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+/* une section vide (« Emails 0 ») : pas de boîte, l'écart de la référence (32) */
+.v2 .dat-espace {
+  height: 24px;
+}
+.v2 .dat-redaction {
+  margin: 0 0 16px;
+  padding: 8px;
+  border: 1px solid var(--a-filet);
+  border-radius: 8px;
+}
+.v2 .dat-zone {
+  height: 96px;
+  padding: 6px 8px;
+  resize: vertical;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+.v2 .dat-redaction-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.v2 .dat-lien-rouge {
+  color: #e5484d;
+  font-size: 12px;
+}
+.v2 .dat-lien-gris {
+  color: var(--a-second);
+}
+.v2 .dat-ligne .dat-icone-bouton {
+  width: 20px;
+  height: 20px;
+}
+/* la barre d'actions d'une sélection, flottante en bas, comme celle d'Attio */
+.v2 .dat-selection {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 40;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--a-fond);
+  box-shadow: var(--a-menu-ombre);
+  white-space: nowrap;
+}
+.v2 .dat-selection-nb {
+  padding: 0 8px;
+  color: var(--a-second);
 }
 .v2 .dat-note {
   margin: 0;
@@ -748,5 +998,21 @@ html:not([data-v2-theme="light"]) .v2 .dat-voir {
   }
   .v2 .dat-barre {
     overflow-x: auto;
+  }
+}
+
+/* « Collapse sidebar » d'Attio : le volet des pages de la coquille se replie, le rail reste (ce navigateur) */
+@media (min-width: 768px) {
+  html[data-dat-replie] .v2-app {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  html[data-dat-replie] .v2-laterale--fixe {
+    overflow: hidden;
+  }
+}
+/* sous 768, la coquille range ses pages dans un tiroir : rien à replier, le bouton s'efface */
+@media (max-width: 767px) {
+  .v2 .dat-entete > .dat-icone-bouton {
+    display: none;
   }
 }
