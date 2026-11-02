@@ -479,11 +479,15 @@ html[data-v2-theme="light"] .v2 .dalp {
 .v2 .dalp .dalp-tligne:hover {
   background: var(--p-remplir-1);
 }
-.v2 .dalp .dalp-tache[aria-current="true"] {
-  border-top-color: var(--p-bleu-fond-2);
+/* 02/11/2026 — Teo : la ligne ouverte en bleu « c'est moche, tout change » ; juste du gris.
+   Un gris un cran plus soutenu que le survol, ni bord ni contour bleu (le contour reste
+   pour la navigation au clavier sur les autres lignes). */
+.v2 .dalp .dalp-tache[aria-current="true"] .dalp-tligne,
+.v2 .dalp .dalp-tache[aria-current="true"] .dalp-tligne:hover {
+  background: var(--p-remplir-2);
 }
-.v2 .dalp .dalp-tache[aria-current="true"] .dalp-tligne {
-  background: var(--p-bleu-fond-2);
+.v2 .dalp .dalp-tache[aria-current="true"]:has(:focus-visible) {
+  box-shadow: none;
 }
 .v2 .dalp .dalp-tcase {
   display: flex;
