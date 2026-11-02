@@ -1,6 +1,58 @@
-# Relevé — Plain, Tasks (liste + détail TASK-1)
+# Relevé — Plain, Tasks (liste + détail)
 
-URLs : https://app.plain.com/workspace/w_01M625JFBKTE3BWN4ECASYHK2B/tasks/ et …/tasks/TASK-1/ (panneau de droite). Relevé le 29/10/2026 au `getComputedStyle`, fenêtre 1440×900 (px CSS). Rien modifié (aucune case cochée, aucun champ édité).
+Complété le 01/11/2026 sur une liste **remplie** (16 tâches dans My tasks, 22 Todo, 9 Done). La partie « 01/11 » ci-dessous décrit
+ce qui n'était pas visible le 29/10 (pastille de compte, lignes sans compte, onglet Done, menu de tri, détail avec description,
+thème sombre) ; la suite (29/10) reste valable et est gardée. Jetons : `plain-commun.md`.
+
+## 01/11 — ce qui a été créé
+
+42 tâches par l'API (`createTask`) : 36 générales (titres « Relancer le paiement de la facture 2026-0987 », « Préparer l'avenant au
+contrat », … « Programmer la revue annuelle », statuts TODO / IN_PROGRESS / DONE / CANCELLED, priorités 0 à 3, 4 sur 5 rattachées à un
+compte, 5 sur 6 assignées à Teo, descriptions courtes sur 3 sur 5) + 6 sur « Agence Immobilière Créole ». Les 4 tâches de Teo
+(TASK-1 à TASK-4) sont intactes.
+
+## 01/11 — liste pleine (1440×900, clair)
+
+- Onglets : « My tasks 16 » (tâches assignées non faites) · « Todo 22 » · « Done 9 ». Les statuts IN_PROGRESS et CANCELLED n'ont pas
+  d'icône à eux dans la liste : une tâche IN_PROGRESS s'affiche comme « To do » ; les CANCELLED ne sont dans aucun onglet.
+- **Ligne avec compte** : grid **`18px 537px 400px 40px`** (gap 8px 12px, p 0 24px, h 48 + filet 1) — 3e colonne = pastille du compte
+  alignée à droite (a 24 de haut, r 6px, ::before inset 1px bg #fff r 5px, ::after bd 1px #e7e7ef r 6px ; span p 0 8px 0 4px gap ~4 :
+  vignette 18×18 r 4px icône bâtiment 12 #8e8e9c + nom 12/400/20 #1f1f28).
+- **Ligne sans compte** : grid `18px 949px 40px` (le titre prend la place).
+- Avatar assigné 18×18 r 4px dans un bouton 32×32, avec **pastille de présence 4,5×4,5** en bas à droite (verte).
+- **Onglet Done** : case pleine cochée #00ab5f (chemin ci-dessous) ; **titre en #636370** (grisé, pas barré), ID #636370.
+- Icône « à faire » (18, #448bff) : `<path d="M18.667 7.333a2 2 0 0 0-2-2H7.333a2 2 0 0 0-2 2v9.334a2 2 0 0 0 2 2h9.334a2 2 0 0 0 2-2zm2.666 9.334a4.667 4.667 0 0 1-4.666 4.666H7.333a4.667 4.667 0 0 1-4.666-4.666V7.333a4.667 4.667 0 0 1 4.666-4.666h9.334a4.667 4.667 0 0 1 4.666 4.666z"/>`
+- Icône « faite » (18, #00ab5f) : `<path fill-rule="evenodd" clip-rule="evenodd" d="M16.667 2.667a4.667 4.667 0 0 1 4.666 4.666v9.334a4.667 4.667 0 0 1-4.666 4.666H7.333a4.667 4.667 0 0 1-4.666-4.666V7.333a4.667 4.667 0 0 1 4.666-4.666zm.158 5.842a1.167 1.167 0 0 0-1.65 0l-4.508 4.508-1.842-1.842a1.167 1.167 0 0 0-1.65 1.65l2.667 2.667a1.167 1.167 0 0 0 1.65 0l5.333-5.334a1.166 1.166 0 0 0 0-1.65"/>`
+- **Menu de tri** (« Last updated ⌄ ») : `role=menu` 136×80 aligné à droite sous le bouton : « Last updated » (coche à droite) · « Priority » ;
+  items **36 de haut, p 8px, 14/400/20** (plus grands que les menus de colonne de 28 px), r 6px, gap 8.
+  La priorité ne s'affiche nulle part dans la ligne : elle ne sert qu'au tri.
+
+## 01/11 — détail ouvert (TASK-31, 1440×900)
+
+- La liste passe à 719 de large et en **lignes de 2 étages** : li **81** (ligne grid `18px 589px 40px`, p **8px 24px**), titre en haut,
+  pastille du compte dessous (x 407). Les onglets disparaissent au profit du bouton « My tasks 16 ⌄ » (+ tri à droite) ;
+  un bouton « masquer le volet » 32×32 apparaît à droite du titre « Tasks ».
+- Ligne ouverte : ligne bg **#f7f9ff** et filet haut du li #f7f9ff (sombre : **#0e111f**). Survol d'une autre : #f0f0f5.
+- Volet 1072,8 360×884 (poignée 10 px `ew-resize` à x 1067) : en-tête « TASK-31 » 12/550/16 #636370 + ⋯ et × 32×32 ;
+  rangée « ☐ To do » (label 58×18) · « (W) Assigned to me » 134×34 · « Handle with Agent » 152×34 (icône verte) ;
+  titre textarea 328×66 Whyte 24/400/32 « Rembourser le double prélèvement » ; « Created 13min ago » 14/400/20 #636370 ;
+  description textarea 328×24 « À faire avant vendredi. » 14/400/20 ; `hr` 360 de large (sombre : filet calculé #808080 — valeur
+  par défaut du hr, à reproduire telle quelle ou à remplacer par #2b292d ; noter l'écart) ; dl gap 4px 16px :
+  « Account » → pastille du compte + lien 32×34 · « Threads » → bouton « Link threads » (icône 18 + 12/400/16 #636370) ·
+  « Knowledge gap » → « No linked knowledge gap ». (Le 29/10 le premier libellé s'appelait encore « Tenant ».)
+
+Sombre : li #1a191b filet #2b292d, ID #b5b2bc, case à faire #5696ff, dt #b5b2bc, ligne ouverte #0e111f. Au chargement en sombre la barre
+d'onglets montre le même filet épais transitoire que celui noté le 29/10 (visible sur `1440-sombre.png`).
+
+À 390 (rechargé) : lignes à 2 étages même sans volet (li 81, grid `18px 260px 40px`, p 8px 24px, titres tronqués « Vérifier les états des lie… »),
+bouton « My tasks 16 ⌄ » + « Last updated ⌄ », « Add new task T » conservé.
+
+Captures 01/11 (`captures/plain-tasks/`) : `1440-clair.png` · `1440-sombre.png` · `1440-clair-onglet-done.png` · `1440-clair-menu-tri.png` ·
+`1440-clair-detail.png` · `1440-sombre-detail.png` · `390-clair.png` · `390-sombre.png`.
+
+## 29/10 — relevé d'origine (4 tâches, toujours valable)
+
+URLs : https://app.plain.com/workspace/w_01M625JFBKTE3BWN4ECASYHK2B/tasks/ et …/tasks/TASK-1/ (panneau de droite). Relevé le 29/10/2026 au `getComputedStyle`, fenêtre 1440×900 (px CSS).
 
 Notation : `fs/fw/lh`, `c` couleur, `bg` fond, `bd` bordure, `r` rayon, `p` padding.
 
