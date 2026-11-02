@@ -112,8 +112,9 @@ export default function Honoraires() {
   const [masquees, setMasquees] = useState<Set<Cle>>(() => new Set(COLONNES.filter((c) => c.plus).map((c) => c.cle)));
   const [recherche, setRecherche] = useState("");
   const [favori, setFavori] = useState(false);
-  const filtres = useOuvert<HTMLDivElement>();
-  const affichage = useOuvert<HTMLDivElement>();
+  const { ouvert: filtresOuvert, setOuvert: ouvrirFiltres, boite: boiteFiltres } = useOuvert<HTMLDivElement>();
+  const { ouvert: affichageOuvert, setOuvert: ouvrirAffichage, boite: boiteAffichage } = useOuvert<HTMLDivElement>();
+  const [maintenant] = useState(() => Date.now());
   const recherchee = useRef<HTMLInputElement>(null);
   const { lireAnnexes } = t;
   useEffect(() => lireAnnexes(), [lireAnnexes]);
@@ -122,19 +123,18 @@ export default function Honoraires() {
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey || (e.target as HTMLElement).closest("input, textarea, select")) return;
-      if (e.key === "f" || e.key === "F") filtres.setOuvert((o) => !o);
-      if (e.key === "v" || e.key === "V") affichage.setOuvert((o) => !o);
+      if (e.key === "f" || e.key === "F") ouvrirFiltres((o) => !o);
+      if (e.key === "v" || e.key === "V") ouvrirAffichage((o) => !o);
     };
     document.addEventListener("keydown", touche);
     return () => document.removeEventListener("keydown", touche);
-  }, [filtres, affichage]);
+  }, [ouvrirFiltres, ouvrirAffichage]);
 
   const poserFiltre = (f: Filtre) => router.replace(`${RACINE}/tamila/honoraires${f === "tous" ? "" : `?filtre=${f}`}`, { scroll: false });
 
   const lignes: Ligne[] = useMemo(() => {
     const par = t.annexes?.honoraires;
     if (!par) return [];
-    const maintenant = Date.now();
     const annee = new Date(maintenant).getFullYear().toString();
     return t.lignes
       .filter((x) => x.dossier.statut !== "efface" && x.dossier.statut !== "refuse")
@@ -165,7 +165,7 @@ export default function Honoraires() {
           signaux,
         };
       });
-  }, [t.annexes, t.lignes, t]);
+  }, [t, maintenant]);
 
   const valeurTri = (l: Ligne): string | number => {
     switch (tri) {
@@ -272,12 +272,12 @@ export default function Honoraires() {
             <button type="button" className="tamp-icone" aria-pressed={favori} aria-label={favori ? "Retirer des favoris" : "Ajouter aux favoris"} onClick={() => setFavori(!favori)}>
               <PlainIcone nom="Etoile" style={favori ? { color: "var(--p-jaune-icone-1)" } : undefined} />
             </button>
-            <div ref={filtres.boite} style={{ position: "relative" }}>
-              <button type="button" className="tamp-fantome" aria-haspopup="menu" aria-expanded={filtres.ouvert} aria-keyshortcuts="F" onClick={() => filtres.setOuvert((o) => !o)}>
+            <div ref={boiteFiltres} style={{ position: "relative" }}>
+              <button type="button" className="tamp-fantome" aria-haspopup="menu" aria-expanded={filtresOuvert} aria-keyshortcuts="F" onClick={() => ouvrirFiltres((o) => !o)}>
                 <PlainIcone nom="Filtres" />
                 Filtres
               </button>
-              {filtres.ouvert ? (
+              {filtresOuvert ? (
                 <div className="tamp-menu" role="menu" style={{ top: 38, right: 0, width: 200 }}>
                   {(
                     [
@@ -286,7 +286,7 @@ export default function Honoraires() {
                       ["signaux", "À traiter"],
                     ] as [Filtre, string][]
                   ).map(([f, l]) => (
-                    <button key={f} type="button" role="menuitemradio" aria-checked={filtre === f} className="tamp-menu-option" onClick={() => (poserFiltre(f), filtres.setOuvert(false))}>
+                    <button key={f} type="button" role="menuitemradio" aria-checked={filtre === f} className="tamp-menu-option" onClick={() => (poserFiltre(f), ouvrirFiltres(false))}>
                       <PlainIcone nom="Filtres" taille={14} />
                       <span style={{ flex: 1 }}>{l}</span>
                       {filtre === f ? "✓" : ""}
@@ -295,13 +295,13 @@ export default function Honoraires() {
                 </div>
               ) : null}
             </div>
-            <div ref={affichage.boite} style={{ position: "relative" }}>
-              <button type="button" className="tamp-fantome" aria-haspopup="dialog" aria-expanded={affichage.ouvert} aria-keyshortcuts="V" onClick={() => affichage.setOuvert((o) => !o)}>
+            <div ref={boiteAffichage} style={{ position: "relative" }}>
+              <button type="button" className="tamp-fantome" aria-haspopup="dialog" aria-expanded={affichageOuvert} aria-keyshortcuts="V" onClick={() => ouvrirAffichage((o) => !o)}>
                 <PlainIcone nom="Ecran" />
                 Affichage
                 <span className="tamp-kbd">V</span>
               </button>
-              {affichage.ouvert ? (
+              {affichageOuvert ? (
                 <div className="tamp-popover" role="dialog" aria-label="Affichage" style={{ top: 42, right: 0 }}>
                   <h4>Colonnes du tableau</h4>
                   {COLONNES.map((c) => (
@@ -382,7 +382,7 @@ export default function Honoraires() {
                   </th>
                 ))}
                 <th scope="col" aria-label="Plus de colonnes">
-                  <button type="button" className="tamp-th" aria-label="Montrer plus de colonnes" onClick={() => affichage.setOuvert(true)}>
+                  <button type="button" className="tamp-th" aria-label="Montrer plus de colonnes" onClick={() => ouvrirAffichage(true)}>
                     <PlainIcone nom="Points" taille={14} />
                   </button>
                 </th>

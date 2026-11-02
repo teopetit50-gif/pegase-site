@@ -81,3 +81,20 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
   première carte 157 (rangées 65), h3 suivant 400, carte 439 — ceux du relevé.
 - **Écarts restants** : survol d'une rangée en sombre non relevé (pas suivant du fond de carte) ; à 390, descriptions plus longues
   sur trois lignes (contenu).
+
+## Honoraires du cabinet — `/espace2/tamila/honoraires`
+
+- **Référence** : Plain, Accounts (ex-Tenants), liste. **Relevés** : `plain-tenants.md` + `plain-commun.md`. Captures
+  `plain-tenants/1440-reel-*.png`, `1440-clair-menu-colonne.png`, `1440-clair-menu-display.png`, `390-*.png`.
+- **Correspondance** : B12 (une fenêtre dans l'écran d'avant) devient la page. Colonnes Name · Open threads · Tier · Source · Ville ·
+  MRR · Renouvellement · Contrat actif · Modules · ⋯ → Dossier (intitulé) · À facturer HT (tri par défaut, décroissant) · Convention
+  (pastille losanges, couleurs des tiers) · Référence · Responsable · Temps non facturé · Provisions disponibles · Convention signée
+  (Oui/Non) · À faire (pastilles empilées : sans convention, impayée > 30 j, forfait ≥ 80 %, clos avec du temps non facturé) ; « ⋯ »
+  et Display montrent Reste dû, Facturé et Encaissé de l'année. Menu de colonne (Tri croissant / décroissant / Masquer), « Trié par … ×».
+  Filters (touche F) : tous / à facturer / à traiter (L6, `?filtre=a_facturer|signaux`, atterrissage E8, E9). « Create account » →
+  « Exporter (CSV) » (L7). Toute la ligne mène à la page du dossier, onglet Honoraires (L5). Le pied (« Load more ») porte les totaux
+  du cabinet. Lecture : `chargerHonorairesCabinet` (via `chargerPilotage`), aucun dossier ouvert.
+- **Comparaisons** : `honoraires-1440-{sombre,clair}-{cote,diff,fusion}.png`, `honoraires-390-{sombre,clair}-cote.png`. Mesures : titre
+  24/30, recherche 20/94, en-têtes 146 (32), lignes de 59,5 avec une pastille, nom à 32/194 — ceux du relevé.
+- **Écarts restants** : icônes des colonnes de champs (texte, nombre, date, booléen) non relevées chez Plain → icônes du sprite de
+  Linear à 14 ; œil de Display non relevé → cercle Todo/Done de Linear ; les intitulés longs sont tronqués comme les noms de Plain à 390.
