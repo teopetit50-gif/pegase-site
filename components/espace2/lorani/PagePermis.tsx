@@ -49,6 +49,8 @@ import type { Calcul, DateLue, Echeance, Etape, Permis, PieceProjet, Recours } f
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { copier as copierTexte, useMarques } from "./lor-local";
+import { BoutonEtoile, BoutonReporter } from "./lor-selection";
 import { IconeAffichage, IconeCalendrierLor, IconeLin, IconePoints, IconePrioriteLor, IconeSansResponsable, IconeSprite, IconeStatutTicket, type StatutTicket } from "./lor-icones";
 import "@/components/espace/espace.css";
 import "@/components/espace/lorani/lorani.css";
@@ -149,7 +151,7 @@ function useMenu() {
 }
 
 /* un geste de la page : ouvrir une fenêtre de PermisVue (mêmes portes) */
-type Commande = { t: "implicite" } | { t: "lue"; d: DateLue } | { t: "ecarter"; d: DateLue } | { t: "saisir"; q: Quoi | "recours" } | { t: "issue"; r: Recours } | { t: "regime" };
+type Commande = { t: "copier" } | { t: "implicite" } | { t: "lue"; d: DateLue } | { t: "ecarter"; d: DateLue } | { t: "saisir"; q: Quoi | "recours" } | { t: "issue"; r: Recours } | { t: "regime" };
 type Option = { cle: string; libelle: string; icone?: React.ReactNode; commande?: Commande; href?: string; off?: boolean; separe?: boolean };
 function Menu({ options, fermer, onChoix, style, etiquette }: { options: Option[]; fermer: () => void; onChoix: (c: Commande) => void; style: React.CSSProperties; etiquette: string }) {
   return (
@@ -205,6 +207,7 @@ export default function PagePermis({ id }: { id: string }) {
   const [ouvertPoints, setOuvertPoints, menuPointsRef] = useMenu();
   const [ouvertSaisir, setOuvertSaisir, menuSaisirRef] = useMenu();
   const [replie, setReplie] = useState(false);
+  const suivis = useMarques("suivis");
   const [ouvertAffichage, setOuvertAffichage, menuAffichageRef] = useMenu();
   const [voirFranchies, setVoirFranchies] = useState(true);
   const [voirDates, setVoirDates] = useState(true);
@@ -216,6 +219,10 @@ export default function PagePermis({ id }: { id: string }) {
   const pieces = p ? dossier.pieces.filter((x) => x.objet_id === p.projet_id && !TYPES_CONTROLE.includes(x.type_piece ?? "")) : [];
   /* le seul endroit qui ouvre une fenêtre : un gestionnaire d'événement */
   const executer = (c: Commande) => {
+    if (c.t === "copier") {
+      void copierResume();
+      return;
+    }
     const pv = piloteRef.current;
     if (!pv) return;
     if (c.t === "implicite") pv.confirmerImplicite();
@@ -376,9 +383,24 @@ export default function PagePermis({ id }: { id: string }) {
     { cle: "courrier", libelle: "Déposer un courrier de la mairie", icone: <IconeSprite nom="Attachment" />, href: `${BASE}/projets/${encodeURIComponent(projet.id)}?deposer=1` },
     { cle: "ancien", libelle: "Ouvrir l'écran d'avant", icone: <IconeSprite nom="Page" />, href: `${BASE}?ancien=1&permis=${encodeURIComponent(p.id)}` },
   ];
-  const optionsSaisir: Option[] = saisies.map((q) => ({ cle: q, libelle: `${LIBELLES_SAISIE[q]}…`, commande: { t: "saisir", q } as Commande }));
-  const premiereSaisie = saisies[0];
+  const optionsSaisir: Option[] = [
+    { cle: "copier", libelle: "Copier pour l'assistant", commande: { t: "copier" } as Commande },
+    ...saisies.map((q, i) => ({ cle: q, libelle: `${LIBELLES_SAISIE[q]}…`, commande: { t: "saisir", q } as Commande, separe: i === 0 })),
+  ];
 
+  /* « Copy as prompt » → Copier pour l'assistant : le permis en clair, à coller dans une question */
+  const copierResume = async () => {
+    const lignes = [
+      `${titre} — ${terrain || projet.nom}`,
+      `${TYPES[p.type_autorisation].libelle}${p.numero ? ` n° ${p.numero}` : ", sans numéro"} ; état : ${etat.libelle}.`,
+      ...dates.map((d) => (d.iso ? `${d.libelle} ${plein(d.iso)}` : d.vide)).filter(Boolean),
+      c.regime ? `Règle d'instruction : ${c.regime.regle_instruction} ; sans réponse de la mairie : ${c.regime.effet_silence}.` : "",
+      etapes.length ? `Calendrier : ${etapes.map((e) => `${e.libelle}${e.date ? ` (${plein(e.date)})` : ""} — ${STATUTS_ETAPE[e.statut]?.libelle ?? e.statut}`).join(" ; ")}.` : "",
+      proposees.length ? `À confirmer : ${proposees.map((d) => NATURES_DATE_LUE[d.nature].libelle.toLowerCase()).join(", ")}.` : "",
+      nomChef ? `Chef de projet : ${nomChef}.` : "Aucun chef de projet.",
+    ].filter(Boolean);
+    toast((await copierTexte(lignes.join("\n"))) ? "Résumé du permis copié pour l'assistant." : "La copie a été refusée par le navigateur.", "vert");
+  };
   const copier = async (texte: string, message: string) => {
     try {
       await navigator.clipboard.writeText(texte);
@@ -458,6 +480,7 @@ export default function PagePermis({ id }: { id: string }) {
               </h2>
             </Link>
           </nav>
+          <BoutonEtoile cle={`permis:${p.id}`} nom={titre} />
           <div className="lor-tk-ancre" ref={menuPointsRef}>
             <button type="button" className="lor-rond" aria-label="Options du permis" title="Options du permis" aria-expanded={ouvertPoints} onClick={() => setOuvertPoints((o) => !o)}>
               <IconePoints />
@@ -478,9 +501,14 @@ export default function PagePermis({ id }: { id: string }) {
               </button>
             </>
           ) : null}
-          <a href="#lor-tk-echeances" className="lor-rond" aria-label="Échéances et rappels" title={`Échéances et rappels : ${pluriel(echeances.filter((e) => e.statut === "ouvert").length, "en cours", "en cours")}`}>
+          {peutEcrire ? (
+            <Link href={`${BASE}/projets/${encodeURIComponent(projet.id)}?nouveau=permis`} className="lor-rond" aria-label="Dupliquer : un nouveau permis sur ce projet" title="Dupliquer : ouvrir un nouveau permis sur ce projet (modificatif, transfert, autre demande)">
+              <IconeLin nom="doublon" />
+            </Link>
+          ) : null}
+          <BoutonReporter cle={`permis:${p.id}`} nom={titre}>
             <IconeSprite nom="ClockOutline" />
-          </a>
+          </BoutonReporter>
         </div>
       </header>
 
@@ -498,15 +526,14 @@ export default function PagePermis({ id }: { id: string }) {
           <button
             type="button"
             className="lor-rond lor-rond--plein lor-tk-moitie"
-            aria-label={premiereSaisie ? `Saisir : ${LIBELLES_SAISIE[premiereSaisie]}` : "Rien à saisir"}
-            title={premiereSaisie ? `Saisir ce qui est arrivé : ${LIBELLES_SAISIE[premiereSaisie].toLowerCase()}` : peutEcrire ? "Rien à saisir à cette étape" : "Lecture seule"}
-            disabled={!premiereSaisie}
-            onClick={() => premiereSaisie && executer({ t: "saisir", q: premiereSaisie })}
+            aria-label="Copier pour l'assistant"
+            title="Copier pour l'assistant : le permis en clair (état, dates, calendrier, ce qui est à confirmer)"
+            onClick={() => void copierResume()}
           >
             <IconeLin nom="invite" />
           </button>
           <span className="lor-tk-double-sep" aria-hidden="true" />
-          <button type="button" className="lor-rond lor-rond--plein lor-tk-moitie" aria-label="Saisir ce qui est arrivé" title="Saisir ce qui est arrivé" aria-expanded={ouvertSaisir} disabled={!saisies.length} onClick={() => setOuvertSaisir((o) => !o)}>
+          <button type="button" className="lor-rond lor-rond--plein lor-tk-moitie" aria-label="Copier ou saisir ce qui est arrivé" title="Copier ou saisir ce qui est arrivé" aria-expanded={ouvertSaisir} onClick={() => setOuvertSaisir((o) => !o)}>
             <IconeLin nom="chevronBas" />
           </button>
           {ouvertSaisir ? <Menu etiquette="Saisir ce qui est arrivé" options={optionsSaisir} fermer={() => setOuvertSaisir(false)} onChoix={executer} style={{ right: 0, top: 34 }} /> : null}
@@ -551,9 +578,9 @@ export default function PagePermis({ id }: { id: string }) {
             {!peutEcrire ? <p className="lor-tk-sourd">Vous voyez ce dossier sans pouvoir y écrire : demandez l&apos;accès en écriture à un gérant ou au chef de projet.</p> : null}
           </div>
           <div className="lor-tk-pieces-jointes">
-            <span className="lor-rond lor-tk-rond-petit" title={`${pluriel(pieces.length, "courrier")} dans le dossier`} aria-label={`${pluriel(pieces.length, "courrier")} dans le dossier`}>
+            <Link href={`${RACINE}/lorani/courrier?onglet=tous`} className="lor-rond lor-tk-rond-petit" title={`${pluriel(pieces.length, "courrier")} dans le dossier · ouvrir le courrier à ranger`} aria-label="Ouvrir le courrier à ranger">
               <IconeLin nom="reaction" />
-            </span>
+            </Link>
             <Link href={`${BASE}/projets/${encodeURIComponent(projet.id)}?deposer=1`} className="lor-rond lor-tk-rond-petit" aria-label="Déposer un courrier de la mairie" title="Déposer un courrier de la mairie">
               <IconeSprite nom="Attachment" />
             </Link>
@@ -617,9 +644,9 @@ export default function PagePermis({ id }: { id: string }) {
             <div className="lor-tk-activite-tete">
               <h3>Activité</h3>
               <div className="lor-tk-activite-droite">
-                <span className="lor-tk-abonne" title={nomChef ? `Les rappels partent à ${nomChef}` : "Aucun destinataire des rappels"}>
-                  {nomChef ? "Rappels au chef de projet" : "Aucun destinataire"}
-                </span>
+                <button type="button" className="lor-tk-abonne" aria-pressed={suivis.a(`permis:${p.id}`)} onClick={() => suivis.basculer(`permis:${p.id}`)} title={suivis.a(`permis:${p.id}`) ? "Ne plus suivre : ses courriers reprennent leur place dans le Courrier" : `Suivre : ses courriers passent en tête du Courrier, marqués « suivi » (gardé dans ce navigateur). Les rappels partent à ${nomChef ?? "personne : nommez un chef de projet"}.`}>
+                  {suivis.a(`permis:${p.id}`) ? "Ne plus suivre" : "Suivre"}
+                </button>
                 <span className="lor-tk-abonnes" title={nomChef ?? "Aucun chef de projet"}>
                   {nomChef ? <Avatar nom={nomChef} taille={16} /> : <IconeSansResponsable />}
                 </span>
