@@ -31,7 +31,8 @@ import { useToast } from "../Toasts";
 import { Badge, ItemMenu, MenuDeroulant, SectionMenu, SeparateurMenu, Vide } from "../ui";
 import { RACINE } from "../modules";
 import { MEMBRES, type Ile } from "./membres";
-import { RESEAU_VIDE, reseauEnExemple } from "./source";
+import { reseauEnExemple } from "./source";
+import { ReseauVide } from "./reseau-vide";
 import { PUBLICATIONS, VOUS, ilYa, initiales, membreDe, type Auteur, type Publication, type Reponse, type TypePublication } from "./fil-donnees";
 import "./fil.css";
 
@@ -40,24 +41,14 @@ const ILES: Ile[] = ["Guadeloupe", "Martinique"];
 const ficheDe = (slug: string) => `${RACINE}/reseau/membres/${slug}`;
 
 export default function FilReseau() {
-  const { source, changer } = useSource();
+  const { source } = useSource();
   if (!reseauEnExemple(source))
     return (
       <div className="v2-page rf">
         <h1 className="v2-sr">Fil du réseau</h1>
         <div className="rf-colonnes">
           <div className="rf-flux">
-            <Vide
-              icone={<Network width={20} height={20} aria-hidden="true" />}
-              titre={RESEAU_VIDE.titre}
-              action={
-                <button type="button" className="v2-btn" onClick={() => changer("exemple")}>
-                  Voir les données d&apos;exemple
-                </button>
-              }
-            >
-              {RESEAU_VIDE.texte} Le Fil y montrera les demandes et les alertes terrain des membres.
-            </Vide>
+            <ReseauVide icone={Network} page="Le Fil y montrera les demandes et les alertes terrain des membres." />
           </div>
         </div>
       </div>

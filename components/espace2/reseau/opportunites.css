@@ -25,27 +25,39 @@
 }
 
 /* ——— l'en-tête ——— */
-.op-tete {
+.v2 .op-tete {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
 }
+/* 02/11/2026, intégration : l'en-tête est celui de Membres (membres.css,
+   .rm-etiquette / .rm-titre / .rm-intro) — même surtitre « Réseau Omega »,
+   même titre 22/29, même chapeau — pour que les pages de la rubrique se
+   ressemblent. Avant, 20/28 et pas de surtitre. */
+.v2 .op-etiquette {
+  margin: 0 0 4px;
+  font-family: var(--v2-code);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 450;
+  text-transform: uppercase;
+  color: var(--v2-gray-600);
+}
 .v2 .op-titre {
   margin: 0;
   font-family: var(--v2-titre);
-  font-size: 20px;
-  line-height: 28px;
-  letter-spacing: -0.4px;
+  font-size: 22px;
+  line-height: 29px;
+  letter-spacing: -0.55px;
   font-weight: 600;
+  color: var(--v2-gray-1000);
 }
-.op-sous {
-  margin: 4px 0 0;
-  max-width: 640px;
+.v2 .op-sous {
+  margin: 6px 0 0;
+  max-width: 680px;
   color: var(--v2-gray-900);
-  font-size: 13px;
-  line-height: 18px;
 }
 
 .op-section {

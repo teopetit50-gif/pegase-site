@@ -31,8 +31,8 @@ import { MessagesSquare } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { useOrganisation } from "../organisation";
 import { useAujourdhui } from "../horloge";
-import { Vide } from "../ui";
 import { reseauEnExemple } from "./source";
+import { ReseauVide } from "./reseau-vide";
 import { MEMBRES } from "./membres";
 import { PRIVES, SALONS, VOUS, mentionsVous, type Message } from "./messages-donnees";
 import { heureMaintenant } from "./messages-commun";
@@ -53,9 +53,7 @@ export default function Messagerie() {
     return (
       <div className="v2-page v2-page--etroite">
         <h1 className="v2-sr">Messages du réseau</h1>
-        <Vide icone={<MessagesSquare width={20} height={20} strokeWidth={1.6} />} titre="Le réseau ouvre bientôt">
-          Les messages entre les entreprises clientes d&apos;Omega arriveront avec l&apos;ouverture du réseau. Aucune conversation n&apos;existe encore dans votre base : il n&apos;y a rien à afficher ici pour l&apos;instant.
-        </Vide>
+        <ReseauVide icone={MessagesSquare} page="Les messages privés et les salons par île et par secteur y arriveront avec les premiers membres." />
       </div>
     );
   return <MessagerieExemple />;

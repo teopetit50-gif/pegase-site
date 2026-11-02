@@ -37,9 +37,10 @@ import { useSource } from "@/components/espace/source";
 import { useOrganisation } from "../organisation";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
-import { Badge, ItemMenu, MenuDeroulant, Vide } from "../ui";
+import { Badge, ItemMenu, MenuDeroulant } from "../ui";
 import { MEMBRES, type Ile, type Membre } from "./membres";
 import { reseauEnExemple } from "./source";
+import { ReseauVide } from "./reseau-vide";
 import { ACHATS_GROUPES, GROUPEMENTS, MISES_EN_RELATION, SUIVI, type AchatGroupe, type Groupement, type MiseEnRelation, type Provenance, type Suivi } from "./opportunites-donnees";
 import "./opportunites.css";
 
@@ -67,7 +68,7 @@ const initiales = (nom: string) =>
 type FiltreIle = "toutes" | Ile;
 
 export default function Opportunites() {
-  const { source, changer, connecte } = useSource();
+  const { source } = useSource();
   const exemple = reseauEnExemple(source);
   const org = useOrganisation();
 
@@ -75,6 +76,7 @@ export default function Opportunites() {
     <div className="v2-page op-page">
       <header className="op-tete">
         <div>
+          <p className="op-etiquette">Réseau Omega</p>
           <h1 className="op-titre">Opportunités</h1>
           <p className="op-sous">Ce que le réseau peut vous faire gagner, tiré de vos données : des mises en relation, des marchés à plusieurs, des achats groupés.</p>
         </div>
@@ -82,9 +84,7 @@ export default function Opportunites() {
       {exemple ? (
         <Tableau vous={org.nom} />
       ) : (
-        <Vide icone={<Network {...I} />} titre="Le réseau ouvre bientôt" action={connecte ? <button type="button" className="v2-btn v2-btn--petit" onClick={() => changer("exemple")}>Voir l&apos;exemple</button> : null}>
-          Aucune entreprise n&apos;est encore inscrite au Réseau Omega. Dès les premiers membres, les mises en relation, les groupements de marchés publics et les achats groupés qui vous concernent apparaîtront ici, avec la raison de chaque suggestion.
-        </Vide>
+        <ReseauVide icone={Network} page="Les mises en relation, les groupements de marchés publics et les achats groupés qui vous concernent y apparaîtront, avec la raison de chaque suggestion." />
       )}
     </div>
   );

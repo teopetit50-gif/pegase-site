@@ -9,7 +9,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { BadgeCheck, Info, Users } from "lucide-react";
 import { Button, Tooltip, TooltipTrigger } from "react-aria-components";
-import { Vide } from "../ui";
+import { ReseauVide } from "./reseau-vide";
 import type { BadgeLu } from "./membres-donnees";
 
 /** Les initiales du nom dans une tuile neutre (aucun logo : les membres n'en déposent pas encore). */
@@ -86,18 +86,16 @@ export function LigneBadge({ badge }: { badge: BadgeLu }) {
 /** En base réelle : le réseau n'a encore aucune table, donc aucun membre — jamais les membres d'exemple. */
 export function ReseauFerme({ retour }: { retour?: boolean }) {
   return (
-    <Vide
-      icone={<Users width={20} height={20} strokeWidth={1.6} />}
-      titre="Le réseau ouvre bientôt"
-      action={
+    <ReseauVide
+      icone={Users}
+      page="L'annuaire y montrera les entreprises qui le rejoignent ; vous choisirez champ par champ ce que vous y montrez."
+      autreAction={
         retour ? (
-          <Link href="/espace2/reseau/membres" className="v2-btn">
+          <Link href="/espace2/reseau/membres" className="v2-btn v2-btn--fantome">
             Retour à l&apos;annuaire
           </Link>
         ) : undefined
       }
-    >
-      L&apos;annuaire montrera ici les entreprises clientes d&apos;Omega qui rejoignent le réseau. Aucune n&apos;est encore inscrite. Quand il ouvrira, vous choisirez champ par champ ce que vous montrez : rien de votre organisation ne sera visible sans votre accord.
-    </Vide>
+    />
   );
 }
