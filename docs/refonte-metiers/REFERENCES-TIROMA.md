@@ -8,7 +8,7 @@ Consigne : `docs/refonte-metiers/cloud/COMMUN.md` et `cloud/TIROMA.md` (branche 
 | Aujourd'hui | `/espace2/tiroma` | Linear, My issues | `linear-my-issues.md` | `aujourdhui-*` | faite : en-tête, onglets, colonnes, lignes, puces, avatar et date superposés au pixel (sombre et clair) ; 390 conforme |
 | Créneaux et appels | `/espace2/tiroma/creneaux` | Plain, Threads | `plain-threads.md` | `creneaux-*`, `creneaux-fil-*` | faite : liste (en-tête, groupes, lignes de 67, colonnes) et fil ouvert (en-tête, messages, volet) superposés ; gestes testés |
 | Fauteuils | `/espace2/tiroma/fauteuils` | Cal.com, Bookings | `calcom-bookings.md` | `fauteuils-*` | à faire |
-| Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | à faire |
+| Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | faite : en-tête, colonnes de 324 au pas de 348, têtes de 50, cartes (identifiant, titre, puces, pied) superposées ; gestes testés |
 | Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | à faire |
 | Réglages | `/espace2/tiroma/reglages` | Linear, Settings › Team | `linear-team-settings.md` | `reglages-*` | à faire |
 
@@ -80,3 +80,25 @@ p 12 16 16), volet de 385 (lignes de 32, libellé 144) confondus. Restent, expli
 - « Assign », « Thread tier », « SLA policy » : sans objet (aucune assignation dans Tiroma) ;
 - Whyte (titre de page, licence payante) remplacée par Inter 400 à la même taille ;
 - textes et nombre de lignes par groupe : contenu du cabinet ; en-tête de liste : un bouton « Liste d'attente » de plus.
+
+## Plans et devis ← Linear, Board
+
+Colonnes (statut de Linear) : Devis à relancer (B15, icône Triage), Mutuelle à obtenir (B9, Backlog), Prêts à poser
+(B9, Todo), Un créneau trouvé (B22, In Progress), Mutuelle refusée (affichée si un refus est noté, ou par Affichage).
+Carte : n° de devis, avatar du praticien, statut + « patient — séance », puces (priorité = ancienneté du plan : rouge
+dès 42 j, haute dès 21 j ; échéance = expiration, calendrier barré rouge quand elle est passée ; cycle = jours depuis la
+signature ; montant ; famille, mutuelle, « À vérifier », « Ne pas contacter », « Famille : N proches à planifier »),
+« Signé le » / « Présenté le ». Onglets Tous · Sans rendez-vous · Devis (Active · Backlog · All issues). Filtre
+(praticien), Affichage (colonnes vides, pastille bleue quand l'option est changée, comme Linear).
+Gestes : la carte ouverte (clic, `?plan=<id>` depuis le point du matin et l'aiguillage) ouvre le volet de droite
+(« Open details ») : propriétés, créneaux trouvés, « Noter la mutuelle » (F1/G3 : état, date, note de 200 caractères),
+« Noter l'appel » (F3/G2, « Ne plus contacter » confirmé) ; clic droit sur une carte : menu contextuel (Ouvrir, Noter
+la mutuelle, Noter l'appel).
+
+Superposition (carte, 1500×920) : en-tête, onglets, ronds, têtes de colonne, colonnes et cartes alignées ; dans la
+carte, identifiant, titre, puces et pied confondus. Restent, expliqués :
+- « New issue » et la cloche : Tiroma ne crée pas de plan (lecture seule du logiciel du cabinet) ; absents ;
+- le « + » d'une colonne mène à Créneaux et appels (pas de création de plan) ;
+- le glisser-déposer entre colonnes : une colonne est un état calculé (mutuelle, créneau), pas un champ qu'on change ;
+  on change la mutuelle dans le volet ;
+- nombre de cartes et de rangées de puces : contenu du cabinet.
