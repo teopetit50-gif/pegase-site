@@ -287,3 +287,22 @@
     height: 32px;
   }
 }
+
+/* ——— « Épinglés » (l'étoile, 02/11 au soir) : la rangée de « Team resources » et un rond pour retirer ——— */
+.v2 .var .var-h-epingle {
+  position: relative;
+}
+.v2 .var .var-h-genre {
+  color: var(--var-t3);
+  font-weight: 450;
+}
+.v2 .var .var-h-desepingler {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  opacity: 0;
+}
+.v2 .var .var-h-epingle:hover .var-h-desepingler,
+.v2 .var .var-h-desepingler:focus-visible {
+  opacity: 1;
+}
