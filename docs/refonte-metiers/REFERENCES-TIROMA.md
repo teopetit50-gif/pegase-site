@@ -7,7 +7,7 @@ Consigne : `docs/refonte-metiers/cloud/COMMUN.md` et `cloud/TIROMA.md` (branche 
 |---|---|---|---|---|---|
 | Aujourd'hui | `/espace2/tiroma` | Linear, My issues | `linear-my-issues.md` | `aujourdhui-*` | faite : en-tête, onglets, colonnes, lignes, puces, avatar et date superposés au pixel (sombre et clair) ; 390 conforme |
 | Créneaux et appels | `/espace2/tiroma/creneaux` | Plain, Threads | `plain-threads.md` | `creneaux-*`, `creneaux-fil-*` | faite : liste (en-tête, groupes, lignes de 67, colonnes) et fil ouvert (en-tête, messages, volet) superposés ; gestes testés |
-| Fauteuils | `/espace2/tiroma/fauteuils` | Cal.com, Bookings | `calcom-bookings.md` | `fauteuils-*` | à faire |
+| Fauteuils | `/espace2/tiroma/fauteuils` | Cal.com, Bookings | `calcom-bookings.md` | `fauteuils-*` | faite : barre d'outils, carte de liste, têtes de groupe, colonnes date / contenu / ⋯ superposées ; panneau de détail ; gestes testés |
 | Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | faite : en-tête, colonnes de 324 au pas de 348, têtes de 50, cartes (identifiant, titre, puces, pied) superposées ; gestes testés |
 | Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | faite : barre de titre, boutons, titre de section, cartes (titre, valeur, graphique, axes) superposés ; gestes testés |
 | Réglages | `/espace2/tiroma/reglages` | Linear, Settings › Team | `linear-team-settings.md` | `reglages-*` | faite : écart moyen 3,3/255 ; lien retour, titre, cartes, rangées de 65, h3 confondus ; gestes testés |
@@ -144,3 +144,26 @@ valeurs, haut des graphiques et axes confondus. Restent, expliqués : « Ask Age
 Plain, sans équivalent) ; Top issues / Themes / rapports Team, Accounts… (navigation latérale de Plain, sans objet) ;
 Whyte remplacée par Inter 400 ; graphiques : séries hebdomadaires (les portes ne donnent pas de série quotidienne) ;
 référence 390 : capture en chargement (flou), seule disponible.
+
+## Fauteuils ← Cal.com, Bookings
+
+Les deux notions enfin séparées (inventaire § 17-21) : onglets du contrôle segmenté Charge du jour (B17, titulaire ;
+groupes « Demi-journée vide » / « Les autres » à la place de Today / Next) · Demi-journées vides (B19, titulaire et
+collaborateur ; « Cette semaine » / « Ensuite ») · Équipe absente (B11, titulaire et assistante) · À regrouper (B20) ·
+Séances longues (B21). Ligne de réservation : colonne date (fauteuil ou jour, taux matin / après-midi ou moment,
+pastille à la place de « Join Cal Video » : demi-journée vide, Demain, motif d'absence, durée), contenu (titre 14/600,
+« qui », mention verte comme « in 2 minutes » : soins exigeant une assistante, patients en liste d'attente ;
+note entre guillemets), bouton ⋯ (menu de Cal.com : ouvrir le détail, liens vers les autres onglets, Pilotage,
+liste d'attente). Clic : panneau de détail flottant de 512 (pastille d'état, ⌃ ⌄ précédent / suivant, ×, sections
+Quand / Qui / Charge…, pied). `?fauteuil=<id>` (point du matin, aiguillage) ouvre le détail de ce fauteuil.
+Gestes : « + Noter une absence » (F2/G4, bouton plein de Cal.com, formulaire dans le panneau : qui, du, au inclus,
+motif codé, « Aucune raison médicale n'est demandée ») ; « Clore l'absence » (G5) à la place de « Reject », confirmé.
+« Filter » mène aux fauteuils des réglages ; la bascule liste / calendrier : liste, et le calendrier mène au Pilotage
+(occupation par semaine).
+
+Superposition (carte, 1488×916 = carte de 1176×852) : écart moyen 9,1/255 ; barre d'outils, bord de la carte de liste,
+tête de groupe, case, colonne date, colonne contenu (x 260) et ⋯ confondus. Restent, expliqués :
+- Cal Sans : Google Fonts n'en sert qu'une graisse (400) ; les 500/600/700 du relevé sont synthétisés ;
+- « Saved filters » : pas de filtres enregistrés dans Tiroma ; à sa place « Noter une absence » (geste du métier) ;
+- nombre de lignes et de lignes de texte : contenu du cabinet (trois fauteuils) ;
+- 390 : seule la référence claire existe.
