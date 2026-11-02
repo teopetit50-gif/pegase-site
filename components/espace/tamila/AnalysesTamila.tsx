@@ -34,9 +34,26 @@ type Props = {
   peutDemander: boolean;
   /* la clé du dossier est au coffre Scaleway (le serveur peut lire et chiffrer) */
   auCoffre: boolean;
+  /* 02/11/2026 : l'espace 2 dessine la carte lui-même ; le composant ne rend que sa fenêtre de lecture */
+  rendu?: (api: ApiAnalyses) => React.ReactNode;
 };
 
-const STATUTS: Record<portes.Analyse["statut"], { libelle: string; teinte: "bleu" | "vert" | "ambre" | "rouge" | "gris" }> = {
+/* 02/11/2026, refonte des pages métiers : ce que le dessin de l'espace 2 reçoit (`rendu`) */
+export type ApiAnalyses = {
+  liste: portes.Analyse[];
+  chargee: boolean;
+  envoi: boolean;
+  erreur: string | null;
+  fait: string | null;
+  vivant: boolean;
+  peutDemander: boolean;
+  auCoffre: boolean;
+  demander: (type: portes.TypeAnalyse) => Promise<void>;
+  lire: (a: portes.Analyse) => Promise<void>;
+};
+
+
+export const STATUTS_LECTURE: Record<portes.Analyse["statut"], { libelle: string; teinte: "bleu" | "vert" | "ambre" | "rouge" | "gris" }> = {
   demandee: { libelle: "Demandée", teinte: "gris" }, en_cours: { libelle: "En lecture", teinte: "bleu" }, finie: { libelle: "Prête", teinte: "vert" },
   partielle: { libelle: "Partielle", teinte: "ambre" }, echec: { libelle: "Échec", teinte: "rouge" },
 };
@@ -84,7 +101,7 @@ function exemple(d: Dossier): { analyses: portes.Analyse[]; resultats: Record<st
   };
 }
 
-export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair, peutDemander, auCoffre }: Props) {
+export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair, peutDemander, auCoffre, rendu }: Props) {
   const ex = useMemo(() => (source === "exemple" ? exemple(d) : null), [source, d]);
   /* undefined : lecture ; null : la base n'a pas les analyses */
   const [liste, setListe] = useState<portes.Analyse[] | null | undefined>(() => ex?.analyses);
@@ -193,6 +210,92 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
   };
 
   const r = ouverte?.resultat ?? null;
+
+  const fenetre0 = (
+  <Dialog open={!!ouverte} onOpenChange={(o) => !o && setOuverte(null)}>
+    <DialogContent className="tam-cabinet-dialogue">
+      {ouverte ? (
+        <>
+          <DialogHeader>
+            <DialogIcone><ScrollText width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>{libelleType(ouverte.analyse.type)}{clair ? ` — ${clair.reference}` : ""}</DialogTitle>
+            <DialogDescription>{r ? `${r.pieces_lues ?? ouverte.analyse.pieces.length} pièce(s) lue(s), ${r.constats.length} constat(s). Déchiffré dans votre navigateur.` : "Le résultat n'est pas lisible."}</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {ouverte.erreur ? <Avis teinte="ambre">{ouverte.erreur}</Avis> : null}
+              {ouverte.analyse.statut === "partielle" ? <Avis teinte="ambre">Lecture partielle : le plafond de coût est atteint, {ouverte.analyse.pieces_non_lues?.length ?? 0} pièce(s) n&apos;ont pas été lues.</Avis> : null}
+              {r?.resume ? <p className="tam-analyse-resume">{r.resume}</p> : null}
+              {r?.constats.map((c, i) => {
+                const meta = resumeDonnees(r.type, c.donnees);
+                return (
+                  <div key={i} className="tam-ligne tam-constat">
+                    <div className="tam-ligne-haut">
+                      <span className="tam-ligne-titre">{c.titre}</span>
+                      <Pastille teinte="gris" contour>{libelleCode(c.code)}</Pastille>
+                      {c.gravite !== "info" ? <Pastille teinte={c.gravite === "critique" ? "rouge" : "ambre"}>{c.gravite === "critique" ? "Critique" : "À vérifier"}</Pastille> : null}
+                    </div>
+                    {meta ? <div className="tam-ligne-meta"><span>{meta}</span></div> : null}
+                    {c.texte ? <p className="tam-constat-texte">{c.texte}</p> : null}
+                    {r && estPieceCitee(r.type, c) ? (() => {
+                      const cleC = `${ouverte.analyse.id}:${i}`;
+                      const e = reclamees.has(cleC) ? { etat: "attendue" as const } : etatPieceCitee(c, pieces, attendues);
+                      return (
+                        <div className="esp-actions">
+                          {e.etat === "nous" ? <Pastille teinte="gris">Produite par votre client</Pastille>
+                            : e.etat === "retrouvee" ? <Pastille teinte="vert">Retrouvée : {e.nom}</Pastille>
+                            : e.etat === "attendue" ? <Pastille teinte="bleu">Déjà dans les pièces attendues</Pastille>
+                            : <>
+                                <Pastille teinte="ambre">Absente des pièces du dossier</Pastille>
+                                <button type="button" className="esp-lien-bouton" disabled={!peutDemander || !vivant || (source === "reelle" && !cle)} onClick={() => void reclamer(cleC, objetReclamation(c))}>Réclamer au confrère</button>
+                              </>}
+                        </div>
+                      );
+                    })() : null}
+                    <ul className="tam-citations">
+                      {c.citations.filter((x) => x.verifiee).map((x, j) => (
+                        <li key={j}>
+                          {renvoi(x)} — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
+                        </li>
+                      ))}
+                    </ul>
+                    {c.citations.some((x) => !x.verifiee) ? (
+                      <ul className="tam-citations tam-citations--doute" aria-label="Citations non retrouvées">
+                        {c.citations.filter((x) => !x.verifiee).map((x, j) => (
+                          <li key={j}>
+                            <Pastille teinte="ambre">Non retrouvée dans la pièce, ne vaut pas preuve</Pastille>{" "}
+                            {renvoi(x)} — « {x.extrait} »
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {r ? <iframe ref={cadre} className="tam-analyse-impression" title="Document à imprimer" srcDoc={doc} sandbox="allow-modals allow-same-origin" tabIndex={-1} aria-hidden="true" /> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--fil" onClick={() => setOuverte(null)}>Fermer</button>
+            <button type="button" className="r-btn r-btn--fil" disabled={!r} onClick={exporterWord}><FileDown width={15} height={15} aria-hidden="true" /> Word</button>
+            <button type="button" className="r-btn r-btn--noir" disabled={!r} onClick={() => cadre.current?.contentWindow?.print()}><Printer width={15} height={15} aria-hidden="true" /> Imprimer ou PDF</button>
+          </DialogFooter>
+        </>
+      ) : null}
+    </DialogContent>
+  </Dialog>
+  );
+
+  if (rendu) {
+    const api: ApiAnalyses = { liste: liste ?? [], chargee: liste !== undefined, envoi, erreur, fait, vivant, peutDemander, auCoffre, demander, lire: ouvrir };
+    return (
+      <>
+        {rendu(api)}
+        {fenetre0}
+      </>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Lectures du dossier">
       <div className="esp-carte-tete">
@@ -212,7 +315,7 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
         {source === "reelle" && !auCoffre ? <Avis teinte="gris">La clé de ce dossier est sous la phrase du cabinet : le lecteur ne peut pas lire ses pièces. Les lectures longues demandent le coffre à clés.</Avis> : null}
         <p className="esp-kpi-sous tam-notice">Le lecteur lit les pièces chiffrées au coffre ; le résultat revient chiffré sous la clé du dossier et ne se lit qu&apos;ici. Chaque constat renvoie à la pièce, à la page et aux lignes : vérifiez avant tout usage.</p>
         {liste === undefined ? <p className="esp-kpi-sous"><Loader variant="spin" /> Lecture…</p> : liste.length === 0 ? <p className="esp-kpi-sous">Aucune lecture demandée.</p> : liste.map((a) => {
-          const st = STATUTS[a.statut];
+          const st = STATUTS_LECTURE[a.statut];
           return (
             <div key={a.id} className="tam-ligne">
               <div className="tam-ligne-haut">
@@ -232,78 +335,7 @@ export default function AnalysesTamila({ dossier: d, source, cle, pieces, clair,
         })}
       </div>
 
-      <Dialog open={!!ouverte} onOpenChange={(o) => !o && setOuverte(null)}>
-        <DialogContent className="tam-cabinet-dialogue">
-          {ouverte ? (
-            <>
-              <DialogHeader>
-                <DialogIcone><ScrollText width={18} height={18} aria-hidden="true" /></DialogIcone>
-                <DialogTitle>{libelleType(ouverte.analyse.type)}{clair ? ` — ${clair.reference}` : ""}</DialogTitle>
-                <DialogDescription>{r ? `${r.pieces_lues ?? ouverte.analyse.pieces.length} pièce(s) lue(s), ${r.constats.length} constat(s). Déchiffré dans votre navigateur.` : "Le résultat n'est pas lisible."}</DialogDescription>
-              </DialogHeader>
-              <DialogBody>
-                <div className="esp-form">
-                  {ouverte.erreur ? <Avis teinte="ambre">{ouverte.erreur}</Avis> : null}
-                  {ouverte.analyse.statut === "partielle" ? <Avis teinte="ambre">Lecture partielle : le plafond de coût est atteint, {ouverte.analyse.pieces_non_lues?.length ?? 0} pièce(s) n&apos;ont pas été lues.</Avis> : null}
-                  {r?.resume ? <p className="tam-analyse-resume">{r.resume}</p> : null}
-                  {r?.constats.map((c, i) => {
-                    const meta = resumeDonnees(r.type, c.donnees);
-                    return (
-                      <div key={i} className="tam-ligne tam-constat">
-                        <div className="tam-ligne-haut">
-                          <span className="tam-ligne-titre">{c.titre}</span>
-                          <Pastille teinte="gris" contour>{libelleCode(c.code)}</Pastille>
-                          {c.gravite !== "info" ? <Pastille teinte={c.gravite === "critique" ? "rouge" : "ambre"}>{c.gravite === "critique" ? "Critique" : "À vérifier"}</Pastille> : null}
-                        </div>
-                        {meta ? <div className="tam-ligne-meta"><span>{meta}</span></div> : null}
-                        {c.texte ? <p className="tam-constat-texte">{c.texte}</p> : null}
-                        {r && estPieceCitee(r.type, c) ? (() => {
-                          const cleC = `${ouverte.analyse.id}:${i}`;
-                          const e = reclamees.has(cleC) ? { etat: "attendue" as const } : etatPieceCitee(c, pieces, attendues);
-                          return (
-                            <div className="esp-actions">
-                              {e.etat === "nous" ? <Pastille teinte="gris">Produite par votre client</Pastille>
-                                : e.etat === "retrouvee" ? <Pastille teinte="vert">Retrouvée : {e.nom}</Pastille>
-                                : e.etat === "attendue" ? <Pastille teinte="bleu">Déjà dans les pièces attendues</Pastille>
-                                : <>
-                                    <Pastille teinte="ambre">Absente des pièces du dossier</Pastille>
-                                    <button type="button" className="esp-lien-bouton" disabled={!peutDemander || !vivant || (source === "reelle" && !cle)} onClick={() => void reclamer(cleC, objetReclamation(c))}>Réclamer au confrère</button>
-                                  </>}
-                            </div>
-                          );
-                        })() : null}
-                        <ul className="tam-citations">
-                          {c.citations.filter((x) => x.verifiee).map((x, j) => (
-                            <li key={j}>
-                              {renvoi(x)} — « {x.extrait} » <Pastille teinte="vert">Vérifiée</Pastille>
-                            </li>
-                          ))}
-                        </ul>
-                        {c.citations.some((x) => !x.verifiee) ? (
-                          <ul className="tam-citations tam-citations--doute" aria-label="Citations non retrouvées">
-                            {c.citations.filter((x) => !x.verifiee).map((x, j) => (
-                              <li key={j}>
-                                <Pastille teinte="ambre">Non retrouvée dans la pièce, ne vaut pas preuve</Pastille>{" "}
-                                {renvoi(x)} — « {x.extrait} »
-                              </li>
-                            ))}
-                          </ul>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                  {r ? <iframe ref={cadre} className="tam-analyse-impression" title="Document à imprimer" srcDoc={doc} sandbox="allow-modals allow-same-origin" tabIndex={-1} aria-hidden="true" /> : null}
-                </div>
-              </DialogBody>
-              <DialogFooter>
-                <button type="button" className="r-btn r-btn--fil" onClick={() => setOuverte(null)}>Fermer</button>
-                <button type="button" className="r-btn r-btn--fil" disabled={!r} onClick={exporterWord}><FileDown width={15} height={15} aria-hidden="true" /> Word</button>
-                <button type="button" className="r-btn r-btn--noir" disabled={!r} onClick={() => cadre.current?.contentWindow?.print()}><Printer width={15} height={15} aria-hidden="true" /> Imprimer ou PDF</button>
-              </DialogFooter>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {fenetre0}
     </section>
   );
 }
