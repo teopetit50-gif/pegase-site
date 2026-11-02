@@ -17,7 +17,7 @@ import { dateHeure } from "../format";
 import { chargerQuestions, poserQuestion, type Question } from "./portes";
 import type { Role } from "./types";
 
-const EXEMPLES: Question[] = [
+export const EXEMPLES: Question[] = [
   { id: "q-ex-1", entite_id: null, question: "Pourquoi a-t-on facturé moins de dommages ce mois-ci ?", statut: "repondue", posee_par: null, posee_le: "2026-10-16T08:12:00Z", repondue_le: "2026-10-16T08:12:40Z", erreur: null,
     reponse: { reponse: "Ce mois-ci, 2 retours sur 7 ne sont pas encore facturés : leur chiffrage attend une photo. Les dommages facturés baissent d'autant.",
       chiffres: [{ libelle: "Retours rendus", valeur: "7" }, { libelle: "Retours sans facture", valeur: "2" }, { libelle: "Facturé pour 100 retours", valeur: "5 214,29 €" }],
@@ -26,7 +26,7 @@ const EXEMPLES: Question[] = [
     reponse: { reponse: "Un passage reste à payer chez l'opérateur, dans le délai de 72 heures.", chiffres: [{ libelle: "À payer", valeur: "1" }, { libelle: "Montant", valeur: "4,80 €" }],
       cause: null, decision: "Payer le passage APRR-77120 avant demain 16 h, puis le refacturer avec le contrat C-2026-0430." } },
 ];
-const STATUTS: Record<Question["statut"], { libelle: string; teinte: "ambre" | "vert" | "rouge" | "bleu" }> = {
+export const STATUTS: Record<Question["statut"], { libelle: string; teinte: "ambre" | "vert" | "rouge" | "bleu" }> = {
   a_traiter: { libelle: "en attente", teinte: "ambre" }, en_cours: { libelle: "en cours", teinte: "bleu" }, repondue: { libelle: "répondue", teinte: "vert" }, echec: { libelle: "sans réponse", teinte: "rouge" },
 };
 

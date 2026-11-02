@@ -1,0 +1,167 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, amendes, péages, contestations — Linear, Triage (liste +
+   élément ouvert), au 1:1 (02/11/2026). Relevé : docs/refonte-metiers/
+   releves/linear-triage.md (1440×900 sombre et clair, paliers 1024, 768,
+   390). Préfixe tav-r- ; la liste et le volet reprennent la charpente de
+   l'Inbox (./tav-inbox.css), l'élément ouvert celle du ticket
+   (./tav-ticket.css, mode volet).
+
+   Repères : lignes 59 (r 8, marges 8, p 0 14), contenu en colonne écart 6
+   p 10 0 : 16 (titre 13/500 primaire, identifiant 13/450 −0.26 tertiaire
+   à droite) puis 15 (avatar 16 + auteur 12/450 tertiaire ; puce de date
+   20, r 48, p 0 6, bord 0.5 ; priorité 16 ; âge à droite) ; survol
+   lch(94.44) / lch(9.345), ouverte lch(92.94). En-tête de l'élément : 4
+   ronds de 28, écart 6. Volet vide : illustration, libellé 13/500,
+   bouton 24 (r 9999, p 0 8 0 6, 12/500).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  --tav-r-date-bord: lch(16.32 1.48 272);
+}
+html[data-v2-theme="light"] .v2 .tav {
+  --tav-r-date-bord: lch(84.44 0 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav {
+    --tav-r-date-bord: lch(84.44 0 282);
+  }
+}
+
+.v2 .tav .tav-r-ligne {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  height: 59px;
+  margin: 0 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+.v2 .tav .tav-r-ligne:hover {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-r-ligne[aria-current="true"] {
+  background: var(--tav-t-selection);
+}
+.v2 .tav .tav-r-l1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 16px;
+}
+.v2 .tav .tav-r-titre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-r-id {
+  flex: none;
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-r-l2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 15px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-r-l2 > .tav-pousse {
+  margin-left: -10px;
+}
+.v2 .tav .tav-r-genre {
+  flex: none;
+  margin-right: -4px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-r-sujet {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tav .tav-r-date {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border: 0.5px solid var(--tav-r-date-bord);
+  border-radius: 48px;
+  background: var(--tav-carte);
+}
+.v2 .tav .tav-r-date > span {
+  margin: 0 1px 0 6px;
+}
+.v2 .tav .tav-r-date[data-depasse] svg {
+  color: var(--tav-t-rouge);
+}
+.v2 .tav .tav-r-prio {
+  flex: none;
+  display: inline-flex;
+  color: var(--tav-t-triage);
+}
+.v2 .tav .tav-r-prio--gris {
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-r-age {
+  flex: none;
+}
+.v2 .tav .tav-r-boutons {
+  display: flex;
+  gap: 6px;
+}
+.v2 .tav .tav-t-pilule[data-rouge] svg {
+  color: var(--tav-t-rouge);
+}
+/* les gestes de l'élément, en toutes lettres sous la description (les ronds de l'en-tête n'ont qu'une icône) */
+.v2 .tav .tav-r-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 14px;
+}
+.v2 .tav .tav-r-geste,
+.v2 .tav .tav-r-creer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tav-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  white-space: nowrap;
+}
+.v2 .tav .tav-r-geste svg,
+.v2 .tav .tav-r-creer svg {
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-r-geste:hover:not(:disabled),
+.v2 .tav .tav-r-creer:hover:not(:disabled) {
+  background: var(--tav-survol-onglet);
+}
+.v2 .tav .tav-r-geste:disabled,
+.v2 .tav .tav-r-creer:disabled {
+  opacity: 0.5;
+}
+.v2 .tav .tav-vide .tav-r-creer {
+  margin-top: -6px;
+}
+@media (max-width: 1024px) {
+  .v2 .tav .tav-r-liste {
+    flex-basis: 386px;
+  }
+}

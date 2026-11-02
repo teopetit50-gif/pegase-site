@@ -1,0 +1,292 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, parc et atelier — Linear, Board (« All issues » en vue Board),
+   au 1:1 (02/11/2026). Relevé : docs/refonte-metiers/releves/
+   linear-board.md (1440×900 sombre et clair, paliers 1024, 768, 390).
+   Préfixe tav-b-.
+
+   Repères : ligne 1 (44) fil « Omega › Issues », à droite cloche et
+   « New issue » ; ligne 2 (44) onglets, à droite Filtre, Affichage, Volet.
+   Tableau qui défile à l'horizontale : colonnes de 324, pas de 348 (fond
+   de 340 avec 8 de marge, mesuré au pixel sur 1440-reel-*.png), la
+   première à 16 du bord ; en-tête de colonne 50 (statut 14, nom 13/500
+   secondaire, compte 13 tertiaire, « … » et « + » de 28) ; cartes
+   empilées à 8 : r 8, p 8 8 12, ombre double ; id 12/450 tertiaire et
+   avatar 18 ; statut 14 + titre 13/500 (2 lignes au plus) ; puces 24
+   (r 48, p 0 8, bord 0.5, 12/450 tertiaire), écart 4 ; pied 12/450.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  --tav-b-carte: lch(9.232 0.85 272);
+  --tav-b-ombre: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tav-b-titre: lch(100 0 272);
+  --tav-b-texte: lch(61.803 1.2 272);
+  --tav-b-puce: lch(16.32 1.48 272);
+  /* fond de colonne : mesuré au pixel (rgb 15,15,15 sur 18,18,18), le relevé le dit transparent */
+  --tav-b-colonne: lch(4.6 0.4 272);
+}
+html[data-v2-theme="light"] .v2 .tav {
+  --tav-b-carte: lch(100 0 282);
+  --tav-b-ombre: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tav-b-titre: lch(10 0 282);
+  --tav-b-texte: lch(40 1 282);
+  --tav-b-puce: lch(86.5 0 282);
+  --tav-b-colonne: lch(96.6 0.5 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav {
+    --tav-b-carte: lch(100 0 282);
+    --tav-b-ombre: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tav-b-titre: lch(10 0 282);
+    --tav-b-texte: lch(40 1 282);
+    --tav-b-puce: lch(86.5 0 282);
+    --tav-b-colonne: lch(96.6 0.5 282);
+  }
+}
+
+.v2 .tav .tav-b-ligne1 {
+  align-items: center;
+  padding-top: 0;
+}
+.v2 .tav .tav-b-ligne1 .tav-fil {
+  padding-right: 0;
+}
+.v2 .tav .tav-b-sep {
+  margin: -2px 2px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-b-page {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tav-t1);
+  white-space: nowrap;
+}
+.v2 .tav .tav-b-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t3);
+  white-space: nowrap;
+}
+.v2 .tav .tav-b-nouveau:hover:not(:disabled) {
+  background: var(--tav-survol-onglet);
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-b-ligne2 {
+  align-items: center;
+  padding-top: 0;
+}
+.v2 .tav .tav-b-cadre {
+  border-color: var(--tav-puce-bord);
+}
+
+/* ——— le tableau ——— */
+.v2 .tav .tav-b-tableau {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 2px 8px 0 8px;
+  overflow: auto;
+}
+.v2 .tav .tav-b-colonne {
+  flex: 0 0 340px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 0 8px 8px;
+  border-radius: 8px;
+  background: var(--tav-b-colonne);
+}
+.v2 .tav .tav-b-col-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 0 0 4px;
+}
+.v2 .tav .tav-b-col-nom {
+  margin-left: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  white-space: nowrap;
+}
+.v2 .tav .tav-b-col-compte {
+  margin-left: -2px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-b-col-tete .tav-rond + .tav-rond,
+.v2 .tav .tav-b-col-tete > div + .tav-rond {
+  margin-left: -6px;
+}
+.v2 .tav .tav-b-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 7px;
+}
+.v2 .tav .tav-b-vide {
+  padding: 4px 4px 0;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-b-carte {
+  display: flex;
+  flex-direction: column;
+  width: 322px;
+  padding: 8px 8px 12px;
+  border-radius: 8px;
+  background: var(--tav-b-carte);
+  box-shadow: var(--tav-b-ombre);
+  color: var(--tav-b-titre);
+  transition: color 0.15s;
+}
+.v2 .tav .tav-b-carte[data-cliquable] {
+  cursor: pointer;
+}
+.v2 .tav .tav-b-l1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 15px;
+  padding-left: 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-b-texte);
+}
+.v2 .tav .tav-b-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--tav-equipe);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 600;
+}
+.v2 .tav .tav-b-sans {
+  display: inline-flex;
+  color: var(--tav-b-texte);
+}
+.v2 .tav .tav-b-l2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 5px;
+  padding-left: 4px;
+}
+.v2 .tav .tav-b-l2 .tav-b-statut {
+  margin-top: 1px;
+}
+.v2 .tav .tav-b-titre {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--tav-b-titre);
+}
+.v2 .tav .tav-b-statut {
+  flex: none;
+  display: inline-flex;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-b-statut[data-etat="fait"] {
+  color: var(--tav-t-fait);
+}
+.v2 .tav .tav-b-statut[data-etat="cours"] {
+  color: var(--tav-t-encours);
+}
+.v2 .tav .tav-b-statut[data-etat="tri"] {
+  color: var(--tav-t-triage);
+}
+.v2 .tav .tav-b-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+.v2 .tav .tav-b-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 8px;
+  border: 0.5px solid var(--tav-b-puce);
+  border-radius: 48px;
+  background: var(--tav-b-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-b-texte);
+  white-space: nowrap;
+}
+.v2 .tav .tav-b-puce > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tav .tav-b-puce svg {
+  flex: none;
+}
+.v2 .tav button.tav-b-puce:hover {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-b-puce[aria-pressed="true"] svg {
+  color: var(--tav-t-fait);
+}
+.v2 .tav .tav-b-rouge {
+  color: var(--tav-t-rouge);
+}
+.v2 .tav .tav-b-pied {
+  margin-top: 10px;
+  padding-left: 2px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--tav-b-texte);
+}
+
+@media (max-width: 1024px) {
+  .v2 .tav .tav-b-colonne {
+    flex-basis: 338px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tav .tav-b-tableau {
+    min-height: calc(100dvh - 48px - 88px);
+  }
+  .v2 .tav .tav-b-nouveau span {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .v2 .tav .tav-b-colonne {
+    flex-basis: 274px;
+  }
+  .v2 .tav .tav-b-carte {
+    width: 264px;
+  }
+}
+/* la carte visée par un repère du point du matin */
+.v2 .tav .tav-b-carte[data-vise] {
+  outline: 2px solid var(--tav-violet);
+  outline-offset: -1px;
+}

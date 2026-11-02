@@ -99,7 +99,7 @@ function Signature({ onChange }: { onChange: (vide: boolean) => void }) {
   );
 }
 
-export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, onFait, netteteMin }: {
+export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, onFait, netteteMin, masque, demande }: {
   dossier: Dossier;
   role: Role | null;
   bareme: LigneBareme[];
@@ -108,6 +108,10 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
   onFait: (message: string) => void;
   /* b2_07 : le seuil du loueur ; une photo plus floue est refusée avant l'envoi */
   netteteMin?: number;
+  /* espace 2 (02/11/2026) : la page Contrat dessine elle-même les états des lieux ; d'ici ne reste
+     que la fenêtre F08, ouverte à chaque nouvelle demande (n change) */
+  masque?: boolean;
+  demande?: { moment: "depart" | "retour"; n: number } | null;
 }) {
   const c = dossier.contrat;
   const dep = etatDe(dossier.etats, "depart");
@@ -170,6 +174,14 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
     setEtape({ moment, pas: e?.statut === "brouillon" && e.photos.length ? "signature" : "constat", etat: e?.statut === "brouillon" ? e.id : null });
   };
 
+  const demandeVue = useRef(0);
+  useEffect(() => {
+    if (!demande || demande.n === demandeVue.current) return;
+    demandeVue.current = demande.n;
+    const t = window.setTimeout(() => ouvrir(demande.moment), 0);
+    return () => window.clearTimeout(t);
+  });
+
   const vuesManquantes = VUES_OBLIGATOIRES.filter((v) => !(photos[v.cle]?.length)).map((v) => v.libelle);
   const dommagesIncomplets = dommages.some((d) => !d.zone || !d.description.trim() || d.fichiers.length === 0);
   const kmNombre = km.trim() === "" ? null : Number(km.replace(/\s/g, ""));
@@ -226,6 +238,140 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
 
   const du = dossier.factures.some((f) => f.statut === "emise" || f.statut === "envoyee" || f.statut === "litige");
 
+  const fenetre = (
+      <Dialog open={!!etape} onOpenChange={(o) => !o && setEtape(null)}>
+      <DialogContent className="tav-dialogue-large">
+        <DialogHeader>
+          <DialogIcone><ClipboardCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>État des lieux de {etape?.moment === "depart" ? "départ" : "retour"} — {c.numero}</DialogTitle>
+          <DialogDescription>
+            {etape?.pas === "constat"
+              ? "Le compteur, le carburant, une photo de chaque côté du véhicule, et chaque dommage déjà là avec sa photo. La signature vient ensuite."
+              : "Le locataire relit et signe. L'heure est celle du serveur ; une empreinte du contenu signé est gardée : l'état ne pourra plus changer."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          {etape?.pas === "constat" ? (
+            <div className="esp-form">
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">Compteur (km) <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" inputMode="numeric" value={km} onChange={(e) => setKm(e.target.value)} /></label>
+                <label className="rv-libelle">Carburant
+                  <select className="rv-champ" value={c8} onChange={(e) => setC8(e.target.value)}>
+                    {[8, 7, 6, 5, 4, 3, 2, 1, 0].map((n) => <option key={n} value={n}>{n === 8 ? "plein (8/8)" : n === 0 ? "vide (0/8)" : `${n}/8`}</option>)}
+                  </select>
+                </label>
+              </div>
+              {(() => {
+                /* la prise de vue guidée : le tour du véhicule, une vue après l'autre */
+                const toutes = [...VUES_OBLIGATOIRES, ...VUES_UTILES];
+                const ordre = ORDRE_VUES.map((cle) => toutes.find((v) => v.cle === cle)).filter((v): v is (typeof toutes)[number] => !!v);
+                const faites = ordre.filter((v) => photos[v.cle]?.length).length;
+                const prochaine = ordre.find((v) => !photos[v.cle]?.length) ?? null;
+                const obligatoire = prochaine ? VUES_OBLIGATOIRES.some((o) => o.cle === prochaine.cle) : false;
+                return (
+                  <div className="tav-guide" aria-live="polite">
+                    <span className="esp-kpi-etiquette">Tour du véhicule · {faites} / {ordre.length}</span>
+                    {prochaine ? (
+                      <>
+                        <strong>{prochaine.libelle}{obligatoire ? "" : " (facultatif)"}</strong>
+                        <p className="esp-kpi-sous">{CONSIGNES_VUES[prochaine.cle]}</p>
+                        <label htmlFor={`edl-${prochaine.cle}`} className="r-btn r-btn--noir r-btn--petit" style={{ cursor: "pointer" }}>Photographier : {prochaine.libelle.toLowerCase()}</label>
+                      </>
+                    ) : <strong>Toutes les vues sont prises.</strong>}
+                  </div>
+                );
+              })()}
+              <fieldset className="tav-edl-vues">
+                <legend className="rv-libelle">Photos du véhicule — les quatre côtés sont obligatoires</legend>
+                {[...VUES_OBLIGATOIRES, ...VUES_UTILES].map((v) => (
+                  <div key={v.cle} className="esp-fichier">
+                    <input id={`edl-${v.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, v.libelle).then((g) => setPhotos((p) => ({ ...p, [v.cle]: g }))); }} />
+                    <label htmlFor={`edl-${v.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{photos[v.cle]?.length ? <span aria-hidden="true">✓ </span> : null}{v.libelle}{VUES_OBLIGATOIRES.some((o) => o.cle === v.cle) ? " *" : ""}</label>
+                    <span className="esp-kpi-sous">{photos[v.cle]?.length ? photos[v.cle].map((f) => f.name).join(", ") : "aucune photo"}</span>
+                  </div>
+                ))}
+              </fieldset>
+              <div className="esp-form">
+                <span className="rv-libelle">Dommages déjà là</span>
+                {dommages.map((d, i) => (
+                  <div key={d.cle} className="tav-ligne-saisie">
+                    <div className="esp-form-ligne">
+                      <label className="rv-libelle">Zone
+                        <select className="rv-champ" value={d.zone} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, zone: e.target.value as ZoneDommage } : x)))}>
+                          <option value="">Choisir…</option>
+                          {ZONES.map((z) => <option key={z.cle} value={z.cle}>{z.libelle}</option>)}
+                        </select>
+                      </label>
+                      <label className="rv-libelle">Poste du barème (facultatif)
+                        <select className="rv-champ" value={d.code} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, code: e.target.value } : x)))}>
+                          <option value="">—</option>
+                          {lignesDommage.map((l) => <option key={l.id} value={l.code}>{l.libelle}</option>)}
+                        </select>
+                      </label>
+                    </div>
+                    <label className="rv-libelle">Description<input className="rv-champ" value={d.description} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, description: e.target.value } : x)))} placeholder="Rayure de 6 cm sur la portière arrière droite" /></label>
+                    <div className="esp-fichier">
+                      <input id={`edl-d-${d.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, `Dommage ${i + 1}`).then((g) => setDommages((l) => l.map((x) => (x.cle === d.cle ? { ...x, fichiers: g } : x)))); }} />
+                      <label htmlFor={`edl-d-${d.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>Photo du dommage *</label>
+                      <span className="esp-kpi-sous">{d.fichiers.length ? d.fichiers.map((f) => f.name).join(", ") : "obligatoire"}</span>
+                      <button type="button" className="r-btn r-btn--fil r-btn--petit" aria-label={`Retirer le dommage ${i + 1}`} onClick={() => setDommages(dommages.filter((x) => x.cle !== d.cle))}><Trash2 width={14} height={14} aria-hidden="true" /></button>
+                    </div>
+                  </div>
+                ))}
+                <button type="button" className="r-btn r-btn--fil r-btn--petit" style={{ justifySelf: "start" }} onClick={() => setDommages([...dommages, { cle: crypto.randomUUID(), zone: "", code: "", description: "", fichiers: [] }])}><Plus width={14} height={14} aria-hidden="true" /> Noter un dommage</button>
+              </div>
+              {etape.moment === "depart" ? (
+                <div className="esp-form-ligne">
+                  <label className="rv-libelle">Caution (€)<input className="rv-champ" inputMode="decimal" value={caution} onChange={(e) => setCaution(e.target.value)} /></label>
+                  <label className="rv-libelle">Prise par
+                    <select className="rv-champ" value={modeCaution} onChange={(e) => setModeCaution(e.target.value)}>
+                      {MODES_CAUTION.map((m) => <option key={m.cle} value={m.cle}>{m.libelle}</option>)}
+                    </select>
+                  </label>
+                  <label className="rv-libelle">Référence<input className="rv-champ" value={refCaution} onChange={(e) => setRefCaution(e.target.value)} placeholder="n° d'autorisation, de chèque…" /></label>
+                </div>
+              ) : null}
+              <label className="rv-libelle">Observations<textarea className="rv-champ" rows={2} value={observations} onChange={(e) => setObservations(e.target.value)} /></label>
+              {mesure ? <p className="esp-kpi-sous" role="status">Mesure de la netteté…</p> : null}
+              {floues.length ? <Avis teinte="rouge" role="alert"><strong>Photo floue refusée : reprenez-la.</strong><ul className="tav-avert">{floues.map((t) => <li key={t}><span>{t}</span></li>)}</ul></Avis> : null}
+              {vuesManquantes.length ? <p className="esp-kpi-sous">Photos manquantes : {vuesManquantes.join(", ")}.</p> : null}
+              {dommagesIncomplets ? <Avis teinte="ambre">Chaque dommage a une zone, une description et sa photo : sans photo, il ne protège personne.</Avis> : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          ) : etape ? (
+            <div className="esp-form">
+              <label className="rv-libelle">Nom de la personne qui signe <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" value={signataire} onChange={(e) => setSignataire(e.target.value)} autoComplete="off" /></label>
+              <div ref={canevas}>
+                <span className="rv-libelle">Signature</span>
+                <Signature onChange={setVide} />
+              </div>
+              {refus !== null ? (
+                <label className="rv-libelle">Pourquoi ce n&apos;est pas signé<textarea className="rv-champ" rows={2} value={refus} onChange={(e) => setRefus(e.target.value)} placeholder="Client absent : clés déposées dans la boîte" /></label>
+              ) : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          ) : null}
+        </DialogBody>
+        <DialogFooter>
+          {etape?.pas === "constat" ? (
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || mesure || !constatPret} onClick={enregistrerConstat}>{envoi ? <Loader variant="spin" /> : null} Enregistrer et faire signer</button>
+          ) : refus === null ? (
+            <>
+              <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setRefus("")}>Le client ne signe pas</button>
+              <button type="button" className="r-btn r-btn--noir" disabled={envoi || vide || !signataire.trim()} onClick={signer}>{envoi ? <Loader variant="spin" /> : null} Signer l&apos;état des lieux</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setRefus(null)}>Revenir à la signature</button>
+              <button type="button" className="r-btn r-btn--rouge" disabled={envoi || refus.trim().length < 5} onClick={constaterRefus}>{envoi ? <Loader variant="spin" /> : null} Clore sans signature</button>
+            </>
+          )}
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+  if (masque) return fenetre;
+
   return (
     <section className="esp-carte" aria-label="États des lieux">
       <div className="esp-carte-tete">
@@ -245,136 +391,7 @@ export default function EtatsDesLieux({ dossier, role, bareme, nommer, gestes, o
         </div>
       </div>
 
-      <Dialog open={!!etape} onOpenChange={(o) => !o && setEtape(null)}>
-        <DialogContent className="tav-dialogue-large">
-          <DialogHeader>
-            <DialogIcone><ClipboardCheck width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>État des lieux de {etape?.moment === "depart" ? "départ" : "retour"} — {c.numero}</DialogTitle>
-            <DialogDescription>
-              {etape?.pas === "constat"
-                ? "Le compteur, le carburant, une photo de chaque côté du véhicule, et chaque dommage déjà là avec sa photo. La signature vient ensuite."
-                : "Le locataire relit et signe. L'heure est celle du serveur ; une empreinte du contenu signé est gardée : l'état ne pourra plus changer."}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            {etape?.pas === "constat" ? (
-              <div className="esp-form">
-                <div className="esp-form-ligne">
-                  <label className="rv-libelle">Compteur (km) <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" inputMode="numeric" value={km} onChange={(e) => setKm(e.target.value)} /></label>
-                  <label className="rv-libelle">Carburant
-                    <select className="rv-champ" value={c8} onChange={(e) => setC8(e.target.value)}>
-                      {[8, 7, 6, 5, 4, 3, 2, 1, 0].map((n) => <option key={n} value={n}>{n === 8 ? "plein (8/8)" : n === 0 ? "vide (0/8)" : `${n}/8`}</option>)}
-                    </select>
-                  </label>
-                </div>
-                {(() => {
-                  /* la prise de vue guidée : le tour du véhicule, une vue après l'autre */
-                  const toutes = [...VUES_OBLIGATOIRES, ...VUES_UTILES];
-                  const ordre = ORDRE_VUES.map((cle) => toutes.find((v) => v.cle === cle)).filter((v): v is (typeof toutes)[number] => !!v);
-                  const faites = ordre.filter((v) => photos[v.cle]?.length).length;
-                  const prochaine = ordre.find((v) => !photos[v.cle]?.length) ?? null;
-                  const obligatoire = prochaine ? VUES_OBLIGATOIRES.some((o) => o.cle === prochaine.cle) : false;
-                  return (
-                    <div className="tav-guide" aria-live="polite">
-                      <span className="esp-kpi-etiquette">Tour du véhicule · {faites} / {ordre.length}</span>
-                      {prochaine ? (
-                        <>
-                          <strong>{prochaine.libelle}{obligatoire ? "" : " (facultatif)"}</strong>
-                          <p className="esp-kpi-sous">{CONSIGNES_VUES[prochaine.cle]}</p>
-                          <label htmlFor={`edl-${prochaine.cle}`} className="r-btn r-btn--noir r-btn--petit" style={{ cursor: "pointer" }}>Photographier : {prochaine.libelle.toLowerCase()}</label>
-                        </>
-                      ) : <strong>Toutes les vues sont prises.</strong>}
-                    </div>
-                  );
-                })()}
-                <fieldset className="tav-edl-vues">
-                  <legend className="rv-libelle">Photos du véhicule — les quatre côtés sont obligatoires</legend>
-                  {[...VUES_OBLIGATOIRES, ...VUES_UTILES].map((v) => (
-                    <div key={v.cle} className="esp-fichier">
-                      <input id={`edl-${v.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, v.libelle).then((g) => setPhotos((p) => ({ ...p, [v.cle]: g }))); }} />
-                      <label htmlFor={`edl-${v.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{photos[v.cle]?.length ? <span aria-hidden="true">✓ </span> : null}{v.libelle}{VUES_OBLIGATOIRES.some((o) => o.cle === v.cle) ? " *" : ""}</label>
-                      <span className="esp-kpi-sous">{photos[v.cle]?.length ? photos[v.cle].map((f) => f.name).join(", ") : "aucune photo"}</span>
-                    </div>
-                  ))}
-                </fieldset>
-                <div className="esp-form">
-                  <span className="rv-libelle">Dommages déjà là</span>
-                  {dommages.map((d, i) => (
-                    <div key={d.cle} className="tav-ligne-saisie">
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Zone
-                          <select className="rv-champ" value={d.zone} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, zone: e.target.value as ZoneDommage } : x)))}>
-                            <option value="">Choisir…</option>
-                            {ZONES.map((z) => <option key={z.cle} value={z.cle}>{z.libelle}</option>)}
-                          </select>
-                        </label>
-                        <label className="rv-libelle">Poste du barème (facultatif)
-                          <select className="rv-champ" value={d.code} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, code: e.target.value } : x)))}>
-                            <option value="">—</option>
-                            {lignesDommage.map((l) => <option key={l.id} value={l.code}>{l.libelle}</option>)}
-                          </select>
-                        </label>
-                      </div>
-                      <label className="rv-libelle">Description<input className="rv-champ" value={d.description} onChange={(e) => setDommages(dommages.map((x) => (x.cle === d.cle ? { ...x, description: e.target.value } : x)))} placeholder="Rayure de 6 cm sur la portière arrière droite" /></label>
-                      <div className="esp-fichier">
-                        <input id={`edl-d-${d.cle}`} type="file" className="esp-fichier-natif" accept="image/*" capture="environment" multiple onChange={(e) => { const fs = Array.from(e.target.files ?? []); void retenir(fs, `Dommage ${i + 1}`).then((g) => setDommages((l) => l.map((x) => (x.cle === d.cle ? { ...x, fichiers: g } : x)))); }} />
-                        <label htmlFor={`edl-d-${d.cle}`} className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>Photo du dommage *</label>
-                        <span className="esp-kpi-sous">{d.fichiers.length ? d.fichiers.map((f) => f.name).join(", ") : "obligatoire"}</span>
-                        <button type="button" className="r-btn r-btn--fil r-btn--petit" aria-label={`Retirer le dommage ${i + 1}`} onClick={() => setDommages(dommages.filter((x) => x.cle !== d.cle))}><Trash2 width={14} height={14} aria-hidden="true" /></button>
-                      </div>
-                    </div>
-                  ))}
-                  <button type="button" className="r-btn r-btn--fil r-btn--petit" style={{ justifySelf: "start" }} onClick={() => setDommages([...dommages, { cle: crypto.randomUUID(), zone: "", code: "", description: "", fichiers: [] }])}><Plus width={14} height={14} aria-hidden="true" /> Noter un dommage</button>
-                </div>
-                {etape.moment === "depart" ? (
-                  <div className="esp-form-ligne">
-                    <label className="rv-libelle">Caution (€)<input className="rv-champ" inputMode="decimal" value={caution} onChange={(e) => setCaution(e.target.value)} /></label>
-                    <label className="rv-libelle">Prise par
-                      <select className="rv-champ" value={modeCaution} onChange={(e) => setModeCaution(e.target.value)}>
-                        {MODES_CAUTION.map((m) => <option key={m.cle} value={m.cle}>{m.libelle}</option>)}
-                      </select>
-                    </label>
-                    <label className="rv-libelle">Référence<input className="rv-champ" value={refCaution} onChange={(e) => setRefCaution(e.target.value)} placeholder="n° d'autorisation, de chèque…" /></label>
-                  </div>
-                ) : null}
-                <label className="rv-libelle">Observations<textarea className="rv-champ" rows={2} value={observations} onChange={(e) => setObservations(e.target.value)} /></label>
-                {mesure ? <p className="esp-kpi-sous" role="status">Mesure de la netteté…</p> : null}
-                {floues.length ? <Avis teinte="rouge" role="alert"><strong>Photo floue refusée : reprenez-la.</strong><ul className="tav-avert">{floues.map((t) => <li key={t}><span>{t}</span></li>)}</ul></Avis> : null}
-                {vuesManquantes.length ? <p className="esp-kpi-sous">Photos manquantes : {vuesManquantes.join(", ")}.</p> : null}
-                {dommagesIncomplets ? <Avis teinte="ambre">Chaque dommage a une zone, une description et sa photo : sans photo, il ne protège personne.</Avis> : null}
-                {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-              </div>
-            ) : etape ? (
-              <div className="esp-form">
-                <label className="rv-libelle">Nom de la personne qui signe <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" value={signataire} onChange={(e) => setSignataire(e.target.value)} autoComplete="off" /></label>
-                <div ref={canevas}>
-                  <span className="rv-libelle">Signature</span>
-                  <Signature onChange={setVide} />
-                </div>
-                {refus !== null ? (
-                  <label className="rv-libelle">Pourquoi ce n&apos;est pas signé<textarea className="rv-champ" rows={2} value={refus} onChange={(e) => setRefus(e.target.value)} placeholder="Client absent : clés déposées dans la boîte" /></label>
-                ) : null}
-                {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-              </div>
-            ) : null}
-          </DialogBody>
-          <DialogFooter>
-            {etape?.pas === "constat" ? (
-              <button type="button" className="r-btn r-btn--noir" disabled={envoi || mesure || !constatPret} onClick={enregistrerConstat}>{envoi ? <Loader variant="spin" /> : null} Enregistrer et faire signer</button>
-            ) : refus === null ? (
-              <>
-                <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setRefus("")}>Le client ne signe pas</button>
-                <button type="button" className="r-btn r-btn--noir" disabled={envoi || vide || !signataire.trim()} onClick={signer}>{envoi ? <Loader variant="spin" /> : null} Signer l&apos;état des lieux</button>
-              </>
-            ) : (
-              <>
-                <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setRefus(null)}>Revenir à la signature</button>
-                <button type="button" className="r-btn r-btn--rouge" disabled={envoi || refus.trim().length < 5} onClick={constaterRefus}>{envoi ? <Loader variant="spin" /> : null} Clore sans signature</button>
-              </>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetre}
     </section>
   );
 }

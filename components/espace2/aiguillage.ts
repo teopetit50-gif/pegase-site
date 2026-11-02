@@ -55,7 +55,6 @@ const PREFIXES: [string, string][] = [
   ["grp_", "varelo"],
 ];
 
-const tavaro = objet("tavaro");
 const tiroma = objet("tiroma");
 const varelo = objet("varelo");
 
@@ -97,17 +96,26 @@ export const REGLES: Record<string, Regle> = {
   btp_situations: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
   btp_situation: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
   btp_passages: (id) => `${RACINE}/daliro/a-faire?passage=${q(id)}`,
-  loc_contrats: tavaro("loc_contrats"),
-  loc_reservations: tavaro("loc_reservations"),
-  loc_vehicules: tavaro("loc_vehicules"),
+  /* TAVARO, refait le 02/11/2026 : la page d'un contrat ; une proposition, une facture ou un
+     avoir (demandes à valider) ouvre son contrat dans les Retours à facturer, qui le retrouvent */
+  loc_contrats: (id) => `${RACINE}/tavaro/contrats/${q(id)}`,
+  loc_propositions: (id) => `${RACINE}/tavaro/retours?proposition=${q(id)}`,
+  loc_factures: (id) => `${RACINE}/tavaro/retours?facture=${q(id)}`,
+  loc_avoirs: (id) => `${RACINE}/tavaro/retours?avoir=${q(id)}`,
+  /* le courrier de recours d'un sinistre (demande « envoi.email », b2_12) : son dossier dans les Incidents */
+  loc_sinistres: (id) => `${RACINE}/tavaro/incidents?onglet=sinistres&element=${q(id)}`,
+  loc_reservations: () => `${RACINE}/tavaro#tavaro-reservations-risque`,
+  /* le même véhicule, deux cartes : le contrôle technique (b2_18, lien /espace2) est au parc,
+     le véhicule inactif (b3t_04, lien /espace) dans les analyses de la vue d'ensemble */
+  loc_vehicules: (id, r) => (r.lien?.startsWith(RACINE) ? `${RACINE}/tavaro/parc?vehicule=${q(id)}` : `${RACINE}/tavaro#tavaro-inactifs`),
   /* le point du matin de production (b2_18) */
-  loc_avis_contravention: tavaro("loc_avis_contravention"),
-  loc_contestations: tavaro("loc_contestations"),
-  loc_entretiens: tavaro("loc_entretiens"),
-  loc_immobilisations: tavaro("loc_immobilisations"),
-  loc_passages_peage: tavaro("loc_passages_peage"),
-  loc_rappels_vehicules: tavaro("loc_rappels_vehicules"),
-  loc_remises: tavaro("loc_remises"),
+  loc_avis_contravention: (id) => `${RACINE}/tavaro/amendes?element=avis:${q(id)}`,
+  loc_contestations: (id) => `${RACINE}/tavaro/amendes?element=contestation:${q(id)}`,
+  loc_entretiens: (id) => `${RACINE}/tavaro/parc?entretien=${q(id)}`,
+  loc_immobilisations: (id) => `${RACINE}/tavaro/parc?immobilisation=${q(id)}`,
+  loc_passages_peage: (id) => `${RACINE}/tavaro/amendes?element=peage:${q(id)}`,
+  loc_rappels_vehicules: (id) => `${RACINE}/tavaro/parc?rappel=${q(id)}`,
+  loc_remises: (id) => `${RACINE}/tavaro/parc?remise=${q(id)}`,
   /* TAMILA, refait le 30/10/2026 : la page du dossier (les demandes à valider ; le point du matin ne nomme aucun dossier) */
   tamila_dossier: (id) => `${RACINE}/tamila/dossiers/${q(id)}`,
   tiroma_evenements_agenda: tiroma("tiroma_evenements_agenda"),
@@ -133,8 +141,18 @@ export function moduleDeObjet(objet_type: string | null | undefined): string | n
    Le point du matin de Tavaro (lot 2a, omega/SOCLE-EXTRAITS-TAVARO.sql)
    écrit « /tavaro/factures », sans /espace : une route qui n'a jamais
    existé. Un lien qui commence par le nom d'un module mène à sa page. */
+/* les repères historiques du point du matin de Tavaro (E13-E19) : la facturation des retours
+   et les factures mènent aux Retours à facturer, les avoirs à décider à la file « À valider » */
+const TAVARO_SOCLE: Record<string, string> = {
+  "/tavaro/facturation": `${RACINE}/tavaro/retours?famille=a_valider`,
+  "/tavaro/factures": `${RACINE}/tavaro/retours`,
+  "/tavaro/avoirs": `${RACINE}/validations`,
+};
+
 function versEspace2(lien: string): string | null {
   if (lien.startsWith(RACINE)) return lien;
+  const socle = TAVARO_SOCLE[lien.split("?")[0]];
+  if (socle) return socle;
   if (/^\/espace(\/|\?|$)/.test(lien)) return lien.includes("ancien=1") ? lien : lien.replace(/^\/espace/, RACINE);
   const nu = lien.match(/^\/([a-z0-9]+)[^?]*(\?.*)?$/);
   return nu && moduleDe(nu[1]) ? `${RACINE}/${nu[1]}${nu[2] ?? ""}` : null;

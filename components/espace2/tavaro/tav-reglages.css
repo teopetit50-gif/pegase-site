@@ -1,0 +1,370 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, réglages — Linear, Settings › Issue labels et Issue templates,
+   au 1:1 (02/11/2026). Relevé : docs/refonte-metiers/releves/
+   linear-labels-templates.md (1440×900 sombre et clair, paliers 1024,
+   768, 390). Préfixe tav-g-.
+
+   Labels : bande vide 64 ; ligne titre p 0 56 12, filet bas 0.5, titre
+   24/500/32 −0.16, boutons 32 (r 9999, p 0 12, 13/500 ; primaire
+   lch(53 52.26 286.91)) ; barre filtre 44 (champ 300×28, r 999, p 6 25 6
+   32, 13/500, loupe 16) ; tableau : 60 · 293 · description · 75 · 75 ·
+   102 · 82 · 28 · 32, en-tête 32 (boutons 24, 12/450 tertiaire), lignes
+   44 (survol ::before 8 de marge, r 8), pastille 9, nom 13/500 (p 6 10 6
+   6), date 12/450 tertiaire ; enfants d'un groupe décalés de 27 avec un
+   trait de liaison.
+   Templates : colonne centrée 640, en-tête p 0 16 gap 4 (titre 24/500/32,
+   aide 13/450/22), carte r 10 (ombre-contour), tête 60 p 16 13/500,
+   lignes 64 p 16 gap 12, vignette 32 r 6, nom 13/500, méta 12/450.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  --tav-g-primaire: lch(53 52.26 286.91);
+  --tav-g-primaire-texte: lch(100 5 286.91);
+  --tav-g-carte: lch(9.232 0.85 272);
+  --tav-g-contour: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tav-g-filet: lch(16.793 1.93 272);
+  --tav-g-vignette: lch(78.247 3.577 260.65 / 0.125);
+}
+html[data-v2-theme="light"] .v2 .tav {
+  --tav-g-carte: lch(100 0 282);
+  --tav-g-contour: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tav-g-filet: lch(0 0 0 / 0.088);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav {
+    --tav-g-carte: lch(100 0 282);
+    --tav-g-contour: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tav-g-filet: lch(0 0 0 / 0.088);
+  }
+}
+
+/* la bande vide de 64 du haut porte le choix de la page (Linear le met dans sa barre latérale) */
+.v2 .tav .tav-g-bande {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 64px;
+  padding: 0 56px;
+}
+.v2 .tav .tav-g-titre-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 45px;
+  padding: 0 56px 12px;
+  border-bottom: 0.5px solid var(--tav-carte-bord);
+}
+.v2 .tav .tav-g-titre {
+  flex: 1;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-g-bouton {
+  height: 32px;
+  padding: 0 12px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tav-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  white-space: nowrap;
+}
+.v2 .tav .tav-g-bouton--primaire {
+  background: var(--tav-g-primaire);
+  color: var(--tav-g-primaire-texte);
+}
+.v2 .tav .tav-g-bouton:disabled {
+  opacity: 0.5;
+}
+.v2 .tav .tav-g-filtre {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 56px 0 50px;
+}
+.v2 .tav .tav-g-champ {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 300px;
+  height: 28px;
+}
+.v2 .tav .tav-g-champ svg {
+  position: absolute;
+  left: 10px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-champ input {
+  width: 100%;
+  height: 28px;
+  padding: 6px 25px 6px 32px;
+  border: 0.5px solid transparent;
+  border-radius: 999px;
+  background: var(--tav-carte);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t1);
+  outline: none;
+}
+.v2 .tav .tav-g-champ input::placeholder {
+  color: var(--tav-t4);
+}
+.v2 .tav .tav-g-avis {
+  padding: 4px 56px 12px;
+  font-size: 13px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-entete,
+.v2 .tav .tav-g-ligne {
+  display: grid;
+  grid-template-columns: 60px 293px minmax(0, 1fr) 75px 75px 102px 82px 28px 32px;
+  align-items: center;
+}
+.v2 .tav .tav-g-entete {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  background: var(--tav-carte);
+}
+.v2 .tav .tav-g-tri {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tav .tav-g-ligne {
+  position: relative;
+  isolation: isolate;
+  height: 44px;
+}
+.v2 .tav .tav-g-ligne::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  z-index: -1;
+  border-radius: 8px;
+}
+.v2 .tav .tav-g-ligne:hover::before {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-g-nom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-g-nom > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 10px 6px 6px;
+}
+.v2 .tav .tav-g-pastille {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-left: 2px;
+  border-radius: 50%;
+}
+.v2 .tav .tav-g-groupe .tav-g-nom svg {
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: -22px;
+  margin-right: 6px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-enfant .tav-g-nom {
+  position: relative;
+  padding-left: 27px;
+}
+.v2 .tav .tav-g-enfant .tav-g-nom::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: -22px;
+  bottom: 22px;
+  width: 12px;
+  border-left: 1px solid var(--tav-carte-bord);
+  border-bottom: 1px solid var(--tav-carte-bord);
+  border-bottom-left-radius: 6px;
+}
+.v2 .tav .tav-g-cellule {
+  padding: 6px 10px 6px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-g-date {
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+
+/* ——— Templates : colonne centrée, cartes-listes ——— */
+.v2 .tav .tav-g-colonne {
+  width: 640px;
+  max-width: calc(100% - 44px);
+  margin: 0 auto;
+  padding-bottom: 48px;
+}
+.v2 .tav .tav-g-entete-centre {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 16px;
+}
+.v2 .tav .tav-g-aide {
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-carte {
+  margin-top: 32px;
+  border-radius: 10px;
+  background: var(--tav-g-carte);
+  box-shadow: var(--tav-g-contour);
+}
+.v2 .tav .tav-g-carte-tete {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 60px;
+  padding: 16px;
+  border-bottom: 0.5px solid var(--tav-g-filet);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-g-carte-tete > span {
+  flex: 1;
+}
+.v2 .tav .tav-g-plus {
+  width: 24px;
+  height: 24px;
+}
+.v2 .tav .tav-g-modele {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 16px;
+}
+.v2 .tav .tav-g-modele:hover {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-g-carte li:last-child {
+  border-radius: 0 0 10px 10px;
+}
+.v2 .tav .tav-g-vignette {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--tav-g-vignette);
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-modele-texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.v2 .tav .tav-g-modele-nom {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-g-modele-meta {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-g-choix {
+  max-width: 180px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid var(--tav-puce-bord);
+  border-radius: 8px;
+  background: var(--tav-bouton);
+  font: inherit;
+  font-size: 12px;
+  color: var(--tav-t2);
+}
+
+@media (max-width: 1024px) {
+  .v2 .tav .tav-g-entete,
+  .v2 .tav .tav-g-ligne {
+    grid-template-columns: 60px 240px minmax(0, 1fr) 0 0 102px 82px 28px 32px;
+  }
+  .v2 .tav .tav-g-ligne > :nth-child(4),
+  .v2 .tav .tav-g-ligne > :nth-child(5),
+  .v2 .tav .tav-g-entete > :nth-child(4),
+  .v2 .tav .tav-g-entete > :nth-child(5) {
+    visibility: hidden;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tav .tav-g-bande {
+    height: 48px;
+    padding: 0 22px;
+  }
+  .v2 .tav .tav-g-titre-ligne,
+  .v2 .tav .tav-g-avis {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .v2 .tav .tav-g-titre-ligne {
+    height: auto;
+    flex-wrap: wrap;
+  }
+  .v2 .tav .tav-g-bouton {
+    height: 36px;
+  }
+  .v2 .tav .tav-g-filtre {
+    padding: 0 22px 0 16px;
+  }
+  .v2 .tav .tav-g-champ {
+    width: 258px;
+  }
+  .v2 .tav .tav-g-entete,
+  .v2 .tav .tav-g-ligne {
+    grid-template-columns: 22px minmax(0, 1fr) 0 0 0 0 0 28px 12px;
+  }
+  .v2 .tav .tav-g-ligne > :nth-child(n + 3):nth-child(-n + 7),
+  .v2 .tav .tav-g-entete > :nth-child(n + 3):nth-child(-n + 7) {
+    visibility: hidden;
+  }
+}
