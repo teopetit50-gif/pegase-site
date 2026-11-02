@@ -40,7 +40,7 @@
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ArrowUpRight, ChevronDown, Copy, FileSignature, HardHat, Layers, Link2, MessageSquare, PanelRight, Percent, Receipt, UserRound } from "lucide-react";
+import { ArrowUpRight, ChevronDown, FileSignature, HardHat, Layers, Link2, MessageSquare, Percent, Receipt, UserRound } from "lucide-react";
 import ChantierVue, { type SectionChantier } from "@/components/espace/daliro/ChantierVue";
 import { CONFIRMATIONS, EXECUTIONS, STATUTS_CHANTIER } from "@/components/espace/daliro/etats";
 import type { Lot, StatutChantier, Tableau } from "@/components/espace/daliro/types";
@@ -54,6 +54,9 @@ import { useDaliro } from "./donnees";
 import Essentiel from "./Essentiel";
 import "../lin/lin.css";
 import "../lin/linear-initiative.css";
+import { DalCarte, DalMenu } from "./DalCadre";
+import { DalIcone } from "./DalIcone";
+import "./dal-initiative.css";
 
 const BASE = `${RACINE}/daliro`;
 
@@ -85,6 +88,8 @@ const PARTIES: Partial<Record<SectionChantier, string>> = {
 
 /* les teintes des états (etats.ts) dans celles du gabarit */
 type TeinteLin = "vert" | "jaune" | "rouge" | "bleu" | "gris";
+/* l'icône du fil d'Ariane, couleur du statut (couleurs d'icônes relevées chez Linear) */
+const COULEUR_FIL: Record<StatutChantier, string> = { preparation: "#f0bf00", ouvert: "#26b5ce", suspendu: "#e78f41", receptionne: "#5e6ad2", clos: "#a2a6ac", annule: "#a2a6ac" };
 const teinteLin = (t: string): TeinteLin => (t === "ambre" ? "jaune" : t === "vert" || t === "rouge" || t === "bleu" ? t : "gris");
 const ETAT: Record<StatutChantier, EtatProjet> = { preparation: "planifie", ouvert: "en-cours", suspendu: "en-cours", receptionne: "fait", clos: "fait", annule: "annule" };
 const ETAT_LOT: Record<Lot["statut"], EtatProjet> = { a_venir: "planifie", en_cours: "en-cours", termine: "fait" };
@@ -240,7 +245,6 @@ export default function FicheChantier({ id }: { id: string }) {
     );
   };
 
-  const statut = t ? STATUTS_CHANTIER[t.chantier.statut] : null;
   const courant = ONGLETS.find((x) => x.cle === onglet);
   const auj = useMemo(() => jourLocal(), []);
   /* la partie montrée : ?partie=, sinon l'ancre d'un repère, sinon la première ; « tout » rend la pile */
@@ -282,55 +286,80 @@ export default function FicheChantier({ id }: { id: string }) {
     cible.parentElement?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [choisie, large, cible]);
   const contexte = useMemo(() => ({ cible, choisie, choisir: setChoisie }), [cible, choisie]);
+  /* ⌘ I ouvre ou ferme le volet de détails (raccourci de Linear) */
+  useEffect(() => {
+    const touche = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "i") return;
+      e.preventDefault();
+      setChoisie(null);
+      setVoletChoisi(!volet);
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, [volet]);
 
   return (
     <VoletContexte.Provider value={contexte}>
+    <DalCarte className="dal-fc">
     <div className="lin lit">
       <h1 className="v2-sr">{nom}</h1>
 
-      <header className="lit-tete">
-        <nav className="lit-fil" aria-label="Fil d'Ariane">
-          <Link href={`${BASE}/chantiers`} className="lit-fil-lien">
-            Chantiers
-          </Link>
-          <span className="lit-fil-sep" aria-hidden="true">
-            ›
-          </span>
-          <span className="lit-fil-ici" aria-current="page" data-teinte={statut ? teinteLin(statut.teinte) : "gris"}>
-            <HardHat aria-hidden="true" />
-            <span>{nom}</span>
-          </span>
-        </nav>
-        <div className="lit-tete-droite">
-          <button type="button" className="lit-rond lit-rond--24" aria-label="Copier le lien de la page" title="Copier le lien de la page" onClick={copierLien}>
-            <Copy aria-hidden="true" />
+      <header className="dal-tete">
+        <div className="dal-ligne1">
+          <nav className="dal-fc-fil" aria-label="Fil d'Ariane">
+            <Link href={`${BASE}/chantiers`} className="dal-fc-fil-lien">
+              Chantiers
+            </Link>
+            <span className="dal-fc-fil-sep" aria-hidden="true">
+              ›
+            </span>
+            <span className="dal-fc-fil-ici" aria-current="page">
+              <DalIcone nom="Crane" style={{ color: COULEUR_FIL[t?.chantier.statut ?? "preparation"] }} />
+              <span>{nom}</span>
+            </span>
+          </nav>
+          <DalMenu
+            libelle="Actions sur le chantier"
+            options={[
+              { libelle: "Propriétés et gestes", icone: "Roue", action: () => (setChoisie(null), setVoletChoisi(true)) },
+              { libelle: "Fil du chantier", icone: "Comment", href: `${chemin}?onglet=fil` },
+              { libelle: "Avenants et situations", icone: "Signature", href: `${BASE}/avenants` },
+            ]}
+          />
+          <span className="dal-pousse" />
+          <button type="button" className="dal-rond dal-fc-24" aria-label="Copier le lien de la page" title="Copier le lien de la page" onClick={copierLien}>
+            <DalIcone nom="LienUrl" />
+          </button>
+          <button type="button" className="dal-rond" aria-label="Ouvrir un avenant, rattacher une facture…" title="Ouvrir un avenant, rattacher une facture…" onClick={() => (setChoisie(null), setVoletChoisi(true))}>
+            <DalIcone nom="Plus" />
           </button>
         </div>
-      </header>
-
-      <div className="lit-barre">
-        <nav className="lit-onglets" aria-label="Vues du chantier">
+        <div className="dal-ligne2 dal-fc-ligne2">
           {ONGLETS.map((x) => (
-            <Link key={x.cle} href={lienOnglet(x.cle)} scroll={false} className="lit-onglet" aria-current={onglet === x.cle ? "page" : undefined}>
+            <Link key={x.cle} href={lienOnglet(x.cle)} scroll={false} className="dal-onglet" aria-current={onglet === x.cle ? "page" : undefined}>
               {x.libelle}
             </Link>
           ))}
-        </nav>
-        <button
-          type="button"
-          className="lit-rond lit-rond--plein"
-          aria-label={volet ? "Fermer les détails du chantier" : "Ouvrir les détails du chantier"}
-          title={volet ? "Fermer les détails du chantier" : "Ouvrir les détails du chantier"}
-          aria-expanded={volet}
-          aria-controls={volet ? "lit-volet" : undefined}
-          onClick={() => {
-            setChoisie(null);
-            setVoletChoisi(!volet);
-          }}
-        >
-          <PanelRight aria-hidden="true" />
-        </button>
-      </div>
+          <Link href={`${BASE}/avenants`} className="dal-rond dal-fc-vue" aria-label="Avenants et situations" title="Avenants et situations">
+            <DalIcone nom="CustomView" />
+          </Link>
+          <span className="dal-pousse" />
+          <button
+            type="button"
+            className="dal-rond dal-rond--plein"
+            aria-label={volet ? "Fermer les détails du chantier" : "Ouvrir les détails du chantier"}
+            title={volet ? "Fermer les détails du chantier (⌘ I)" : "Ouvrir les détails du chantier (⌘ I)"}
+            aria-expanded={volet}
+            aria-controls={volet ? "lit-volet" : undefined}
+            onClick={() => {
+              setChoisie(null);
+              setVoletChoisi(!volet);
+            }}
+          >
+            <DalIcone nom="Volet" />
+          </button>
+        </div>
+      </header>
 
       {!t ? (
         <div className="lit-corps">
@@ -398,6 +427,7 @@ export default function FicheChantier({ id }: { id: string }) {
         </div>
       )}
     </div>
+    </DalCarte>
     </VoletContexte.Provider>
   );
 }

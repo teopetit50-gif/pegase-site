@@ -315,3 +315,47 @@ html[data-v2-theme="light"] .v2 .dal {
     width: 32px;
   }
 }
+
+/* ——— le pont : un gabarit `lin` (../lin, partagé, non touché) monté dans une page Daliro
+   prend les couleurs exactes de Linear ci-dessus, dans les deux thèmes. Le double .lin
+   l'emporte sur les règles de thème de lin.css (html[data-v2-theme] .v2 .lin). ——— */
+.v2 .dal .lin.lin {
+  --lin-fond: var(--dal-carte);
+  --lin-trait: var(--dal-carte-bord);
+  --lin-survol: var(--dal-survol);
+  --lin-groupe: var(--dal-groupe);
+  --lin-pastille: var(--dal-inactif);
+  --lin-pastille-active: var(--dal-actif);
+  --lin-anneau: 0 0 0 0.5px transparent;
+  --lin-ombre-pastille: none;
+  --lin-bouton: var(--dal-bouton);
+  --lin-icone: var(--dal-t3);
+  --lin-titre: var(--dal-t1);
+  --lin-texte: var(--dal-t2);
+  --lin-texte-groupe: var(--dal-t2);
+  --lin-second: var(--dal-t3);
+  --lin-compte: var(--dal-t3);
+  --lin-cercle: var(--dal-t4);
+  --lin-en-cours: lch(80 90 85);
+  --lin-fait: lch(48 59.31 288.43);
+  --lin-avatar: var(--dal-t4);
+  --lin-carte: var(--dal-menu);
+  --lin-detail: var(--dal-menu);
+  --lin-detail-trait: var(--dal-menu-bord);
+  --lin-onglet-detail: var(--dal-inactif);
+  --lin-onglet-detail-actif: var(--dal-actif);
+  --lin-onglet-detail-texte: var(--dal-t3);
+  --lin-menu: var(--dal-menu);
+  --lin-menu-trait: var(--dal-menu-bord);
+  --lin-ombre-menu: var(--dal-menu-ombre);
+  --lin-champ: var(--dal-inactif);
+  --lin-menu-fond: var(--dal-menu);
+  --lin-menu-bord: var(--dal-menu-bord);
+  --lin-menu-sep: var(--dal-menu-bord);
+  --lin-menu-survol: var(--dal-menu-survol);
+  --lin-menu-texte: var(--dal-menu-texte);
+  --lin-menu-gris: var(--dal-menu-icone);
+  --lin-maj-trait: var(--dal-menu-bord);
+  min-height: 0;
+  background: transparent;
+}

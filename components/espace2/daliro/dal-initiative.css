@@ -1,0 +1,88 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › fiche d'un chantier — Linear, page d'une Initiative, au 1:1
+   (01/11/2026). Relevé : docs/refonte-metiers/releves/linear-initiative.md.
+   Le corps garde les briques lit- (../lin/linear-initiative.css, non
+   touché), recolorées par le pont de ./dal.css ; ce fichier pose l'en-tête
+   de Linear et ramène dans la carte ce que la page posait à plat.
+
+   Repères (px CSS) :
+     fil         « Chantiers » a 24 de haut, r 8, padding 0 5 0 4, 13/500
+                 secondaire ; « › » 13/500 tertiaire ; l'icône (16) et le nom
+                 dans un a r 6, padding 2 4, marge −2 −4
+     à droite    « copier le lien » 24×24, puis ronds de 28, écart 4
+     onglets     écart 4 ; « nouvelle vue » 28, icône quaternaire
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal.dal-fc .lin.lit {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal.dal-fc .lit-corps {
+  overflow: auto;
+}
+.v2 .dal.dal-fc .lit-volet {
+  top: 0;
+  max-height: 100%;
+}
+.v2 .dal .dal-fc-fil {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  height: 28px;
+  padding-left: 10px;
+  margin-right: 8px;
+}
+.v2 .dal .dal-fc-fil-lien {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 5px 0 4px;
+  margin-left: -4px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-fc-fil-lien:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-fc-fil-sep {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-fc-fil-ici {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 2px 4px;
+  margin: -2px 0 -2px -4px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-fc-fil-ici svg {
+  flex: none;
+}
+.v2 .dal .dal-fc-fil-ici span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-rond.dal-fc-24 {
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+}
+.v2 .dal .dal-fc-ligne2 {
+  gap: 4px;
+}
+.v2 .dal .dal-fc-vue svg {
+  color: var(--dal-t4);
+}
