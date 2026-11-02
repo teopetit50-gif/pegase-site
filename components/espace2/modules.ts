@@ -121,6 +121,7 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Vue d'ensemble", href: `${RACINE}/lorani`, exact: true },
     { libelle: "Courrier à ranger", href: `${RACINE}/lorani/courrier` },
     { libelle: "Questions et réponses", href: `${RACINE}/lorani/questions` },
+    { libelle: "À viser", href: `${RACINE}/lorani/a-viser` },
     { libelle: "Honoraires et temps", href: `${RACINE}/lorani/honoraires` },
     { libelle: "Réglages", href: `${RACINE}/lorani/reglages` },
   ]),

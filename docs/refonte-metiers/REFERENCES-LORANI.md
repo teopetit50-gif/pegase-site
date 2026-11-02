@@ -118,6 +118,7 @@ Comparaisons : `vue-1440-sombre-*`, `vue-1440-clair-*`, `vue-390-sombre-*`, `vue
 | Page | Route | Référence | Relevé | État |
 |---|---|---|---|---|
 | Questions et réponses | `/espace2/lorani/questions` | Plain, Threads (liste « All threads » et fil ouvert) | `plain-threads.md`, `plain-commun.md` | écrite (`Questions.tsx`, `lor-plain.css`) ; superposée en sombre et clair à 1440 (liste et fil ouvert) et à 390 (`comparaisons/lorani/questions-*`) |
+| À viser | `/espace2/lorani/a-viser` | Linear, My issues (« Assigned ») | `linear-my-issues.md` | écrite (`AViser.tsx`, `lor-viser.css`) ; superposée en sombre et clair à 1440 et à 390 (`comparaisons/lorani/a-viser-*`) |
 
 Choix tranchés en autonomie (Teo absent, consigne de la coordinatrice) :
 - Référence prise telle que proposée par le plan (Plain, Threads), non encore prise par Lorani : une question = un fil (destinataire, âge, extrait, état).
@@ -136,3 +137,23 @@ Correspondances : groupes Needs first response / Needs next response / Investiga
 - Pas de « Tasks » ni de « Add link » dans le volet, pas de composeur Reply / Note : Lorani n'envoie rien aux intervenants et n'a ni tâches ni notes sur un point ; « Réponse reçue » note la réponse arrivée ailleurs.
 - La colonne liste de 400 du fil ouvert n'apparaît qu'à partir de 1700 de large : dans le cadre de l'espace 2, elle ne tient pas à 1440 (Plain l'omet aussi quand le fil est ouvert par son adresse, comme ici avec `?point=`).
 - Titre en Inter 400 au lieu de Whyte (licence payante).
+
+### À viser → Linear, My issues (« Assigned »)
+
+Choix : référence du plan, non prise par Lorani. Groupes de Linear (Urgent issues, Cycle 1 « Oct 28 → Nov 10 », Cycle 2) → **En retard**, **Cette semaine** (dates), **Semaine prochaine** (dates), Plus tard, Sans date (+ « Traités depuis 30 jours » par l'affichage). Une ligne = une chose à viser ou à lever avant une date, tous projets confondus : situations à viser (`lorani_situations`, échéance `a_viser_avant`), documents à viser (`lorani_visas`, date butoir calée sur la commande, b5_15, b5_25), réserves ouvertes (`lorani_reserves.lever_avant`) et décennales qui expirent sous 30 jours (`lorani_attestations.fin`). `public.delais` n'est pas lu par `chargerDossier` : la date affichée est celle de la ligne, la même que l'échéance que le registre suit ; aucune lecture nouvelle.
+
+Mesures relues au DOM contre le relevé (depuis la carte) : identifiant à x 66 (relevé 67), titre à 153 (154), premier en-tête de groupe à y 87,5 (88), première ligne à 123,5 (124) ; lignes de 44, en-têtes de 36 (m 0 8, r 8) ; grille `[indent] 8 [checkbox] 18 [priority] 16 [identifier] 55 [status] 16 [title] 1fr [createdAt] 60 [end-padding] 18`, gap 8 ; puces 24 r 48 bd 0.5 ; à 390 la grille réduite du relevé (ni identifiant, ni puces, ni date ; « 2 de plus ▾ » ; « + » seul). Fenêtre 1492 × 904 (méthode de la vue d'ensemble). Exemple : `exemples-suivi.ts` ajoute en mémoire 8 visas, 1 situation et 1 réserve fictifs (17 lignes visibles comme la capture).
+
+Correspondances : onglets Assigned · Created · Subscribed · Activity → Tout · Situations · Visas · Réserves et assurances (`?onglet=`) ; priorité → proximité de l'échéance (retard = Urgent) ; identifiant « OME-21 » → « SIT 3 », « VISA B » (indice), « RÉS 4 », « DÉC » ; statut → à faire / visé / refusé ; puces étiquette, projet, cycle, échéance → lot (pastille de couleur), projet (lien vers son chantier), montant cumulé ou date de commande ou localisation ou assureur, échéance (calendrier barré rouge si passée) ; avatar → chef de projet ; date de création → reçu ou constaté le. « New issue » → **Document à viser** (`recevoirDocument`, F27 ; raccourci C) ; « + » de groupe → la même fenêtre ; filtre → projets ; affichage → grouper par échéance ou par projet, traités ; troisième rond → export CSV. Clic sur une ligne : **Viser / Rectifier** la situation (`viserSituation`, F26, avec marché, cumul, précédente, avancement, dépassement) ; **Rendre l'avis** VSO / VAO / refusé (`rendreVisa`, F28) ; **Lever** la réserve (confirmation) ou **Reporter** sa date (`changerReserve`) ; décennale → vue Assurances du projet. Sélection (case au survol) : barre flottante « Viser sans observation » (confirmation), CSV, Copier pour l'assistant, Échap.
+
+Écarts restants, avec leur raison :
+- Pas de page « ticket » au clic : une situation, un visa, une réserve n'ont pas de page propre ; le geste s'ouvre dans la fenêtre commune de l'espace 2 (F26, F28), le chantier du projet est à un clic (puce projet).
+- Troisième rond (« Open details » chez Linear) = export CSV : la page n'a pas de volet de détails.
+- Une décennale n'a pas de geste ici : aucune porte ne la renouvelle ; la ligne mène à la vue Assurances du projet.
+- Pas de groupe « Cycle » : Lorani n'a pas de cycles ; les plages de dates sont les semaines.
+
+### Ce qui n'a pas pu être fait (02/11)
+
+- Aucun nouveau relevé (pas d'accès aux comptes de Teo) : les deux pages reposent sur les relevés existants ; le popover Display de Plain n'est pas relevé en détail, il est rendu avec la brique « Popover » de `plain-commun.md`.
+- Pas de relance envoyée par Lorani : aucune porte n'envoie un courriel à un intervenant ; « Relancer par courriel » ouvre la messagerie de l'utilisateur (mailto), qui l'envoie lui-même.
+- Le délai « 7 ou 15 jours » des situations n'est pas recalculé ici : il est posé par la base (`delai_verification_jours` du marché, b5_13).
