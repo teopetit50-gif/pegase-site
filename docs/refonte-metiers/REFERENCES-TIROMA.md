@@ -10,7 +10,7 @@ Consigne : `docs/refonte-metiers/cloud/COMMUN.md` et `cloud/TIROMA.md` (branche 
 | Fauteuils | `/espace2/tiroma/fauteuils` | Cal.com, Bookings | `calcom-bookings.md` | `fauteuils-*` | à faire |
 | Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | faite : en-tête, colonnes de 324 au pas de 348, têtes de 50, cartes (identifiant, titre, puces, pied) superposées ; gestes testés |
 | Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | à faire |
-| Réglages | `/espace2/tiroma/reglages` | Linear, Settings › Team | `linear-team-settings.md` | `reglages-*` | à faire |
+| Réglages | `/espace2/tiroma/reglages` | Linear, Settings › Team | `linear-team-settings.md` | `reglages-*` | faite : écart moyen 3,3/255 ; lien retour, titre, cartes, rangées de 65, h3 confondus ; gestes testés |
 
 ## Fichiers communs (préfixe `tir-`, propres à Tiroma)
 
@@ -102,3 +102,24 @@ carte, identifiant, titre, puces et pied confondus. Restent, expliqués :
 - le glisser-déposer entre colonnes : une colonne est un état calculé (mutuelle, créneau), pas un champ qu'on change ;
   on change la mutuelle dans le volet ;
 - nombre de cartes et de rangées de puces : contenu du cabinet.
+
+## Réglages ← Linear, Settings › Team
+
+Page d'accueil (les rangées mènent à leur sous-page, comme chez Linear) : Général · Praticiens et équipe · Fauteuils ;
+« Agenda et logiciel » : Horaires · Fermetures et congés · Vocabulaire du logiciel · Relevés du logiciel ; « Règles » :
+Règles du cabinet · Règles communes (verrouillée « Dès deux centres » / « Réservé au titulaire », gabarit « Available on
+Business ») ; « Patients » : Rappels aux patients · Moyens de contact ; « Données » : Vos données (+ lien vers l'ancien
+écran) ; « Zone sensible » (Danger zone) : mode et état. « Team overview » → « Aujourd'hui ». Sélecteur de cabinet sous
+le titre en réel (plusieurs cabinets).
+Sous-pages (`?section=`), même gabarit (lien retour, titre 24/500, cartes de rangées) : general (28.1 ; G13 Brancher ;
+F14/G14 mode et F15/G15 couper, réactiver, clore, chacun confirmé), equipe (28.4, F12/G16), fauteuils (28.5, F9/G17),
+horaires (28.6, F10/G18, G19 Retirer confirmé), fermetures (28.7, F11/G20), vocabulaire (28.8, F13 : Valider G22 ou
+Classer sans valider G21), releves (28.2, 28.3), regles (28.9, lecture), communes (B26, F8/G11 confirmé), rappels (B24 :
+mode, texte HDS, moyens de contact avec Retirer G8 confirmé, F5/G7 avec recherche de patients, réponses, derniers
+rappels), donnees (B27/G12, fichier `tiroma-donnees-AAAA-MM-JJ.json`), installer (B7/G1, en réel sans cabinet ; message
+pour un non-gérant).
+
+Superposition (carte, 1500×920) : écart moyen 3,3/255. Restent, expliqués : textes et nombre de rangées (contenu) ;
+la barre latérale des réglages de Linear (« Back to app », groupes) n'appartient pas à la page : le sous-menu de
+l'espace 2 en tient lieu ; les sous-pages de réglages de Linear ne sont pas relevées : elles reprennent le gabarit de
+cette page (cartes, rangées, boutons 32) et les formulaires sont posés en cartes du même gabarit.
