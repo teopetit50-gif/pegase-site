@@ -446,3 +446,84 @@ html[data-v2-theme="light"] .v2 .tir.tir-mi {
     z-index: 5;
   }
 }
+
+/* ——— sélection (cases de la ligne) et barre d'actions groupées, flottante en bas, au gabarit du menu de Linear ——— */
+.v2 .tir-mi .tir-mi-case {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.v2 .tir-mi .tir-mi-case[data-coche] {
+  opacity: 1;
+  border-color: #5e6ad2;
+  background: #5e6ad2;
+  color: #fff;
+}
+.v2 .tir-mi .tir-mi-ligne[data-choisie]::before {
+  background: var(--tir-actif);
+}
+.v2 .tir-mi .tir-mi-corps {
+  position: relative;
+}
+.v2 .tir-mi .tir-mi-lot {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  transform: translateX(-50%);
+  border: 0.5px solid var(--tir-menu-bord);
+  border-radius: 12px;
+  background: var(--tir-menu);
+  box-shadow: var(--tir-menu-ombre);
+  white-space: nowrap;
+}
+.v2 .tir-mi .tir-mi-lot-compte {
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t2);
+}
+.v2 .tir-mi .tir-mi-lot-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t2);
+}
+.v2 .tir-mi .tir-mi-lot-bouton svg {
+  color: var(--tir-t3);
+}
+.v2 .tir-mi .tir-mi-lot-bouton:hover {
+  background: var(--tir-menu-survol);
+}
+
+/* ——— 1024 et moins (relevé) : les puces se compriment et se tronquent sans « … », l'avatar reste ; rien ne déborde ——— */
+.v2 .tir-mi .tir-mi-puces {
+  flex: 0 1 auto;
+  overflow: hidden;
+}
+.v2 .tir-mi .tir-mi-puces .tir-avatar,
+.v2 .tir-mi .tir-mi-puces .tir-avatar-vide {
+  flex: none;
+}
+.v2 .tir-mi .tir-mi-titre {
+  flex: 1 1 auto;
+}
+@media (max-width: 1024px) {
+  .v2 .tir-mi .tir-mi-titre {
+    flex: 0 1 auto;
+    min-width: 120px;
+  }
+  .v2 .tir-mi .tir-mi-puces {
+    margin-right: 2px;
+  }
+}

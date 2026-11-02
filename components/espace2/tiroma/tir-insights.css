@@ -460,3 +460,179 @@ html[data-v2-theme="light"] .v2 .tir-in {
     min-width: 720px;
   }
 }
+
+/* ——— « Ask Agent » (26×26, icône verte, libellé au survol), pastille « Investigate this spike » ——— */
+.v2 .tir-in .in-carte-tete .pl-pousse {
+  flex: 1;
+}
+.v2 .tir-in .in-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 475;
+  color: var(--pl-vert-icone);
+}
+.v2 .tir-in .in-agent-lib {
+  display: none;
+  white-space: nowrap;
+}
+.v2 .tir-in .in-agent:hover,
+.v2 .tir-in .in-agent:focus-visible {
+  background: var(--pl-rempli-1);
+}
+.v2 .tir-in .in-agent:hover .in-agent-lib,
+.v2 .tir-in .in-agent:focus-visible .in-agent-lib {
+  display: inline;
+}
+.v2 .tir-in .in-pique {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: #e2f9e8;
+  font-size: 12px;
+  font-weight: 475;
+  color: #074022;
+  white-space: nowrap;
+}
+/* carte de chaleur */
+.v2 .tir-in .in-chaleur {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .tir-in .in-chaleur-grille {
+  display: grid;
+  row-gap: 1.5px;
+  column-gap: 1.5px;
+}
+.v2 .tir-in .in-chaleur-ligne {
+  display: contents;
+}
+.v2 .tir-in .in-chaleur-nom,
+.v2 .tir-in .in-chaleur-x {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--in-axe);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tir-in .in-chaleur-case {
+  height: 18.8px;
+  border-radius: 2px;
+  border: 1px solid var(--in-grille);
+  background: var(--pl-fond-1);
+}
+.v2 .tir-in .in-chaleur-case[data-palier="0"] { background: color-mix(in oklab, #5c67f4 12%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tir-in .in-chaleur-case[data-palier="1"] { background: color-mix(in oklab, #5c67f4 32%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tir-in .in-chaleur-case[data-palier="2"] { background: color-mix(in oklab, #5c67f4 52%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tir-in .in-chaleur-case[data-palier="3"] { background: color-mix(in oklab, #5c67f4 76%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tir-in .in-chaleur-case[data-palier="4"] { background: #5c67f4; border-color: transparent; }
+.v2 .tir-in .in-chaleur-legende {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-chaleur-legende span:first-child {
+  margin-right: 6px;
+}
+.v2 .tir-in .in-chaleur-legende span:last-child {
+  margin-left: 6px;
+}
+.v2 .tir-in .in-chaleur-case--10 {
+  width: 10px;
+  height: 10px;
+}
+/* outils de tableau : recherche (« Search accounts ») et téléchargement 24 */
+.v2 .tir-in .in-outils {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v2 .tir-in .in-recherche {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 320px;
+  max-width: 100%;
+  height: 40px;
+}
+.v2 .tir-in .in-recherche svg {
+  position: absolute;
+  left: 12px;
+  color: var(--pl-icone-1);
+}
+.v2 .tir-in .in-recherche input {
+  width: 100%;
+  height: 40px;
+  padding: 9px 12px 9px 38px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--pl-rempli-1);
+  font: inherit;
+  font-size: 14px;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-recherche input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #525cdb;
+}
+.v2 .tir-in .in-telecharger {
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+}
+/* barre « Ask Sidekick Agent » flottante, centrée en bas de la carte */
+.v2 .tir-in .pl-carte {
+  position: relative;
+}
+.v2 .tir-in .in-sidekick {
+  position: absolute;
+  left: 50%;
+  bottom: 17px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  transform: translateX(-50%);
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 12px;
+  background: var(--pl-fond-1);
+  box-shadow: rgba(0, 0, 0, 0.05) 0 1px 12px, rgba(0, 0, 0, 0.05) 0 0.5px 4px;
+  white-space: nowrap;
+}
+.v2 .tir-in .in-sidekick-question {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-sidekick-question strong {
+  font-weight: 550;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-sidekick-question:hover {
+  background: var(--pl-rempli-1);
+}
+@media (max-width: 768px) {
+  .v2 .tir-in .in-sidekick-question span {
+    display: none;
+  }
+}

@@ -31,6 +31,7 @@ import { RACINE } from "../modules";
 import { useTiroma, type Mutuelle } from "./donnees";
 import { TirAvatar, TirCarte, TirMenu, type OptionMenu } from "./TirCadre";
 import { TirIcone, type NomTirIcone } from "./TirIcone";
+import { copier, exporterCSV, useFavoris, useSuivis } from "./navigateur";
 import "./tir-mes.css";
 import "./tir-board.css";
 
@@ -305,6 +306,13 @@ export default function PlansDevis() {
   const [vides, setVides] = useState(false);
   const [contexte, setContexte] = useState<{ cle: string; x: number; y: number } | null>(null);
   const ouvert = params.get("plan");
+  const [favoris, poserFavori] = useFavoris();
+  const [suivis, poserSuivi] = useSuivis();
+  const [avis, setAvis] = useState<string | null>(null);
+  const annoncer = (texte: string) => {
+    setAvis(texte);
+    window.setTimeout(() => setAvis(null), 4000);
+  };
 
   const cartes = useMemo(() => (d ? cartesDuDossier(d) : []), [d]);
   const filtrees = cartes.filter((c) => (vue === "tous" || (vue === "devis" ? c.colonne === "relancer" : c.colonne !== "relancer")) && (!praticiens.length || (c.personne && praticiens.includes(c.personne))));
@@ -333,6 +341,21 @@ export default function PlansDevis() {
     const q = new URLSearchParams(params.toString());
     q.set("plan", c.id);
     return `${BASE}?${q.toString()}`;
+  };
+  const epingler = (c: Carte) => {
+    const oui = !favoris[`plan-${c.id}`];
+    poserFavori(`plan-${c.id}`, oui ? { titre: `${c.ident} · ${c.titre}`, href: `${BASE}?plan=${encodeURIComponent(c.id)}`, type: COLONNES.find((k) => k.cle === c.colonne)?.libelle ?? "Plan", depuis: new Date().toISOString() } : null);
+    annoncer(oui ? "Épinglé en tête d'Aujourd'hui." : "Désépinglé.");
+  };
+  const suivre = (c: Carte) => {
+    if (!c.cible) return;
+    const oui = !suivis[c.cible.patient_id];
+    poserSuivi(c.cible.patient_id, oui ? c.cible.patient_nom : null);
+    annoncer(oui ? `${c.cible.patient_nom} est suivi : ses fils passent en tête de Créneaux et appels.` : "Vous ne suivez plus ce patient.");
+  };
+  const exporter = () => {
+    exporterCSV("tiroma-plans-devis", ["Colonne", "Devis", "Titre", "Praticien", "Étiquettes", "Date"], filtrees.map((c) => [COLONNES.find((k) => k.cle === c.colonne)?.libelle ?? "", c.ident, c.titre, c.personne ?? "", c.puces.map((p) => p.texte).filter(Boolean).join(", "), c.pied]));
+    annoncer("Cartes exportées en CSV.");
   };
   const fermer = () => {
     const q = new URLSearchParams(params.toString());
@@ -363,16 +386,52 @@ export default function PlansDevis() {
           <span>{d?.cabinet.entite_nom?.replace(/ \(exemple\)$/, "") ?? "Cabinet"}</span>
           <TirIcone nom="Chevron" taille={14} className="tir-bd-chevron" />
           <span className="tir-bd-fil-page">Plans et devis</span>
-          <TirIcone nom="Etoile" taille={14} className="tir-bd-etoile" />
+          <TirMenu
+            libelle="Épingler"
+            icone="Etoile"
+            classeBouton={`tir-rond tir-bd-etoile-bouton${(carteOuverte ? favoris[`plan-${carteOuverte.id}`] : favoris["vue-plans"]) ? " tir-bd-etoile--active" : ""}`}
+            options={[
+              ...(carteOuverte ? [{ libelle: favoris[`plan-${carteOuverte.id}`] ? `Désépingler ${carteOuverte.ident}` : `Épingler ${carteOuverte.ident} dans Aujourd'hui`, icone: "Etoile" as NomTirIcone, action: () => epingler(carteOuverte) }] : []),
+              { libelle: favoris["vue-plans"] ? "Désépingler cette vue" : "Épingler cette vue dans Aujourd'hui", icone: "CustomView", action: () => { const oui = !favoris["vue-plans"]; poserFavori("vue-plans", oui ? { titre: `Plans et devis${vue !== "tous" ? ` · ${ONGLETS.find((o) => o.cle === vue)?.libelle}` : ""}`, href: vue === "tous" ? BASE : `${BASE}?vue=${vue}`, type: "Vue", depuis: new Date().toISOString() } : null); annoncer(oui ? "Vue épinglée en tête d'Aujourd'hui." : "Vue désépinglée."); } },
+            ]}
+          />
         </span>
         <span className="tir-pousse" />
+        {avis ? <span className="tir-bd-avis-tete" role="status">{avis}</span> : null}
+        <TirMenu
+          libelle="Suivre"
+          icone="Subscribe"
+          alignement="droite"
+          classeBouton={`tir-rond${carteOuverte?.cible && suivis[carteOuverte.cible.patient_id] ? " tir-bd-etoile--active" : ""}`}
+          largeur={240}
+          options={[
+            ...(carteOuverte?.cible ? [{ libelle: suivis[carteOuverte.cible.patient_id] ? `Ne plus suivre ${carteOuverte.cible.patient_nom}` : `Suivre ${carteOuverte.cible.patient_nom}`, icone: "Subscribe" as NomTirIcone, action: () => suivre(carteOuverte) }] : [{ titre: "Ouvrez une carte pour suivre son patient" } as OptionMenu]),
+            ...(Object.keys(suivis).length ? ["sep" as const, { titre: "Suivis (en tête de Créneaux et appels)" } as OptionMenu, ...Object.entries(suivis).map(([id, nom]) => ({ libelle: nom, coche: true, action: () => poserSuivi(id, null) }))] : []),
+          ]}
+        />
+        <Link href={`${RACINE}/tiroma/creneaux?vue=attente&inscrire=1`} className="tir-mi-nouveau" title="Inscrire un patient en liste d'attente">
+          <TirIcone nom="Plus" taille={14} />
+          <span>Nouvelle inscription</span>
+        </Link>
       </div>
       <div className="tir-mi-l2">
         <nav className="tir-mi-onglets" aria-label="Vues">
           {ONGLETS.map((o) => (
             <Link key={o.cle} href={o.cle === "tous" ? BASE : `${BASE}?vue=${o.cle}`} className="tir-onglet" aria-current={vue === o.cle ? "page" : undefined}>{o.libelle}</Link>
           ))}
-          <TirIcone nom="CustomView" taille={14} className="tir-bd-vues" />
+          <TirMenu
+            libelle="Vues"
+            icone="CustomView"
+            classeBouton="tir-rond tir-bd-vues-bouton"
+            largeur={230}
+            options={[
+              { titre: "Vues" },
+              ...ONGLETS.map((o) => ({ libelle: o.libelle, coche: vue === o.cle, href: o.cle === "tous" ? BASE : `${BASE}?vue=${o.cle}` })),
+              "sep",
+              { libelle: "Copier le lien de cette vue", icone: "LienUrl", action: () => void copier(window.location.href).then((ok) => annoncer(ok ? "Lien copié." : "Le presse-papier a refusé la copie.")) },
+              { libelle: "Exporter les cartes en CSV", icone: "Spreadsheet", action: exporter },
+            ]}
+          />
         </nav>
         <span className="tir-pousse" />
         <TirMenu libelle="Filtrer" icone="Filtre" options={filtre} alignement="droite" classeBouton="tir-rond tir-rond--plein" />
@@ -397,7 +456,7 @@ export default function PlansDevis() {
                   <span className="tir-bd-compte">{k.cartes.length}</span>
                   <span className="tir-pousse" />
                   <TirMenu libelle={`Actions de ${k.libelle}`} options={[{ libelle: "Masquer les colonnes vides", coche: !vides, action: () => setVides((v) => !v) }, { libelle: "Retirer le filtre", icone: "Refresh", action: () => setPraticiens([]) }]} classeBouton="tir-rond" alignement="droite" />
-                  <Link href={`${RACINE}/tiroma/creneaux`} className="tir-rond" aria-label="Créneaux et appels" title="Créneaux et appels"><TirIcone nom="Plus" taille={14} /></Link>
+                  <Link href={`${RACINE}/tiroma/creneaux?vue=attente&inscrire=1`} className="tir-rond" aria-label="Nouvelle inscription en liste d'attente" title="Nouvelle inscription en liste d'attente"><TirIcone nom="Plus" taille={14} /></Link>
                 </div>
                 <div className="tir-bd-cartes">
                   {k.cartes.map((c) => (
@@ -448,6 +507,18 @@ export default function PlansDevis() {
               <TirIcone nom="Phone" /><span className="tir-menu-libelle">Noter l&apos;appel</span>
             </button>
           ) : null}
+          <div className="tir-menu-sep" />
+          <button type="button" role="menuitem" className="tir-menu-option" onClick={() => { setContexte(null); epingler(carteCtx); }}>
+            <TirIcone nom="Etoile" /><span className="tir-menu-libelle">{favoris[`plan-${carteCtx.id}`] ? "Désépingler" : "Épingler dans Aujourd'hui"}</span>
+          </button>
+          {carteCtx.cible ? (
+            <button type="button" role="menuitem" className="tir-menu-option" onClick={() => { setContexte(null); suivre(carteCtx); }}>
+              <TirIcone nom="Subscribe" /><span className="tir-menu-libelle">{suivis[carteCtx.cible.patient_id] ? "Ne plus suivre le patient" : "Suivre le patient"}</span>
+            </button>
+          ) : null}
+          <button type="button" role="menuitem" className="tir-menu-option" onClick={() => { setContexte(null); void copier([carteCtx.titre, ...carteCtx.details.map((r) => `${r.libelle} : ${r.valeur}`)].join("\n")).then((ok) => annoncer(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie.")); }}>
+            <TirIcone nom="Agent" /><span className="tir-menu-libelle">Copier pour l&apos;assistant</span>
+          </button>
         </div>
       ) : null}
     </TirCarte>

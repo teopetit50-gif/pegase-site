@@ -33,6 +33,7 @@ import type { Attente, CibleAppel, Dossier, Famille, IssueAppel, PatientCourt } 
 import { RACINE } from "../modules";
 import { useTiroma } from "./donnees";
 import { PlainIcone, PrioriteIcone, type NomPlainIcone, type PrioritePlain } from "./PlainIcone";
+import { copier, dansJours, estReporte, exporterCSV, useAssignes, useFavoris, useLiens, useNotes, useReportes, useSuivis } from "./navigateur";
 import "./tir-plain.css";
 import "./tir-fils.css";
 
@@ -77,6 +78,9 @@ type Fil = {
   timeline: Item[];
   cibles: CibleAppel[];
   attente?: Attente;
+  /* le patient du fil (Suivre), quand il est connu */
+  patient?: { id: string; nom: string };
+  suivi?: boolean;
 };
 
 /* ——— dates ——— */
@@ -223,6 +227,7 @@ function filsDuDossier(d: Dossier): Fil[] {
         { type: "date", texte: "Aujourd'hui" },
         { type: "etat", texte: !c.libre ? "Créneau repris" : libres.length ? `À sauver : ${libres.length} patient${libres.length > 1 ? "s" : ""} à appeler` : "À sauver : personne à appeler" },
       ],
+      patient: c.candidats[0] ? { id: c.candidats[0].patient_id, nom: c.candidats[0].patient_nom } : undefined,
       cibles: registre && c.libre ? libres.map((x) => ({ patient_id: x.patient_id, patient_nom: x.patient_nom, motif: "creneau" as const, plan_id: x.plan_id, evenement_id: c.evenement_id })) : [],
     });
   });
@@ -261,6 +266,7 @@ function filsDuDossier(d: Dossier): Fil[] {
           { type: "date", texte: "Aujourd'hui" },
           { type: "etat", texte: s.du ? "À rappeler aujourd'hui" : "À rappeler plus tard" },
         ],
+        patient: { id: s.patient_id, nom: s.patient_nom },
         cibles: [{ patient_id: s.patient_id, patient_nom: s.patient_nom, motif: s.motif, plan_id: s.plan_id, evenement_id: null }],
       });
     });
@@ -296,6 +302,7 @@ function filsDuDossier(d: Dossier): Fil[] {
         ...evenementAppel(a.patient_id, a.patient_nom),
         { type: "etat", texte: a.annonce ? "Le patient a annoncé son absence : libérez le créneau dans le logiciel du cabinet" : "Un appel de confirmation la veille réduit le risque" },
       ],
+      patient: { id: a.patient_id, nom: a.patient_nom },
       cibles: registre && !a.annonce ? [{ patient_id: a.patient_id, patient_nom: a.patient_nom, motif: "autre", plan_id: null, evenement_id: null }] : [],
     });
   });
@@ -371,6 +378,7 @@ function filsDuDossier(d: Dossier): Fil[] {
         ...evenementAppel(at.patient_id, nom),
         { type: "etat", texte: "Proposé au premier créneau libéré qui lui convient, après les plans acceptés" },
       ],
+      patient: { id: at.patient_id, nom },
       cibles: registre ? [{ patient_id: at.patient_id, patient_nom: nom, motif: "attente", plan_id: null, evenement_id: null }] : [],
       attente: at,
     });
@@ -390,6 +398,7 @@ function filsDuDossier(d: Dossier): Fil[] {
       titre: p.dernier_controle_le ? `Dernier contrôle le ${jourCourt(p.dernier_controle_le)}` : "Aucun contrôle au cabinet",
       apercu: p.derniere_venue ? `dernière venue le ${jourCourt(p.derniere_venue)}` : "",
       etiquettes: ["Contrôle dû"],
+      patient: { id: p.patient_id, nom: p.patient_nom },
       priorite: p.mois_depuis === null ? "high" : p.mois_depuis >= 2 * seuil ? "normal" : "low",
       canal: "code",
       quand: p.derniere_venue ?? new Date().toISOString(),
@@ -415,10 +424,10 @@ function filsDuDossier(d: Dossier): Fil[] {
 }
 
 /* ——— le composeur « Noter l'appel » (Reply) ——— */
-function Composeur({ fil, jour, fermer }: { fil: Fil; jour: string; fermer: () => void }) {
+function Composeur({ fil, jour, fermer, issueDepart = "rdv_pris" }: { fil: Fil; jour: string; fermer: () => void; issueDepart?: IssueAppel }) {
   const t = useTiroma();
   const [cible, setCible] = useState<CibleAppel | null>(fil.cibles[0] ?? null);
-  const [issue, setIssue] = useState<IssueAppel>("rdv_pris");
+  const [issue, setIssue] = useState<IssueAppel>(issueDepart);
   const [rappel, setRappel] = useState(enJours(jour, 2));
   const [confirme, setConfirme] = useState(false);
   const [occupe, setOccupe] = useState(false);
@@ -589,10 +598,32 @@ function Inscription({ fermer }: { fermer: () => void }) {
 }
 
 /* ——— une ligne de la liste (1073×67, grille 32 18 300 355.5 76 84 113.5 94) ——— */
-function LigneFil({ f, href }: { f: Fil; href: string }) {
+function LigneFil({ f, href, choisi, basculer }: { f: Fil; href: string; choisi: boolean; basculer: () => void }) {
   return (
-    <Link href={href} className="pl-ligne" data-fait={f.fait ? "" : undefined}>
-      <span className="pl-ligne-case"><span className="pl-case-carre" aria-hidden="true" /></span>
+    <Link href={href} className="pl-ligne" data-fait={f.fait ? "" : undefined} data-choisi={choisi ? "" : undefined}>
+      <span className="pl-ligne-case">
+        <span
+          className="pl-case-carre"
+          role="checkbox"
+          aria-checked={choisi}
+          aria-label={`Choisir ${f.ref}`}
+          tabIndex={0}
+          data-coche={choisi ? "" : undefined}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            basculer();
+          }}
+          onKeyDown={(e) => {
+            if (e.key === " " || e.key === "Enter") {
+              e.preventDefault();
+              basculer();
+            }
+          }}
+        >
+          {choisi ? <PlainIcone nom="Coche" taille={14} /> : null}
+        </span>
+      </span>
       <span className="pl-ligne-statut"><PlainIcone nom={f.icone} /></span>
       <span className="pl-ligne-compte">
         <span className="pl-l1">
@@ -665,10 +696,15 @@ function CarteFil({ f, href, ouvert }: { f: Fil; href: string; ouvert: boolean }
   );
 }
 
-function Timeline({ f }: { f: Fil }) {
+function Timeline({ f, compact, notes }: { f: Fil; compact: boolean; notes: { texte: string; le: string }[] }) {
+  /* vue compacte (premier bouton du segment de Plain) : les messages seuls ; vue complète : notes, événements et notes de ce poste */
+  const items: Item[] = [
+    ...f.timeline.filter((it) => !compact || it.type === "message" || it.type === "date"),
+    ...(compact ? [] : notes.map((n) => ({ type: "note" as const, auteur: "Vous", date: n.le, corps: [n.texte], pied: "Visible sur ce poste seulement" }))),
+  ];
   return (
     <div className="pl-fil-timeline">
-      {f.timeline.map((it, i) => {
+      {items.map((it, i) => {
         if (it.type === "date") return <div key={i} className="pl-sep-date">{it.texte}</div>;
         if (it.type === "message")
           return (
@@ -744,18 +780,80 @@ export default function CreneauxAppels() {
   const [retrait, setRetrait] = useState<Attente["motif_retrait"] | null>(null);
   const [avisRetrait, setAvisRetrait] = useState<string | null>(null);
   const zone = useRef<HTMLDivElement>(null);
+  const [favoris, poserFavori] = useFavoris();
+  const [suivis, poserSuivi] = useSuivis();
+  const [reportes, poserReporte] = useReportes();
+  const [notesLoc, poserNotes] = useNotes();
+  const [assignes, poserAssigne] = useAssignes();
+  const [liensLoc, poserLiens] = useLiens();
+  const [reportesVisibles, setReportesVisibles] = useState(false);
+  const [choisis, setChoisis] = useState<Set<string>>(new Set());
+  const [menuLot, setMenuLot] = useState<null | "appel" | "reporter">(null);
+  const [issueLot, setIssueLot] = useState<IssueAppel | null>(null);
+  const [avis, setAvis] = useState<string | null>(null);
+  const [compact, setCompact] = useState(false);
+  const [noteOuverte, setNoteOuverte] = useState(false);
+  const [noteTexte, setNoteTexte] = useState("");
+  const [issueDepart, setIssueDepart] = useState<IssueAppel>("rdv_pris");
+  const [sousMenu, setSousMenu] = useState<null | "statut" | "assigner" | "lien">(null);
+  const annoncer = (texte: string) => {
+    setAvis(texte);
+    window.setTimeout(() => setAvis(null), 4000);
+  };
 
   /* le fil ouvert : ?fil=<clé> depuis la liste (avec la colonne de 400), ?creneau=<id> par son adresse (sans) */
   const parAdresse = params.get("creneau");
   const cleOuverte = params.get("fil") ?? (parAdresse ? `creneau:${parAdresse}` : null);
-  const ouvert = cleOuverte ? (fils.find((f) => f.cle === cleOuverte) ?? null) : null;
+  const ouvertBrut = cleOuverte ? (fils.find((f) => f.cle === cleOuverte) ?? null) : null;
   const avecListe = !!params.get("fil");
 
-  const visibles = useMemo(
-    () => fils.filter((f) => (!vue || f.groupe === vue) && !masques.includes(f.groupe) && (faits || !f.fait)),
-    [fils, vue, masques, faits],
+  /* Suivre (cloche) : les fils d'un patient suivi passent en tête, marqués « Suivi » ; Reporter (Snooze) : masqués jusqu'à la date ; Assign : qui appelle */
+  const enrichis = useMemo(
+    () =>
+      fils.map((f) => {
+        const suivi = !!(f.patient && suivis[f.patient.id]);
+        return { ...f, suivi, assigne: assignes[f.cle] ?? f.assigne, etiquettes: suivi ? ["Suivi", ...f.etiquettes] : f.etiquettes };
+      }),
+    [fils, suivis, assignes],
   );
-  const groupes = GROUPES.filter((g) => (!vue || g.cle === vue) && !masques.includes(g.cle)).map((g) => ({ ...g, fils: visibles.filter((f) => f.groupe === g.cle) })).filter((g) => g.fils.length);
+  const ouvert = ouvertBrut ? (enrichis.find((f) => f.cle === ouvertBrut.cle) ?? null) : null;
+  const visibles = useMemo(
+    () => enrichis.filter((f) => (!vue || f.groupe === vue) && !masques.includes(f.groupe) && (faits || !f.fait) && (reportesVisibles || !estReporte(reportes, f.cle))),
+    [enrichis, vue, masques, faits, reportes, reportesVisibles],
+  );
+  const groupes = [
+    ...(visibles.some((f) => f.suivi) ? [{ cle: "suivis" as const, libelle: "Suivis", icone: "Suivante" as NomPlainIcone, fils: visibles.filter((f) => f.suivi) }] : []),
+    ...GROUPES.filter((g) => (!vue || g.cle === vue) && !masques.includes(g.cle)).map((g) => ({ ...g, fils: visibles.filter((f) => f.groupe === g.cle && !f.suivi) })),
+  ].filter((g) => g.fils.length);
+  const choisisF = visibles.filter((f) => choisis.has(f.cle));
+  const basculer = (cle: string) =>
+    setChoisis((c) => {
+      const n = new Set(c);
+      if (n.has(cle)) n.delete(cle);
+      else n.add(cle);
+      return n;
+    });
+  const resumeFil = (f: Fil) => [`${f.ref} — ${f.titre} (${GROUPES.find((g) => g.cle === f.groupe)?.libelle})`, `${f.compte}${f.client ? `, ${f.client}` : ""} · ${f.apercu}`, ...f.details.map((r) => `${r.libelle} : ${typeof r.valeur === "string" ? r.valeur : ""}`), ...f.timeline.filter((it) => it.type === "message").flatMap((it) => (it.type === "message" ? it.corps.filter(Boolean) : []))].join("\n");
+  const finirLot = (texte: string) => {
+    setChoisis(new Set());
+    setMenuLot(null);
+    setIssueLot(null);
+    annoncer(texte);
+  };
+  const noterLot = async () => {
+    if (!issueLot) return;
+    const avecCible = choisisF.filter((f) => f.cibles.length);
+    try {
+      for (const f of avecCible) await t.noterAppel({ cible: f.cibles[0], issue: issueLot, rappeler_le: issueLot === "rappeler" ? dansJours(2) : null });
+      finirLot(`${avecCible.length} appel(s) noté(s) : ${ISSUES_APPEL[issueLot].libelle.toLowerCase()}.`);
+    } catch (e) {
+      finirLot(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    }
+  };
+  const suivreFil = (f: Fil, oui: boolean) => f.patient && poserSuivi(f.patient.id, oui ? f.patient.nom : null);
+  const epinglerFil = (f: Fil, oui: boolean) => poserFavori(`fil-${f.cle}`, oui ? { titre: `${f.ref} · ${f.compte} — ${f.titre}`, href: `${BASE}?fil=${encodeURIComponent(f.cle)}`, type: GROUPES.find((g) => g.cle === f.groupe)?.libelle ?? "Fil", depuis: new Date().toISOString() } : null);
+  const exporterListe = (fs: Fil[]) =>
+    exporterCSV("tiroma-creneaux-appels", ["Réf.", "Groupe", "Compte", "Client", "Titre", "Aperçu", "Étiquettes", "Priorité", "Assigné"], fs.map((f) => [f.ref, GROUPES.find((g) => g.cle === f.groupe)?.libelle ?? "", f.compte, f.client, f.titre, f.apercu, f.etiquettes.join(", "), f.priorite, f.assigne ?? ""]));
 
   const lien = useCallback(
     (f: Fil) => {
@@ -783,6 +881,9 @@ export default function CreneauxAppels() {
       if (!ouvert && (e.key === "f" || e.key === "F")) setMenu((m) => (m === "filtres" ? null : "filtres"));
       if (!ouvert && (e.key === "v" || e.key === "V")) setMenu((m) => (m === "affichage" ? null : "affichage"));
       if (ouvert && (e.key === "r" || e.key === "R") && ouvert.cibles.length) setComposer(true);
+      if (ouvert && (e.key === "y" || e.key === "Y")) setSousMenu((m) => (m === "statut" ? null : "statut"));
+      if (ouvert && (e.key === "n" || e.key === "N")) setNoteOuverte(true);
+      if (ouvert && (e.key === "b" || e.key === "B")) void copier(resumeFil(ouvert)).then((ok) => annoncer(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie."));
       if (ouvert && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
         const i = visibles.findIndex((f) => f.cle === ouvert.cle);
         const j = e.key === "ArrowDown" ? i + 1 : i - 1;
@@ -798,6 +899,9 @@ export default function CreneauxAppels() {
       setComposer(false);
       setRetrait(null);
       setAvisRetrait(null);
+      setNoteOuverte(false);
+      setSousMenu(null);
+      setIssueDepart("rdv_pris");
     }, 0);
     return () => window.clearTimeout(h);
   }, [cleOuverte]);
@@ -850,12 +954,12 @@ export default function CreneauxAppels() {
               <PlainIcone nom={ouvert.canal === "code" ? "Code" : "Bulle"} taille={14} style={{ color: "var(--pl-icone-1)" }} />
               <span className="pf-quand">{relatif(ouvert.quand)}</span>
               <span className="pl-pousse" />
-              <span className="pf-segment" role="group" aria-label="Fil précédent ou suivant">
-                <button type="button" aria-label="Fil précédent" disabled={!precedent} onClick={() => precedent && router.push(lien(precedent))}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8.6 6.7 13.9a1 1 0 0 0 1.4 1.4L12 11.4l3.9 3.9a1 1 0 0 0 1.4-1.4z" /></svg>
+              <span className="pf-segment" role="group" aria-label="Vue du fil">
+                <button type="button" aria-label="Vue compacte : les messages seuls" title="Vue compacte" aria-pressed={compact} data-actif={compact ? "" : undefined} onClick={() => setCompact(true)}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 7a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1m0 5a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1m1 4a1 1 0 1 0 0 2h8a1 1 0 1 0 0-2z" /></svg>
                 </button>
-                <button type="button" aria-label="Fil suivant" disabled={!suivant} onClick={() => suivant && router.push(lien(suivant))}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 15.4 6.7 10.1a1 1 0 0 1 1.4-1.4l3.9 3.9 3.9-3.9a1 1 0 0 1 1.4 1.4z" /></svg>
+                <button type="button" aria-label="Vue complète : notes et événements" title="Vue complète" aria-pressed={!compact} data-actif={!compact ? "" : undefined} onClick={() => setCompact(false)}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2m0 2v3h14V6zm0 7h14a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2m0 2v3h14v-3z" /></svg>
                 </button>
               </span>
               <div className="pl-ancre">
@@ -863,10 +967,16 @@ export default function CreneauxAppels() {
                   <PlainIcone nom="Points" />
                 </button>
                 {menu === "plus" ? (
-                  <div className="pl-menu" role="menu" style={{ right: 0, top: 36 }}>
+                  <div className="pl-menu" role="menu" style={{ right: 0, top: 36, width: 220 }}>
+                    <button type="button" role="menuitem" className="pl-menu-item" onClick={() => { setMenu(null); const oui = !favoris[`fil-${ouvert.cle}`]; epinglerFil(ouvert, oui); annoncer(oui ? "Épinglé en tête d'Aujourd'hui." : "Désépinglé."); }}>{favoris[`fil-${ouvert.cle}`] ? "Désépingler" : "Épingler dans Aujourd'hui"}</button>
+                    {ouvert.patient ? <button type="button" role="menuitem" className="pl-menu-item" onClick={() => { setMenu(null); suivreFil(ouvert, !ouvert.suivi); annoncer(ouvert.suivi ? "Vous ne suivez plus ce patient." : "Patient suivi : ses fils passent en tête."); }}>{ouvert.suivi ? `Ne plus suivre ${ouvert.patient.nom}` : `Suivre ${ouvert.patient.nom}`}</button> : null}
+                    <button type="button" role="menuitem" className="pl-menu-item" onClick={() => { setMenu(null); void copier(`${window.location.origin}${BASE}?fil=${encodeURIComponent(ouvert.cle)}`).then((ok) => annoncer(ok ? "Lien copié." : "Le presse-papier a refusé la copie.")); }}>Copier le lien du fil</button>
+                    <div className="pl-menu-sep" />
                     {ouvert.liens.map((l) => (
                       <Link key={l.href} href={l.href} role="menuitem" className="pl-menu-item" onClick={() => setMenu(null)}>{l.libelle}</Link>
                     ))}
+                    <button type="button" role="menuitem" className="pl-menu-item" disabled={!precedent} onClick={() => { setMenu(null); if (precedent) router.push(lien(precedent)); }}>Fil précédent<kbd className="pl-kbd">↑</kbd></button>
+                    <button type="button" role="menuitem" className="pl-menu-item" disabled={!suivant} onClick={() => { setMenu(null); if (suivant) router.push(lien(suivant)); }}>Fil suivant<kbd className="pl-kbd">↓</kbd></button>
                     <Link href={listeHref} role="menuitem" className="pl-menu-item" onClick={() => setMenu(null)}>Revenir à la liste</Link>
                   </div>
                 ) : null}
@@ -880,9 +990,26 @@ export default function CreneauxAppels() {
             </header>
             <div className={`pf-corps${details ? "" : " pf-corps--seul"}`}>
               <div className="pf-fil" ref={zone}>
-                <Timeline f={ouvert} />
+                <Timeline f={ouvert} compact={compact} notes={notesLoc[ouvert.cle] ?? []} />
                 {avisRetrait ? <div className="pl-etat" role="status"><span>{avisRetrait}</span></div> : null}
-                {composer && peutEcrire && ouvert.cibles.length ? <Composeur fil={ouvert} jour={d.appels?.jour ?? jourISO(new Date())} fermer={() => setComposer(false)} /> : null}
+                {composer && peutEcrire && ouvert.cibles.length ? <Composeur key={issueDepart} fil={ouvert} jour={d.appels?.jour ?? jourISO(new Date())} issueDepart={issueDepart} fermer={() => setComposer(false)} /> : null}
+                {noteOuverte ? (
+                  <div className="pl-composeur pl-composeur--note" role="dialog" aria-label="Ajouter une note">
+                    <div className="pl-composeur-tete">
+                      <span className="pl-composeur-titre">Ajouter une note</span>
+                      <span className="pl-composeur-pour">visible sur ce poste seulement</span>
+                      <span className="pl-pousse" />
+                      <button type="button" className="pl-icone-bouton" aria-label="Fermer" onClick={() => setNoteOuverte(false)}><PlainIcone nom="Croix" taille={14} /></button>
+                    </div>
+                    <textarea className="pl-champ pl-zone" rows={3} maxLength={500} value={noteTexte} placeholder="Rappeler après 17 h, préfère le Fauteuil 1…" onChange={(e) => setNoteTexte(e.target.value)} autoFocus />
+                    <p className="pl-composeur-aide">Aucune porte de Tiroma n&apos;écrit de note dans le dossier : la note reste dans ce navigateur. Rien de médical ici.</p>
+                    <div className="pl-composeur-pied">
+                      <button type="button" className="pl-secondaire" onClick={() => setNoteOuverte(false)}>Annuler</button>
+                      <button type="button" className="pl-primaire" disabled={!noteTexte.trim()} onClick={() => { poserNotes(ouvert.cle, [...(notesLoc[ouvert.cle] ?? []), { texte: noteTexte.trim(), le: new Date().toISOString() }]); setNoteTexte(""); setNoteOuverte(false); setCompact(false); annoncer("Note ajoutée au fil."); }}>Ajouter</button>
+                    </div>
+                  </div>
+                ) : null}
+                {avis ? <div className="pl-etat" role="status"><span>{avis}</span></div> : null}
                 {retrait ? (
                   <div className="pl-composeur" role="dialog" aria-label="Retirer de la liste">
                     <div className="pl-composeur-tete"><span className="pl-composeur-titre">Retirer {ouvert.compte} de la liste</span></div>
@@ -903,8 +1030,25 @@ export default function CreneauxAppels() {
                     {ouvert.details.map((r) => (
                       <div key={r.libelle} className="pf-rang"><span className="pf-rang-lib">{r.libelle}</span><span className="pf-rang-val">{r.valeur}</span></div>
                     ))}
+                    <div className="pf-rang"><span className="pf-rang-lib">Qui appelle</span><span className="pf-rang-val"><Avatar nom={ouvert.assigne} />{ouvert.assigne ?? <span className="pl-vide">Personne</span>}</span></div>
+                    <div className="pf-rang pf-rang--sous">
+                      <span />
+                      <span className="pl-ancre">
+                        <button type="button" className="pf-ajout" aria-expanded={sousMenu === "assigner"} onClick={() => setSousMenu((m) => (m === "assigner" ? null : "assigner"))}><PlainIcone nom="Plus" taille={14} />Assigner</button>
+                        {sousMenu === "assigner" ? (
+                          <div className="pl-menu" role="menu" style={{ left: 0, top: 28 }}>
+                            {[...d.membres.filter((m) => m.actif).map((m) => m.prenom), ...d.praticiens.map((p) => p.nom_affiche)].map((n) => (
+                              <button key={n} type="button" role="menuitemradio" aria-checked={ouvert.assigne === n} className="pl-menu-item" onClick={() => { poserAssigne(ouvert.cle, n); setSousMenu(null); }}>{n}</button>
+                            ))}
+                            <div className="pl-menu-sep" />
+                            <button type="button" role="menuitem" className="pl-menu-item" onClick={() => { poserAssigne(ouvert.cle, null); setSousMenu(null); }}>Revenir au choix de Tiroma</button>
+                          </div>
+                        ) : null}
+                      </span>
+                    </div>
                     <div className="pf-rang"><span className="pf-rang-lib">Priorité</span><span className="pf-rang-val"><PrioriteIcone p={ouvert.priorite} />{ouvert.priorite === "urgent" ? "Urgent" : ouvert.priorite === "high" ? "Haute" : ouvert.priorite === "normal" ? "Normale" : "Basse"}</span></div>
                     <div className="pf-rang"><span className="pf-rang-lib">Étiquettes</span><span className="pf-rang-val pf-rang-pastilles">{ouvert.etiquettes.length ? ouvert.etiquettes.map((e) => <span key={e} className="pl-pastille pl-etiquette">{e}</span>) : <span className="pl-vide">Aucune</span>}</span></div>
+                    <div className="pf-rang"><span className="pf-rang-lib">Délai d&apos;appel</span><span className="pf-rang-val">{d.regles ? `${d.regles.delai_min_appel_minutes} min avant le créneau, au plus tard` : <span className="pl-vide">Non réglé</span>}</span></div>
                   </section>
                   {ouvert.personne ? (
                     <section className="pf-bloc">
@@ -917,29 +1061,64 @@ export default function CreneauxAppels() {
                   ) : null}
                   <section className="pf-bloc">
                     <div className="pf-bloc-tete"><span>Liens</span></div>
-                    {ouvert.liens.length ? (
-                      ouvert.liens.map((l) => <Link key={l.href} href={l.href} className="pf-lien">{l.libelle}</Link>)
+                    {[...ouvert.liens, ...(liensLoc[ouvert.cle] ?? [])].length ? (
+                      [...ouvert.liens, ...(liensLoc[ouvert.cle] ?? [])].map((l) => <Link key={l.href} href={l.href} className="pf-lien">{l.libelle}</Link>)
                     ) : (
                       <div className="pf-vide-liens">
                         <span className="pf-vide-icone"><PlainIcone nom="Cercle" taille={14} /></span>
                         <strong>Rien de lié</strong>
-                        <span>Un plan ou un devis lié à ce fil apparaît ici.</span>
+                        <span>Liez un plan ou un devis à ce fil pour l&apos;avoir sous la main.</span>
                       </div>
+                    )}
+                    <span className="pl-ancre pf-ajout-ancre">
+                      <button type="button" className="pf-ajout pf-ajout--bord" aria-expanded={sousMenu === "lien"} onClick={() => setSousMenu((m) => (m === "lien" ? null : "lien"))}><PlainIcone nom="Plus" taille={14} />Lier un plan</button>
+                      {sousMenu === "lien" ? (
+                        <div className="pl-menu" role="menu" style={{ left: 0, top: 30, width: 280, maxHeight: 260, overflowY: "auto" }}>
+                          {d.plans.map((p) => (
+                            <button key={p.plan_id} type="button" role="menuitem" className="pl-menu-item" onClick={() => { poserLiens(ouvert.cle, [...(liensLoc[ouvert.cle] ?? []).filter((x) => !x.href.endsWith(encodeURIComponent(p.plan_id))), { libelle: `${p.devis_numero ?? "Plan"} · ${p.patient_nom}`, href: `${RACINE}/tiroma/plans?plan=${encodeURIComponent(p.plan_id)}` }]); setSousMenu(null); }}>{p.devis_numero ?? "Plan"} · {p.patient_nom}</button>
+                          ))}
+                          {(liensLoc[ouvert.cle] ?? []).length ? <><div className="pl-menu-sep" /><button type="button" role="menuitem" className="pl-menu-item" data-danger="" onClick={() => { poserLiens(ouvert.cle, null); setSousMenu(null); }}>Retirer les liens ajoutés</button></> : null}
+                        </div>
+                      ) : null}
+                    </span>
+                  </section>
+                  <section className="pf-bloc">
+                    <div className="pf-bloc-tete"><span>Tâches</span></div>
+                    {ouvert.cibles.length && peutEcrire ? (
+                      <button type="button" className="pf-ajout" onClick={() => { setIssueDepart("rappeler"); setComposer(true); }}><PlainIcone nom="Plus" taille={14} />Rappeler plus tard</button>
+                    ) : (
+                      <span className="pl-vide">Pas d&apos;appel à prévoir pour ce fil.</span>
                     )}
                   </section>
                 </aside>
               ) : null}
             </div>
             <div className="pf-barre" role="toolbar" aria-label="Actions du fil" style={details ? undefined : { right: 0 }}>
-              <span className="pf-barre-groupe pf-barre-statut" title={ouvert.fait ? "Fait" : "À traiter"}>
-                <PlainIcone nom={ouvert.icone} taille={18} style={{ color: "var(--pl-bleu-icone)" }} />
-                <kbd className="pl-kbd">Y</kbd>
+              <span className="pf-barre-groupe pf-barre-statut pl-ancre">
+                <button type="button" className="pf-barre-bouton pf-barre-bouton--statut" aria-label={estReporte(reportes, ouvert.cle) ? `Reporté au ${reportes[ouvert.cle]}` : "Reporter ce fil"} title="Statut : reporter ce fil" aria-expanded={sousMenu === "statut"} onClick={() => setSousMenu((m) => (m === "statut" ? null : "statut"))}>
+                  <PlainIcone nom={ouvert.icone} taille={18} style={{ color: estReporte(reportes, ouvert.cle) ? "var(--pl-icone-2)" : "var(--pl-bleu-icone)" }} />
+                  <kbd className="pl-kbd">Y</kbd>
+                </button>
+                {sousMenu === "statut" ? (
+                  <div className="pl-menu" role="menu" style={{ bottom: 48, left: 0, width: 220 }}>
+                    <div className="pl-menu-titre">Reporter jusqu&apos;à</div>
+                    {[[1, "Demain"], [3, "Dans 3 jours"], [7, "Dans une semaine"]].map(([n, lib]) => (
+                      <button key={n} type="button" role="menuitem" className="pl-menu-item" onClick={() => { poserReporte(ouvert.cle, dansJours(n as number)); setSousMenu(null); annoncer(`Reporté : ce fil quitte la liste jusqu'au ${dansJours(n as number)}.`); }}>{lib}</button>
+                    ))}
+                    {estReporte(reportes, ouvert.cle) ? <><div className="pl-menu-sep" /><button type="button" role="menuitem" className="pl-menu-item" onClick={() => { poserReporte(ouvert.cle, null); setSousMenu(null); annoncer("Remis dans la liste."); }}>Remettre à traiter</button></> : null}
+                  </div>
+                ) : null}
               </span>
               <span className="pf-barre-groupe">
                 <button type="button" className="pf-barre-bouton" disabled={!peutEcrire || !ouvert.cibles.length} onClick={() => setComposer(true)} title={!ouvert.cibles.length ? "Pas d'appel à noter pour ce fil" : undefined}>
                   <PlainIcone nom="Suivante" taille={16} />
                   <span><strong>Noter l&apos;appel</strong>{ouvert.cibles.length === 1 ? ` de ${ouvert.cibles[0].patient_nom}` : ""}</span>
                   <kbd className="pl-kbd">R</kbd>
+                </button>
+                <button type="button" className="pf-barre-bouton" onClick={() => setNoteOuverte(true)}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e79d00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /><path d="M9 13h6" /><path d="M9 17h4" /></svg>
+                  <strong>Note</strong>
+                  <kbd className="pl-kbd">N</kbd>
                 </button>
                 <div className="pl-ancre">
                   <button type="button" className="pf-barre-bouton" aria-expanded={menu === "plus-barre"} onClick={() => setMenu((m) => (m === "plus-barre" ? null : "plus-barre"))}>
@@ -971,6 +1150,16 @@ export default function CreneauxAppels() {
                     </details>
                   </div>
                 ) : null}
+              </span>
+              <span className="pf-barre-groupe">
+                <button type="button" className="pf-barre-bouton" onClick={() => void copier(resumeFil(ouvert)).then((ok) => annoncer(ok ? "Copié pour l'assistant : collez-le dans l'assistant de l'espace." : "Le presse-papier a refusé la copie."))}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ab5f" strokeWidth="2" aria-hidden="true"><path d="M12 3 4 7v6c0 4 3.4 7.4 8 8 4.6-.6 8-4 8-8V7z" /></svg>
+                  <span><strong>Copier pour l&apos;assistant</strong></span>
+                  <kbd className="pl-kbd">B</kbd>
+                </button>
+                <button type="button" className="pf-barre-bouton pf-barre-bouton--rond" aria-label="Relire le dossier" title={t.source === "reelle" ? "Relire le dossier" : "Données d'exemple : rien à relire"} onClick={() => { if (t.source === "reelle") void t.relire().then(() => annoncer("Dossier relu.")); else annoncer("Données d'exemple : rien à relire."); }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>
+                </button>
               </span>
             </div>
           </section>
@@ -1027,6 +1216,13 @@ export default function CreneauxAppels() {
                   <span style={{ flex: 1 }}>Les fils faits (créneau repris, rendez-vous confirmé)</span>
                   {faits ? <PlainIcone nom="Coche" taille={14} /> : null}
                 </button>
+                <button type="button" role="menuitemcheckbox" aria-checked={reportesVisibles} className="pl-menu-item" onClick={() => setReportesVisibles((v) => !v)}>
+                  <span style={{ flex: 1 }}>Les fils reportés</span>
+                  {reportesVisibles ? <PlainIcone nom="Coche" taille={14} /> : null}
+                </button>
+                <button type="button" role="menuitem" className="pl-menu-item" onClick={() => { setMenu(null); exporterListe(visibles); annoncer("Liste exportée en CSV."); }}>
+                  <span style={{ flex: 1 }}>Exporter la liste en CSV</span>
+                </button>
                 <div className="pl-pop-titre">Vues</div>
                 <Link href={BASE} className="pl-menu-item" onClick={() => setMenu(null)}>Tous les fils</Link>
                 {GROUPES.map((g) => (
@@ -1067,11 +1263,57 @@ export default function CreneauxAppels() {
                   ) : null}
                   {g.cle === "controles" && d?.controlesDus ? <span className="pfl-groupe-sous">sans contrôle depuis plus de {d.controlesDus.seuil_mois} mois{d.controlesDus.ne_pas_contacter ? ` · ${d.controlesDus.ne_pas_contacter} « ne pas contacter » à part` : ""}</span> : null}
                 </div>
-                {g.fils.map((f) => <LigneFil key={f.cle} f={f} href={lien(f)} />)}
+                {g.fils.map((f) => <LigneFil key={f.cle} f={f} href={lien(f)} choisi={choisis.has(f.cle)} basculer={() => basculer(f.cle)} />)}
               </section>
             ))}
           {!etat && !groupes.length ? <div className="pfl-vide">Aucun fil dans cette vue.</div> : null}
         </div>
+        {choisisF.length || avis ? (
+          <div className="pfl-lot" role="toolbar" aria-label="Actions sur la sélection">
+            {!choisisF.length ? (
+              <span className="pfl-lot-compte">{avis}</span>
+            ) : issueLot ? (
+              <>
+                <span className="pfl-lot-compte">Noter « {ISSUES_APPEL[issueLot].libelle} » pour {choisisF.filter((f) => f.cibles.length).length} patient(s){issueLot === "rappeler" ? ", à rappeler dans deux jours" : ""} ?</span>
+                <button type="button" className="pf-barre-bouton" onClick={() => setIssueLot(null)}>Annuler</button>
+                <button type="button" className="pl-primaire" onClick={() => void noterLot()}>Confirmer</button>
+              </>
+            ) : (
+              <>
+                <span className="pfl-lot-compte">{choisisF.length} choisi{choisisF.length > 1 ? "s" : ""}</span>
+                {peutEcrire && choisisF.some((f) => f.cibles.length) ? (
+                  <span className="pl-ancre">
+                    <button type="button" className="pf-barre-bouton" aria-expanded={menuLot === "appel"} onClick={() => setMenuLot((m) => (m === "appel" ? null : "appel"))}><PlainIcone nom="Suivante" taille={16} /><strong>Noter l&apos;appel</strong></button>
+                    {menuLot === "appel" ? (
+                      <div className="pl-menu" role="menu" style={{ bottom: 40, left: 0 }}>
+                        {(Object.keys(ISSUES_APPEL) as IssueAppel[]).map((k) => (
+                          <button key={k} type="button" role="menuitem" className="pl-menu-item" data-danger={k === "ne_plus_contacter" ? "" : undefined} onClick={() => { setMenuLot(null); setIssueLot(k); }}>{ISSUES_APPEL[k].libelle}</button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </span>
+                ) : null}
+                <button type="button" className="pf-barre-bouton" onClick={() => { const tous = choisisF.every((f) => f.suivi); choisisF.forEach((f) => suivreFil(f, !tous)); finirLot(tous ? "Vous ne suivez plus ces patients." : "Patients suivis : leurs fils passent en tête."); }}><strong>{choisisF.every((f) => f.suivi) ? "Ne plus suivre" : "Suivre"}</strong></button>
+                <button type="button" className="pf-barre-bouton" onClick={() => { choisisF.forEach((f) => epinglerFil(f, true)); finirLot("Épinglés en tête d'Aujourd'hui."); }}><strong>Épingler</strong></button>
+                <span className="pl-ancre">
+                  <button type="button" className="pf-barre-bouton" aria-expanded={menuLot === "reporter"} onClick={() => setMenuLot((m) => (m === "reporter" ? null : "reporter"))}><strong>Reporter</strong></button>
+                  {menuLot === "reporter" ? (
+                    <div className="pl-menu" role="menu" style={{ bottom: 40, left: 0 }}>
+                      {[[1, "Demain"], [3, "Dans 3 jours"], [7, "Dans une semaine"]].map(([n, lib]) => (
+                        <button key={n} type="button" role="menuitem" className="pl-menu-item" onClick={() => { choisisF.forEach((f) => poserReporte(f.cle, dansJours(n as number))); finirLot(`${choisisF.length} fil(s) reporté(s).`); }}>{lib}</button>
+                      ))}
+                      <div className="pl-menu-sep" />
+                      <button type="button" role="menuitem" className="pl-menu-item" onClick={() => { choisisF.forEach((f) => poserReporte(f.cle, null)); finirLot("Remis dans la liste."); }}>Remettre à traiter</button>
+                    </div>
+                  ) : null}
+                </span>
+                <button type="button" className="pf-barre-bouton" onClick={() => void copier(choisisF.map(resumeFil).join("\n\n")).then((ok) => finirLot(ok ? "Copié pour l'assistant." : "Le presse-papier a refusé la copie."))}><strong>Copier pour l&apos;assistant</strong></button>
+                <button type="button" className="pf-barre-bouton" onClick={() => { exporterListe(choisisF); finirLot("Sélection exportée en CSV."); }}><strong>Exporter</strong></button>
+                <button type="button" className="pl-icone-bouton" aria-label="Tout désélectionner" onClick={() => setChoisis(new Set())}><PlainIcone nom="Croix" taille={14} /></button>
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );

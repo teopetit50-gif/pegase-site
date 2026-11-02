@@ -75,9 +75,8 @@ aiguillage : sans la colonne liste, comme Plain ouvert par son adresse) ; `?vue=
 Superpositions : liste carte contre carte (fenêtre 1391×948 = carte de 1079×884) écart moyen 12,9/255 ; fil ouvert
 par son adresse (1688×948 = carte de 1376×884) 8,8/255 ; en-tête, séparateur de date, cartes de message (avatar 40,
 p 12 16 16), volet de 385 (lignes de 32, libellé 144) confondus. Restent, expliqués :
-- « Ask Sidekick Agent » (assistant IA de Plain) et « Add note » : fonctions de Plain sans équivalent dans Tiroma,
-  absentes ; la barre se recentre donc sur deux groupes (statut, Noter l'appel · Plus) ;
-- « Assign », « Thread tier », « SLA policy » : sans objet (aucune assignation dans Tiroma) ;
+- (02/11, soir) « Ask Sidekick Agent », « Add note », le statut, « Assign », « SLA policy », « Add link » et « Add task »
+  sont dessinés et utiles : voir « Boutons de la référence et leur utilité » ;
 - Whyte (titre de page, licence payante) remplacée par Inter 400 à la même taille ;
 - textes et nombre de lignes par groupe : contenu du cabinet ; en-tête de liste : un bouton « Liste d'attente » de plus.
 
@@ -97,8 +96,8 @@ la mutuelle, Noter l'appel).
 
 Superposition (carte, 1500×920) : en-tête, onglets, ronds, têtes de colonne, colonnes et cartes alignées ; dans la
 carte, identifiant, titre, puces et pied confondus. Restent, expliqués :
-- « New issue » et la cloche : Tiroma ne crée pas de plan (lecture seule du logiciel du cabinet) ; absents ;
-- le « + » d'une colonne mène à Créneaux et appels (pas de création de plan) ;
+- (02/11, soir) « New issue », la cloche, l'étoile, l'icône des vues et le « + » de colonne sont dessinés et utiles : voir
+  « Boutons de la référence et leur utilité » ;
 - le glisser-déposer entre colonnes : une colonne est un état calculé (mutuelle, créneau), pas un champ qu'on change ;
   on change la mutuelle dans le volet ;
 - nombre de cartes et de rangées de puces : contenu du cabinet.
@@ -139,9 +138,8 @@ jours, « Ne plus contacter » confirmé. Boutons : Filtre (praticien), Grouper 
 les horizons sont ceux, fixes, des portes : 30 jours, semaine passée, six semaines — Quotidien et Mensuel grisés
 comme les pas indisponibles de Plain). Conditions de profil de l'écran d'avant gardées.
 
-Superposition (carte, 1391×948) : écart moyen 9,0/255 ; barre de titre, boutons, titre de section, titres de carte,
-valeurs, haut des graphiques et axes confondus. Restent, expliqués : « Ask Agent » et « Ask Sidekick Agent » (IA de
-Plain, sans équivalent) ; Top issues / Themes / rapports Team, Accounts… (navigation latérale de Plain, sans objet) ;
+Superposition (carte, 1391×948) : écart moyen 9,3/255 ; barre de titre, boutons, titre de section, titres de carte,
+valeurs, haut des graphiques et axes confondus. Restent, expliqués : Top issues / Themes / rapports Team, Accounts… (navigation latérale de Plain, sans objet) ;
 Whyte remplacée par Inter 400 ; graphiques : séries hebdomadaires (les portes ne donnent pas de série quotidienne) ;
 référence 390 : capture en chargement (flou), seule disponible.
 
@@ -164,6 +162,57 @@ motif codé, « Aucune raison médicale n'est demandée ») ; « Clore l'absence
 Superposition (carte, 1488×916 = carte de 1176×852) : écart moyen 9,1/255 ; barre d'outils, bord de la carte de liste,
 tête de groupe, case, colonne date, colonne contenu (x 260) et ⋯ confondus. Restent, expliqués :
 - Cal Sans : Google Fonts n'en sert qu'une graisse (400) ; les 500/600/700 du relevé sont synthétisés ;
-- « Saved filters » : pas de filtres enregistrés dans Tiroma ; à sa place « Noter une absence » (geste du métier) ;
+- (02/11, soir) « Filter », « Saved filters », la vue calendrier, les cases et le pied du détail sont dessinés et utiles ;
+  « Noter une absence » (geste du métier) s'ajoute à côté de « Saved filters » ;
 - nombre de lignes et de lignes de texte : contenu du cabinet (trois fauteuils) ;
 - 390 : seule la référence claire existe.
+
+## Boutons de la référence et leur utilité (02/11/2026, soir)
+
+Décision de Teo transmise par la session coordinatrice : « trouve une utilité aux boutons ». Tous les éléments des pages
+de référence sont dessinés ; chacun fait une chose réelle. D'abord un geste existant (portes inchangées, aucune
+migration), sinon une utilité côté navigateur (`components/espace2/tiroma/navigateur.ts` : localStorage
+`espace2:favoris|suivis|reportes|notes|assignes|liens|vues:tiroma`, presse-papier, export CSV au point-virgule).
+Un geste qui écrit en base ou qui ne se défait pas demande une confirmation.
+
+| Page | Bouton de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|
+| Aujourd'hui | « New issue » | « Nouvelle inscription » : ouvre l'inscription en liste d'attente | geste existant G9 (Créneaux, `?inscrire=1`) |
+| Aujourd'hui | « + » d'un groupe | création du domaine du groupe : inscription (créneaux, plans, avant, faits), absence de l'équipe (demi-journées vides), moyen de contact (réponses) | G9, G4, G7 |
+| Aujourd'hui | cases à cocher des lignes | sélection multiple puis barre d'actions : Épingler, Reporter (demain, 3 j, 7 j, remettre), Copier pour l'assistant, Exporter en CSV | localStorage, presse-papier, CSV |
+| Aujourd'hui | — (étoile des autres pages) | groupe « Épinglés » en tête, depuis toutes les sous-pages | `espace2:favoris:tiroma` |
+| Aujourd'hui | Display options | + « Les reportés », « Exporter la liste en CSV » | localStorage, CSV |
+| Créneaux | cases à cocher | sélection puis barre : Noter l'appel (issue au choix, confirmation, porte `tiroma_noter_appel`), Suivre, Épingler, Reporter, Copier pour l'assistant, Exporter | G2 + navigateur |
+| Créneaux | statut « Y » (Snooze de Plain) | Reporter le fil (demain, 3 j, 7 j) ou le remettre à traiter | `espace2:reportes:tiroma` |
+| Créneaux | « Add note N » | note de ce poste sur le fil (aucune porte n'écrit de note), affichée en note jaune « Visible sur ce poste seulement » | `espace2:notes:tiroma` |
+| Créneaux | « Ask Sidekick Agent B » | Copier pour l'assistant : résumé en clair du fil dans le presse-papier | presse-papier |
+| Créneaux | ⟳ à côté | Relire le dossier (base réelle ; en exemple : rien à relire) | lecture existante |
+| Créneaux | segment vue compacte / complète | les messages seuls, ou avec notes et événements | état de la page |
+| Créneaux | ⋯ de l'en-tête | Épingler, Suivre le patient, Copier le lien, liens, fil précédent / suivant | navigateur |
+| Créneaux | « Assignee » + « Assign » | « Qui appelle » : choisir l'assistante ou le praticien (colonne assigné de la liste) | `espace2:assignes:tiroma` |
+| Créneaux | « SLA policy » | « Délai d'appel » : la règle du cabinet (`delai_min_appel_minutes`) | lecture existante |
+| Créneaux | « Add link » | Lier un plan au fil (liste des plans) | `espace2:liens:tiroma` |
+| Créneaux | « + Add task » | « Rappeler plus tard » : ouvre Noter l'appel sur « À rappeler » | G2 |
+| Créneaux | — (cloche des autres pages) | groupe « Suivis » en tête, fils marqués « Suivi » | `espace2:suivis:tiroma` |
+| Créneaux | Display (V) | + « Les fils reportés », « Exporter la liste en CSV » | localStorage, CSV |
+| Plans et devis | étoile | Épingler la carte ouverte ou la vue dans Aujourd'hui | favoris |
+| Plans et devis | cloche | Suivre le patient de la carte ouverte ; liste des suivis (retirer) | suivis |
+| Plans et devis | « New issue » et « + » de colonne | « Nouvelle inscription » en liste d'attente | G9 |
+| Plans et devis | icône des vues | menu des vues, Copier le lien de la vue, Exporter les cartes en CSV | adresse, presse-papier, CSV |
+| Plans et devis | clic droit d'une carte | + Épingler, Suivre le patient, Copier pour l'assistant | navigateur |
+| Pilotage | « Ask Agent » de chaque carte | Copier pour l'assistant : le chiffre et sa série | presse-papier |
+| Pilotage | « Investigate this spike » | sur un fauteuil prévu sous son objectif : « Voir les demi-journées vides » | lien vers Fauteuils |
+| Pilotage | carte de chaleur + légende | occupation par fauteuil et par semaine (5 paliers de #5c67f4), ligne « Tous » | calcul sur les objectifs |
+| Pilotage | « Search … » + téléchargement des rapports | filtre les lignes du tableau ; télécharge le tableau filtré en CSV | calcul, CSV |
+| Pilotage | barre « Ask Sidekick Agent » (B), ⟳, ≫ | Copier pour l'assistant le résumé du pilotage ; relire ; replier | presse-papier, lecture |
+| Fauteuils | cases à cocher | sélection puis barre : Clore les absences (confirmation, G5), Épingler, Copier pour l'assistant, Exporter | G5 + navigateur |
+| Fauteuils | « Filter » | filtre par fauteuil, praticien ou membre, gardé dans l'adresse (`?filtre=`) | adresse |
+| Fauteuils | « Saved filters » | « Vues enregistrées » : enregistrer la vue (onglet, filtre, affichage), la rouvrir, la supprimer | `espace2:vues:tiroma` |
+| Fauteuils | bascule liste / calendrier | vue calendrier de la semaine (matin / après-midi, ‹ ›, Aujourd'hui), gardée dans l'adresse | adresse |
+| Fauteuils | « Join Cal Video \| ⧉ » du détail | lien vers la page liée \| Copier pour l'assistant | navigation, presse-papier |
+| Fauteuils | ⋯ (ligne et pied du détail) | Ouvrir, Épingler, Copier pour l'assistant, liens, Exporter | navigateur |
+| Réglages | (rien de laissé de côté) | rangées, « Team overview », zone sensible : déjà câblés | gestes existants |
+
+Superpositions refaites après ces ajouts (mêmes fichiers `comparaisons/tiroma/*`) : Aujourd'hui 9,5, Créneaux 12,9, fil
+ouvert 9,1, Plans 12,7, Pilotage 9,3, Fauteuils 9,2 (/255) ; la barre du fil retrouve ses trois groupes (statut ·
+Noter l'appel, Note, Plus · Copier pour l'assistant, ⟳).

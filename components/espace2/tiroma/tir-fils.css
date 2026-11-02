@@ -979,3 +979,128 @@
     padding-left: 0;
   }
 }
+
+/* ——— sélection (case de la 1re colonne), barre d'actions groupées, note de ce poste, ajouts du volet ——— */
+.v2 .tir-pfl .pl-case-carre {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.v2 .tir-pfl .pl-case-carre[data-coche] {
+  opacity: 1;
+  border-color: var(--pl-bleu-plein);
+  background: var(--pl-bleu-plein);
+  color: #fff;
+}
+.v2 .tir-pfl .pl-ligne[data-choisi] {
+  background: var(--pl-bleu-rempli-1);
+}
+.v2 .tir-pfl .pl-carte {
+  position: relative;
+}
+.v2 .tir-pl .pfl-lot {
+  position: absolute;
+  left: 50%;
+  bottom: 17px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  transform: translateX(-50%);
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 12px;
+  background: var(--pl-fond-1);
+  box-shadow: rgba(0, 0, 0, 0.05) 0 1px 12px, rgba(0, 0, 0, 0.05) 0 0.5px 4px;
+  white-space: nowrap;
+}
+.v2 .tir-pl .pfl-lot .pf-barre-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-pl .pfl-lot .pf-barre-bouton:hover {
+  background: var(--pl-rempli-1);
+}
+.v2 .tir-pl .pfl-lot .pf-barre-bouton strong {
+  font-weight: 550;
+}
+.v2 .tir-pl .pfl-lot-compte {
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 550;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-pf .pf-segment button[data-actif] {
+  background: var(--pl-fond-1);
+  color: var(--pl-texte-1);
+  box-shadow: 0 0 0 1px var(--pl-bord-1);
+}
+.v2 .tir-pf .pf-barre-bouton--statut {
+  padding: 0 4px;
+  gap: 2px;
+}
+.v2 .tir-pf .pf-barre-bouton--rond {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+.v2 .tir-pf .pf-barre-statut {
+  padding: 4px;
+}
+.v2 .tir-pl .pl-zone {
+  height: auto;
+  padding: 8px 10px;
+  resize: vertical;
+  line-height: 20px;
+}
+.v2 .tir-pl .pl-composeur--note {
+  background: var(--pl-jaune-fond-2);
+}
+.v2 .tir-pf .pf-rang--sous {
+  min-height: 28px;
+}
+.v2 .tir-pf .pf-ajout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 475;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-pf .pf-ajout:hover {
+  background: var(--pl-rempli-1);
+}
+.v2 .tir-pf .pf-ajout--bord {
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 10px;
+  margin: 4px auto 0;
+}
+.v2 .tir-pf .pf-ajout-ancre {
+  display: flex;
+  justify-content: center;
+}
+/* carte du fil étroite (colonne liste ouverte) : la barre garde ses groupes, libellés secondaires et touches masqués */
+.v2 .tir-pf .pf-carte {
+  container-type: inline-size;
+}
+@container (max-width: 1100px) {
+  .v2 .tir-pf .pf-barre .pl-kbd,
+  .v2 .tir-pf .pf-barre-bouton > strong,
+  .v2 .tir-pf .pf-barre-bouton > span > strong ~ *,
+  .v2 .tir-pf .pf-barre-groupe:last-child .pf-barre-bouton > span {
+    display: none;
+  }
+  .v2 .tir-pf .pf-barre {
+    gap: 6px;
+  }
+}
