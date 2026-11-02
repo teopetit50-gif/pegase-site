@@ -5,7 +5,7 @@
 | Vue d'ensemble | `/espace2/lorani` | Linear, Projects (liste) | `linear-projects.md` | écrite (`VueEnsemble.tsx`, `lor-projets.css`) ; superposition 1 faite en sombre : géométrie alignée (en-tête, colonnes, lignes) ; restent : capture avec 13 lignes, clair, 390 |
 | Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | écrite (`PagePermis.tsx`, `lor-ticket.css`) ; superposée en sombre, clair, 1024 et 390 (`comparaisons/lorani/permis-*`) ; écarts ci-dessous |
 | Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | écrite (`PageProjet.tsx`, `lor-initiative.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/projet-*`) ; écarts ci-dessous |
-| Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | à faire |
+| Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | écrite (`Courrier.tsx`, `lor-inbox.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/courrier-*`) ; écarts ci-dessous |
 | Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | à faire |
 | Honoraires et temps | `/espace2/lorani/honoraires` | Attio, People + fiche | `attio-people.md` | en dernier (relevé Attio refait) |
 
@@ -69,3 +69,15 @@ Correspondances : fil « Initiatives › Résidence » → « Permis › projet 
 - Les vues du dossier (Équipe…Assurances) gardent les briques de liste de `components/espace2/lin` (My issues de Linear, partagées) recolorées aux jetons de Linear par un pont de variables (`lor-in-pont`) ; elles n'ont pas d'équivalent dans la page d'une Initiative, qui n'a qu'une section Projects.
 - Pas de bouton « réaction » dans la carte « Latest update » ; « Update » ouvre la vue Chantier (le compte rendu se rédige là, F29).
 - Le composeur de l'onglet Activité dépose un courrier (F3) : Lorani n'a pas de commentaires sur un projet.
+
+## Courrier à ranger → Linear, Inbox
+
+Données : les deux éléments à traiter de l'exemple (une date lue, une décision implicite) et, avec le bouton d'archives (`?traites=1`), les dates lues déjà confirmées ou écartées en lignes « lues » (comme les 6 notifications lues de la capture).
+Mesures relues au DOM : liste de 400 et filet droit ; en-tête 44 (titre à x 18) ; lignes de 55 à y 52, fond de survol en retrait de 8 ; avatar 32 à x 16 ; textes à x 60 ; pastille non lue à y 67-75 (capture : 68-75) ; ligne 1 de 17, ligne 2 de 16 ; état vide : illustration de Linear (EmptyInboxIcon, 105 × 100) et compte, centrés sur la hauteur.
+Comparaisons : `courrier-1440-sombre-*`, `courrier-1440-clair-*`, `courrier-390-sombre-*`, `courrier-390-clair-*`. Les pixels en écart viennent du nombre de lignes (2 à traiter + 5 traitées contre 5 + 6) et de leurs textes.
+
+Correspondances : notification non lue → courrier à traiter (date lue à confirmer : statut Triage ; à ranger : Backlog ; lecture à vérifier : In Progress ; illisible : Canceled) ; « You asked to be reminded… » → ce qu'il faut faire ; priorité → urgence de la prochaine date du permis ; heure → âge de la lecture ; avatar rappel → icône du sprite selon la nature de la date (dépôt, délai, demande de pièces, décision, affichage, courrier) sur le même fond violet ; archives → courriers traités ; Filter → À confirmer / À ranger / Tous ; Display → afficher les traités ; « … » → déposer un courrier sur un projet ; ticket ouvert à droite → le courrier ouvert (titre, pilules, lecture et citations), Accept / Decline → Confirmer / Écarter (F7, F8), décision implicite : Confirmer (F9) / Saisir la décision (page du permis).
+
+Écarts restants, avec leur raison :
+- Le courrier ouvert n'a pas la barre d'outils (copier le lien, l'identifiant, la branche) ni la colonne d'activité du ticket : un courrier n'a pas de page propre, ses liens mènent au permis et au projet (pilules).
+- Pas de « Snooze » ni d'archivage d'une notification : un courrier se traite (confirmer, écarter) ou se saisit à la main, il ne se met pas de côté.

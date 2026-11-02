@@ -274,3 +274,13 @@ export function IconeStatutTicket({ statut, part = 0.5, titre, className }: P & 
   const nom: NomLin = statut === "triage" ? "statutTriage" : statut === "backlog" ? "statutBacklog" : statut === "fait" ? "statutFait" : statut === "doublon" ? "statutDoublon" : "statutAnnule";
   return <IconeLin nom={nom} taille={14} vue={14} couleur={c} titre={titre} className={className} />;
 }
+
+/* la boîte d'archives (Open archive) : releves/linear-commun/icones-en-ligne.md */
+export function IconeArchive({ titre, className }: P) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" className={className} {...aria(titre)}>
+      <path fillRule="evenodd" clipRule="evenodd" d="M9.25 8C9.66421 8 10 8.33579 10 8.75C10 9.16421 9.66421 9.5 9.25 9.5H6.75C6.33579 9.5 6 9.16421 6 8.75C6 8.33579 6.33579 8 6.75 8H9.25Z" />
+      <path fillRule="evenodd" clipRule="evenodd" d="M12.75 2C13.9926 2 15 3.00736 15 4.25V5.75C15 6.35471 14.5705 6.85876 14 6.97461V11.75C14 12.9926 12.9926 14 11.75 14H4.2002C2.95755 14 1.9502 12.9926 1.9502 11.75V6.96191C1.40486 6.82746 1 6.33685 1 5.75V4.25C1 3.00736 2.00736 2 3.25 2H12.75ZM3.4502 11.75C3.4502 12.1642 3.78598 12.5 4.2002 12.5H11.75C12.1642 12.5 12.5 12.1642 12.5 11.75V7H3.4502V11.75ZM3.25 3.5C2.83579 3.5 2.5 3.83579 2.5 4.25V5.5H13.5V4.25C13.5 3.83579 13.1642 3.5 12.75 3.5H3.25Z" />
+    </svg>
+  );
+}

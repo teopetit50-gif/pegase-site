@@ -1,56 +1,56 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   LORANI « Courrier à ranger », sur « My issues » de Linear (29/10/2026)
+   LORANI « Courrier à ranger » (refait le 02/11/2026)
 
-   Ce que la lecture des courriers de la mairie laisse à traiter, tous
-   permis confondus, au lieu d'être noyé sous chaque permis (inventaire
-   docs/refonte-metiers/lorani.md, § 8.3 O3 et O8) :
+   L'Inbox de Linear, au 1:1 : relevé docs/refonte-metiers/releves/
+   linear-inbox.md (01/11), styles dans ./lor-inbox.css (préfixe lor-ib-),
+   jetons dans ./lor.css. Une notification de Linear = un courrier qui
+   attend un membre, tous permis confondus :
 
-     · À confirmer : les dates lues sur un courrier et rattachées à un
-       permis (B10), et les décisions implicites nées du silence de la
-       mairie (B9) ;
-     · À ranger : les dates lues sans permis (« Permis à choisir », O8,
-       jusqu'ici comptées nulle part) et les courriers que le lecteur n'a
-       pas reconnus, n'a pas pu lire, ou dont la lecture est à vérifier
-       sans qu'aucune date n'en soit sortie (B17) ;
-     · Tous : les deux.
-   L'onglet est dans l'adresse (?onglet=a-ranger | tous), les lignes sont
-   groupées par projet, le plus récent d'abord.
+     · les dates lues sur un courrier et rattachées à un permis (B10) et
+       les décisions implicites nées du silence de la mairie (B9) :
+       « à confirmer » (statut Triage) ;
+     · les dates lues sans permis (« Permis à choisir », O8) et les
+       courriers que le lecteur n'a pas reconnus, n'a pas pu lire, ou dont
+       la lecture est à vérifier sans date sortie (B17) : « à ranger ».
+   Non lu = à traiter ; les dates déjà confirmées ou écartées sont les
+   notifications lues (bouton d'archives, ou Affichage). Le filtre (À
+   confirmer, À ranger, Tous) est dans l'adresse (?onglet=), le courrier
+   ouvert aussi (?choix=) : il s'ouvre à droite, comme un ticket dans
+   l'Inbox, avec Confirmer / Écarter à la place d'Accept / Decline.
 
-   Les gestes sont ceux de l'écran du permis (components/espace/lorani/
-   PermisVue.tsx), mêmes portes : cocher la case ou « Confirmer… » ouvre
-   la fenêtre F7 (valeurs corrigeables, permis visé quand il y en a
-   plusieurs ou aucun) → confirmerDateLue ; « Écarter… » ouvre F8 (motif
-   obligatoire) → ecarterDateLue ; une décision implicite se confirme par
-   F9 → confirmerDecisionImplicite. Un courrier non reconnu n'a pas de
-   geste ici : la ligne mène au permis (ou au projet), où il se saisit à
-   la main, et le « + » d'un groupe mène au dépôt d'un courrier (B19).
+   Les gestes sont ceux de l'écran du permis (PermisVue), mêmes portes :
+   F7 (confirmer, valeurs corrigeables, permis visé) → confirmerDateLue ;
+   F8 (écarter, motif obligatoire) → ecarterDateLue ; F9 (décision
+   implicite) → confirmerDecisionImplicite. Un courrier non reconnu se
+   saisit à la main sur la page du permis ; « … » mène au dépôt d'un
+   courrier sur un projet (B19).
 
    Ce que le dossier ne contient pas n'est pas montré : les courriels du
    guichet à ranger (E10, E11), le sursis à statuer (E4) et les situations
    lues à ranger (E18) ne sont lus nulle part par chargerDossier.
-   Gabarit : ../lin/lin.css ; mesures propres : ../lin/linear-my-issues.css.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
-import { Check, ChevronDown, FileCheck2, FileInput, FileQuestionMark, FileWarning, Folder, Gavel, Hourglass, Plus, Quote, Signpost, UserRound, XCircle } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check, Gavel, XCircle } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
 import { dateCourte } from "@/components/espace/format";
-import { DECISIONS, NATURES_DATE_LUE, TYPES, TYPES_CONTROLE, libelleTypePiece, titrePermis } from "@/components/espace/lorani/etats";
+import { DECISIONS, NATURES_DATE_LUE, TYPES, TYPES_CONTROLE, libelleTypePiece, prochaineDate, titrePermis } from "@/components/espace/lorani/etats";
 import { confirmerDateLue, confirmerDecisionImplicite, ecarterDateLue } from "@/components/espace/lorani/portes";
 import type { DateLue, Dossier, NatureDateLue, Permis, PieceProjet, Projet } from "@/components/espace/lorani/types";
-import { Menu, MenuActions, type Option } from "../lin/Lin";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { IconeAffichage, IconeArchive, IconeCalendrierLor, IconeFiltre, IconeLin, IconePoints, IconePrioriteLor, IconeSansResponsable, IconeSprite, IconeStatutTicket, type StatutTicket } from "./lor-icones";
+import type { NomIcone } from "./lor-sprite";
 import "@/components/espace/espace.css";
-import "../lin/lin.css";
-import "../lin/linear-my-issues.css";
+import "./lor.css";
+import "./lor-inbox.css";
 
 const CHEMIN = `${RACINE}/lorani/courrier`;
 const lienPermis = (id: string) => `${RACINE}/lorani/permis/${encodeURIComponent(id)}`;
@@ -63,7 +63,6 @@ const ONGLETS: { cle: CleOnglet; libelle: string }[] = [
   { cle: "tous", libelle: "Tous" },
 ];
 const estOnglet = (x: string | null): x is CleOnglet => ONGLETS.some((o) => o.cle === x);
-const lienOnglet = (cle: CleOnglet) => (cle === "a-confirmer" ? CHEMIN : `${CHEMIN}?onglet=${cle}`);
 
 /* une ligne de la file */
 type Element = {
@@ -106,11 +105,6 @@ function valeursEnClair(nature: NatureDateLue, v: Record<string, unknown>): stri
     .join(" · ");
 }
 
-/* « 28 oct. », comme le « Oct 28 » de Linear */
-const jourCourt = (iso: string) => {
-  const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T12:00:00` : iso);
-  return Number.isNaN(d.getTime()) ? "" : new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(d);
-};
 const initiales = (nom: string) =>
   nom
     .split(/\s+/)
@@ -118,62 +112,48 @@ const initiales = (nom: string) =>
     .slice(0, 2)
     .map((x) => x[0])
     .join("");
-const COULEURS = ["#26b5ce", "#5e6ad2", "#4cb782", "#f2994a", "#eb5757", "#bb87fc", "#f2c94c", "#95a2b3"];
-const couleurDe = (s: string) => COULEURS[[...s].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
 
-const ICONES_NATURE: Record<NatureDateLue, typeof FileInput> = {
-  depot: FileInput,
-  delai_notifie: Hourglass,
-  demande_pieces: FileQuestionMark,
-  decision: Gavel,
-  decision_tacite: FileCheck2,
-  affichage: Signpost,
+/* l'avatar d'une ligne : l'icône du sprite de Linear selon la nature de la date lue */
+const ICONE_NATURE: Record<NatureDateLue, NomIcone> = {
+  depot: "Calendar",
+  delai_notifie: "Hourglass",
+  demande_pieces: "Page",
+  decision: "Judge",
+  decision_tacite: "Judge",
+  affichage: "Sign",
 };
+type Vue = { id: string; titre: string; sous: string; icone: NomIcone; statut: StatutTicket; libelleStatut: string };
 
-/* le statut de la ligne, 14 px, aux formes de Linear */
-type Statut = "confirmer" | "ranger" | "verifier" | "illisible";
-const LIBELLES_STATUT: Record<Statut, string> = { confirmer: "À confirmer", ranger: "À ranger", verifier: "Lecture à vérifier", illisible: "Illisible" };
-function IconeStatut({ statut }: { statut: Statut }) {
-  return (
-    <span className="lmi-statut" data-statut={statut} title={LIBELLES_STATUT[statut]}>
-      <svg viewBox="0 0 14 14" role="img" aria-label={LIBELLES_STATUT[statut]}>
-        {statut === "confirmer" ? (
-          <>
-            <circle cx="7" cy="7" r="6" fill="currentColor" />
-            <path d="M4 5.4h5.6M8.2 4l1.4 1.4-1.4 1.4M10 8.6H4.4M5.8 7.2 4.4 8.6 5.8 10" fill="none" stroke="var(--lin-fond)" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" />
-          </>
-        ) : statut === "ranger" ? (
-          <circle cx="7" cy="7" r="5.75" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="1.4 1.65" />
-        ) : statut === "verifier" ? (
-          <>
-            <circle cx="7" cy="7" r="5.75" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M7 3.5a3.5 3.5 0 0 1 0 7z" fill="currentColor" />
-          </>
-        ) : (
-          <>
-            <circle cx="7" cy="7" r="6" fill="currentColor" />
-            <path d="m4.9 4.9 4.2 4.2m0-4.2-4.2 4.2" stroke="var(--lin-fond)" strokeWidth="1.3" strokeLinecap="round" />
-          </>
-        )}
-      </svg>
-    </span>
-  );
+/* « il y a 46 min », « 4 j » : l'heure relative de l'Inbox (« 46min », « 4d ») */
+function depuis(iso: string): string {
+  if (!iso) return "";
+  const t = /^\d{4}-\d{2}-\d{2}$/.test(iso) ? Date.parse(`${iso}T12:00:00`) : Date.parse(iso);
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 60) return "à l'instant";
+  if (s < 3600) return `${Math.floor(s / 60)} min`;
+  if (s < 86_400) return `${Math.floor(s / 3600)} h`;
+  if (s < 30 * 86_400) return `${Math.floor(s / 86_400)} j`;
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(t));
 }
 
-function Avatar({ nom }: { nom: string | null }) {
-  const ini = nom ? initiales(nom) : "";
-  if (!nom || !ini) {
-    return (
-      <span className="lmi-avatar lmi-avatar--vide" title="Aucun chef de projet nommé">
-        <UserRound aria-hidden="true" />
-      </span>
-    );
-  }
-  return (
-    <span className="lmi-avatar" title={`Chef de projet : ${nom}`} style={{ "--lmi-teinte": couleurDe(nom) } as React.CSSProperties} aria-hidden="true">
-      {ini}
-    </span>
-  );
+/* un menu de Linear qui se ferme au clic dehors et sur Échap */
+function useMenu() {
+  const [ouvert, setOuvert] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ouvert) return;
+    const dehors = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOuvert(false);
+    };
+    const echap = (e: KeyboardEvent) => e.key === "Escape" && setOuvert(false);
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [ouvert]);
+  return [ouvert, setOuvert, ref] as const;
 }
 
 type Form = { type: "confirmer"; date: DateLue } | { type: "ecarter"; date: DateLue } | { type: "implicite"; permis: Permis } | null;
@@ -182,6 +162,9 @@ export default function Courrier() {
   const { source, pret, erreur: erreurLecture, dossier, peutEcrire, agir, nommer } = useLorani();
   const params = useSearchParams();
   const toast = useToast();
+  const [ouvertPoints, setOuvertPoints, menuPointsRef] = useMenu();
+  const [ouvertFiltre, setOuvertFiltre, menuFiltreRef] = useMenu();
+  const [ouvertAff, setOuvertAff, menuAffRef] = useMenu();
   const o = params.get("onglet");
   const onglet: CleOnglet = estOnglet(o) ? o : "a-confirmer";
   const chargement = source === "reelle" && !pret;
@@ -237,15 +220,6 @@ export default function Courrier() {
     const recent = (g: { lignes: Element[] }) => g.lignes.reduce((r, e) => (e.quand > r ? e.quand : r), "");
     return liste.sort((a, b) => recent(b).localeCompare(recent(a)));
   }, [elements, onglet]);
-
-  const [replies, setReplies] = useState<Set<string>>(() => new Set());
-  const basculer = (id: string) =>
-    setReplies((avant) => {
-      const apres = new Set(avant);
-      if (apres.has(id)) apres.delete(id);
-      else apres.add(id);
-      return apres;
-    });
 
   /* ——— les gestes : les fenêtres F7, F8, F9 de PermisVue, mêmes portes ——— */
   const [form, setForm] = useState<Form>(null);
@@ -352,128 +326,81 @@ export default function Courrier() {
     );
   };
 
-  /* ——— une ligne ——— */
+  /* ——— une ligne : le titre, sa sous-ligne, son statut ——— */
   const titreImplicite = (p: Permis) => {
     const impl = p.calcul.decision_implicite!;
     const dp = p.type_autorisation === "dp";
     return `${impl.nature === "tacite" ? (dp ? "Non-opposition tacite née" : "Permis tacite né") : dp ? "Opposition tacite" : "Rejet implicite"} le ${dateCourte(`${impl.date}T12:00:00`)}`;
   };
-
-  function ligne(e: Element) {
-    const nomPermis = e.permis ? titrePermis(e.permis, e.projet.nom) : "";
-    const chef = dossier.membres.find((m) => m.projet_id === e.projet.id && m.role_projet === "chef_projet");
-    const nomChef = chef ? nommer(chef.user_id) : null;
-    const ouvrir: Option = { cle: "ouvrir", libelle: e.permis ? `Ouvrir ${nomPermis}` : "Ouvrir le projet", icone: <Folder width={16} height={16} aria-hidden="true" />, href: e.lien };
-
+  const vue = (e: Element): Vue => {
+    const id = e.permis ? (e.permis.numero ?? TYPES[e.permis.type_autorisation].court) : e.piece ? (e.piece.source === "courriel" ? "Guichet" : "Dépôt") : "Projet";
     if (e.date) {
       const d = e.date;
       const nature = NATURES_DATE_LUE[d.nature];
-      const Icone = ICONES_NATURE[d.nature];
-      const piece = dossier.pieces.find((x) => x.id === d.piece_id);
-      const titre = `${nature.libelle} : ${valeursEnClair(d.nature, d.proposition) || "valeur à saisir"}`;
-      const options: Option[] = [
-        { cle: "confirmer", libelle: "Confirmer…", icone: <Check width={16} height={16} aria-hidden="true" />, action: () => ouvrirConfirmation(d) },
-        { cle: "ecarter", libelle: "Écarter…", icone: <XCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrirEcart(d) },
-        ouvrir,
-      ];
-      return (
-        <li key={e.cle} className="lmi-ligne">
-          <Link className="lmi-ligne-lien" href={e.lien} aria-label={`${titre}, ${e.permis ? nomPermis : "permis à choisir"}`} />
-          <button type="button" className="lmi-case" aria-label={`Confirmer : ${titre}`} title="Confirmer" disabled={gris} onClick={() => ouvrirConfirmation(d)} />
-          <span className="lmi-icone" title={nature.libelle}>
-            <Icone aria-hidden="true" />
-          </span>
-          <span className="lmi-id">{e.permis ? TYPES[e.permis.type_autorisation].court : "Projet"}</span>
-          <IconeStatut statut={e.permis ? "confirmer" : "ranger"} />
-          <span className="lmi-titre">
-            <span className="lmi-titre-texte">{titre}</span>
-            <span className="lmi-titre-second">{piece?.nom_fichier ?? libelleTypePiece(d.type_piece)}</span>
-          </span>
-          <span className="lmi-droite">
-            {e.permis ? null : (
-              <span className="lmi-pilule" title="Aucun permis n'a été reconnu sur ce courrier : choisissez-le en confirmant.">
-                Permis à choisir
-              </span>
-            )}
-            <span className="lmi-pilule" data-teinte={d.verifiee ? "vert" : "jaune"} title={d.verifiee ? "Citation retrouvée sur le courrier" : "Citation non retrouvée sur le courrier"}>
-              <Quote aria-hidden="true" />
-              {d.citations?.length ?? 0}
-            </span>
-            <Avatar nom={nomChef} />
-            {peutEcrire ? (
-              <span className="lmi-actions">
-                <MenuActions rond titre="Actions sur cette date lue" options={options} />
-              </span>
-            ) : null}
-          </span>
-          <span className="lmi-date" title={`Lu le ${dateCourte(d.cree_le)}`}>
-            {jourCourt(d.cree_le)}
-          </span>
-        </li>
-      );
+      return {
+        id,
+        titre: `${nature.libelle} : ${valeursEnClair(d.nature, d.proposition) || "valeur à saisir"}`,
+        sous: e.permis ? `Lue sur le ${nature.piece}, à confirmer` : "Lue sur un courrier, permis à choisir",
+        icone: ICONE_NATURE[d.nature],
+        statut: e.permis ? "triage" : "backlog",
+        libelleStatut: e.permis ? "À confirmer" : "À ranger : permis à choisir",
+      };
     }
-
-    if (e.implicite) {
-      const p = e.implicite;
-      const titre = titreImplicite(p);
-      const options: Option[] = [{ cle: "confirmer", libelle: "Confirmer la décision…", icone: <Gavel width={16} height={16} aria-hidden="true" />, action: () => { setErreur(null); setForm({ type: "implicite", permis: p }); } }, ouvrir];
-      return (
-        <li key={e.cle} className="lmi-ligne">
-          <Link className="lmi-ligne-lien" href={e.lien} aria-label={`${titre}, ${nomPermis}`} />
-          <button type="button" className="lmi-case" aria-label={`Confirmer : ${titre}`} title="Confirmer" disabled={gris} onClick={() => { setErreur(null); setForm({ type: "implicite", permis: p }); }} />
-          <span className="lmi-icone" title="Décision implicite">
-            <Gavel aria-hidden="true" />
-          </span>
-          <span className="lmi-id">{TYPES[p.type_autorisation].court}</span>
-          <IconeStatut statut="confirmer" />
-          <span className="lmi-titre">
-            <span className="lmi-titre-texte">{titre}</span>
-            <span className="lmi-titre-second">{nomPermis}</span>
-          </span>
-          <span className="lmi-droite">
-            <Avatar nom={nomChef} />
-            {peutEcrire ? (
-              <span className="lmi-actions">
-                <MenuActions rond titre="Actions sur cette décision" options={options} />
-              </span>
-            ) : null}
-          </span>
-          <span className="lmi-date" title={`Née le ${dateCourte(`${p.calcul.decision_implicite!.date}T12:00:00`)}`}>
-            {jourCourt(p.calcul.decision_implicite!.date)}
-          </span>
-        </li>
-      );
-    }
-
+    if (e.implicite) return { id, titre: titreImplicite(e.implicite), sous: "Le silence de la mairie vaut décision, à confirmer", icone: "AlarmClock", statut: "triage", libelleStatut: "À confirmer" };
     const x = e.piece!;
-    const statut: Statut = x.statut === "echec" ? "illisible" : x.statut === "a_verifier" ? "verifier" : "ranger";
-    const titre = x.statut === "echec" ? "Courrier illisible" : x.statut === "a_verifier" ? "Lecture à vérifier" : "Courrier non reconnu";
-    return (
-      <li key={e.cle} className="lmi-ligne">
-        <Link className="lmi-ligne-lien" href={e.lien} aria-label={`${titre} : ${x.nom_fichier}`} />
-        <span className="lmi-icone" title={libelleTypePiece(x.type_piece)}>
-          <FileWarning aria-hidden="true" />
-        </span>
-        <span className="lmi-id">{x.source === "courriel" ? "Guichet" : "Dépôt"}</span>
-        <IconeStatut statut={statut} />
-        <span className="lmi-titre">
-          <span className="lmi-titre-texte">
-            {titre} : {x.nom_fichier}
-          </span>
-          <span className="lmi-titre-second">{x.motif ? `« ${x.motif} »` : "aucune date n'en est proposée, saisissez-la à la main"}</span>
-        </span>
-        <span className="lmi-droite">
-          <Avatar nom={nomChef} />
-          <span className="lmi-actions">
-            <MenuActions rond titre="Actions sur ce courrier" options={[ouvrir]} />
-          </span>
-        </span>
-        <span className="lmi-date" title={x.cree_le ? `${x.source === "courriel" ? "Reçu" : "Déposé"} le ${dateCourte(x.cree_le)}` : undefined}>
-          {x.cree_le ? jourCourt(x.cree_le) : ""}
-        </span>
-      </li>
-    );
-  }
+    return {
+      id,
+      titre: `${x.statut === "echec" ? "Courrier illisible" : x.statut === "a_verifier" ? "Lecture à vérifier" : "Courrier non reconnu"} : ${x.nom_fichier}`,
+      sous: x.motif ? `« ${x.motif} »` : "Aucune date n'en est proposée : saisissez-la à la main",
+      icone: "PdfFile",
+      statut: x.statut === "echec" ? "annule" : x.statut === "a_verifier" ? "encours" : "backlog",
+      libelleStatut: x.statut === "echec" ? "Illisible" : x.statut === "a_verifier" ? "Lecture à vérifier" : "À ranger",
+    };
+  };
+  /* l'urgence d'une ligne : celle de la prochaine date de son permis (l'icône de priorité de Linear) */
+  const auj = new Date().toISOString().slice(0, 10);
+  const urgence = (p: Permis | null): 0 | 1 | 2 => {
+    const pd = p ? prochaineDate(p) : null;
+    if (!pd) return 0;
+    const j = Math.round((Date.parse(`${pd}T12:00:00Z`) - Date.parse(`${auj}T12:00:00Z`)) / 86_400_000);
+    return j < 0 ? 1 : j <= 7 ? 2 : 0;
+  };
+
+  /* ce qui est déjà traité : les dates lues confirmées ou écartées, les plus récentes (les notifications lues) */
+  const traites = dossier.datesLues
+    .filter((d) => d.statut !== "proposee")
+    .sort((a, b) => (b.decide_le ?? b.maj_le).localeCompare(a.decide_le ?? a.maj_le))
+    .slice(0, 12)
+    .map((d) => ({ d, projet: dossier.projets.find((p) => p.id === d.projet_id), permis: d.permis_id ? (dossier.permis.find((p) => p.id === d.permis_id) ?? null) : null }))
+    .filter((t): t is { d: DateLue; projet: Projet; permis: Permis | null } => !!t.projet);
+
+  const visibles = groupes.flatMap((g) => g.lignes).sort((a, b) => b.quand.localeCompare(a.quand));
+  const choix = params.get("choix");
+  const choisi = visibles.find((e) => e.cle === choix) ?? null;
+  const traiteChoisi = choix?.startsWith("t:") ? (traites.find((t) => `t:${t.d.id}` === choix) ?? null) : null;
+  const lienChoix = (cle: string | null) => {
+    const q = new URLSearchParams(params.toString());
+    if (cle) q.set("choix", cle);
+    else q.delete("choix");
+    const s = q.toString();
+    return s ? `${CHEMIN}?${s}` : CHEMIN;
+  };
+  const lienFiltre = (cle: CleOnglet) => {
+    const q = new URLSearchParams(params.toString());
+    if (cle === "a-confirmer") q.delete("onglet");
+    else q.set("onglet", cle);
+    q.delete("choix");
+    const s = q.toString();
+    return s ? `${CHEMIN}?${s}` : CHEMIN;
+  };
+  const voirTraites = params.get("traites") === "1";
+  const lienTraites = () => {
+    const q = new URLSearchParams(params.toString());
+    if (voirTraites) q.delete("traites");
+    else q.set("traites", "1");
+    const s = q.toString();
+    return s ? `${CHEMIN}?${s}` : CHEMIN;
+  };
 
   const vide =
     onglet === "a-confirmer"
@@ -488,99 +415,323 @@ export default function Courrier() {
   const dpForm = actifsForm.find((x) => x.id === permisVise)?.type_autorisation === "dp";
   const implicite = form?.type === "implicite" ? form.permis : null;
 
+  /* ——— le courrier ouvert, à droite : la page d'un ticket, sans sa colonne de propriétés ——— */
+  const detail = (() => {
+    if (traiteChoisi) {
+      const { d, projet, permis } = traiteChoisi;
+      const nature = NATURES_DATE_LUE[d.nature];
+      const piece = dossier.pieces.find((x) => x.id === d.piece_id);
+      return {
+        id: permis?.numero ?? (permis ? TYPES[permis.type_autorisation].court : "Projet"),
+        titre: `${nature.libelle} : ${valeursEnClair(d.nature, d.confirme ?? d.proposition) || "—"}`,
+        lien: permis ? lienPermis(permis.id) : lienProjet(projet.id),
+        pilules: [
+          { cle: "statut", icone: <IconeStatutTicket statut={d.statut === "confirmee" ? "fait" : "annule"} />, texte: d.statut === "confirmee" ? "Confirmée" : "Écartée" },
+          { cle: "qui", icone: <IconeSprite nom="Creator" />, texte: nommer(d.decide_par) },
+          { cle: "projet", icone: <IconeSprite nom="Project" />, texte: projet.nom, href: lienProjet(projet.id) },
+          ...(permis ? [{ cle: "permis", icone: <IconeSprite nom="Page" />, texte: titrePermis(permis, projet.nom), href: lienPermis(permis.id) }] : []),
+        ],
+        corps: (
+          <>
+            <p>
+              Lue sur le {nature.piece}
+              {piece ? ` (${piece.nom_fichier})` : ""}, {d.statut === "confirmee" ? "confirmée" : "écartée"} par {nommer(d.decide_par)}
+              {d.decide_le ? ` le ${dateCourte(d.decide_le)}` : ""}.{d.motif ? ` Motif : « ${d.motif} ».` : ""}
+            </p>
+            {d.citations.filter((c) => c.texte).slice(0, 3).map((c, i) => (
+              <p key={i} className="lor-ib-citation">
+                « {c.texte} »{c.page ? ` (p. ${c.page})` : ""}
+              </p>
+            ))}
+          </>
+        ),
+        gestes: null as React.ReactNode,
+      };
+    }
+    if (!choisi) return null;
+    const v = vue(choisi);
+    const nomPermis = choisi.permis ? titrePermis(choisi.permis, choisi.projet.nom) : null;
+    const chef = dossier.membres.find((m) => m.projet_id === choisi.projet.id && m.role_projet === "chef_projet");
+    const pilules: { cle: string; icone: React.ReactNode; texte: string; href?: string }[] = [
+      { cle: "statut", icone: <IconeStatutTicket statut={v.statut} />, texte: v.libelleStatut },
+      { cle: "chef", icone: chef ? <span className="lor-ib-avatar-petit">{initiales(nommer(chef.user_id))}</span> : <IconeSansResponsable />, texte: chef ? nommer(chef.user_id) : "Aucun chef de projet" },
+      { cle: "projet", icone: <IconeSprite nom="Project" />, texte: choisi.projet.nom, href: lienProjet(choisi.projet.id) },
+      ...(nomPermis && choisi.permis ? [{ cle: "permis", icone: <IconeSprite nom="Page" />, texte: nomPermis, href: lienPermis(choisi.permis.id) }] : []),
+    ];
+    let corps: React.ReactNode = null;
+    let gestes: React.ReactNode = null;
+    if (choisi.date) {
+      const d = choisi.date;
+      const nature = NATURES_DATE_LUE[d.nature];
+      const piece = dossier.pieces.find((x) => x.id === d.piece_id);
+      pilules.push({ cle: "lu", icone: <IconeCalendrierLor />, texte: `Lu le ${dateCourte(d.cree_le)}` });
+      corps = (
+        <>
+          <p>
+            {nature.libelle} lue sur le {nature.piece}
+            {piece ? ` (${piece.nom_fichier})` : ""} : {valeursEnClair(d.nature, d.proposition) || "valeur à saisir"}.{" "}
+            {d.verifiee ? "La citation a été retrouvée sur le courrier." : "La citation n'a pas été retrouvée sur le courrier : vérifiez avant de confirmer."}
+            {choisi.permis ? "" : " Aucun permis n'a été reconnu sur ce courrier : choisissez-le en confirmant."}
+          </p>
+          {d.citations.filter((c) => c.texte).slice(0, 3).map((c, i) => (
+            <p key={i} className="lor-ib-citation">
+              « {c.texte} »{c.page ? ` (p. ${c.page})` : ""}
+            </p>
+          ))}
+          <p className="lor-ib-sourd">Confirmée, la valeur est recalculée dans le calendrier du permis ; écartée, le permis n&apos;en garde rien et le motif reste au journal.</p>
+        </>
+      );
+      gestes = peutEcrire ? (
+        <>
+          <button type="button" className="lor-texte-btn lor-ib-texte" disabled={gris} onClick={() => ouvrirConfirmation(d)} title="Confirmer cette date">
+            <IconeLin nom="accepter" />
+            <span>Confirmer</span>
+          </button>
+          <button type="button" className="lor-texte-btn lor-ib-texte" disabled={gris} onClick={() => ouvrirEcart(d)} title="Écarter cette lecture">
+            <IconeLin nom="refuser" />
+            <span>Écarter</span>
+          </button>
+        </>
+      ) : null;
+    } else if (choisi.implicite) {
+      const p = choisi.implicite;
+      corps = (
+        <>
+          <p>{p.calcul.decision_implicite!.motif}</p>
+          <p className="lor-ib-sourd">Si aucune décision ne vous a été notifiée, confirmez-la : le permis est accordé ou rejeté à cette date. Si un arrêté est arrivé, saisissez-le sur la page du permis.</p>
+        </>
+      );
+      gestes = peutEcrire ? (
+        <>
+          <button
+            type="button"
+            className="lor-texte-btn lor-ib-texte"
+            disabled={gris}
+            onClick={() => {
+              setErreur(null);
+              setForm({ type: "implicite", permis: p });
+            }}
+            title="Confirmer la décision implicite"
+          >
+            <IconeLin nom="accepter" />
+            <span>Confirmer</span>
+          </button>
+          <Link href={lienPermis(p.id)} className="lor-texte-btn lor-ib-texte" title="Saisir la décision reçue sur la page du permis">
+            <IconeLin nom="refuser" />
+            <span>Saisir la décision</span>
+          </Link>
+        </>
+      ) : null;
+    } else if (choisi.piece) {
+      const x = choisi.piece;
+      pilules.push({ cle: "recu", icone: <IconeCalendrierLor />, texte: x.cree_le ? `${x.source === "courriel" ? "Reçu" : "Déposé"} le ${dateCourte(x.cree_le)}` : "Sans date" });
+      corps = (
+        <>
+          <p>
+            {x.nom_fichier} ({libelleTypePiece(x.type_piece).toLowerCase()}){x.source === "courriel" ? ", reçu par courriel du guichet" : ", déposé dans le dossier"}.{x.motif ? ` Le lecteur dit : « ${x.motif} ».` : ""} Aucune date n&apos;en est proposée : saisissez-la à la main sur la page du permis.
+          </p>
+        </>
+      );
+      gestes = (
+        <Link href={choisi.lien} className="lor-texte-btn lor-ib-texte" title="Saisir à la main sur la page du permis ou du projet">
+          <IconeLin nom="accepter" />
+          <span>Saisir à la main</span>
+        </Link>
+      );
+    }
+    return { id: v.id, titre: v.titre, lien: choisi.lien, pilules, corps, gestes };
+  })();
+
+  const ligne = (e: Element) => {
+    const v = vue(e);
+    const u = urgence(e.permis);
+    return (
+      <li key={e.cle}>
+        <Link href={lienChoix(e.cle)} scroll={false} className="lor-ib-ligne" data-choisie={choix === e.cle ? "" : undefined} aria-current={choix === e.cle ? "true" : undefined}>
+          <span className="lor-ib-avatar" aria-hidden="true">
+            <IconeSprite nom={v.icone} />
+          </span>
+          <span className="lor-ib-textes">
+            <span className="lor-ib-l1">
+              <span className="lor-ib-point" aria-label="À traiter" />
+              <span className="lor-ib-id">{v.id}</span>
+              <span className="lor-ib-titre">{v.titre}</span>
+              <IconeStatutTicket statut={v.statut} titre={v.libelleStatut} />
+            </span>
+            <span className="lor-ib-l2">
+              <span className="lor-ib-sous">{v.sous}</span>
+              {u ? <IconePrioriteLor niveau={u} titre={u === 1 ? "Date du permis passée" : "Date du permis dans la semaine"} /> : null}
+              <time className="lor-ib-quand" dateTime={e.quand} title={e.quand ? dateCourte(e.quand.length <= 10 ? `${e.quand}T12:00:00` : e.quand) : undefined}>
+                {depuis(e.quand)}
+              </time>
+            </span>
+          </span>
+        </Link>
+      </li>
+    );
+  };
+
   return (
-    <div className="lin lmi">
+    <div className="lor lor-ib" data-ouvert={detail ? "" : undefined}>
       <h1 className="v2-sr">Courrier à ranger</h1>
-
-      <header className="lmi-tete">
-        <h2 className="lmi-h2">Courrier à ranger</h2>
-        {comptes.tous ? <span className="lmi-tete-compte">{comptes.tous} en attente</span> : null}
-      </header>
-
-      <div className="lmi-barre">
-        <nav className="lmi-onglets" aria-label="Vues du courrier">
-          {ONGLETS.map((x, i) => (
-            <Link key={x.cle} href={lienOnglet(x.cle)} scroll={false} className="lmi-onglet" aria-current={onglet === x.cle ? "page" : undefined} data-replie={i >= 2 && onglet !== x.cle ? "" : undefined}>
-              {x.libelle}
-            </Link>
-          ))}
-          {/* en étroit : les onglets en trop dans « N de plus ▾ » (ici : Tous, sauf quand il est l'onglet courant) */}
-          {onglet !== "tous" ? (
-            <div className="lmi-plus">
-              <Menu
-                largeur={180}
-                bouton={(ouvert, basculerMenu) => (
-                  <button type="button" className="lmi-onglet" aria-expanded={ouvert} aria-haspopup="menu" onClick={basculerMenu}>
-                    1 de plus
-                    <svg viewBox="0 0 9 8" aria-hidden="true">
-                      <path d="M1 2.5 4.5 6 8 2.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                )}
-              >
-                {(fermer) =>
-                  ONGLETS.slice(2).map((x) => (
-                    <Link key={x.cle} href={lienOnglet(x.cle)} scroll={false} className="lin-menu-option" onClick={fermer}>
-                      {x.libelle}
-                      <span className="lin-meta">{comptes[x.cle]}</span>
-                    </Link>
-                  ))
-                }
-              </Menu>
-            </div>
-          ) : null}
-        </nav>
-        {!peutEcrire && pret ? <span className="lmi-lecture-seule">Lecture seule</span> : null}
-      </div>
-
-      {chargement ? (
-        <ul className="lmi-lignes" aria-busy="true" aria-label="Lecture du dossier">
-          {[0, 1, 2, 3].map((i) => (
-            <li key={i} className="lmi-ligne" aria-hidden="true">
-              <span className="lmi-titre">
-                <span className="lmi-squelette" style={{ width: `${70 - i * 12}%` }} />
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : erreurLecture ? (
-        <p className="lmi-vide" role="alert">
-          <strong>Le dossier n&apos;a pas pu être lu.</strong>
-          {erreurLecture}
-        </p>
-      ) : groupes.length ? (
-        <ul className="lmi-liste">
-          {groupes.map((g) => {
-            const replie = replies.has(g.projet.id);
-            const precision = [g.projet.reference, g.projet.commune].filter(Boolean).join(" · ");
-            return (
-              <li key={g.projet.id} className="lmi-groupe">
-                <div className="lmi-groupe-tete">
-                  <button type="button" className="lmi-groupe-replier" aria-expanded={!replie} aria-label={replie ? `Déplier ${g.projet.nom}` : `Replier ${g.projet.nom}`} onClick={() => basculer(g.projet.id)}>
-                    <ChevronDown aria-hidden="true" />
-                  </button>
-                  <Folder className="lmi-groupe-icone" aria-hidden="true" />
-                  <Link className="lmi-groupe-nom" href={lienProjet(g.projet.id)}>
-                    {g.projet.nom}
-                  </Link>
-                  <span className="lmi-groupe-compte">{g.lignes.length}</span>
-                  {precision ? <span className="lmi-groupe-precision">{precision}</span> : null}
-                  <Link className="lmi-rond" href={lienProjet(g.projet.id)} aria-label={`Déposer un courrier sur ${g.projet.nom}`} title="Déposer un courrier">
-                    <Plus aria-hidden="true" />
-                  </Link>
+      <section className="lor-ib-liste" aria-label="Courrier à ranger">
+        <header className="lor-ib-tete">
+          <div className="lor-ib-tete-gauche">
+            <h2>Courrier</h2>
+            <div className="lor-ib-ancre" ref={menuPointsRef}>
+              <button type="button" className="lor-rond" aria-label="Options du courrier" title="Options du courrier" aria-expanded={ouvertPoints} onClick={() => setOuvertPoints((o) => !o)}>
+                <IconePoints />
+              </button>
+              {ouvertPoints ? (
+                <div className="lor-menu lor-ib-menu" role="menu" aria-label="Options du courrier" style={{ left: 0, top: 34 }}>
+                  <div className="lor-menu-liste">
+                    {dossier.projets.map((p) => (
+                      <Link key={p.id} role="menuitem" href={`${lienProjet(p.id)}&deposer=1`} className="lor-option" onClick={() => setOuvertPoints(false)}>
+                        <IconeSprite nom="Attachment" />
+                        <span className="lor-option-libelle">Déposer un courrier sur {p.nom}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-                {replie ? null : <ul className="lmi-lignes">{g.lignes.map(ligne)}</ul>}
+              ) : null}
+            </div>
+          </div>
+          <div className="lor-ib-tete-droite">
+            <Link href={lienTraites()} scroll={false} className="lor-rond" aria-pressed={voirTraites} aria-label={voirTraites ? "Masquer les courriers traités" : "Afficher les courriers traités"} title={voirTraites ? "Masquer les courriers traités" : "Afficher les courriers traités"}>
+              <IconeArchive />
+            </Link>
+            <div className="lor-ib-ancre" ref={menuFiltreRef}>
+              <button type="button" className="lor-rond" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvertFiltre} onClick={() => setOuvertFiltre((o) => !o)}>
+                <IconeFiltre />
+              </button>
+              {ouvertFiltre ? (
+                <div className="lor-menu lor-ib-menu" role="menu" aria-label="Filtrer" style={{ right: 0, top: 34 }}>
+                  <div className="lor-menu-liste">
+                    {ONGLETS.map((x) => (
+                      <Link key={x.cle} role="menuitemradio" aria-checked={onglet === x.cle} href={lienFiltre(x.cle)} scroll={false} className="lor-option" data-actif={onglet === x.cle ? "" : undefined} onClick={() => setOuvertFiltre(false)}>
+                        <span className="lor-option-libelle">{x.libelle}</span>
+                        <span className="lor-option-droite">{comptes[x.cle]}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <div className="lor-ib-ancre" ref={menuAffRef}>
+              <button type="button" className="lor-rond" aria-label="Affichage" title="Affichage" aria-expanded={ouvertAff} onClick={() => setOuvertAff((o) => !o)}>
+                <IconeAffichage />
+              </button>
+              {ouvertAff ? (
+                <div className="lor-menu lor-ib-menu" role="dialog" aria-label="Affichage" style={{ right: 0, top: 34 }}>
+                  <div className="lor-menu-liste">
+                    <Link href={lienTraites()} scroll={false} className="lor-option" onClick={() => setOuvertAff(false)}>
+                      <span className="lor-option-libelle">{voirTraites ? "Masquer les courriers traités" : "Afficher les courriers traités"}</span>
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </header>
+        {!peutEcrire && pret ? <p className="lor-ib-note">Lecture seule : vous voyez le courrier sans pouvoir le traiter.</p> : null}
+        {chargement ? (
+          <p className="lor-ib-note" role="status">
+            Lecture du dossier…
+          </p>
+        ) : erreurLecture ? (
+          <p className="lor-ib-note" role="alert">
+            Le dossier n&apos;a pas pu être lu. {erreurLecture}
+          </p>
+        ) : (
+          <ul className="lor-ib-lignes">
+            {visibles.map(ligne)}
+            {voirTraites
+              ? traites.map((t) => {
+                  const nature = NATURES_DATE_LUE[t.d.nature];
+                  const cle = `t:${t.d.id}`;
+                  return (
+                    <li key={cle}>
+                      <Link href={lienChoix(cle)} scroll={false} className="lor-ib-ligne" data-lu="" data-choisie={choix === cle ? "" : undefined}>
+                        <span className="lor-ib-avatar" aria-hidden="true">
+                          <IconeSprite nom={ICONE_NATURE[t.d.nature]} />
+                        </span>
+                        <span className="lor-ib-textes">
+                          <span className="lor-ib-l1">
+                            <span className="lor-ib-id">{t.permis?.numero ?? (t.permis ? TYPES[t.permis.type_autorisation].court : "Projet")}</span>
+                            <span className="lor-ib-titre">
+                              {nature.libelle} : {valeursEnClair(t.d.nature, t.d.confirme ?? t.d.proposition) || "—"}
+                            </span>
+                            <IconeStatutTicket statut={t.d.statut === "confirmee" ? "fait" : "annule"} titre={t.d.statut === "confirmee" ? "Confirmée" : "Écartée"} />
+                          </span>
+                          <span className="lor-ib-l2">
+                            <span className="lor-ib-sous">
+                              {t.d.statut === "confirmee" ? "Confirmée" : "Écartée"} par {nommer(t.d.decide_par)}
+                            </span>
+                            <time className="lor-ib-quand">{depuis(t.d.decide_le ?? t.d.maj_le)}</time>
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })
+              : null}
+            {!visibles.length && !voirTraites ? (
+              <li className="lor-ib-note">
+                {vide.titre}. {vide.aide}
               </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <p className="lmi-vide">
-          <strong>{vide.titre}</strong>
-          {vide.aide}
-        </p>
-      )}
+            ) : null}
+          </ul>
+        )}
+      </section>
 
+      <section className="lor-ib-droite" aria-label={detail ? "Courrier ouvert" : "Aucun courrier ouvert"}>
+        {detail ? (
+          <>
+            <header className="lor-ib-d-tete">
+              <div className="lor-ib-d-fil">
+                <Link href={lienChoix(null)} scroll={false} className="lor-rond lor-ib-retour" aria-label="Revenir à la liste" title="Revenir à la liste">
+                  <IconeLin nom="chevronBas" className="lor-ib-retour-icone" />
+                </Link>
+                <Link href={detail.lien} className="lor-ib-d-courant">
+                  <h2>
+                    <span className="lor-ib-d-id">{detail.id}</span>
+                    {detail.titre}
+                  </h2>
+                </Link>
+              </div>
+              <div className="lor-ib-d-gestes">{detail.gestes}</div>
+            </header>
+            <div className="lor-ib-d-corps">
+              <h2 className="lor-ib-d-titre">{detail.titre}</h2>
+              <div className="lor-ib-d-pilules">
+                {detail.pilules.map((x) =>
+                  x.href ? (
+                    <Link key={x.cle} href={x.href} className="lor-ib-pilule">
+                      {x.icone}
+                      <span>{x.texte}</span>
+                    </Link>
+                  ) : (
+                    <span key={x.cle} className="lor-ib-pilule">
+                      {x.icone}
+                      <span>{x.texte}</span>
+                    </span>
+                  ),
+                )}
+              </div>
+              <div className="lor-ib-d-texte">{detail.corps}</div>
+            </div>
+          </>
+        ) : (
+          <div className="lor-ib-vide">
+            <svg viewBox="0 0 78 80" fill="none" width="105" height="100" aria-hidden="true">
+              <path stroke="var(--lor-t3)" strokeWidth="1.5" d="M10.4 9.11A10 10 0 0 1 20.22 1h37.56a10 10 0 0 1 9.82 8.11l8.11 42.2a10 10 0 0 1-9.82 11.9H54.7a6.36 6.36 0 0 0-5.65 3.45 6.36 6.36 0 0 1-5.66 3.45H34.6a6.36 6.36 0 0 1-5.66-3.45 6.36 6.36 0 0 0-5.65-3.46H12.1a10 10 0 0 1-9.8-11.89l8.11-42.2Z" />
+              <path stroke="var(--lor-t2)" strokeWidth="1.5" d="M14.3 9.03a5 5 0 0 1 4.91-4.08H58.8a5 5 0 0 1 4.91 4.08l8.07 43.22a6 6 0 0 1-5.9 7.1H52.76a5.72 5.72 0 0 0-5.24 3.41 5.72 5.72 0 0 1-5.23 3.42h-6.58a5.72 5.72 0 0 1-5.23-3.42 5.72 5.72 0 0 0-5.24-3.4h-13.1a6 6 0 0 1-5.9-7.1L14.3 9.02Z" />
+              <path stroke="var(--lor-t3)" strokeWidth="1.5" d="m2.36 55.6 3.2 14.06A12 12 0 0 0 17.26 79h43.48a12 12 0 0 0 11.7-9.34l3.2-14.06" />
+            </svg>
+            <p>{visibles.length ? `${visibles.length} courrier${visibles.length > 1 ? "s" : ""} à traiter` : "Aucun courrier ouvert"}</p>
+          </div>
+        )}
+      </section>
       {/* F7 — confirmer une date lue (le permis visé se choisit quand il y en a plusieurs, ou aucun) */}
       <Dialog open={form?.type === "confirmer"} onOpenChange={(ouvert) => !ouvert && !envoi && setForm(null)}>
         <DialogContent>
