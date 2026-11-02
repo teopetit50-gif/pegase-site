@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Opportunites from "@/components/espace2/reseau/opportunites-vue";
 
-/* /espace2/reseau/opportunites — Réseau Omega › Opportunités (02/11/2026) :
-   ce que le réseau fait gagner à l'organisation connectée, en kanban à la
-   façon d'Attio (mises en relation, groupements de marchés publics, achats
-   groupés) et le suivi de ce qu'il a déjà apporté.
+/* /espace2/reseau/opportunites — Réseau Omega › Opportunités : ce que le
+   réseau fait gagner à l'organisation connectée. Le tableau en colonnes
+   des moteurs (kit ../lin, comme OFFLOAD › Affaires), la carte ouverte au
+   milieu (?id=), et « Ce que le réseau vous a apporté » (?vue=apports).
    components/espace2/reseau/opportunites-vue.tsx */
 
 export const metadata: Metadata = {
@@ -13,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Opportunites />;
+  return (
+    <Suspense>
+      <Opportunites />
+    </Suspense>
+  );
 }
