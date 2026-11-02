@@ -60,6 +60,8 @@ import {
   type StatutLor,
 } from "./lor-icones";
 import type { NomIcone } from "./lor-sprite";
+import { datesReport, exporterCsv, useMarques, useReports } from "./lor-local";
+import { BarreSelection, useSelection } from "./lor-selection";
 import "@/components/espace/espace.css";
 import "./lor.css";
 import "./lor-projets.css";
@@ -186,6 +188,12 @@ export default function VueEnsemble() {
   const [ouvertFiltre, setOuvertFiltre, menuFiltreRef] = useMenu();
   const [ouvertAffichage, setOuvertAffichage, menuAffichageRef] = useMenu();
   const [recherche, setRecherche] = useState("");
+  /* 02/11 : épingles (étoile), suivis (cloche), reports (Snooze), sélection (cases) — ./lor-local.ts */
+  const favoris = useMarques("favoris");
+  const suivis = useMarques("suivis");
+  const reports = useReports();
+  const selection = useSelection();
+  const [voirReportes, setVoirReportes] = useState(false);
 
   const comptes = useMemo(() => {
     const c: Record<Famille, number> = { a_confirmer: 0, pieces: 0, instruction: 0, accordes: 0, clos: 0 };
@@ -250,6 +258,48 @@ export default function VueEnsemble() {
 
   const sansPermis = useMemo(() => (filtre ? [] : dossier.projets.filter((pr) => !dossier.permis.some((p) => p.projet_id === pr.id))), [dossier.projets, dossier.permis, filtre]);
 
+  /* les reportés (Snooze) quittent la liste jusqu'à leur date ; les épinglés (étoile) passent en tête */
+  const permisVus = visibles.filter((p) => voirReportes || !reports.jusqua(`permis:${p.id}`));
+  const projetsVus = sansPermis.filter((pr) => voirReportes || !reports.jusqua(`projet:${pr.id}`));
+  const nombreReportes = visibles.length + sansPermis.length - permisVus.length - projetsVus.length;
+  const epingles: ({ sorte: "permis"; p: Permis } | { sorte: "projet"; pr: Projet })[] = [
+    ...permisVus.filter((p) => favoris.a(`permis:${p.id}`)).map((p) => ({ sorte: "permis" as const, p })),
+    ...projetsVus.filter((pr) => favoris.a(`projet:${pr.id}`)).map((pr) => ({ sorte: "projet" as const, pr })),
+  ];
+
+  /* export CSV de la liste affichée (filtre, tri et reports compris) */
+  const exporter = () => {
+    const lignes = [
+      ...permisVus.map((p) => {
+        const pr = projetDe(p.projet_id);
+        const chef = chefDe(p.projet_id);
+        return [titrePermis(p, pr?.nom ?? ""), pr?.nom ?? "", p.numero ?? "", FAMILLES.find((f) => f.cle === familleDe(p))?.libelle ?? "", ETATS[p.etat]?.libelle ?? p.etat, prochaineDate(p) ?? "", chef ? nommer(chef) : "", proposeesPar[p.id] ?? 0, favoris.a(`permis:${p.id}`) ? "oui" : ""];
+      }),
+      ...projetsVus.map((pr) => [`${pr.nom} (sans permis)`, pr.nom, "", "Sans permis", PHASES[pr.phase], "", chefDe(pr.id) ? nommer(chefDe(pr.id)) : "", proposeesPar[`projet:${pr.id}`] ?? 0, favoris.a(`projet:${pr.id}`) ? "oui" : ""]),
+    ];
+    exporterCsv(`permis-${aujourdhui}`, ["Permis", "Projet", "Numéro", "Santé", "État", "Prochaine date", "Chef de projet", "Dates lues à confirmer", "Épinglé"], lignes);
+    toast(`${lignes.length} lignes exportées en CSV.`);
+  };
+  const actionsGroupees = [
+    { cle: "epingler", libelle: "Épingler", faire: () => favoris.poser(selection.cles, true) },
+    { cle: "desepingler", libelle: "Désépingler", faire: () => favoris.poser(selection.cles, false) },
+    { cle: "suivre", libelle: "Suivre", faire: () => { suivis.poser(selection.cles, true); toast("Suivis : leurs courriers passent en tête du Courrier."); } },
+    ...datesReport().slice(0, 3).map((d) => ({ cle: `rep-${d.cle}`, libelle: `Reporter · ${d.libelle.toLowerCase()}`, faire: () => { selection.cles.forEach((k) => reports.reporter(k, d.date)); selection.vider(); } })),
+    { cle: "csv", libelle: "Exporter en CSV", faire: () => {
+      const lignes = selection.cles.map((k) => {
+        const [sorte, id] = k.split(":");
+        if (sorte === "permis") {
+          const p = dossier.permis.find((x) => x.id === id);
+          const pr = p ? projetDe(p.projet_id) : undefined;
+          return p ? [titrePermis(p, pr?.nom ?? ""), pr?.nom ?? "", ETATS[p.etat]?.libelle ?? "", prochaineDate(p) ?? ""] : [];
+        }
+        const pr = dossier.projets.find((x) => x.id === id);
+        return pr ? [pr.nom, pr.nom, "Sans permis", ""] : [];
+      });
+      exporterCsv(`permis-selection-${aujourdhui}`, ["Permis", "Projet", "État", "Prochaine date"], lignes);
+    } },
+  ];
+
   const trier = (cle: Tri) => setTri((t) => (t.cle === cle ? (t.montant ? { cle, montant: false } : { cle: "manuel", montant: true }) : { cle, montant: true }));
 
   /* ——— F1 : nouveau projet (G1), puis la page du projet ——— */
@@ -288,6 +338,29 @@ export default function VueEnsemble() {
     }
   };
 
+  /* ——— la case à cocher d'une ligne (sélection multiple, « x » au clavier comme dans Linear) ——— */
+  const caseLigne = (cle: string) => (
+    <span
+      className="lor-pj-c-case"
+      role="checkbox"
+      aria-checked={selection.a(cle)}
+      aria-label="Sélectionner"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        selection.basculer(cle);
+      }}
+    >
+      <span className="lor-pj-case lor-coche" aria-checked={selection.a(cle)} />
+    </span>
+  );
+  const toucheLigne = (e: React.KeyboardEvent, cle: string) => {
+    if (e.key === "x" && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault();
+      selection.basculer(cle);
+    }
+  };
+
   /* ——— cellules communes ——— */
   const celluleChef = (projetId: string) => {
     const chef = chefDe(projetId);
@@ -306,6 +379,7 @@ export default function VueEnsemble() {
 
   /* ——— une ligne de permis ——— */
   const lignePermis = (p: Permis) => {
+    const cle = `permis:${p.id}`;
     const pr = projetDe(p.projet_id);
     const nomProjet = pr?.nom ?? "Projet";
     const f = familleDe(p);
@@ -327,10 +401,8 @@ export default function VueEnsemble() {
     const etat = ETATS[p.etat] ?? ETATS.a_deposer;
     return (
       <li key={p.id}>
-        <Link href={`${BASE}/permis/${encodeURIComponent(p.id)}`} className="lor-pj-grille lor-pj-ligne">
-          <span className="lor-pj-c-case" aria-hidden="true">
-            <span className="lor-pj-case" />
-          </span>
+        <Link href={`${BASE}/permis/${encodeURIComponent(p.id)}`} className="lor-pj-grille lor-pj-ligne" data-coche={selection.a(cle) ? "" : undefined} onKeyDown={(e) => toucheLigne(e, cle)}>
+          {caseLigne(cle)}
           <span className="lor-pj-c-titre">
             <span className="lor-pj-nom-cell">
               <span className="lor-pj-icone" title={pr ? NATURES_PROJET[pr.nature] : undefined}>
@@ -396,14 +468,13 @@ export default function VueEnsemble() {
 
   /* ——— une ligne de projet sans permis ——— */
   const ligneProjet = (pr: Projet) => {
+    const cle = `projet:${pr.id}`;
     const n = proposeesPar[`projet:${pr.id}`] ?? 0;
     const nature = ICONE_NATURE[pr.nature];
     return (
       <li key={pr.id}>
-        <Link href={`${BASE}/projets/${encodeURIComponent(pr.id)}`} className="lor-pj-grille lor-pj-ligne">
-          <span className="lor-pj-c-case" aria-hidden="true">
-            <span className="lor-pj-case" />
-          </span>
+        <Link href={`${BASE}/projets/${encodeURIComponent(pr.id)}`} className="lor-pj-grille lor-pj-ligne" data-coche={selection.a(cle) ? "" : undefined} onKeyDown={(e) => toucheLigne(e, cle)}>
+          {caseLigne(cle)}
           <span className="lor-pj-c-titre">
             <span className="lor-pj-nom-cell">
               <span className="lor-pj-icone" title={NATURES_PROJET[pr.nature]}>
@@ -560,6 +631,16 @@ export default function VueEnsemble() {
                       <option value="masques">Masqués</option>
                     </select>
                   </label>
+                  <label className="lor-pj-aff-ligne">
+                    Reportés{reports.nombre ? ` (${reports.nombre})` : ""}
+                    <select value={voirReportes ? "tous" : "masques"} onChange={(e) => setVoirReportes(e.target.value === "tous")}>
+                      <option value="masques">Masqués jusqu&apos;à leur date</option>
+                      <option value="tous">Affichés</option>
+                    </select>
+                  </label>
+                  <button type="button" className="lor-option" onClick={() => { setOuvertAffichage(false); exporter(); }}>
+                    <span className="lor-option-libelle">Exporter la liste affichée (CSV)</span>
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -606,10 +687,24 @@ export default function VueEnsemble() {
                 </span>
                 {entete("statut", "Statut", "lor-pj-c-statut")}
               </div>
+              {epingles.length ? (
+                <>
+                  <div className="lor-groupe-epingles" title="Épinglés avec l'étoile de leur page ; gardé dans ce navigateur">
+                    Épinglés · {epingles.length}
+                  </div>
+                  <ul>{epingles.map((x) => (x.sorte === "permis" ? lignePermis(x.p) : ligneProjet(x.pr)))}</ul>
+                  <div className="lor-groupe-epingles">{actif ? actif.libelle : "Tous les permis"}</div>
+                </>
+              ) : null}
               <ul>
-                {visibles.map(lignePermis)}
-                {sansPermis.map(ligneProjet)}
+                {permisVus.filter((p) => !favoris.a(`permis:${p.id}`)).map(lignePermis)}
+                {projetsVus.filter((pr) => !favoris.a(`projet:${pr.id}`)).map(ligneProjet)}
               </ul>
+              {nombreReportes && !voirReportes ? (
+                <button type="button" className="lor-pj-reportes" onClick={() => setVoirReportes(true)}>
+                  {nombreReportes} reporté{nombreReportes > 1 ? "s" : ""} jusqu&apos;à une date : les afficher
+                </button>
+              ) : null}
             </>
           )}
         </section>
@@ -655,6 +750,8 @@ export default function VueEnsemble() {
           </aside>
         ) : null}
       </div>
+
+      <BarreSelection nombre={selection.cles.length} actions={actionsGroupees} vider={selection.vider} />
 
       {/* ——— F1 : nouveau projet ——— */}
       <Dialog open={ouvert} onOpenChange={(o) => !o && setOuvert(false)}>
