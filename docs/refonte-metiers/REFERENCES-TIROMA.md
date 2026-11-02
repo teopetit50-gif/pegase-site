@@ -9,7 +9,7 @@ Consigne : `docs/refonte-metiers/cloud/COMMUN.md` et `cloud/TIROMA.md` (branche 
 | Créneaux et appels | `/espace2/tiroma/creneaux` | Plain, Threads | `plain-threads.md` | `creneaux-*`, `creneaux-fil-*` | faite : liste (en-tête, groupes, lignes de 67, colonnes) et fil ouvert (en-tête, messages, volet) superposés ; gestes testés |
 | Fauteuils | `/espace2/tiroma/fauteuils` | Cal.com, Bookings | `calcom-bookings.md` | `fauteuils-*` | à faire |
 | Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | faite : en-tête, colonnes de 324 au pas de 348, têtes de 50, cartes (identifiant, titre, puces, pied) superposées ; gestes testés |
-| Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | à faire |
+| Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | faite : barre de titre, boutons, titre de section, cartes (titre, valeur, graphique, axes) superposés ; gestes testés |
 | Réglages | `/espace2/tiroma/reglages` | Linear, Settings › Team | `linear-team-settings.md` | `reglages-*` | faite : écart moyen 3,3/255 ; lien retour, titre, cartes, rangées de 65, h3 confondus ; gestes testés |
 
 ## Fichiers communs (préfixe `tir-`, propres à Tiroma)
@@ -123,3 +123,24 @@ Superposition (carte, 1500×920) : écart moyen 3,3/255. Restent, expliqués : t
 la barre latérale des réglages de Linear (« Back to app », groupes) n'appartient pas à la page : le sous-menu de
 l'espace 2 en tient lieu ; les sous-pages de réglages de Linear ne sont pas relevées : elles reprennent le gabarit de
 cette page (cartes, rangées, boutons 32) et les formulaires sont posés en cartes du même gabarit.
+
+## Pilotage ← Plain, Insights › Reporting
+
+Sections : Vue d'ensemble (B15 : Devis acceptés avec la courbe de l'occupation moyenne par semaine ; Signé sans
+rendez-vous avec la répartition reste à charge / devis sans réponse / à relancer / expirent ; Rendez-vous manqués par
+praticien), Occupation des fauteuils (B18 : barres par semaine au gabarit « New threads created per day », ligne
+pointillée et étiquette « Objectif » à la place de « Average »), Répartitions (devis par panier, réinscription par
+praticien B14, appels notés B12), Objectifs par fauteuil (B18 : tableau au gabarit des rapports, « Fixer » /
+« Changer » F4/G6 dans la ligne, valeur 1 à 100, vide = retirer), Semaine du … au … (B13 : tableau par centre + TOTAL),
+Devis à relancer (B15), Vus sans prochain rendez-vous (B14 ; noms masqués pour la direction), pied « Patients
+rappelés » au compteur à volets (« Customers helped »).
+« Noter l'appel » (F3/G2) : menu de Plain (items de 36) avec les issues, « À rappeler » demain / dans 7 / dans 30
+jours, « Ne plus contacter » confirmé. Boutons : Filtre (praticien), Grouper par, Période et Pas (menus de Plain ;
+les horizons sont ceux, fixes, des portes : 30 jours, semaine passée, six semaines — Quotidien et Mensuel grisés
+comme les pas indisponibles de Plain). Conditions de profil de l'écran d'avant gardées.
+
+Superposition (carte, 1391×948) : écart moyen 9,0/255 ; barre de titre, boutons, titre de section, titres de carte,
+valeurs, haut des graphiques et axes confondus. Restent, expliqués : « Ask Agent » et « Ask Sidekick Agent » (IA de
+Plain, sans équivalent) ; Top issues / Themes / rapports Team, Accounts… (navigation latérale de Plain, sans objet) ;
+Whyte remplacée par Inter 400 ; graphiques : séries hebdomadaires (les portes ne donnent pas de série quotidienne) ;
+référence 390 : capture en chargement (flou), seule disponible.

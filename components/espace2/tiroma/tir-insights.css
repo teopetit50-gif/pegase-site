@@ -1,0 +1,462 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA — Pilotage : Insights › Reporting de Plain au 1:1 (02/11/2026)
+   Relevé : docs/refonte-metiers/releves/plain-insights.md ; cotes sur
+   1440-reel-*.png (carte à 353,8).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tir-in {
+  --in-grille: #323035;
+  --in-raye-1: #1a191b;
+  --in-raye-2: #121113;
+  --in-axe: #b5b2bc;
+  --in-moyenne: #49474e;
+  --in-badge-haut-fond: #18100f;
+  --in-badge-haut-texte: #ffd2cc;
+  --in-badge-bas-fond: #0c130e;
+  --in-badge-bas-texte: #b2f2c0;
+}
+html[data-v2-theme="light"] .v2 .tir-in {
+  --in-grille: #e0e0e9;
+  --in-raye-1: #fff;
+  --in-raye-2: #f9f9fc;
+  --in-axe: #636370;
+  --in-moyenne: #cdcddb;
+  --in-badge-haut-fond: #fff7f7;
+  --in-badge-haut-texte: #651818;
+  --in-badge-bas-fond: #f3fcf5;
+  --in-badge-bas-texte: #074022;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tir-in {
+    --in-grille: #e0e0e9;
+    --in-raye-1: #fff;
+    --in-raye-2: #f9f9fc;
+    --in-axe: #636370;
+    --in-moyenne: #cdcddb;
+    --in-badge-haut-fond: #fff7f7;
+    --in-badge-haut-texte: #651818;
+    --in-badge-bas-fond: #f3fcf5;
+    --in-badge-bas-texte: #074022;
+  }
+}
+
+/* barre de titre 86 : h1 Whyte 24/400/32 à 24,30 ; boutons bordés 30 à droite (gap 8), 24 du bord */
+.v2 .tir-in .in-tete {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  height: 86px;
+  padding: 30px 24px 0;
+}
+.v2 .tir-in .in-h1 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  white-space: nowrap;
+}
+.v2 .tir-in .in-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+.v2 .tir-in .in-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 6px 12px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 6px;
+  background: var(--pl-fond-1);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.v2 .tir-in .in-bouton > svg {
+  flex: none;
+  color: var(--pl-icone-1);
+}
+.v2 .tir-in .in-bouton-lib {
+  font-weight: 550;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-bouton-val {
+  font-weight: 400;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-menu .pl-menu-item {
+  height: 36px;
+  padding: 8px;
+  font-size: 14px;
+}
+.v2 .tir-in .in-menu--36 .in-menu-deux {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  height: 54px;
+  line-height: 20px;
+}
+.v2 .tir-in .in-menu-deux span + span {
+  font-size: 12px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-indispo {
+  color: var(--pl-texte-2);
+}
+
+/* zone défilante : filet haut, p 0 24 120 ; sections, titre collant */
+.v2 .tir-in .in-defile {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 0 24px 120px;
+  border-top: 1px solid var(--pl-bord-2);
+}
+.v2 .tir-in .in-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .tir-in .in-section-titre {
+  position: sticky;
+  top: -12px;
+  z-index: 3;
+  height: 60px;
+  padding: 26px 0 12px;
+  background: var(--pl-fond-1);
+}
+.v2 .tir-in .in-section-titre button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-section-titre h2 {
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+}
+.v2 .tir-in .in-section-titre svg {
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-grille {
+  display: grid;
+  gap: 42px;
+}
+.v2 .tir-in .in-grille--3 {
+  grid-template-columns: repeat(3, minmax(0, 315.66px));
+}
+.v2 .tir-in .in-grille--2 {
+  grid-template-columns: repeat(2, minmax(0, 494.5px));
+}
+/* carte : p 12, r 8, sans fond ni bordure ; gap 24 */
+.v2 .tir-in .in-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 4px 0 12px;
+  border-radius: 8px;
+}
+.v2 .tir-in .in-carte-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-carte-tete svg {
+  color: var(--pl-icone-2);
+}
+.v2 .tir-in .in-valeur {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: -16px;
+}
+.v2 .tir-in .in-valeur-chiffre {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 36px;
+  color: var(--pl-texte-1);
+  white-space: nowrap;
+}
+.v2 .tir-in .in-valeur-suffixe {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-graphe {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+}
+.v2 .tir-in .in-axe-y {
+  font-size: 14px;
+  fill: var(--in-axe);
+}
+.v2 .tir-in .in-axe-x {
+  font-size: 12px;
+  fill: var(--in-axe);
+}
+.v2 .tir-in .in-moy {
+  display: inline-flex;
+  gap: 2px;
+  padding: 0 4px 2px;
+  border: 1px solid var(--pl-bord-2);
+  border-radius: 4px;
+  background: var(--pl-fond-1);
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-moy strong {
+  font-weight: 400;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-note,
+.v2 .tir-in .in-texte {
+  margin-top: -12px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-texte {
+  margin: 0 0 8px;
+}
+/* répartition : 5 lignes ; icône 18 + nom 12/400/16 au-dessus d'une barre de 8 r 2 ; valeur 12/550 à droite */
+.v2 .tir-in .in-repartition {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.v2 .tir-in .in-rep-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 8px;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+.v2 .tir-in .in-rep-haut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 64px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+  min-width: 0;
+}
+.v2 .tir-in .in-rep-nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tir-in .in-rep-barre {
+  grid-column: 1;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--pl-rempli-1);
+  overflow: hidden;
+}
+.v2 .tir-in .in-rep-barre span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+.v2 .tir-in .in-rep-val {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.v2 .tir-in .in-badge {
+  padding: 1px 4px 1px 1px;
+  border-radius: 4px;
+  background: var(--pl-rempli-1);
+  font-weight: 400;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-badge--haut {
+  background: var(--in-badge-haut-fond);
+  color: var(--in-badge-haut-texte);
+}
+.v2 .tir-in .in-badge--bas {
+  background: var(--in-badge-bas-fond);
+  color: var(--in-badge-bas-texte);
+}
+.v2 .tir-in .in-vide-boite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 24px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 8px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-vide-boite strong {
+  font-weight: 550;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-lien {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-bleu-texte-2);
+}
+.v2 .tir-in .in-erreur {
+  font-size: 12px;
+  color: var(--pl-rouge-icone);
+}
+/* tableau en grille CSS (pas de <table>) : lignes de 42, p 4 20, gap 0 16 ; en-têtes 12/550 ; 1re cellule 12/550 */
+.v2 .tir-in .in-tableau {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.v2 .tir-in .in-tab-ligne {
+  display: grid;
+  grid-template-columns: var(--in-cols);
+  align-items: center;
+  column-gap: 16px;
+  min-height: 42px;
+  padding: 4px 20px;
+  border-top: 1px solid var(--pl-bord-1);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+}
+.v2 .tir-in .in-tab-ligne > span,
+.v2 .tir-in .in-tab-ligne > a {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tir-in .in-tab-tete {
+  border-top: 0;
+  font-weight: 550;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-tab-total {
+  font-weight: 550;
+  background: var(--pl-fond-2);
+}
+.v2 .tir-in .in-tab-objet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 8px 0;
+  font-weight: 550;
+}
+.v2 .tir-in .in-tab-objet svg {
+  flex: none;
+  color: var(--pl-icone-1);
+}
+.v2 .tir-in .in-tab-ligne > span:has(.pl-ancre) {
+  overflow: visible;
+  justify-self: end;
+}
+.v2 .tir-in .in-prevu {
+  color: var(--pl-texte-2);
+  font-style: italic;
+}
+.v2 .tir-in .in-sous {
+  color: #e79d00;
+}
+.v2 .tir-in .in-edition {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .tir-in .in-edition .pl-champ {
+  width: 64px;
+  height: 26px;
+  font-size: 12px;
+}
+.v2 .tir-in .in-section + .in-section {
+  margin-top: 24px;
+}
+/* pied : « Customers helped » Whyte 20/400/28 et compteur à volets (demi-cases 28×17,5) */
+.v2 .tir-in .in-pied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 48px;
+  padding: 24px 0;
+}
+.v2 .tir-in .in-pied-sur {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tir-in .in-pied-titre {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+}
+.v2 .tir-in .in-volets {
+  display: inline-flex;
+  gap: 4px;
+}
+.v2 .tir-in .in-volet {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 35px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 4px;
+  background: linear-gradient(var(--pl-fond-2) 50%, var(--pl-fond-1) 50%);
+  font-size: 20px;
+  line-height: 20px;
+}
+.v2 .tir-in .in-volet::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 0.5px solid var(--pl-bord-1);
+}
+
+/* ——— 390 : boutons sur deux lignes à droite, grille d'une colonne ——— */
+@media (max-width: 768px) {
+  .v2 .tir-in .in-tete {
+    flex-direction: column;
+    height: auto;
+    padding: 16px;
+  }
+  .v2 .tir-in .in-defile {
+    padding: 0 16px 80px;
+  }
+  .v2 .tir-in .in-grille--3,
+  .v2 .tir-in .in-grille--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .tir-in .in-tableau {
+    overflow-x: auto;
+  }
+  .v2 .tir-in .in-tab-ligne {
+    min-width: 720px;
+  }
+}
