@@ -27,12 +27,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { montant } from "@/components/espace/format";
-import { FAMILLES, famille, nomLocataire, propositionVivante, type Famille } from "@/components/espace/tavaro/etats";
-import type { Dossier } from "@/components/espace/tavaro/types";
+import { FAMILLES, STATUTS_FACTURE, famille, nomLocataire, propositionVivante, resteDu, type Famille } from "@/components/espace/tavaro/etats";
+import type { Dossier, Facture } from "@/components/espace/tavaro/types";
 import { useTavaro } from "./donnees";
 import { TavCarte, TavMenu, type OptionMenu } from "./TavCadre";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import FicheContrat from "./FicheContrat";
+import { exporterCsv, useReportes, useSuivis } from "./navigateur";
 import { BASE } from "./VueEnsemble";
 import "./tav-inbox.css";
 
@@ -68,32 +69,72 @@ export default function Retours() {
     return dossiers.find((d) => (prop && d.propositions.some((x) => x.id === prop)) || (fac && d.factures.some((x) => x.id === fac)) || (av && d.avoirs.some((x) => x.id === av)))?.contrat.id ?? null;
   }, [params, dossiers]);
   const choix = params.get("contrat") ?? parObjet;
+  /* la vue « Factures » (promesse : factures de restitution échues relancées ; repères /tavaro/factures, E15 et E17) */
+  const vue = params.get("vue") === "factures" ? "factures" : "contrats";
+  const SOUS = ["a_envoyer", "hier", "impayees", "toutes"] as const;
+  type Sous = (typeof SOUS)[number];
+  const sousFacture = (SOUS.includes(params.get("factures") as Sous) ? params.get("factures") : "impayees") as Sous;
+  const voirReportes = params.get("reportes") === "1";
+  const suivis = useSuivis();
+  const reportes = useReportes();
   const [maintenant] = useState(() => Date.now());
   const liste = useRef<HTMLUListElement>(null);
 
   const visibles = useMemo(() => {
-    const l = dossiers.filter((d) => !filtre || famille(d.contrat, d.propositions, d.factures) === filtre);
+    const l = dossiers.filter((d) => (!filtre || famille(d.contrat, d.propositions, d.factures) === filtre) && (voirReportes ? !!reportes.jusquA(`contrat:${d.contrat.id}`) : !reportes.jusquA(`contrat:${d.contrat.id}`)));
     return [...l].sort((a, b) => {
+      /* Suivre (la cloche) : les contrats suivis d'abord */
+      const sa = suivis.a(`contrat:${a.contrat.id}`) ? 0 : 1;
+      const sb = suivis.a(`contrat:${b.contrat.id}`) ? 0 : 1;
+      if (sa !== sb) return sa - sb;
       const fa = RANG[famille(a.contrat, a.propositions, a.factures)];
       const fb = RANG[famille(b.contrat, b.propositions, b.factures)];
       if (fa !== fb) return fa - fb;
       return (b.contrat.retour_reel_le ?? b.contrat.retour_prevu_le).localeCompare(a.contrat.retour_reel_le ?? a.contrat.retour_prevu_le);
     });
-  }, [dossiers, filtre]);
-  const dossier = visibles.find((d) => d.contrat.id === choix) ?? null;
+  }, [dossiers, filtre, voirReportes, reportes, suivis]);
+
+  /* ——— les factures : à envoyer soi-même, émises hier, impayées avec leurs relances ——— */
+  const [hier] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0, 10);
+  });
+  const toutesFactures = useMemo(() => dossiers.flatMap((d) => d.factures.map((f) => ({ f, d, reste: resteDu(f, d.avoirs) }))), [dossiers]);
+  const estAEnvoyer = (f: Facture) => f.statut === "emise" && !f.envoi_id;
+  const estImpayee = (x: { f: Facture; reste: number }) => (x.f.statut === "emise" || x.f.statut === "envoyee" || x.f.statut === "litige") && x.reste > 0;
+  const comptesFactures = {
+    a_envoyer: toutesFactures.filter((x) => estAEnvoyer(x.f)).length,
+    hier: toutesFactures.filter((x) => x.f.date_facture.slice(0, 10) === hier).length,
+    impayees: toutesFactures.filter(estImpayee).length,
+    toutes: toutesFactures.length,
+  };
+  const factures = useMemo(
+    () =>
+      toutesFactures
+        .filter((x) => (sousFacture === "a_envoyer" ? estAEnvoyer(x.f) : sousFacture === "hier" ? x.f.date_facture.slice(0, 10) === hier : sousFacture === "impayees" ? estImpayee(x) : true))
+        .sort((x, y) => x.f.echeance_le.localeCompare(y.f.echeance_le)),
+    [toutesFactures, sousFacture, hier],
+  );
+  const dossier = (vue === "factures" ? dossiers : visibles).find((d) => d.contrat.id === choix) ?? null;
   useEffect(() => {
     setActif(dossier?.contrat.id ?? null);
   }, [dossier, setActif]);
 
   const adresse = useCallback(
-    (f: Famille | null, contrat: string | null) => {
+    (f: Famille | null, contrat: string | null, autre?: { vue?: "contrats" | "factures"; factures?: string; reportes?: boolean }) => {
       const q = new URLSearchParams();
-      if (f) q.set("famille", f);
+      const v = autre?.vue ?? vue;
+      if (v === "factures") {
+        q.set("vue", "factures");
+        q.set("factures", autre?.factures ?? sousFacture);
+      } else if (f) q.set("famille", f);
+      if (autre?.reportes ?? (v === "contrats" && voirReportes)) q.set("reportes", "1");
       if (contrat) q.set("contrat", contrat);
       const s = q.toString();
       return `${BASE}/retours${s ? `?${s}` : ""}`;
     },
-    [],
+    [vue, sousFacture, voirReportes],
   );
   const ouvrir = useCallback(
     (d: Dossier | null) => {
@@ -129,7 +170,23 @@ export default function Retours() {
     return () => document.removeEventListener("keydown", touche);
   }, [dossier, visibles, ouvrir]);
 
-  const optionsFiltre: OptionMenu[] = [
+  const exporter = () =>
+    vue === "factures"
+      ? exporterCsv(
+          `factures-${sousFacture}`,
+          ["Facture", "Contrat", "Locataire", "Nature", "Statut", "Émise le", "Échéance", "Total TTC", "Reste dû", "Relances", "Courriel"],
+          factures.map(({ f, d, reste }) => [f.reference, d.contrat.numero, nomLocataire(d.locataire), f.nature, STATUTS_FACTURE[f.statut].libelle, f.date_facture.slice(0, 10), f.echeance_le.slice(0, 10), f.total_ttc, reste, f.relances ?? 0, f.statut === "envoyee" || f.statut === "reglee" ? "parti" : f.envoi_id ? "préparé" : "à envoyer vous-même"]),
+        )
+      : exporterCsv(
+          "retours-a-facturer",
+          ["Contrat", "Famille", "Locataire", "Véhicule", "Agence", "Départ", "Retour", "Montant"],
+          visibles.map((d) => {
+            const pv = propositionVivante(d.propositions);
+            return [d.contrat.numero, FAMILLES.find((x) => x.cle === famille(d.contrat, d.propositions, d.factures))?.libelle, nomLocataire(d.locataire), d.vehicule?.immatriculation, nomAgenceDe(d.contrat.entite_id), d.contrat.depart_le.slice(0, 16), (d.contrat.retour_reel_le ?? d.contrat.retour_prevu_le).slice(0, 16), d.factures.length ? d.factures.reduce((x, f) => x + f.total_ttc, 0) : (pv?.total_ttc ?? "")];
+          }),
+        );
+  const LIB_SOUS: Record<Sous, string> = { a_envoyer: "À envoyer vous-même", hier: "Émises hier", impayees: "Impayées", toutes: "Toutes les factures" };
+  const optionsFiltre: OptionMenu[] = vue === "factures" ? SOUS.map((x) => ({ libelle: `${LIB_SOUS[x]} · ${comptesFactures[x]}`, icone: (sousFacture === x ? "IssueStatusDone" : "Euro") as NomTavIcone, href: adresse(null, null, { factures: x }) })) : [
     { libelle: `Tous les contrats · ${dossiers.length}`, icone: filtre === null ? "IssueStatusDone" : "Inbox", href: adresse(null, null) },
     ...FAMILLES.map((f) => ({ libelle: `${f.libelle} · ${compteurs[f.cle]}`, icone: (filtre === f.cle ? "IssueStatusDone" : STATUT[f.cle].icone) as NomTavIcone, href: adresse(filtre === f.cle ? null : f.cle, null) })),
   ];
@@ -137,7 +194,7 @@ export default function Retours() {
     { libelle: "Toutes les agences", icone: agence === null ? "IssueStatusDone" : "Team", action: () => setAgence(null) },
     ...agences.map((a) => ({ libelle: (a.nom ?? a.code).split(" — ").pop() ?? a.code, icone: (agence === a.entite_id ? "IssueStatusDone" : "Team") as NomTavIcone, action: () => setAgence(a.entite_id) })),
   ];
-  const titreListe = filtre ? (FAMILLES.find((f) => f.cle === filtre)?.libelle ?? "Retours à facturer") : "Retours à facturer";
+  const titreListe = vue === "factures" ? `Factures · ${LIB_SOUS[sousFacture].toLowerCase()}` : voirReportes ? "Retours reportés" : filtre ? (FAMILLES.find((f) => f.cle === filtre)?.libelle ?? "Retours à facturer") : "Retours à facturer";
   const actifs = visibles.filter((d) => famille(d.contrat, d.propositions, d.factures) !== "reste").length;
 
   return (
@@ -150,9 +207,13 @@ export default function Retours() {
             <TavMenu
               libelle="Actions sur les retours"
               options={[
-                { libelle: `À encaisser · ${montant(compteurs.encaisser)}`, icone: "Euro", href: adresse("bloquee", null) },
-                { libelle: "Ouvrir la file « À valider »", icone: "Inbox", href: "/espace2/validations" },
+                vue === "factures"
+                  ? { libelle: "Les contrats (retours à facturer)", icone: "Car", href: adresse(null, null, { vue: "contrats" }) }
+                  : { libelle: `Les factures · ${montant(compteurs.encaisser)} à encaisser`, icone: "Euro", href: adresse(null, null, { vue: "factures", factures: "impayees" }) },
+                ...(vue === "contrats" ? [{ libelle: voirReportes ? "Revenir aux retours" : `Voir les retours reportés · ${reportes.nombre}`, icone: "AlarmClock" as NomTavIcone, href: adresse(filtre, null, { reportes: !voirReportes }) }] : []),
+                { libelle: "Exporter la liste affichée (CSV)", icone: "Spreadsheet", action: exporter },
                 "sep",
+                { libelle: "Ouvrir la file « À valider »", icone: "Inbox", href: "/espace2/validations" },
                 { libelle: "Vue d'ensemble", icone: "Home", href: BASE },
               ]}
             />
@@ -168,6 +229,54 @@ export default function Retours() {
             {source === "reelle" && pret && !moi ? <p className="tav-i-avis">Aucun compte rattaché à cette session : la lecture passe, les gestes resteront gris.</p> : null}
             {!pret ? (
               <p className="tav-i-avis">Lecture du parking…</p>
+            ) : vue === "factures" ? (
+              <>
+                <p className="tav-i-avis">
+                  À encaisser : {montant(compteurs.encaisser)} · {comptesFactures.a_envoyer} à envoyer vous-même · {comptesFactures.hier} émise{comptesFactures.hier > 1 ? "s" : ""} hier · {comptesFactures.impayees} impayée{comptesFactures.impayees > 1 ? "s" : ""}. Une relance se prépare depuis la facture, dans le contrat ouvert à droite ; elle part après validation.
+                </p>
+                {factures.length === 0 ? (
+                  <p className="tav-i-avis">Aucune facture dans cette vue.</p>
+                ) : (
+                  <ul className="tav-i-lignes">
+                    {factures.map(({ f, d, reste }) => {
+                      const echue = (f.statut === "emise" || f.statut === "envoyee") && Date.parse(f.echeance_le) + 86_400_000 < maintenant;
+                      const aFaire = estAEnvoyer(f) || estImpayee({ f, reste });
+                      return (
+                        <li key={f.id}>
+                          <Link href={adresse(null, d.contrat.id)} replace scroll={false} className="tav-i-ligne" data-lu={aFaire ? undefined : ""} aria-current={dossier?.contrat.id === d.contrat.id ? "true" : undefined}>
+                            <span className="tav-i-avatar" aria-hidden="true">
+                              <TavIcone nom="Euro" taille={20} />
+                            </span>
+                            <span className="tav-i-texte">
+                              <span className="tav-i-l1">
+                                {aFaire ? <span className="tav-i-point" aria-label="geste en attente" /> : null}
+                                <span className="tav-i-id">{f.reference}</span>
+                                <span className="tav-i-sujet">
+                                  {nomLocataire(d.locataire)} — {montant(f.total_ttc)}
+                                </span>
+                                <span className="tav-i-statut" data-etat={f.statut === "reglee" ? "fait" : f.statut === "litige" ? "tri" : f.statut === "envoyee" ? "cours" : "bloque"}>
+                                  <TavIcone nom={f.statut === "reglee" ? "IssueStatusDone" : f.statut === "litige" ? "IssueStatusTriage" : f.statut === "envoyee" ? "IssueStatusStarted" : "IssueStatusTodo"} taille={14} />
+                                </span>
+                              </span>
+                              <span className="tav-i-l2">
+                                <span className="tav-i-sous">
+                                  {[STATUTS_FACTURE[f.statut].libelle, estAEnvoyer(f) ? "à envoyer vous-même" : null, reste > 0 && f.statut !== "reglee" ? `reste ${montant(reste)}` : null, f.relances ? `${f.relances} relance${f.relances > 1 ? "s" : ""}` : null, d.contrat.numero].filter(Boolean).join(" · ")}
+                                </span>
+                                {echue ? (
+                                  <span className="tav-i-priorite" aria-label="échéance dépassée">
+                                    <TavIcone nom="Priority1" taille={14} />
+                                  </span>
+                                ) : null}
+                                <span className="tav-i-age">{age(f.date_facture, maintenant)}</span>
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
             ) : visibles.length === 0 ? (
               <p className="tav-i-avis">{filtre ? "Rien dans cette famille." : "Aucun contrat connu pour l'instant : ils arrivent par l'export de votre logiciel, par un contrat PDF lu, ou au comptoir."}</p>
             ) : (
@@ -181,6 +290,8 @@ export default function Retours() {
                   const sous = [
                     FAMILLES.find((f) => f.cle === fam)?.libelle,
                     litige ? "litige" : d.factures.some((f) => f.statut === "reglee") ? "réglé" : fam === "bloquee" && p?.statut !== "preuve_manquante" ? "impayé" : null,
+                    suivis.a(`contrat:${d.contrat.id}`) ? "suivi" : null,
+                    reportes.jusquA(`contrat:${d.contrat.id}`) ? `reporté au ${reportes.jusquA(`contrat:${d.contrat.id}`)?.slice(8, 10)}/${reportes.jusquA(`contrat:${d.contrat.id}`)?.slice(5, 7)}` : null,
                     nomAgenceDe(d.contrat.entite_id).split(" — ").pop(),
                     total !== null && total > 0 ? montant(total) : null,
                   ].filter(Boolean);
@@ -240,7 +351,7 @@ export default function Retours() {
           ) : (
             <div className="tav-vide">
               <TavIcone nom="Inbox" taille={96} className="tav-i-illustration" />
-              <p>{!pret ? "Lecture du dossier…" : `${actifs} retour${actifs > 1 ? "s" : ""} à facturer`}</p>
+              <p>{!pret ? "Lecture du dossier…" : vue === "factures" ? `${factures.length} facture${factures.length > 1 ? "s" : ""} · ${montant(compteurs.encaisser)} à encaisser` : `${actifs} retour${actifs > 1 ? "s" : ""} à facturer`}</p>
             </div>
           )}
         </section>

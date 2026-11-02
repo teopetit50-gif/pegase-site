@@ -309,3 +309,74 @@
     display: none;
   }
 }
+
+/* ——— la case « Select initiative » (14×14, bord 1 lch(52.04 0 282), r 3, visible au survol) et la barre d'actions groupées ——— */
+.v2 .tav .tav-n-li {
+  position: relative;
+}
+.v2 .tav .tav-n-coche {
+  position: absolute;
+  left: 17px;
+  top: 21.5px;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border-radius: 3px;
+  accent-color: var(--tav-g-primaire, lch(53 52.26 286.91));
+  opacity: 0;
+  cursor: pointer;
+}
+.v2 .tav .tav-n-li:hover .tav-n-coche,
+.v2 .tav .tav-n-li[data-coche] .tav-n-coche,
+.v2 .tav .tav-n-coche:focus-visible {
+  opacity: 1;
+}
+.v2 .tav .tav-n-tri {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  border-radius: 9999px;
+}
+.v2 .tav .tav-n-tri:hover,
+.v2 .tav .tav-n-tri[aria-current="true"] {
+  background: var(--tav-survol-onglet);
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-n-barre {
+  position: sticky;
+  bottom: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 16px auto;
+  padding: 6px 6px 6px 14px;
+  border: 0.5px solid var(--tav-menu-bord);
+  border-radius: 12px;
+  background: var(--tav-menu);
+  box-shadow: var(--tav-menu-ombre);
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tav-menu-texte);
+}
+.v2 .tav .tav-n-barre-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.v2 .tav .tav-n-barre-bouton:hover {
+  background: var(--tav-menu-survol);
+}
+@media (max-width: 768px) {
+  .v2 .tav .tav-n-coche {
+    display: none;
+  }
+}

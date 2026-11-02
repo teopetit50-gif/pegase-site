@@ -40,6 +40,7 @@ import { FenetresAvis, FenetresContestations, STATUTS_AVIS, STATUTS_CONTESTATION
 import { TavCarte, TavMenu, type OptionMenu } from "./TavCadre";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
+import { copier as copierTexte, dansJours, exporterCsv, useFavoris, useReportes } from "./navigateur";
 import "./tav-inbox.css";
 import "./tav-ticket.css";
 import "./tav-triage.css";
@@ -129,7 +130,14 @@ export default function Amendes() {
     }
     return l.sort((x, y) => (x.jours ?? 9999) - (y.jours ?? 9999) || y.quand.localeCompare(x.quand));
   }, [monte, monde, o.ops.passages, o.maintenant]);
-  const elements = useMemo(() => tousElements.filter((e) => (vue === "a_traiter" ? e.ouvert : !e.ouvert) && (!filtreGenre || e.genre === filtreGenre) && (!agence || e.entite === agence)), [tousElements, vue, filtreGenre, agence]);
+  /* Reporter (Snooze) : l'élément quitte la file jusqu'à la date choisie ; « Reportés » les montre */
+  const reportes = useReportes();
+  const favoris = useFavoris();
+  const voirReportes = params.get("reportes") === "1";
+  const elements = useMemo(
+    () => tousElements.filter((e) => (voirReportes ? !!reportes.jusquA(`amende:${e.cle}`) : (vue === "a_traiter" ? e.ouvert : !e.ouvert) && !reportes.jusquA(`amende:${e.cle}`)) && (!filtreGenre || e.genre === filtreGenre) && (!agence || e.entite === agence)),
+    [tousElements, vue, filtreGenre, agence, reportes, voirReportes],
+  );
   /* un repère (aiguillage.ts) peut viser un élément déjà traité : on le cherche dans toute la file */
   const element = tousElements.find((e) => e.cle === choix) ?? null;
 
@@ -201,13 +209,32 @@ export default function Amendes() {
     { libelle: "Tous les sujets", icone: filtreGenre === null ? "IssueStatusDone" : "Inbox", href: adresse(vue, null, null) },
     ...GENRES.map((g) => ({ libelle: g.libelle, icone: (filtreGenre === g.cle ? "IssueStatusDone" : g.icone) as NomTavIcone, href: adresse(vue, g.cle, null) })),
     "sep",
-    { libelle: "À traiter", icone: vue === "a_traiter" ? "IssueStatusDone" : "IssueStatusTodo", href: adresse("a_traiter", filtreGenre, null) },
-    { libelle: "Traités et clos", icone: vue === "traites" ? "IssueStatusDone" : "Archive", href: adresse("traites", filtreGenre, null) },
+    { libelle: "À traiter", icone: vue === "a_traiter" && !voirReportes ? "IssueStatusDone" : "IssueStatusTodo", href: adresse("a_traiter", filtreGenre, null) },
+    { libelle: "Traités et clos", icone: vue === "traites" && !voirReportes ? "IssueStatusDone" : "Archive", href: adresse("traites", filtreGenre, null) },
+    { libelle: `Reportés · ${reportes.nombre}`, icone: voirReportes ? "IssueStatusDone" : "AlarmClock", href: `${BASE}/amendes?reportes=1` },
   ];
+  const exporter = () =>
+    exporterCsv(
+      voirReportes ? "amendes-reportees" : `amendes-${vue}`,
+      ["Sujet", "Référence", "Titre", "Statut", "Échéance", "Jours restants", "Agence"],
+      elements.map((e) => [genre(e.genre).libelle, e.ref, e.titre, e.sujet, e.echeance ?? "", e.jours ?? "", e.entite ? nomAgenceDe(e.entite) : ""]),
+    );
   const optionsAgence: OptionMenu[] = [
     { libelle: "Toutes les agences", icone: agence === null ? "IssueStatusDone" : "Team", action: () => setAgence(null) },
     ...agences.map((a) => ({ libelle: (a.nom ?? a.code).split(" — ").pop() ?? a.code, icone: (agence === a.entite_id ? "IssueStatusDone" : "Team") as NomTavIcone, action: () => setAgence(a.entite_id) })),
   ];
+
+  const reporterElement = (date: string | null) => {
+    if (!element) return;
+    reportes.reporter(`amende:${element.cle}`, date);
+    toast(date ? `${element.ref} quitte la file jusqu'au ${dateCourte(date)}.` : `${element.ref} revient dans la file.`);
+  };
+  const copierPourAssistant = async () => {
+    if (!element) return;
+    const texte = [`${genre(element.genre).libelle} ${element.ref} : ${element.titre}`, `Statut : ${element.sujet}`, element.echeance ? `Échéance : ${dateCourte(element.echeance)}${element.jours !== null ? ` (${element.jours < 0 ? `dépassée de ${-element.jours} j` : `dans ${element.jours} j`})` : ""}` : null, element.entite ? `Agence : ${nomAgenceDe(element.entite)}` : null].filter(Boolean).join("\n");
+    const ok = await copierTexte(texte);
+    toast(ok ? "Copié pour l'assistant : collez-le dans votre question." : "La copie a échoué.", ok ? undefined : "rouge");
+  };
 
   /* ——— l'élément ouvert ——— */
   type Bouton = { libelle: string; icone: NomTavIcone; action: () => void; actif: boolean; titre?: string };
@@ -330,8 +357,11 @@ export default function Amendes() {
       <div className="tav-i">
         <section className="tav-r-liste tav-i-liste" aria-label="Amendes, péages, contestations">
           <header className="tav-i-tete">
-            <h2 className="tav-i-titre">{vue === "traites" ? "Traités et clos" : "Amendes et péages"}</h2>
-            <TavMenu libelle="Créer, et les péages en chiffres" options={menu} />
+            <h2 className="tav-i-titre">{voirReportes ? "Reportés" : vue === "traites" ? "Traités et clos" : "Amendes et péages"}</h2>
+            <button type="button" className="tav-rond" aria-pressed={favoris.a("page:amendes")} aria-label={favoris.a("page:amendes") ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} title={favoris.a("page:amendes") ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} onClick={() => favoris.basculer({ cle: "page:amendes", libelle: "Amendes, péages, contestations", href: `${BASE}/amendes`, detail: `${elements.length} à traiter` })}>
+              <TavIcone nom={favoris.a("page:amendes") ? "Favorite" : "Etoile"} />
+            </button>
+            <TavMenu libelle="Créer, exporter, et les péages en chiffres" options={[...menu, "sep", { libelle: "Exporter la liste affichée (CSV)", icone: "Spreadsheet", action: exporter }]} />
             <span className="tav-pousse" />
             <TavMenu libelle="Filtrer par sujet" icone="Filtre" alignement="droite" options={optionsFiltre} />
             {agences.length > 1 ? <TavMenu libelle="Filtrer par agence" icone="Affichage" alignement="droite" options={optionsAgence} /> : null}
@@ -391,6 +421,9 @@ export default function Amendes() {
                     </h2>
                   </Link>
                 </nav>
+                <button type="button" className="tav-rond" aria-pressed={favoris.a(`amende:${element.cle}`)} aria-label={favoris.a(`amende:${element.cle}`) ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} title={favoris.a(`amende:${element.cle}`) ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} onClick={() => favoris.basculer({ cle: `amende:${element.cle}`, libelle: `${element.ref} — ${element.titre}`, href: adresse(vue, null, element.cle), detail: element.sujet })}>
+                  <TavIcone nom={favoris.a(`amende:${element.cle}`) ? "Favorite" : "Etoile"} />
+                </button>
                 <span className="tav-pousse" />
                 <div className="tav-r-boutons">
                   {boutons.map((b) => (
@@ -398,9 +431,34 @@ export default function Amendes() {
                       <TavIcone nom={b.icone} />
                     </button>
                   ))}
+                  <TavMenu
+                    libelle={reportes.jusquA(`amende:${element.cle}`) ? `Reporté jusqu'au ${dateCourte(reportes.jusquA(`amende:${element.cle}`))}` : "Reporter (quitte la file jusqu'à la date choisie)"}
+                    icone="AlarmClock"
+                    alignement="droite"
+                    options={[
+                      { libelle: "Reporter à demain", icone: "Calendar", action: () => reporterElement(dansJours(1)) },
+                      { libelle: "Reporter de 3 jours", icone: "Calendar", action: () => reporterElement(dansJours(3)) },
+                      ...(element.echeance && element.jours !== null && element.jours > 1 ? [{ libelle: `Reporter jusqu'à la veille de l'échéance (${dateCourte(element.echeance)})`, icone: "Calendar" as NomTavIcone, action: () => reporterElement(dansJours(element.jours! - 1)) }] : []),
+                      ...(reportes.jusquA(`amende:${element.cle}`) ? (["sep", { libelle: "Annuler le report", icone: "Refresh", action: () => reporterElement(null) }] as const) : []),
+                    ]}
+                  />
                 </div>
               </header>
               <div className="tav-t-defile">
+                <div className="tav-t-outils">
+                  <button type="button" className="tav-rond tav-rond--plein" aria-label="Copier le lien" title="Copier le lien de l'élément" onClick={() => void copierTexte(`${window.location.origin}${adresse(vue, null, element.cle)}`).then((ok) => toast(ok ? "Lien copié" : "La copie a échoué.", ok ? undefined : "rouge"))}>
+                    <TavIcone nom="LienUrl" />
+                  </button>
+                  <button type="button" className="tav-rond tav-rond--plein" aria-label="Copier la référence" title="Copier la référence" onClick={() => void copierTexte(element.ref).then((ok) => toast(ok ? "Référence copiée" : "La copie a échoué.", ok ? undefined : "rouge"))}>
+                    <TavIcone nom="Page" />
+                  </button>
+                  <span className="tav-t-double">
+                    <button type="button" className="tav-t-double-g" onClick={() => void copierPourAssistant()} title="Copier pour l'assistant : l'élément en clair">
+                      <TavIcone nom="Agent" taille={14} />
+                      <span>Copier pour l&apos;assistant</span>
+                    </button>
+                  </span>
+                </div>
                 <div className="tav-t-corps">
                   <div className="tav-t-principal">
                     <h1 className="tav-t-titre">{element.titre}</h1>

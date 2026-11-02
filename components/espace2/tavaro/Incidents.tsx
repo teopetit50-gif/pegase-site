@@ -35,6 +35,7 @@ import { FenetreOperations } from "./operations";
 import { TavMenu, type OptionMenu } from "./TavCadre";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
+import { copier as copierTexte, dansJours, exporterCsv, useFavoris, useReportes, useSuivis } from "./navigateur";
 import "./tav.css";
 import "./tav-plain.css";
 
@@ -87,7 +88,13 @@ export default function Incidents() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [o.pret, o.ops, agence, tous]);
   const comptes = { sinistres: o.sinistresOuverts.length, assistance: o.incidentsOuverts.length, caution: o.cautionsVivantes.length };
-  const liste = lignes[onglet];
+  /* les boutons de Plain sans geste en base : « Assigned to me » = suivre, « Handle with Agent » = copier pour
+     l'assistant, « More » = épingler, reporter, exporter (./navigateur) */
+  const favoris = useFavoris();
+  const suivis = useSuivis();
+  const reportes = useReportes();
+  const cleDe = (l: Ligne) => `incident:${onglet}:${l.cle}`;
+  const liste = lignes[onglet].filter((l) => !reportes.jusquA(cleDe(l))).sort((a, b) => Number(suivis.a(cleDe(b))) - Number(suivis.a(cleDe(a))));
   const ligne = liste.find((l) => l.cle === choix) ?? null;
   const adresse = (on: Onglet, el: string | null) => `${BASE}/incidents?onglet=${on}${el ? `&element=${encodeURIComponent(el)}` : ""}`;
 
@@ -232,6 +239,7 @@ export default function Incidents() {
                       <span className="tav-p-nom" data-faite={l.faite ? "" : undefined}>
                         {l.titre}
                       </span>
+                      {suivis.a(cleDe(l)) ? <span className="tav-p-id">suivi</span> : null}
                     </span>
                     {l.compte ? (
                       <span className="tav-p-pastille">
@@ -256,6 +264,17 @@ export default function Incidents() {
             <div className="tav-p-detail-tete">
               <span className="tav-p-detail-id">{ligne.id}</span>
               <span className="tav-pousse" />
+              <TavMenu
+                libelle="Plus d'actions"
+                alignement="droite"
+                options={[
+                  { libelle: favoris.a(cleDe(ligne)) ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble", icone: favoris.a(cleDe(ligne)) ? "Favorite" : "Etoile", action: () => favoris.basculer({ cle: cleDe(ligne), libelle: `${ligne.id} — ${ligne.titre}`, href: adresse(onglet, ligne.cle), detail: statut }) },
+                  { libelle: "Reporter à demain", icone: "AlarmClock", action: () => { reportes.reporter(cleDe(ligne), dansJours(1)); toast(`${ligne.id} quitte la liste jusqu'à demain.`); } },
+                  { libelle: "Reporter d'une semaine", icone: "AlarmClock", action: () => { reportes.reporter(cleDe(ligne), dansJours(7)); toast(`${ligne.id} quitte la liste pour une semaine.`); } },
+                  "sep",
+                  { libelle: "Exporter l'onglet (CSV)", icone: "Spreadsheet", action: () => exporterCsv(`incidents-${onglet}`, ["Identifiant", "Titre", "Compte", "Fait"], liste.map((l) => [l.id, l.titre, l.compte ?? "", l.faite ? "oui" : "non"])) },
+                ]}
+              />
               <Link href={adresse(onglet, null)} className="tav-p-rond" aria-label="Fermer" title="Fermer">
                 <TavIcone nom="Plus" taille={18} style={{ transform: "rotate(45deg)" }} />
               </Link>
@@ -265,6 +284,14 @@ export default function Incidents() {
                 <Case faite={ligne.faite} />
                 <span>{statut}</span>
               </span>
+              <button type="button" className="tav-p-bouton tav-p-bouton--suivre" aria-pressed={suivis.a(cleDe(ligne))} onClick={() => suivis.basculer({ cle: cleDe(ligne), libelle: `${ligne.id} — ${ligne.titre}`, href: adresse(onglet, ligne.cle) })}>
+                <TavIcone nom={suivis.a(cleDe(ligne)) ? "Notified" : "Subscribe"} taille={18} />
+                <span>{suivis.a(cleDe(ligne)) ? "Suivi" : "Suivre"}</span>
+              </button>
+              <button type="button" className="tav-p-bouton" onClick={() => void copierTexte([`${ligne.id} : ${ligne.titre}`, `Statut : ${statut}`, ...proprietes.map((x) => `${x.dt} : ${x.dd}`)].join("\n")).then((ok) => toast(ok ? "Copié pour l'assistant : collez-le dans votre question." : "La copie a échoué.", ok ? undefined : "rouge"))}>
+                <TavIcone nom="Agent" taille={18} />
+                <span>Copier pour l&apos;assistant</span>
+              </button>
               {gestes.map((g) => (
                 <button key={g.libelle} type="button" className="tav-p-bouton" disabled={!g.actif} title={g.titre} onClick={g.action}>
                   <TavIcone nom={g.icone} taille={18} />

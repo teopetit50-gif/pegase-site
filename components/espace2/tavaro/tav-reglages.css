@@ -378,3 +378,40 @@ html[data-v2-theme="light"] .v2 .tav {
 .v2 .tav .tav-g-ligne > * {
   min-width: 0;
 }
+
+/* ——— cases, « … » de ligne et outils du filtre (02/11/2026) : la case et le « … » n'apparaissent qu'au survol, comme chez Linear ——— */
+.v2 .tav .tav-g-filtre {
+  gap: 6px;
+}
+.v2 .tav .tav-g-outils {
+  display: inline-flex;
+  gap: 6px;
+}
+.v2 .tav .tav-g-outils .tav-rond {
+  background: var(--tav-bouton);
+}
+.v2 .tav .tav-g-case {
+  display: inline-flex;
+  justify-content: center;
+}
+.v2 .tav .tav-g-case input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--tav-g-primaire);
+  opacity: 0;
+  cursor: pointer;
+}
+.v2 .tav .tav-g-menu {
+  display: inline-flex;
+  opacity: 0;
+}
+.v2 .tav .tav-g-ligne:hover :is(.tav-g-case input, .tav-g-menu),
+.v2 .tav .tav-g-ligne[data-coche] .tav-g-case input,
+.v2 .tav .tav-g-case input:focus-visible,
+.v2 .tav .tav-g-menu:focus-within {
+  opacity: 1;
+}
+.v2 .tav .tav-g-barre {
+  margin: 16px auto;
+}

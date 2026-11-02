@@ -145,7 +145,7 @@ export function moduleDeObjet(objet_type: string | null | undefined): string | n
    et les factures mènent aux Retours à facturer, les avoirs à décider à la file « À valider » */
 const TAVARO_SOCLE: Record<string, string> = {
   "/tavaro/facturation": `${RACINE}/tavaro/retours?famille=a_valider`,
-  "/tavaro/factures": `${RACINE}/tavaro/retours`,
+  "/tavaro/factures": `${RACINE}/tavaro/retours?vue=factures`,
   "/tavaro/avoirs": `${RACINE}/validations`,
 };
 
