@@ -17,6 +17,13 @@ Jetons et briques : `plain-commun.md`. Les graphiques sont des **Recharts** (cla
 - **Top issues** demande une intégration de suivi de tickets (non branchée, interdit) → reste vide. **Themes** est généré par l'IA
   chaque jour à 5 h UTC sur les 7 derniers jours → vide le 01/11, devrait se remplir le 02/11.
 
+## Mise à jour du 01/11 au soir
+
+Les métriques différées sont arrivées : **New threads created per day 53 total** (moyenne 2, pic du jour avec la pastille verte
+« ⓘ Investigate this spike »), **Threads re-opened per day 6 total** (moyenne 6), Queue size 28. Median first response time et
+Median resolution time restent « N/A / No data » (icône fantôme 16 + « No data »). Captures à taille réelle : `1440-reel-clair.png`,
+`1440-reel-sombre.png` (1440×900, tuiles à l'échelle 1 recollées — méthode dans `linear-home.md` de la branche refs-linear).
+
 ## Navigation Insights (panneau latéral, remplace celui de Support)
 
 ```
