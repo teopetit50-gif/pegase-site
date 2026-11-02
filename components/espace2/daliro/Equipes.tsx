@@ -1,72 +1,135 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   DALIRO › Équipes (29/10/2026) : la page Projects de Linear en affichage
-   « Timeline », au 1:1, sur la même frise que Chantiers (./Frise.tsx,
-   ../lin/linear-timeline.css ; relevé : docs/refonte-metiers/releves/
-   linear-timeline.md).
+   DALIRO › Équipes — copie 1:1 de « Availability » de Cal.com
+   (02/11/2026, règles de Teo : docs/refonte-metiers/REGLES.md ;
+   relevé : docs/refonte-metiers/releves/calcom-availability.md ;
+   styles : ./dal-cal.css, préfixe dcal-).
 
-   Une ligne par intervenant : nos équipes et les sous-traitants de
-   l'annuaire, plus ceux que le planning nomme sans les avoir rapprochés.
-   Ses barres : ses passages prévus sur les 30 prochains jours, tous
-   chantiers (libellé « chantier · tâche », teinte de la confirmation J-2),
-   et ses absences, hachurées. C'est le bloc B27 de l'écran d'avant
-   (DisponibilitesBloc, rangé dans l'annuaire d'un chantier) sorti à
-   l'échelle de l'entreprise : mêmes portes, mêmes gestes.
+   Ce que Cal.com montre, et ce que c'est ici :
+     liste des horaires (nom, badge « Default », une ligne par plage,
+     fuseau au globe, bouton ⋯)
+         → un intervenant par ligne : nos équipes, les sous-traitants de
+           l'annuaire et ceux que le planning nomme sans les avoir
+           rapprochés ; badge « Équipe » pour nos équipes ; une ligne par
+           passage prévu sur 30 jours (jours, heures, tâche, chantier) et
+           par absence ; au globe, son métier et sa commune
+     « My availability / Team availability »
+         → « Tout le monde / Sous-traitants » (?type=)
+     « + New »  → « + Absence » (G61) ; « ⋯ » → noter une absence (G61),
+           annuler une absence (G62), ouvrir sa fiche d'annuaire
+     « Temporarily out-of-office? Add a redirect »
+         → « Un intervenant indisponible ? Noter une absence »
+     page d'un horaire (?intervenant=)
+       « Weekly hours » : sept jours, interrupteur, plages d'heures, ×, + et ⧉
+         → la semaine choisie de l'intervenant, jour par jour : ses passages
+           et leurs heures. Les gestes du planning façon Float d'avant
+           (./Planning, retiré de la page) y sont tous :
+             heures (les deux champs)  poser des heures (b6_82)
+             ×                          retirer ce jour du passage
+                                        (raccourcir par la fin ou le début)
+             +                          étendre jusqu'à ce jour le passage
+                                        qui finit la veille (étirer)
+             ⧉ « Copy times to… »       « Déplacer vers… » un autre jour
+                                        (glisser)
+           Comme dans Cal.com, rien ne part avant « Enregistrer » ; en base
+           réelle, btp_deplacer_passage (./deplacer), en exemple la même
+           règle en mémoire. Le nom d'un chantier ouvre son passage dans
+           Chantiers (?passage=).
+       « Date overrides » → « Absences » : « + Ajouter une absence » (G61),
+           la poubelle annule (G62, après confirmation)
+       « Timezone » → « Semaine » (?semaine=) ; « Something doesn't look
+           right? / Launch troubleshooter » → « Un passage à revoir ? /
+           Ouvrir les chantiers »
 
      lecture  base réelle : les tableaux de tous les chantiers
               (useDaliro().demanderTous) et btp_disponibilites
               (chargerDisponibilites, gérant, admin ou valideur) ;
-              exemple : les passages des tableaux en mémoire, les absences
-              notées gardées le temps de la visite, comme l'écran d'avant
-     G61      « Noter une absence » (barre du titre, ou le « ··· » d'un
-              sous-traitant) : noterIndisponibilite, dans une fenêtre
-     G62      « Annuler l'absence » (clic sur une absence, ou le « ··· ») :
-              annulerIndisponibilite, après une fenêtre de confirmation
-   Le coût horaire (G48) reste dans la fiche du chantier.
-   Filtre ?type=sous-traitants|equipes.
-
-   30/10/2026 : la frise laisse la place au planning façon Float (./Planning,
-   le même que Chantiers) : une ligne par intervenant, ses passages en blocs
-   qu'on glisse ou qu'on étire (./deplacer), ses absences en hachures (un
-   clic : l'annuler, G62). ?semaine=, ?echelle=mois.
+              exemple : les tableaux en mémoire, les absences notées
+              gardées le temps de la visite.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarOff, Plus } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ArrowLeft, BookUser, CalendarOff, ChevronsUpDown, Copy, Ellipsis, Globe, Info, Pencil, Plus, Trash, X } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { RACINE } from "@/components/espace2/modules";
 import { dateCourte } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
 import { annulerIndisponibilite, chargerDisponibilites, noterIndisponibilite } from "@/components/espace/daliro/portes";
-import type { Confirmation, Disponibilite, Tableau } from "@/components/espace/daliro/types";
+import type { Confirmation, Disponibilite, Passage, Tableau } from "@/components/espace/daliro/types";
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
-import Planning, { estDensite, lundiDe } from "./Planning";
 import { useDeplacer } from "./deplacer";
 import "@/components/espace/espace.css";
+import "./dal-cal.css";
+
+const BASE = `${RACINE}/daliro`;
 
 type Absence = Disponibilite["absences"][number];
-type PassageVu = { id: string; chantierId: string | null; chantier: string; tache: string | null; debut: string; fin: string; confirmation: Confirmation | null };
+type PassageVu = { id: string; chantierId: string | null; chantier: string; tache: string | null; debut: string; fin: string; hd: string | null; hf: string | null; confirmation: Confirmation | null; p: Passage | null };
 type Genre = "equipe" | "tiers" | "inconnu";
-type Intervenant = { cle: string; nom: string; genre: Genre; tiers: string | null; passages: PassageVu[]; absences: Absence[] };
+type Intervenant = { cle: string; nom: string; genre: Genre; tiers: string | null; lieu: string; passages: PassageVu[]; absences: Absence[] };
+type Brouillon = Record<string, { debut: string; fin: string; hd: string | null; hf: string | null }>;
 
 const RANG: Record<Genre, number> = { equipe: 0, tiers: 1, inconnu: 2 };
+const JOUR = 86_400_000;
+const JOURS = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+const JOURS_COURTS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const MOIS_COURTS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+/* la liste des heures de Cal.com : un quart d'heure par option */
+const HEURES = Array.from({ length: 96 }, (_, i) => `${`${Math.floor(i / 4)}`.padStart(2, "0")}:${`${(i % 4) * 15}`.padStart(2, "0")}`);
 
-const iso = (d: Date) => `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
-const plus = (n: number) => {
+const num = (iso: string) => {
+  const [a, m, j] = iso.slice(0, 10).split("-").map(Number);
+  return Math.floor(Date.UTC(a, (m || 1) - 1, j || 1) / JOUR);
+};
+const iso = (n: number) => new Date(n * JOUR).toISOString().slice(0, 10);
+const plusJours = (jour: string, n: number) => iso(num(jour) + n);
+const lundiDe = (jour: string) => {
+  const n = num(jour);
+  return iso(n - ((n + 3) % 7));
+};
+/* 0 = lundi */
+const rangJour = (jour: string) => (num(jour) + 3) % 7;
+const aujourdhui = () => {
   const d = new Date();
-  d.setDate(d.getDate() + n);
-  return iso(d);
+  return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
 };
 const jj = (s: string) => s.slice(0, 10);
+const hh = (s: string | null | undefined) => (s ? s.slice(0, 5) : null);
 const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 const chevauche = (a: { debut: string; fin: string }, b: { du: string; au: string }) => jj(a.debut) <= b.au && jj(a.fin) >= b.du;
 const periode = (du: string, au: string) => (du === au ? `le ${dateCourte(du)}` : `du ${dateCourte(du)} au ${dateCourte(au)}`);
+const morceaux = (jour: string) => {
+  const [, m, j] = jour.split("-").map(Number);
+  return { j, m: m - 1, r: rangJour(jour) };
+};
+/* « Lun 3 nov. », « Lun 3 - Ven 7 nov. », « Ven 28 nov. - Mar 2 déc. » (la plage de Cal.com : « Mon - Fri ») */
+function jours(debut: string, fin: string): string {
+  const a = morceaux(debut);
+  const b = morceaux(fin);
+  if (debut === fin) return `${JOURS_COURTS[a.r]} ${a.j} ${MOIS_COURTS[a.m]}`;
+  if (a.m === b.m) return `${JOURS_COURTS[a.r]} ${a.j} - ${JOURS_COURTS[b.r]} ${b.j} ${MOIS_COURTS[b.m]}`;
+  return `${JOURS_COURTS[a.r]} ${a.j} ${MOIS_COURTS[a.m]} - ${JOURS_COURTS[b.r]} ${b.j} ${MOIS_COURTS[b.m]}`;
+}
+/* « Vendredi 20 novembre » (« Friday, November 20 ») */
+function dateLongue(jour: string): string {
+  const a = morceaux(jour);
+  return `${JOURS[a.r]} ${a.j} ${MOIS[a.m]}`;
+}
+function plageLongue(du: string, au: string): string {
+  if (du === au) return dateLongue(du);
+  const a = morceaux(du);
+  const b = morceaux(au);
+  return a.m === b.m ? `${JOURS[a.r]} ${a.j} - ${JOURS[b.r].toLowerCase()} ${b.j} ${MOIS[b.m]}` : `${dateLongue(du)} - ${dateLongue(au).toLowerCase()}`;
+}
+const heures = (hd: string | null, hf: string | null) => (hd && hf ? `${hd} - ${hf}` : null);
+const libellePassage = (p: PassageVu) => `${p.tache ?? "Passage"}, ${p.chantier}`;
 
 export default function Equipes() {
   const { source, pret, erreur, client, liste, tableau, demanderTous } = useDaliro();
@@ -74,11 +137,11 @@ export default function Equipes() {
   const routeur = useRouter();
   const chemin = usePathname();
   const toast = useToast();
-  const du = useMemo(() => plus(0), []);
-  /* les absences se lisent sur la fenêtre la plus large du planning (neuf semaines) */
-  const au = useMemo(() => plus(70), []);
+  const du = useMemo(() => aujourdhui(), []);
+  /* les passages des 30 prochains jours (la liste) ; les absences sur neuf semaines (le choix de la semaine) */
+  const au = useMemo(() => plusJours(du, 30), [du]);
+  const auAbsences = useMemo(() => plusJours(lundiDe(du), 63), [du]);
 
-  /* base réelle : tous les tableaux (les passages de chaque chantier) */
   useEffect(() => {
     if (source === "reelle") demanderTous();
   }, [source, demanderTous]);
@@ -91,12 +154,12 @@ export default function Equipes() {
   const lire = useCallback(async () => {
     if (!clientId) return;
     try {
-      setReel(await chargerDisponibilites(clientId, du, au));
+      setReel(await chargerDisponibilites(clientId, du, auAbsences));
       setErreurDispo(null);
     } catch (e) {
       setErreurDispo(e instanceof Error ? e.message : "La base n'a pas répondu.");
     }
-  }, [clientId, du, au]);
+  }, [clientId, du, auAbsences]);
   useEffect(() => {
     if (source !== "reelle" || !clientId) return;
     const t = window.setTimeout(() => void lire(), 0);
@@ -109,36 +172,40 @@ export default function Equipes() {
   /* recalculé à chaque rendu : les tableaux arrivent un à un en base réelle */
   const intervenants = (() => {
     const m = new Map<string, Intervenant>();
-    const ajouter = (cle: string, nom: string, genre: Genre, tiers: string | null) => {
-      if (!m.has(cle)) m.set(cle, { cle, nom, genre, tiers, passages: [], absences: [] });
+    const ajouter = (cle: string, nom: string, genre: Genre, tiers: string | null, lieu: string) => {
+      if (!m.has(cle)) m.set(cle, { cle, nom, genre, tiers, lieu, passages: [], absences: [] });
       return m.get(cle)!;
     };
+    const lieuTiers = (id: string | null) => {
+      const t = id ? tableaux.flatMap((x) => x.tiers).find((x) => x.id === id) : null;
+      const metier = t?.corps_etat[0] ? t.corps_etat[0].charAt(0).toUpperCase() + t.corps_etat[0].slice(1).replace(/_/g, " ") : "Sous-traitant";
+      return t?.commune ? `${metier} · ${t.commune}` : metier;
+    };
     for (const t of tableaux) {
-      for (const x of t.tiers) if (x.actif && x.roles.includes("sous_traitant")) ajouter(`t:${x.id}`, x.nom, "tiers", x.id);
-      for (const e of t.equipes) ajouter(`e:${e.id}`, e.nom, "equipe", null);
+      for (const x of t.tiers) if (x.actif && x.roles.includes("sous_traitant")) ajouter(`t:${x.id}`, x.nom, "tiers", x.id, lieuTiers(x.id));
+      for (const e of t.equipes) ajouter(`e:${e.id}`, e.nom, "equipe", null, "Équipe interne");
     }
     const vus = new Set<string>();
     for (const t of tableaux)
       for (const p of t.passages) {
-        if (p.statut !== "prevu" || !chevauche(p, { du, au })) continue;
+        if (p.statut !== "prevu" || !chevauche(p, { du, au: auAbsences })) continue;
         const nom = p.intervenant_nom ?? p.intervenant_lu ?? "Intervenant à désigner";
-        const iv = p.tiers_id ? ajouter(`t:${p.tiers_id}`, nom, "tiers", p.tiers_id) : p.equipe_id ? ajouter(`e:${p.equipe_id}`, nom, "equipe", null) : ajouter(`n:${nom.toLocaleLowerCase("fr")}`, nom, "inconnu", null);
-        iv.passages.push({ id: p.id, chantierId: t.chantier.id, chantier: t.chantier.nom, tache: p.tache, debut: jj(p.debut), fin: jj(p.fin), confirmation: p.confirmation });
+        const iv = p.tiers_id ? ajouter(`t:${p.tiers_id}`, nom, "tiers", p.tiers_id, lieuTiers(p.tiers_id)) : p.equipe_id ? ajouter(`e:${p.equipe_id}`, nom, "equipe", null, "Équipe interne") : ajouter(`n:${nom.toLocaleLowerCase("fr")}`, nom, "inconnu", null, "Pas encore rapproché de l'annuaire");
+        iv.passages.push({ id: p.id, chantierId: t.chantier.id, chantier: t.chantier.nom, tache: p.tache, debut: jj(p.debut), fin: jj(p.fin), hd: hh(p.heure_debut), hf: hh(p.heure_fin), confirmation: p.confirmation, p });
         vus.add(p.id);
       }
     if (source === "reelle")
       for (const d of reel ?? []) {
-        const iv = ajouter(`t:${d.tiers}`, d.nom, "tiers", d.tiers);
+        const iv = ajouter(`t:${d.tiers}`, d.nom, "tiers", d.tiers, lieuTiers(d.tiers));
         iv.absences = d.absences;
-        /* un passage d'un chantier dont le tableau n'est pas encore lu : sans confirmation connue */
-        for (const p of d.passages) if (!vus.has(p.passage)) iv.passages.push({ id: p.passage, chantierId: liste.find((c) => c.nom === p.chantier)?.id ?? null, chantier: p.chantier, tache: p.tache, debut: jj(p.debut), fin: jj(p.fin), confirmation: null });
+        /* un passage d'un chantier dont le tableau n'est pas encore lu : lu seulement */
+        for (const p of d.passages) if (!vus.has(p.passage)) iv.passages.push({ id: p.passage, chantierId: liste.find((c) => c.nom === p.chantier)?.id ?? null, chantier: p.chantier, tache: p.tache, debut: jj(p.debut), fin: jj(p.fin), hd: null, hf: null, confirmation: null, p: null });
       }
     else for (const iv of m.values()) if (iv.tiers) iv.absences = locales[iv.tiers] ?? [];
+    for (const iv of m.values()) iv.passages.sort((a, b) => a.debut.localeCompare(b.debut));
     return [...m.values()].sort((a, b) => RANG[a.genre] - RANG[b.genre] || a.nom.localeCompare(b.nom, "fr"));
   })();
 
-  const typeParam = params.get("type");
-  const type = typeParam === "equipes" || typeParam === "sous-traitants" ? typeParam : null;
   const lien = (modif: Record<string, string | null>) => {
     const p = new URLSearchParams(params.toString());
     for (const [k, v] of Object.entries(modif)) {
@@ -148,7 +215,10 @@ export default function Equipes() {
     const s = p.toString();
     return `${chemin}${s ? `?${s}` : ""}`;
   };
+  const typeParam = params.get("type");
+  const type = typeParam === "equipes" || typeParam === "sous-traitants" ? typeParam : null;
   const sousTraitants = intervenants.filter((i) => i.tiers);
+  const choisi = intervenants.find((i) => i.cle === params.get("intervenant")) ?? null;
 
   /* ——— G61 : noter une absence ——— */
   const [form, setForm] = useState<{ tiers: string; du: string; au: string; motif: string } | null>(null);
@@ -205,81 +275,100 @@ export default function Equipes() {
     }
   };
 
-  /* le planning façon Float (./Planning, comme Chantiers) : ses absences par sous-traitant, ses gestes partagés */
-  const { changer } = useDeplacer(du);
-  const absences: Record<string, Absence[]> = Object.fromEntries(intervenants.filter((iv) => iv.tiers).map((iv) => [iv.tiers as string, iv.absences]));
-  const sParam = params.get("semaine");
-  const lundi = sParam && /^\d{4}-\d{2}-\d{2}$/.test(sParam) ? lundiDe(sParam) : lundiDe(du);
-  const eParam = params.get("echelle");
-
-  const vide = !pret || (enLecture && !intervenants.length) ? (
-    <p className="lin-vide">Lecture du planning…</p>
-  ) : (
-    <p className="lin-vide">
-      {type ? "Personne dans ce groupe." : "Aucun intervenant : les équipes et les sous-traitants viennent de l'annuaire et du planning de vos chantiers."}{" "}
-      <Link href={`${RACINE}/daliro/annuaire`} className="lin-voir-tout" style={{ marginTop: 0 }}>
-        Ouvrir l&apos;annuaire
-      </Link>
-    </p>
-  );
-  const choisi = form ? intervenants.find((i) => i.tiers === form.tiers) : null;
-  const pendant = form && choisi ? choisi.passages.filter((p) => chevauche(p, { du: form.du, au: form.au })) : [];
-
-  return (
-    <div className="lin">
-      <h1 className="v2-sr">Équipes</h1>
-      <header className="lin-tete">
-        <span className="lin-tete-titre">Équipes</span>
-        <div className="lin-tete-droite">
-          <button type="button" className="v2-btn v2-btn--petit" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
-            <Plus width={14} height={14} aria-hidden="true" />
-            <span>Noter une absence</span>
-          </button>
-        </div>
-      </header>
-
-
+  const avis = (
+    <>
       {erreur && source === "reelle" ? (
-        <p className="ltl-note" data-teinte="rouge" role="alert">
+        <p className="dcal-note" data-teinte="rouge" role="alert">
           La base réelle n&apos;a pas répondu. {erreur}
         </p>
       ) : null}
       {erreurDispo ? (
-        <p className="ltl-note" data-teinte="rouge" role="alert">
+        <p className="dcal-note" data-teinte="rouge" role="alert">
           Les absences n&apos;ont pas pu être lues (réservé au gérant, à l&apos;administrateur et au valideur). {erreurDispo}
         </p>
       ) : null}
       {enLecture && intervenants.length ? (
-        <p className="ltl-note" role="status">
+        <p className="dcal-note" role="status">
           Lecture des chantiers : {tableaux.length} sur {liste.length}.
         </p>
       ) : null}
+    </>
+  );
 
-      {pret && (tableaux.length || !enLecture) && intervenants.length ? (
-        <Planning
-          lundi={lundi}
-          aujourdhui={du}
-          densite={estDensite(eParam) ? eParam : "semaines"}
-          type={type}
-          chantiers={liste}
-          tous={liste}
-          tableau={tableau}
-          passageChoisi={null}
-          onSemaine={(l) => routeur.replace(lien({ semaine: l ?? lundiDe(du) }), { scroll: false })}
-          onDensite={(d) => routeur.replace(lien({ echelle: d === "semaines" ? null : d }), { scroll: false })}
-          onType={(t) => routeur.replace(lien({ type: t }), { scroll: false })}
-          onPassage={(id) => routeur.push(`${RACINE}/daliro/chantiers?passage=${encodeURIComponent(id)}`)}
-          onChanger={changer}
-          absences={absences}
-          onAbsence={(tiers, id) => {
-            const iv = intervenants.find((x) => x.tiers === tiers);
-            const a = iv?.absences.find((x) => x.id === id);
-            if (iv && a) ouvrirAnnuler(iv, a);
-          }}
-        />
-      ) : (
-        <div className="ltl">{vide}</div>
-      )}
+  const choisiAbsentPendant = form ? intervenants.find((i) => i.tiers === form.tiers) : null;
+  const pendant = form && choisiAbsentPendant ? choisiAbsentPendant.passages.filter((p) => chevauche(p, { du: form.du, au: form.au })) : [];
+
+  return (
+    <div className="dcal">
+      <main className="dcal-main">
+        {choisi ? (
+          <FicheIntervenant
+            iv={choisi}
+            du={du}
+            semaine={params.get("semaine")}
+            avis={avis}
+            retour={lien({ intervenant: null, semaine: null })}
+            onSemaine={(s) => routeur.replace(lien({ semaine: s }), { scroll: false })}
+            onNoter={() => ouvrirNoter(choisi.tiers ?? undefined)}
+            onAnnuler={(a) => ouvrirAnnuler(choisi, a)}
+          />
+        ) : (
+          <>
+            <h1 className="v2-sr">Équipes</h1>
+            <header className="dcal-tete">
+              <div className="dcal-tete-textes">
+                <p className="dcal-titre" aria-hidden="true">
+                  Équipes
+                </p>
+                <p className="dcal-sous-titre">Les passages prévus et les absences de vos intervenants.</p>
+              </div>
+              <nav className="dcal-segment" aria-label="Qui">
+                <Link href={lien({ type: null })} scroll={false} aria-current={type !== "sous-traitants" ? "page" : undefined}>
+                  Tout le monde
+                </Link>
+                <Link href={lien({ type: "sous-traitants" })} scroll={false} aria-current={type === "sous-traitants" ? "page" : undefined}>
+                  Sous-traitants
+                </Link>
+              </nav>
+              <button type="button" className="dcal-plein" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
+                <Plus width={16} height={16} strokeWidth={2} aria-hidden="true" />
+                Absence
+              </button>
+            </header>
+            {avis}
+            <div className="dcal-liste">
+              <ul>
+                {!pret || (enLecture && !intervenants.length) ? (
+                  <li className="dcal-vide">Lecture des intervenants…</li>
+                ) : (
+                  (() => {
+                    const vus = intervenants.filter((i) => (type === "sous-traitants" ? !!i.tiers : type === "equipes" ? i.genre === "equipe" : true));
+                    if (!vus.length)
+                      return (
+                        <li className="dcal-vide">
+                          {type ? "Personne dans ce groupe." : "Aucun intervenant : les équipes et les sous-traitants viennent de l'annuaire et du planning de vos chantiers."}{" "}
+                          <Link href={`${BASE}/annuaire`} style={{ textDecoration: "underline" }}>
+                            Ouvrir l&apos;annuaire
+                          </Link>
+                        </li>
+                      );
+                    return vus.map((iv) => <LigneIntervenant key={iv.cle} iv={iv} du={du} au={au} href={lien({ intervenant: iv.cle })} onNoter={() => ouvrirNoter(iv.tiers ?? undefined)} onAnnuler={(a) => ouvrirAnnuler(iv, a)} />);
+                  })()
+                )}
+              </ul>
+              <p className="dcal-pied">
+                Un intervenant indisponible ?{" "}
+                <button type="button" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
+                  Noter une absence
+                </button>
+              </p>
+            </div>
+            <button type="button" className="dcal-flottant" aria-label="Noter une absence" onClick={() => ouvrirNoter()} disabled={!sousTraitants.length}>
+              <Plus width={20} height={20} aria-hidden="true" />
+            </button>
+          </>
+        )}
+      </main>
 
       <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -368,6 +457,390 @@ export default function Equipes() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+/* ——— le menu « ⋯ » de Cal.com : aligné à droite, 4 px sous le bouton ; Échap ou un clic dehors le ferme ——— */
+type Option = { libelle: string; icone: React.ReactNode; action?: () => void; href?: string; rouge?: boolean; desactive?: boolean } | { titre: string } | "sep";
+function MenuPoints({ libelle, options, petit }: { libelle: string; options: Option[]; petit?: boolean }) {
+  const [ouvert, setOuvert] = useState(false);
+  const boite = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ouvert) return;
+    const dehors = (e: MouseEvent) => {
+      if (!boite.current?.contains(e.target as Node)) setOuvert(false);
+    };
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOuvert(false);
+    };
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [ouvert]);
+  return (
+    <div className="dcal-menu-boite" ref={boite}>
+      <button type="button" className={`dcal-carre${petit ? " dcal-carre--petit" : ""}`} aria-label={libelle} title={libelle} aria-haspopup="menu" aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)}>
+        <Ellipsis width={16} height={16} aria-hidden="true" />
+      </button>
+      {ouvert ? (
+        <div className="dcal-menu" role="menu" aria-label={libelle}>
+          {options.map((o, i) =>
+            o === "sep" ? (
+              <div key={i} className="dcal-menu-sep" role="separator" />
+            ) : "titre" in o ? (
+              <div key={i} className="dcal-menu-titre">
+                {o.titre}
+              </div>
+            ) : o.href ? (
+              <Link key={i} href={o.href} role="menuitem" className={`dcal-menu-option${o.rouge ? " dcal-menu-option--rouge" : ""}`} onClick={() => setOuvert(false)}>
+                {o.icone}
+                {o.libelle}
+              </Link>
+            ) : (
+              <button
+                key={i}
+                type="button"
+                role="menuitem"
+                className={`dcal-menu-option${o.rouge ? " dcal-menu-option--rouge" : ""}`}
+                disabled={o.desactive}
+                onClick={() => {
+                  setOuvert(false);
+                  o.action?.();
+                }}
+              >
+                {o.icone}
+                {o.libelle}
+              </button>
+            ),
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+const ico = (I: typeof Plus) => <I width={16} height={16} aria-hidden="true" />;
+
+function LigneIntervenant({ iv, du, au, href, onNoter, onAnnuler }: { iv: Intervenant; du: string; au: string; href: string; onNoter: () => void; onAnnuler: (a: Absence) => void }) {
+  const passages = iv.passages.filter((p) => chevauche(p, { du, au }));
+  const absences = iv.absences.filter((a) => a.au >= du && a.du <= au);
+  const options: Option[] = [
+    { libelle: "Noter une absence", icone: ico(CalendarOff), action: onNoter, desactive: !iv.tiers },
+    ...absences.map((a) => ({ libelle: `Annuler l'absence ${jours(a.du, a.au)}`, icone: ico(Trash), action: () => onAnnuler(a), rouge: true })),
+  ];
+  if (iv.tiers) options.push({ libelle: "Ouvrir dans l'annuaire", icone: ico(BookUser), href: `${BASE}/annuaire?entreprise=${encodeURIComponent(iv.tiers)}` });
+  return (
+    <li className="dcal-ligne">
+      <div className="dcal-ligne-corps">
+        <div className="dcal-nom">
+          <Link href={href} scroll={false} className="dcal-ligne-lien">
+            {iv.nom}
+          </Link>
+          {iv.genre === "equipe" ? <span className="dcal-badge">Équipe</span> : null}
+        </div>
+        <div className="dcal-plages">
+          {passages.map((p) => (
+            <p key={p.id}>
+              {jours(p.debut, p.fin)}
+              {heures(p.hd, p.hf) ? `, ${heures(p.hd, p.hf)}` : ""} · {libellePassage(p)}
+            </p>
+          ))}
+          {absences.map((a) => (
+            <p key={a.id}>
+              {jours(a.du, a.au)}, absent{a.motif ? ` · ${a.motif}` : ""}
+            </p>
+          ))}
+          {!passages.length && !absences.length ? <p>Aucun passage sur 30 jours</p> : null}
+        </div>
+        <div className="dcal-lieu">
+          <Globe width={16} height={16} aria-hidden="true" />
+          {iv.lieu}
+        </div>
+      </div>
+      <MenuPoints libelle={`Actions : ${iv.nom}`} options={options} />
+    </li>
+  );
+}
+
+/* ——— la page d'un intervenant : la page d'un horaire de Cal.com ——— */
+function FicheIntervenant({
+  iv,
+  du,
+  semaine,
+  avis,
+  retour,
+  onSemaine,
+  onNoter,
+  onAnnuler,
+}: {
+  iv: Intervenant;
+  du: string;
+  semaine: string | null;
+  avis: React.ReactNode;
+  retour: string;
+  onSemaine: (s: string) => void;
+  onNoter: () => void;
+  onAnnuler: (a: Absence) => void;
+}) {
+  const { poser } = useDeplacer(du);
+  const [brouillon, setBrouillon] = useState<Brouillon>({});
+  const [envoi, setEnvoi] = useState(false);
+  const [deplacer, setDeplacer] = useState<string | null>(null);
+  const premier = lundiDe(du);
+  const semaines = Array.from({ length: 9 }, (_, i) => plusJours(premier, i * 7));
+  const lundi = semaine && /^\d{4}-\d{2}-\d{2}$/.test(semaine) ? lundiDe(semaine) : premier;
+  const joursSemaine = Array.from({ length: 7 }, (_, i) => plusJours(lundi, i));
+
+  /* un passage tel qu'il sera après « Enregistrer » */
+  const vus = iv.passages.map((p) => (brouillon[p.id] ? { ...p, ...brouillon[p.id] } : p));
+  const modifier = (p: PassageVu, champs: Partial<Brouillon[string]>) =>
+    setBrouillon((b) => {
+      const avant = b[p.id] ?? { debut: p.debut, fin: p.fin, hd: p.hd, hf: p.hf };
+      const apres = { ...avant, ...champs };
+      const origine = iv.passages.find((x) => x.id === p.id);
+      const copie = { ...b };
+      if (origine && origine.debut === apres.debut && origine.fin === apres.fin && origine.hd === apres.hd && origine.hf === apres.hf) delete copie[p.id];
+      else copie[p.id] = apres;
+      return copie;
+    });
+  const absentLe = (jour: string) => iv.absences.find((a) => a.du <= jour && a.au >= jour) ?? null;
+
+  const enregistrer = async () => {
+    setEnvoi(true);
+    try {
+      for (const [id, b] of Object.entries(brouillon)) {
+        const p = iv.passages.find((x) => x.id === id);
+        if (!p?.p || !p.chantierId) continue;
+        const quoi = b.debut !== p.debut || b.fin !== p.fin ? `prévu ${jours(b.debut, b.fin)}${heures(b.hd, b.hf) ? `, ${heures(b.hd, b.hf)}` : ""}` : heures(b.hd, b.hf) ? `de ${b.hd} à ${b.hf}` : "sans heures";
+        await poser(p.p, p.chantierId, b.debut, b.fin, b.hd, b.hf, quoi);
+      }
+      setBrouillon({});
+    } finally {
+      setEnvoi(false);
+    }
+  };
+  const nbModifs = Object.keys(brouillon).length;
+  const absencesVues = iv.absences.filter((a) => a.au >= du).sort((a, b) => a.du.localeCompare(b.du));
+
+  return (
+    <>
+      <h1 className="v2-sr">{iv.nom}</h1>
+      <header className="dcal-fiche-tete">
+        <Link href={retour} scroll={false} className="dcal-retour" aria-label="Retour aux équipes" title="Retour aux équipes">
+          <ArrowLeft width={16} height={16} aria-hidden="true" />
+        </Link>
+        <p className="dcal-fiche-nom" aria-hidden="true">
+          {iv.nom}
+        </p>
+        {iv.tiers ? (
+          <Link href={`${BASE}/annuaire?entreprise=${encodeURIComponent(iv.tiers)}`} className="dcal-crayon" aria-label="Modifier dans l'annuaire" title="Modifier dans l'annuaire">
+            <Pencil width={16} height={16} aria-hidden="true" />
+          </Link>
+        ) : null}
+        <div className="dcal-fiche-actions">
+          <button type="button" className="dcal-plein" disabled={!nbModifs || envoi} onClick={() => void enregistrer()}>
+            {envoi ? <Loader variant="spin" /> : null}
+            Enregistrer
+          </button>
+        </div>
+      </header>
+      {avis}
+      <div className="dcal-fiche-corps">
+        <div className="dcal-gauche">
+          <section className="dcal-carte" aria-labelledby="dcal-semaine-titre">
+            <div className="dcal-carte-tete">
+              <div className="dcal-carte-textes">
+                <h2 id="dcal-semaine-titre" className="dcal-carte-titre">
+                  Passages de la semaine
+                </h2>
+                <p className="dcal-carte-aide">Les heures posées chaque jour, chantier par chantier</p>
+              </div>
+            </div>
+            <div className="dcal-panneau">
+              <div className="dcal-semaine">
+                {joursSemaine.map((jour, i) => {
+                  const ici = vus.filter((p) => p.debut <= jour && p.fin >= jour);
+                  const veille = vus.filter((p) => p.fin === plusJours(jour, -1) && p.p);
+                  const absence = absentLe(jour);
+                  const etendre = () => {
+                    for (const p of veille) modifier(p, { fin: jour });
+                  };
+                  const retirer = (p: PassageVu) => {
+                    if (p.debut === p.fin) return;
+                    if (jour === p.fin) modifier(p, { fin: plusJours(jour, -1) });
+                    else if (jour === p.debut) modifier(p, { debut: plusJours(jour, 1) });
+                  };
+                  const retirable = (p: PassageVu) => !!p.p && p.debut !== p.fin && (jour === p.fin || jour === p.debut);
+                  const tousRetirables = ici.length > 0 && ici.every(retirable);
+                  return (
+                    <div key={jour} className="dcal-jour" data-actif={ici.length ? "" : undefined}>
+                      <div className="dcal-jour-nom">
+                        <button
+                          type="button"
+                          role="switch"
+                          className="dcal-inter"
+                          aria-checked={ici.length > 0}
+                          aria-label={`${JOURS[i]} ${morceaux(jour).j}`}
+                          title={ici.length ? (tousRetirables ? "Retirer ce jour des passages" : "Un passage d'un jour se déplace : utilisez « Déplacer vers… »") : veille.length ? "Étendre jusqu'à ce jour le passage de la veille" : "Aucun passage ne finit la veille"}
+                          disabled={ici.length ? !tousRetirables : !veille.length}
+                          onClick={() => (ici.length ? ici.forEach(retirer) : etendre())}
+                        />
+                        <span>
+                          {JOURS[i]} {morceaux(jour).j}
+                        </span>
+                      </div>
+                      <div className="dcal-plages-jour">
+                        {ici.length ? (
+                          ici.map((p) => (
+                            <div key={p.id} className="dcal-plage">
+                              <ChampHeure valeur={p.hd} libelle={`Début : ${libellePassage(p)}`} desactive={!p.p} onChange={(v) => modifier(p, v ? { hd: v, hf: p.hf && p.hf > v ? p.hf : (HEURES[HEURES.indexOf(v) + 16] ?? "23:45") } : { hd: null, hf: null })} />
+                              <span className="dcal-tiret">-</span>
+                              <ChampHeure valeur={p.hf} libelle={`Fin : ${libellePassage(p)}`} desactive={!p.p} onChange={(v) => modifier(p, v ? { hf: v, hd: p.hd && p.hd < v ? p.hd : (HEURES[HEURES.indexOf(v) - 16] ?? "00:00") } : { hd: null, hf: null })} />
+                              <button type="button" className="dcal-croix" aria-label="Retirer ce jour du passage" title={retirable(p) ? "Retirer ce jour du passage" : "Seul le premier ou le dernier jour d'un passage de plusieurs jours se retire"} disabled={!retirable(p)} onClick={() => retirer(p)}>
+                                <X width={16} height={16} aria-hidden="true" />
+                              </button>
+                              <Link href={`${BASE}/chantiers?passage=${encodeURIComponent(p.id)}`} className="dcal-chantier">
+                                {libellePassage(p)}
+                              </Link>
+                            </div>
+                          ))
+                        ) : (
+                          <span className="dcal-libre">{absence ? `Absent${absence.motif ? ` · ${absence.motif}` : ""}` : "Aucun passage"}</span>
+                        )}
+                      </div>
+                      <div className="dcal-jour-boutons">
+                        <button type="button" className="dcal-carre dcal-carre--petit" aria-label="Étendre jusqu'à ce jour le passage de la veille" title={veille.length ? `Étendre jusqu'à ce jour : ${veille.map(libellePassage).join(", ")}` : "Aucun passage ne finit la veille"} disabled={!veille.length} onClick={etendre}>
+                          <Plus width={16} height={16} aria-hidden="true" />
+                        </button>
+                        <div className="dcal-menu-boite">
+                          <button type="button" className="dcal-carre dcal-carre--petit" aria-label="Déplacer vers…" title="Déplacer vers…" aria-haspopup="menu" aria-expanded={deplacer === jour} disabled={!ici.some((p) => p.p)} onClick={() => setDeplacer((d) => (d === jour ? null : jour))}>
+                            <Copy width={16} height={16} aria-hidden="true" />
+                          </button>
+                          {deplacer === jour ? (
+                            <DeplacerVers
+                              jour={jour}
+                              lundi={lundi}
+                              fermer={() => setDeplacer(null)}
+                              choisir={(cible) => {
+                                const n = num(cible) - num(jour);
+                                for (const p of ici) if (p.p) modifier(p, { debut: plusJours(p.debut, n), fin: plusJours(p.fin, n) });
+                                setDeplacer(null);
+                              }}
+                            />
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          <section className="dcal-carte" aria-labelledby="dcal-absences-titre">
+            <div className="dcal-carte-tete">
+              <div className="dcal-carte-textes">
+                <h2 id="dcal-absences-titre" className="dcal-carte-titre">
+                  Absences
+                  <span title="Une absence notée retire ces jours des propositions : ni passage, ni remplacement." style={{ display: "inline-flex" }}>
+                    <Info width={16} height={16} aria-hidden="true" />
+                  </span>
+                </h2>
+                <p className="dcal-carte-aide">Ajoutez les jours où cet intervenant n&apos;est pas disponible.</p>
+              </div>
+              <button type="button" className="dcal-bord" onClick={onNoter} disabled={!iv.tiers} title={iv.tiers ? undefined : "Les absences se notent pour les sous-traitants de l'annuaire"}>
+                <Plus width={16} height={16} aria-hidden="true" />
+                Ajouter une absence
+              </button>
+            </div>
+            {absencesVues.length ? (
+              <div className="dcal-panneau">
+                {absencesVues.map((a) => (
+                  <div key={a.id} className="dcal-exception">
+                    <div className="dcal-carte-textes">
+                      <p className="dcal-exception-date">{plageLongue(a.du, a.au)}</p>
+                      <p className="dcal-exception-plage">{a.motif ?? "Absent toute la journée"}</p>
+                    </div>
+                    <button type="button" className="dcal-carre dcal-carre--petit dcal-carre--rouge" aria-label="Annuler l'absence" title="Annuler l'absence" onClick={() => onAnnuler(a)}>
+                      <Trash width={16} height={16} aria-hidden="true" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </section>
+        </div>
+
+        <aside className="dcal-droite">
+          <label className="dcal-libelle" htmlFor="dcal-semaine-choix">
+            Semaine
+          </label>
+          <div className="dcal-select">
+            <select id="dcal-semaine-choix" value={lundi} onChange={(e) => onSemaine(e.target.value)}>
+              {semaines.map((s) => (
+                <option key={s} value={s}>
+                  Semaine du {morceaux(s).j} {MOIS[morceaux(s).m]}
+                </option>
+              ))}
+            </select>
+            <ChevronsUpDown width={16} height={16} aria-hidden="true" />
+          </div>
+          <div className="dcal-filet" />
+          <div className="dcal-aide-carte">
+            <p>Un passage à revoir ?</p>
+            <Link href={`${BASE}/chantiers`}>Ouvrir les chantiers</Link>
+          </div>
+        </aside>
+      </div>
+    </>
+  );
+}
+
+function ChampHeure({ valeur, libelle, desactive, onChange }: { valeur: string | null; libelle: string; desactive: boolean; onChange: (v: string | null) => void }) {
+  return (
+    <span className="dcal-heure">
+      <select aria-label={libelle} value={valeur ?? ""} disabled={desactive} onChange={(e) => onChange(e.target.value || null)}>
+        <option value="">--:--</option>
+        {HEURES.map((h) => (
+          <option key={h} value={h}>
+            {h}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
+/* le « Copy times to… » de Cal.com : ici, déplacer les passages du jour vers un autre jour */
+function DeplacerVers({ jour, lundi, fermer, choisir }: { jour: string; lundi: string; fermer: () => void; choisir: (cible: string) => void }) {
+  const boite = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const dehors = (e: MouseEvent) => {
+      if (!boite.current?.parentElement?.contains(e.target as Node)) fermer();
+    };
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") fermer();
+    };
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [fermer]);
+  const cibles = Array.from({ length: 14 }, (_, i) => plusJours(lundi, i)).filter((j) => j !== jour);
+  return (
+    <div className="dcal-menu" role="menu" aria-label="Déplacer vers" ref={boite} style={{ maxHeight: 320, overflow: "auto" }}>
+      <div className="dcal-menu-titre">Déplacer vers</div>
+      {cibles.map((c) => (
+        <button key={c} type="button" role="menuitem" className="dcal-menu-option" onClick={() => choisir(c)}>
+          {dateLongue(c)}
+        </button>
+      ))}
     </div>
   );
 }
