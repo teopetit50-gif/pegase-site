@@ -1,0 +1,188 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI › « À viser » = Linear, My issues (« Assigned »), au 1:1
+   (02/11/2026)
+
+   Relevé : releves/linear-my-issues.md (29/10, complété le 01/11 en sombre
+   et clair, paliers 1024, 768 et 390). Jetons de Linear : ./lor.css.
+   Préfixe lor-av-, propre à Lorani. Repères depuis le bord de la carte de
+   Linear (1188 de large, x 244) :
+     en-tête    ligne 1 : 44, filet bas 0.5 ; titre 13/500 à x 19 ; bouton « New issue » 28
+                ligne 2 : 43.5 ; onglets de 28 (pastilles de vue), ronds de 28 à droite
+     groupes    en-tête 36, m 0 8, r 8, p 0 8 0 0, gap 8 ; puis lignes de 44 ; 2 sous le groupe
+     ligne      [indent] 8 [checkbox] 18 [priority] 16 [identifier] 55 [status] 16
+                [title] 1fr [createdAt] 60 [end-padding] 18, gap 8 ; survol en ::before (inset 0 8, r 8)
+     puces      24, r 48, bd 0.5, p 0 8, 12/450 ; pastille d'étiquette 9 dans 14 ; avatar 18
+     390        [indent] 2 [checkbox] 0 [priority] 16 [status] 16 [title] 1fr [end-padding] 15 :
+                ni identifiant, ni puces, ni date
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lor-av {
+  --lor-av-groupe: lch(9.232 0.85 272);
+  --lor-av-groupe-t: lch(90.826 1.425 272);
+  --lor-av-groupe-n: lch(63.304 1.425 272);
+  --lor-av-groupe-d: lch(39.452 1.425 272);
+  --lor-av-puce-bd: lch(16.32 1.48 272);
+  --lor-av-survol: lch(9.345 0.85 272);
+  --lor-av-case: lch(48.72 1.48 272);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 48px);
+}
+html[data-v2-theme="light"] .v2 .lor-av {
+  --lor-av-groupe: lch(94.44 0.5 282);
+  --lor-av-groupe-t: lch(18.888 1.25 282);
+  --lor-av-groupe-n: lch(37.776 1.25 282);
+  --lor-av-groupe-d: lch(62.33 1.25 282);
+  --lor-av-puce-bd: lch(84.44 0 282);
+  --lor-av-survol: lch(94.44 0.5 282);
+  --lor-av-case: #7c7c7c;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lor-av {
+    --lor-av-groupe: lch(94.44 0.5 282);
+    --lor-av-groupe-t: lch(18.888 1.25 282);
+    --lor-av-groupe-n: lch(37.776 1.25 282);
+    --lor-av-groupe-d: lch(62.33 1.25 282);
+    --lor-av-puce-bd: lch(84.44 0 282);
+    --lor-av-survol: lch(94.44 0.5 282);
+    --lor-av-case: #7c7c7c;
+  }
+}
+
+/* ——— en-tête ——— */
+.v2 .lor-av-l1 { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 44px; padding: 0 8px; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-av-titre { padding: 0 4px 0 11px; font-size: 13px; font-weight: 500; line-height: normal; color: var(--lor-t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-av-l2 { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 43.5px; padding: 0 8px; }
+.v2 .lor-av-vues { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.v2 .lor-av-vues .lor-vue[data-plus] { display: none; }
+.v2 .lor-av-outils { display: flex; align-items: center; gap: 6px; }
+.v2 .lor-av-ancre { position: relative; }
+.v2 .lor-av-note { margin: 8px 16px 0; padding: 8px 12px; border-radius: 8px; background: var(--lor-av-groupe); font-size: 12px; color: var(--lor-t3); }
+
+/* ——— liste ——— */
+.v2 .lor-av-liste { flex: 1; display: flex; flex-direction: column; gap: 0; padding-bottom: 8px; container-type: inline-size; }
+.v2 .lor-av-groupe { padding-bottom: 2px; }
+.v2 .lor-av-groupe-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0 8px;
+  padding: 0 8px 0 0;
+  border-radius: 8px;
+  background: var(--lor-av-groupe);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--lor-av-groupe-t);
+  white-space: nowrap;
+}
+.v2 .lor-av-replier { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-left: 8px; padding: 2px; border-radius: 9999px; color: var(--lor-t4); }
+.v2 .lor-av-replier svg { width: 16px; height: 16px; fill: currentColor; transition: transform 0.15s; }
+.v2 .lor-av-replier[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.v2 .lor-av-groupe-icone { display: inline-flex; width: 16px; height: 16px; }
+.v2 .lor-av-groupe-icone svg { width: 16px; height: 16px; }
+.v2 .lor-av-groupe-n { font-weight: 450; color: var(--lor-av-groupe-n); }
+.v2 .lor-av-groupe-d { font-weight: 450; color: var(--lor-av-groupe-d); overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-av-groupe-plus { margin-left: auto; width: 24px; height: 24px; }
+
+.v2 .lor-av-ligne {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: [indent] 8px [checkbox] 18px [priority] 16px [identifier] 55px [status] 16px [title] minmax(0, 1fr) [createdAt] 60px [end-padding] 18px;
+  column-gap: 8px;
+  align-items: center;
+  height: 44px;
+  line-height: normal;
+  color: var(--lor-t1);
+  cursor: default;
+}
+.v2 .lor-av-ligne::before { content: ""; position: absolute; inset: 0 8px; border-radius: 8px; z-index: -1; }
+.v2 .lor-av-ligne:hover::before, .v2 .lor-av-ligne[data-coche]::before, .v2 .lor-av-ligne:focus-visible::before { background: var(--lor-av-survol); }
+.v2 .lor-av-ligne:focus-visible { outline: none; }
+.v2 .lor-av-case { grid-column: checkbox; display: flex; align-items: center; justify-content: center; }
+.v2 .lor-av-case input { appearance: none; width: 14px; height: 14px; margin: 0; border: 1px solid var(--lor-av-case); border-radius: 3px; opacity: 0; background: transparent; }
+.v2 .lor-av-ligne:hover .lor-av-case input, .v2 .lor-av[data-selection] .lor-av-case input, .v2 .lor-av-case input:checked, .v2 .lor-av-case input:focus-visible { opacity: 1; }
+.v2 .lor-av-case input:checked {
+  border-color: var(--lor-fait);
+  background: var(--lor-fait) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='white'%3E%3Cpath d='M10.78 5.28a.75.75 0 0 0-1.06-1.06L5.75 8.19 4.28 6.72a.75.75 0 0 0-1.06 1.06l2 2a.75.75 0 0 0 1.06 0z'/%3E%3C/svg%3E") center / 12px no-repeat;
+}
+.v2 .lor-av-prio { grid-column: priority; display: flex; }
+.v2 .lor-av-id { grid-column: identifier; font-size: 13px; font-weight: 450; letter-spacing: -0.26px; color: var(--lor-t3); white-space: nowrap; overflow: hidden; }
+.v2 .lor-av-statut { grid-column: status; display: flex; }
+.v2 .lor-av-statut svg { width: 14px; height: 14px; }
+.v2 .lor-av-titre-c { grid-column: title; display: flex; align-items: center; gap: 4px; min-width: 0; }
+.v2 .lor-av-nom { flex: 0 1 auto; min-width: 0; font-size: 13px; font-weight: 500; color: var(--lor-t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: auto; padding-right: 8px; }
+.v2 .lor-av-puces { display: flex; align-items: center; gap: 4px; min-width: 0; flex-shrink: 1; overflow: hidden; }
+.v2 .lor-av-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 48px;
+  border: 0.5px solid var(--lor-av-puce-bd);
+  background: var(--lor-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lor-t2);
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  flex-shrink: 1;
+}
+.v2 .lor-av-puce svg { width: 14px; height: 14px; }
+.v2 a.lor-av-puce:hover, .v2 button.lor-av-puce:hover { background: var(--lor-av-survol); }
+.v2 .lor-av-point { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; flex-shrink: 0; }
+.v2 .lor-av-point::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--c, var(--lor-t3)); }
+.v2 .lor-av-avatar { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-left: 4px; border-radius: 50%; background: lch(48 59.31 288.43); color: #fff; font-size: 9px; font-weight: 600; flex-shrink: 0; }
+.v2 .lor-av-titre-c > svg { margin-left: 4px; }
+.v2 .lor-av-date { grid-column: createdAt; justify-self: end; font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; }
+.v2 .lor-av-vide { padding: 64px 24px; text-align: center; color: var(--lor-t3); font-size: 13px; }
+
+/* ——— barre de sélection (Linear : barre flottante en bas) ——— */
+.v2 .lor-av-barre {
+  position: sticky;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  align-self: center;
+  margin: 0 auto 8px;
+  padding: 4px;
+  border-radius: 12px;
+  border: 0.5px solid var(--lor-menu-trait);
+  background: var(--lor-menu);
+  box-shadow: var(--lor-menu-ombre);
+  font-size: 12px;
+  color: var(--lor-menu-texte);
+}
+.v2 .lor-av-barre-nb { padding: 0 8px; color: var(--lor-menu-gris); white-space: nowrap; }
+
+/* ——— fenêtre d'avis : rappel des montants ——— */
+.v2 .lor-av-faits { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0; font-size: 13px; }
+.v2 .lor-av-faits dt { color: var(--muted-foreground, #6b6f76); }
+.v2 .lor-av-faits dd { margin: 0; }
+
+/* ——— paliers ——— */
+@container (max-width: 900px) {
+  .v2 .lor-av-puce[data-second] { display: none; }
+}
+@media (max-width: 768px) {
+  .v2 .lor-av-date { display: none; }
+  .v2 .lor-av-ligne { grid-template-columns: [indent] 8px [checkbox] 18px [priority] 16px [identifier] 55px [status] 16px [title] minmax(0, 1fr) [end-padding] 10px; }
+}
+@media (max-width: 600px) {
+  .v2 .lor-av-ligne { grid-template-columns: [indent] 2px [checkbox] 0 [priority] 16px [status] 16px [title] minmax(0, 1fr) [end-padding] 15px; }
+  .v2 .lor-av-id, .v2 .lor-av-puces, .v2 .lor-av-case { display: none; }
+  .v2 .lor-av-groupe-d { display: none; }
+  .v2 .lor-av-groupe-plus { width: 28px; height: 28px; }
+  .v2 .lor-av-vues .lor-vue[data-repli] { display: none; }
+  .v2 .lor-av-vues .lor-vue[data-plus] { display: inline-flex; gap: 6px; }
+  .v2 .lor-av-l2 { height: 48px; }
+  .v2 .lor-av-nouveau { display: none; }
+  .v2 .lor-av-l1 .lor-texte-btn svg { margin-right: 0; }
+  .v2 .lor-av-titre-c > .lor-av-avatar { margin-left: 4px; }
+}
