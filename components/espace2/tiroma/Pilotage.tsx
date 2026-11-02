@@ -27,13 +27,14 @@
    praticien) agissent sur les répartitions.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ISSUES_APPEL, PANIERS } from "@/components/espace/tiroma/libelles";
 import type { CibleAppel, IssueAppel, ObjectifFauteuil } from "@/components/espace/tiroma/types";
 import { RACINE } from "../modules";
 import { useTiroma } from "./donnees";
 import { PlainIcone } from "./PlainIcone";
+import { copier, exporterCSV } from "./navigateur";
 import "./tir-plain.css";
 import "./tir-fils.css";
 import "./tir-insights.css";
@@ -155,15 +156,74 @@ function Repartition({ lignes }: { lignes: { nom: string; valeur: number; texte:
   );
 }
 
-function Carte({ titre, valeur, suffixe, children, large }: { titre: string; valeur?: string; suffixe?: string; children?: React.ReactNode; large?: boolean }) {
+/* « Ask Agent » (icône verte, libellé au survol) : copie le résumé de la carte pour l'assistant */
+function Agent({ resume, libelle = "Copier pour l'assistant" }: { resume: string; libelle?: string }) {
+  const [fait, setFait] = useState<string | null>(null);
+  return (
+    <button
+      type="button"
+      className="in-agent"
+      aria-label={libelle}
+      onClick={() => void copier(resume).then((ok) => { setFait(ok ? "Copié" : "Refusé"); window.setTimeout(() => setFait(null), 2500); })}
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ab5f" strokeWidth="2" aria-hidden="true"><path d="M12 3 4 7v6c0 4 3.4 7.4 8 8 4.6-.6 8-4 8-8V7z" /></svg>
+      <span className="in-agent-lib">{fait ?? libelle}</span>
+    </button>
+  );
+}
+
+function Carte({ titre, valeur, suffixe, children, large, resume, alerte }: { titre: string; valeur?: string; suffixe?: string; children?: React.ReactNode; large?: boolean; resume?: string; alerte?: { libelle: string; href: string } }) {
   return (
     <article className={`in-carte${large ? " in-carte--large" : ""}`}>
-      <div className="in-carte-tete"><span>{titre}</span><Info /></div>
+      <div className="in-carte-tete">
+        <span>{titre}</span>
+        <Info />
+        <span className="pl-pousse" />
+        {alerte ? <Link href={alerte.href} className="in-pique"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 3 4 7v6c0 4 3.4 7.4 8 8 4.6-.6 8-4 8-8V7z" /></svg>{alerte.libelle}</Link> : null}
+        <Agent resume={`${titre} : ${valeur ?? ""} ${suffixe ?? ""}${resume ? `\n${resume}` : ""}`.trim()} />
+      </div>
       {valeur !== undefined ? (
         <div className="in-valeur"><span className="in-valeur-chiffre">{valeur}</span>{suffixe ? <span className="in-valeur-suffixe">{suffixe}</span> : null}</div>
       ) : null}
       {children}
     </article>
+  );
+}
+
+/* carte de chaleur (« New thread volume by time and day ») : cases de 18, r 2, gap 1,5 ; 5 paliers de #5c67f4 ; légende « Plus bas ▢▢▢▢▢ Plus haut » */
+function Chaleur({ lignes, colonnes }: { lignes: { nom: string; valeurs: (number | null)[] }[]; colonnes: string[] }) {
+  const palier = (v: number | null) => (v === null ? -1 : Math.min(4, Math.floor(v * 5)));
+  return (
+    <div className="in-chaleur">
+      <div className="in-chaleur-grille" style={{ gridTemplateColumns: `90px repeat(${colonnes.length}, minmax(0, 1fr))` }}>
+        {lignes.map((l) => (
+          <div key={l.nom} className="in-chaleur-ligne" role="row">
+            <span className="in-chaleur-nom">{l.nom}</span>
+            {l.valeurs.map((v, i) => <span key={i} className="in-chaleur-case" data-palier={palier(v)} title={`${l.nom}, ${colonnes[i]} : ${pct(v)}`} />)}
+          </div>
+        ))}
+        <div className="in-chaleur-ligne">
+          <span />
+          {colonnes.map((c, i) => <span key={i} className="in-chaleur-x">{i % 2 === 0 ? c : ""}</span>)}
+        </div>
+      </div>
+      <div className="in-chaleur-legende"><span>Plus bas</span>{[0, 1, 2, 3, 4].map((k) => <span key={k} className="in-chaleur-case in-chaleur-case--10" data-palier={k} />)}<span>Plus haut</span></div>
+    </div>
+  );
+}
+
+/* au-dessus d'un tableau de rapport : champ « Search … » (filtre les lignes) et téléchargement CSV */
+function OutilsTableau({ recherche, setRecherche, telecharger, invite }: { recherche: string; setRecherche: (v: string) => void; telecharger: () => void; invite: string }) {
+  return (
+    <div className="in-outils">
+      <label className="in-recherche">
+        <PlainIcone nom="Loupe" taille={18} />
+        <input value={recherche} onChange={(e) => setRecherche(e.target.value)} placeholder={invite} aria-label={invite} />
+      </label>
+      <button type="button" className="pl-icone-bouton in-telecharger" aria-label="Télécharger en CSV" title="Télécharger en CSV" onClick={telecharger}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 15V3" /><path d="m7 10 5 5 5-5" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></svg>
+      </button>
+    </div>
   );
 }
 
@@ -277,6 +337,20 @@ export default function Pilotage() {
   const [menu, setMenu] = useState<null | "filtre" | "grouper" | "periode" | "pas">(null);
   const [praticien, setPraticien] = useState<string | null>(null);
   const [grouper, setGrouper] = useState<"fauteuil" | "praticien">("fauteuil");
+  const [chercheSyn, setChercheSyn] = useState("");
+  const [chercheDevis, setChercheDevis] = useState("");
+  const [chercheSuite, setChercheSuite] = useState("");
+  const [sidekick, setSidekick] = useState(true);
+  const [avisSk, setAvisSk] = useState<string | null>(null);
+  /* B : « Ask Sidekick Agent » */
+  useEffect(() => {
+    const touche = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement).closest("input, textarea, select") || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "b" || e.key === "B") (document.querySelector(".in-sidekick-question") as HTMLButtonElement | null)?.click();
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, []);
 
   const reel = t.reel;
   let etat: React.ReactNode = null;
@@ -393,10 +467,15 @@ export default function Pilotage() {
           {obj && obj.fauteuils.length ? (
             <Section titre="Occupation des fauteuils" colonnes={2}>
               {fauteuilsObj.map((f) => (
-                <Carte key={f.fauteuil_id} titre={`${f.nom} · taux par semaine`} valeur={pct(f.moyenne)} suffixe={f.objectif ? `objectif ${pct(f.objectif)} · tenu ${f.atteintes} semaine${f.atteintes > 1 ? "s" : ""} sur ${f.comptees}` : "sans objectif"} large>
+                <Carte key={f.fauteuil_id} titre={`${f.nom} · taux par semaine`} valeur={pct(f.moyenne)} suffixe={f.objectif ? `objectif ${pct(f.objectif)} · tenu ${f.atteintes} semaine${f.atteintes > 1 ? "s" : ""} sur ${f.comptees}` : "sans objectif"} large
+                  resume={f.semaines.map((x, i) => `${etiquettesSem[i]} : ${pct(x.taux)}`).join(" · ")}
+                  alerte={f.objectif && f.semaines.some((x, i) => semainesObj[i]?.nature === "prevue" && x.taux !== null && x.taux < (f.objectif ?? 0) - 0.1) ? { libelle: "Voir les demi-journées vides", href: `${RACINE}/tiroma/fauteuils?vue=vides` } : undefined}>
                   <Barres valeurs={f.semaines.map((s) => s.taux)} etiquettes={etiquettesSem.map((e, i) => (i % 2 === 0 || semainesObj[i]?.en_cours ? e : ""))} ligne={f.objectif} libelleLigne="Objectif" />
                 </Carte>
               ))}
+              <Carte titre="Occupation par fauteuil et par semaine" large resume={fauteuilsObj.map((f) => `${f.nom} : ${f.semaines.map((x) => pct(x.taux)).join(", ")}`).join("\n")}>
+                <Chaleur lignes={[...fauteuilsObj.map((f) => ({ nom: f.nom, valeurs: f.semaines.map((x) => x.taux) })), { nom: "Tous", valeurs: moyenneSem }]} colonnes={etiquettesSem} />
+              </Carte>
             </Section>
           ) : null}
 
@@ -446,11 +525,12 @@ export default function Pilotage() {
             <section className="in-section">
               <div className="in-section-titre"><button type="button"><h2>Semaine du {jourCourt(syn.semaine.du)} au {jourCourt(syn.semaine.au)}</h2></button></div>
               <p className="in-texte">Le lundi matin, la même synthèse arrive au point du matin du titulaire et de la direction.</p>
+              <OutilsTableau invite="Chercher un centre" recherche={chercheSyn} setRecherche={setChercheSyn} telecharger={() => exporterCSV("tiroma-synthese-semaine", ["Centre", "Rendez-vous", "Manqués", "Taux de manqués", "Réinscription", "Créneaux libérés", "Devis signés", "Devis présentés", "Montant signé", "Plans sans rendez-vous", "Montant sans rendez-vous", "Appels", "Rendez-vous repris"], syn.cabinets.filter((c) => c.nom.toLowerCase().includes(chercheSyn.toLowerCase())).map((c) => [c.nom, c.rdv.passes, c.rdv.manques, pct(c.rdv.taux_manques), pct(c.reinscription?.taux), c.creneaux.liberes, c.devis.signes, c.devis.presentes, c.devis.montant_signe, c.plans_sans_rdv.nombre, c.plans_sans_rdv.montant, c.appels.appels, c.appels.rdv_pris]))} />
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: "200px repeat(7, minmax(0, 1fr))" }}>
                 <div className="in-tab-ligne in-tab-tete" role="row">
                   <span role="columnheader">Centre</span><span role="columnheader">Rendez-vous</span><span role="columnheader">Manqués</span><span role="columnheader">Réinscription</span><span role="columnheader">Créneaux libérés</span><span role="columnheader">Devis signés</span><span role="columnheader">Sans rendez-vous</span><span role="columnheader">Appels</span>
                 </div>
-                {syn.cabinets.map((c) => (
+                {syn.cabinets.filter((c) => c.nom.toLowerCase().includes(chercheSyn.toLowerCase())).map((c) => (
                   <div key={c.entite_id} className="in-tab-ligne" role="row">
                     <span className="in-tab-objet" role="cell"><PlainIcone nom="Batiment" taille={14} />{c.nom}</span>
                     <span role="cell">{c.rdv.passes}</span>
@@ -472,9 +552,10 @@ export default function Pilotage() {
           {p && p.en_attente.a_relancer_liste.length ? (
             <section className="in-section">
               <div className="in-section-titre"><button type="button"><h2>Devis à relancer</h2></button></div>
+              <OutilsTableau invite="Chercher un patient ou un devis" recherche={chercheDevis} setRecherche={setChercheDevis} telecharger={() => exporterCSV("tiroma-devis-a-relancer", ["Patient", "Devis", "Présenté le", "Expire le", "Panier", "Montant", "Reste à charge"], p.en_attente.a_relancer_liste.filter((dv) => `${dv.patient_nom} ${dv.devis_numero ?? ""}`.toLowerCase().includes(chercheDevis.toLowerCase())).map((dv) => [dv.patient_nom, dv.devis_numero, dv.presente_le, dv.valide_jusqu_au, PANIERS[dv.panier ?? "non_precise"], dv.montant, dv.reste_a_charge]))} />
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: "200px 150px 150px 150px minmax(0, 1fr) 130px" }}>
                 <div className="in-tab-ligne in-tab-tete" role="row"><span role="columnheader">Patient</span><span role="columnheader">Devis</span><span role="columnheader">Présenté le</span><span role="columnheader">Expire le</span><span role="columnheader">Panier · montant</span><span role="columnheader" /></div>
-                {p.en_attente.a_relancer_liste.map((dv) => (
+                {p.en_attente.a_relancer_liste.filter((dv) => `${dv.patient_nom} ${dv.devis_numero ?? ""}`.toLowerCase().includes(chercheDevis.toLowerCase())).map((dv) => (
                   <div key={dv.plan_id} className="in-tab-ligne" role="row">
                     <Link href={`${RACINE}/tiroma/plans?plan=${encodeURIComponent(dv.plan_id)}`} className="in-tab-objet" role="cell">{dv.patient_nom}</Link>
                     <span role="cell">{dv.devis_numero ?? "—"}</span>
@@ -491,9 +572,10 @@ export default function Pilotage() {
           {rei && rei.sans_suite.length ? (
             <section className="in-section">
               <div className="in-section-titre"><button type="button"><h2>Vus sans prochain rendez-vous</h2></button></div>
+              <OutilsTableau invite="Chercher un patient ou un praticien" recherche={chercheSuite} setRecherche={setChercheSuite} telecharger={() => exporterCSV("tiroma-vus-sans-suite", ["Patient", "Vu le", "Praticien"], rei.sans_suite.filter((x) => `${x.patient_nom} ${x.praticien ?? ""}`.toLowerCase().includes(chercheSuite.toLowerCase())).map((x) => [d?.profil === "direction" ? "Patient du cabinet" : x.patient_nom, x.derniere_visite, x.praticien]))} />
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: "240px 180px minmax(0, 1fr) 130px" }}>
                 <div className="in-tab-ligne in-tab-tete" role="row"><span role="columnheader">Patient</span><span role="columnheader">Vu le</span><span role="columnheader">Praticien</span><span role="columnheader" /></div>
-                {rei.sans_suite.map((s) => (
+                {rei.sans_suite.filter((x) => `${x.patient_nom} ${x.praticien ?? ""}`.toLowerCase().includes(chercheSuite.toLowerCase())).map((s) => (
                   <div key={s.patient_id} className="in-tab-ligne" role="row">
                     <span className="in-tab-objet" role="cell">{d?.profil === "direction" ? "Patient du cabinet" : s.patient_nom}</span>
                     <span role="cell">{jourCourt(s.derniere_visite)}</span>
@@ -517,6 +599,36 @@ export default function Pilotage() {
             </footer>
           ) : null}
         </div>
+        {d && sidekick ? (
+          <div className="in-sidekick" role="toolbar" aria-label="Assistant">
+            <button
+              type="button"
+              className="in-sidekick-question"
+              onClick={() => {
+                const lignesR = [
+                  `Pilotage du ${d.cabinet.entite_nom ?? "cabinet"}, ${new Date().toLocaleDateString("fr-FR", { dateStyle: "long" })}.`,
+                  ...(p ? [`Devis acceptés : ${pct(p.devis.taux)} (${p.devis.signes} sur ${p.devis.presentes}) ; signé sans rendez-vous : ${euros(p.plans_sans_rdv.montant)} (${p.plans_sans_rdv.nombre} plans) ; manqués : ${pct(p.rendez_vous.taux_manques)}.`] : []),
+                  ...(rei ? [`Réinscription : ${pct(rei.taux)} (${rei.reinscrits} sur ${rei.visites}).`] : []),
+                  ...(obj ? obj.fauteuils.map((f) => `${f.nom} : moyenne ${pct(f.moyenne)}, objectif ${pct(f.objectif)}, tenu ${f.atteintes}/${f.comptees}.`) : []),
+                  ...(d.appels ? [`Appels sur ${d.appels.bilan.jours} jours : ${d.appels.bilan.appels}, ${d.appels.bilan.rdv_pris} rendez-vous repris.`] : []),
+                  "Question : qu'est-ce qui progresse et qu'est-ce qui recule ?",
+                ];
+                void copier(lignesR.join("\n")).then((ok) => { setAvisSk(ok ? "Copié : collez-le dans l'assistant de l'espace." : "Le presse-papier a refusé la copie."); window.setTimeout(() => setAvisSk(null), 3500); });
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ab5f" strokeWidth="2" aria-hidden="true"><path d="M12 3 4 7v6c0 4 3.4 7.4 8 8 4.6-.6 8-4 8-8V7z" /></svg>
+              <strong>Copier pour l&apos;assistant</strong>
+              <span>{avisSk ?? "qu'est-ce qui progresse, qu'est-ce qui recule ?"}</span>
+              <kbd className="pl-kbd">B</kbd>
+            </button>
+            <button type="button" className="pl-icone-bouton" aria-label="Relire les chiffres" title={t.source === "reelle" ? "Relire les chiffres" : "Données d'exemple : rien à relire"} onClick={() => { if (t.source === "reelle") void t.relire(); else { setAvisSk("Données d'exemple : rien à relire."); window.setTimeout(() => setAvisSk(null), 3000); } }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>
+            </button>
+            <button type="button" className="pl-icone-bouton" aria-label="Replier" title="Replier" onClick={() => setSidekick(false)}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 17 5-5-5-5" /><path d="m13 17 5-5-5-5" /></svg>
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
