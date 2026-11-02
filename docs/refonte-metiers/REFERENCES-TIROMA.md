@@ -6,7 +6,7 @@ Consigne : `docs/refonte-metiers/cloud/COMMUN.md` et `cloud/TIROMA.md` (branche 
 | Sous-page | Route | Référence | Relevé | Comparaisons (`comparaisons/tiroma/`) | État |
 |---|---|---|---|---|---|
 | Aujourd'hui | `/espace2/tiroma` | Linear, My issues | `linear-my-issues.md` | `aujourdhui-*` | faite : en-tête, onglets, colonnes, lignes, puces, avatar et date superposés au pixel (sombre et clair) ; 390 conforme |
-| Créneaux et appels | `/espace2/tiroma/creneaux` | Plain, Threads | `plain-threads.md` | `creneaux-*` | à faire |
+| Créneaux et appels | `/espace2/tiroma/creneaux` | Plain, Threads | `plain-threads.md` | `creneaux-*`, `creneaux-fil-*` | faite : liste (en-tête, groupes, lignes de 67, colonnes) et fil ouvert (en-tête, messages, volet) superposés ; gestes testés |
 | Fauteuils | `/espace2/tiroma/fauteuils` | Cal.com, Bookings | `calcom-bookings.md` | `fauteuils-*` | à faire |
 | Plans et devis | `/espace2/tiroma/plans` | Linear, Board | `linear-board.md` | `plans-*` | à faire |
 | Pilotage | `/espace2/tiroma/pilotage` | Plain, Insights | `plain-insights.md` | `pilotage-*` | à faire |
@@ -54,3 +54,29 @@ puces de 24, avatar 18, date alignée à droite). Restent, expliqués :
 - anneau « Todo » sombre : lu sur la capture (le relevé ne le donne qu'en clair, #a6a6a6) ;
 - 390 : nos libellés d'onglets sont plus longs que « Assigned · Created » ; le second se tronque pour garder
   « 2 de plus » et les trois ronds.
+
+## Créneaux et appels ← Plain, Threads
+
+Un fil = un patient à appeler ou à suivre. Groupes (icônes de statut de Plain) : Créneaux à sauver (B8, un fil par
+créneau, candidats dans l'ordre en message, « hors préférences » / « ne pas contacter » en note jaune), Appels à
+reprendre (B12, bilan des trente jours dans la tête de groupe ; montant des plans pour le titulaire seul), Absences
+probables (B10), Réponses des patients (B24), Liste d'attente (B25), Contrôles dus (B23, sans « Noter l'appel »,
+comme avant). Colonnes de Plain : compte = fauteuil ou patient, client = praticien ou motif, tier = famille de soin ou
+issue, réf. + titre + aperçu, étiquettes, priorité, canal (`<>` = relevé du logiciel, bulle = appel noté) + temps,
+assigné.
+Gestes : « Reply » (R) = « Noter l'appel » (F3/G2, choix du patient parmi les candidats, six issues, date si « À
+rappeler » ; « Ne plus contacter » demande une confirmation) ; « Nouveau fil » = « Liste d'attente » (F6/G9,
+recherche de patients) ; « Retirer de la liste » (F7/G10, motif puis confirmation) dans la barre du fil ;
+F (Filtres : groupes, puce de filtre actif + « Tout effacer »), V (Affichage : fils faits, vues), Échap, ↑/↓.
+Adresses : `?fil=<clé>` (ouvert depuis la liste : colonne de 400 + carte du fil) ; `?creneau=<id>` (point du matin,
+aiguillage : sans la colonne liste, comme Plain ouvert par son adresse) ; `?vue=attente|appels|reponses|…` ;
+`?inscrire=1`.
+
+Superpositions : liste carte contre carte (fenêtre 1391×948 = carte de 1079×884) écart moyen 12,9/255 ; fil ouvert
+par son adresse (1688×948 = carte de 1376×884) 8,8/255 ; en-tête, séparateur de date, cartes de message (avatar 40,
+p 12 16 16), volet de 385 (lignes de 32, libellé 144) confondus. Restent, expliqués :
+- « Ask Sidekick Agent » (assistant IA de Plain) et « Add note » : fonctions de Plain sans équivalent dans Tiroma,
+  absentes ; la barre se recentre donc sur deux groupes (statut, Noter l'appel · Plus) ;
+- « Assign », « Thread tier », « SLA policy » : sans objet (aucune assignation dans Tiroma) ;
+- Whyte (titre de page, licence payante) remplacée par Inter 400 à la même taille ;
+- textes et nombre de lignes par groupe : contenu du cabinet ; en-tête de liste : un bouton « Liste d'attente » de plus.
