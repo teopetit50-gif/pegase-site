@@ -133,6 +133,21 @@ html[data-v2-theme="light"] .v2 .dal.dal-bd-page {
   color: var(--dal-t2);
 }
 
+/* l'étoile (épingler la vue) suit le fil ; pleine et jaune une fois épinglée ; cloche pleine une fois suivie */
+.v2 .dal .dal-bd-etoile {
+  margin-left: 0;
+}
+.v2 .dal .dal-rond[data-actif] svg {
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-bd-etoile[data-actif] svg {
+  color: lch(80 90 85);
+}
+.v2 .dal .dal-rond:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 /* ——— ligne 2 ——— */
 .v2 .dal .dal-bd-ligne2 {
   gap: 8px;
@@ -184,6 +199,19 @@ html[data-v2-theme="light"] .v2 .dal.dal-bd-page {
   line-height: 16px;
   color: var(--dal-t3);
   white-space: normal;
+}
+.v2 .dal .dal-bd-menu .dal-menu-option {
+  max-width: 380px;
+}
+.v2 .dal .dal-bd-menu-ident {
+  flex: none;
+  font-size: 12px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-menu-titre-el {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .v2 .dal .dal-bd-menu-compte {
   font-size: 12px;

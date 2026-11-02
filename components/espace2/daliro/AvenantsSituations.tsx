@@ -8,32 +8,39 @@
    docs/refonte-metiers/releves/linear-board.md ; mesures prises sur ses
    captures à taille réelle, styles : ./dal-board.css, préfixe dal-bd-).
    Seul le contenu change :
-     · onglets « Avenants » et « Situations » (Active · Backlog · All issues
-       chez Linear), gardés dans l'adresse (?vue=situations) ;
-     · une colonne par état (statut d'un ticket) : à chiffrer, dans
-       « À valider », à signer, signés — et pour les situations : en
-       préparation, à valider, à encaisser, payées. Refusés, abandonnés et
-       annulées sont dans la colonne repliée de droite (Hidden rows) ;
+     · trois onglets (Active · Backlog · All issues chez Linear) :
+       « Avenants », « Situations » et « Tous » (les deux, par étape) ;
+     · une colonne par état ; refusés, abandonnés et annulées dans la
+       colonne de droite (Hidden rows) ;
      · une carte par avenant ou situation, aux briques de la carte de
        Linear : identifiant, signataire (avatar), état et titre, puces
        (urgence, échéance, montant, chantier, origine), date d'ouverture.
+
+   Chaque bouton de la référence fait quelque chose (décision de Teo du
+   02/11, ./navigateur.ts) :
+     · l'étoile épingle la vue affichée (onglet et filtre) : elle remonte
+       dans « Épinglés » de la vue d'ensemble (navigateur) ;
+     · la cloche suit le ou les chantiers affichés : leurs messages passent
+       en tête d'À ranger (navigateur) ;
+     · « Nouvel avenant » ouvre la fenêtre « Ouvrir un avenant » du
+       chantier choisi ; le « + » d'une colonne y fait entrer un élément
+       par le geste qui y mène (chiffrer → soumettre, signer, abandonner :
+       fenêtres de la fiche ; pour une situation, son détail) ;
+     · Filtre (chantier, recherche) et Affichage (colonnes, tri) sont dans
+       l'adresse : ?chantier, ?q, ?masquees, ?tri ;
+     · le volet de droite ouvre le détail de l'élément.
 
    Les gestes (chiffrer une ligne, retirer une ligne, soumettre, signer,
    faire signer sur place, voir la preuve, abandonner, resoumettre ;
    avancer, reprendre l'avancement lu sur les photos, soumettre, valider,
    annuler, noter un paiement) vivent dans le détail de l'élément, ouvert
-   dans le volet de droite au clic sur sa carte (ou par l'aiguillage :
-   ?avenant=<id>, ?situation=<id>). Ce détail est celui de la fiche du
-   chantier (../lin/Volet, rendu par ChantierVue quand la page fournit un
-   volet) : mêmes portes, mêmes fenêtres, mêmes confirmations. La liste
-   que ChantierVue rend avec n'est pas montrée (la page a la sienne).
-   Glisser une carte dans une autre colonne (le geste de Linear qui change
-   le statut) ouvre ce détail : le statut d'un avenant ne change que par sa
-   fenêtre (soumettre, signer, abandonner).
-
-   « Nouvel avenant » et le « + » d'une colonne mènent à la fiche du
-   chantier choisi, où l'avenant s'ouvre (origine, objet) ; « Nouvelle
-   situation » de même, sur un chantier au marché vérifié.
+   dans le volet au clic sur sa carte (ou par l'aiguillage : ?avenant=<id>,
+   ?situation=<id>). Ce détail est celui de la fiche du chantier
+   (../lin/Volet, rendu par ChantierVue quand la page fournit un volet) :
+   mêmes portes, mêmes fenêtres, mêmes confirmations. La liste que
+   ChantierVue rend avec n'est pas montrée (la page a la sienne).
+   Glisser une carte dans une autre colonne ouvre ce détail : le statut
+   d'un avenant ne change que par sa fenêtre.
 
    Données : useDaliro() (./donnees) ; en base réelle, les tableaux de tous
    les chantiers sont lus à l'arrivée (demanderTous). En exemple, la page
@@ -43,7 +50,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import ChantierVue from "@/components/espace/daliro/ChantierVue";
+import ChantierVue, { type FormChantier } from "@/components/espace/daliro/ChantierVue";
 import { encaissement } from "@/components/espace/daliro/situations";
 import type { Avenant, Situation, Tableau } from "@/components/espace/daliro/types";
 import { dateCourte, montant } from "@/components/espace/format";
@@ -55,6 +62,7 @@ import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { useDaliro } from "./donnees";
 import { AVENANTS_PLUS, SITUATIONS_PLUS } from "./exemplesAvenants";
+import { copier as copierTexte, useFavoris, useSuivis } from "./navigateur";
 import "./dal-board.css";
 
 const BASE = `${RACINE}/daliro`;
@@ -62,10 +70,13 @@ const CHEMIN = `${BASE}/avenants`;
 const fiche = (id: string) => `${BASE}/chantiers/${encodeURIComponent(id)}`;
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 
-type Vue = "avenants" | "situations";
+type Vue = "avenants" | "situations" | "tous";
 type Etat = "triage" | "backlog" | "todo" | "started" | "done" | "canceled";
-type Colonne<T> = { cle: string; nom: string; etat: Etat; garde: (x: T) => boolean; masquee?: boolean };
+/* un élément du tableau : un avenant ou une situation, avec le tableau de son chantier */
+type El = { cle: string; t: Tableau; a: Avenant; s?: undefined } | { cle: string; t: Tableau; s: Situation; a?: undefined };
+type Colonne = { cle: string; nom: string; etat: Etat; garde: (x: El) => boolean; masquee?: boolean };
 type Item = { cle: string; id: string; t: Tableau; ident: string; titre: string; etat: Etat; quand: string | null };
+type Tri = "date" | "montant" | "chantier";
 
 const ICONE_ETAT: Record<Etat, NomDalIcone> = {
   triage: "IssueStatusTriage",
@@ -79,19 +90,57 @@ const ICONE_ETAT: Record<Etat, NomDalIcone> = {
 const valide = (d: string | null | undefined) => d === "approuvee" || d === "executee";
 const reste = (s: Situation) => encaissement(s, aujourdhui()).reste;
 
-const COLONNES_AVENANT: Colonne<Avenant>[] = [
-  { cle: "a-chiffrer", nom: "À chiffrer", etat: "backlog", garde: (a) => a.statut === "brouillon" },
-  { cle: "a-valider", nom: "Dans « À valider »", etat: "todo", garde: (a) => a.statut === "soumis" && !valide(a.demande_statut) },
-  { cle: "a-signer", nom: "À signer", etat: "started", garde: (a) => a.statut === "soumis" && valide(a.demande_statut) },
-  { cle: "signes", nom: "Signés", etat: "done", garde: (a) => a.statut === "signe" },
-  { cle: "refuses", nom: "Refusés et abandonnés", etat: "canceled", garde: (a) => a.statut === "refuse" || a.statut === "abandonne", masquee: true },
+/* les étapes d'un avenant et d'une situation */
+const A = {
+  aChiffrer: (a: Avenant) => a.statut === "brouillon",
+  aValider: (a: Avenant) => a.statut === "soumis" && !valide(a.demande_statut),
+  aSigner: (a: Avenant) => a.statut === "soumis" && valide(a.demande_statut),
+  signe: (a: Avenant) => a.statut === "signe",
+  clos: (a: Avenant) => a.statut === "refuse" || a.statut === "abandonne",
+};
+const S = {
+  enPreparation: (s: Situation) => s.statut === "brouillon" || s.statut === "refusee",
+  aValider: (s: Situation) => s.statut === "soumise",
+  aEncaisser: (s: Situation) => s.statut === "validee" && reste(s) > 0.005,
+  payee: (s: Situation) => s.statut === "validee" && reste(s) <= 0.005,
+  annulee: (s: Situation) => s.statut === "annulee",
+};
+const av = (f: (a: Avenant) => boolean) => (x: El) => !!x.a && f(x.a);
+const si = (f: (s: Situation) => boolean) => (x: El) => !!x.s && f(x.s);
+const ou = (f: (x: El) => boolean, g: (x: El) => boolean) => (x: El) => f(x) || g(x);
+
+const COLONNES: Record<Vue, Colonne[]> = {
+  avenants: [
+    { cle: "a-chiffrer", nom: "À chiffrer", etat: "backlog", garde: av(A.aChiffrer) },
+    { cle: "a-valider", nom: "Dans « À valider »", etat: "todo", garde: av(A.aValider) },
+    { cle: "a-signer", nom: "À signer", etat: "started", garde: av(A.aSigner) },
+    { cle: "signes", nom: "Signés", etat: "done", garde: av(A.signe) },
+    { cle: "refuses", nom: "Refusés et abandonnés", etat: "canceled", garde: av(A.clos), masquee: true },
+  ],
+  situations: [
+    { cle: "en-preparation", nom: "En préparation", etat: "backlog", garde: si(S.enPreparation) },
+    { cle: "a-valider", nom: "À valider", etat: "todo", garde: si(S.aValider) },
+    { cle: "a-encaisser", nom: "À encaisser", etat: "started", garde: si(S.aEncaisser) },
+    { cle: "payees", nom: "Payées", etat: "done", garde: si(S.payee) },
+    { cle: "annulees", nom: "Annulées", etat: "canceled", garde: si(S.annulee), masquee: true },
+  ],
+  tous: [
+    { cle: "a-preparer", nom: "À préparer", etat: "backlog", garde: ou(av(A.aChiffrer), si(S.enPreparation)) },
+    { cle: "a-valider", nom: "Dans « À valider »", etat: "todo", garde: ou(av(A.aValider), si(S.aValider)) },
+    { cle: "a-signer", nom: "À signer ou à encaisser", etat: "started", garde: ou(av(A.aSigner), si(S.aEncaisser)) },
+    { cle: "faits", nom: "Signés et payés", etat: "done", garde: ou(av(A.signe), si(S.payee)) },
+    { cle: "clos", nom: "Refusés, abandonnés, annulés", etat: "canceled", garde: ou(av(A.clos), si(S.annulee)), masquee: true },
+  ],
+};
+const ONGLETS: { cle: Vue; libelle: string }[] = [
+  { cle: "avenants", libelle: "Avenants" },
+  { cle: "situations", libelle: "Situations" },
+  { cle: "tous", libelle: "Tous" },
 ];
-const COLONNES_SITUATION: Colonne<Situation>[] = [
-  { cle: "en-preparation", nom: "En préparation", etat: "backlog", garde: (s) => s.statut === "brouillon" || s.statut === "refusee" },
-  { cle: "a-valider", nom: "À valider", etat: "todo", garde: (s) => s.statut === "soumise" },
-  { cle: "a-encaisser", nom: "À encaisser", etat: "started", garde: (s) => s.statut === "validee" && reste(s) > 0.005 },
-  { cle: "payees", nom: "Payées", etat: "done", garde: (s) => s.statut === "validee" && reste(s) <= 0.005 },
-  { cle: "annulees", nom: "Annulées", etat: "canceled", garde: (s) => s.statut === "annulee", masquee: true },
+const TRIS: { cle: Tri; libelle: string }[] = [
+  { cle: "date", libelle: "Date d'ouverture" },
+  { cle: "montant", libelle: "Montant" },
+  { cle: "chantier", libelle: "Chantier" },
 ];
 
 /* l'origine d'un avenant, en étiquette (pastille de la palette des étiquettes de Linear) */
@@ -110,6 +159,8 @@ const ORIGINES: Record<string, { libelle: string; couleur: string }> = {
 
 /* « OME-52 » chez Linear : le préfixe du chantier, A pour un avenant, S pour une situation */
 const prefixe = (t: Tableau) => (t.chantier.reference || t.chantier.nom).split(/[-\s]/)[0].toUpperCase().slice(0, 4);
+const ident = (x: El) => (x.a ? `${prefixe(x.t)}-A${x.a.numero}` : `${prefixe(x.t)}-S${x.s!.numero}`);
+const titreEl = (x: El) => (x.a ? x.a.objet : `Situation n° ${x.s!.numero} au ${dateCourte(x.s!.periode_fin)}`);
 const initiales = (nom: string | null | undefined) =>
   (nom ?? "")
     .replace(/^(Signé sur place\s*:?\s*|M\.\s*et\s*Mme\s*|M\.\s*|Mme\s*|Dr\s*)/i, "")
@@ -136,11 +187,48 @@ const PRIORITE: Record<0 | 1 | 2 | 3, { icone: NomDalIcone; libelle: string }> =
   3: { icone: "Priority4", libelle: "À suivre" },
 };
 
+/* le « + » d'une colonne : ce qui peut y entrer, et le geste qui l'y fait entrer */
+type Entree = { titre: string; aide: string; candidats: (x: El) => boolean; geste: (x: El) => { form: FormChantier } | { detail: true } } | { titre: string; aide: string; nouveau: true };
+function entreeDe(colonne: string, vue: Vue): Entree | null {
+  const avenantPar = (type: "soumettre" | "signer" | "abandonner") => (x: El) => ({ form: { type, avenant: x.a! } as FormChantier });
+  const detail = () => ({ detail: true as const });
+  switch (colonne) {
+    case "a-chiffrer":
+      return { titre: "Ouvrir un avenant sur…", aide: "Un avenant se prépare sur un chantier ouvert.", nouveau: true };
+    case "a-preparer":
+      return { titre: "Ouvrir un avenant sur…", aide: "Un avenant se prépare sur un chantier ouvert.", nouveau: true };
+    case "en-preparation":
+      return { titre: "Nouvelle situation sur…", aide: "Une situation se calcule sur un chantier au marché vérifié, pour qui voit les prix.", nouveau: true };
+    case "a-valider":
+      return vue === "situations"
+        ? { titre: "Soumettre une situation", aide: "Aucune situation en préparation.", candidats: si(S.enPreparation), geste: detail }
+        : { titre: "Soumettre à la signature", aide: "Aucun avenant chiffré à soumettre.", candidats: (x) => !!x.a && A.aChiffrer(x.a) && x.a.lignes.length > 0, geste: avenantPar("soumettre") };
+    case "a-signer":
+      return vue === "avenants"
+        ? { titre: "En attente dans « À valider »", aide: "Aucun avenant en attente de validation.", candidats: av(A.aValider), geste: detail }
+        : { titre: "Valider une situation approuvée", aide: "Aucune situation approuvée à valider.", candidats: (x) => !!x.s && S.aValider(x.s) && valide(x.s.demande_statut), geste: detail };
+    case "signes":
+      return { titre: "Signer un avenant", aide: "Aucun avenant validé à signer.", candidats: av(A.aSigner), geste: avenantPar("signer") };
+    case "payees":
+      return { titre: "Noter un paiement", aide: "Aucune situation à encaisser.", candidats: si(S.aEncaisser), geste: detail };
+    case "faits":
+      return { titre: "Signer ou noter un paiement", aide: "Rien à signer ni à encaisser.", candidats: ou(av(A.aSigner), si(S.aEncaisser)), geste: (x) => (x.a ? avenantPar("signer")(x) : detail()) };
+    case "refuses":
+    case "clos":
+      return { titre: "Abandonner un avenant", aide: "Aucun avenant à abandonner.", candidats: (x) => !!x.a && (A.aChiffrer(x.a) || x.a.statut === "soumis"), geste: avenantPar("abandonner") };
+    case "annulees":
+      return { titre: "Annuler une situation", aide: "Aucune situation à annuler.", candidats: (x) => !!x.s && (S.enPreparation(x.s) || S.aValider(x.s)), geste: detail };
+  }
+  return null;
+}
+
 export default function AvenantsSituations() {
   const { source, pret, erreur, liste, tableau, demanderTous, enLecture, onLocal, relireChantier } = useDaliro();
   const params = useSearchParams();
   const router = useRouter();
   const toast = useToast();
+  const { estEpingle, basculer: epingler } = useFavoris();
+  const { estSuivi, basculer: suivre } = useSuivis();
 
   /* en base réelle : les tableaux de tous les chantiers, relus quand la liste change (temps réel) */
   const listeLue = useRef<unknown>(null);
@@ -170,10 +258,30 @@ export default function AvenantsSituations() {
   const lecture = source === "reelle" && (!pret || liste.some((c) => enLecture(c.id)));
   const voitPrix = tableaux.some((t) => t.voit_prix);
 
-  /* ——— l'adresse : la vue, l'élément ouvert ——— */
+  /* ——— l'adresse : la vue, le filtre, l'affichage, l'élément ouvert ——— */
   const idAvenant = params.get("avenant");
   const idSituation = params.get("situation");
-  const vue: Vue = idSituation ? "situations" : idAvenant ? "avenants" : params.get("vue") === "situations" ? "situations" : "avenants";
+  const pVue = params.get("vue");
+  const vue: Vue = pVue === "tous" ? "tous" : idSituation ? "situations" : idAvenant ? "avenants" : pVue === "situations" ? "situations" : "avenants";
+  const filtre = params.get("chantier");
+  const q = params.get("q") ?? "";
+  const tri: Tri = TRIS.find((x) => x.cle === params.get("tri"))?.cle ?? "date";
+  const masquees = (params.get("masquees") ?? "").split(",").filter(Boolean);
+  const adresse = useCallback(
+    (changes: Record<string, string | null>) => {
+      const p = new URLSearchParams(params.toString());
+      for (const [k, v] of Object.entries(changes)) {
+        if (v) p.set(k, v);
+        else p.delete(k);
+      }
+      const s = p.toString().replace(/%3A/gi, ":").replace(/%2C/gi, ",");
+      return s ? `${CHEMIN}?${s}` : CHEMIN;
+    },
+    [params],
+  );
+  const aller = (changes: Record<string, string | null>) => router.replace(adresse(changes), { scroll: false });
+  const lienVue = (v: Vue) => adresse({ vue: v === "avenants" ? null : v, avenant: null, situation: null, masquees: null });
+
   const choisieAdresse = idAvenant ? `avenant:${idAvenant}` : idSituation ? `situation:${idSituation}` : null;
   const [choisie, setChoisie] = useState<string | null>(choisieAdresse);
   const [adresseVue, setAdresseVue] = useState(choisieAdresse);
@@ -181,20 +289,21 @@ export default function AvenantsSituations() {
     setAdresseVue(choisieAdresse);
     setChoisie(choisieAdresse);
   }
-  const lienVue = (v: Vue) => (v === "situations" ? `${CHEMIN}?vue=situations` : CHEMIN);
   const choisir = useCallback(
     (cle: string | null) => {
       setChoisie(cle);
       const [type, id] = cle ? cle.split(":") : [null, null];
-      const p = new URLSearchParams();
-      if (type === "avenant" && id) p.set("avenant", id);
-      else if (type === "situation" && id) p.set("situation", id);
-      else if (vue === "situations") p.set("vue", "situations");
-      const qs = p.toString();
       setAdresseVue(type ? cle : null);
-      router.replace(qs ? `${CHEMIN}?${qs}` : CHEMIN, { scroll: false });
+      router.replace(
+        adresse({
+          avenant: type === "avenant" ? id : null,
+          situation: type === "situation" ? id : null,
+          vue: vue === "avenants" && type !== "situation" ? null : vue === "situations" && type !== "avenant" ? "situations" : vue === "tous" ? "tous" : type === "situation" ? "situations" : null,
+        }),
+        { scroll: false },
+      );
     },
-    [router, vue],
+    [router, adresse, vue],
   );
   useEffect(() => {
     if (choisie === null) return;
@@ -206,12 +315,9 @@ export default function AvenantsSituations() {
     return () => window.removeEventListener("keydown", touche);
   }, [choisie, choisir]);
 
-  /* ——— le filtre (chantier), l'affichage (colonnes masquées) ——— */
+  /* ——— les menus ——— */
   const [menu, setMenu] = useState<string | null>(null);
-  const [filtre, setFiltre] = useState<string | null>(null);
-  const [q, setQ] = useState("");
-  const [cachees, setCachees] = useState<string[]>([]);
-  const [masqueesVisibles, setMasqueesVisibles] = useState(true);
+  const [saisie, setSaisie] = useState(q);
   useEffect(() => {
     if (!menu) return;
     const dehors = (e: MouseEvent) => {
@@ -228,9 +334,19 @@ export default function AvenantsSituations() {
 
   const chantiersVus = tableaux.filter((t) => (!filtre || t.chantier.id === filtre) && (!q.trim() || `${t.chantier.nom} ${t.chantier.commune} ${t.chantier.reference ?? ""}`.toLowerCase().includes(q.trim().toLowerCase())));
 
-  /* ——— les cartes ——— */
-  const avenants = chantiersVus.flatMap((t) => t.avenants.map((a) => ({ a, t }))).sort((x, y) => new Date(y.a.cree_le).getTime() - new Date(x.a.cree_le).getTime());
-  const situations = chantiersVus.flatMap((t) => (t.voit_prix ? (t.situations ?? []) : []).map((s) => ({ s, t }))).sort((x, y) => y.s.periode_fin.localeCompare(x.s.periode_fin));
+  /* ——— les éléments ——— */
+  const montantEl = (x: El) => (x.a ? (x.a.montant_ht ?? 0) : x.s!.statut === "validee" ? x.s!.net_a_payer : x.s!.periode_ht);
+  const dateEl = (x: El) => (x.a ? x.a.cree_le : x.s!.periode_fin);
+  const elements: El[] = chantiersVus
+    .flatMap((t): El[] => [
+      ...(vue !== "situations" ? t.avenants.map((a) => ({ cle: `avenant:${a.id}`, t, a })) : []),
+      ...(vue !== "avenants" && t.voit_prix ? (t.situations ?? []).map((s) => ({ cle: `situation:${s.id}`, t, s })) : []),
+    ])
+    .sort((x, y) =>
+      tri === "montant" ? montantEl(y) - montantEl(x) : tri === "chantier" ? x.t.chantier.nom.localeCompare(y.t.chantier.nom, "fr") || new Date(dateEl(y)).getTime() - new Date(dateEl(x)).getTime() : new Date(dateEl(y)).getTime() - new Date(dateEl(x)).getTime(),
+    );
+  /* tous les éléments, filtre compris, pour les « + » de colonne (une situation peut entrer dans la vue Avenants…) */
+  const tousElements: El[] = chantiersVus.flatMap((t): El[] => [...t.avenants.map((a) => ({ cle: `avenant:${a.id}`, t, a })), ...(t.voit_prix ? (t.situations ?? []) : []).map((s) => ({ cle: `situation:${s.id}`, t, s }))]);
 
   /* le détail ouvert : le tableau de son chantier, la partie qui le porte */
   const elu = (() => {
@@ -248,6 +364,14 @@ export default function AvenantsSituations() {
   const contexte = useMemo<Volet>(() => ({ cible, choisie, choisir }), [cible, choisie, choisir]);
   const voletOuvert = choisie !== null;
 
+  /* une fenêtre de la fiche ouverte d'ici (« Ouvrir un avenant », soumettre, signer, abandonner) */
+  const [geste, setGeste] = useState<{ chantier: string; n: number; form: FormChantier } | null>(null);
+  const tGeste = geste ? tableau(geste.chantier) : null;
+  const ouvrirGeste = (chantier: string, form: FormChantier) => {
+    setMenu(null);
+    setGeste((g) => ({ chantier, n: (g?.n ?? 0) + 1, form }));
+  };
+
   /* glisser une carte dans une autre colonne : son détail s'ouvre, avec le geste qui change son état */
   const [glisse, setGlisse] = useState<string | null>(null);
   const [survolee, setSurvolee] = useState<string | null>(null);
@@ -258,14 +382,28 @@ export default function AvenantsSituations() {
     const verifie = c.marche_verifie || t?.marches.some((m) => m.statut === "verifie");
     return (c.statut === "ouvert" || c.statut === "suspendu" || c.statut === "receptionne") && verifie && (!t || t.voit_prix);
   });
-  const pourNouveau = vue === "avenants" ? ouverts : voitPrix ? pourSituation : [];
-  const lienNouveau = (id: string) => `${fiche(id)}?onglet=argent&partie=${vue === "avenants" ? "avenants" : "situations"}#${vue}`;
+  const lienSituation = (id: string) => `${fiche(id)}?onglet=argent&partie=situations#situations`;
+
+  /* ——— l'étoile : la vue affichée, épinglée ; la cloche : les chantiers affichés, suivis ——— */
+  const nomFiltre = filtre ? tableaux.find((t) => t.chantier.id === filtre)?.chantier.nom : null;
+  const vueEpinglee = {
+    type: "vue",
+    id: `daliro-avenants:${vue}:${filtre ?? "tous"}`,
+    titre: `${ONGLETS.find((o) => o.cle === vue)!.libelle === "Tous" ? "Avenants et situations" : ONGLETS.find((o) => o.cle === vue)!.libelle}${nomFiltre ? ` · ${nomFiltre}` : ""}`,
+    href: adresse({ avenant: null, situation: null }),
+  };
+  const epinglee = estEpingle(vueEpinglee.type, vueEpinglee.id);
+  const aSuivre = (filtre ? tableaux.filter((t) => t.chantier.id === filtre) : chantiersVus).map((t) => t.chantier);
+  const suivi = aSuivre.length > 0 && aSuivre.every((c) => estSuivi("btp_chantiers", c.id));
+  const basculerSuivi = () => {
+    if (!aSuivre.length) return;
+    for (const c of aSuivre) if (estSuivi("btp_chantiers", c.id) === suivi) suivre({ type: "btp_chantiers", id: c.id, titre: c.nom, href: fiche(c.id) });
+    const qui = aSuivre.length === 1 ? `« ${aSuivre[0].nom} »` : `les ${aSuivre.length} chantiers affichés`;
+    toast(suivi ? `Vous ne suivez plus ${qui}.` : `Vous suivez ${qui} : ses nouveaux messages passent en tête d'À ranger.`);
+  };
 
   const copier = (chemin: string) => {
-    void navigator.clipboard?.writeText(`${window.location.origin}${chemin}`).then(
-      () => toast("Lien copié"),
-      () => toast("Le lien n'a pas pu être copié.", "rouge"),
-    );
+    void copierTexte(`${window.location.origin}${chemin}`).then((ok) => toast(ok ? "Lien copié" : "Le lien n'a pas pu être copié.", ok ? undefined : "rouge"));
   };
 
   const [contextuel, setContextuel] = useState<{ x: number; y: number; item: Item } | null>(null);
@@ -329,19 +467,67 @@ export default function AvenantsSituations() {
   };
 
   /* les colonnes de la vue */
-  const colonnes =
-    vue === "avenants"
-      ? COLONNES_AVENANT.map((c) => {
-          const items = avenants.filter((x) => c.garde(x.a));
-          return { c: c as Colonne<unknown>, n: items.length, cartes: items.map(({ a, t }) => carteAvenant(a, t, c.etat)) };
-        })
-      : COLONNES_SITUATION.map((c) => {
-          const items = situations.filter((x) => c.garde(x.s));
-          return { c: c as Colonne<unknown>, n: items.length, cartes: items.map(({ s, t }) => carteSituation(s, t, c.etat)) };
-        });
-  const visibles = colonnes.filter(({ c }) => !cachees.includes(`${vue}:${c.cle}`) && (!c.masquee || masqueesVisibles));
-  const nbCachees = colonnes.length - visibles.length;
-  const affichageModifie = nbCachees > 0;
+  const colonnes = COLONNES[vue].map((c) => {
+    const items = elements.filter(c.garde);
+    return { c, n: items.length, cartes: items.map((x) => (x.a ? carteAvenant(x.a, x.t, c.etat) : carteSituation(x.s!, x.t, c.etat))) };
+  });
+  const visibles = colonnes.filter(({ c }) => !masquees.includes(c.cle));
+  const affichageModifie = masquees.length > 0 || tri !== "date";
+  const basculerColonne = (cle: string) => aller({ masquees: (masquees.includes(cle) ? masquees.filter((x) => x !== cle) : [...masquees, cle]).join(",") || null });
+
+  /* le menu « Nouvel avenant » / « + » d'une colonne */
+  const menuEntree = (colonne: string | null) => {
+    const e = colonne ? entreeDe(colonne, vue) : vue === "situations" ? entreeDe("en-preparation", vue) : entreeDe("a-chiffrer", vue);
+    if (!e) return null;
+    if ("nouveau" in e) {
+      const situation = colonne === "en-preparation" || (!colonne && vue === "situations");
+      const chantiers = situation ? (voitPrix ? pourSituation : []) : ouverts;
+      return (
+        <MenuChoix titre={e.titre} aide={e.aide}>
+          {chantiers.map((c) =>
+            situation ? (
+              <Link key={c.id} href={lienSituation(c.id)} role="menuitem" className="dal-menu-option" onClick={() => setMenu(null)}>
+                <DalIcone nom="Crane" />
+                <span className="dal-pousse">{c.nom}</span>
+                <span className="dal-bd-menu-compte">{c.commune}</span>
+              </Link>
+            ) : (
+              <button key={c.id} type="button" role="menuitem" className="dal-menu-option" onClick={() => ouvrirGeste(c.id, { type: "avenant" })}>
+                <DalIcone nom="Crane" />
+                <span className="dal-pousse">{c.nom}</span>
+                <span className="dal-bd-menu-compte">{c.commune}</span>
+              </button>
+            ),
+          )}
+        </MenuChoix>
+      );
+    }
+    const candidats = tousElements.filter(e.candidats);
+    return (
+      <MenuChoix titre={e.titre} aide={e.aide}>
+        {candidats.map((x) => (
+          <button
+            key={x.cle}
+            type="button"
+            role="menuitem"
+            className="dal-menu-option"
+            onClick={() => {
+              const g = e.geste(x);
+              if ("form" in g) ouvrirGeste(x.t.chantier.id, g.form);
+              else {
+                setMenu(null);
+                choisir(x.cle);
+              }
+            }}
+          >
+            <DalIcone nom={x.a ? "Signature" : "Spreadsheet"} />
+            <span className="dal-bd-menu-ident">{ident(x)}</span>
+            <span className="dal-pousse dal-bd-menu-titre-el">{titreEl(x)}</span>
+          </button>
+        ))}
+      </MenuChoix>
+    );
+  };
 
   const titreVide =
     vue === "situations" && !voitPrix && !lecture
@@ -366,25 +552,49 @@ export default function AvenantsSituations() {
                 Avenants et situations
               </span>
             </nav>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={epinglee}
+              className="dal-rond dal-bd-etoile"
+              data-actif={epinglee ? "" : undefined}
+              aria-label={epinglee ? "Retirer la vue des épinglés" : "Épingler cette vue"}
+              title={epinglee ? "Retirer la vue des épinglés de la vue d'ensemble" : "Épingler cette vue : elle remonte dans « Épinglés » de la vue d'ensemble"}
+              onClick={() => {
+                epingler(vueEpinglee);
+                toast(epinglee ? "La vue n'est plus épinglée." : "Vue épinglée : elle est dans « Épinglés » de la vue d'ensemble.");
+              }}
+            >
+              <DalIcone nom={epinglee ? "Favorite" : "Etoile"} />
+            </button>
             <span className="dal-pousse" />
-            <Link href={`${BASE}/a-faire`} className="dal-rond" aria-label="À faire : avenants à faire signer, situations à soumettre" title="À faire : avenants à faire signer, situations à soumettre">
-              <DalIcone nom="Subscribe" />
-            </Link>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={suivi}
+              className="dal-rond"
+              data-actif={suivi ? "" : undefined}
+              disabled={!aSuivre.length}
+              aria-label={suivi ? "Ne plus suivre ces chantiers" : "Suivre les chantiers affichés"}
+              title={suivi ? `Ne plus suivre ${nomFiltre ?? "les chantiers affichés"}` : `Suivre ${nomFiltre ?? "les chantiers affichés"} : leurs nouveaux messages passent en tête d'À ranger`}
+              onClick={basculerSuivi}
+            >
+              <DalIcone nom={suivi ? "Notified" : "Subscribe"} />
+            </button>
             <div className="dal-bd-pop" data-dal-bd-pop="">
               <button type="button" className="dal-bd-nouveau" aria-haspopup="menu" aria-expanded={menu === "nouveau"} onClick={() => setMenu(menu === "nouveau" ? null : "nouveau")}>
                 <DalIcone nom="Plus" taille={14} />
-                <span>{vue === "avenants" ? "Nouvel avenant" : "Nouvelle situation"}</span>
+                <span>{vue === "situations" ? "Nouvelle situation" : "Nouvel avenant"}</span>
               </button>
-              {menu === "nouveau" ? <MenuChantiers vue={vue} chantiers={pourNouveau} lien={lienNouveau} fermer={() => setMenu(null)} /> : null}
+              {menu === "nouveau" ? menuEntree(null) : null}
             </div>
           </div>
           <div className="dal-ligne2 dal-bd-ligne2">
-            <Link href={lienVue("avenants")} scroll={false} className="dal-onglet" aria-current={vue === "avenants" ? "page" : undefined}>
-              Avenants
-            </Link>
-            <Link href={lienVue("situations")} scroll={false} className="dal-onglet" aria-current={vue === "situations" ? "page" : undefined}>
-              Situations
-            </Link>
+            {ONGLETS.map((o) => (
+              <Link key={o.cle} href={lienVue(o.cle)} scroll={false} replace className="dal-onglet" aria-current={vue === o.cle ? "page" : undefined}>
+                {o.libelle}
+              </Link>
+            ))}
             <Link href={BASE} className="dal-rond dal-bd-vues" aria-label="Vue d'ensemble des chantiers" title="Vue d'ensemble des chantiers">
               <DalIcone nom="CustomView" />
             </Link>
@@ -397,19 +607,30 @@ export default function AvenantsSituations() {
                 </button>
                 {menu === "filtre" ? (
                   <div className="dal-menu dal-bd-menu" role="menu" aria-label="Filtrer">
-                    <input className="dal-bd-champ" autoFocus placeholder="Filtrer : chantier, commune…" aria-label="Rechercher un chantier" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && setMenu(null)} />
+                    <input
+                      className="dal-bd-champ"
+                      autoFocus
+                      placeholder="Filtrer : chantier, commune…"
+                      aria-label="Rechercher un chantier"
+                      value={saisie}
+                      onChange={(e) => {
+                        setSaisie(e.target.value);
+                        aller({ q: e.target.value.trim() || null });
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && setMenu(null)}
+                    />
                     <div className="dal-menu-sep" role="separator" />
-                    <button type="button" role="menuitemradio" aria-checked={!filtre} className="dal-menu-option" onClick={() => (setFiltre(null), setMenu(null))}>
+                    <Link href={adresse({ chantier: null })} scroll={false} replace role="menuitemradio" aria-checked={!filtre} className="dal-menu-option" onClick={() => setMenu(null)}>
                       <DalIcone nom="Project" />
                       <span className="dal-pousse">Tous les chantiers</span>
                       {!filtre ? <DalIcone nom="IssueStatusDone" /> : null}
-                    </button>
+                    </Link>
                     {tableaux.map((t) => (
-                      <button key={t.chantier.id} type="button" role="menuitemradio" aria-checked={filtre === t.chantier.id} className="dal-menu-option" onClick={() => (setFiltre(filtre === t.chantier.id ? null : t.chantier.id), setMenu(null))}>
+                      <Link key={t.chantier.id} href={adresse({ chantier: filtre === t.chantier.id ? null : t.chantier.id })} scroll={false} replace role="menuitemradio" aria-checked={filtre === t.chantier.id} className="dal-menu-option" onClick={() => setMenu(null)}>
                         <DalIcone nom="Crane" />
                         <span className="dal-pousse">{t.chantier.nom}</span>
                         {filtre === t.chantier.id ? <DalIcone nom="IssueStatusDone" /> : null}
-                      </button>
+                      </Link>
                     ))}
                   </div>
                 ) : null}
@@ -421,21 +642,20 @@ export default function AvenantsSituations() {
                 </button>
                 {menu === "affichage" ? (
                   <div className="dal-menu dal-bd-menu" role="menu" aria-label="Options d'affichage">
-                    <p className="dal-bd-menu-titre">Colonnes</p>
+                    <p className="dal-bd-menu-titre">Trier les cartes par</p>
+                    {TRIS.map((x) => (
+                      <Link key={x.cle} href={adresse({ tri: x.cle === "date" ? null : x.cle })} scroll={false} replace role="menuitemradio" aria-checked={tri === x.cle} className="dal-menu-option">
+                        <DalIcone nom={x.cle === "montant" ? "Euro" : x.cle === "chantier" ? "Crane" : "Calendar"} />
+                        <span className="dal-pousse">{x.libelle}</span>
+                        {tri === x.cle ? <DalIcone nom="IssueStatusDone" /> : null}
+                      </Link>
+                    ))}
+                    <div className="dal-menu-sep" role="separator" />
+                    <p className="dal-bd-menu-titre">Colonnes affichées</p>
                     {colonnes.map(({ c, n }) => {
-                      const vu = visibles.some((x) => x.c.cle === c.cle);
+                      const vu = !masquees.includes(c.cle);
                       return (
-                        <button
-                          key={c.cle}
-                          type="button"
-                          role="menuitemcheckbox"
-                          aria-checked={vu}
-                          className="dal-menu-option"
-                          onClick={() => {
-                            if (c.masquee) setMasqueesVisibles(!vu);
-                            setCachees((l) => (vu ? [...l, `${vue}:${c.cle}`] : l.filter((x) => x !== `${vue}:${c.cle}`)));
-                          }}
-                        >
+                        <button key={c.cle} type="button" role="menuitemcheckbox" aria-checked={vu} className="dal-menu-option" onClick={() => basculerColonne(c.cle)}>
                           <DalIcone nom={ICONE_ETAT[c.etat]} className="dal-bd-etat" data-etat={c.etat} />
                           <span className="dal-pousse">{c.nom}</span>
                           <span className="dal-bd-menu-compte">{n}</span>
@@ -443,6 +663,15 @@ export default function AvenantsSituations() {
                         </button>
                       );
                     })}
+                    {affichageModifie ? (
+                      <>
+                        <div className="dal-menu-sep" role="separator" />
+                        <Link href={adresse({ tri: null, masquees: null })} scroll={false} replace role="menuitem" className="dal-menu-option" onClick={() => setMenu(null)}>
+                          <DalIcone nom="Refresh" />
+                          <span>Revenir à l&apos;affichage par défaut</span>
+                        </Link>
+                      </>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -454,8 +683,7 @@ export default function AvenantsSituations() {
                 aria-pressed={voletOuvert}
                 onClick={() => {
                   if (voletOuvert) return choisir(null);
-                  const premier = vue === "avenants" ? avenants[0] && `avenant:${avenants[0].a.id}` : situations[0] && `situation:${situations[0].s.id}`;
-                  if (premier) choisir(premier);
+                  if (elements[0]) choisir(elements[0].cle);
                 }}
               >
                 <DalIcone nom="Volet" />
@@ -476,7 +704,7 @@ export default function AvenantsSituations() {
               {titreVide}
             </p>
           ) : (
-            <div className="dal-bd-tableau" role="list" aria-label={vue === "avenants" ? "Avenants par état" : "Situations par état"}>
+            <div className="dal-bd-tableau" role="list" aria-label={vue === "avenants" ? "Avenants par état" : vue === "situations" ? "Situations par état" : "Avenants et situations par étape"}>
               {visibles.map(({ c, n, cartes }) => (
                 <section
                   key={c.cle}
@@ -500,7 +728,7 @@ export default function AvenantsSituations() {
                     setGlisse(null);
                     if (!cle) return;
                     choisir(cle);
-                    toast(vue === "avenants" ? "L'état d'un avenant change par son geste, dans le détail : soumettre, signer, abandonner." : "L'état d'une situation change par son geste, dans le détail : soumettre, valider, noter un paiement.");
+                    toast(cle.startsWith("avenant") ? "L'état d'un avenant change par son geste, dans le détail : soumettre, signer, abandonner." : "L'état d'une situation change par son geste, dans le détail : soumettre, valider, noter un paiement.");
                   }}
                 >
                   <div className="dal-bd-colonne-tete">
@@ -508,23 +736,17 @@ export default function AvenantsSituations() {
                     <h2 className="dal-bd-colonne-nom">{c.nom}</h2>
                     <span className="dal-bd-colonne-compte">{n}</span>
                     <span className="dal-pousse" />
-                    <MenuColonne
-                      nom={c.nom}
-                      masquer={() => {
-                        if (c.masquee) setMasqueesVisibles(false);
-                        setCachees((l) => [...l, `${vue}:${c.cle}`]);
-                      }}
-                    />
+                    <MenuColonne nom={c.nom} masquer={() => basculerColonne(c.cle)} />
                     <div className="dal-bd-pop" data-dal-bd-pop="">
-                      <button type="button" className="dal-rond dal-bd-plus" aria-label={vue === "avenants" ? "Nouvel avenant" : "Nouvelle situation"} title={vue === "avenants" ? "Nouvel avenant" : "Nouvelle situation"} aria-expanded={menu === `plus:${c.cle}`} onClick={() => setMenu(menu === `plus:${c.cle}` ? null : `plus:${c.cle}`)}>
+                      <button type="button" className="dal-rond dal-bd-plus" aria-label={entreeDe(c.cle, vue)?.titre ?? "Ajouter"} title={entreeDe(c.cle, vue)?.titre ?? "Ajouter"} aria-expanded={menu === `plus:${c.cle}`} onClick={() => setMenu(menu === `plus:${c.cle}` ? null : `plus:${c.cle}`)}>
                         <DalIcone nom="Plus" />
                       </button>
-                      {menu === `plus:${c.cle}` ? <MenuChantiers vue={vue} chantiers={pourNouveau} lien={lienNouveau} fermer={() => setMenu(null)} /> : null}
+                      {menu === `plus:${c.cle}` ? menuEntree(c.cle) : null}
                     </div>
                   </div>
                   <div className="dal-bd-cartes">
                     {cartes}
-                    {!n && !c.masquee ? <p className="dal-bd-colonne-vide">{vue === "avenants" ? "Aucun avenant dans cet état." : "Aucune situation dans cet état."}</p> : null}
+                    {!n && !c.masquee ? <p className="dal-bd-colonne-vide">{vue === "avenants" ? "Aucun avenant dans cet état." : vue === "situations" ? "Aucune situation dans cet état." : "Rien à cette étape."}</p> : null}
                   </div>
                 </section>
               ))}
@@ -583,6 +805,17 @@ export default function AvenantsSituations() {
           </div>
         ) : null}
       </DalCarte>
+
+      {/* la fenêtre demandée d'ici (ouvrir, soumettre, signer, abandonner) : hors du volet, la vue du chantier n'y rend que sa fenêtre */}
+      {geste && tGeste ? (
+        <VoletContexte.Provider value={null}>
+          <div className="dal-bd-hote" hidden>
+            <Habille>
+              <ChantierVue key={`geste-${source}-${geste.chantier}`} tableau={tGeste} source={source} onLocal={onLocal} relire={() => relireChantier(geste.chantier)} sections={["avenants"]} demande={{ n: geste.n, form: geste.form }} />
+            </Habille>
+          </div>
+        </VoletContexte.Provider>
+      ) : null}
     </VoletContexte.Provider>
   );
 }
@@ -659,22 +892,12 @@ function Puce({ icone, pastille, carre, titre, children, ...data }: { icone?: No
   );
 }
 
-/* ——— « Nouvel avenant » : le chantier où l'ouvrir ——— */
-function MenuChantiers({ vue, chantiers, lien, fermer }: { vue: Vue; chantiers: { id: string; nom: string; commune: string }[]; lien: (id: string) => string; fermer: () => void }) {
+/* ——— le menu d'un « + » : ce qui peut entrer dans la colonne ——— */
+function MenuChoix({ titre, aide, children }: { titre: string; aide: string; children: React.ReactNode[] }) {
   return (
-    <div className="dal-menu dal-bd-menu" role="menu" aria-label={vue === "avenants" ? "Ouvrir un avenant sur" : "Nouvelle situation sur"}>
-      <p className="dal-bd-menu-titre">{vue === "avenants" ? "Ouvrir un avenant sur…" : "Nouvelle situation sur…"}</p>
-      {chantiers.length ? (
-        chantiers.map((c) => (
-          <Link key={c.id} href={lien(c.id)} role="menuitem" className="dal-menu-option" onClick={fermer}>
-            <DalIcone nom="Crane" />
-            <span className="dal-pousse">{c.nom}</span>
-            <span className="dal-bd-menu-compte">{c.commune}</span>
-          </Link>
-        ))
-      ) : (
-        <p className="dal-bd-menu-aide">{vue === "avenants" ? "Un avenant se prépare sur un chantier ouvert." : "Une situation se calcule sur un chantier au marché vérifié, pour qui voit les prix."}</p>
-      )}
+    <div className="dal-menu dal-bd-menu" role="menu" aria-label={titre}>
+      <p className="dal-bd-menu-titre">{titre}</p>
+      {children.length ? children : <p className="dal-bd-menu-aide">{aide}</p>}
     </div>
   );
 }
