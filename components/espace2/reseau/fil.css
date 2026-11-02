@@ -1,516 +1,285 @@
 /* ══════════════════════════════════════════════════════════════════════
-   Réseau Omega · Fil (02/11/2026)
+   Réseau Omega · Fil (reprise du 02/11/2026, soir)
 
-   La composition du fil de Circle, relevée au style calculé sur
-   community.circle.so/feed : colonne de 672 px, cartes empilées à 12 px
-   (Circle : 20), titre puis auteur (pastille, nom en 500, étiquettes,
-   date ; dessous, d'où il vient), texte, résumé, filet, actions, réponses.
-   L'habit est celui d'Espace 2 : jetons --v2-*, rayons 6 / 8 px, filets
-   sans ombre portée, police de l'espace. Rien de Circle (ni couleur, ni
-   police, ni rayon). Le sombre suit les jetons, sans règle de plus.
-   Tout est rangé sous .v2 .rf.
+   L'habillage des moteurs : le kit components/espace2/lin/ (lin.css, la
+   barre du titre, les pastilles, les ronds, les menus) et le fil d'activité
+   de Linear (linear-pulse.css, déjà posé sur Activité : colonne, composeur,
+   cartes, bloc des propriétés, panneau de droite de 400). Ce fichier n'ajoute
+   que ce que le Fil a en propre, sous le préfixe rf- : titre et texte coupé
+   d'une publication (Circle), badges de membre, « qui peut aider », pastille
+   « Vous », filtres posés, retour au fil, réponses. Couleurs : jetons
+   --lin-* seulement, qui suivent le sombre et le clair.
    ══════════════════════════════════════════════════════════════════════ */
 
-.v2 .rf.v2-page {
-  max-width: 1248px;
-  padding: 24px 24px 96px;
+/* ——— la barre du titre ——— */
+.v2 .lin.rf .rf-h1 {
+  margin: 0 0 0 4px;
+  line-height: normal;
 }
-
-/* — les colonnes : le fil (672 px au plus), puis le côté sur grand écran — */
-.v2 .rf-colonnes {
-  display: grid;
-  grid-template-columns: minmax(0, 672px);
-  justify-content: center;
-  align-items: start;
-  gap: 24px;
-}
-.v2 .rf-flux {
-  display: grid;
-  gap: 12px;
-  min-width: 0;
-}
-.v2 .rf-cote {
-  display: none;
-}
-@container principale (min-width: 1040px) {
-  .v2 .rf-colonnes {
-    grid-template-columns: minmax(0, 672px) 280px;
-  }
-  .v2 .rf-cote {
-    display: grid;
-    gap: 12px;
-    position: sticky;
-    top: 24px;
-  }
-}
-
-/* — la barre des filtres — */
-.v2 .rf-outils {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.v2 .rf-types {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  border-radius: 8px;
-  background: var(--v2-bg-100);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-}
-.v2 .rf-types button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 26px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--v2-gray-900);
+.v2 .lin.rf .rf-h1-fil {
+  margin: 0;
   font: inherit;
-  font-size: 12px;
   font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
 }
-.v2 .rf-types button:hover {
-  color: var(--v2-gray-1000);
+.v2 .lin.rf .lin-fil-sep {
+  width: auto;
+  margin: 0 8px;
 }
-.v2 .rf-types button[aria-pressed="true"],
-.v2 .rf-types button[aria-checked="true"] {
-  background: var(--v2-a-300);
-  color: var(--v2-gray-1000);
-}
-.v2 .rf-nb {
-  color: var(--v2-gray-700);
+.v2 .lin.rf .rf-onglet-n {
+  margin-left: 6px;
+  color: var(--lin-compte);
   font-variant-numeric: tabular-nums;
 }
-.v2 .rf-menus {
-  display: flex;
-  gap: 8px;
-  min-width: 0;
+.v2 .lin.rf .lin-onglet[data-actif] .rf-onglet-n {
+  color: var(--lin-second);
 }
-.v2.oc .rf .rf-menu {
-  height: 30px;
-  max-width: 220px;
-  min-width: 0;
+.v2 .lin.rf .rf-pose {
+  gap: 4px;
+  color: var(--lin-texte);
 }
-.v2 .rf-menu-texte {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.v2 .lin.rf .rf-pose-cle,
+.v2 .lin.rf .rf-pose-x {
+  color: var(--lin-second);
+}
+.v2 .lin.rf .rf-pose-x {
+  margin-left: 2px;
+  font-size: 14px;
+}
+.v2 .lin.rf .rf-pose:hover .rf-pose-x {
+  color: var(--lin-titre);
 }
 
-/* — le composeur — */
-.v2 .rf-composeur {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+/* ——— base réelle : l'état vide commun, centré comme sur Membres ——— */
+.v2 .lin.rf .rf-ferme {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
 }
-.v2 .rf-composeur-ouvrir {
-  flex: 1;
-  min-width: 0;
-  height: 34px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--v2-bg-200);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  color: var(--v2-gray-700);
-  font: inherit;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: text;
-  transition: box-shadow 0.15s, color 0.15s;
+
+/* ——— le fil : les publications à 12 l'une de l'autre (Circle : 20) ——— */
+.v2 .lin.rf .rf-bloc {
+  padding-top: 12px;
 }
-.v2 .rf-composeur-ouvrir:hover {
-  box-shadow: 0 0 0 1px var(--v2-a-600);
-  color: var(--v2-gray-900);
-}
-.v2 .rf-composeur--ouvert {
-  display: grid;
-  align-items: stretch;
-  gap: 10px;
-  padding: 16px;
-}
-.v2 .rf-composeur-tete {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.v2.oc .rf .rf-zone {
-  height: auto;
-  padding: 8px 12px;
-  align-items: stretch;
-}
-.v2 .rf-zone textarea {
-  flex: 1;
-  min-width: 0;
-  min-height: 64px;
-  border: 0;
-  outline: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--v2-gray-1000);
-  font: inherit;
+
+/* ——— le composeur : les champs dépliés sous le titre ——— */
+.v2 .lin.rf .rf-zone {
+  min-height: 52px;
+  margin-top: 0;
+  font-size: 14px;
+  line-height: 22px;
   resize: vertical;
 }
-.v2 .rf-zone textarea::placeholder {
-  color: var(--v2-gray-700);
+.v2 .lin.rf .rf-precision {
+  min-height: 28px;
+  margin-top: 0;
+  font-size: 13px;
 }
-.v2 .rf-composeur-ligne {
-  display: grid;
-  grid-template-columns: 160px minmax(0, 1fr);
-  gap: 8px;
+.v2 .lin.rf .rf-composeur--reponse {
+  min-height: 0;
 }
-.v2 .rf-composeur-pied {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+.v2 .lin.rf .rf-composeur--reponse .rf-zone {
+  margin-top: 8px;
 }
-.v2 .rf-composeur-boutons {
-  display: flex;
-  gap: 8px;
-  margin-left: auto;
+.v2 .lin.rf .rf-envoyer {
+  padding: 0 12px;
+  color: var(--lin-titre);
+}
+.v2 .lin.rf .rf-envoyer:disabled {
+  opacity: 0.5;
 }
 
-/* — la pastille d'une entreprise (Circle : 40 px ; ici 36, la carte est plus dense) — */
-.v2 .rf-pastille {
-  width: 36px;
-  height: 36px;
-  flex: none;
+/* ——— une publication ——— */
+.v2 .lin.rf .rf-tete-droite {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.v2 .lin.rf .rf-epingle {
   display: inline-grid;
   place-items: center;
-  border-radius: 999px;
-  background: var(--v2-gray-300);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  color: var(--v2-gray-1000);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-.v2 .rf-pastille[data-petite] {
   width: 28px;
   height: 28px;
-  font-size: 10px;
+  color: var(--lin-jaune);
 }
-.v2 .rf-pastille[data-vous] {
-  background: var(--v2-blue-200);
-  color: var(--v2-blue-900);
+.v2 .lin.rf .lpu-carte[data-epinglee] {
+  border-color: color-mix(in srgb, var(--lin-jaune) 30%, transparent);
 }
-
-/* — une publication — */
-.v2 .rf-liste {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 12px;
-}
-.v2 .rf-pub {
-  padding: 20px 20px 8px;
-}
-.v2 .rf-epinglee {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 8px;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 500;
-  color: var(--v2-amber-900);
-}
-.v2 .rf-pub-haut {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.v2 .rf-pub-haut .v2-badge {
-  margin-top: 1px;
-}
-.v2.oc .rf .rf-pub-titre {
-  margin: 0;
-  font-family: var(--v2-titre);
+.v2 .lin.rf .rf-titre {
+  margin: 0 0 6px;
   font-size: 16px;
-  line-height: 22px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--v2-gray-1000);
-}
-.v2 .rf-pub-icone {
-  display: inline-block;
-  margin-right: 6px;
-  vertical-align: -2px;
-  color: var(--v2-amber-900);
-}
-.v2 .rf-auteur {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-}
-.v2 .rf-auteur-texte {
-  min-width: 0;
-}
-.v2 .rf-auteur-ligne {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 8px;
-  min-height: 20px;
-}
-.v2 .rf-nom {
   font-weight: 500;
-  color: var(--v2-gray-1000);
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--lin-titre);
+  overflow-wrap: anywhere;
 }
-.v2 .rf-lien-nom:hover {
+.v2 .lin.rf .rf-titre a:hover {
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
-.v2 .rf-quand {
-  font-size: 12px;
-  color: var(--v2-gray-700);
+.v2 .lin.rf .rf-texte[data-coupe] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
-.v2 .rf-auteur-sous {
-  margin: 2px 0 0;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--v2-gray-900);
-}
-.v2 .rf-pub-texte {
-  margin: 12px 0 0;
-  font-size: 14px;
-  line-height: 21px;
-  color: var(--v2-gray-1000);
-}
-.v2 .rf-meta {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0 0;
-  padding: 0;
-}
-.v2 .rf-meta li {
-  display: inline-flex;
-  align-items: center;
-  height: 22px;
-  padding: 0 8px;
-  border-radius: 6px;
-  background: var(--v2-a-200);
-  font-size: 12px;
-  color: var(--v2-gray-900);
-}
-.v2 .rf-resume {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 14px;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--v2-gray-900);
-}
-.v2 .rf-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 10px;
-  padding-top: 6px;
-  border-top: 1px solid var(--v2-a-400);
-}
-.v2.oc .rf .rf-action {
-  height: 30px;
-  padding: 0 10px;
+.v2 .lin.rf .rf-voir-plus {
+  align-self: flex-start;
+  margin-top: 4px;
   font-size: 13px;
-  color: var(--v2-gray-900);
-}
-.v2.oc .rf .rf-action:hover {
-  color: var(--v2-gray-1000);
-}
-.v2.oc .rf .rf-action[aria-pressed="true"] {
-  background: var(--v2-blue-100);
-  color: var(--v2-blue-900);
-}
-
-/* — les réponses, sous un filet de bord à bord — */
-.v2 .rf-reponses {
-  margin: 8px -20px 0;
-  padding: 12px 20px 12px;
-  border-top: 1px solid var(--v2-a-400);
-}
-.v2 .rf-voir {
-  margin: 0 0 10px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--v2-gray-900);
-  font: inherit;
-  font-size: 12px;
-  font-weight: 500;
+  font-weight: 450;
+  color: var(--lin-second);
   cursor: pointer;
 }
-.v2 .rf-voir:hover {
-  color: var(--v2-gray-1000);
+.v2 .lin.rf .rf-voir-plus:hover {
+  color: var(--lin-texte);
+}
+.v2 .lin.rf .rf-auteur-lien {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: var(--lin-texte);
+}
+.v2 .lin.rf .rf-auteur-lien:hover {
+  color: var(--lin-titre);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.v2 .rf-reponses-liste {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 12px;
+.v2 .lin.rf .rf-auteur-vous {
+  font-weight: 500;
+  color: var(--lin-texte);
 }
-.v2 .rf-reponse {
-  display: flex;
-  gap: 10px;
+.v2 .lin.rf .rf-vous {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: var(--lin-pastille-active);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--lin-texte);
 }
-.v2 .rf-reponse-corps {
-  min-width: 0;
+.v2 .lin.rf .lpu-avatar[data-vous] {
+  background: var(--lin-fait);
+  color: #fff;
 }
-.v2 .rf-reponse-corps p {
-  margin: 2px 0 0;
-  color: var(--v2-gray-1000);
+
+/* les badges de membre (les étiquettes de Circle), dans le bloc des propriétés */
+.v2 .lin.rf .lpu-props dd.rf-badges {
+  flex-wrap: wrap;
+  overflow: visible;
 }
-.v2 .rf-saisie {
+.v2 .lin.rf .rf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px 0 5px;
+  border-radius: 9999px;
+  background: var(--lin-pastille);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .lin.rf .rf-badge svg,
+.v2 .lin.rf .lpu-props dd .rf-badge svg {
+  width: 12px;
+  height: 12px;
+  color: var(--lin-vert);
+}
+
+/* qui peut aider : la pile d'avatars et la phrase (le résumé des réactions de Circle) */
+.v2 .lin.rf .rf-aidants {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 12px;
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
 }
-.v2 .rf-reponses-liste + .rf-saisie,
-.v2 .rf-voir + .rf-saisie {
-  margin-top: 12px;
+.v2 .lin.rf .rf-pile {
+  display: inline-flex;
 }
-.v2 .rf-reponses > .rf-saisie:first-child {
-  margin-top: 0;
+.v2 .lin.rf .rf-pile .lpu-avatar {
+  box-shadow: 0 0 0 1.5px var(--lin-fond);
 }
-.v2 .rf-saisie-champ {
-  flex: 1;
+.v2 .lin.rf .rf-pile .lpu-avatar + .lpu-avatar {
+  margin-left: -4px;
 }
-.v2.oc .rf .rf-saisie .v2-btn--icone {
-  width: 34px;
-  height: 34px;
-  flex: none;
+.v2 .lin.rf .rf-aider[aria-pressed="true"],
+.v2 .lin.rf .rf-aider[aria-pressed="true"] svg {
+  color: var(--lin-fait);
+}
+.v2 .lin.rf .rf-aider[aria-pressed="true"] {
+  background: var(--lin-pastille-active);
 }
 
-/* — le côté — */
-.v2 .rf-encart {
-  display: grid;
-  gap: 12px;
-  padding: 16px;
-}
-.v2 .rf-chiffres {
-  display: grid;
-  margin: 0;
-}
-.v2 .rf-chiffres > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 6px 0;
-  border-top: 1px solid var(--v2-a-300);
-}
-.v2 .rf-chiffres > div:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-.v2 .rf-chiffres dt {
-  color: var(--v2-gray-900);
-}
-.v2 .rf-chiffres dd {
-  margin: 0;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--v2-gray-1000);
-}
-.v2 .rf-chiffres dd a,
-.v2 .rf-lien-tout {
-  color: var(--v2-blue-900);
-}
-.v2 .rf-chiffres dd a:hover,
-.v2 .rf-lien-tout:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-.v2 .rf-lien-tout {
-  font-size: 12px;
-  font-weight: 500;
-}
-.v2 .rf-aide {
-  margin: 0;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--v2-gray-900);
-}
-.v2 .rf-nouveaux {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 10px;
-}
-.v2 .rf-nouveaux li {
-  display: flex;
+/* ——— une publication ouverte : le retour, le titre des réponses, les réponses ——— */
+.v2 .lin.rf .rf-retour {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-width: 0;
+  gap: 6px;
+  height: 28px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
 }
-.v2 .rf-nouveau-texte {
-  display: grid;
-  min-width: 0;
+.v2 .lin.rf .rf-retour:hover {
+  color: var(--lin-texte);
 }
-.v2 .rf-nouveau-texte small {
+.v2 .lin.rf .rf-section {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin.rf .rf-reponse-tete {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 18px;
+  row-gap: 4px;
+  padding-right: 32px;
+}
+.v2 .lin.rf .rf-reponse-tete .rf-badge svg {
+  width: 12px;
+  height: 12px;
+  color: var(--lin-vert);
+}
+.v2 .lin.rf .rf-reponse-sous {
+  margin: 0;
   font-size: 12px;
-  line-height: 16px;
-  color: var(--v2-gray-900);
-  white-space: nowrap;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+
+/* ——— le panneau ——— */
+.v2 .lin.rf .rf-jalon-sous {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .lin.rf .rf-panneau-vide {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--lin-second);
 }
 
-/* — petits écrans — */
-@container principale (max-width: 599px) {
-  .v2 .rf.v2-page {
-    padding: 16px 16px 64px;
+/* ——— petits écrans ——— */
+@media (max-width: 720px) {
+  .v2 .lin.rf .lin-position {
+    display: none;
   }
-  .v2 .rf-outils {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .v2 .rf-types {
-    display: flex;
-  }
-  .v2 .rf-types button {
-    flex: 1;
-    justify-content: center;
-    padding: 0 6px;
-  }
-  .v2 .rf-menus > * {
-    flex: 1;
-  }
-  .v2.oc .rf .rf-menu {
-    max-width: none;
-    justify-content: space-between;
-  }
-  .v2 .rf-pub {
-    padding: 16px 16px 6px;
-  }
-  .v2 .rf-reponses {
-    margin: 8px -16px 0;
-    padding: 12px 16px;
-  }
-  .v2 .rf-composeur-ligne {
-    grid-template-columns: minmax(0, 1fr);
+  .v2 .lin.rf .rf-reponse-tete .rf-badge {
+    display: none;
   }
 }
