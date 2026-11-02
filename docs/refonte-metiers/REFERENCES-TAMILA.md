@@ -183,3 +183,61 @@ Ce qui reste dans l'écart moyen est le contenu (textes, nombres, longueurs) : l
 - **Écarts restants** : les fenêtres des gestes (B39, B31, B34, B23, B25, B27) gardent l'habillage de l'écran d'avant (Linear n'a pas
   ces formulaires) ; l'onglet Projects de Linear est une frise (Timeline) — ici, Procédure est le tableau de la vue d'ensemble, que
   Linear montre lui-même à 390 à la place de la frise ; pas de réactions ni de commentaires sous la carte (rien de tel dans le métier).
+
+## Boutons de la référence et leur utilité (02/11/2026, décision de Teo : « trouve une utilité aux boutons »)
+
+Chaque bouton des pages de référence est dessiné et fait une chose réelle : d'abord un geste existant (portes inchangées,
+aucune migration), sinon une utilité dans le navigateur (`components/espace2/tamila/navigateur.ts` : `localStorage`
+`espace2:favoris:tamila`, `espace2:suivis:tamila`, `espace2:reportes:tamila`, presse-papier, CSV composé ici). Un geste qui
+écrit, envoie ou ne se défait pas passe par une confirmation.
+
+| Page | Bouton de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|
+| Vue d'ensemble | Case à cocher d'une ligne | Sélection multiple ; barre d'actions : Épingler les dossiers, Copier pour l'assistant, Exporter (CSV) | navigateur |
+| Vue d'ensemble | (section) | « Épinglés » en tête des Échéances : dossiers et pages épinglés par leur étoile | `espace2:favoris:tamila` |
+| Vue d'ensemble | New issue, « + » d'un groupe | Fenêtre « Ouvrir un dossier » (B16) | `creerDossier` |
+| Vue d'ensemble | Filter · Display · Open details | Compteurs-filtres (L3) · grouper par statut ou responsable · volet des compteurs (B9) | déjà en place |
+| Arrivées | Étoile (en-tête de la liste) | Épingle la page en tête de la vue d'ensemble | `espace2:favoris:tamila` |
+| Arrivées | Accept · Decline · Duplicate | Rattacher (G7) · Écarter (G8, fenêtre) · Écarter comme doublon (G8, fenêtre) | `rattacherAvis`, `ecarterAvis` |
+| Arrivées | Snooze | Reporter jusqu'à une date (avant l'effacement) ; filtre « Reportés », « Ne plus reporter » | `espace2:reportes:tamila` |
+| Arrivées | Copy URL · Copy as prompt · Choose coding tool | Copier l'adresse · Copier pour l'assistant (résumé de l'avis) · menu : texte du courriel, n° RG, sujet | presse-papier |
+| Arrivées | Unsubscribe (Activity) | Suivre le dossier proposé : ses avis passent en tête, marqués « suivi » | `espace2:suivis:tamila` |
+| Arrivées | Display | Tri, et « Exporter la file affichée (CSV) » | navigateur |
+| Arrivées | Create triage issue | Ouvrir un dossier (B16) | `creerDossier` |
+| Dossier | Étoile | Épingler le dossier (section « Épinglés » de la vue d'ensemble) | `espace2:favoris:tamila` |
+| Dossier | Notifications (cloche) | Suivre le dossier (ses avis en tête des Arrivées) | `espace2:suivis:tamila` |
+| Dossier | Copy page URL · « … » · « + » | Copier l'adresse · gestes du dossier (G10-G13, G62, G63, L11, L12, L17) · ajouter (G14, G17-G19, G25, G27, G43, G44, G61) | portes existantes |
+| Dossier | En-têtes Name / Health / Priority / Lead / Target date / Status | Trient les lignes de chaque groupe (`?tri=`) | adresse |
+| Dossier | Display options · « + » de la section | Tri, ordre d'origine, Exporter le tableau (CSV) · menu « Ajouter » | adresse, navigateur |
+| Dossier | Case à cocher d'une ligne | Sélection ; Copier pour l'assistant, Exporter (CSV) | navigateur |
+| Dossier | Commentaires · réaction (carte « Latest update ») | Copier pour l'assistant (résumé du dossier) · Copier l'adresse | presse-papier |
+| Dossier | Update | Poser un délai (G18) | `poserDelai` |
+| Dossier | Add new view (calques) | Agenda des audiences (.ics, L11) | navigateur |
+| Honoraires | Favori | Épingle la page | `espace2:favoris:tamila` |
+| Honoraires | Filters (F) · Display (V) · Create account | Tous / à facturer / à traiter · colonnes montrées · Exporter (CSV, L7) | déjà en place |
+| Conformité | Case d'une tâche | Sélection ; Copier pour l'assistant, Exporter (CSV) | navigateur |
+| Conformité | Assign to (avatar) · « Assigned to me » | Mène aux personnes du dossier (onglet Conformité : G62, G64) | page du dossier |
+| Conformité | More (⋯ du volet) | Copier pour l'assistant · copier le lien · ouvrir le dossier | presse-papier |
+| Conformité | Handle with Agent | Traiter dans le dossier (G44-G46, G59, G60) | page du dossier |
+| Conformité | Add new task (T) | Ouvrir un dossier, contrôle des conflits à l'entrée (B16) ; dans « Accès », Exporter tous les dossiers (confirmation) | `creerDossier`, `demanderExportCabinet` |
+| Pilotage | Ask Agent (chaque carte) | Copier la carte pour l'assistant (valeur, définition, lignes) | presse-papier |
+| Pilotage | Filter · Group by · Timeframe · Granularity | Un responsable · Grouper par · Période · Coût horaire (L8) | déjà en place |
+| Réglages | Rangées, Team overview, Danger zone | Gestes existants (G1, G3, G4, G56, G57, L1, L2) ; adresse de transfert copiée ; agenda .ics du cabinet | portes, navigateur |
+
+Écarts : l'icône « Ask Agent » de Plain (hexagone vert) n'est pas relevée → bulle « Comment » de Linear ; la case d'une ligne
+cochée prend la couleur violette de Linear (non relevée).
+
+## Accès (Conformité du cabinet) et Sources et outils (Réglages) — 02/11/2026 (PAGES-MANQUANTES.md)
+
+- **Conformité › onglet « Accès »** (quatrième segment de Tasks) : le journal des accès de tout le cabinet (« Le journal indique qui
+  a consulté quel dossier… l'exporter à tout moment »). En réel, la porte `tamila_journal_acces` (b4_02) se lit dossier par dossier
+  et trace elle-même une lecture « journal » : la lecture se demande (fenêtre qui annonce le nombre de lignes ajoutées au journal).
+  Les dossiers dont le journal revient à un autre responsable sont comptés, pas lus. Pour les associés, le journal du coffre
+  (`tamila_coffre_journal`, b4_05, lecture RLS sans trace). Export CSV du journal lu. À la place de « Add new task » : « Exporter
+  tous les dossiers du cabinet » (`demanderExportCabinet`, portes.ts:285, jusque-là sans bouton), gérant seul, avec confirmation.
+  Lectures dans `components/espace2/tamila/acces.ts` (portes.ts inchangé).
+- **Réglages › « Sources et outils »** (« Vos outils restent en place ») : adresse de transfert e-barreau (`expediteurs`, canal
+  email, module tamila ; associés ; clic = copier), agenda .ics de toutes les audiences prévues du cabinet, et en lecture seule
+  e-barreau/RPVA et la messagerie (aucune connexion).
+- **Superpositions** refaites pour les sept pages : premier écran inchangé (mêmes écarts moyens), les ajouts sont plus bas ou dans
+  des menus et fenêtres.
