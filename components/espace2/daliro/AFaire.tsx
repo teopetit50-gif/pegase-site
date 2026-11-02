@@ -40,14 +40,16 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dateCourte, dateHeure, montant } from "@/components/espace/format";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { CONFIRMATIONS, libelleEnvoi } from "@/components/espace/daliro/etats";
-import { ouvrirSituation, terminerPassage } from "@/components/espace/daliro/portes";
+import { chargerAppro, ouvrirSituation, terminerPassage } from "@/components/espace/daliro/portes";
+import { echeancesCommande, exempleAppro } from "@/components/espace/daliro/ApproCarte";
+import { TILLEULS } from "@/components/espace/daliro/exemples";
 import { ouvrirLocale } from "@/components/espace/daliro/situations";
 import { ouverte as fonctionOuverte } from "@/components/espace/daliro/fonctions";
-import type { Chantier, Passage, Tableau } from "@/components/espace/daliro/types";
+import type { Chantier, Commande, Passage, Tableau } from "@/components/espace/daliro/types";
 import { Note } from "../ui";
 import { useToast } from "../Toasts";
 import { useAujourdhui } from "../horloge";
@@ -67,7 +69,7 @@ const SITUATIONS = "?onglet=argent#situations";
 
 type Vue = "a_faire" | "attente" | "tous";
 type Groupement = "semaine" | "chantier";
-type Genre = "confirmer" | "fait" | "signer" | "soumettre" | "valider" | "avenant_attente" | "situation_attente" | "passage";
+type Genre = "confirmer" | "fait" | "signer" | "soumettre" | "valider" | "avenant_attente" | "situation_attente" | "passage" | "commander" | "livraison" | "rendre";
 
 type Propriete = { libelle: string; valeur: string; icone: NomDalIcone; lien?: string };
 type Tache = {
@@ -279,6 +281,93 @@ function tachesDe(t: Tableau, jour: string): Tache[] {
   return sortie;
 }
 
+/* ——— les tâches de commande et de livraison d'un chantier (02/11/2026, « trois listes du matin ») :
+   les motifs E07 à E12 du point du matin (private.btp_point_matin_lignes, b6_23:624-652), sur les
+   échéances de la carte Appro (private.btp_echeances_commande) ; le geste est dans la fiche du chantier,
+   Terrain › Approvisionnement (noter commandée, reçue, rendue ; date promise) ——— */
+const APPRO = "?onglet=terrain&partie=appro";
+function tachesAppro(t: Tableau, commandes: Commande[], jour: string): Tache[] {
+  const c = t.chantier;
+  const ref = c.reference ?? c.code_postal;
+  const sortie: Tache[] = [];
+  for (const k of commandes) {
+    const e = k.echeances;
+    const chez = k.fournisseur_nom ? ` chez ${k.fournisseur_nom}` : "";
+    const proprietes: Propriete[] = [
+      { libelle: "Chantier", valeur: c.nom, icone: "Crane" as NomDalIcone, lien: fiche(c.id) },
+      { libelle: "Commande", valeur: `${k.objet}${k.quantite_texte ? ` · ${k.quantite_texte}` : ""}`, icone: "Box" as NomDalIcone },
+      ...(k.fournisseur_nom ? [{ libelle: "Fournisseur", valeur: k.fournisseur_nom, icone: "Cart" as NomDalIcone }] : []),
+      ...(k.passage_tache ? [{ libelle: "Pour", valeur: k.passage_tache, icone: "Calendar" as NomDalIcone }] : []),
+    ];
+    const base = { chantier: c, ref, aFaire: true, qui: k.fournisseur_nom ?? null, lien: fiche(c.id, APPRO), proprietes };
+    /* E07 · E08 : à commander */
+    if ((e.etat === "commande_en_retard" || e.etat === "a_commander_vite") && e.commander_avant) {
+      const retard = e.etat === "commande_en_retard";
+      sortie.push({
+        ...base,
+        cle: `commande:${k.id}`,
+        genre: "commander",
+        titre: retard ? `Commander « ${k.objet} »${chez}, à commander avant le ${dateCourte(e.commander_avant)}` : `Commander « ${k.objet} »${chez} avant le ${dateCourte(e.commander_avant)}`,
+        quand: e.commander_avant,
+        enRetard: retard,
+        geste: "Noter commandée",
+        dateLigne: retard ? `À commander avant le ${dateCourte(e.commander_avant)}, dépassé` : `À commander avant le ${dateCourte(e.commander_avant)}`,
+        description: retard
+          ? `« ${k.objet} »${chez} devait être commandé avant le ${dateCourte(e.commander_avant)}${e.livrer_avant ? ` pour une livraison avant le ${dateCourte(e.livrer_avant)}` : ""} : commandez aujourd'hui ou recalez le passage.`
+          : `Commandez « ${k.objet} »${chez} avant le ${dateCourte(e.commander_avant)}${e.livrer_avant ? ` (livraison avant le ${dateCourte(e.livrer_avant)})` : ""}.`,
+      });
+    }
+    /* E09 · E10 : livraison attendue, livraison tardive */
+    if (e.etat === "livraison_attendue" || e.etat === "livraison_tardive") {
+      const attendue = e.etat === "livraison_attendue";
+      const promis = k.livraison_prevue ?? jour;
+      sortie.push({
+        ...base,
+        cle: `livraison:${k.id}`,
+        genre: "livraison",
+        titre: attendue ? `Relancer${chez ? ` ${k.fournisseur_nom}` : " le fournisseur"} : « ${k.objet} » attendu le ${dateCourte(promis)}, pas noté reçu` : `« ${k.objet} » promis le ${dateCourte(promis)}, après le ${e.livrer_avant ? dateCourte(e.livrer_avant) : "besoin"}`,
+        quand: promis,
+        enRetard: attendue,
+        geste: attendue ? "Noter reçue" : "Changer la date promise",
+        dateLigne: attendue ? `Attendu le ${dateCourte(promis)}` : `Promis le ${dateCourte(promis)}`,
+        description: attendue
+          ? `« ${k.objet} » attendu le ${dateCourte(promis)}${chez} n'est pas noté reçu : relancez le fournisseur, ou notez-le reçu.`
+          : `« ${k.objet} » promis le ${dateCourte(promis)}${chez}, après le ${e.livrer_avant ? dateCourte(e.livrer_avant) : "jour du besoin"} où il le faut : relancez ou recalez le passage.`,
+      });
+    }
+    /* E11 : matériel à rendre */
+    if (e.retour === "a_rendre") {
+      const prevu = e.retour_prevu ?? jour;
+      sortie.push({
+        ...base,
+        cle: `rendre:${k.id}`,
+        genre: "rendre",
+        titre: `Rendre « ${k.objet} »${chez}, il devait repartir le ${dateCourte(prevu)}`,
+        quand: prevu,
+        enRetard: true,
+        geste: "Noter rendu",
+        dateLigne: `Devait repartir le ${dateCourte(prevu)}`,
+        description: `« ${k.objet} »${chez} devait repartir le ${dateCourte(prevu)} et reste sur le chantier : rendez-le, chaque jour se paie.`,
+      });
+    }
+    /* E12 : il manque au bon de livraison */
+    if (e.ecart != null && e.ecart < 0) {
+      sortie.push({
+        ...base,
+        cle: `manque:${k.id}`,
+        genre: "livraison",
+        titre: `Relancer${chez ? ` ${k.fournisseur_nom}` : " le fournisseur"} : il manque ${-e.ecart} au bon de livraison de « ${k.objet} »`,
+        quand: k.livraison_prevue ?? jour,
+        enRetard: !!k.livraison_prevue && k.livraison_prevue < jour,
+        geste: "Noter reçue",
+        dateLigne: "Livré en partie",
+        description: `« ${k.objet} »${chez} : il manque ${-e.ecart} au bon de livraison. Relancez le fournisseur, puis notez le reste reçu.`,
+      });
+    }
+  }
+  return sortie;
+}
+
 /* un passage ouvert par son repère (?passage=) sans rien à faire aujourd'hui : on le dit */
 function passageSansTache(t: Tableau, p: Passage, jour: string): Tache {
   const c = t.chantier;
@@ -327,7 +416,8 @@ const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? cry
 /* la priorité de Linear (sprite Priority0…4) donnée par la nature de la tâche */
 function prioriteDe(x: Tache): { icone: NomDalIcone; libelle: string; urgente?: boolean } {
   if (x.enRetard) return { icone: "Priority1", libelle: "Urgente", urgente: true };
-  if (x.genre === "signer" || x.genre === "valider") return { icone: "Priority2", libelle: "Haute" };
+  if (x.genre === "signer" || x.genre === "valider" || x.genre === "commander") return { icone: "Priority2", libelle: "Haute" };
+  if (x.genre === "livraison" || x.genre === "rendre") return { icone: "Priority3", libelle: "Moyenne" };
   if (x.genre === "confirmer") return { icone: "Priority3", libelle: "Moyenne" };
   if (x.genre === "fait" || x.genre === "soumettre") return { icone: "Priority4", libelle: "Basse" };
   return { icone: "Priority0", libelle: "Sans priorité" };
@@ -346,6 +436,9 @@ const NATURE: Record<Genre, { libelle: string; couleur: string }> = {
   soumettre: { libelle: "Situation", couleur: VIOLET },
   valider: { libelle: "Situation", couleur: VIOLET },
   situation_attente: { libelle: "Situation", couleur: VIOLET },
+  commander: { libelle: "Commande", couleur: BEIGE },
+  livraison: { libelle: "Livraison", couleur: BEIGE },
+  rendre: { libelle: "Matériel à rendre", couleur: BEIGE },
 };
 
 function Avatar({ nom, taille = 18 }: { nom: string | null; taille?: number }) {
@@ -456,8 +549,35 @@ export default function AFaire() {
   }, [reelle, cleTableaux, onLocal]);
   const enLecture = reelle && (!d.pret || liste.some((c) => d.enLecture(c.id)));
 
+  /* les commandes des chantiers ouverts (tâches de commande et de livraison) : en base réelle,
+     btp_appro_chantier une fois par chantier ; en exemple, l'exemple de la carte Appro */
+  const [approReel, setApproReel] = useState<Record<string, Commande[]>>({});
+  const ouvertsIds = tableaux.filter((t) => t.chantier.statut === "ouvert" || t.chantier.statut === "suspendu").map((t) => t.chantier.id).join(",");
+  useEffect(() => {
+    if (!reelle || !ouvertsIds) return;
+    let vivant = true;
+    void Promise.all(ouvertsIds.split(",").map((id) => chargerAppro(id).then((a) => [id, a?.commandes ?? []] as const).catch(() => [id, [] as Commande[]] as const))).then((l) => {
+      if (vivant) setApproReel(Object.fromEntries(l));
+    });
+    return () => {
+      vivant = false;
+    };
+  }, [reelle, ouvertsIds]);
+  const approExemple = useMemo(() => {
+    if (reelle || !jour) return {};
+    const r: Record<string, Commande[]> = {};
+    for (const t of tableaux) {
+      /* l'exemple de la carte Appro est écrit pour les Tilleuls (fenêtres, garde-corps, nacelle) */
+      if (t.chantier.id !== TILLEULS) continue;
+      r[t.chantier.id] = exempleAppro(t).map((k, i) => ({ ...k, id: `${t.chantier.id}-appro-${i}`, echeances: echeancesCommande(k, t, jour) }));
+    }
+    return r;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- recalculé quand un tableau change de passages
+  }, [reelle, jour, cleTableaux]);
+  const appro = reelle ? approReel : approExemple;
+
   /* recalculées à chaque rendu : quelques chantiers, quelques dizaines de passages */
-  const toutes = jour ? tableaux.flatMap((t) => tachesDe(t, jour)) : [];
+  const toutes = jour ? [...tableaux.flatMap((t) => tachesDe(t, jour)), ...tableaux.flatMap((t) => tachesAppro(t, appro[t.chantier.id] ?? [], jour))] : [];
   const { estReporte } = reportes;
   const nbReportees = toutes.filter((x) => estReporte("tache", x.cle)).length;
   const visibles = toutes

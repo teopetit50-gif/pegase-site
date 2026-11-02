@@ -525,3 +525,7 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
     </section>
   );
 }
+
+/* 02/11/2026 — À faire (espace 2) reprend les mêmes échéances et le même exemple pour ses tâches de
+   commande et de livraison (motifs E07 à E12 du point du matin) */
+export { echeances as echeancesCommande, exemple as exempleAppro };
