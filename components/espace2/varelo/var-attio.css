@@ -704,3 +704,72 @@ html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-case {
     width: 140px;
   }
 }
+
+/* ——— boutons de la référence rendus utiles (02/11 au soir) ——— */
+.v2 .var.var--attio .var-a-bouton--nu {
+  background: transparent;
+  box-shadow: none;
+}
+.v2 .var.var--attio .var-a-lien-tete {
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: rgb(0 0 0 / 0.55);
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-lien-tete {
+  color: rgb(255 255 255 / 0.55);
+}
+.v2 .var.var--attio .var-a-lien-tete:hover {
+  background: var(--a-survol);
+}
+.v2 .var.var--attio input.var-a-case {
+  appearance: none;
+  cursor: pointer;
+}
+.v2 .var.var--attio input.var-a-case:checked {
+  border-color: var(--a-accent);
+  background: var(--a-accent);
+  box-shadow: inset 0 0 0 3px var(--a-fond);
+}
+.v2 .var.var--attio .var-a-ligne[data-choisi] > .var-a-cellule {
+  background: var(--a-survol);
+}
+.v2 .var.var--attio .var-a-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-plus svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .var.var--attio .var-a-plus:hover {
+  background: var(--a-survol);
+}
+.v2 .var.var--attio .var-a-voir-tout {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: rgb(0 0 0 / 0.55);
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-voir-tout {
+  color: rgb(255 255 255 / 0.55);
+}
+.v2 .var.var--attio .var-a-barre {
+  position: sticky;
+  bottom: 48px;
+  left: 50%;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  margin: 0 auto 8px;
+  padding: 6px 6px 6px 12px;
+  border-radius: 10px;
+  background: var(--a-fond);
+  box-shadow: inset 0 0 0 1px var(--a-filet), 0 4px 12px #0000001f;
+}
