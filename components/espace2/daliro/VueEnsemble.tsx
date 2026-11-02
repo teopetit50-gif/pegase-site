@@ -294,7 +294,7 @@ export default function VueEnsemble() {
                   <div className="dal-h-membres">
                     <Link href={`${BASE}/equipes`} className="dal-h-membre" title="Vos équipes">
                       <span className="dal-h-avatar">{initiales}</span>
-                      <DalIcone nom="Chevron" taille={14} />
+                      <DalIcone nom="Chevron" taille={12} />
                     </Link>
                     <Link href={`${BASE}/annuaire`} className="dal-rond" aria-label="Ajouter un intervenant" title="Ajouter un intervenant">
                       <DalIcone nom="Plus" />
