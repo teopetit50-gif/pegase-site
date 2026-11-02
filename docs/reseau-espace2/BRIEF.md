@@ -95,20 +95,107 @@ côte juraient. **On harmonise** :
 
 ## État
 
-| Page | Branche | État |
+*Mis à jour le 02/11/2026 par la session d'intégration
+(branche `reseau-espace2/integration`).*
+
+| Page | Branche d'origine | État |
 |---|---|---|
-| Socle (navigation, titres, palette, `source.ts`, `membres.ts`) | `claude/brave-turing-1vhu5x` | Fait. Recette aux cinq largeurs, en clair et en sombre. |
-| **Fil** | `claude/brave-turing-1vhu5x` | Fait : demandes avec réponses et « Je peux aider », alertes terrain épinglables, filtres par type, île et secteur gardés dans l'adresse, composeur en état local, côté « Le réseau » au-delà de 1040 px de colonne, état vide en base réelle. Schéma visé : `schema-fil.sql`. |
-| Membres | (autre session) | En cours. |
-| Messages | (autre session) | En cours. |
-| Opportunités | (autre session) | En cours. |
+| Socle (navigation, titres, palette, `source.ts`, `membres.ts`) | `claude/brave-turing-1vhu5x` | Fusionné. |
+| **Fil** | `claude/brave-turing-1vhu5x` | Fusionné. Schéma visé : `schema-fil.sql` (non appliqué). |
+| **Membres** | `claude/exciting-darwin-65rwta` | Fusionné. Schéma visé : `schema-membres.sql` (non appliqué). |
+| **Messages** | `claude/sharp-hopper-hnyhb6` | Fusionné. Schéma visé : `schema-messages.sql` (non appliqué). |
+| **Opportunités** | `claude/beautiful-gates-h31nkp` | Fusionné. Schéma visé : `schema-opportunites.sql` (non appliqué). |
 
-### Ce qui reste pour l'intégration
+### L'intégration
 
-- La fiche `/espace2/reseau/membres/<slug>`, vers laquelle mène l'auteur
-  d'une publication du Fil, est construite par la session Membres. Avant la
-  fusion, ce lien aboutit à une 404.
-- Le Fil ne fait encore rien en base réelle : il attend les tables de
-  `schema-fil.sql` et l'accord de Teo.
-- « Je peux aider » prévient l'auteur seulement dans la page (un toast).
-  Une fois Messages fusionné, ce geste pourra ouvrir une conversation.
+- **Fusion.** Partie de `main` 6ee8ee7, quatre merges normaux dans l'ordre
+  Fil → Membres → Messages → Opportunités. Un seul conflit, celui qui était
+  attendu : `source.ts`, ajouté par chaque branche. La version de la
+  branche Fil est gardée (`reseauEnExemple` et `RESEAU_VIDE`). Les trois
+  bouchons TEMPORAIRE avaient la même signature. `membres.ts` est
+  identique partout (blob 18a9854e).
+- **Contrôles.** `npx tsc --noEmit` passe. `npx eslint` passe sur
+  `app/espace2/reseau`, `components/espace2/reseau`, `Coquille.tsx`,
+  `modules.ts` et `Palette.tsx`, avec un seul avertissement, déjà présent
+  sur `main` (`LogoClient` inutilisé dans `Coquille.tsx`). `npm run build`
+  passe.
+- **Recette** (`node outils/recette-reseau.mjs <base> [captures] [reelle]`).
+  Six adresses : Fil, Membres, fiche `atelier-moko`, Messages, Messages
+  `?a=atelier-moko`, Opportunités. Chacune à 390, 768, 1024, 1440 et
+  1700 px, en sombre et en clair, sur un `next start`. Sans session,
+  Espace 2 montre l'exemple. Résultat : **60 / 60** sans erreur de
+  console, sans débordement horizontal, l'entrée Réseau allumée (dans le
+  tiroir sous 768 px), et l'exemple signalé une seule fois, par le ruban
+  de la barre du haut.
+  - La **base réelle** n'existe que pour un compte connecté
+    (`SourceFournisseur connecte`). Elle a donc été recettée sur un
+    `next dev` où `connecte` était forcé à vrai par un correctif local,
+    jamais commité, à 1440 et 390, en sombre et en clair : **24 / 24**.
+    Les six adresses montrent l'état vide commun, sans ruban et sans
+    aucun des 12 membres. Les seules erreurs de console relevées sont des
+    401 de la coquille (tables validations et FILED lues sans jeton). Le
+    Réseau ne lit aucune table.
+- **Raccords faits.**
+  - Un seul état vide, `reseau-vide.tsx` : titre et texte de
+    `RESEAU_VIDE`, une phrase propre à la page, le même bouton « Voir les
+    données d'exemple ». La fiche garde en plus « Retour à l'annuaire ».
+    Avant, il y avait quatre textes, trois tailles d'icône et trois
+    boutons différents.
+  - L'en-tête d'Opportunités reprend celui de Membres : surtitre « Réseau
+    Omega », titre 22/29, même chapeau.
+- **Vérifié sans rien changer.**
+  - « Vous » est `useOrganisation()` sur les quatre pages. CAMA n'est
+    écrit en dur nulle part, sauf dans des commentaires.
+  - « Écrire » sur une fiche mène à `/espace2/reseau/messages?a=<slug>`,
+    y compris pour un membre sans conversation (`nauti-sable` ouvre une
+    conversation neuve).
+  - Mènent à la fiche du membre : les auteurs du Fil et de ses réponses,
+    l'en-tête, « Voir la fiche », les auteurs et les mentions des
+    Messages, les membres des cartes d'Opportunités.
+  - Les quatre CSS sont étanches. Chaque sélecteur porte son préfixe
+    (`rf-`, `rm-`, `ms-`, `op-`), aucun autre fichier n'en définit, et
+    aucune règle ne vise une classe `v2-` hors de son préfixe. `ms-` ne
+    recoupe aucune utilitaire Tailwind (`ms-1`…).
+- **Captures** : `captures/`, 23 vues légères (960 px de large) — chaque
+  adresse à 1440 en sombre et en clair et à 390 en sombre, plus l'état
+  vide en base réelle à 1440. Les vues en base réelle viennent du
+  `next dev` : la pastille « N » en bas à gauche est l'indicateur de
+  développement de Next, absent en production.
+
+### Ce qui jure encore
+
+- Le Fil et les Messages n'ont pas d'en-tête visible : le fil de Circle
+  et Slack n'en ont pas, et c'est leur composition. Membres et
+  Opportunités en ont un, désormais le même.
+- L'état vide du Fil tient dans la colonne du fil (moins large, décalé à
+  gauche). Celui des Messages est centré dans une page étroite. Même
+  contenu, mais pas la même largeur.
+- Opportunités occupe toute la largeur (kanban). Membres reste dans la
+  page de 1248 px.
+- Dans la liste des Messages, le nom d'un interlocuteur ouvre la
+  conversation, pas la fiche. La fiche est à un clic, depuis l'en-tête de
+  la conversation.
+
+### Défaut trouvé hors du réseau (déjà sur `main`)
+
+Sous 768 px, refermer le tiroir de navigation efface `data-v2-theme` de
+`<html>` : en sombre, toute page d'Espace 2 repasse en clair jusqu'au
+rechargement (vu aussi sur `/espace2/contacts`). La cause : la copie de
+`BarreLaterale` montée dans le tiroir appelle `useTheme()`
+(`components/espace2/theme.ts`), dont le nettoyage retire le thème au
+démontage. Non corrigé ici, puisque ce n'est pas un raccord du réseau.
+
+### Avant une mise en production (décision de Teo)
+
+- Relire la prévisualisation Vercel de la PR, en particulier en sombre à
+  390.
+- Décider du défaut de thème du tiroir ci-dessus (il touche tout Espace
+  2).
+- Le réseau n'a encore aucune table. En production, un client connecté en
+  « Base réelle » voit l'état vide, un visiteur sans compte voit l'exemple
+  (ruban « Données d'exemple »). Appliquer les `schema-*.sql` est une
+  décision séparée, qui demande l'accord de Teo.
+- Les gestes restent en état local : publier, répondre, « Je peux aider »,
+  envoyer un message, accepter une opportunité. « Je peux aider » pourrait
+  maintenant ouvrir une conversation dans Messages (pas fait : ce n'est pas
+  un raccord demandé).
