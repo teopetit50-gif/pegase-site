@@ -120,12 +120,12 @@ const dateCible = (iso: string) => {
   return (d.getUTCFullYear() === new Date().getFullYear() ? fmtCourt : fmtLong).format(d);
 };
 const pluriel = (n: number, un: string, plusieurs = `${un}s`) => `${n} ${n > 1 ? plusieurs : un}`;
-/* « · 4 j », « · 2 h » : depuis la dernière mise à jour, comme « · 4d » dans Linear */
+/* le temps depuis la dernière mise à jour (« · 4d » dans Linear, ici dans l'info-bulle de la santé) */
 const depuis = (iso: string) => {
   const ms = Date.now() - Date.parse(iso);
-  if (!Number.isFinite(ms) || ms < 0) return "maintenant";
+  if (!Number.isFinite(ms) || ms < 0) return "moins d'une heure";
   const h = Math.floor(ms / 3_600_000);
-  if (h < 1) return "maintenant";
+  if (h < 1) return "moins d'une heure";
   if (h < 24) return `${h} h`;
   const j = Math.floor(h / 24);
   return j < 30 ? `${j} j` : `${Math.floor(j / 30)} mois`;
@@ -337,8 +337,8 @@ export default function VueEnsemble() {
                 <IconeSprite nom={nature.nom} couleur={nature.couleur} />
               </span>
               <span className="lor-pj-textes">
-                <span className="lor-pj-nom">
-                  {nomProjet} {p.intitule ? titrePermis(p, nomProjet) : TYPES[p.type_autorisation].court}
+                <span className="lor-pj-nom" title={`${titrePermis(p, nomProjet)} · projet ${nomProjet}`}>
+                  {`${TYPES[p.type_autorisation].court} ${p.intitule ?? nomProjet}`}
                 </span>
                 {jalon ? (
                   <span className="lor-pj-jalon" title={`Prochaine étape : ${jalon}`}>
@@ -350,12 +350,11 @@ export default function VueEnsemble() {
             </span>
           </span>
           <span className="lor-pj-c-sante">
-            <span className="lor-pj-sante" title={`${famille?.libelle} : ${famille?.sous} · ${etat.libelle}`}>
+            <span className="lor-pj-sante" title={`${famille?.libelle} : ${famille?.sous} · ${etat.libelle} · mis à jour il y a ${depuis(p.maj_le)}`}>
               <span>
                 <IconeSanteLor etat={sante.etat} />
                 <b style={{ color: sante.etat === "aucune" ? "var(--lor-t3)" : `var(--lor-${sante.etat})` }}>
                   {sante.libelle}
-                  {sante.etat === "aucune" ? null : <i>{` · ${depuis(p.maj_le)}`}</i>}
                 </b>
               </span>
             </span>
