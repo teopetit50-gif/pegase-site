@@ -140,9 +140,6 @@ html[data-v2-theme="light"] .v2 .dal.dal-bd-page {
 .v2 .dal .dal-rond[data-actif] svg {
   color: var(--dal-t2);
 }
-.v2 .dal .dal-bd-etoile[data-actif] svg {
-  color: lch(80 90 85);
-}
 .v2 .dal .dal-rond:disabled {
   opacity: 0.5;
   cursor: default;

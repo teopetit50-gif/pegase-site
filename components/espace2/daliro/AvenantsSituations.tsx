@@ -61,6 +61,7 @@ import { useToast } from "../Toasts";
 import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { useDaliro } from "./donnees";
+import { EtoilePleine } from "./IconesProjet";
 import { AVENANTS_PLUS, SITUATIONS_PLUS } from "./exemplesAvenants";
 import { copier as copierTexte, useFavoris, useSuivis } from "./navigateur";
 import "./dal-board.css";
@@ -565,7 +566,7 @@ export default function AvenantsSituations() {
                 toast(epinglee ? "La vue n'est plus épinglée." : "Vue épinglée : elle est dans « Épinglés » de la vue d'ensemble.");
               }}
             >
-              <DalIcone nom={epinglee ? "Favorite" : "Etoile"} />
+              {epinglee ? <EtoilePleine /> : <DalIcone nom="Etoile" />}
             </button>
             <span className="dal-pousse" />
             <button
