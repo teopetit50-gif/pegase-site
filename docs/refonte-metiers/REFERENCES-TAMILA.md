@@ -65,3 +65,19 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
   le métier) ; la barre flottante garde deux boutons ronds (ouvrir le dossier proposé, copier le n° RG) ; icônes de la barre de triage :
   `Resolved`, `StatusCanceled`, `StatusDuplicate`, `AlarmClock` du sprite (les icônes exactes Accept/Decline/Snooze ne sont pas
   relevées) ; l'état vide est centré dans une carte plus basse de 20 px (illustration 8 px plus haut).
+
+## Réglages — `/espace2/tamila/reglages`
+
+- **Référence** : Linear, Settings › Team. **Relevé** : `linear-team-settings.md`. Captures `linear-team-settings/1440-reel-*.png`, `390-*.png`.
+- **Correspondance** : « ‹ Teams » → « ‹ Dossiers » ; « Omega » → nom du cabinet (en-tête des factures) ; « Team overview › » → « Vue
+  d'ensemble › ». Cartes : (sans titre) Installation (B3, G1), Personnes du cabinet, Phrase du cabinet (B15, L1) · « Clés et
+  chiffrement » : Coffre à clés (B14, G3, G4), Clé d'index du cabinet (G57), Clé de chaque dossier, Journal des lectures · « Factures et
+  bordereaux » : En-tête des factures et Délai de paiement (B32, G56) · « Conservation » (aide, comme « Team hierarchy ») : effacement
+  après clôture, exports, audit (lecture seule : rangées verrouillées comme « Available on Business ») · « Zone sensible » (Danger
+  zone) : Passer au coffre…, Ré-envelopper…, Oublier… (fenêtres de confirmation). Une rangée hors des droits de la personne est
+  verrouillée avec sa raison (« Réservé au gérant »…).
+- **Comparaisons** : `reglages-1440-{sombre,clair}-{cote,diff,fusion}.png` (superposées avec `--dx -30` : la colonne de 640 est centrée
+  dans une carte plus étroite de 60), `reglages-390-{sombre,clair}-cote.png`. Mesures : lien retour 9/11, titre 65, sous-titre 102,
+  première carte 157 (rangées 65), h3 suivant 400, carte 439 — ceux du relevé.
+- **Écarts restants** : survol d'une rangée en sombre non relevé (pas suivant du fond de carte) ; à 390, descriptions plus longues
+  sur trois lignes (contenu).
