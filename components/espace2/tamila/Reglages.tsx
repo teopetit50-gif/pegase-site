@@ -25,6 +25,9 @@ import { TamIcone, type NomTamIcone } from "./TamIcone";
 import { Champ, TamFenetre } from "./TamFenetre";
 import { useTamila } from "./donnees";
 import Phrase from "./Phrase";
+import { adresseTransfert } from "./acces";
+import { copier } from "./navigateur";
+import { NATURES_AUDIENCE } from "@/components/espace/tamila/regles";
 import "./tam-reglages.css";
 
 type Fenetre = "installer" | "coffre" | "index" | "entete" | "oublier" | null;
@@ -114,6 +117,36 @@ export default function Reglages() {
   }, [t.source, t.clientId]);
 
   const gerant = estGerant(t.moi);
+  /* « Sources et outils » (PAGES-MANQUANTES.md : « Vos outils restent en place ») */
+  const [adresse, setAdresse] = useState<string | null | undefined>(t.source === "exemple" ? "delorme@recu.omegaai.fr" : undefined);
+  useEffect(() => {
+    if (t.source !== "reelle") return;
+    let actif = true;
+    adresseTransfert()
+      .then((a) => actif && setAdresse(a))
+      .catch(() => actif && setAdresse(null));
+    return () => {
+      actif = false;
+    };
+  }, [t.source]);
+  const prevues = t.audiencesCabinet.filter((a) => a.statut === "prevue" && new Date(a.date_heure).getTime() >= Date.parse(new Date().toISOString().slice(0, 10)));
+  /* l'agenda .ics de tout le cabinet (RFC 5545), composé ici comme celui d'un dossier (L11) */
+  const agendaCabinet = () => {
+    const echap = (x: string) => x.replace(/\\/g, "\\\\").replace(/[,;]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
+    const utc = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    const evts = prevues.map((a) => {
+      const ref = t.referenceDe(a.dossier_id) ?? "dossier";
+      const fin = new Date(new Date(a.date_heure).getTime() + (a.heure_connue ? 2 : 1) * 3600_000).toISOString();
+      return ["BEGIN:VEVENT", `UID:tamila-${a.id}@omegaai.fr`, `DTSTAMP:${utc(new Date().toISOString())}`, a.heure_connue ? `DTSTART:${utc(a.date_heure)}` : `DTSTART;VALUE=DATE:${a.date_heure.slice(0, 10).replace(/-/g, "")}`, a.heure_connue ? `DTEND:${utc(fin)}` : "", `SUMMARY:${echap(`${NATURES_AUDIENCE[a.nature] ?? "Audience"} — ${ref}`)}`, a.juridiction || a.chambre ? `LOCATION:${echap([a.juridiction, a.chambre].filter(Boolean).join(", "))}` : "", "END:VEVENT"].filter(Boolean).join("\r\n");
+    });
+    const ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Omega//Tamila//FR", "CALSCALE:GREGORIAN", ...evts, "END:VCALENDAR"].join("\r\n") + "\r\n";
+    const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+    const lien = document.createElement("a");
+    lien.href = url;
+    lien.download = `audiences-cabinet-${new Date().toISOString().slice(0, 10)}.ics`;
+    lien.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
   const associe = estAssocie(t.moi);
   const etat = t.etat;
   const nomCabinet = entete.nom || "Le cabinet";
@@ -272,6 +305,27 @@ export default function Reglages() {
               ) : (
                 <Rangee icone="Calendar" titre="Délai de paiement" desc="Imprimé sur chaque facture d'honoraires" verrou={`${entete.delai_paiement_jours ?? 30} jours`} />
               )}
+            </section>
+          </fieldset>
+
+          <fieldset className="tam-reg-champs">
+            <h3>Sources et outils</h3>
+            <p className="tam-reg-aide">Vos outils restent en place : Tamila reçoit ce que vous lui transférez et produit des fichiers, sans se brancher sur votre messagerie ni sur votre agenda.</p>
+            <section className="tam-reg-carte">
+              {adresse ? (
+                <Rangee
+                  icone="Email"
+                  titre="Adresse de transfert e-barreau"
+                  desc="Faites suivre ici vos notifications e-barreau : chaque avis arrive dans « Arrivées »"
+                  valeur={adresse}
+                  onClick={() => void copier(adresse).then((ok) => setFait(ok ? `Adresse copiée : ${adresse}` : "Le presse-papier a refusé la copie."))}
+                />
+              ) : (
+                <Rangee icone="Email" titre="Adresse de transfert e-barreau" desc="Faites suivre ici vos notifications e-barreau : chaque avis arrive dans « Arrivées »" verrou={adresse === undefined ? "Lecture…" : associe ? "Pas encore créée" : "Réservée aux associés"} />
+              )}
+              <Rangee icone="Calendar" titre="Agenda des audiences du cabinet" desc="Un fichier .ics de toutes les audiences prévues, à ouvrir dans votre agenda" valeur={`${prevues.length} audience${prevues.length > 1 ? "s" : ""}`} onClick={agendaCabinet} />
+              <Rangee icone="Inbox" titre="e-barreau et RPVA" desc="Vos notifications vous restent adressées ; Tamila n'envoie rien en votre nom" verrou="Lecture seule" />
+              <Rangee icone="Chat" titre="Votre messagerie" desc="Aucune connexion à vos courriels : seule l'adresse de transfert reçoit" verrou="Aucun accès" />
             </section>
           </fieldset>
 
