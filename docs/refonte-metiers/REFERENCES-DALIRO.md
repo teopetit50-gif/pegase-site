@@ -70,26 +70,71 @@ Motif admis (geste du métier sans place dans la référence) :
 - Annuaire : colonne « Rôles » ; Équipes : nom du chantier après chaque plage horaire.
 - À faire : le volet de détails remplace la page d'un ticket (une tâche n'a pas de page à elle).
 
-Éléments de la référence sans geste Daliro derrière (non dessinés, **à trancher par Teo**) :
-- Étoile « Add to favorites » (Vue d'ensemble, Fiche, À ranger, Avenants) : l'espace 2 n'a pas de favoris.
-- Fiche : cloche « Notifications » ; onglet « Projects » en Timeline (le planning des lots reste dans Terrain) ;
-  composeur « Comment | Update » de l'onglet Activity (le fil se remplit par WhatsApp et courriel) ; flèche de tri
-  remplacée par « ↓ » (le tracé n'est relevé qu'en partie).
-- À faire : « New issue », « + » de groupe, case à cocher au survol, puce de cycle.
-- À ranger : Duplicate, Snooze, « Copy as prompt », boîte de commentaire.
-- Équipes : « Set as default », corbeille, crayon de renommage, crayon d'une absence.
-- Annuaire : « View settings », « Import / Export », « + New Person », cases à cocher, épingles et automatisations
-  de colonne, « Add column », « Add calculation », repli de la barre latérale d'Attio, onglets Emails / Calls / Files.
-- Réglages : case à cocher de ligne (aucune action groupée sur les prix) ; Labels et Templates empilés sur une
-  route (pas de barre latérale de réglages).
+Éléments de la référence sans geste Daliro derrière : **plus aucun** depuis le 02/11 au soir (décision de Teo,
+« trouve une utilité aux boutons ») — chacun est dessiné et utile, voir la section suivante.
 
 Autres :
 - Couleurs prises sur les captures faute de relevé : carte du volet de la fiche en sombre (26/255 = lch(9.232), la
   palette du relevé dit 12.72), segments du volet ; À ranger et À faire : couleur « Todo », chevron de groupe en
   sombre, surbrillance de la ligne ouverte, bord de l'illustration.
-- Annuaire : icônes d'Attio non relevées → Lucide de même taille et même place.
+- Annuaire : icônes d'Attio tirées de ses fichiers publics (jeu 16 px ; « Activité » du jeu 12 px agrandi) ; l'icône de personnes de l'en-tête est redessinée dans le même carré bleu, l'épingle de colonne est l'épingle simple (la barrée n'est pas dans le jeu).
+- Fiche, onglet Lots : la capture de Linear montre l'onglet Projects en liste, le relevé (29/10) en Timeline ; la Timeline est gardée.
 - Contenu : 6 chantiers d'exemple contre 13 projets chez Linear (Chantiers) ; 13 entreprises contre 77 contacts
   (Annuaire) ; plages horaires des intervenants (Équipes). La géométrie est vérifiée sur les lignes présentes.
 - Barres de défilement : celles de Linear sont les barres flottantes de macOS (absentes de Chromium headless).
 - L'exemple étendu d'Avenants, de Réglages et d'À faire se pose dans les données partagées à la première visite de
   la page qui le porte.
+
+## Boutons de la référence et leur utilité (02/11/2026)
+
+Décision de Teo : chaque élément des pages de référence est dessiné 1:1 et fait une chose réelle — d'abord un geste
+existant (portes inchangées, aucune migration), sinon une utilité côté navigateur. Les gestes qui envoient ou
+qu'on ne défait pas demandent une confirmation. Utilités communes : `components/espace2/daliro/navigateur.ts`
+(localStorage `espace2:favoris:daliro`, `espace2:suivis:daliro`, `espace2:reportes:daliro` ; export CSV ; presse-papier).
+
+| Page | Bouton de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|
+| Vue d'ensemble | étoile « Add to favorites » | épingle la vue ouverte (Vue d'ensemble ou Point du mois) ; étoile pleine de Linear (yellowBase) | localStorage |
+| Vue d'ensemble | section de ressources (« Add section ») | « Épinglés » en tête : chantiers, avenants, vues, messages, entreprises épinglés ailleurs | localStorage |
+| Fiche | étoile | épingle le chantier dans « Épinglés » | localStorage |
+| Fiche | cloche « Notifications » | suit le chantier : ses nouveaux messages en tête d'À ranger, marqués « suivi » | localStorage |
+| Fiche | « + » (Add project) | fenêtre « Ouvrir un avenant » | porte (fenêtre de ChantierVue) |
+| Fiche | menu « … » | ouvrir / suspendre / reprendre, avenant, facture, relevé, détails, fil, avenants | portes (fenêtres de ChantierVue) |
+| Fiche | onglet « Projects » | « Lots » : frise de Chantiers, une ligne par lot, passages qu'on glisse ou étire ; filtre par état et échelle | porte `btp_deplacer_passage` ; adresse (`?lots=`, `?zoom=`) |
+| Fiche | composeur « Comment / Update » | « Question » posée au chantier (réponse dans Terrain › Questions) ; « Avenant » ouvre la fenêtre pré-remplie ; trombone = rattacher une facture | portes `poserQuestion`, `btp_ouvrir_avenant`, rattachement |
+| Fiche | flèche de tri | tri des lots (nom, santé, priorité, fin, statut) ; tracé de Linear (AnimatedArrowUpDownIcon) | page |
+| À ranger | étoile (liste / message) | épingle la page / le message | localStorage |
+| À ranger | Accept / Decline | ranger dans un chantier / écarter avec motif (confirmation) | portes `rangerMessage`, `ecarterMessage` |
+| À ranger | Mark as duplicate | choisir l'original, puis écarter celui-ci avec un motif qui le nomme (confirmation) | porte `ecarterMessage` |
+| À ranger | Snooze, puce de cycle | reporter (demain, 3 jours, lundi, une semaine, date) ; « Afficher les reportés » | localStorage, adresse (`?reportes=1`) |
+| À ranger | Copy URL / ID / git branch / as prompt | lien, « canal de X, reçu le … », texte, résumé pour l'assistant | presse-papier |
+| À ranger | Subscribe, « … » | suivre l'expéditeur ; ouvrir un avenant ; copier le lien | localStorage ; porte `avenantDepuisMessage` |
+| À ranger | Add sub-issues | « Ajouter un avenant » | porte `avenantDepuisMessage` |
+| À ranger | boîte de commentaire | répondre par le canal du message : WhatsApp, SMS ou courriel s'ouvre avec le texte (confirmation, rien ne part de Daliro) ; sinon copie | lien `wa.me` / `sms:` / `mailto:`, presse-papier |
+| À faire | « New issue », « + » de groupe | « Nouvelle tâche » : ouvrir une situation (fin de période pré-remplie avec la semaine ou le chantier du groupe) | porte `ouvrirSituation` |
+| À faire | cases à cocher | barre d'actions : noter faits (confirmation), reporter, exporter, copier | porte `terminerPassage` ; localStorage ; CSV ; presse-papier |
+| À faire | puce de cycle | semaine de la tâche (« S45 ») ; un clic filtre sur cette semaine | adresse (`?semaine=`) |
+| Avenants | étoile / cloche | épingle la vue (onglet, filtre) / suit les chantiers montrés | localStorage |
+| Avenants | « Nouvel avenant », « + » de colonne | fenêtre d'ouverture, de soumission, de signature ou d'abandon selon la colonne | portes (fenêtres de ChantierVue) |
+| Avenants | troisième onglet, « … » de colonne, filtre, affichage | « Tous » ; masquer une colonne ; chantier et recherche ; tri et colonnes | adresse |
+| Réglages | case à cocher de ligne | barre : valider les prix choisis (confirmation), exporter | porte `btp_valider_prix` ; CSV |
+| Réglages | « New group » | « Nouveau corps d'état » : nommer le groupe et poser son premier prix | porte `btp_poser_prix` |
+| Réglages | barre latérale Labels / Templates | bascule Bibliothèque / Organisation | adresse (`?page=organisation`) |
+| Équipes | Set as default | l'intervenant passe en tête, badge « Par défaut », présélectionné pour les absences | localStorage |
+| Équipes | Duplicate, corbeille | copier le planning de 30 jours ; retirer de la liste (confirmation, « les remettre ») | presse-papier ; localStorage |
+| Équipes | crayons | renommer une équipe (localStorage) ; ouvrir la fiche d'un sous-traitant ; modifier une absence | localStorage ; adresse ; portes `btp_noter_indisponibilite`, `btp_annuler_indisponibilite` |
+| Annuaire | repli de la barre, View settings, Add column, épingle, éclair | colonnes, regroupement par rôle, colonne fixée, tri | localStorage ; adresse (`?cols=`, `?groupe=`, `?epingle=`, `?tri=`) |
+| Annuaire | Import / Export | exporter la liste affichée (il n'y a pas d'import : l'annuaire se remplit par les chantiers) | CSV |
+| Annuaire | « + New Person », « + » d'en-tête | nouvelle entreprise dans les Entreprises de l'espace (aucune porte ne crée un tiers, la fenêtre le dit) | localStorage |
+| Annuaire | cases à cocher | exporter, copier les courriels, écrire à tous (mailto en copie cachée), épingler | CSV ; presse-papier ; mailto ; localStorage |
+| Annuaire | Add calculation | décompte rempli / vide, % rempli, valeurs distinctes, date la plus proche, sur les lignes affichées | adresse (`?calc=`) |
+| Annuaire, fiche | étoile, crayon, actions | épingler ; description locale ; écrire, appeler, note, disponibilités | localStorage ; mailto / tel ; liens |
+| Annuaire, fiche | onglets Emails / Calls / Files / Notes / Tasks | coordonnées et échanges J-2 par ce canal ; factures de ses lots ; notes et tâches locales | données lues ; localStorage |
+
+Superpositions refaites après ces ajouts (1440, sombre / clair) : vue d'ensemble 3.4 / 3.5 ; fiche 5.5 / 5.5 ;
+À ranger 6.1 ; À faire 11.0 / 11.5 ; Avenants 12.5 / 13.6 ; Réglages 7.4 (bibliothèque), 3.7 / 4.1 (organisation) ;
+Équipes 7.5 / 7.4, fiche d'intervenant 7.9 / 7.0 ; Annuaire 12.0 / 12.5, fiche 7.0 / 7.4.
+Restent : sur Réglages, la bascule Bibliothèque / Organisation est posée dans la carte (la barre latérale de
+réglages de Linear est la place de celle de l'espace 2) ; sur À faire à 390, la case à cocher est masquée (Linear
+lui donne une largeur nulle) ; couleur de la case cochée (violet de l'espace) et du champ de commentaire en sombre
+prises hors relevé.
