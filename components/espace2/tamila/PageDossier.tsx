@@ -233,6 +233,7 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
     { libelle: "Poser une muraille…", icone: "Shield", action: () => api.ouvrir({ type: "muraille" }), desactive: !api.gerant || !["attente", "ouvert", "audit"].includes(d.statut) },
     "sep",
     { libelle: "Agenda des audiences (.ics)", icone: "Calendar", action: api.exporterAgenda, desactive: !complet.audiences.some((a) => a.statut === "prevue") },
+    { libelle: "Dossier de faits", icone: "Book", href: `${RACINE}/tamila/dossiers/${d.id}/faits` },
     { libelle: "Bordereau de pièces", icone: "Page", action: api.bordereau, desactive: !complet.pieces.length || !api.clairLisible },
     { libelle: "Journal des accès (CSV)", icone: "Policy", action: api.exporterJournal, desactive: !complet.lectures.length },
   ];

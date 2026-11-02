@@ -1,0 +1,673 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — le dossier de faits (02/11/2026, pages manquantes) : copie 1:1
+   de la page d'un ticket de Linear en plein écran (releves/linear-ticket.md,
+   OME-19 ; captures 1440-reel-*.png, 390-*.png, 1024 et 768).
+
+   Les coordonnées ci-dessous sont celles du relevé, relatives à la carte
+   `main` (Linear : 244,8 ; ici 304,56 sous la coquille d'espace2).
+   En-tête       44, filet 0,5 : fil (lien 24 r 8, « › », h2 13/500) ;
+                 étoile, « … » 28 ; à droite deux boutons 28 (icône +
+                 libellé 12/500, r 9999, p 0 10 0 8) et deux ronds 28.
+   Barre d'outils 44 (p 8 12 8 0) : trois ronds 28 fond bouton, gap 6, et
+                 le bouton double (r 9999 0 0 9999 / 0 9999 9999 0).
+   Corps         colonne 667,5 (contenu à +14, 653,5) · 48,5 · propriétés
+                 375,7 (sticky). Titre 24/600/32 −0,16 à 105 ; description
+                 15/450/24 −0,1 (p 10 14 16, m 0 −14) à 183 ; deux ronds 28
+                 à 266 ; « Sub-issues » à 308 : en-tête 32 (bouton r 9999
+                 p 0 12 0 6, 12/500 t3 ; jauge 16 ; compte 12/450 ; filtre et
+                 « + » 28), lignes 36 (grid, r 8 ; icône 14, titre 13/500 t1,
+                 avatar 16) ; filet 0,5 à 540 ; « Activity » 15/600/23 à 559
+                 (bouton 98×32 12/500, rond 32) ; événement 12/450 à 608 ;
+                 cartes 669,5 à 643 (fond, bord 0,5, r 8, ombre ; tête 20 +
+                 corps 15/450/24 ; pied p 11 16, filet haut, 15/450 t4).
+   Propriétés    h3 13/500 t3 (p 0 8) à 119 ; pilules 28 (r 9999, p 0 10 0 6,
+                 gap 6, 13/500 t2) espacées de 32 ; puces d'étiquette 23
+                 (pastille 9×9) ; sections espacées de 33.
+   ≤ 1024        la colonne des propriétés disparaît : rangée de pilules
+                 sous le titre (linear-ticket.md, Paliers).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tam.tk {
+  --tk-carte: lch(9.232 0.85 272);
+  --tk-carte-bord: lch(16.793 1.93 272);
+  --tk-carte-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tk-texte: lch(90.826 1.425 272);
+  --tk-date: lch(63.304 1.425 272);
+  --tk-reponse: lch(39.452 1.425 272);
+  --tk-envoi: lch(13.861 1.139 272);
+}
+html[data-v2-theme="light"] .v2 .tam.tk {
+  --tk-carte: lch(100 0 282);
+  --tk-carte-bord: lch(91.9 0 282);
+  --tk-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tk-texte: lch(20 1 282);
+  --tk-date: lch(40 1 282);
+  --tk-reponse: lch(66 1 282);
+  --tk-envoi: lch(94.854 0.5 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tam.tk {
+    --tk-carte: lch(100 0 282);
+    --tk-carte-bord: lch(91.9 0 282);
+    --tk-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tk-texte: lch(20 1 282);
+    --tk-date: lch(40 1 282);
+    --tk-reponse: lch(66 1 282);
+    --tk-envoi: lch(94.854 0.5 282);
+  }
+}
+
+/* ——— en-tête ——— */
+.v2 .tam .tk-tete-droite {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding-right: 4px;
+}
+.v2 .tam .tk-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t2);
+  white-space: nowrap;
+  transition: background-color 0.15s;
+}
+.v2 .tam .tk-bouton svg {
+  width: 14px;
+  height: 14px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-bouton:hover:not(:disabled) {
+  background: var(--tam-survol-onglet);
+}
+.v2 .tam :is(.tk-bouton, .tam-rond):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— corps ——— */
+.v2 .tam .tk-corps {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  container-type: inline-size;
+}
+.v2 .tam .tk-outils {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 44px;
+  padding: 7px 12px 9px 0;
+  pointer-events: none;
+}
+.v2 .tam .tk-outils > * {
+  pointer-events: auto;
+}
+.v2 .tam .tk-outils .tam-rond {
+  background: var(--tam-bouton);
+}
+.v2 .tam .tk-double {
+  display: inline-flex;
+  position: relative;
+}
+.v2 .tam .tk-double > button,
+.v2 .tam .tk-double > div > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  border: 0.5px solid transparent;
+  background: var(--tam-bouton);
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-double > button {
+  width: 31px;
+  padding-left: 3px;
+  border-radius: 9999px 0 0 9999px;
+}
+.v2 .tam .tk-double > div > button {
+  width: 26px;
+  padding-right: 4px;
+  border-radius: 0 9999px 9999px 0;
+  margin-left: 0;
+}
+.v2 .tam .tk-double button:hover {
+  background: var(--tam-survol-onglet);
+}
+.v2 .tam .tk-double svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tk-cols {
+  display: flex;
+  justify-content: center;
+  gap: 48.5px;
+  margin-top: -44px;
+  padding: 0 0 48px;
+}
+.v2 .tam .tk-principal {
+  flex: 0 1 667.5px;
+  min-width: 0;
+  padding: 60px 0 0 14px;
+}
+.v2 .tam .tk-titre {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--tam-t1);
+  overflow-wrap: anywhere;
+}
+.v2 .tam .tk-description {
+  margin: 14px -14px 0;
+  padding: 10px 14px 16px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--tam-t2);
+}
+.v2 .tam .tk-description small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-reactions {
+  display: flex;
+  gap: 0;
+  margin-top: 9px;
+}
+.v2 .tam .tk-pilules-ligne {
+  display: none;
+}
+
+/* ——— « Sub-issues » → les faits ——— */
+.v2 .tam .tk-sous {
+  margin: 14px 0 0 -6px;
+  width: calc(100% + 6px);
+}
+.v2 .tam .tk-sous-tete {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding-right: 7.5px;
+}
+.v2 .tam .tk-replier {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  margin-left: 4px;
+  padding: 0 12px 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-replier:hover {
+  background: var(--tam-survol-onglet);
+}
+.v2 .tam .tk-replier svg {
+  width: 8px;
+  height: 8px;
+  transition: transform 0.15s;
+}
+.v2 .tam .tk-replier[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.v2 .tam .tk-jauge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-sous-tete .tam-pousse + * {
+  margin-right: 6px;
+}
+.v2 .tam .tk-lignes {
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+}
+.v2 .tam .tk-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: 14px auto minmax(0, 1fr) 16px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 36px;
+  padding: 0 13.5px 0 39px;
+  border-radius: 8px;
+  text-align: left;
+  isolation: isolate;
+}
+.v2 .tam .tk-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  z-index: -1;
+}
+@media (any-hover: hover) and (any-pointer: fine) {
+  .v2 .tam .tk-ligne:hover::before {
+    background: var(--tam-survol);
+  }
+}
+.v2 .tam .tk-ligne[aria-current="true"]::before {
+  background: var(--tam-choisi);
+}
+.v2 .tam .tk-ligne > svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tk-ligne-date {
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--tam-t3);
+  white-space: nowrap;
+}
+.v2 .tam .tk-ligne-titre {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t1);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tam .tk-ligne .tam-avatar,
+.v2 .tam .tk-ligne .tam-sans-avatar {
+  width: 16px;
+  height: 16px;
+}
+.v2 .tam .tk-vide {
+  padding: 10px 0 10px 39px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tam-t3);
+}
+.v2 .tam [data-g="info"] {
+  color: var(--tam-fait);
+}
+.v2 .tam [data-g="attention"] {
+  color: var(--tam-triage);
+}
+.v2 .tam [data-g="critique"] {
+  color: var(--tam-rouge);
+}
+.v2 .tam [data-g="doute"] {
+  color: var(--tam-triage);
+}
+
+/* ——— « Activity » → les sources ——— */
+.v2 .tam .tk-filet {
+  height: 0.5px;
+  margin: 16px 0 0;
+  background: var(--tam-carte-bord);
+}
+.v2 .tam .tk-activite-tete {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  margin-top: 18.5px;
+  padding-right: 7.5px;
+}
+.v2 .tam .tk-activite-tete h3 {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--tam-t1);
+}
+.v2 .tam .tk-suivre {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-suivre:hover {
+  background: var(--tam-survol-onglet);
+  color: var(--tam-t2);
+}
+.v2 .tam .tk-rond32 {
+  width: 32px;
+  height: 32px;
+}
+.v2 .tam .tk-evenement {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 16.8px;
+  margin: 17px 0 0 11px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-evenement + .tk-evenement {
+  margin-top: 12px;
+}
+.v2 .tam .tk-evenement svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tk-evenement b {
+  font-weight: 500;
+}
+.v2 .tam .tk-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 18px -8px 0;
+}
+.v2 .tam .tk-carte {
+  position: relative;
+  border: 0.5px solid var(--tk-carte-bord);
+  border-radius: 8px;
+  background: var(--tk-carte);
+  box-shadow: var(--tk-carte-ombre);
+  scroll-margin-top: 52px;
+}
+.v2 .tam .tk-carte[data-actif] {
+  border-color: var(--tam-violet);
+}
+.v2 .tam .tk-carte-haut {
+  padding: 15.5px 16px 14.5px;
+}
+.v2 .tam .tk-carte-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t1);
+}
+.v2 .tam .tk-carte-tete time {
+  font-weight: 450;
+  color: var(--tk-date);
+}
+.v2 .tam .tk-carte-gestes {
+  display: flex;
+  gap: 0;
+  margin: -4px -8px -4px auto;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.v2 .tam .tk-carte:hover .tk-carte-gestes,
+.v2 .tam .tk-carte:focus-within .tk-carte-gestes {
+  opacity: 1;
+}
+.v2 .tam .tk-carte-texte {
+  margin-top: 5px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--tk-texte);
+}
+.v2 .tam .tk-carte-texte + .tk-carte-texte {
+  margin-top: 4px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-carte-etat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.v2 .tam .tk-pied {
+  border-top: 0.5px solid var(--tk-carte-bord);
+}
+.v2 .tam .tk-pieds--cote {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.v2 .tam .tk-pieds--cote .tk-pied + .tk-pied {
+  border-left: 0.5px solid var(--tk-carte-bord);
+}
+.v2 .tam .tk-pied {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 45.5px;
+  padding: 10.75px 16px;
+}
+.v2 .tam .tk-pied > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.v2 .tam .tk-renvoi {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  color: var(--tk-reponse);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tam .tk-renvoi q {
+  color: var(--tk-texte);
+}
+.v2 .tam .tk-pieds--cote .tk-renvoi {
+  white-space: normal;
+}
+.v2 .tam button.tk-renvoi:hover:not(:disabled) {
+  text-decoration: underline;
+}
+.v2 .tam .tk-petit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-petit svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tk-petit--plein {
+  background: var(--tk-envoi);
+}
+.v2 .tam .tk-petit:hover:not(:disabled) {
+  background: var(--tam-survol-onglet);
+}
+.v2 .tam .tk-petit:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— les propriétés ——— */
+.v2 .tam .tk-proprietes {
+  position: sticky;
+  top: 0;
+  flex: 0 0 375.7px;
+  align-self: flex-start;
+  padding: 74px 0 24px 4px;
+}
+.v2 .tam .tk-proprietes h3 {
+  height: 16px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-proprietes h3 ~ h3 {
+  margin-top: 33px;
+}
+.v2 .tam .tk-props {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 10px 0 0 2px;
+}
+.v2 .tam .tk-prop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t2);
+  white-space: nowrap;
+}
+.v2 .tam .tk-prop span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tam .tk-prop[data-vide] {
+  color: var(--tam-t3);
+}
+.v2 .tam .tk-prop svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--tam-t3);
+}
+.v2 .tam :is(a, button).tk-prop:hover:not(:disabled) {
+  background: var(--tam-survol-onglet);
+}
+.v2 .tam .tk-etiquettes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 12px 0 0 6px;
+}
+.v2 .tam .tk-etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 23px;
+  padding: 0 8px;
+  border: 0.5px solid var(--tam-puce-bord);
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t2);
+}
+.v2 .tam .tk-etiquette[aria-pressed="true"] {
+  background: var(--tam-actif);
+  color: var(--tam-t1);
+}
+.v2 .tam .tk-etiquette i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.v2 .tam .tk-impression {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 0;
+  visibility: hidden;
+}
+
+/* ——— la carte se resserre : plus de colonne de propriétés ——— */
+@container (max-width: 1060px) {
+  .v2 .tam .tk-proprietes {
+    display: none;
+  }
+  .v2 .tam .tk-principal {
+    flex: 1 1 auto;
+    max-width: 768px;
+    padding: 50px 14px 0;
+  }
+  .v2 .tam .tk-pilules-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .v2 .tam .tk-pilules-ligne .tk-prop {
+    height: 28px;
+    padding: 0 10px 0 6px;
+    background: var(--tam-bouton);
+    border-color: var(--tam-puce-bord);
+    font-size: 12px;
+  }
+  .v2 .tam .tk-pilules-ligne .tk-prop[data-icone-seule] {
+    padding: 0 6px;
+  }
+}
+@media (max-width: 1024px) {
+  .v2 .tam .tk-bouton span {
+    display: none;
+  }
+  .v2 .tam .tk-bouton {
+    width: 28px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tam .tk-corps {
+    overflow: visible;
+  }
+  .v2 .tam .tk-bouton {
+    width: 32px;
+    height: 32px;
+  }
+  .v2 .tam .tk-tete .tam-ini-fil > a:first-child {
+    display: none;
+  }
+  .v2 .tam .tk-tete .tam-ini-sep {
+    display: none;
+  }
+  .v2 .tam .tk-pieds--cote {
+    grid-template-columns: 1fr;
+  }
+  .v2 .tam .tk-pieds--cote .tk-pied + .tk-pied {
+    border-left: 0;
+    border-top: 0.5px solid var(--tk-carte-bord);
+  }
+}
+@media (max-width: 520px) {
+  .v2 .tam .tk-cartes {
+    margin: 18px -6px 0;
+  }
+  .v2 .tam .tk-ligne {
+    padding-left: 30px;
+  }
+  .v2 .tam .tk-ligne-date {
+    display: none;
+  }
+  .v2 .tam .tk-ligne {
+    grid-template-columns: 14px minmax(0, 1fr) 16px;
+  }
+}

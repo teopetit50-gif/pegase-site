@@ -16,6 +16,7 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
 | Pilotage `/pilotage` | Plain, Insights | `plain-insights.md` | 9,5 / 9,5 |
 | Conformité du cabinet `/conformite` | Plain, Tasks | `plain-tasks.md` | 9,2 / 8,0 |
 | Réglages `/reglages` | Linear, Settings › Team | `linear-team-settings.md` | 3,6 / 4,1 |
+| Dossier de faits `/dossiers/[id]/faits` (pages manquantes, 02/11) | Linear, page d'un ticket | `linear-ticket.md` | 7,6 / 7,6 |
 
 Ce qui reste dans l'écart moyen est le contenu (textes, nombres, longueurs) : les positions, tailles, couleurs et rayons mesurés
 (`tam-mesure.mjs`) tombent sur ceux des relevés, à 1 px près, sauf les écarts écrits page par page ci-dessous.
@@ -183,3 +184,52 @@ Ce qui reste dans l'écart moyen est le contenu (textes, nombres, longueurs) : l
 - **Écarts restants** : les fenêtres des gestes (B39, B31, B34, B23, B25, B27) gardent l'habillage de l'écran d'avant (Linear n'a pas
   ces formulaires) ; l'onglet Projects de Linear est une frise (Timeline) — ici, Procédure est le tableau de la vue d'ensemble, que
   Linear montre lui-même à 390 à la place de la frise ; pas de réactions ni de commentaires sous la carte (rien de tel dans le métier).
+
+## Dossier de faits — `/espace2/tamila/dossiers/[id]/faits` (pages manquantes, 02/11/2026)
+
+- **Pourquoi** : `PAGES-MANQUANTES.md` — « Chronologie sourcée », « Dossier de faits daté et sourcé », « Contradictions relevées…
+  côte à côte », « Dossier de plaidoirie et renvois cliquables », « L'ensemble de la pré-lecture » n'avaient qu'une fenêtre « Lire »
+  (B27). Branche `claude/pages-tamila`, tirée de `main`. Code : `components/espace2/tamila/DossierFaits.tsx`, `faitsExemple.ts`,
+  `tam-ticket.css` (préfixe `tk-`), route `app/espace2/tamila/dossiers/[id]/faits/page.tsx` (`?ancien=1` : l'écran d'avant).
+- **Référence** : Linear, page d'un ticket en plein écran (OME-19). **Relevé** : `linear-ticket.md`. Captures `linear-ticket/1440-reel-*-OME-19.png`,
+  `390-*-OME-19.png`, `1024-sombre-OME-19.png`, `768-sombre-OME-19.png`. Libre pour Tamila (prise par Lorani permis et Tavaro contrat,
+  jamais par Tamila).
+- **Choix de la référence (le plan proposait Timeline ou ticket)** : le ticket. Un dossier de faits se lit comme un document — titre,
+  résumé, liste de faits, puis chaque fait avec ses sources — ce que la page d'un ticket porte telle quelle (description, Sub-issues,
+  Activity en cartes). La Timeline de Linear ne montre ni texte ni citation : une chronologie de 5 à 30 faits datés au jour, au mois ou à
+  l'année y deviendrait des barres sans extrait ni renvoi, et les contradictions, les pièces citées et la pré-lecture n'y auraient pas de
+  place. Tamila a aussi déjà pris l'Initiative, dont l'onglet Projects est une frise.
+- **Correspondance** : fil « Initiatives › OME-19 titre » → « Dossiers › 2026-0412 Dossier de faits » ; étoile → ouvrir d'office ce dossier de
+  faits sur cette lecture (gardé dans ce navigateur, `omega.tamila.faits.lecture`) ; « … » → Word, Imprimer ou PDF, Copier pour l'assistant,
+  Copier les renvois, Redemander cette lecture, Ouvrir la fiche ; Accept · Decline · Mark as duplicate · Snooze → Word · PDF · Redemander
+  (confirmation) · Lectures du dossier (menu) ; barre d'outils Copy issue URL · Copy issue ID · Copy branch name · « Copy as prompt | Choose
+  coding tool » → copier l'adresse · la référence du dossier · les renvois · « Copier pour l'assistant | format » (Markdown, texte brut,
+  renvois seuls). Titre → « Dossier de faits · chronologie : intitulé (RG …) » ; description → le résumé du lecteur (avis « partielle » sous le
+  résumé) ; réaction · pièce jointe → copier le résumé · pièces lues (menu, ouvertes déchiffrées). Sub-issues → Faits / Contradictions / Pièces
+  citées : jauge = faits dont toutes les citations sont retrouvées, filtre (tous, à vérifier, citation non retrouvée, par acteur), « + » =
+  demander une lecture (G37-G41, avec confirmation : coût facturé) ; ligne : icône de gravité (fait vérifié, à vérifier, critique, citation
+  non retrouvée), date du fait, titre, avatar de l'acteur ; un clic mène à sa carte. Activity → Sources : « Unsubscribe » → Replier / Déplier
+  les sources ; rond d'avatars → les acteurs (filtre) ; l'événement « created the issue » → « Le lecteur a rendu N constats · il y a » ; une
+  carte de commentaire = un fait (tête : acteur, date ; corps : titre et texte ; au survol : copier, « … » ouvrir chaque pièce, réclamer,
+  filtrer) ; le pied « Leave a reply… » = le renvoi « extrait » — pièce, p., l. cliquable (la pièce déchiffrée ouverte à la page), trombone
+  (ouvrir), flèche (copier le renvoi) ; une contradiction met ses deux pieds côte à côte ; une pièce citée absente porte « Réclamer au
+  confrère » (G42, confirmation). Properties → Lecture (type : menu des lectures, état, pièces lues, date) ; Labels → Acteurs (pastilles
+  9×9, filtre) ; Project → Dossier (lien vers la fiche).
+- **Données** : `portes.chargerAnalyses` (b4_15), résultat déchiffré exactement comme la fenêtre « Lire » (`lireResultat(dechiffrer(cle,
+  resultat_chiffre))`), clé du trousseau du layout ouvert par `useTamila().ouvrir` (consultation tracée, comme la fiche) ; pièces citées
+  comparées aux pièces attendues déchiffrées (`chargerAttentes`) ; Word et impression par `htmlAnalyse`. Aucune migration, `portes.ts`
+  inchangé. En exemple : `faitsExemple.ts` (dossier 2026-0412 : chronologie 5 faits, contradictions 2, pièces citées 3, pré-lecture en cours).
+- **Lien** : fiche du dossier, menu « … » → « Dossier de faits » (seule ligne ajoutée à `PageDossier.tsx`). **Aiguillage** : aucune règle
+  ajoutée (les lectures ne produisent aucun lien en base ; `tamila_dossier` mène toujours à la fiche) ; `verifier-aiguillage.mjs` vert.
+- **Comparaisons** : `comparaisons/tamila/faits-1440-{sombre,clair}-{cote,diff,fusion}.png` (`--dx -30` : colonnes de 667,5 et 375,7 centrées
+  dans une carte plus étroite de 60), `faits-1440-sombre-contradictions-cote.png` (contradictions côte à côte), `faits-390-{sombre,clair}-cote.png`.
+  Mesures (`tam-mesure.mjs`, relatives à la carte) : titre 105, description 183, réactions 266, en-tête des faits 308, lignes 344 (36), filet 540,
+  « Sources » 559, événement 608, première carte 643 (tête +16, texte +41, pied +80), « Lecture » 119, pilules toutes les 32 — celles du relevé
+  à 1 px près. Recette sans défilement de côté : 390, 768, 1024, 1440, 1700.
+- **Écarts restants** : pas de « Leave a comment… » ni de réponse sous les cartes, pas de réactions (aucun commentaire en base pour une
+  lecture : non maquetté) ; icônes « Copy issue ID », « Copy branch name », « Add reaction » et le sélecteur d'outil non relevés → `Page`,
+  `Link`, `Comment`, `Agent` et un triangle du sprite de Linear ; la flèche d'envoi du pied est tracée ici (non relevée) ; la date du fait
+  s'ajoute avant le titre de ligne (rien de tel dans les sous-tickets) ; couleurs des pastilles d'acteur autres que le vert « Client » non
+  relevées ; la fenêtre de confirmation est `TamFenetre` (écart commun). En exemple, les pièces ne s'ouvrent pas (aucune pièce chiffrée).
+- **Sans back-end, non construit** : « Dispositif contre motifs (art. 954) », « Prétentions nouvelles », « sommation prête », « Index des
+  personnes », « Premier jet de l'exposé » (déjà notés dans `PAGES-MANQUANTES.md`).
