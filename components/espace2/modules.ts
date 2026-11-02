@@ -96,7 +96,16 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Urgences et escalade", href: `${RACINE}/reput/urgences` },
   ]),
   m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
-  m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
+  /* 02/11/2026 — refonte de TAVARO : une sous-page par usage (docs/refonte-metiers/cloud/TAVARO.md) */
+  m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/tavaro`, exact: true },
+    { libelle: "Retours à facturer", href: `${RACINE}/tavaro/retours` },
+    { libelle: "Parc et atelier", href: `${RACINE}/tavaro/parc` },
+    { libelle: "Amendes, péages, contestations", href: `${RACINE}/tavaro/amendes` },
+    { libelle: "Incidents", href: `${RACINE}/tavaro/incidents` },
+    { libelle: "Réseau et flotte", href: `${RACINE}/tavaro/reseau` },
+    { libelle: "Réglages", href: `${RACINE}/tavaro/reglages` },
+  ]),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp, [
     { libelle: "Vue d'ensemble", href: `${RACINE}/lorani`, exact: true },
