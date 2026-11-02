@@ -1,0 +1,401 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — « Tasks » de Plain (02/11/2026)
+   Relevé : releves/plain-tasks.md (29/10 et 01/11), captures 1440-reel-*.png,
+   1440-*-detail.png, 1440-clair-menu-tri.png, 1440-clair-onglet-done.png,
+   390-*.png.
+
+   Colonne        p 24 24 120 ; tête 56 (p 0 24 24) : h1 Whyte 24/400/32.
+   Onglets        collants, 49 (p 0 24 12, gap 16, filet bas 1 bord-2) :
+                  contrôle segmenté 36 (r 8, p 2, gap 8, piste remplir-1) ;
+                  onglet 32 (p 0 8, r 6, gap 4 : icône 18 + 14/550/20 +
+                  compteur 12/400/16 t2) ; actif remplir-2. Tri à droite 34
+                  (p 8, r 6, icône 18 + 12/550/16).
+   Ajout          48 (grid 18 1fr, gap 12, p 12 24) : 14/550/20 t2 + kbd.
+   Ligne          li 49 (filet haut 1 bord-1) ; grille 18 · 1fr · [400] · 40,
+                  gap 8 12, p 0 24, h 48 : case 18 ; ID 12/475/16 t2 +
+                  titre 14/550/20 t1 (≈6) ; pastille du compte à droite ;
+                  avatar 18 r 4 dans un bouton 32 (pastille de présence 4,5).
+                  Survol remplir-1 ; ligne ouverte bleu-fond-2.
+   Détail         la liste à 719, lignes de deux étages (li 81, p 8 24) ;
+                  volet 360 (p 16, gap 16) : en-tête 32, rangée d'actions,
+                  titre Whyte 24/400/32, « Created… » 14/400/20 t2,
+                  description 14/400/20, hr, dl (dt 12/550/32 t2).
+   390            onglets → bouton « My tasks 16 ⌄ » ; lignes à deux étages.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tamp .tamp-taches {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+.v2 .tamp .tamp-tliste {
+  flex: 1;
+  min-width: 0;
+  padding: 24px 0 120px;
+  overflow: auto;
+}
+.v2 .tamp .tamp-ttete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 24px 24px;
+}
+.v2 .tamp .tamp-ttete h1 {
+  font-size: 24px;
+  line-height: 32px;
+}
+.v2 .tamp .tamp-onglets {
+  position: sticky;
+  top: -24px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 49px;
+  /* relevé : p 0 24 12, mais l'onglet actif est mesuré à 369 (16 dans la carte) : la piste commence à 14 */
+  padding: 0 24px 12px 14px;
+  border-bottom: 1px solid var(--p-bord-2);
+  background: var(--p-carte);
+}
+.v2 .tamp .tamp-segments {
+  display: flex;
+  gap: 8px;
+  height: 36px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--p-texte-2);
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-segment svg {
+  margin-right: 4px;
+}
+.v2 .tamp .tamp-segment small {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-segment:hover {
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-segment[aria-selected="true"] {
+  background: var(--p-remplir-2);
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-afaire {
+  color: var(--p-bleu-icone-1);
+}
+.v2 .tamp .tamp-faite {
+  color: var(--p-vert-icone-1);
+}
+.v2 .tamp .tamp-onglets .tamp-fantome {
+  margin-left: auto;
+  padding: 8px;
+}
+.v2 .tamp .tamp-menu-segments {
+  display: none;
+}
+.v2 .tamp .tamp-ajout {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 48px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--p-texte-2);
+  text-align: left;
+}
+.v2 .tamp .tamp-ajout svg {
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-ajout span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .tamp .tamp-tache {
+  border-top: 1px solid var(--p-bord-1);
+  background: var(--p-carte);
+}
+.v2 .tamp .tamp-tache:has(:focus-visible) {
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 0 2px var(--p-bleu-focus);
+}
+.v2 .tamp .tamp-tligne {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto 40px;
+  align-items: center;
+  gap: 8px 12px;
+  height: 48px;
+  padding: 0 24px;
+  color: inherit;
+}
+.v2 .tamp .tamp-tligne:hover {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-tache[aria-current="true"] {
+  border-top-color: var(--p-bleu-fond-2);
+}
+.v2 .tamp .tamp-tache[aria-current="true"] .tamp-tligne {
+  background: var(--p-bleu-fond-2);
+}
+.v2 .tamp .tamp-tcase {
+  display: flex;
+}
+.v2 .tamp .tamp-ttitre {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-tid {
+  flex: none;
+  font-size: 12px;
+  font-weight: 475;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-ttitre b {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--p-texte-1);
+  text-overflow: ellipsis;
+}
+.v2 .tamp .tamp-tache[data-faite] .tamp-ttitre b {
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-tcompte {
+  justify-self: end;
+  max-width: 400px;
+  overflow: hidden;
+}
+.v2 .tamp .tamp-tcompte .tamp-vignette {
+  margin-top: 0;
+  background: transparent;
+}
+.v2 .tamp .tamp-assigne {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+}
+.v2 .tamp .tamp-assigne:hover {
+  background: var(--p-remplir-2);
+}
+.v2 .tamp .tamp-carre {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 550;
+  line-height: 1;
+  color: #fff;
+}
+.v2 .tamp .tamp-assigne::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 4.5px;
+  height: 4.5px;
+  border-radius: 50%;
+  background: var(--p-vert-plein-2);
+  box-shadow: 0 0 0 1px var(--p-carte);
+}
+.v2 .tamp .tamp-tvide {
+  padding: 24px;
+  font-size: 14px;
+  color: var(--p-texte-2);
+}
+
+/* ——— une tâche ouverte : la liste à deux étages, le volet de 360 ——— */
+.v2 .tamp .tamp-taches[data-ouvert="true"] .tamp-tligne,
+.v2 .tamp .tamp-tligne--etages {
+  grid-template-columns: 18px minmax(0, 1fr) 40px;
+  grid-template-rows: auto auto;
+  height: 80px;
+  padding: 8px 24px;
+}
+.v2 .tamp .tamp-taches[data-ouvert="true"] .tamp-tcompte,
+.v2 .tamp .tamp-tligne--etages .tamp-tcompte {
+  grid-row: 2;
+  grid-column: 2;
+  justify-self: start;
+}
+.v2 .tamp .tamp-taches[data-ouvert="true"] .tamp-assigne,
+.v2 .tamp .tamp-tligne--etages .tamp-assigne {
+  grid-row: 1 / span 2;
+  grid-column: 3;
+}
+.v2 .tamp .tamp-tvolet {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 16px;
+  width: 360px;
+  padding: 16px;
+  overflow: auto;
+  background: var(--p-carte);
+}
+.v2 .tamp .tamp-tvolet-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-tvolet-tete .tamp-icone {
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-tactions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .tamp .tamp-tstatut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-tbouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-tbouton:hover {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-tbouton--agent {
+  font-weight: 550;
+}
+.v2 .tamp .tamp-tbouton--agent svg {
+  color: var(--p-vert-icone-1);
+}
+.v2 .tamp .tamp-tgrand {
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-tcree {
+  margin-top: -12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-tdesc {
+  padding-bottom: 8px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-tvolet hr {
+  width: calc(100% + 32px);
+  margin: 0 -16px;
+  border: 0;
+  border-top: 1px solid var(--p-bord-1);
+}
+.v2 .tamp .tamp-tdl {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 4px 16px;
+}
+.v2 .tamp .tamp-tdl dt {
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 32px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-tdl dd {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+
+@media (max-width: 1024px) {
+  .v2 .tamp .tamp-tvolet {
+    position: fixed;
+    inset: 48px 0 0 auto;
+    z-index: 50;
+    box-shadow: var(--p-menu-ombre);
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tamp .tamp-tliste {
+    padding: 16px 0 120px;
+  }
+  .v2 .tamp .tamp-ttete {
+    padding: 0 16px 24px;
+  }
+  .v2 .tamp .tamp-segments {
+    display: none;
+  }
+  .v2 .tamp .tamp-menu-segments {
+    display: block;
+  }
+  .v2 .tamp .tamp-tligne {
+    grid-template-columns: 18px minmax(0, 1fr) 40px;
+    grid-template-rows: auto auto;
+    height: 80px;
+    padding: 8px 24px;
+  }
+  .v2 .tamp .tamp-tcompte {
+    grid-row: 2;
+    grid-column: 2;
+    justify-self: start;
+  }
+  .v2 .tamp .tamp-assigne {
+    grid-row: 1 / span 2;
+    grid-column: 3;
+  }
+  .v2 .tamp .tamp-tvolet {
+    inset: 48px 0 0 0;
+    width: auto;
+  }
+}

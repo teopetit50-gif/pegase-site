@@ -98,3 +98,22 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
   24/30, recherche 20/94, en-têtes 146 (32), lignes de 59,5 avec une pastille, nom à 32/194 — ceux du relevé.
 - **Écarts restants** : icônes des colonnes de champs (texte, nombre, date, booléen) non relevées chez Plain → icônes du sprite de
   Linear à 14 ; œil de Display non relevé → cercle Todo/Done de Linear ; les intitulés longs sont tronqués comme les noms de Plain à 390.
+
+## Conformité du cabinet — `/espace2/tamila/conformite`
+
+- **Référence** : Plain, Tasks (liste + détail). **Relevé** : `plain-tasks.md`. Captures `plain-tasks/1440-reel-*.png`, `1440-sombre-detail.png`,
+  `390-*.png`.
+- **Correspondance** : les deux vues cabinet qui manquaient (§ 8.5-2) en tâches : conflit d'intérêts sans décision (E7), parties jamais
+  contrôlées, vigilance LCB-FT à faire, temps proposé à la saisie (E4, pour la personne qui regarde) ; « Faits » : vigilances revues.
+  Onglets My tasks · Todo · Done → À moi · À traiter · Faits ; tri Last updated · Priority → Dernière date · Priorité ; « Add new task T »
+  → « Ouvrir un dossier (contrôle à l'entrée) T » (B16). Ligne : case, référence (ID), titre, pastille du dossier (compte), avatar carré
+  du responsable avec pastille de présence. Tâche ouverte (`?tache=…`) : liste à deux étages, volet de 360 (référence, « À faire »,
+  « Assigné à … », « Traiter dans le dossier » à la place de « Handle with Agent », titre, depuis, description, Dossier / Origine / Règle).
+  Les décisions (G59), la vigilance (G60) et la saisie du temps (G44-G46) se font dans la page du dossier, avec leurs fenêtres.
+  Lecture : `tamila_conformite` par dossier vivant (sans trace) ; aucun dossier ouvert. Le journal des accès (B38) reste dans la page de
+  chaque dossier : le lire est lui-même tracé, on ne le lit pas pour tout le cabinet sans le demander.
+- **Comparaisons** : `conformite-1440-{sombre,clair}-{cote,diff,fusion}.png`, `conformite-1440-sombre-ouvert-cote.png` (côte à côte avec
+  `1440-sombre-detail.png`), `conformite-390-{sombre,clair}-cote.png`. Mesures : titre 24/24, barre d'onglets 80 (49), ajout 129 (48),
+  première tâche 177 (49), ID à 54 — ceux du relevé.
+- **Écarts restants** : piste des onglets à 14 du bord (mesurée sur l'onglet actif) au lieu des 24 du padding relevé ; en exemple, l'état
+  de conformité des dix dossiers ajoutés est tiré de leur rang (vigilance un sur deux, une partie non contrôlée un sur trois).
