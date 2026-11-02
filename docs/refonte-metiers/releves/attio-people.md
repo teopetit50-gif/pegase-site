@@ -93,6 +93,20 @@ la grille garde ses colonnes de 250/215… et défile à l'horizontale ; la fich
 `1440-clair.png` · `1440-sombre.png` · `390-clair.png` (liste, noms remplacés à l'affichage) · `1440-clair-fiche.png` · `1440-sombre-fiche.png` ·
 `390-clair-fiche.png`. Résolution : voir la limite notée dans `calcom-bookings.md` (1440 rendu en 800 px).
 
+**À taille réelle (1440×900, quatre tuiles à l'échelle 1 recollées)** : `1440-reel-clair.png` · `1440-reel-sombre.png` (liste, noms
+remplacés à l'affichage, photos masquées) · `1440-reel-clair-fiche.png` · `1440-reel-sombre-fiche.png` (Bastien Marchand, fictif) ; et
+`captures/attio-companies/1440-reel-clair.png` · `1440-reel-sombre.png` (vue « All Companies » : les entreprises de Teo sont réelles, donc
+noms, descriptions, comptes Twitter/LinkedIn et nombres d'abonnés remplacés à l'affichage, logos masqués ; pays et années laissés).
+Ici la barre latérale d'Attio est repliée (état de l'espace au moment de la capture).
+
+## Remplissage prêt à importer
+
+`attio-import-fictif.csv` (40 contacts : prénom, nom, courriel `@example.com`, entreprise, poste, ville, téléphone fictif en `00`,
+étiquettes) et `attio-import-entreprises-fictif.csv` (15 entreprises BTP des Antilles, domaines `*.example.com`). Import par
+« Import / Export → Import CSV » sur Companies d'abord, puis People. Non importés : en attente de l'accord de Teo. Attention, Attio
+rattache les personnes à une entreprise d'après le domaine du courriel : toutes en `@example.com`, elles iraient à « Example Domain »
+si la colonne Company n'est pas associée à l'attribut Company à l'import.
+
 ## Non relevé
 
 Menus « View settings », « Import / Export », filtre actif, sélection de lignes, fiche entreprise, onglets Activity/Emails/Notes de la fiche
