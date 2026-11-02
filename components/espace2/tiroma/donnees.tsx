@@ -84,6 +84,8 @@ export type ContexteTiroma = {
   fixerObjectif: (f: ObjectifFauteuil, objectif: number | null) => Promise<void>;
   exporter: () => Promise<unknown>;
   aligner: () => Promise<number>;
+  /* relire le dossier (base réelle) ; en exemple, rien à relire */
+  relire: () => Promise<void>;
 };
 
 const Contexte = createContext<ContexteTiroma | null>(null);
@@ -376,7 +378,7 @@ export function DonneesTiroma({ children }: { children: React.ReactNode }) {
     source, dossier, reel, erreur, choisirCabinet: (id: string) => { setChoix(id); void charger(id); },
     installation: { entite: entiteInst, setEntite: setEntiteInst, logiciel: logicielInst, setLogiciel: setLogicielInst, perimetre: perimetreInst, setPerimetre: setPerimetreInst, version: versionInst, setVersion: setVersionInst, enCours: installe, installer },
     agir, noterMutuelle: noter, chercher, inscrire, retirer, noterAppel: noterUnAppel, noterContact: noterUnContact, retirerContact: retirerUnContact,
-    noterAbsence: noterUneAbsence, cloreAbsence: cloreUneAbsence, fixerObjectif: fixerUnObjectif, exporter: exporterLesDonnees, aligner: alignerLesRegles,
+    noterAbsence: noterUneAbsence, cloreAbsence: cloreUneAbsence, fixerObjectif: fixerUnObjectif, exporter: exporterLesDonnees, aligner: alignerLesRegles, relire,
   };
   return <Contexte.Provider value={valeur}>{children}</Contexte.Provider>;
 }
