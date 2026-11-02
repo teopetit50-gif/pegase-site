@@ -44,6 +44,7 @@ import { VarCarte } from "./VarCadre";
 import { PlainIcone, type NomPlainIcone } from "./PlainIcone";
 import { MenuPlain, useOuvert, useTouche, type OptionPlain } from "./PlainCadre";
 import { Confirmer, type Demande } from "./Confirmer";
+import { useFavoris } from "./local";
 import "./var-plain.css";
 
 const ICI = `${RACINE}/varelo/contrats`;
@@ -78,6 +79,12 @@ export default function VueContrats() {
   const objets = useMemo(() => v.donnees?.objets ?? [], [v.donnees]);
   const c = useContratsGroupe({ source: v.source, contexte: v.contexte, client_id: v.client_id, societes, objets, onFait: v.setFait });
   const [confirmer, setConfirmer] = useState<Demande | null>(null);
+  /* « + » d'une section de Ce matin : ?nouveau=1 ouvre « Ajouter un contrat » une fois */
+  const [nouveauVu, setNouveauVu] = useState(false);
+  if (params.get("nouveau") === "1" && !nouveauVu && c.peutSaisir) {
+    setNouveauVu(true);
+    c.setEdition("nouveau");
+  }
 
   const tous = c.tous ?? [];
   const contrat = ouvertId ? (tous.find((k) => k.id === ouvertId) ?? null) : null;
@@ -128,6 +135,7 @@ function Liste({ c, ouvrir, introuvable }: { c: C; ouvrir: (id: string) => void;
   const { ouvert: filtresOuvert, setOuvert: setFiltresOuvert, boite: filtresBoite } = useOuvert<HTMLDivElement>();
   const { ouvert: affichageOuvert, setOuvert: setAffichageOuvert, boite: affichageBoite } = useOuvert<HTMLDivElement>();
   const [menuCol, setMenuCol] = useState<"nom" | Colonne | null>(null);
+  const favoris = useFavoris();
   const basculerFiltres = useCallback(() => setFiltresOuvert((o) => !o), [setFiltresOuvert]);
   const basculerAffichage = useCallback(() => setAffichageOuvert((o) => !o), [setAffichageOuvert]);
   useTouche("f", basculerFiltres);
@@ -238,6 +246,16 @@ function Liste({ c, ouvrir, introuvable }: { c: C; ouvrir: (id: string) => void;
           <h2 className="var-p-h1">Contrats</h2>
         </div>
         <div className="var-p-actions">
+          <button
+            type="button"
+            className="var-p-icone"
+            aria-pressed={favoris.estEpingle("vue:contrats")}
+            aria-label={favoris.estEpingle("vue:contrats") ? "Retirer Contrats des épinglés" : "Épingler Contrats dans Ce matin"}
+            title={favoris.estEpingle("vue:contrats") ? "Retirer des épinglés" : "Épingler dans Ce matin"}
+            onClick={() => favoris.basculer({ cle: "vue:contrats", libelle: "Contrats à dénoncer", href: ICI, genre: "vue" })}
+          >
+            <PlainIcone nom="Etoile" style={favoris.estEpingle("vue:contrats") ? { color: "#e79d00" } : { color: "var(--p-i2)" }} />
+          </button>
           <div ref={filtresBoite} style={{ position: "relative" }}>
             <button type="button" className="var-p-fantome" aria-haspopup="menu" aria-expanded={filtresOuvert} onClick={basculerFiltres}>
               <PlainIcone nom="Filtres" />
@@ -255,7 +273,12 @@ function Liste({ c, ouvrir, introuvable }: { c: C; ouvrir: (id: string) => void;
             </button>
             {affichageOuvert ? (
               <div className="var-p-pop" role="dialog" aria-label="Affichage" style={{ top: 42, right: 0 }}>
-                <p className="var-p-pop-titre">Colonnes du tableau</p>
+                <p className="var-p-pop-titre" style={{ display: "flex", justifyContent: "space-between" }}>
+                  Colonnes du tableau
+                  <button type="button" className="var-p-pop-lien" onClick={() => setMasquees([])} disabled={masquees.length === 0}>
+                    Tout afficher
+                  </button>
+                </p>
                 {COLONNES.map((k) => {
                   const vue = !masquees.includes(k.cle);
                   return (
@@ -268,6 +291,12 @@ function Liste({ c, ouvrir, introuvable }: { c: C; ouvrir: (id: string) => void;
                     </div>
                   );
                 })}
+                <div className="var-p-pop-pied">
+                  <span>Le tri et les colonnes reviennent à l&apos;ordre par défaut</span>
+                  <button type="button" className="var-p-oeil" aria-label="Rétablir l'affichage par défaut" title="Rétablir l'affichage par défaut" onClick={() => { setMasquees([]); setTri(null); }}>
+                    <PlainIcone nom="Tri" />
+                  </button>
+                </div>
               </div>
             ) : null}
           </div>
@@ -355,6 +384,7 @@ function Fiche({ k, tous, c, onValider, onArchiver }: { k: Contrat; tous: Contra
   const routeur = useRouter();
   const [onglet, setOnglet] = useState<"etapes" | "tiers" | "notes">("etapes");
   const [volet, setVolet] = useState(true);
+  const favoris = useFavoris();
   const { ouvert: plusOuvert, setOuvert: setPlusOuvert, boite: plusBoite } = useOuvert<HTMLDivElement>();
   const decision = c.decisionDe("denoncer_contrat", k.id);
   const peutValider = c.peutSaisir && !decision && k.statut === "actif" && k.reconduction === "tacite" && k.jours_restants >= 0;
@@ -396,6 +426,16 @@ function Fiche({ k, tous, c, onValider, onArchiver }: { k: Contrat; tous: Contra
             </div>
           </div>
           <div className="var-p-fiche-actions" ref={plusBoite}>
+            <button
+              type="button"
+              className="var-p-icone"
+              aria-pressed={favoris.estEpingle(`contrat:${k.id}`)}
+              aria-label={favoris.estEpingle(`contrat:${k.id}`) ? "Retirer ce contrat des épinglés" : "Épingler ce contrat dans Ce matin"}
+              title={favoris.estEpingle(`contrat:${k.id}`) ? "Retirer des épinglés" : "Épingler dans Ce matin"}
+              onClick={() => favoris.basculer({ cle: `contrat:${k.id}`, libelle: `${k.intitule} (${k.tiers})`, href: `${ICI}?contrat=${encodeURIComponent(k.id)}`, genre: "contrat" })}
+            >
+              <PlainIcone nom="Etoile" style={{ color: favoris.estEpingle(`contrat:${k.id}`) ? "#e79d00" : "var(--p-i2)" }} />
+            </button>
             <button type="button" className="var-p-icone" aria-label="Plus d'actions" aria-haspopup="menu" aria-expanded={plusOuvert} onClick={() => setPlusOuvert((o) => !o)} disabled={options.length === 0}>
               <PlainIcone nom="Points" />
             </button>
@@ -468,6 +508,11 @@ function Fiche({ k, tous, c, onValider, onArchiver }: { k: Contrat; tous: Contra
                       {x.montant_annuel !== null ? ` · ${montant(x.montant_annuel)} par an` : ""}
                     </span>
                   </Link>
+                  {c.peutArchiver ? (
+                    <button type="button" className="var-p-icone var-p-rangee-retirer" aria-label={`Archiver « ${x.intitule} »`} title="Archiver ce contrat" onClick={() => onArchiver(x)}>
+                      <PlainIcone nom="Croix" />
+                    </button>
+                  ) : null}
                 </li>
               ))}
             </ul>

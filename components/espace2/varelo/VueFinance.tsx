@@ -41,6 +41,8 @@ import { useVarelo } from "./donnees";
 import { VarCarte } from "./VarCadre";
 import { PlainIcone } from "./PlainIcone";
 import { MenuPlain, useOuvert } from "./PlainCadre";
+import { copier, exporterCsv } from "./local";
+import { useToast } from "../Toasts";
 import "./var-plain.css";
 import "./var-insights.css";
 
@@ -98,6 +100,32 @@ function Barres({ valeurs }: { valeurs: { libelle: string; valeur: number }[] })
   );
 }
 
+/* « Ask Agent » de Plain : copie le résumé de la carte pour l'assistant (presse-papier) */
+function Agent({ texte }: { texte: string }) {
+  const toast = useToast();
+  return (
+    <button type="button" className="var-n-agent" aria-label="Copier pour l'assistant" title="Copier pour l'assistant : le résumé de la carte, à coller dans l'assistant" onClick={() => void copier(texte).then((ok) => toast(ok ? "Résumé copié pour l'assistant" : "Le résumé n'a pas pu être copié.", ok ? "neutre" : "rouge"))}>
+      <PlainIcone nom="Info" />
+      <span>Copier pour l&apos;assistant</span>
+    </button>
+  );
+}
+
+/* la recherche et le téléchargement d'un rapport de Plain : filtre et export CSV des lignes affichées */
+function OutilsRapport({ recherche, setRecherche, exporter }: { recherche: string; setRecherche: (q: string) => void; exporter: () => void }) {
+  return (
+    <div className="var-n-rapport-outils">
+      <label className="var-p-recherche" style={{ width: 240 }}>
+        <PlainIcone nom="Loupe" />
+        <input type="search" placeholder="Chercher" value={recherche} onChange={(e) => setRecherche(e.target.value)} aria-label="Chercher dans le rapport" />
+      </label>
+      <button type="button" className="var-n-telecharger" aria-label="Télécharger les lignes affichées (CSV)" title="Télécharger les lignes affichées (CSV)" onClick={exporter}>
+        <PlainIcone nom="Telecharger" />
+      </button>
+    </div>
+  );
+}
+
 function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
   const [ouverte, setOuverte] = useState(true);
   return (
@@ -121,6 +149,9 @@ function Repartition({ titre, info, lignes }: { titre: string; info: string; lig
         <p className="var-n-carte-titre" title={info}>
           {titre}
           <PlainIcone nom="Info" />
+          <span className="var-n-droite">
+            <Agent texte={`${titre} (${info}) : ${lignes.slice(0, 5).map((l) => `${l.nom} ${l.texte}${l.badge ? ` (${l.badge.texte})` : ""}`).join(" ; ")}.`} />
+          </span>
         </p>
       </div>
       {lignes.length ? (
@@ -167,6 +198,16 @@ export default function VueFinance() {
   const rc = useReciproquesGroupe({ source: v.source, contexte: v.contexte, client_id: v.client_id, onFait: v.setFait });
   const ca = useCaisses({ source: v.source, contexte: v.contexte, client_id: v.client_id });
   const [societe, setSociete] = useState<string | null>(null);
+  /* la recherche de chaque rapport (Search accounts…) */
+  const [rqEncours, setRqEncours] = useState("");
+  const [rqRecip, setRqRecip] = useState("");
+  const [rqCaisses, setRqCaisses] = useState("");
+  /* « + » d'une section de Ce matin : ?nouveau=balance ouvre le dépôt d'une balance âgée */
+  const [nouveauVu, setNouveauVu] = useState(false);
+  if (!nouveauVu && params.get("nouveau") === "balance" && en.peutDeposer) {
+    setNouveauVu(true);
+    en.setDepot(true);
+  }
   const { ouvert: fOuvert, setOuvert: setFOuvert, boite: fBoite } = useOuvert<HTMLDivElement>();
   const { ouvert: dOuvert, setOuvert: setDOuvert, boite: dBoite } = useOuvert<HTMLDivElement>();
   const { ouvert: nOuvert, setOuvert: setNOuvert, boite: nBoite } = useOuvert<HTMLDivElement>();
@@ -179,6 +220,11 @@ export default function VueFinance() {
   const courants = en.courants.filter((c) => !societe || c.entite_id === societe);
   const magasins = ca.magasins.filter((m) => !societe || m.entite_id === societe);
   const reciproques = rc.liste.filter((r) => !societe || r.creancier_id === societe || r.debiteur_id === societe);
+  const q = (t: string) => t.trim().toLowerCase();
+  const encoursAffiches = en.visibles.filter((g) => !q(rqEncours) || `${g.code_groupe} ${g.nom_groupe}`.toLowerCase().includes(q(rqEncours)));
+  const recipAffichees = reciproques.filter((r) => !q(rqRecip) || `${r.creancier} ${r.debiteur}`.toLowerCase().includes(q(rqRecip)));
+  const magasinsAffiches = magasins.filter((m) => !q(rqCaisses) || `${m.magasin} ${m.societe}`.toLowerCase().includes(q(rqCaisses)));
+  const exporte = (n: number) => v.setFait(`${n} ligne${n > 1 ? "s" : ""} exportée${n > 1 ? "s" : ""} en CSV.`);
   const evolution = ca.avant ? Math.round(((ca.hier - ca.avant) / ca.avant) * 1000) / 10 : null;
   const libelleNature = nature === "client" ? "Clients" : "Fournisseurs";
   const ouvrirObjet = (id: string) => routeur.push(`${RACINE}/varelo/referentiel?objet=${encodeURIComponent(id)}&nature=${nature}`);
@@ -266,6 +312,9 @@ export default function VueFinance() {
                   <p className="var-n-carte-titre" title="Hors intragroupe, d'après la dernière balance âgée de chaque société">
                     Encours du groupe — {libelleNature.toLowerCase()}
                     <PlainIcone nom="Info" />
+                    <span className="var-n-droite">
+                      <Agent texte={`Encours du groupe (${libelleNature.toLowerCase()}) : ${montant(en.totaux.total)}, dont ${montant(en.totaux.echu)} échus et ${montant(en.totaux.plus90)} à plus de 90 jours. Par société : ${courants.map((c) => `${c.societe} ${montant(c.total)} (balance du ${dateCourte(c.arrete_le)})`).join(" ; ")}.`} />
+                    </span>
                   </p>
                   <p className="var-n-valeur">
                     {k(en.totaux.total)} <small>dont {k(en.totaux.echu)} échus</small>
@@ -278,6 +327,9 @@ export default function VueFinance() {
                   <p className="var-n-carte-titre" title="Échu depuis plus de 90 jours, hors intragroupe">
                     Échu à plus de 90 jours
                     <PlainIcone nom="Info" />
+                    <span className="var-n-droite">
+                      <Agent texte={`Échu à plus de 90 jours : ${montant(en.totaux.plus90)}. ${en.groupe.filter((g) => !g.intragroupe && g.echu_plus_90 > 0).map((g) => `${g.nom_groupe} ${montant(g.echu_plus_90)}`).join(" ; ")}.`} />
+                    </span>
                   </p>
                   <p className="var-n-valeur">
                     {k(en.totaux.plus90)} <small>{nature === "client" ? `${en.totaux.depasses} au-dessus du plafond` : `intragroupe à part : ${k(en.totaux.intragroupe)}`}</small>
@@ -290,6 +342,9 @@ export default function VueFinance() {
                   <p className="var-n-carte-titre" title="Le Z de chaque magasin, hier, pour tout le groupe">
                     Ventes des caisses hier
                     <PlainIcone nom="Info" />
+                    <span className="var-n-droite">
+                      <Agent texte={`Ventes des caisses hier : ${montant(ca.hier)} (semaine dernière ${montant(ca.avant)}). ${magasins.map((m) => `${m.magasin} ${m.hier_ttc === null ? "rien remonté" : montant(m.hier_ttc)}`).join(" ; ")}.`} />
+                    </span>
                   </p>
                   <p className="var-n-valeur">
                     {k(ca.hier)} <small>{evolution === null ? "pas de semaine dernière" : `${evolution > 0 ? "+" : ""}${evolution.toLocaleString("fr-FR")} % sur une semaine`}</small>
@@ -317,6 +372,7 @@ export default function VueFinance() {
               </p>
             ) : null}
             <div className="var-n-rapport">
+              <OutilsRapport recherche={rqEncours} setRecherche={setRqEncours} exporter={() => exporte(exporterCsv(`encours-${en.libelle.des}`, ["Code", "Nom", "Sociétés", "Encours", "Échu", "Échu > 90 j", "Plafond", "État"], encoursAffiches.map((g) => [g.code_groupe, g.nom_groupe, g.societes, g.total, g.echu, g.echu_plus_90, g.plafond, g.depasse ? "Au-dessus du plafond" : g.intragroupe ? "Intragroupe" : g.provisoire ? "Provisoire" : ""])))} />
               <div className="var-n-ligne var-n-ligne--tete" style={{ gridTemplateColumns: colonnesEncours }}>
                 <span>
                   <PlainIcone nom="Batiment" taille={14} />
@@ -330,7 +386,7 @@ export default function VueFinance() {
                 <span>État</span>
                 {nature === "client" ? <span /> : null}
               </div>
-              {en.visibles.map((g) => {
+              {encoursAffiches.map((g) => {
                 const d = en.decisionDe("relever_plafond", g.objet_id);
                 return (
                   <div key={g.objet_id} className="var-n-ligne" style={{ gridTemplateColumns: colonnesEncours }} data-vise={g.objet_id === viseObjet ? "" : undefined}>
@@ -394,6 +450,9 @@ export default function VueFinance() {
                   <p className="var-n-carte-titre" title="À traiter avant la clôture">
                     Écarts à traiter
                     <PlainIcone nom="Info" />
+                    <span className="var-n-droite">
+                      <Agent texte={`Réciproques intragroupe : ${rc.compte.ouverts} paire(s) à traiter sur ${rc.compte.paires}, ${montant(rc.compte.montant)} en jeu. ${reciproques.map((r) => `${r.creancier} → ${r.debiteur} : écart ${montant(r.ecart)} (${LIBELLE_ETAT_RECIPROQUE[r.etat].libelle})`).join(" ; ")}.`} />
+                    </span>
                   </p>
                   <p className="var-n-valeur">
                     {k(rc.compte.montant)} <small>{rc.compte.ouverts} paire{rc.compte.ouverts > 1 ? "s" : ""} sur {rc.compte.paires}</small>
@@ -407,6 +466,9 @@ export default function VueFinance() {
                   <p className="var-n-carte-titre">
                     Concordantes ou justifiées
                     <PlainIcone nom="Info" />
+                    <span className="var-n-droite">
+                      <Agent texte={`${rc.compte.concordes} paire(s) de comptes réciproques concordantes ou justifiées sur ${rc.compte.paires}.`} />
+                    </span>
                   </p>
                   <p className="var-n-valeur">
                     {rc.compte.concordes} <small>paire{rc.compte.concordes > 1 ? "s" : ""}</small>
@@ -421,6 +483,7 @@ export default function VueFinance() {
               </div>
             </div>
             <div className="var-n-rapport">
+              <OutilsRapport recherche={rqRecip} setRecherche={setRqRecip} exporter={() => exporte(exporterCsv("reciproques-affichees", ["Créancier", "Débiteur", "Créance", "Dette reconnue", "Écart", "État"], recipAffichees.map((r) => [r.creancier, r.debiteur, r.creance, r.dette, r.ecart, LIBELLE_ETAT_RECIPROQUE[r.etat].libelle])))} />
               <div className="var-n-ligne var-n-ligne--tete" style={{ gridTemplateColumns: "minmax(220px, 1.6fr) 130px 130px 120px 180px 110px" }}>
                 <span>Créancier → débiteur</span>
                 <span className="var-n-num">Créance</span>
@@ -429,7 +492,7 @@ export default function VueFinance() {
                 <span>État</span>
                 <span />
               </div>
-              {reciproques.map((r) => (
+              {recipAffichees.map((r) => (
                 <div key={`${r.creancier_id}-${r.debiteur_id}`} className="var-n-ligne" style={{ gridTemplateColumns: "minmax(220px, 1.6fr) 130px 130px 120px 180px 110px" }}>
                   <span className="var-n-cellule-nom" style={{ marginLeft: -12 }}>
                     <PlainIcone nom="Batiment" />
@@ -456,6 +519,7 @@ export default function VueFinance() {
 
           <Section titre="Ventes des caisses">
             <div className="var-n-rapport">
+              <OutilsRapport recherche={rqCaisses} setRecherche={setRqCaisses} exporter={() => exporte(exporterCsv("ventes-caisses", ["Magasin", "Société", "Hier", "Tickets hier", "Semaine dernière", "Mois en cours", "Dernier Z"], magasinsAffiches.map((m) => [m.magasin, m.societe, m.hier_ttc, m.hier_tickets, m.semaine_derniere_ttc, m.mois_ttc, m.dernier_jour])))} />
               <div className="var-n-ligne var-n-ligne--tete" style={{ gridTemplateColumns: "minmax(200px, 1.4fr) minmax(160px, 1fr) 120px 140px 130px 200px" }}>
                 <span>Magasin</span>
                 <span>Société</span>
@@ -464,7 +528,7 @@ export default function VueFinance() {
                 <span className="var-n-num">Mois en cours</span>
                 <span>État</span>
               </div>
-              {magasins.map((m) => {
+              {magasinsAffiches.map((m) => {
                 const ecart = m.hier_ttc !== null && m.semaine_derniere_ttc ? Math.round(((m.hier_ttc - m.semaine_derniere_ttc) / m.semaine_derniere_ttc) * 100) : null;
                 return (
                   <div key={`${m.entite_id}-${m.magasin}`} className="var-n-ligne" style={{ gridTemplateColumns: "minmax(200px, 1.4fr) minmax(160px, 1fr) 120px 140px 130px 200px" }}>
@@ -489,6 +553,22 @@ export default function VueFinance() {
               </div>
             </div>
           </Section>
+
+          {/* le pied « Customers helped » de Plain : depuis le début, les codes locaux rangés sous un nom du groupe */}
+          <div className="var-n-pied" aria-label="Codes rangés sous un nom du groupe">
+            <span className="var-n-pied-depuis">Depuis le début</span>
+            <h3 className="var-n-pied-titre">Codes rangés sous un nom</h3>
+            <span className="var-n-compteur" aria-label={String(codes.filter((x) => x.objet_id).length)}>
+              {String(codes.filter((x) => x.objet_id).length)
+                .padStart(3, "0")
+                .split("")
+                .map((ch, i) => (
+                  <span key={i} className="var-n-chiffre">
+                    <span>{ch}</span>
+                  </span>
+                ))}
+            </span>
+          </div>
         </div>
       </div>
 

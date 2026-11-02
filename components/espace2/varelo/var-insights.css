@@ -410,3 +410,95 @@ html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-n-badge[data-teinte="
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ——— boutons de la référence rendus utiles (02/11 au soir) ——— */
+.v2 .var.var--plain .var-n-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 6px;
+  border-radius: 6px;
+  color: var(--p-vert-icone);
+  font-size: 12px;
+  font-weight: 475;
+}
+.v2 .var.var--plain .var-n-agent svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .var.var--plain .var-n-agent span {
+  display: none;
+  color: #074022;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-n-agent span {
+  color: #b2f2c0;
+}
+.v2 .var.var--plain .var-n-agent:hover {
+  background: var(--p-f1);
+}
+.v2 .var.var--plain .var-n-agent:hover span,
+.v2 .var.var--plain .var-n-agent:focus-visible span {
+  display: inline;
+}
+.v2 .var.var--plain .var-n-telecharger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-telecharger svg {
+  width: 18px;
+  height: 18px;
+}
+.v2 .var.var--plain .var-n-telecharger:hover {
+  background: var(--p-f1);
+}
+.v2 .var.var--plain .var-n-pied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 48px 0 24px;
+}
+.v2 .var.var--plain .var-n-pied-depuis {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-pied-titre {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+}
+.v2 .var.var--plain .var-n-compteur {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+.v2 .var.var--plain .var-n-chiffre {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 35px;
+  border: 1px solid var(--p-b1);
+  border-radius: 4px;
+  background: linear-gradient(var(--p-f1) 50%, var(--p-fond) 50%);
+  font-size: 20px;
+  line-height: 20px;
+}
+.v2 .var.var--plain .var-n-chiffre::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0.5px;
+  background: var(--p-b1);
+}

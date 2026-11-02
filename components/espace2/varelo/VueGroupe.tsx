@@ -32,9 +32,11 @@ import { useSearchParams } from "next/navigation";
 import { dateCourte, montant } from "@/components/espace/format";
 import { DialogueBalanceGenerale, DialogueObjectif, useGroupePage } from "@/components/espace/varelo/GroupePage";
 import type { PageSociete } from "@/components/espace/varelo/groupe";
+import { RACINE } from "../modules";
 import { useVarelo } from "./donnees";
 import { VarCarte } from "./VarCadre";
 import { VarIcone, type NomVarIcone } from "./VarIcone";
+import { exporterCsv, useFavoris } from "./local";
 import "./var-board.css";
 import "./var-init.css";
 
@@ -63,6 +65,17 @@ export default function VueGroupe() {
   const [pole, setPole] = useState<string | null>(null);
   const [masquees, setMasquees] = useState<Colonne[]>([]);
   const [menu, setMenu] = useState<"filtre" | "affichage" | null>(null);
+  /* cases à cocher : sélection multiple, puis actions groupées */
+  const [selection, setSelection] = useState<string[]>([]);
+  /* le troisième rond (« Open details ») : le volet des totaux des lignes affichées ou choisies */
+  const [volet, setVolet] = useState(false);
+  const favoris = useFavoris();
+  /* « + » d'une section de Ce matin : ?nouveau=balance ouvre le dépôt d'une balance générale */
+  const [nouveauVu, setNouveauVu] = useState(false);
+  if (!nouveauVu && params.get("nouveau") === "balance" && g.peutDeposer) {
+    setNouveauVu(true);
+    g.setDepot(true);
+  }
   const [tri, setTri] = useState<{ col: "nom" | "statut" | "urgence" | "cible" | "sante"; sens: 1 | -1 } | null>(null);
 
   const viseSociete = params.get("societe");
@@ -168,14 +181,26 @@ export default function VueGroupe() {
         <span />
       </>
     );
+    const coche = (
+      <input
+        type="checkbox"
+        className="var-i-coche"
+        aria-label={`Choisir ${l.societe}`}
+        checked={selection.includes(l.entite_id)}
+        data-visible={selection.length ? "" : undefined}
+        onChange={(e) => setSelection((x) => (e.target.checked ? [...x, l.entite_id] : x.filter((y) => y !== l.entite_id)))}
+      />
+    );
     return g.peutObjectif ? (
-      <li key={l.entite_id}>
+      <li key={l.entite_id} className="var-i-li">
+        {coche}
         <button type="button" className="var-i-ligne" data-vise={vise(l) ? "" : undefined} aria-label={`${l.societe} : régler ses objectifs`} onClick={() => g.setObjectif(l)}>
           {contenu}
         </button>
       </li>
     ) : (
-      <li key={l.entite_id}>
+      <li key={l.entite_id} className="var-i-li">
+        {coche}
         <div className="var-i-ligne" data-vise={vise(l) ? "" : undefined}>
           {contenu}
         </div>
@@ -262,10 +287,14 @@ export default function VueGroupe() {
                 </div>
               ) : null}
             </span>
+            <button type="button" className="var-rond" aria-pressed={volet} aria-label={volet ? "Fermer le volet des totaux" : "Ouvrir le volet des totaux"} title={volet ? "Fermer le volet des totaux" : "Totaux des sociétés affichées (ou choisies)"} onClick={() => setVolet((x) => !x)}>
+              <VarIcone nom="Volet" />
+            </button>
           </div>
         </div>
       </header>
 
+      <div className="var-i-cadre">
       <div className="var-defile var-i-defile">
         <div className="var-i-tete" role="row">
           <span />
@@ -389,6 +418,75 @@ export default function VueGroupe() {
           </ul>
         )}
       </div>
+
+      {volet ? (() => {
+        const base = selection.length ? g.lignes.filter((l) => selection.includes(l.entite_id)) : lignes;
+        const somme = (f: (l: PageSociete) => number) => base.reduce((x, l) => x + f(l), 0);
+        const champs: [string, string][] = [
+          ["Sociétés", String(base.length)],
+          ["Ventes à date", montant(somme((l) => l.ventes))],
+          ["Résultat", montant(somme((l) => l.resultat))],
+          ["Trésorerie", montant(somme((l) => l.tresorerie))],
+          ["Sous le plancher", String(base.filter((l) => l.sous_plancher).length)],
+          ["Écart sur l'objectif", montant(somme((l) => l.ecart_objectif ?? 0))],
+          ["Balance la plus ancienne", base.length ? `${Math.max(...base.map((l) => l.age_jours))} jours` : "–"],
+        ];
+        return (
+          <aside className="var-b-volet" aria-label="Totaux">
+            <p className="var-b-volet-titre">{selection.length ? "Totaux des sociétés choisies" : "Totaux des sociétés affichées"}</p>
+            <dl className="var-b-volet-champs">
+              {champs.map(([k, x]) => (
+                <div key={k}>
+                  <dt>{k}</dt>
+                  <dd>{x}</dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        );
+      })() : null}
+      </div>
+
+      {selection.length ? (
+        <div className="var-i-barre" role="toolbar" aria-label="Actions sur les sociétés choisies">
+          <span>
+            {selection.length} choisie{selection.length > 1 ? "s" : ""}
+          </span>
+          {selection.length === 1 && g.peutObjectif ? (
+            <button type="button" className="var-menu-option" onClick={() => { const l = g.lignes.find((x) => x.entite_id === selection[0]); if (l) g.setObjectif(l); }}>
+              <VarIcone nom="Write" />
+              Objectifs…
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="var-menu-option"
+            onClick={() => {
+              const ch = g.lignes.filter((l) => selection.includes(l.entite_id));
+              const n = exporterCsv("groupe-societes", ["Société", "Pôle", "Balance au", "Ventes", "Résultat", "Trésorerie", "Plancher", "Objectif à date", "Écart sur l'objectif", "Écart N-1 (%)"], ch.map((l) => [l.societe, l.pole, l.arrete_le, l.ventes, l.resultat, l.tresorerie, l.tresorerie_plancher, l.objectif_a_date, l.ecart_objectif, l.ecart_n1_pct]));
+              v.setFait(`${n} société${n > 1 ? "s" : ""} exportée${n > 1 ? "s" : ""} en CSV.`);
+            }}
+          >
+            <VarIcone nom="Page" />
+            Exporter en CSV
+          </button>
+          <button
+            type="button"
+            className="var-menu-option"
+            onClick={() => {
+              const n = favoris.ajouter(g.lignes.filter((x) => selection.includes(x.entite_id)).map((l) => ({ cle: `societe:${l.entite_id}`, libelle: l.societe, href: `${RACINE}/varelo/groupe?societe=${encodeURIComponent(l.entite_id)}`, genre: "société" })));
+              v.setFait(n ? `${n} société${n > 1 ? "s" : ""} épinglée${n > 1 ? "s" : ""} dans Ce matin.` : "Ces sociétés sont déjà épinglées dans Ce matin.");
+            }}
+          >
+            <VarIcone nom="Etoile" />
+            Épingler dans Ce matin
+          </button>
+          <button type="button" className="var-menu-option" onClick={() => setSelection([])}>
+            <VarIcone nom="Points" />
+            Effacer la sélection
+          </button>
+        </div>
+      ) : null}
 
       {g.objectif ? <DialogueObjectif l={g.objectif} onFermer={() => g.setObjectif(null)} regler={g.regler} onFait={v.setFait} /> : null}
       <DialogueBalanceGenerale ouvert={g.depot} onFermer={() => g.setDepot(false)} societes={societes} deposer={g.deposer} onFait={v.setFait} />

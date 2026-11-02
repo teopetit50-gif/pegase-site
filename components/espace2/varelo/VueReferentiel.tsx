@@ -43,10 +43,19 @@ import { useVarelo } from "./donnees";
 import { VarCarte } from "./VarCadre";
 import { VarIcone, type NomVarIcone } from "./VarIcone";
 import { Confirmer, type Demande } from "./Confirmer";
+import { copier, exporterCsv, useFavoris } from "./local";
+import { useToast } from "../Toasts";
 import "./var-attio.css";
 
 const ICI = `${RACINE}/varelo/referentiel`;
 type Vue = Nature | "lots" | "decisions";
+type ColonneA = "rattachement" | "codes" | "societes" | "maj";
+const COLONNES_A: { cle: ColonneA; libelle: string; largeur: number }[] = [
+  { cle: "rattachement", libelle: "Rattachement", largeur: 215 },
+  { cle: "codes", libelle: "Codes locaux", largeur: 288 },
+  { cle: "societes", libelle: "Sociétés", largeur: 310 },
+  { cle: "maj", libelle: "Mis à jour", largeur: 250 },
+];
 const majuscule = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const ICONE_NATURE: Record<Nature, NomVarIcone> = { fournisseur: "Box", client: "Users", article: "Cart", site: "Factory" };
 const initiales = (nom: string) =>
@@ -66,7 +75,10 @@ export default function VueReferentiel() {
   const vueParam = params.get("vue");
   const donnees = v.donnees;
   const [confirmer, setConfirmer] = useState<Demande | null>(null);
-  const [menu, setMenu] = useState<"vue" | "reglages" | "export" | null>(null);
+  const [menu, setMenu] = useState<"vue" | "reglages" | "export" | "plus" | null>(null);
+  /* « View settings » : les colonnes affichées */
+  const [masquees, setMasquees] = useState<ColonneA[]>([]);
+  const toast = useToast();
   const [filtre, setFiltre] = useState(false);
   const vue: Vue = vueParam === "lots" ? "lots" : vueParam === "decisions" ? "decisions" : v.nature;
 
@@ -133,10 +145,50 @@ export default function VueReferentiel() {
             )}
           </span>
           <span className="var-a-pousse" />
-          <Link href={`${RACINE}/validations`} className="var-a-bouton">
-            <VarIcone nom="Triage" />
-            File de validation
+          <button type="button" className="var-a-lien-tete" onClick={() => void copier(window.location.href).then((ok) => toast(ok ? "Lien copié" : "Le lien n'a pas pu être copié.", ok ? "neutre" : "rouge"))}>
+            Partager
+          </button>
+          <Link href={`${RACINE}/notes`} className="var-a-bouton var-a-bouton--icone var-a-bouton--nu" aria-label="Notes de l'équipe" title="Notes de l'équipe">
+            <VarIcone nom="Comment" />
           </Link>
+          <Link href={`${RACINE}/formation`} className="var-a-bouton var-a-bouton--icone var-a-bouton--nu" aria-label="Aide" title="Aide : la formation">
+            <VarIcone nom="Inbox" />
+          </Link>
+          <div style={{ position: "relative" }} data-var-menu="">
+            <button type="button" className="var-a-bouton var-a-bouton--icone var-a-bouton--nu" aria-label="Plus" aria-haspopup="menu" aria-expanded={menu === "plus"} onClick={() => setMenu(menu === "plus" ? null : "plus")}>
+              <VarIcone nom="Points" />
+            </button>
+            {menu === "plus" ? (
+              <div className="var-a-menu" role="menu" aria-label="Plus" style={{ top: 32, right: 0 }}>
+                <Link href={`${RACINE}/validations`} role="menuitem" className="var-a-menu-option" onClick={() => setMenu(null)}>
+                  <VarIcone nom="Triage" />
+                  File de validation
+                </Link>
+                <Link href={`${RACINE}/varelo/sources`} role="menuitem" className="var-a-menu-option" onClick={() => setMenu(null)}>
+                  <VarIcone nom="Roue" />
+                  Sources et structure
+                </Link>
+                <Link href={`${RACINE}/varelo?ancien=1`} role="menuitem" className="var-a-menu-option" onClick={() => setMenu(null)}>
+                  <VarIcone nom="Archive" />
+                  Ouvrir l&apos;ancien écran
+                </Link>
+              </div>
+            ) : null}
+          </div>
+          <button
+            type="button"
+            className="var-a-bouton"
+            title="Copier pour l'assistant : le résumé de ce que vous regardez"
+            onClick={() => {
+              const texte = objet
+                ? `${objet.code_groupe} ${objet.nom_groupe} (${LIBELLE_NATURE[objet.nature].un}) : ${(v.codesParObjet.get(objet.id) ?? []).map((c) => `${c.code_local} « ${c.nom_local} » chez ${c.societe}`).join(" ; ")}.`
+                : `${libelleVue} : ${v.objets.length} objets, ${v.compteurs.codes} codes locaux, ${v.compteurs.lots} paires à valider. ${v.objets.slice(0, 20).map((o) => `${o.code_groupe} ${o.nom_groupe}`).join(" ; ")}.`;
+              void copier(texte).then((ok) => toast(ok ? "Résumé copié pour l'assistant" : "Le résumé n'a pas pu être copié.", ok ? "neutre" : "rouge"));
+            }}
+          >
+            <VarIcone nom="Chat" />
+            Copier pour l&apos;assistant
+          </button>
         </header>
 
         {objet && donnees ? (
@@ -173,6 +225,25 @@ export default function VueReferentiel() {
                   </div>
                 ) : null}
               </div>
+              {vue !== "lots" && vue !== "decisions" ? (
+                <div style={{ position: "relative" }} data-var-menu="">
+                  <button type="button" className="var-a-bouton" aria-haspopup="menu" aria-expanded={menu === "reglages"} onClick={() => setMenu(menu === "reglages" ? null : "reglages")}>
+                    <VarIcone nom="Affichage" />
+                    Réglages de la vue
+                    <VarIcone nom="Chevron" className="var-a-chevron" style={{ transform: "rotate(90deg)" }} />
+                  </button>
+                  {menu === "reglages" ? (
+                    <div className="var-a-menu" role="menu" aria-label="Colonnes affichées" style={{ top: 32, left: 0 }}>
+                      {COLONNES_A.map((c) => (
+                        <button key={c.cle} type="button" role="menuitemcheckbox" aria-checked={!masquees.includes(c.cle)} className="var-a-menu-option" onClick={() => setMasquees((m) => (m.includes(c.cle) ? m.filter((x) => x !== c.cle) : [...m, c.cle]))}>
+                          {c.libelle}
+                          {!masquees.includes(c.cle) ? <span className="var-a-menu-coche">✓</span> : null}
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               <span className="var-a-pousse" />
               <div style={{ position: "relative" }} data-var-menu="">
                 <button type="button" className="var-a-bouton" aria-haspopup="menu" aria-expanded={menu === "export"} onClick={() => setMenu(menu === "export" ? null : "export")}>
@@ -226,7 +297,7 @@ export default function VueReferentiel() {
                 )
               ) : null}
             </div>
-            {vue === "lots" || vue === "decisions" ? <GrilleLots decisions={vue === "decisions"} /> : <GrilleObjets />}
+            {vue === "lots" || vue === "decisions" ? <GrilleLots decisions={vue === "decisions"} /> : <GrilleObjets masquees={masquees} />}
           </>
         )}
       </div>
@@ -236,33 +307,77 @@ export default function VueReferentiel() {
 }
 
 /* ——— la grille des objets (People) ——— */
-function GrilleObjets() {
+function GrilleObjets({ masquees }: { masquees: ColonneA[] }) {
   const v = useVarelo();
+  const toast = useToast();
+  const favoris = useFavoris();
   const lien = (o: Objet) => `${ICI}?objet=${encodeURIComponent(o.id)}&nature=${o.nature}`;
   const c = v.compteurs;
+  const montre = (k: ColonneA) => !masquees.includes(k);
+  const gabarit = ["250px", ...COLONNES_A.filter((k) => montre(k.cle)).map((k) => `${k.largeur}px`)].join(" ");
+  /* cases à cocher : sélection multiple, puis actions groupées */
+  const [selection, setSelection] = useState<string[]>([]);
+  const [confirmer, setConfirmer] = useState<Demande | null>(null);
+  const choisis = v.objets.filter((o) => selection.includes(o.id));
+  const tousCoches = v.objets.length > 0 && selection.length === v.objets.length;
+  const fusionner = () => {
+    const [cible, ...autres] = choisis;
+    setConfirmer({
+      titre: `Fusionner ${autres.length} objet${autres.length > 1 ? "s" : ""} dans ${cible.code_groupe}`,
+      texte: `${autres.map((o) => `${o.code_groupe} ${o.nom_groupe}`).join(", ")} ${autres.length > 1 ? "passent" : "passe"} sous ${cible.code_groupe} ${cible.nom_groupe}. Chaque fusion part en proposition au référent données, qui la décide dans la file de validation.`,
+      bouton: "Proposer les fusions",
+      faire: async () => {
+        let n = 0;
+        for (const o of autres) {
+          try {
+            await v.actions.proposer("fusionner", { objet_source: o.id, objet_cible: cible.id }, "Fusion proposée depuis la sélection du référentiel");
+            n++;
+          } catch (e) {
+            toast(`${o.code_groupe} : ${e instanceof Error ? e.message : "la fusion n'a pas pu être proposée."}`, "rouge");
+          }
+        }
+        if (n) v.setFait(`${n} fusion${n > 1 ? "s" : ""} proposée${n > 1 ? "s" : ""} vers ${cible.code_groupe} : elles attendent la décision du référent données.`);
+        setSelection([]);
+      },
+    });
+  };
   return (
     <div className="var-a-grille" role="table" aria-label={`${majuscule(LIBELLE_NATURE[v.nature].des)} du groupe`}>
-      <div className="var-a-ligne var-a-ligne--tete" role="row">
+      <div className="var-a-ligne var-a-ligne--tete" role="row" style={{ gridTemplateColumns: gabarit }}>
         <span className="var-a-cellule--premiere" role="columnheader">
-          <span className="var-a-case" aria-hidden="true" />
+          <input type="checkbox" className="var-a-case" aria-label="Tout choisir" checked={tousCoches} onChange={(e) => setSelection(e.target.checked ? v.objets.map((o) => o.id) : [])} />
           {majuscule(LIBELLE_NATURE[v.nature].un)} du groupe
+          <span className="var-a-pousse" />
+          {v.peutGerer ? (
+            <Link href={`${RACINE}/varelo/sources`} className="var-a-plus" aria-label="Déposer l'export d'une société" title="Ajouter des codes : déposer l'export d'une société">
+              <VarIcone nom="Plus" />
+            </Link>
+          ) : null}
         </span>
-        <span role="columnheader">
-          <VarIcone nom="AddRelation" />
-          Rattachement
-        </span>
-        <span role="columnheader">
-          <VarIcone nom="Label" />
-          Codes locaux
-        </span>
-        <span role="columnheader">
-          <VarIcone nom="Factory" />
-          Sociétés
-        </span>
-        <span role="columnheader" className="var-a-ajout">
-          <VarIcone nom="Calendar" />
-          Mis à jour
-        </span>
+        {montre("rattachement") ? (
+          <span role="columnheader">
+            <VarIcone nom="AddRelation" />
+            Rattachement
+          </span>
+        ) : null}
+        {montre("codes") ? (
+          <span role="columnheader">
+            <VarIcone nom="Label" />
+            Codes locaux
+          </span>
+        ) : null}
+        {montre("societes") ? (
+          <span role="columnheader">
+            <VarIcone nom="Factory" />
+            Sociétés
+          </span>
+        ) : null}
+        {montre("maj") ? (
+          <span role="columnheader" className="var-a-ajout">
+            <VarIcone nom="Calendar" />
+            Mis à jour
+          </span>
+        ) : null}
       </div>
       {v.source === "reelle" && !v.reel ? (
         <p className="var-a-cellule var-a-vide">Lecture du référentiel…</p>
@@ -277,48 +392,101 @@ function GrilleObjets() {
           const societes = Array.from(new Set(codes.map((x) => x.societe)));
           const etat = attente ? { libelle: `${attente} à valider`, couleur: "#F97514" } : o.intragroupe ? { libelle: "Intragroupe", couleur: "#266DF0" } : o.nom_origine === "humain" ? { libelle: "Nom choisi", couleur: "#00D17E" } : codes.length > 1 ? { libelle: "Rattaché", couleur: "#00D17E" } : { libelle: "Seul", couleur: "#77797C" };
           return (
-            <div key={o.id} className="var-a-ligne" role="row">
+            <div key={o.id} className="var-a-ligne" role="row" style={{ gridTemplateColumns: gabarit }} data-choisi={selection.includes(o.id) ? "" : undefined}>
               <span className="var-a-cellule var-a-cellule--premiere" role="cell">
-                <span className="var-a-case" aria-hidden="true" />
+                <input type="checkbox" className="var-a-case" aria-label={`Choisir ${o.nom_groupe}`} checked={selection.includes(o.id)} onChange={(e) => setSelection((x) => (e.target.checked ? [...x, o.id] : x.filter((y) => y !== o.id)))} />
                 <Link href={lien(o)} scroll={false} className="var-a-pastille" title={`${o.code_groupe} ${o.nom_groupe}`}>
                   <span className="var-a-avatar">{initiales(o.nom_groupe)}</span>
                   <span>{o.nom_groupe}</span>
                 </Link>
               </span>
-              <span className="var-a-cellule" role="cell">
-                <span className="var-a-force" style={{ ["--var-force" as string]: etat.couleur }}>
-                  {etat.libelle}
+              {montre("rattachement") ? (
+                <span className="var-a-cellule" role="cell">
+                  <span className="var-a-force" style={{ ["--var-force" as string]: etat.couleur }}>
+                    {etat.libelle}
+                  </span>
                 </span>
-              </span>
-              <span className="var-a-cellule" role="cell" title={codes.map((x) => `${x.code_local} (${x.societe})`).join(", ")}>
-                <span className="var-a-mono">{o.code_groupe}</span>
-                {codes.length ? `${codes.length} code${codes.length > 1 ? "s" : ""} · ${codes.map((x) => x.code_local).join(", ")}` : <span className="var-a-vide">aucun code</span>}
-              </span>
-              <span className="var-a-cellule" role="cell">
-                {societes.length ? societes.join(" · ") : <span className="var-a-vide">Aucune société</span>}
-              </span>
-              <span className="var-a-cellule" role="cell">
-                <span className="var-a-vide">{relatif(o.maj_le)}</span>
-              </span>
+              ) : null}
+              {montre("codes") ? (
+                <span className="var-a-cellule" role="cell" title={codes.map((x) => `${x.code_local} (${x.societe})`).join(", ")}>
+                  <span className="var-a-mono">{o.code_groupe}</span>
+                  {codes.length ? `${codes.length} code${codes.length > 1 ? "s" : ""} · ${codes.map((x) => x.code_local).join(", ")}` : <span className="var-a-vide">aucun code</span>}
+                </span>
+              ) : null}
+              {montre("societes") ? (
+                <span className="var-a-cellule" role="cell">
+                  {societes.length ? societes.join(" · ") : <span className="var-a-vide">Aucune société</span>}
+                </span>
+              ) : null}
+              {montre("maj") ? (
+                <span className="var-a-cellule" role="cell">
+                  <span className="var-a-vide">{relatif(o.maj_le)}</span>
+                </span>
+              ) : null}
             </div>
           );
         })
       )}
-      <div className="var-a-ligne var-a-ligne--pied" role="row">
+      <div className="var-a-ligne var-a-ligne--pied" role="row" style={{ gridTemplateColumns: gabarit }}>
         <span className="var-a-cellule--premiere">
           <strong>{v.objets.length}</strong> objet{v.objets.length > 1 ? "s" : ""}
         </span>
-        <span>
-          <strong>{c.taux === null ? "—" : pourcent(Math.round(c.taux * 1000) / 10)}</strong> rattachés
-        </span>
-        <span>
-          <strong>{c.codes}</strong> codes locaux{c.a_traiter ? ` · ${c.a_traiter} à traiter au prochain passage` : ""}
-        </span>
-        <span>
-          <strong>{c.lots}</strong> paire{c.lots > 1 ? "s" : ""} à valider · {v.lotsOuverts} lot{v.lotsOuverts > 1 ? "s" : ""} dans la file
-        </span>
-        <span />
+        {montre("rattachement") ? (
+          <span>
+            <strong>{c.taux === null ? "—" : pourcent(Math.round(c.taux * 1000) / 10)}</strong> rattachés
+          </span>
+        ) : null}
+        {montre("codes") ? (
+          <span>
+            <strong>{c.codes}</strong> codes locaux{c.a_traiter ? ` · ${c.a_traiter} à traiter au prochain passage` : ""}
+          </span>
+        ) : null}
+        {montre("societes") ? (
+          <span>
+            <strong>{c.lots}</strong> paire{c.lots > 1 ? "s" : ""} à valider · {v.lotsOuverts} lot{v.lotsOuverts > 1 ? "s" : ""} dans la file
+          </span>
+        ) : null}
+        {montre("maj") ? <span /> : null}
       </div>
+      {selection.length ? (
+        <div className="var-a-barre" role="toolbar" aria-label="Actions sur les objets choisis">
+          <span>
+            {selection.length} choisi{selection.length > 1 ? "s" : ""}
+          </span>
+          {choisis.length >= 2 && v.actions.contexte && v.actions.contexte.role !== "lecteur" ? (
+            <button type="button" className="var-a-bouton" onClick={fusionner}>
+              <VarIcone nom="AddRelation" />
+              Fusionner dans {choisis[0].code_groupe}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="var-a-bouton"
+            onClick={() => {
+              const n = exporterCsv(`referentiel-${LIBELLE_NATURE[v.nature].des}-selection`, ["code_groupe", "nom_groupe", "societe", "code_local", "nom_local", "etat"], choisis.flatMap((o) => (v.codesParObjet.get(o.id) ?? []).map((x) => [o.code_groupe, o.nom_groupe, x.societe, x.code_local, x.nom_local, x.etat])));
+              v.setFait(`${n} code${n > 1 ? "s" : ""} exporté${n > 1 ? "s" : ""} en CSV.`);
+            }}
+          >
+            <VarIcone nom="Page" />
+            Exporter en CSV
+          </button>
+          <button
+            type="button"
+            className="var-a-bouton"
+            onClick={() => {
+              const n = favoris.ajouter(choisis.map((o) => ({ cle: `objet:${o.id}`, libelle: `${o.code_groupe} ${o.nom_groupe}`, href: lien(o), genre: LIBELLE_NATURE[o.nature].un })));
+              v.setFait(n ? `${n} objet${n > 1 ? "s" : ""} épinglé${n > 1 ? "s" : ""} dans Ce matin.` : "Ces objets sont déjà épinglés dans Ce matin.");
+            }}
+          >
+            <VarIcone nom="Etoile" />
+            Épingler
+          </button>
+          <button type="button" className="var-a-bouton" onClick={() => setSelection([])}>
+            Effacer
+          </button>
+        </div>
+      ) : null}
+      <Confirmer demande={confirmer} onFermer={() => setConfirmer(null)} />
     </div>
   );
 }
@@ -442,6 +610,7 @@ function FicheObjet({ objet }: { objet: Objet }) {
     }
   }, [fait, setFait, toast]);
   const [onglet, setOnglet] = useState<"apercu" | "codes" | "propositions">("apercu");
+  const favoris = useFavoris();
   const societes = useMemo(() => Array.from(new Set(h.codes.map((c) => c.societe))), [h.codes]);
   const decisions = useMemo(
     () =>
@@ -510,6 +679,21 @@ function FicheObjet({ objet }: { objet: Objet }) {
         <div className="var-a-identite">
           <span className="var-a-avatar">{initiales(objet.nom_groupe)}</span>
           <h2>{objet.nom_groupe}</h2>
+          {h.peutProposer ? (
+            <button type="button" className="var-a-bouton var-a-bouton--icone var-a-bouton--nu" aria-label="Proposer un nom" title="Proposer un nom pour le groupe" onClick={() => h.ouvrir({ genre: "renommer" })}>
+              <VarIcone nom="Write" />
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="var-a-bouton var-a-bouton--icone var-a-bouton--nu"
+            aria-pressed={favoris.estEpingle(`objet:${objet.id}`)}
+            aria-label={favoris.estEpingle(`objet:${objet.id}`) ? "Retirer des épinglés" : "Épingler dans Ce matin"}
+            title={favoris.estEpingle(`objet:${objet.id}`) ? "Retirer des épinglés" : "Épingler dans Ce matin"}
+            onClick={() => favoris.basculer({ cle: `objet:${objet.id}`, libelle: `${objet.code_groupe} ${objet.nom_groupe}`, href: `${ICI}?objet=${encodeURIComponent(objet.id)}&nature=${objet.nature}`, genre: LIBELLE_NATURE[objet.nature].un })}
+          >
+            <VarIcone nom="Etoile" style={favoris.estEpingle(`objet:${objet.id}`) ? { color: "#f2c94c" } : undefined} />
+          </button>
         </div>
         {h.peutProposer ? (
           <div className="var-a-actions">
@@ -560,6 +744,9 @@ function FicheObjet({ objet }: { objet: Objet }) {
               <dd className={h.intragroupe ? undefined : "var-a-vide"}>{h.intragroupe ?? "Non"}</dd>
             </div>
           </dl>
+          <button type="button" className="var-a-voir-tout" onClick={() => setOnglet("codes")}>
+            Voir tous les codes
+          </button>
         </div>
         <div className="var-a-bloc">
           <p className="var-a-bloc-titre">
@@ -682,6 +869,12 @@ function FicheObjet({ objet }: { objet: Objet }) {
               {codesListe}
               <p className="var-a-section-titre">
                 Propositions <span className="var-a-compteur">{h.attente.length}</span>
+                <span className="var-a-pousse" />
+                {h.peutProposer ? (
+                  <button type="button" className="var-a-plus" aria-label="Proposer un nom" title="Proposer une correction : un nom pour le groupe" onClick={() => h.ouvrir({ genre: "renommer" })}>
+                    <VarIcone nom="Plus" />
+                  </button>
+                ) : null}
               </p>
               {propositionsListe}
             </>
