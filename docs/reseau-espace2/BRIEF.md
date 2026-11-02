@@ -166,22 +166,18 @@ côte juraient. **On harmonise** :
 ### Ce qui jure encore
 
 *Mis à jour le 02/11 au soir, après la réintégration d'Opportunités
-(commit 59835427). Fil, Membres et Messages sont en cours de reprise sur
-la DA des moteurs (demande de Teo) ; cette liste se refera une fois les
-quatre réintégrées.*
+(59835427) et de Membres (a4f27808). Le Fil et les Messages sont en cours
+de reprise sur la DA des moteurs (demande de Teo) ; cette liste se refera
+une fois les quatre réintégrées.*
 
-- Opportunités a maintenant la DA des moteurs (kit `lin/`, barre du titre
-  de 44 px, colonnes de Linear). Les trois autres pages gardent encore
-  l'habillage d'avant : la rubrique ne sera homogène qu'après leur
-  reprise.
-- Le Fil et les Messages n'ont pas d'en-tête visible. Membres a un
-  en-tête de page (surtitre, titre 22/29), Opportunités la barre du titre
-  des moteurs.
+- Opportunités et Membres ont maintenant la DA des moteurs : kit `lin/`,
+  barre du titre de 44 px, liste « Projects » et page de projet de Linear
+  pour Membres, colonnes de Linear pour Opportunités. Le Fil et les
+  Messages gardent encore l'habillage d'avant : la rubrique ne sera
+  homogène qu'après leur reprise.
 - L'état vide du Fil tient dans la colonne du fil (moins large, décalé à
   gauche). Celui des Messages est centré dans une page étroite. Même
   contenu, mais pas la même largeur.
-- Opportunités occupe toute la largeur (kanban). Membres reste dans la
-  page de 1248 px.
 - Dans la liste des Messages, le nom d'un interlocuteur ouvre la
   conversation, pas la fiche. La fiche est à un clic, depuis l'en-tête de
   la conversation.
