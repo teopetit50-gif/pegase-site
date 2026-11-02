@@ -1,0 +1,572 @@
+/* ══════════════════════════════════════════════════════════════════════
+   VARELO, Sources et structure — Linear, Settings › Integrations
+   (catalogue et page d'une intégration), au 1:1 (02/11/2026). Relevé :
+   docs/refonte-metiers/releves/linear-integrations.md. Préfixe var-g-.
+
+   Repères (px CSS, depuis le bord de la carte, 1440) : colonne de 640
+   centrée ; titre 24/500/32 à 64 ; recherche 640×44 à 166 ; carrousel
+   640×384 à 258, rayon 6 ; onglets de 27 à 17 dessous ; sections à 48,
+   sur-titre 11/500 capitales, grille de 3 × 202,66, écart 16 ; carte de
+   156, rayon 8, p 16, logo 36 rayon 6, nom 13/500, texte 12/450 sur 4
+   lignes au plus.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .var .var-g,
+.v2 .var .var-g-page,
+.v2 .var .var-g-retour {
+  --g-carte: lch(9.232 0.85 272);
+  --g-carte-survol: lch(11.5 0.85 272);
+  --g-anneau: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --g-texte-carte: lch(63.304 1.425 272);
+  --g-bord-champ: lch(25.68 1.93 272);
+  --g-pastille: lch(100 0 282);
+  --g-accent: lch(53 52.26 286.91);
+  --g-filet: lch(100 0 0 / 0.083);
+  --g-montre: lch(16.706 0.979 272);
+}
+.v2 .var .var-g {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 0 64px;
+}
+html[data-v2-theme="light"] .v2 .var .var-g,
+html[data-v2-theme="light"] .v2 .var .var-g-page,
+html[data-v2-theme="light"] .v2 .var .var-g-retour {
+  --g-carte: lch(100 0 282);
+  --g-carte-survol: lch(96.5 0 282);
+  --g-anneau: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --g-texte-carte: lch(40 1 282);
+  --g-bord-champ: lch(84.44 0 282);
+  --g-filet: lch(0 0 0 / 0.088);
+  --g-montre: lch(94.5 0 282);
+}
+.v2 .var .var-g-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 16px;
+  margin-bottom: 44px;
+}
+.v2 .var .var-g-titre {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-sous {
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--var-t3);
+}
+.v2 .var .var-g-recherche {
+  position: relative;
+  display: block;
+  height: 44px;
+  margin-bottom: 48px;
+  border: 1px solid var(--g-bord-champ);
+  border-radius: 8px;
+}
+.v2 .var .var-g-recherche svg {
+  position: absolute;
+  left: 16px;
+  top: 13px;
+  width: 16px;
+  height: 16px;
+  color: var(--var-t3);
+  pointer-events: none;
+}
+.v2 .var .var-g-recherche input {
+  width: 100%;
+  height: 42px;
+  padding: 12px 12px 12px 40px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--var-t1);
+  outline: 0;
+}
+.v2 .var .var-g-recherche input::placeholder {
+  color: var(--var-t3);
+}
+
+/* ——— carrousel ——— */
+.v2 .var .var-g-vitrine {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 640 / 384;
+  overflow: hidden;
+  border: 0.5px solid var(--var-carte-bord);
+  border-radius: 6px;
+  background: var(--g-montre);
+  text-align: left;
+}
+.v2 .var .var-g-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 2.5px 5px 2px;
+  border-radius: 8px;
+  background: var(--g-pastille);
+  box-shadow: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16.5px;
+  text-transform: uppercase;
+  color: lch(9.794 0 282);
+}
+.v2 .var .var-g-vitrine-pied {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 88px;
+  padding: 16px;
+}
+.v2 .var .var-g-vitrine-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+  background: var(--g-pastille);
+  color: lch(9.794 0 282);
+  box-shadow: lch(0 0 0 / 0.02) 0 6px 18px, lch(0 0 0 / 0.04) 0 3px 9px, lch(0 0 0 / 0.04) 0 1px 1px;
+}
+.v2 .var .var-g-vitrine-logo svg {
+  width: 28px;
+  height: 28px;
+}
+.v2 .var .var-g-vitrine-nom {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-vitrine-texte {
+  display: block;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-pastilles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 17px;
+}
+.v2 .var .var-g-pastilles-defile {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .var .var-g-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 27px;
+  padding: 2px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--var-t1);
+  opacity: 0.6;
+  white-space: nowrap;
+}
+.v2 .var .var-g-onglet[aria-selected="true"] {
+  opacity: 1;
+}
+.v2 .var .var-g-onglet svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ——— sections du catalogue ——— */
+.v2 .var .var-g-section {
+  margin-top: 48px;
+}
+.v2 .var .var-g-surtitre {
+  padding-left: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: normal;
+  text-transform: uppercase;
+  color: var(--var-t3);
+}
+.v2 .var .var-g-grille {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.v2 .var .var-g-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 156px;
+  padding: 16px;
+  border-radius: 8px;
+  background: var(--g-carte);
+  box-shadow: var(--g-anneau);
+  text-align: left;
+  transition: all 0.15s;
+}
+.v2 .var .var-g-carte:hover {
+  background: var(--g-carte-survol);
+}
+.v2 .var .var-g-carte-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  min-width: 0;
+}
+.v2 .var .var-g-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--var-equipe-fond);
+  color: var(--var-equipe);
+  font-size: 13px;
+  font-weight: 600;
+}
+.v2 .var .var-g-logo svg {
+  width: 20px;
+  height: 20px;
+}
+.v2 .var .var-g-nom {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--var-t1);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var .var-g-texte {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: normal;
+  color: var(--g-texte-carte);
+}
+.v2 .var .var-g-chevron {
+  display: none;
+}
+.v2 .var .var-g-vide {
+  padding: 16px;
+  font-size: 13px;
+  color: var(--var-t3);
+}
+
+/* ——— page d'une intégration ——— */
+.v2 .var .var-g-retour {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 80px;
+  margin-bottom: -80px;
+  padding: 11px 9px 0;
+  background: linear-gradient(var(--var-carte) 40px, transparent 80px);
+  pointer-events: none;
+}
+.v2 .var .var-g-retour a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--var-t3);
+  pointer-events: auto;
+}
+.v2 .var .var-g-retour a:hover {
+  background: var(--var-survol-onglet);
+  color: var(--var-t1);
+}
+.v2 .var .var-g-retour svg {
+  width: 14px;
+  height: 14px;
+  transform: scaleX(-1);
+}
+.v2 .var .var-g-page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 77px 0 64px;
+}
+.v2 .var .var-g-page-tete {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.v2 .var .var-g-page-tete .var-g-logo {
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--var-carte-bord);
+  border-radius: 8px;
+  font-size: 16px;
+}
+.v2 .var .var-g-page-tete h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-page-tete p {
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--var-t3);
+}
+.v2 .var .var-g-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 0.5px solid var(--var-carte-bord);
+  border-radius: 10px;
+  background: var(--g-carte);
+}
+.v2 .var .var-g-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+.v2 .var .var-g-meta dt {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16.5px;
+  text-transform: uppercase;
+  color: var(--g-texte-carte);
+}
+.v2 .var .var-g-meta dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 19.5px;
+  color: var(--var-t2);
+}
+.v2 .var .var-g-meta .var-pousse {
+  flex: 1;
+}
+.v2 .var .var-g-activer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  background: var(--g-accent);
+  box-shadow: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+.v2 .var .var-g-activer:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .var .var-g-activer--neutre {
+  background: var(--var-bouton);
+  color: var(--var-t2);
+  box-shadow: var(--g-anneau);
+}
+.v2 .var .var-g-info h3 {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 18.75px;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-info p {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 25.5px;
+  color: var(--g-texte-carte);
+}
+.v2 .var .var-g-bloc {
+  margin-top: 32px;
+}
+.v2 .var .var-g-bloc-tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-left: 16px;
+}
+.v2 .var .var-g-bloc-tete h3 {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 23px;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-bloc-tete p {
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--var-t3);
+}
+.v2 .var .var-g-petit {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: var(--g-carte);
+  box-shadow: var(--g-anneau);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--var-t2);
+  white-space: nowrap;
+}
+.v2 .var .var-g-liste {
+  border-radius: 10px;
+  background: var(--g-carte);
+  box-shadow: var(--g-anneau);
+}
+.v2 .var .var-g-liste > li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+.v2 .var .var-g-liste > li + li::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  top: 0;
+  border-top: 0.5px solid var(--g-filet);
+}
+.v2 .var .var-g-liste-textes {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .var .var-g-liste-titre {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--var-t1);
+}
+.v2 .var .var-g-liste-aide {
+  display: block;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--g-texte-carte);
+}
+.v2 .var .var-g-interrupteur {
+  position: relative;
+  flex: none;
+  width: 30px;
+  height: 20px;
+  border-radius: 72px;
+  background: lch(82.484 0.054 281.8);
+}
+.v2 .var .var-g-interrupteur[data-on] {
+  background: var(--g-accent);
+}
+.v2 .var .var-g-interrupteur::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.15s;
+}
+.v2 .var .var-g-interrupteur[data-on]::after {
+  transform: translateX(10px);
+}
+.v2 .var .var-g-interrupteur[data-inactif] {
+  opacity: 0.5;
+}
+
+/* ——— 390 : plus de carrousel ; chaque section devient une liste de 68 ——— */
+@media (max-width: 480px) {
+  .v2 .var .var-g {
+    padding: 32px 22px 48px;
+  }
+  .v2 .var .var-g-sous {
+    line-height: 18px;
+  }
+  .v2 .var .var-g-vitrine,
+  .v2 .var .var-g-pastilles {
+    display: none;
+  }
+  .v2 .var .var-g-section {
+    margin-top: 48px;
+  }
+  .v2 .var .var-g-grille {
+    display: block;
+    margin-top: 13px;
+    border-radius: 10px;
+    background: var(--g-carte);
+    box-shadow: var(--g-anneau);
+  }
+  .v2 .var .var-g-carte {
+    flex-direction: row;
+    align-items: center;
+    height: 68px;
+    padding: 16px 10.67px 16px 16px;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .v2 .var .var-g-carte + .var-g-carte::before {
+    content: "";
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: 0;
+    border-top: 0.5px solid var(--g-filet);
+  }
+  .v2 .var .var-g-carte-tete {
+    flex: 1;
+    gap: 5px;
+  }
+  .v2 .var .var-g-texte {
+    display: none;
+  }
+  .v2 .var .var-g-chevron {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    color: lch(66 1 282);
+  }
+  .v2 .var .var-g-page {
+    padding: 64px 22px 48px;
+  }
+  .v2 .var .var-g-meta {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+}

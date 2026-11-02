@@ -48,7 +48,11 @@ const EXEMPLE = (): Magasin[] => [
   { entite_id: ANNECY, societe: nomDe(ANNECY), magasin: "Annecy Vieille Ville", hier_ttc: null, hier_tickets: null, semaine_derniere_ttc: 3900, mois_ttc: 30100, dernier_jour: jourIlYa(2) },
 ];
 
-export default function Caisses({ source, contexte, client_id, societes, onFait }: { source: Source; contexte: Contexte | null; client_id: string; societes: Societe[]; onFait: (m: string) => void }) {
+type Props = { source: Source; contexte: Contexte | null; client_id: string; societes: Societe[]; onFait: (m: string) => void };
+
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useCaisses({ source, contexte, client_id }: Omit<Props, "societes" | "onFait">) {
   const [locaux, setLocaux] = useState<Magasin[]>(EXEMPLE);
   const [reels, setReels] = useState<Magasin[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -107,6 +111,11 @@ export default function Caisses({ source, contexte, client_id, societes, onFait 
     return { lignes: lignes.length, retenues: retenues.length, rejetees: rejets.length, rejets };
   };
 
+  return { locaux, setLocaux, reels, setReels, erreur, setErreur, charger, magasins, hier, avant, muets, peutDeposer, depot, setDepot, deposer };
+}
+
+export default function Caisses({ source, contexte, client_id, societes, onFait }: Props) {
+  const { erreur, magasins, hier, avant, muets, peutDeposer, depot, setDepot, deposer } = useCaisses({ source, contexte, client_id });
   return (
     <section id="vrl-caisses" className="esp-carte" aria-label="Ventes des caisses" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
@@ -157,7 +166,7 @@ export default function Caisses({ source, contexte, client_id, societes, onFait 
   );
 }
 
-function DialogueVentes({ societes, onFermer, deposer, onFait }: { societes: Societe[]; onFermer: () => void; deposer: (entite_id: string, lignes: Record<string, string>[], source: string | null) => Promise<Resultat>; onFait: (m: string) => void }) {
+export function DialogueVentes({ societes, onFermer, deposer, onFait }: { societes: Societe[]; onFermer: () => void; deposer: (entite_id: string, lignes: Record<string, string>[], source: string | null) => Promise<Resultat>; onFait: (m: string) => void }) {
   const [entite, setEntite] = useState(societes[0]?.entite_id ?? "");
   const [texte, setTexte] = useState("");
   const [envoi, setEnvoi] = useState(false);

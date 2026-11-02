@@ -54,7 +54,9 @@ type Props = { source: Source; contexte: Contexte | null; client_id: string; soc
 type Filtre = "a_examiner" | "traitees";
 const nouvelId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-export default function Reserves({ source, contexte, client_id, societes, objets, onFait }: Props) {
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useReservesGroupe({ source, contexte, client_id, objets, onFait }: Omit<Props, "societes">) {
   const [locales, setLocales] = useState<Reserve[]>(RESERVES_EXEMPLE);
   const [reelles, setReelles] = useState<Reserve[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -171,6 +173,11 @@ export default function Reserves({ source, contexte, client_id, societes, objets
     [source, charger],
   );
 
+  return { locales, setLocales, reelles, setReelles, erreur, setErreur, filtre, setFiltre, charger, toutes, liste, urgentes, ouvertes, enJeu, role, peutSaisir, decisionDe, proposer, faireValider, peutDecider, ajout, setAjout, lettre, setLettre, suite, setSuite, enregistrer, ajouterPhotos, photos, setPhotos, reservePhotos, ouvrirLettre, decider };
+}
+
+export default function Reserves({ source, contexte, client_id, societes, objets, onFait }: Props) {
+  const { reelles, erreur, filtre, setFiltre, liste, urgentes, ouvertes, enJeu, peutSaisir, decisionDe, faireValider, peutDecider, ajout, setAjout, lettre, setLettre, suite, setSuite, enregistrer, ajouterPhotos, setPhotos, reservePhotos, ouvrirLettre, decider } = useReservesGroupe({ source, contexte, client_id, objets, onFait });
   return (
     <section id="vrl-reserves" className="esp-carte" aria-label="Réserves à émettre" style={{ marginBottom: 16 }}>
       <div className="esp-carte-tete">
@@ -268,7 +275,7 @@ export default function Reserves({ source, contexte, client_id, societes, objets
   );
 }
 
-function DialogueReception({ societes, objets, onFermer, enregistrer, ajouterPhotos, onFait }: {
+export function DialogueReception({ societes, objets, onFermer, enregistrer, ajouterPhotos, onFait }: {
   societes: Societe[];
   objets: Objet[];
   onFermer: () => void;
@@ -398,7 +405,7 @@ function DialogueReception({ societes, objets, onFermer, enregistrer, ajouterPho
   );
 }
 
-function DialogueLettre({ r, texte, onFermer }: { r: Reserve; texte: string; onFermer: () => void }) {
+export function DialogueLettre({ r, texte, onFermer }: { r: Reserve; texte: string; onFermer: () => void }) {
   const [copie, setCopie] = useState(false);
   const copier = async () => {
     try {
@@ -428,7 +435,7 @@ function DialogueLettre({ r, texte, onFermer }: { r: Reserve; texte: string; onF
   );
 }
 
-function DialogueSuite({ r, onFermer, decider, onFait }: { r: Reserve; onFermer: () => void; decider: (r: Reserve, c: "protestee" | "sans_suite", d: string, m: Moyen, motif: string) => Promise<string | null>; onFait: (m: string) => void }) {
+export function DialogueSuite({ r, onFermer, decider, onFait }: { r: Reserve; onFermer: () => void; decider: (r: Reserve, c: "protestee" | "sans_suite", d: string, m: Moyen, motif: string) => Promise<string | null>; onFait: (m: string) => void }) {
   const [choix, setChoix] = useState<"protestee" | "sans_suite">("protestee");
   const [date, setDate] = useState(aujourdhui());
   const [moyen, setMoyen] = useState<Moyen>("lrar");
@@ -493,7 +500,7 @@ function DialogueSuite({ r, onFermer, decider, onFait }: { r: Reserve; onFermer:
   );
 }
 
-function DialoguePhotos({ r, source, peutAjouter, ajouterPhotos, onFermer }: {
+export function DialoguePhotos({ r, source, peutAjouter, ajouterPhotos, onFermer }: {
   r: Reserve;
   source: Source;
   peutAjouter: boolean;

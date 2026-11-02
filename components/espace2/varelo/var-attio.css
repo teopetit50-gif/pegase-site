@@ -1,0 +1,706 @@
+/* ══════════════════════════════════════════════════════════════════════
+   VARELO, Référentiel — Attio, liste People et fiche d'un contact, au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/attio-people.md
+   (complément « Après import » du 02/11) ; positions lues sur
+   captures/attio-people/1440-reel-*-importes.png et *-fiche-marie.png
+   (barre latérale d'Attio repliée : la page part du bord). Préfixe var-a-.
+
+   Repères (px) : en-tête 49 (p 0 12, filet bas) ; barre de vue à 10 sous
+   l'en-tête, boutons de 28 (blanc, rayon 8, p 4 6) ; barre de tri à 49 ;
+   grille à 146 : en-têtes de 40, lignes de 36, colonnes 250 · 215 · 288 ·
+   310 · 250, filets droit et bas ; pied « N count » collant. Fiche :
+   panneau gauche 432 (nom 18/600/24, actions de 28, détails en lignes de
+   34) ; onglets à 57 ; « Highlights » en cartes de 86, écart 10.
+   Texte d'interface Inter 14/500/20, interlettre −0,07.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .var.var--attio {
+  --a-fond: #101112;
+  --a-texte: #f1f2f3;
+  --a-second: rgb(255 255 255 / 0.6);
+  --a-vide: rgb(255 255 255 / 0.45);
+  --a-filet: #1b1c1f;
+  --a-bouton: #101112;
+  --a-bouton-ombre: inset 0 0 0 1px #212224;
+  --a-lien: #4e8cfc;
+  --a-accent: #266df0;
+  --a-survol: rgb(255 255 255 / 0.05);
+  --a-onglet: #17181a;
+  --a-compteur: rgb(255 255 255 / 0.06);
+  --a-compteur-texte: rgb(255 255 255 / 0.6);
+  --var-app: #0b0c0d;
+  --var-carte: #101112;
+  --var-carte-bord: #1b1c1f;
+  font-family: var(--font-v2-inter), Inter, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  color: var(--a-texte);
+}
+html[data-v2-theme="light"] .v2 .var.var--attio {
+  --a-fond: #fff;
+  --a-texte: #101112;
+  --a-second: rgb(0 0 0 / 0.63);
+  --a-vide: rgb(0 0 0 / 0.5);
+  --a-filet: #eeeff1;
+  --a-bouton: #fff;
+  --a-bouton-ombre: inset 0 0 0 1px transparent, 0 0 2px #1c284030, 0 1px 3px #0000000a;
+  --a-lien: #266df0;
+  --a-survol: rgb(0 0 0 / 0.04);
+  --a-onglet: #fbfbfb;
+  --a-compteur: rgb(0 0 0 / 0.04);
+  --a-compteur-texte: #505155;
+  --var-app: #f7f7f8;
+  --var-carte: #fff;
+  --var-carte-bord: #eeeff1;
+}
+.v2 .var.var--attio .var-carte {
+  background: var(--a-fond);
+}
+.v2 .var.var--attio .var-a-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ——— en-tête (49) ——— */
+.v2 .var.var--attio .var-a-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 49px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--a-filet);
+}
+.v2 .var.var--attio .var-a-fil {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.v2 .var.var--attio .var-a-fil a {
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-fil a:hover {
+  color: var(--a-texte);
+}
+.v2 .var.var--attio .var-a-objet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #266df0;
+  color: #fff;
+}
+.v2 .var.var--attio .var-a-objet svg {
+  width: 12px;
+  height: 12px;
+}
+.v2 .var.var--attio .var-a-pousse {
+  flex: 1;
+}
+
+/* ——— boutons ——— */
+.v2 .var.var--attio .var-a-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: var(--a-bouton);
+  box-shadow: var(--a-bouton-ombre);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--a-texte);
+  white-space: nowrap;
+}
+.v2 .var.var--attio .var-a-bouton svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-bouton:hover,
+.v2 .var.var--attio .var-a-bouton[aria-expanded="true"] {
+  background: var(--a-survol);
+}
+.v2 .var.var--attio .var-a-bouton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .var.var--attio .var-a-bouton--bleu {
+  padding: 4px 8px 4px 6px;
+  background: var(--a-accent);
+  box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f;
+  color: #fff;
+}
+.v2 .var.var--attio .var-a-bouton--bleu svg {
+  color: #fff;
+}
+.v2 .var.var--attio .var-a-bouton--bleu:hover {
+  background: #1f5fd6;
+}
+.v2 .var.var--attio .var-a-bouton--icone {
+  width: 28px;
+  justify-content: center;
+  padding: 0;
+}
+.v2 .var.var--attio .var-a-bouton .var-a-chevron {
+  width: 14px;
+  height: 14px;
+}
+
+/* ——— barres de vue et de tri ——— */
+.v2 .var.var--attio .var-a-vue {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 10px 12px;
+}
+.v2 .var.var--attio .var-a-tri {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 49px;
+  padding: 10px 12px 11px;
+  border-top: 1px solid var(--a-filet);
+}
+.v2 .var.var--attio .var-a-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 4px 8px 4px 6px;
+  border-radius: 8px;
+  background: var(--a-bouton);
+  box-shadow: inset 0 0 0 1px #e6e7ea;
+  white-space: nowrap;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-puce {
+  box-shadow: inset 0 0 0 1px #212224;
+}
+.v2 .var.var--attio .var-a-puce svg {
+  width: 16px;
+  height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-puce-libelle {
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-filtre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 4px 8px 4px 6px;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.02);
+  color: var(--a-vide);
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-filtre {
+  background: rgb(255 255 255 / 0.03);
+}
+.v2 .var.var--attio .var-a-filtre svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .var.var--attio .var-a-filtre input {
+  width: 260px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: var(--a-texte);
+  outline: 0;
+}
+.v2 .var.var--attio .var-a-filtre input::placeholder {
+  color: var(--a-vide);
+}
+
+/* ——— menu ——— */
+.v2 .var.var--attio .var-a-menu {
+  position: absolute;
+  z-index: 40;
+  min-width: 220px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--a-fond);
+  box-shadow: inset 0 0 0 1px var(--a-filet), 0 4px 12px #0000001f, 0 1px 3px #0000000f;
+}
+.v2 .var.var--attio .var-a-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--a-texte);
+}
+.v2 .var.var--attio .var-a-menu-option svg {
+  width: 16px;
+  height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-menu-option:hover {
+  background: var(--a-survol);
+}
+.v2 .var.var--attio .var-a-menu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--a-filet);
+}
+.v2 .var.var--attio .var-a-menu-coche {
+  margin-left: auto;
+  color: var(--a-lien);
+}
+
+/* ——— grille ——— */
+.v2 .var.var--attio .var-a-grille {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.v2 .var.var--attio .var-a-grille > .var-a-ligne {
+  flex: none;
+}
+.v2 .var.var--attio .var-a-ligne {
+  display: grid;
+  grid-template-columns: 250px 215px 288px 310px 250px;
+  width: max-content;
+  min-width: 100%;
+}
+.v2 .var.var--attio .var-a-ligne > * {
+  min-width: 0;
+  border-right: 1px solid var(--a-filet);
+  border-bottom: 1px solid var(--a-filet);
+}
+.v2 .var.var--attio .var-a-ligne--tete {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--a-fond);
+}
+.v2 .var.var--attio .var-a-ligne--tete > * {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px;
+  border-top: 1px solid var(--a-filet);
+  background: var(--a-fond);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .var.var--attio .var-a-ligne--tete svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-ligne--tete .var-a-ajout {
+  color: var(--a-vide);
+}
+.v2 .var.var--attio .var-a-cellule {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  height: 36px;
+  padding: 8px 12px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: var(--a-fond);
+}
+.v2 .var.var--attio .var-a-cellule--premiere {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  padding-left: 16px;
+  /* case 16, puis la pastille (p 4) : avatar à 44, nom à 66 (capture) */
+  gap: 8px;
+}
+.v2 .var.var--attio .var-a-ligne--tete > .var-a-cellule--premiere {
+  z-index: 3;
+  padding-left: 16px;
+  gap: 14px;
+}
+.v2 .var.var--attio .var-a-case {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border: 1px solid rgb(0 0 0 / 0.09);
+  border-radius: 6px;
+  background: #fff;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-case {
+  border-color: rgb(255 255 255 / 0.09);
+  background: transparent;
+}
+.v2 .var.var--attio .var-a-ligne--tete .var-a-case {
+  margin-top: 0;
+}
+.v2 .var.var--attio .var-a-pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  height: 24px;
+  margin-top: -2px;
+  padding: 2px 6px 2px 4px;
+  border-radius: 10px;
+  color: var(--a-texte);
+}
+.v2 .var.var--attio a.var-a-pastille:hover,
+.v2 .var.var--attio button.var-a-pastille:hover {
+  background: var(--a-survol);
+}
+.v2 .var.var--attio .var-a-pastille > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--a-compteur);
+  color: var(--a-second);
+  font-size: 8px;
+  font-weight: 600;
+}
+.v2 .var.var--attio .var-a-force {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .var.var--attio .var-a-force::before {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  border-radius: 3px;
+  background: var(--var-force, #77797c);
+}
+.v2 .var.var--attio .var-a-vide {
+  color: var(--a-vide);
+}
+.v2 .var.var--attio .var-a-mono {
+  font-family: "JetBrains Mono", var(--font-v2-code), ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-ligne--pied {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: auto;
+}
+.v2 .var.var--attio .var-a-ligne--pied > * {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px;
+  border-top: 1px solid var(--a-filet);
+  border-bottom: 0;
+  background: var(--a-fond);
+  color: var(--a-vide);
+  white-space: nowrap;
+}
+.v2 .var.var--attio .var-a-ligne--pied strong {
+  font-weight: 500;
+  color: var(--a-texte);
+}
+.v2 .var.var--attio .var-a-petit {
+  height: 24px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--a-bouton);
+  box-shadow: var(--a-bouton-ombre);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-texte);
+}
+.v2 .var.var--attio .var-a-petit:hover {
+  background: var(--a-survol);
+}
+
+/* ——— fiche d'un objet ——— */
+.v2 .var.var--attio .var-a-fiche {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.v2 .var.var--attio .var-a-gauche {
+  flex: none;
+  width: 432px;
+  overflow-y: auto;
+  border-right: 1px solid var(--a-filet);
+}
+.v2 .var.var--attio .var-a-identite {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* nom centré à 28 sous l'en-tête, actions à 56 (capture de la fiche) */
+  padding: 8px 16px 0 12px;
+  height: 48px;
+}
+.v2 .var.var--attio .var-a-identite .var-a-avatar {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+.v2 .var.var--attio .var-a-identite h2 {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .var.var--attio .var-a-bloc {
+  padding: 8px 16px 16px;
+  border-top: 1px solid var(--a-filet);
+}
+.v2 .var.var--attio .var-a-bloc-titre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.v2 .var.var--attio .var-a-detail {
+  display: grid;
+  grid-template-columns: 16px 112px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 6px;
+  min-height: 32px;
+}
+.v2 .var.var--attio .var-a-detail svg {
+  width: 16px;
+  height: 16px;
+  color: var(--a-vide);
+}
+.v2 .var.var--attio .var-a-detail dt {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-detail dd {
+  margin: 0 0 0 8px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-droite {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+.v2 .var.var--attio .var-a-onglets {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 49px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--a-filet);
+  background: var(--a-fond);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .var.var--attio .var-a-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: var(--a-second);
+  white-space: nowrap;
+}
+.v2 .var.var--attio .var-a-onglet svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .var.var--attio .var-a-onglet[aria-selected="true"] {
+  background: var(--a-onglet);
+  box-shadow: inset 0 0 0 1px var(--a-filet);
+  color: var(--a-texte);
+}
+.v2 .var.var--attio .var-a-compteur {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--a-compteur);
+  box-shadow: inset 0 0 0 1px var(--a-filet);
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--a-compteur-texte);
+}
+.v2 .var.var--attio .var-a-corps {
+  padding: 22px 20px 32px;
+}
+.v2 .var.var--attio .var-a-section-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  margin-top: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-section-titre:first-child {
+  margin-top: 0;
+}
+.v2 .var.var--attio .var-a-section-titre .var-a-pousse + * {
+  font-size: 12px;
+}
+.v2 .var.var--attio .var-a-cartes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 10px;
+  margin-top: 4px;
+}
+.v2 .var.var--attio .var-a-carte {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 86px;
+  padding: 10px 12px 12px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--a-filet);
+}
+.v2 .var.var--attio .var-a-carte-titre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-carte-titre svg {
+  width: 16px;
+  height: 16px;
+  color: var(--a-vide);
+}
+.v2 .var.var--attio .var-a-carte-valeur {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-carte-valeur small {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .var.var--attio .var-a-liste {
+  margin-top: 4px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--a-filet);
+}
+.v2 .var.var--attio .var-a-liste > li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 6px 12px;
+}
+.v2 .var.var--attio .var-a-liste > li + li {
+  border-top: 1px solid var(--a-filet);
+}
+.v2 .var.var--attio .var-a-liste-texte {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-liste-texte .var-a-vide {
+  margin-left: 8px;
+}
+.v2 .var.var--attio .var-a-heure {
+  flex: none;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-vide);
+}
+.v2 .var.var--attio .var-a-rond {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--a-vide);
+  border-radius: 50%;
+}
+.v2 .var.var--attio .var-a-rond[data-fait] {
+  border-color: #00d17e;
+  background: #00d17e;
+}
+
+/* Attio n'a pas de mise en page mobile : la grille et la fiche défilent à l'horizontale */
+@media (max-width: 768px) {
+  .v2 .var.var--attio .var-a-vue,
+  .v2 .var.var--attio .var-a-tri {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v2 .var.var--attio .var-a-fiche {
+    overflow-x: auto;
+  }
+  .v2 .var.var--attio .var-a-gauche {
+    width: 320px;
+  }
+  .v2 .var.var--attio .var-a-droite {
+    flex: none;
+    width: 700px;
+  }
+  .v2 .var.var--attio .var-a-filtre input {
+    width: 140px;
+  }
+}
