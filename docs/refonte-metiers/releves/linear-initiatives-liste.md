@@ -91,3 +91,63 @@ a  245,128  1187×57  display grid (subgrid), p 0 10px, r 8px, gap colonnes 12px
 - Ligne 2 : onglets inchangés en largeur mais **hauteur 32px** (@8,50 / 71 / 145) ; les 3 boutons outils passent à **32×32** (@274 / 312 / 350).
 - **L'en-tête de colonnes disparaît.** Grille : `[indent] 8px [title] 320px [initiativeHealth] 32px [end-padding] 12px`, gap 6px.
 - Ligne 390×57 : icône 28×28 @14 · nom/résumé @48 (résumé 286px, ellipsis) · bouton santé 32×32 @340. Statut, priorité, owner, date, projets et Active Projects ne sont plus affichés.
+
+---
+
+# Complément du 01/11/2026 (liste remplie, sombre + clair)
+
+## Ce qui a été créé (4 initiatives, toutes à moi)
+
+| Initiative | Résumé | Statut | Priorité | Responsable | Cible |
+|---|---|---|---|---|---|
+| Extension zone artisanale de Jarry | Appel d'offres de la CCI, réponse attendue avant le 10 novembre | Proposed | Urgent | — | — |
+| Entretien du parc de bureaux Jarry | Contrat de maintenance 2026 soldé | Completed | Low | — | 30/09/2026 |
+| Rénovation énergétique des écoles | Isolation et brise-soleil, 4 groupes scolaires de la commune | Active | Medium | Wizyy | 30/06/2027 |
+| Programme logements sociaux Baie-Mahault | 3 résidences, 64 logements, bailleur SIG | Planned | High | Wizyy | 15/12/2027 |
+
+Les 3 initiatives de Teo (Déclaration préalable — Extension Rolland, Permis de construire — Maison Berthier, Résidence Les Tilleuls) sont inchangées ; « Résidence Les Tilleuls » montre maintenant 0 / 5 projets et la santé des projets actifs (● 1 vert, ● 2 gris). La liste compte 7 lignes, 5 statuts (Proposed, Planned, Active, Completed — Canceled non utilisé), 4 priorités.
+
+## Ligne (1440, mesurée)
+
+`a` 1187×**57** (display grid, r 8px, transition color 0.15s) — grid-template-columns : `[indent] 8px [checkbox] 20px [title] 572px [status] 100px [priority] 56px [owner] 50px [targetDate] 100px [projects] 59px [initiativeHealth] 52px [projectsHealth] 98px [end-padding] 12px`, column-gap 6px.
+
+```
+a @245,470 1187×57
+├ case « Select initiative » 14×22 @261 (input 12×12, opacity 0 hors survol)
+├ titre @285 572×33 : button "Choose icon" 28×28 (r 8px, p 6px, icône 16×16 couleur de l'initiative)
+│   └ bloc @319 538×33 : nom span 13px/500 (h 15.5) + résumé span 13px/450 c tertiaire, une ligne tronquée (« … »), display flow-root
+├ statut @863 : button h28 (r 9999px, p 3px 6px) → icône 16×16 + libellé 12px/450 m-left 8px
+├ priorité @969 : button 28×28 → icône 16×16 (aria « No Priority », « Urgent Priority »…)
+├ responsable @1028 : button 30×28 → avatar 18×18 (ou icône « Unassigned »)
+├ cible @1084 : div[button] 103×28 (m-left −3px, r 8px) → date 12px/450
+├ projets @1193 : button 57×24 (r 9999px, p 2px 4px) → icône 16×16 + « 0 / 5 » (« 0 / » 12px/450 tertiaire, « 5 » 12px/500)
+├ santé de l'initiative @1258 : button 28×28 → icône 14×14 (cercle pointillé si aucune mise à jour)
+└ santé des projets @1313 : boutons 32×22 (r 12px, p 2px 6px 2px 2px) « ● 1 » « ● 2 » : pastille 8×8 dans un span 16×16 + nombre 12px/500
+```
+
+## Styles (sombre → clair)
+
+| Élément | Typo | Sombre | Clair |
+|---|---|---|---|
+| Nom d'initiative | 13px / 500 | lch(90.451 1.2 272) | lch(19.588 1.25 282) |
+| Résumé | 13px / 450 | lch(61.803 1.2 272) | lch(39.176 1.25 282) |
+| Libellé de statut, date | 12px / 450 | lch(100 0 272) | lch(9.794 0 282) |
+| En-têtes de colonne | 12px / 450 | lch(61.803 1.2 272) | lch(39.176 1.25 282) |
+| Onglets de vue « Active », « Planned » (a, inactifs) | 12px / 500 | c lch(61.803 1.2 272) bg lch(10.149 0.593 272) | c lch(39.176 1.25 282) bg lch(99.997 0.5 282) |
+| Onglet « All initiatives » (actif) | 12px / 500 | c lch(100 0 272) bg lch(16.706 0.979 272) | c lch(9.794 0 282) bg lch(93.483 0.5 282) |
+| Pastille santé projets « vert » | — | — | bg lch(60 64.37 141.95) ; « gris » lch(39.176 1.25 282) |
+| Bouton « New initiative » | 12px / 500 | c lch(61.803 1.2 272) | c lch(39.176 1.25 282) — r 9999px, p 0 10px 0 8px, 116×28 |
+
+Couleurs d'icône d'initiative relevées : bleu-vert, orange, gris, vert (choisies à la création, aléatoires).
+
+## Création en ligne (« New initiative »)
+
+Le bouton n'ouvre pas de fenêtre : une **ligne d'édition** s'insère en tête de liste (carte à fond légèrement plus clair, pleine largeur) avec : icône, champ « New initiative » (nom), « Add a short summary… », puis pilules **Active ▾ · Priority · Owner · Target date · Labels**, et à droite « Cancel » / « Create » (bouton violet). Menus : statut au chiffre (1 Proposed · 2 Planned · 3 Active · 4 Completed · 5 Canceled), priorité au chiffre (0–4), Owner filtrable (« Set owner… »), date (« Try: May 2027, Q4, 05/20/2027 »).
+
+## Paliers
+
+- 390×844 : grille `[indent] 8px [title] 324px [initiativeHealth] 28px [end-padding] 12px` ; ligne 57px ; ne restent que l'icône, le nom, le résumé tronqué et l'icône de santé ; onglets Active / Planned / All initiatives en pilules 32px ; « New initiative » réduit à « + ».
+
+## Captures (`captures/linear-initiatives-liste/`)
+
+`1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
