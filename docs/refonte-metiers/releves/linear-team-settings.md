@@ -86,3 +86,25 @@ Variantes :
 - Colonne 346px @22 ; titre « Omega » @38,96 ; sous-titre sur 2 lignes (190×36) ; « Team overview » 122×**28** à droite @236,136.
 - Rangées : p **16px 10.67px** ; figure @33 ; texte @73 ; la description **passe à la ligne** au lieu d'être tronquée (rangée General 80px de haut) ; valeur à droite (« 1 member » @278), chevron conservé.
 - « Available on Business » 160×**36**.
+
+---
+
+# Complément du 01/11/2026 (sombre + clair, 390)
+
+## Remplissage
+
+Rien à créer sur cette page sans changer les réglages de l'équipe (interdit) : elle liste des liens vers les sous-réglages. Les compteurs reflètent l'espace rempli : « 1 member » (on n'invite personne), « 7 statuses », cycles « Every 2 weeks », étiquettes d'équipe « None » (les étiquettes créées sont au niveau de l'espace, pas de l'équipe), modèles d'équipe « None » (les 5 modèles sont au niveau de l'espace). Page relevée telle quelle.
+
+## Ajouts au relevé
+
+- Sections = cartes `section` (sombre bg lch(9.232 0.85 272), ombre `lch(100 0 0/.083) 0 0 0 .5px, lch(0 0 0/.3) 0 .5px 1px 1px` ; clair bg lch(100 0 282), ombre `lch(0 0 0/.088) 0 0 0 .5px, lch(0 0 0/.02) 0 3px 6px −2px, lch(0 0 0/.04) 0 1px 1px 0`), 640px de large à x 518 (1440), lignes `a` 640×65 (p 16px, gap 12px ; première r 10px 10px 0 0, dernière r 0 0 10px 10px) séparées par un filet.
+- Ligne : icône 16×16 dans un carré `figure` (sombre lch(11.033 1.3 272), clair lch(94.5 0 282)) · titre 13px/500 primaire · sous-titre 12px/450 (sombre lch(63.304 1.425 272), clair lch(40 1 282)) · valeur à droite 12px/450 (« 1 member », « Off », « None », « 7 statuses », « Every 2 weeks ») · chevron ›.
+- Ligne verrouillée « Project labels » / « Project statuses » : bouton-pilule « Available on Business » (13px/500, r 9999px, p 0 12px, h 32, **opacity 0.6**), libellés grisés.
+- Titres de section h3 15px/500/23px (« Issues, projects, and documents », « Workflow », …) ; titre de page « Omega » 24px/500/32px ls −0.16px ; sous-titre « Accessible to all workspace members » 13px/450/22px tertiaire ; bouton « Team overview › » 12px/500 (r 9999px, p 0 6px 0 8px, h 24) ; fil « ‹ Teams » 13px/500 tertiaire.
+- Zone « danger » en bas : boutons « Leave team… », « Retire… » (13px/500, r 9999px, p 0 12px, h 32, opacity 0.6).
+- Barre latérale des réglages (commune aux pages Settings) : « ‹ Back to app », champ « Search… », groupes Personal / Issues / Projects / Features / Integrations / Administration / Your teams (« Omega » actif, « + Create a team »).
+- 390×844 : barre des réglages en tiroir (« ◧ ‹ Settings » en tête, animation de glissement visible juste après le changement de taille) ; cartes pleine largeur (marges 22px), sous-titres sur 2 lignes.
+
+## Captures (`captures/linear-team-settings/`)
+
+`1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
