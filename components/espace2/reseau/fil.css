@@ -1,0 +1,516 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Réseau Omega · Fil (02/11/2026)
+
+   La composition du fil de Circle, relevée au style calculé sur
+   community.circle.so/feed : colonne de 672 px, cartes empilées à 12 px
+   (Circle : 20), titre puis auteur (pastille, nom en 500, étiquettes,
+   date ; dessous, d'où il vient), texte, résumé, filet, actions, réponses.
+   L'habit est celui d'Espace 2 : jetons --v2-*, rayons 6 / 8 px, filets
+   sans ombre portée, police de l'espace. Rien de Circle (ni couleur, ni
+   police, ni rayon). Le sombre suit les jetons, sans règle de plus.
+   Tout est rangé sous .v2 .rf.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .rf.v2-page {
+  max-width: 1248px;
+  padding: 24px 24px 96px;
+}
+
+/* — les colonnes : le fil (672 px au plus), puis le côté sur grand écran — */
+.v2 .rf-colonnes {
+  display: grid;
+  grid-template-columns: minmax(0, 672px);
+  justify-content: center;
+  align-items: start;
+  gap: 24px;
+}
+.v2 .rf-flux {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.v2 .rf-cote {
+  display: none;
+}
+@container principale (min-width: 1040px) {
+  .v2 .rf-colonnes {
+    grid-template-columns: minmax(0, 672px) 280px;
+  }
+  .v2 .rf-cote {
+    display: grid;
+    gap: 12px;
+    position: sticky;
+    top: 24px;
+  }
+}
+
+/* — la barre des filtres — */
+.v2 .rf-outils {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.v2 .rf-types {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+}
+.v2 .rf-types button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--v2-gray-900);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.v2 .rf-types button:hover {
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-types button[aria-pressed="true"],
+.v2 .rf-types button[aria-checked="true"] {
+  background: var(--v2-a-300);
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-nb {
+  color: var(--v2-gray-700);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .rf-menus {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.v2.oc .rf .rf-menu {
+  height: 30px;
+  max-width: 220px;
+  min-width: 0;
+}
+.v2 .rf-menu-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* — le composeur — */
+.v2 .rf-composeur {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+.v2 .rf-composeur-ouvrir {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--v2-bg-200);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-700);
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+  transition: box-shadow 0.15s, color 0.15s;
+}
+.v2 .rf-composeur-ouvrir:hover {
+  box-shadow: 0 0 0 1px var(--v2-a-600);
+  color: var(--v2-gray-900);
+}
+.v2 .rf-composeur--ouvert {
+  display: grid;
+  align-items: stretch;
+  gap: 10px;
+  padding: 16px;
+}
+.v2 .rf-composeur-tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.v2.oc .rf .rf-zone {
+  height: auto;
+  padding: 8px 12px;
+  align-items: stretch;
+}
+.v2 .rf-zone textarea {
+  flex: 1;
+  min-width: 0;
+  min-height: 64px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--v2-gray-1000);
+  font: inherit;
+  resize: vertical;
+}
+.v2 .rf-zone textarea::placeholder {
+  color: var(--v2-gray-700);
+}
+.v2 .rf-composeur-ligne {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 8px;
+}
+.v2 .rf-composeur-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.v2 .rf-composeur-boutons {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* — la pastille d'une entreprise (Circle : 40 px ; ici 36, la carte est plus dense) — */
+.v2 .rf-pastille {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--v2-gray-300);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.v2 .rf-pastille[data-petite] {
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
+}
+.v2 .rf-pastille[data-vous] {
+  background: var(--v2-blue-200);
+  color: var(--v2-blue-900);
+}
+
+/* — une publication — */
+.v2 .rf-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.v2 .rf-pub {
+  padding: 20px 20px 8px;
+}
+.v2 .rf-epinglee {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--v2-amber-900);
+}
+.v2 .rf-pub-haut {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v2 .rf-pub-haut .v2-badge {
+  margin-top: 1px;
+}
+.v2.oc .rf .rf-pub-titre {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-pub-icone {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: -2px;
+  color: var(--v2-amber-900);
+}
+.v2 .rf-auteur {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.v2 .rf-auteur-texte {
+  min-width: 0;
+}
+.v2 .rf-auteur-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-height: 20px;
+}
+.v2 .rf-nom {
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-lien-nom:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.v2 .rf-quand {
+  font-size: 12px;
+  color: var(--v2-gray-700);
+}
+.v2 .rf-auteur-sous {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+}
+.v2 .rf-pub-texte {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-meta {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+}
+.v2 .rf-meta li {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--v2-a-200);
+  font-size: 12px;
+  color: var(--v2-gray-900);
+}
+.v2 .rf-resume {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+}
+.v2 .rf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+  padding-top: 6px;
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2.oc .rf .rf-action {
+  height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2.oc .rf .rf-action:hover {
+  color: var(--v2-gray-1000);
+}
+.v2.oc .rf .rf-action[aria-pressed="true"] {
+  background: var(--v2-blue-100);
+  color: var(--v2-blue-900);
+}
+
+/* — les réponses, sous un filet de bord à bord — */
+.v2 .rf-reponses {
+  margin: 8px -20px 0;
+  padding: 12px 20px 12px;
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2 .rf-voir {
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--v2-gray-900);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.v2 .rf-voir:hover {
+  color: var(--v2-gray-1000);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.v2 .rf-reponses-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.v2 .rf-reponse {
+  display: flex;
+  gap: 10px;
+}
+.v2 .rf-reponse-corps {
+  min-width: 0;
+}
+.v2 .rf-reponse-corps p {
+  margin: 2px 0 0;
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-saisie {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.v2 .rf-reponses-liste + .rf-saisie,
+.v2 .rf-voir + .rf-saisie {
+  margin-top: 12px;
+}
+.v2 .rf-reponses > .rf-saisie:first-child {
+  margin-top: 0;
+}
+.v2 .rf-saisie-champ {
+  flex: 1;
+}
+.v2.oc .rf .rf-saisie .v2-btn--icone {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+
+/* — le côté — */
+.v2 .rf-encart {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+.v2 .rf-chiffres {
+  display: grid;
+  margin: 0;
+}
+.v2 .rf-chiffres > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--v2-a-300);
+}
+.v2 .rf-chiffres > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+.v2 .rf-chiffres dt {
+  color: var(--v2-gray-900);
+}
+.v2 .rf-chiffres dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--v2-gray-1000);
+}
+.v2 .rf-chiffres dd a,
+.v2 .rf-lien-tout {
+  color: var(--v2-blue-900);
+}
+.v2 .rf-chiffres dd a:hover,
+.v2 .rf-lien-tout:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.v2 .rf-lien-tout {
+  font-size: 12px;
+  font-weight: 500;
+}
+.v2 .rf-aide {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+}
+.v2 .rf-nouveaux {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.v2 .rf-nouveaux li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.v2 .rf-nouveau-texte {
+  display: grid;
+  min-width: 0;
+}
+.v2 .rf-nouveau-texte small {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* — petits écrans — */
+@container principale (max-width: 599px) {
+  .v2 .rf.v2-page {
+    padding: 16px 16px 64px;
+  }
+  .v2 .rf-outils {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .rf-types {
+    display: flex;
+  }
+  .v2 .rf-types button {
+    flex: 1;
+    justify-content: center;
+    padding: 0 6px;
+  }
+  .v2 .rf-menus > * {
+    flex: 1;
+  }
+  .v2.oc .rf .rf-menu {
+    max-width: none;
+    justify-content: space-between;
+  }
+  .v2 .rf-pub {
+    padding: 16px 16px 6px;
+  }
+  .v2 .rf-reponses {
+    margin: 8px -16px 0;
+    padding: 12px 16px;
+  }
+  .v2 .rf-composeur-ligne {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

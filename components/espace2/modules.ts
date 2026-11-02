@@ -155,10 +155,20 @@ export function porteeDe(chemin: string): ModuleV2 | null {
   return moduleDe(seg) ?? null;
 }
 
+/* 02/11/2026 — le Réseau Omega : quatre pages, entre clients d'Omega */
+export const ONGLETS_RESEAU: Onglet[] = [
+  { libelle: "Fil", href: `${RACINE}/reseau`, exact: true },
+  { libelle: "Membres", href: `${RACINE}/reseau/membres` },
+  { libelle: "Messages", href: `${RACINE}/reseau/messages` },
+  { libelle: "Opportunités", href: `${RACINE}/reseau/opportunites` },
+];
+
 /* le titre de la page, au centre de la barre du haut */
 export function titreDe(chemin: string): string {
   /* les pages de la formation portent toutes « Formation » */
   if (chemin.startsWith(`${RACINE}/formation/`)) return "Formation";
+  /* une sous-page du réseau (la fiche d'un membre…) porte le nom de son onglet */
+  if (chemin === `${RACINE}/reseau` || chemin.startsWith(`${RACINE}/reseau/`)) return [...ONGLETS_RESEAU].reverse().find((o) => chemin === o.href || chemin.startsWith(`${o.href}/`))?.libelle ?? "Réseau";
   const portee = porteeDe(chemin);
   /* un module sans sous-pages porte son nom ; avec, le nom de la sous-page */
   const onglets = portee ? (portee.onglets.length > 1 ? portee.onglets : []) : ONGLETS_ORGANISATION;

@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, CornerDownLeft, Link2, Search } from "lucide-react";
 import { Autocomplete, Dialog, Input, Menu, Modal, ModalOverlay, TextField, useFilter } from "react-aria-components";
 import { ItemMenu, Kbd, SectionMenu } from "./ui";
-import { MODULES, ONGLETS_ORGANISATION } from "./modules";
+import { MODULES, ONGLETS_ORGANISATION, ONGLETS_RESEAU } from "./modules";
 import { useToast } from "./Toasts";
 
 export default function Palette({ ouverte, changer }: { ouverte: boolean; changer: (v: boolean) => void }) {
@@ -51,6 +51,13 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
                 <ItemMenu id="aller:/espace2/filed/a-payer" textValue="À payer FILED factures" icone={<ArrowRight width={16} height={16} aria-hidden="true" />}>
                   À payer (FILED)
                 </ItemMenu>
+              </SectionMenu>
+              <SectionMenu titre="Réseau Omega">
+                {ONGLETS_RESEAU.map((o) => (
+                  <ItemMenu key={o.href} id={`aller:${o.href}`} textValue={`Réseau ${o.libelle}`} icone={<ArrowRight width={16} height={16} aria-hidden="true" />}>
+                    {`Réseau · ${o.libelle}`}
+                  </ItemMenu>
+                ))}
               </SectionMenu>
               <SectionMenu titre="Modules">
                 {MODULES.map((m) => (
