@@ -26,6 +26,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | Parc et atelier | `/espace2/tavaro/parc` | Linear, Board | `linear-board.md` | `parc-1440-{sombre,clair}-{cote,diff,fusion}.png`, `parc-390-sombre-cote.png` | superposé : colonnes (x, pas de 348), en-têtes de colonne, cartes (id, statut, titre, puces, pied) alignés ; écarts ci-dessous |
 | Amendes, péages, contestations | `/espace2/tavaro/amendes` | Linear, Triage | `linear-triage.md` | `amendes-1440-{sombre,clair}-{cote,diff,fusion}.png`, `amendes-ouvert-1440-sombre.png` | superposé : lignes de 59, titre et référence, 2ᵉ ligne (sujet, date, priorité, âge), en-tête alignés ; écarts ci-dessous |
 | Incidents | `/espace2/tavaro/incidents` | Plain, Tasks | `plain-tasks.md`, `plain-commun.md` (relevés Plain) | `incidents-1440-{sombre,clair}-{cote,diff,fusion}.png` (`--ref-origine 353,8`), `incidents-390-*.png` | superposé : titre, contrôle segmenté, ligne d'ajout, lignes de 49 alignés ; écarts ci-dessous |
+| Réseau et flotte | `/espace2/tavaro/reseau` | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `reseau-1440-{sombre,clair}-{cote,diff,fusion}.png`, `reseau-390-*.png` | superposé : lignes de 57, icône, nom et résumé, en-tête de colonnes alignés ; colonnes de droite décalées de 59 px (carte plus étroite, colonne titre variable comme chez Linear) |
 | Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
@@ -131,6 +132,21 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
   la description.
 - **G42 Libérer** : demande désormais une confirmation (règle 5).
 
+### Réseau et flotte
+
+- **Quatre onglets** (Flotte, Plan de flotte, Transferts, Audit et 2027) au lieu de trois (Active, Planned, All) : un
+  par sujet de décision de la direction.
+- **Colonnes** : celles de Linear, aux valeurs du sujet ; leur titre suit l'onglet (Échéance, Canal, Cote…). Owner
+  reste vide (aucun responsable par sujet dans Tavaro). La santé est un disque vert ou rouge (marge, utilisation,
+  cote notée) ou le cercle pointillé de Linear quand rien n'est mesuré.
+- **Texte d'aide sous l'en-tête** : les totaux du plan de flotte (B43) et l'avis des transferts ; Linear n'en a pas.
+- **Doublon tranché (§ 8.3-3)** : la cote de revente se note à un seul endroit — la fiche du véhicule (F28) quand il
+  en a une, la cote du plan (F27) sinon ; « vendre / renouveler » : la ligne du véhicule porte la décision du plan,
+  la fiche porte l'avis économique.
+- **Fenêtres** : F17, F18, F27-F30 de l'écran d'avant ; une mise en vente, une tournée, un audit et la préparation
+  2027 s'ouvrent dans la fenêtre de l'espace 2.
+- **G26, G46, G60, G63** : demandent désormais une confirmation (G28 se décide dans la fenêtre de la tournée).
+
 ## Inventaire : où va chaque bloc (au fil des sous-pages)
 
 | Bloc / geste | Sous-page | Place dans la référence |
@@ -162,4 +178,9 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | B29 sinistres, G35-G37 | Incidents | onglet Sinistres, ligne d'ajout, détail |
 | B30 assistance, G38 | Incidents | onglet Assistance, détail |
 | B32 caution, G40-G42 | Incidents | onglet Caution, ligne d'ajout, détail |
+| B27 transferts, G26-G28 | Réseau et flotte | onglet Transferts |
+| B34, B35 audit, G44-G46, F17, F18 | Réseau et flotte | onglet Audit et 2027 |
+| B43, B44 plan de flotte, G57, F27 | Réseau et flotte | onglet Plan de flotte |
+| B45, B46 flotte, G58-G63, F28-F30 | Réseau et flotte | onglet Flotte |
+| B47 préparation 2027 | Réseau et flotte | onglet Audit et 2027 |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |
