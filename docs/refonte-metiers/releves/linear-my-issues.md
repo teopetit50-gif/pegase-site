@@ -94,3 +94,52 @@ Même en-tête et même gabarit de lignes ; groupes **par jour** : « Today » (
 - Grille : `[indent] 2px [checkbox] 0px [priority] 16px [status] 16px [title] 301px [end-padding] 15px` — **identifiant, pilule cycle et date disparaissent** ; il reste priorité @18, statut @43, titre @66 et l'avatar 18×18 @351.
 - En-tête de groupe : chevron @18, icône @42, « Cycle 1 » @64, compteur ; bouton « + » 28×28 @346 ; les dates du cycle ne s'affichent plus.
 - Lignes toujours 44px.
+
+---
+
+# Complément du 01/11/2026 (My issues › Assigned rempli, sombre + clair)
+
+## Ce qui a été créé (tous dans l'équipe OME, assignés à Wizyy quand indiqué)
+
+Tickets OME-20 à OME-48 et OME-60 à OME-66 (40 tickets environ) : titres de chantier en français, statuts Backlog / Todo / In Progress / Done / Canceled, priorités Urgent / High / Medium / Low / sans, étiquettes créées pour l'occasion (Peinture, Carrelage, Administratif, Sécurité, Réserve, Facture, Client, Urgent chantier) + étiquettes existantes, projets, cycles 1 et 2. Échéances ajoutées (raccourci **⇧ D** sur la page du ticket, champ « Try: 24h, 7 days, Feb 9 ») : OME-23 (saisie « Oct 28 » → interprétée **Oct 2027**), OME-26 (« Oct 30 »), OME-28 (Nov 3), OME-31 (Nov 15). Liste détaillée des titres : voir le Triage et Projects ; rien n'a été modifié sur les tickets de Teo (OME-1 à OME-19).
+
+État relevé : 17 lignes visibles réparties en **groupes** « Urgent issues 3 », « Cycle 1 11 Oct 28 → Nov 10 », « Cycle 2 3 Nov 11 → Nov 24 » (+ suite en défilant).
+
+## Ligne (1440, mesurée)
+
+`a` 1187×**44** (display grid, r 8px, gap 0 8px) — grid-template-columns : `[indent] 8px [checkbox] 18px [priority] 16px [identifier] 55px [status] 16px [title] 940px [createdAt] 60px [end-padding] 18px`.
+
+```
+a @245,222 1187×44
+├ case « Select issue » 14×22 (input 12×12 opacity 0)
+├ priorité : icône 16×16 (Urgent = carré orange)
+├ identifiant « OME-23 » span 13px/450 c tertiaire (55px)
+├ statut : icône 14×14 (cercle Todo, demi-cercle jaune In Progress…)
+├ titre @398 945×36 : span 13px/500 c primaire, puis à droite une rangée de puces (gap 4px) :
+│   étiquette : div 24px r 48px p 0 8px bd 0.5px (sombre lch(16.32 1.48 272), clair lch(84.44 0 282)) bg = fond de carte → pastille 9×9 ronde (couleur de l'étiquette) dans 14×14 + nom 12px/450
+│   projet « Open project » : même puce, icône du projet 14×14 + nom
+│   cycle : puce avec icône cycle 14×14 + « 1 »
+│   échéance : puce avec icône calendrier 14×14 + « Nov 3 » / « Oct 2027 »
+│   assigné : avatar 18×18 à droite (@1322)
+└ date de création @1374 : span 12px/450 c tertiaire « Nov 1 » (title « Created Nov 1, 8:38:09 PM »)
+```
+
+## En-tête de groupe
+
+div 1171×36, **bg lch(9.232 0.85 272)** (clair lch(94.44 0.5 282)), r 8px, p 0 8px 0 0, m 0 8px, gap 8px : chevron de repli · icône (cycle) · libellé 13px/500 c lch(90.826 1.425 272) (clair lch(18.888 1.25 282)) · compteur 13px c lch(63.304 1.425 272) (clair lch(37.776 1.25 282)) · plage de dates « Oct 28 → Nov 10 » c lch(39.452 1.425 272) (clair lch(62.33 1.25 282)) · « + » à droite.
+
+## Barre du haut
+
+Titre « My issues » + « New issue » ; onglets **Assigned** (actif) · Created · Subscribed · Activity (pilules 28px comme ailleurs) ; à droite filtre, affichage, « Open details » (28×28 ronds).
+
+## Couleurs d'étiquettes relevées
+
+rgb(235, 87, 87) rouge, rgb(247, 200, 193) rose, rgb(38, 181, 206) bleu-vert, rgb(76, 183, 130) vert, lch(48 59.31 288.43) violet, lch(67.969 19.321 31.72) beige (clair).
+
+## Paliers
+
+390×844 : grille `[indent] 2px [checkbox] 0px [priority] 16px [status] 16px [title] 303px [end-padding] 13px` — l'identifiant, les puces et la date disparaissent ; restent priorité, statut, titre tronqué, avatar ; onglets réduits à « Assigned · Created · 2 more ▾ » ; « New issue » devient « + ».
+
+## Captures (`captures/linear-my-issues/`)
+
+`1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
