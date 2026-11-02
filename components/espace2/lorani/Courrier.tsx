@@ -46,6 +46,8 @@ import type { DateLue, Dossier, NatureDateLue, Permis, PieceProjet, Projet } fro
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { useMarques, useReports } from "./lor-local";
+import { BoutonReporter } from "./lor-selection";
 import { IconeAffichage, IconeArchive, IconeCalendrierLor, IconeFiltre, IconeLin, IconePoints, IconePrioriteLor, IconeSansResponsable, IconeSprite, IconeStatutTicket, type StatutTicket } from "./lor-icones";
 import type { NomIcone } from "./lor-sprite";
 import "@/components/espace/espace.css";
@@ -165,6 +167,8 @@ export default function Courrier() {
   const [ouvertPoints, setOuvertPoints, menuPointsRef] = useMenu();
   const [ouvertFiltre, setOuvertFiltre, menuFiltreRef] = useMenu();
   const [ouvertAff, setOuvertAff, menuAffRef] = useMenu();
+  const suivis = useMarques("suivis");
+  const reports = useReports();
   const o = params.get("onglet");
   const onglet: CleOnglet = estOnglet(o) ? o : "a-confirmer";
   const chargement = source === "reelle" && !pret;
@@ -374,7 +378,15 @@ export default function Courrier() {
     .map((d) => ({ d, projet: dossier.projets.find((p) => p.id === d.projet_id), permis: d.permis_id ? (dossier.permis.find((p) => p.id === d.permis_id) ?? null) : null }))
     .filter((t): t is { d: DateLue; projet: Projet; permis: Permis | null } => !!t.projet);
 
-  const visibles = groupes.flatMap((g) => g.lignes).sort((a, b) => b.quand.localeCompare(a.quand));
+  /* 02/11 : la cloche (Suivre) d'un permis ou d'un projet fait passer ses courriers en tête, marqués « suivi » ;
+     Snooze (Reporter) retire un courrier de la liste jusqu'à sa date — ./lor-local.ts */
+  const suiviDe = (e: Element) => suivis.a(`projet:${e.projet.id}`) || (!!e.permis && suivis.a(`permis:${e.permis.id}`));
+  const toutes = groupes.flatMap((g) => g.lignes);
+  const voirReportes = params.get("reportes") === "1";
+  const nombreReportes = toutes.filter((e) => reports.jusqua(`courrier:${e.cle}`)).length;
+  const visibles = toutes
+    .filter((e) => voirReportes || !reports.jusqua(`courrier:${e.cle}`))
+    .sort((a, b) => Number(suiviDe(b)) - Number(suiviDe(a)) || b.quand.localeCompare(a.quand));
   const choix = params.get("choix");
   const choisi = visibles.find((e) => e.cle === choix) ?? null;
   const traiteChoisi = choix?.startsWith("t:") ? (traites.find((t) => `t:${t.d.id}` === choix) ?? null) : null;
@@ -554,6 +566,7 @@ export default function Courrier() {
           <span className="lor-ib-textes">
             <span className="lor-ib-l1">
               <span className="lor-ib-point" aria-label="À traiter" />
+              {suiviDe(e) ? <span className="lor-marque" title="Permis ou projet suivi (la cloche de sa page)">suivi</span> : null}
               <span className="lor-ib-id">{v.id}</span>
               <span className="lor-ib-titre">{v.titre}</span>
               <IconeStatutTicket statut={v.statut} titre={v.libelleStatut} />
@@ -675,6 +688,13 @@ export default function Courrier() {
                   );
                 })
               : null}
+            {nombreReportes ? (
+              <li className="lor-ib-note">
+                <Link href={`${CHEMIN}?${new URLSearchParams({ ...Object.fromEntries(params.entries()), reportes: voirReportes ? "0" : "1" }).toString()}`} scroll={false}>
+                  {voirReportes ? `Masquer les ${nombreReportes} reportés` : `${nombreReportes} reporté${nombreReportes > 1 ? "s" : ""} jusqu'à une date : les afficher`}
+                </Link>
+              </li>
+            ) : null}
             {!visibles.length && !voirTraites ? (
               <li className="lor-ib-note">
                 {vide.titre}. {vide.aide}
@@ -699,7 +719,26 @@ export default function Courrier() {
                   </h2>
                 </Link>
               </div>
-              <div className="lor-ib-d-gestes">{detail.gestes}</div>
+              <div className="lor-ib-d-gestes">
+                {choisi ? (
+                  <>
+                    <button
+                      type="button"
+                      className="lor-rond"
+                      aria-pressed={suiviDe(choisi)}
+                      aria-label={suiviDe(choisi) ? "Ne plus suivre" : "Suivre"}
+                      title={suiviDe(choisi) ? `Ne plus suivre ${choisi.permis ? "ce permis" : "ce projet"}` : `Suivre ${choisi.permis ? "ce permis" : "ce projet"} : ses courriers passent en tête, marqués « suivi » (gardé dans ce navigateur)`}
+                      onClick={() => suivis.basculer(choisi.permis ? `permis:${choisi.permis.id}` : `projet:${choisi.projet.id}`)}
+                    >
+                      <IconeSprite nom="Subscribe" />
+                    </button>
+                    <BoutonReporter cle={`courrier:${choisi.cle}`} nom="ce courrier">
+                      <IconeSprite nom="ClockOutline" />
+                    </BoutonReporter>
+                  </>
+                ) : null}
+                {detail.gestes}
+              </div>
             </header>
             <div className="lor-ib-d-corps">
               <h2 className="lor-ib-d-titre">{detail.titre}</h2>
