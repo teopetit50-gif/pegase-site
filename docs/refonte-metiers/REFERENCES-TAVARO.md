@@ -25,6 +25,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | Retours à facturer | `/espace2/tavaro/retours` | Linear, Inbox | `linear-inbox.md` | `retours-1440-{sombre,clair}-{cote,diff,fusion}.png`, `retours-ouvert-1440-*.png` (contrat ouvert à droite), `retours-390-sombre-cote.png` | superposé : liste, lignes, avatars, pastilles, icônes de statut, en-tête alignés au pixel ; écarts ci-dessous |
 | Parc et atelier | `/espace2/tavaro/parc` | Linear, Board | `linear-board.md` | `parc-1440-{sombre,clair}-{cote,diff,fusion}.png`, `parc-390-sombre-cote.png` | superposé : colonnes (x, pas de 348), en-têtes de colonne, cartes (id, statut, titre, puces, pied) alignés ; écarts ci-dessous |
 | Amendes, péages, contestations | `/espace2/tavaro/amendes` | Linear, Triage | `linear-triage.md` | `amendes-1440-{sombre,clair}-{cote,diff,fusion}.png`, `amendes-ouvert-1440-sombre.png` | superposé : lignes de 59, titre et référence, 2ᵉ ligne (sujet, date, priorité, âge), en-tête alignés ; écarts ci-dessous |
+| Incidents | `/espace2/tavaro/incidents` | Plain, Tasks | `plain-tasks.md`, `plain-commun.md` (relevés Plain) | `incidents-1440-{sombre,clair}-{cote,diff,fusion}.png` (`--ref-origine 353,8`), `incidents-390-*.png` | superposé : titre, contrôle segmenté, ligne d'ajout, lignes de 49 alignés ; écarts ci-dessous |
 | Contrat | `/espace2/tavaro/contrats/[id]` | Linear, page d'un ticket | `linear-ticket.md` | `contrat-1440-{sombre,clair}-{cote,diff,fusion}.png`, `contrat-390-{sombre,clair}-cote.png` | superposé : fil, titre, description, ronds, blocs et rangées, propriétés alignés ; écarts ci-dessous |
 
 ## Écarts restants, avec leur raison
@@ -114,6 +115,22 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
   « Create triage issue » → « Enregistrer un avis ».
 - **G31, G51, G54** : demandent désormais une confirmation (règle 5).
 
+### Incidents
+
+- **Police des titres** : Whyte (Dinamo, licence payante) chez Plain ; Inter 400 à la même taille (24/32) ici, faute
+  de licence — le relevé le prévoit (« substitut à choisir par la session métier »).
+- **Carte** : 1128 de large dans la coquille (1079 chez Plain) : les éléments calés à droite (pastille du compte,
+  avatar) sont décalés de 49 px dans la superposition.
+- **Onglets** : Sinistres, Assistance, Caution à la place de My tasks, Todo, Done, avec la même case bleue ; le tri
+  « Last updated » devient le filtre d'agence.
+- **Ligne d'ajout** (« Add new task ») : « Déclarer un sinistre » (G35) ou « Demander une préautorisation » (G40) ; pas
+  de raccourci « T ». L'onglet Assistance n'en a pas (les appels arrivent par le fournisseur de voix).
+- **Avis** « fournisseur de voix » et « prestataire de paiement » (B30, B32) : une ligne de texte sous les onglets.
+- **Détail** : « Handle with Agent » et « Assigned to me » → les gestes de l'objet (faire avancer, recours, clore,
+  capturer, libérer) ; « Account / Threads / Knowledge gap » → les propriétés de l'objet. Le recours se déplie dans
+  la description.
+- **G42 Libérer** : demande désormais une confirmation (règle 5).
+
 ## Inventaire : où va chaque bloc (au fil des sous-pages)
 
 | Bloc / geste | Sous-page | Place dans la référence |
@@ -142,4 +159,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | B28 péages, G29-G34 | Amendes, péages, contestations | lignes, élément ouvert, menu « … » |
 | B36 avis, G47-G51, F19-F22 | Amendes, péages, contestations | lignes, élément ouvert |
 | B37 contestations, G52-G55, L8, F23-F25 | Amendes, péages, contestations | lignes, élément ouvert |
+| B29 sinistres, G35-G37 | Incidents | onglet Sinistres, ligne d'ajout, détail |
+| B30 assistance, G38 | Incidents | onglet Assistance, détail |
+| B32 caution, G40-G42 | Incidents | onglet Caution, ligne d'ajout, détail |
 | B49 mention de l'exemple | coquille (ruban « Données d'exemple ») | — |
