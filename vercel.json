@@ -21,7 +21,10 @@
       "worker-c2": false,
       "worker-c3": false,
       "worker-c4": false,
-      "worker-c5": false
+      "worker-c5": false,
+      "claude/**": false,
+      "reseau-espace2/**": false,
+      "refonte-metiers/**": false
     }
   }
 }
