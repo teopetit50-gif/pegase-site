@@ -119,9 +119,9 @@ export const REGLES: Record<string, Regle> = {
   /* 02/11/2026 — VARELO redécoupé : chaque objet mène à la sous-page qui le montre */
   grp_contrats: (id) => `${RACINE}/varelo/contrats?contrat=${q(id)}`,
   grp_encours_depots: varelo("grp_encours_depots"),
-  grp_receptions: varelo("grp_receptions"),
+  grp_receptions: (id) => `${RACINE}/varelo/operations?reception=${q(id)}`,
   grp_ref_objets: varelo("grp_ref_objets"),
-  grp_reportings_echeances: varelo("grp_reportings_echeances"),
+  grp_reportings_echeances: (id) => `${RACINE}/varelo/operations?echeance=${q(id)}`,
   grp_societes: varelo("grp_societes"),
 };
 

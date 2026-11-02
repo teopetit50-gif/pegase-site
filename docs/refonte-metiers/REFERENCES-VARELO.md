@@ -35,6 +35,7 @@ Inventaire (contrat de la refonte) : `docs/refonte-metiers/varelo.md`. Préfixe 
 |---|---|---|---|---|---|
 | Ce matin | `/espace2/varelo` | Linear, accueil d'une équipe | `linear-home.md` | `ce-matin-*` | fait |
 | Contrats | `/espace2/varelo/contrats` (`?contrat=<id>`) | Plain, Accounts : liste et fiche | `plain-tenants.md`, `plain-tenant.md` | `contrats-liste-*`, `contrats-fiche-*`, `contrats-fiche-volet-*` | fait |
+| Opérations | `/espace2/varelo/operations` (`?reception=`, `?echeance=`) | Linear, Board | `linear-board.md` | `operations-*` | fait |
 
 ### Ce matin → Linear, accueil d'une équipe (`linear-home.md`)
 
@@ -80,3 +81,28 @@ le volet de 360 de la fiche) :
   « Notes » (carte vide de Plain quand il n'y en a pas) : Threads, Themes et Issues n'ont pas d'équivalent.
 - Whyte (titre de page, licence payante) → Inter 400 même taille ; geistMono → Source Code Pro (chargée par l'espace).
 - « Faire valider » et « Archiver » passent par une confirmation (consigne commune).
+
+### Opérations → Linear, Board (`linear-board.md`)
+
+Contenu : blocs 7 (reportings dus) et 8 (réserves à émettre) en cartes, rangées par état ; fenêtres 7.a, 7.b, 8.a-8.d
+d'avant ; gestes G16 à G23. Repères `grp_receptions` → `?reception=<id>`, `grp_reportings_echeances` → `?echeance=<id>`
+(la carte visée défile au centre, ses gestes ouverts).
+
+Mesures prises sur la capture de référence (pixels) : zone de colonne 340 au pas de 348, colonne à 17 du bord, en-tête
+de 50, cartes de 322 à rayon 8, ligne 1 de 15, titre à 5, puces de 24 à 10, pied de 22,5 à 8 : 132,5 px pour un titre
+de deux lignes et une rangée de puces. Fond des colonnes : transparent en sombre, lch(94.44 0.5 282) en clair.
+
+Preuves 1440 : sombre 12,8/255, clair 13,7/255 (dx 0 : le tableau part du bord gauche). Colonnes, en-têtes, icônes
+d'état, « … » et « + », bords des cartes, identifiant, titre, puces et pied tombent sur la référence ; l'écart suit le
+contenu (nombre de puces : la société d'un groupe est plus longue qu'un projet de Linear, la rangée passe à la ligne).
+390 : colonnes de 290, cartes de 264, défilement horizontal, comme Linear.
+
+Écarts restants, expliqués :
+- Colonnes : les états du métier (En retard, À venir, Cette semaine, Aujourd'hui ou demain, Faits, Classés) dans les
+  icônes d'état de Linear (Triage, Backlog, Todo, In Progress, Done, Canceled), dans le même ordre.
+- Identifiant de carte : « Réserve · mode de transport » ou « Reporting · périodicité » (pas de numéro de ticket).
+- Pied : la date de réception ou la période (pas de « Created … »).
+- Pas de cloche (notifications) ni de bouton « Open details » : pas de volet de ticket ; un clic sur une carte ouvre ses
+  gestes (le menu contextuel de Linear, aussi au clic droit), car une réserve ou un reporting n'a pas de page.
+- Puces du métier : avarie, manquant, photos, préjudice, décision, canal (pastille 9×9 comme une étiquette).
+- La colonne « Faits » montre les 20 plus récents, puis « … et N de plus » (les reportings faits s'accumulent).

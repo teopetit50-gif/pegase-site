@@ -352,6 +352,7 @@ function Liste({ c, ouvrir, introuvable }: { c: C; ouvrir: (id: string) => void;
 
 /* ——— la fiche (page d'un account) ——— */
 function Fiche({ k, tous, c, onValider, onArchiver }: { k: Contrat; tous: Contrat[]; c: C; onValider: (k: Contrat) => void; onArchiver: (k: Contrat) => void }) {
+  const routeur = useRouter();
   const [onglet, setOnglet] = useState<"etapes" | "tiers" | "notes">("etapes");
   const [volet, setVolet] = useState(true);
   const { ouvert: plusOuvert, setOuvert: setPlusOuvert, boite: plusBoite } = useOuvert<HTMLDivElement>();
@@ -365,7 +366,7 @@ function Fiche({ k, tous, c, onValider, onArchiver }: { k: Contrat; tous: Contra
     ...(c.peutSaisir && k.statut !== "archive" ? [{ libelle: "Corriger", action: () => c.setEdition(k) }] : []),
     ...(peutValider ? [{ libelle: "Faire valider la dénonciation", action: () => onValider(k) }] : []),
     ...(c.peutDenoncer && k.statut === "actif" && k.reconduction !== "aucune" ? [{ libelle: "Dénoncé…", action: () => c.setDenonce(k) }] : []),
-    ...(lienTiers ? ["sep" as const, { libelle: "Ouvrir le tiers dans le référentiel", action: () => window.location.assign(lienTiers) }] : []),
+    ...(lienTiers ? ["sep" as const, { libelle: "Ouvrir le tiers dans le référentiel", action: () => routeur.push(lienTiers) }] : []),
     ...(c.peutArchiver && k.statut !== "archive" ? ["sep" as const, { libelle: "Archiver", action: () => onArchiver(k) }] : []),
   ];
 
