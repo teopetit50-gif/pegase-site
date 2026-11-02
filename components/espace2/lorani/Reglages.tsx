@@ -4,8 +4,9 @@
    LORANI — les réglages d'un projet (29/10/2026, refonte des pages métiers)
 
    Settings › Team de Linear, au 1:1 : relevé docs/refonte-metiers/releves/
-   linear-team-settings.md, mesures dans components/espace2/lin/
-   linear-team-settings.css (préfixe lts-).
+   linear-team-settings.md (29/10 et 01/11, sombre et clair), mesures dans
+   ./lor-reglages.css (préfixe lor-rg-, jetons de Linear de ./lor.css,
+   02/11), icônes du sprite de Linear.
 
    Ce qui se règle une fois par projet, ou rarement (inventaire lorani.md,
    § 8.2 « Réglage », et DECOUPAGES.md) : l'équipe, les lots, les
@@ -21,7 +22,7 @@
    Controle, Honoraires, Chantier, OrdresService, Assurances, et la carte
    du projet) : la rangée mène à la page qui montre cette carte, à la bonne
    partie — le permis (/permis/<id>), le projet (/projets/<id>?partie=
-   projet | controle | chantier | assurances), les honoraires
+   equipe | controle | chantier | assurances), les honoraires
    (/honoraires?projet=<id>). Rien n'est écrit depuis cette page : mêmes
    portes, mêmes droits, là où elles sont.
    ══════════════════════════════════════════════════════════════════════ */
@@ -29,14 +30,17 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Building2, CalendarDays, ChevronLeft, ChevronRight, FileSignature, FileText, FolderClosed, HardHat, Layers, Receipt, SlidersHorizontal, Timer, UserCheck, Users } from "lucide-react";
 import { dateCourte, montant } from "@/components/espace/format";
 import { PHASES, ROLES_PROJET, libelleActivite, titrePermis } from "@/components/espace/lorani/etats";
 import type { Permis, Projet } from "@/components/espace/lorani/types";
 import { RACINE } from "../modules";
 import { useLorani } from "./donnees";
-import "../lin/lin.css";
-import "../lin/linear-team-settings.css";
+import { IconeLin, IconeSprite } from "./lor-icones";
+import type { NomIcone } from "./lor-sprite";
+import "./lor.css";
+import "./lor-reglages.css";
+
+const Icone = ({ nom }: { nom: NomIcone }) => <IconeSprite nom={nom} />;
 
 const BASE = `${RACINE}/lorani`;
 
@@ -64,29 +68,29 @@ type RangeeP = { href?: string; icone?: React.ReactNode; nom: string; desc?: str
 function Rangee({ href, icone, nom, desc, valeur, teinte }: RangeeP) {
   const corps = (
     <>
-      {icone ? <figure className="lts-case">{icone}</figure> : null}
-      <span className="lts-textes">
-        <span className="lts-nom">{nom}</span>
-        {desc ? <span className="lts-desc">{desc}</span> : null}
+      {icone ? <figure className="lor-rg-case" aria-hidden="true">{icone}</figure> : null}
+      <span className="lor-rg-textes">
+        <span className="lor-rg-nom">{nom}</span>
+        {desc ? <span className="lor-rg-desc">{desc}</span> : null}
       </span>
-      <span className="lts-droite">
+      <span className="lor-rg-droite">
         {valeur ? (
-          <span className="lts-valeur" data-teinte={teinte}>
+          <span className="lor-rg-valeur" data-teinte={teinte}>
             {valeur}
           </span>
         ) : null}
-        {href ? <ChevronRight className="lts-chevron" aria-hidden="true" /> : null}
+        {href ? <IconeLin nom="chevronBas" className="lor-rg-chevron" /> : null}
       </span>
     </>
   );
   return (
     <li>
       {href ? (
-        <Link href={href} className="lts-rangee">
+        <Link href={href} className="lor-rg-rangee">
           {corps}
         </Link>
       ) : (
-        <div className="lts-rangee lts-rangee--muette">{corps}</div>
+        <div className="lor-rg-rangee">{corps}</div>
       )}
     </li>
   );
@@ -94,9 +98,9 @@ function Rangee({ href, icone, nom, desc, valeur, teinte }: RangeeP) {
 
 function Section({ titre, children }: { titre?: string; children: React.ReactNode }) {
   return (
-    <section className="lts-section" aria-label={titre}>
-      {titre ? <h3 className="lts-h3">{titre}</h3> : null}
-      <ul className="lts-carte">{children}</ul>
+    <section className="lor-rg-section" aria-label={titre}>
+      {titre ? <h3 className="lor-rg-h3">{titre}</h3> : null}
+      <ul className="lor-rg-carte">{children}</ul>
     </section>
   );
 }
@@ -112,16 +116,16 @@ export default function Reglages() {
   const projet = id && pret ? (dossier.projets.find((p) => p.id === id) ?? null) : null;
 
   const barre = (
-    <div className="lts-barre">
-      <Link href={projet ? `${BASE}/reglages` : BASE} className="lts-retour">
-        <ChevronLeft aria-hidden="true" />
+    <div className="lor-rg-barre">
+      <Link href={projet ? `${BASE}/reglages` : BASE} className="lor-rg-retour">
+        <IconeLin nom="chevronBas" />
         {projet ? "Projets" : "Permis"}
       </Link>
     </div>
   );
   const note =
     erreur && source === "reelle" ? (
-      <p className="lts-note" role="alert">
+      <p className="lor-rg-note" role="alert">
         La base réelle n&apos;a pas répondu. {erreur}
       </p>
     ) : null;
@@ -129,25 +133,25 @@ export default function Reglages() {
   /* ——— sans projet choisi : la liste des projets ——— */
   if (!projet) {
     return (
-      <div className="lin lts">
+      <div className="lor lor-rg">
         <h1 className="v2-sr">Réglages des projets</h1>
         {barre}
-        <div className="lts-zone">
-          <div className="lts-colonne">
-            <div className="lts-tete">
-              <h2 className="lts-titre">Réglages</h2>
-              <div className="lts-sous">
-                <p className="lts-aide">{id && pret ? "Ce projet n'existe pas ou vous n'y avez pas accès. Choisissez-en un." : "Choisissez un projet : régime des permis, contrôles, honoraires, marchés et assurances."}</p>
+        <div className="lor-rg-zone">
+          <div className="lor-rg-colonne">
+            <div className="lor-rg-tete">
+              <h2 className="lor-rg-titre">Réglages</h2>
+              <div className="lor-rg-sous">
+                <p className="lor-rg-aide">{id && pret ? "Ce projet n'existe pas ou vous n'y avez pas accès. Choisissez-en un." : "Choisissez un projet : régime des permis, contrôles, honoraires, marchés et assurances."}</p>
               </div>
             </div>
             {note}
-            <div className="lts-sections">
+            <div className="lor-rg-sections">
               {!pret ? (
-                <p className="lts-vide" role="status">
+                <p className="lor-rg-vide" role="status">
                   Lecture de vos projets…
                 </p>
               ) : projets.length === 0 ? (
-                <p className="lts-vide">Aucun projet. Ouvrez-en un depuis la liste des permis : ses réglages s&apos;afficheront ici.</p>
+                <p className="lor-rg-vide">Aucun projet. Ouvrez-en un depuis la liste des permis : ses réglages s&apos;afficheront ici.</p>
               ) : (
                 <Section>
                   {projets.map((p) => {
@@ -156,7 +160,7 @@ export default function Reglages() {
                       <Rangee
                         key={p.id}
                         href={`${chemin}?projet=${encodeURIComponent(p.id)}`}
-                        icone={<FolderClosed aria-hidden="true" />}
+                        icone={<Icone nom="Project" />}
                         nom={p.nom}
                         desc={[p.reference, p.commune, PHASES[p.phase]].filter(Boolean).join(" · ")}
                         valeur={n ? pluriel(n, "permis", "permis") : "Sans permis"}
@@ -195,36 +199,36 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
   const sous = [projet.reference, projet.adresse, [projet.code_postal, projet.commune].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
 
   return (
-    <div className="lin lts">
+    <div className="lor lor-rg">
       <h1 className="v2-sr">Réglages du projet {projet.nom}</h1>
       {barre}
-      <div className="lts-zone">
-        <div className="lts-colonne">
-          <div className="lts-tete">
-            <h2 className="lts-titre">{projet.nom}</h2>
-            <div className="lts-sous">
-              <p className="lts-aide">{sous || "Réglages du projet"}</p>
-              <Link href={`${BASE}/projets/${encodeURIComponent(pid)}`} className="lts-bouton">
+      <div className="lor-rg-zone">
+        <div className="lor-rg-colonne">
+          <div className="lor-rg-tete">
+            <h2 className="lor-rg-titre">{projet.nom}</h2>
+            <div className="lor-rg-sous">
+              <p className="lor-rg-aide">{sous || "Réglages du projet"}</p>
+              <Link href={`${BASE}/projets/${encodeURIComponent(pid)}`} className="lor-rg-bouton">
                 Ouvrir le projet
-                <ArrowUpRight aria-hidden="true" />
+                <IconeLin nom="chevronBas" />
               </Link>
             </div>
           </div>
           {note}
 
-          <div className="lts-sections">
+          <div className="lor-rg-sections">
             {/* B20-B22 : l'équipe, les lots, les intervenants (F6, F4, F5) */}
             <Section>
               <Rangee
-                href={versProjet(pid, "projet")}
-                icone={<Users aria-hidden="true" />}
+                href={versProjet(pid, "equipe")}
+                icone={<Icone nom="Members" />}
                 nom="Équipe"
                 desc="Le chef de projet reçoit les rappels et la ligne du point du matin."
                 valeur={chef ? `${ROLES_PROJET.chef_projet} : ${nommer(chef.user_id)}` : membres.length ? pluriel(membres.length, "membre") : "Personne"}
                 teinte={chef ? undefined : "jaune"}
               />
-              <Rangee href={versProjet(pid, "projet")} icone={<Layers aria-hidden="true" />} nom="Lots" desc="Ils servent aux consultations, aux marchés, aux réserves, au DOE et aux assurances." valeur={lots.length ? pluriel(lots.length, "lot") : "Aucun"} />
-              <Rangee href={versProjet(pid, "projet")} icone={<Building2 aria-hidden="true" />} nom="Intervenants" desc="Maître d'ouvrage, bureaux d'études, contrôleur, entreprises, et leur lot." valeur={intervenants.length ? pluriel(intervenants.length, "intervenant") : "Aucun"} />
+              <Rangee href={versProjet(pid, "equipe")} icone={<Icone nom="Brick" />} nom="Lots" desc="Ils servent aux consultations, aux marchés, aux réserves, au DOE et aux assurances." valeur={lots.length ? pluriel(lots.length, "lot") : "Aucun"} />
+              <Rangee href={versProjet(pid, "equipe")} icone={<Icone nom="Users" />} nom="Intervenants" desc="Maître d'ouvrage, bureaux d'études, contrôleur, entreprises, et leur lot." valeur={intervenants.length ? pluriel(intervenants.length, "intervenant") : "Aucun"} />
             </Section>
 
             {/* F12 : le régime de chaque permis, sur la page du permis */}
@@ -234,14 +238,14 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
                   <Rangee
                     key={p.id}
                     href={`${BASE}/permis/${encodeURIComponent(p.id)}`}
-                    icone={<FileText aria-hidden="true" />}
+                    icone={<Icone nom="Page" />}
                     nom={`Régime · ${titrePermis(p, projet.nom)}`}
                     desc={p.calcul?.regime ? `Règle ${p.calcul.regime.regle_instruction} · sans réponse de la mairie : ${p.calcul.regime.effet_silence}` : "Secteur protégé, monument historique, ERP, IGH, évaluation environnementale, cas de rejet."}
                     valeur={p.actif ? regimeDe(p) : "Permis inactif"}
                   />
                 ))
               ) : (
-                <Rangee icone={<FileText aria-hidden="true" />} nom="Aucun permis saisi" desc="Le régime se règle sur chaque permis, une fois saisi depuis le projet." />
+                <Rangee icone={<Icone nom="Page" />} nom="Aucun permis saisi" desc="Le régime se règle sur chaque permis, une fois saisi depuis le projet." />
               )}
             </Section>
 
@@ -249,14 +253,14 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
             <Section titre="Contrôle du dossier">
               <Rangee
                 href={versProjet(pid, "controle")}
-                icone={<SlidersHorizontal aria-hidden="true" />}
+                icone={<Icone nom="Gears" />}
                 nom="Régler les contrôles"
                 desc="L'écart toléré par grandeur, et les familles de contrôle qui ne tournent pas."
                 valeur={[tolerances ? `${pluriel(tolerances, "tolérance propre", "tolérances propres")}` : "Tolérances du code", coupees ? pluriel(coupees, "famille coupée", "familles coupées") : null].filter(Boolean).join(" · ")}
               />
               <Rangee
                 href={versProjet(pid, "controle")}
-                icone={<UserCheck aria-hidden="true" />}
+                icone={<Icone nom="Judge" />}
                 nom="Qui décide des constats"
                 desc={dernier ? `Sur le dernier contrôle, « ${dernier.intitule} » (indice ${dernier.indice}). Le gérant et les admins gardent la main.` : "Se choisit sur un contrôle, une fois celui-ci préparé."}
                 valeur={!dernier ? "Aucun contrôle" : dernier.decideur ? nommer(dernier.decideur) : "Toute l'équipe"}
@@ -267,7 +271,7 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
             <Section titre="Honoraires">
               <Rangee
                 href={`${BASE}/honoraires?projet=${encodeURIComponent(pid)}`}
-                icone={<Receipt aria-hidden="true" />}
+                icone={<Icone nom="Euro" />}
                 nom="Éléments de mission"
                 desc="Les honoraires et les heures prévues par élément ; le temps passé s'y compare."
                 valeur={honoraires.length ? `${pluriel(honoraires.length, "élément")} · ${montant(totalHonoraires)} HT` : "Aucun"}
@@ -278,7 +282,7 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
             <Section titre="Chantier">
               <Rangee
                 href={versProjet(pid, "chantier")}
-                icone={<FileSignature aria-hidden="true" />}
+                icone={<Icone nom="Signature" />}
                 nom="Marchés de travaux"
                 desc="Un marché par lot : titulaire, montant, avenants, retenue, avance, pénalité de retard."
                 valeur={marches.length ? pluriel(marches.length, "marché") : "Aucun"}
@@ -289,7 +293,7 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
                   <Rangee
                     key={m.id}
                     href={versProjet(pid, "chantier")}
-                    icone={<Timer aria-hidden="true" />}
+                    icone={<Icone nom="Stopwatch" />}
                     nom={`Délai d'exécution · ${l ? `lot ${l.numero}, ${l.intitule}` : "lot"}`}
                     desc={`${m.titulaire} · ${montant(m.montant_ht)} HT. Avec l'ordre de service de démarrage, il fixe la fin contractuelle.`}
                     valeur={m.delai_execution_jours ? pluriel(m.delai_execution_jours, "jour") : "Non saisi"}
@@ -302,7 +306,7 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
             <Section titre="Assurances">
               <Rangee
                 href={versProjet(pid, "assurances")}
-                icone={<CalendarDays aria-hidden="true" />}
+                icone={<Icone nom="Calendar" />}
                 nom="Ouverture du chantier"
                 desc="La date que les décennales des entreprises doivent couvrir."
                 valeur={projet.ouverture_chantier ? date(projet.ouverture_chantier) : "Non saisie"}
@@ -311,7 +315,7 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
                 <Rangee
                   key={l.id}
                   href={versProjet(pid, "assurances")}
-                  icone={<HardHat aria-hidden="true" />}
+                  icone={<Icone nom="Shield" />}
                   nom={`Activités du lot ${l.numero} · ${l.intitule}`}
                   desc={l.activites_requises.length ? l.activites_requises.map(libelleActivite).join(", ") : "Aucune activité requise : la décennale n'est pas comparée au lot."}
                   valeur={l.activites_requises.length ? pluriel(l.activites_requises.length, "activité") : "Aucune"}

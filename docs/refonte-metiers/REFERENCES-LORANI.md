@@ -6,7 +6,7 @@
 | Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | écrite (`PagePermis.tsx`, `lor-ticket.css`) ; superposée en sombre, clair, 1024 et 390 (`comparaisons/lorani/permis-*`) ; écarts ci-dessous |
 | Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | écrite (`PageProjet.tsx`, `lor-initiative.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/projet-*`) ; écarts ci-dessous |
 | Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | écrite (`Courrier.tsx`, `lor-inbox.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/courrier-*`) ; écarts ci-dessous |
-| Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | à faire |
+| Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | refaite aux jetons et icônes de Linear (`Reglages.tsx`, `lor-reglages.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/reglages-*`) |
 | Honoraires et temps | `/espace2/lorani/honoraires` | Attio, People + fiche | `attio-people.md` | en dernier (relevé Attio refait) |
 
 ## Fichiers communs (préfixe lor-, propres à Lorani)
@@ -81,3 +81,14 @@ Correspondances : notification non lue → courrier à traiter (date lue à conf
 Écarts restants, avec leur raison :
 - Le courrier ouvert n'a pas la barre d'outils (copier le lien, l'identifiant, la branche) ni la colonne d'activité du ticket : un courrier n'a pas de page propre, ses liens mènent au permis et au projet (pilules).
 - Pas de « Snooze » ni d'archivage d'une notification : un courrier se traite (confirmer, écarter) ou se saisit à la main, il ne se met pas de côté.
+
+## Réglages → Linear, Settings › Team (Omega)
+
+La page existait déjà sur Settings › Team (29/10) mais avec les couleurs « dashboard » de `lin/lin.css` et des icônes Lucide. Reprise le 02/11 : feuille propre `lor-reglages.css` (préfixe lor-rg-), jetons de Linear (`lor.css` + cartes, anneaux, cases et textes seconds relevés en sombre et clair), icônes du sprite de Linear (Members, Brick, Users, Page, Gears, Judge, Euro, Signature, Stopwatch, Calendar, Shield, Project), chevrons de Linear.
+Mesures relues au DOM, égales au relevé : lien retour à x 9, y 11 ; colonne 640 à x 274 ; titre à y 65 ; première carte à y 157 ; h3 « Permis » à y 400 ; rangées de 65. À 390 : colonne à 22, rangées p 16 10.67, texte sur plusieurs lignes, 24 entre sections (capture `390-clair`).
+Comparaisons : `reglages-1440-sombre-*`, `reglages-1440-clair-*`, `reglages-390-sombre-*`, `reglages-390-clair-*`. Écarts : le contenu (sections Permis, Contrôle, Honoraires, Chantier, Assurances à la place d'Issues / Workflow / AI / Team hierarchy).
+
+Écarts restants, avec leur raison :
+- Pas de « Danger zone » (Leave / Retire / Delete) ni de rangée verrouillée « Available on Business » : aucun geste de ce genre sur un projet ; supprimer un projet n'existe pas dans Lorani.
+- La barre latérale des réglages de Linear n'a pas d'équivalent : c'est le cadre de l'espace 2 (rail et sous-menu communs).
+- L'équipe, les lots et les intervenants mènent à la vue « Équipe » de la page du projet (`?partie=equipe`).
