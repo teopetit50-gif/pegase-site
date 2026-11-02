@@ -1,17 +1,32 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   Réseau Omega — la fiche d'un membre (02/11/2026)
+   Réseau Omega — la fiche d'un membre (reprise du 02/11/2026)
 
-   Composition de la fiche entreprise de pappers.be (relevée dans Chromium
-   le 02/11/2026) : une carte d'en-tête en deux moitiés — à gauche
-   l'identité (nom en grand, statut), à droite une liste de faits en
-   libellé / valeur — puis des cartes de section sur deux colonnes, chacune
-   avec son titre, le nom de l'entreprise en petites capitales dessous, un
-   filet, et ses lignes. SANS l'aplat de couleur pleine largeur de la
-   référence : la carte d'en-tête se pose sur le fond de page d'Espace 2,
-   comme toutes les autres. Habillage : jetons --v2-*, v2-carte, v2-btn,
-   v2-modale.
+   LE CONTENU suit la fiche entreprise publique de pappers.be, relevée dans
+   Chromium (https://www.pappers.be/fr/company/menuiserie-brahy-0444482209,
+   sans compte), dans son ordre :
+     · l'en-tête : le nom en grand, le statut (« Active ») et l'identifiant,
+       puis les faits (adresse, activité, effectif, création, dirigeants) ;
+     · « Informations juridiques » → ici « Informations du membre » ;
+     · « Activité » (codes et domaines) → l'activité et ce qu'il propose ;
+     · « Finances » (un tableau par indicateur et par année) → les badges
+       vérifiés par la donnée : indicateur, valeur, période, source ;
+     · « Prospecter dans ce secteur » → les membres du même secteur ou de
+       la même île ;
+     · « Informations de contact » (« Réservé aux utilisateurs
+       connectés ») → les coordonnées ne sont pas partagées : on écrit par
+       la messagerie du réseau.
+   Les états de pappers sont gardés : un champ que le membre n'a pas
+   accepté de montrer s'affiche « Non montré par le membre », comme
+   l'« Accès restreint » des bénéficiaires effectifs.
+
+   L'HABILLAGE est celui des pages des moteurs (tableaux de bord de FILED,
+   CASHD, REPUT, OFFLOAD) : la page d'un projet de Linear du kit
+   components/espace2/lin/ — barre du titre de 44 avec le fil, colonne de
+   texte (tuile 36, titre 24/600, résumé 15, ligne « Propriétés » en
+   puces, sections au titre gris 13/500), cartes de 388 à droite
+   repliables. Jetons --lin-*, sombre et clair.
 
    « Écrire » mène aux Messages du réseau (?a=<slug>) ; « Demander une
    mise en relation » prépare une demande à Omega, qui présente « vous »
@@ -20,173 +35,295 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, BadgeCheck, Handshake, MessageSquare, ShieldCheck, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Briefcase, CalendarDays, Handshake, Info, Lock, MapPin, MessageSquare, ShieldCheck, Users, X } from "lucide-react";
 import { Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { useSource } from "@/components/espace/source";
 import { useToast } from "../Toasts";
 import { useOrganisation } from "../organisation";
+import { CarteDroite } from "../lin/Lin";
 import { MEMBRES, type Membre } from "./membres";
 import { reseauEnExemple } from "./source";
-import { LigneBadge, Monogramme, ReseauFerme } from "./membres-ui";
-import { RACINE_MEMBRES, badgesLus, lienEcrire, lienMembre, membreDe, moisEnClair } from "./membres-donnees";
+import { Avatar, ContenuBulle, IconeBadge, Infobulle, ReseauFerme } from "./membres-ui";
+import { BADGES_CONNUS, PERIODE_BADGES, RACINE_MEMBRES, badgesLus, lienEcrire, lienMembre, membreDe, moisCourt, moisEnClair } from "./membres-donnees";
+import "../lin/lin.css";
 import "./membres.css";
 
 export function FicheMembre({ slug }: { slug: string }) {
   const { source } = useSource();
   const m = membreDe(slug);
+  const exemple = reseauEnExemple(source) && !!m;
   return (
-    <div className="v2-page rm-page">
-      <nav className="rm-fil" aria-label="Fil d'Ariane">
-        <Link href={RACINE_MEMBRES}>
-          <ArrowLeft width={14} height={14} aria-hidden="true" />
-          Membres
-        </Link>
-        {reseauEnExemple(source) && m ? (
-          <>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">{m.nom}</span>
-          </>
+    <div className="lin rm">
+      <header className="lin-tete">
+        <nav className="lin-fil" aria-label="Fil d'Ariane">
+          <Link href={RACINE_MEMBRES} className="lin-fil-equipe">
+            <Users aria-hidden="true" />
+            <span className="lin-fil-lien">Membres</span>
+          </Link>
+          {exemple ? (
+            <>
+              <span className="lin-fil-sep" aria-hidden="true">
+                ›
+              </span>
+              <span className="lin-fil-ici" aria-current="page">
+                {m.nom}
+              </span>
+            </>
+          ) : null}
+        </nav>
+        {exemple ? (
+          <div className="lin-tete-droite rm-tete-actions">
+            <Link href={lienEcrire(m.slug)} className="v2-btn v2-btn--petit">
+              <MessageSquare width={14} height={14} aria-hidden="true" />
+              Écrire
+            </Link>
+          </div>
         ) : null}
-      </nav>
-      {reseauEnExemple(source) && m ? <Fiche m={m} /> : <ReseauFerme retour />}
+      </header>
+      {exemple ? (
+        <Fiche m={m} />
+      ) : (
+        <div className="rm-ferme">
+          <ReseauFerme retour />
+        </div>
+      )}
     </div>
   );
 }
 
 function Fiche({ m }: { m: Membre }) {
   const badges = badgesLus(m.badges);
-  const voisins = MEMBRES.filter((x) => x.ile === m.ile && x.slug !== m.slug).slice(0, 4);
+  const memeSecteur = MEMBRES.filter((x) => x.secteur === m.secteur && x.slug !== m.slug);
+  const memeIle = MEMBRES.filter((x) => x.ile === m.ile && x.slug !== m.slug && !memeSecteur.includes(x)).slice(0, 4);
+
   return (
-    <>
-      <section className="v2-carte rm-entete" aria-labelledby="rm-fiche-nom">
-        <div className="rm-entete-identite">
-          <Monogramme nom={m.nom} taille={48} />
-          <div className="rm-entete-noms">
-            <h1 className="rm-titre" id="rm-fiche-nom">
-              {m.nom}
-            </h1>
-            <p className="rm-entete-statut">
-              <ShieldCheck width={14} height={14} aria-hidden="true" />
-              Membre vérifié du Réseau Omega
-            </p>
-          </div>
-          <div className="rm-entete-actions">
-            <Link href={lienEcrire(m.slug)} className="v2-btn v2-btn--primaire">
-              <MessageSquare width={16} height={16} aria-hidden="true" />
-              Écrire
-            </Link>
-            <MiseEnRelation membre={m} />
-          </div>
+    <div className="lin-projet">
+      <div className="lin-projet-texte">
+        <span className="lin-tuile rm-tuile">
+          <Avatar nom={m.nom} taille={36} />
+        </span>
+        <h1 className="lin-projet-h1">{m.nom}</h1>
+        <p className="lin-projet-resume">
+          {m.secteur} à {m.commune}, en {m.ile}. Membre vérifié du Réseau Omega depuis {moisEnClair(m.depuis)}.
+        </p>
+
+        <div className="lin-projet-ligne">
+          <span className="lin-projet-etiquette">Propriétés</span>
+          <span className="lin-puce rm-puce-statut">
+            <ShieldCheck width={16} height={16} aria-hidden="true" />
+            Membre vérifié
+          </span>
+          <span className="lin-puce">
+            <Briefcase width={16} height={16} aria-hidden="true" />
+            {m.secteur}
+          </span>
+          <span className="lin-puce">
+            <MapPin width={16} height={16} aria-hidden="true" />
+            {m.commune}
+          </span>
+          <span className="lin-puce">
+            <CalendarDays width={16} height={16} aria-hidden="true" />
+            Depuis {moisCourt(m.depuis)}
+          </span>
         </div>
-        <dl className="rm-faits">
+        <div className="lin-projet-ligne">
+          <span className="lin-projet-etiquette">Réseau</span>
+          <MiseEnRelation membre={m} />
+        </div>
+
+        <h2 className="lin-projet-h2">Informations du membre</h2>
+        <dl className="rm-lignes">
           <div>
-            <dt>Activité</dt>
-            <dd>{m.secteur}</dd>
+            <dt>Nom</dt>
+            <dd>{m.nom}</dd>
           </div>
           <div>
-            <dt>Commune</dt>
+            <dt>Situation</dt>
             <dd>
-              {m.commune}, {m.ile}
+              <span className="rm-statut">Actif</span> · membre vérifié par Omega
             </dd>
           </div>
           <div>
-            <dt>Membre depuis</dt>
+            <dt>Entrée dans le réseau</dt>
             <dd>{moisEnClair(m.depuis)}</dd>
           </div>
           <div>
-            <dt>Badges</dt>
-            <dd>{badges.length ? `${badges.length} vérifié${badges.length > 1 ? "s" : ""} par la donnée` : "Aucun montré"}</dd>
+            <dt>Île</dt>
+            <dd>{m.ile}</dd>
+          </div>
+          <div>
+            <dt>Commune</dt>
+            <dd>{m.commune}</dd>
           </div>
         </dl>
-      </section>
 
-      <div className="rm-sections">
-        <Section titre="Ce qu'il propose" nom={m.nom}>
-          <ul className="rm-puces">
-            {m.propose.map((p) => (
-              <li key={p}>{p}</li>
-            ))}
-          </ul>
-        </Section>
+        <h2 className="lin-projet-h2">Activité</h2>
+        <dl className="rm-lignes">
+          <div>
+            <dt>Secteur</dt>
+            <dd>{m.secteur}</dd>
+          </div>
+          <div>
+            <dt>Ce qu&apos;il propose</dt>
+            <dd>
+              <ul className="rm-liste-points">
+                {m.propose.map((p) => (
+                  <li key={p}>{p}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+          <div>
+            <dt>Ce qu&apos;il cherche</dt>
+            <dd>
+              <ul className="rm-liste-points">
+                {m.cherche.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        </dl>
 
-        <Section titre="Ce qu'il cherche" nom={m.nom}>
-          <ul className="rm-puces">
-            {m.cherche.map((c) => (
-              <li key={c}>{c}</li>
-            ))}
-          </ul>
-        </Section>
+        <h2 className="lin-projet-h2">Badges vérifiés par la donnée</h2>
+        <div className="rm-badges-table" role="table" aria-label="Badges vérifiés par la donnée">
+          <div className="rm-badges-tete" role="row">
+            <span role="columnheader">Indicateur</span>
+            <span role="columnheader">Valeur</span>
+            <span role="columnheader">Période</span>
+            <span role="columnheader">Source</span>
+          </div>
+          {BADGES_CONNUS.map((connu) => {
+            const b = badges.find((x) => x.cle === connu.cle);
+            return (
+              <div key={connu.cle} className="rm-badges-ligne" role="row" data-absent={b ? undefined : ""}>
+                <span role="cell" className="rm-badges-nom">
+                  <IconeBadge cle={connu.cle} />
+                  {connu.nom}
+                </span>
+                {b ? (
+                  <>
+                    <span role="cell" className="rm-badges-valeur">
+                      {b.phrase}
+                      <Infobulle etiquette={`D'où vient « ${b.phrase} » ?`} contenu={<ContenuBulle badge={b} />} classe="rm-bulle-i">
+                        <Info width={14} height={14} aria-hidden="true" />
+                      </Infobulle>
+                    </span>
+                    <span role="cell">12 mois glissants</span>
+                    <span role="cell">{b.origine}</span>
+                  </>
+                ) : (
+                  <span role="cell" className="rm-badges-restreint">
+                    <Lock width={14} height={14} aria-hidden="true" />
+                    Non montré par le membre
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <p className="rm-note">Omega calcule chaque badge sur {PERIODE_BADGES} ; le membre ne le déclare pas, il choisit seulement de le montrer.</p>
 
-        <Section titre="Badges vérifiés par la donnée" nom={m.nom}>
-          {badges.length ? (
-            <ul className="rm-lignes-badges">
-              {badges.map((b) => (
-                <LigneBadge key={b.cle} badge={b} />
-              ))}
-            </ul>
-          ) : (
-            <p className="rm-sourdine rm-section-vide">
-              <BadgeCheck width={14} height={14} aria-hidden="true" />
-              {m.nom} n&apos;a pas choisi de montrer de badge.
-            </p>
-          )}
-          <p className="rm-section-note">Un badge n&apos;apparaît que si le membre l&apos;accepte. Omega le calcule, le membre ne le déclare pas.</p>
-        </Section>
-
-        <Section titre="Informations" nom={m.nom}>
-          <dl className="rm-tableau-faits">
-            <div>
-              <dt>Activité</dt>
-              <dd>{m.secteur}</dd>
-            </div>
-            <div>
-              <dt>Commune</dt>
-              <dd>{m.commune}</dd>
-            </div>
-            <div>
-              <dt>Île</dt>
-              <dd>{m.ile}</dd>
-            </div>
-            <div>
-              <dt>Entrée dans le réseau</dt>
-              <dd>{moisEnClair(m.depuis)}</dd>
-            </div>
-          </dl>
-        </Section>
-
-        {voisins.length ? (
-          <Section titre={`Aussi en ${m.ile}`} nom="Membres du réseau" large>
-            <ul className="rm-voisins">
-              {voisins.map((v) => (
+        {memeSecteur.length || memeIle.length ? (
+          <>
+            <h2 className="lin-projet-h2">{memeSecteur.length ? "Dans le même secteur" : `Aussi en ${m.ile}`}</h2>
+            <ul className="lin-projet-liste">
+              {(memeSecteur.length ? memeSecteur : memeIle).map((v) => (
                 <li key={v.slug}>
-                  <Link href={lienMembre(v.slug)} className="rm-voisin">
-                    <Monogramme nom={v.nom} />
-                    <span>
-                      <span className="rm-voisin-nom">{v.nom}</span>
-                      <small>
-                        {v.secteur} · {v.commune}
-                      </small>
+                  <Link href={lienMembre(v.slug)} className="lin-projet-lien">
+                    <Avatar nom={v.nom} />
+                    <span>{v.nom}</span>
+                    <span className="lin-meta">
+                      {v.secteur} · {v.commune}
                     </span>
                   </Link>
                 </li>
               ))}
             </ul>
-          </Section>
+            {memeSecteur.length ? null : (
+              <Link href={`${RACINE_MEMBRES}?ile=${encodeURIComponent(m.ile)}`} className="lin-voir-tout">
+                Tous les membres en {m.ile}
+                <ArrowRight width={14} height={14} aria-hidden="true" />
+              </Link>
+            )}
+          </>
         ) : null}
-      </div>
-    </>
-  );
-}
 
-function Section({ titre, nom, large, children }: { titre: string; nom: string; large?: boolean; children: React.ReactNode }) {
-  return (
-    <section className="v2-carte rm-section" data-large={large || undefined}>
-      <header className="rm-section-tete">
-        <h2 className="rm-h2">{titre}</h2>
-        <p className="rm-etiquette">{nom}</p>
-      </header>
-      <div className="rm-section-corps">{children}</div>
-    </section>
+        <h2 className="lin-projet-h2">Informations de contact</h2>
+        <dl className="rm-lignes">
+          <div>
+            <dt>Téléphone, e-mail</dt>
+            <dd className="rm-restreint">
+              <Lock width={14} height={14} aria-hidden="true" />
+              Non partagés dans le réseau
+            </dd>
+          </div>
+          <div>
+            <dt>Messagerie du réseau</dt>
+            <dd>
+              <Link href={lienEcrire(m.slug)} className="rm-lien">
+                Écrire à {m.nom}
+              </Link>
+            </dd>
+          </div>
+          <div>
+            <dt>Adresse</dt>
+            <dd>
+              {m.commune}, {m.ile}
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="lin-cartes-droite">
+        <CarteDroite titre="Propriétés">
+          <dl className="lin-props">
+            <div>
+              <dt>Statut</dt>
+              <dd>
+                <ShieldCheck width={16} height={16} className="rm-ic-statut" aria-hidden="true" />
+                Membre vérifié
+              </dd>
+            </div>
+            <div>
+              <dt>Activité</dt>
+              <dd>
+                <Briefcase width={16} height={16} aria-hidden="true" />
+                {m.secteur}
+              </dd>
+            </div>
+            <div>
+              <dt>Lieu</dt>
+              <dd>
+                <MapPin width={16} height={16} aria-hidden="true" />
+                {m.commune}, {m.ile}
+              </dd>
+            </div>
+            <div>
+              <dt>Membre depuis</dt>
+              <dd>
+                <CalendarDays width={16} height={16} aria-hidden="true" />
+                {moisEnClair(m.depuis)}
+              </dd>
+            </div>
+          </dl>
+        </CarteDroite>
+        <CarteDroite titre="Badges">
+          {badges.length ? (
+            <ul className="rm-carte-badges">
+              {badges.map((b) => (
+                <li key={b.cle}>
+                  <IconeBadge cle={b.cle} />
+                  <span>{b.phrase}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="lin-activite-vide">Aucun badge montré par {m.nom}.</p>
+          )}
+        </CarteDroite>
+      </div>
+    </div>
   );
 }
 
@@ -200,14 +337,14 @@ function MiseEnRelation({ membre: m }: { membre: Membre }) {
   const [motif, setMotif] = useState("");
   if (envoyee)
     return (
-      <button type="button" className="v2-btn" disabled>
-        <Handshake width={16} height={16} aria-hidden="true" />
+      <span className="lin-puce rm-puce-faite">
+        <BadgeCheck width={16} height={16} aria-hidden="true" />
         Mise en relation demandée
-      </button>
+      </span>
     );
   return (
     <>
-      <button type="button" className="v2-btn" onClick={() => setOuvert(true)}>
+      <button type="button" className="lin-puce" onClick={() => setOuvert(true)}>
         <Handshake width={16} height={16} aria-hidden="true" />
         Demander une mise en relation
       </button>
@@ -224,7 +361,7 @@ function MiseEnRelation({ membre: m }: { membre: Membre }) {
             >
               <div className="v2-modale-corps rm-modale-corps">
                 <div className="rm-modale-tete">
-                  <Heading slot="title" className="rm-h2">
+                  <Heading slot="title" className="rm-modale-titre">
                     Demander une mise en relation
                   </Heading>
                   <button type="button" className="v2-btn v2-btn--petit v2-btn--fantome v2-btn--icone" aria-label="Fermer" onClick={() => setOuvert(false)}>

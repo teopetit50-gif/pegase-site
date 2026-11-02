@@ -23,6 +23,14 @@ export function moisEnClair(aaaamm: string): string {
   return MOIS[m - 1] ? `${MOIS[m - 1]} ${a}` : aaaamm;
 }
 
+const MOIS_COURTS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+/** « 2026-09 » → « sept. 2026 » (les colonnes de date de la liste) */
+export function moisCourt(aaaamm: string): string {
+  const [a, m] = aaaamm.split("-").map(Number);
+  return MOIS_COURTS[m - 1] ? `${MOIS_COURTS[m - 1]} ${a}` : aaaamm;
+}
+
 /* ——— les badges : la phrase, le chiffre, d'où il vient ——— */
 
 export type CleBadge = keyof Badges;
@@ -46,7 +54,7 @@ export function dureeEnClair(minutes: number): string {
   return m ? `${h} h ${String(m).padStart(2, "0")}` : `${h} h`;
 }
 
-export type BadgeLu = { cle: CleBadge; nom: string; phrase: string; chiffre: string; source: string };
+export type BadgeLu = { cle: CleBadge; nom: string; phrase: string; court: string; chiffre: string; origine: string; source: string };
 
 /** Les badges d'un membre, dans l'ordre d'affichage, avec leur provenance. */
 export function badgesLus(badges: Badges): BadgeLu[] {
@@ -57,7 +65,9 @@ export function badgesLus(badges: Badges): BadgeLu[] {
       cle: "bonPayeur",
       nom: "Bon payeur",
       phrase: phraseBonPayeur(j),
+      court: `${j} j`,
       chiffre: `${j} jours en moyenne`,
+      origine: "Factures FILED",
       source: `Calculé par Omega sur les factures fournisseurs traitées dans FILED : délai moyen entre la réception de chaque facture et son paiement, sur ${PERIODE_BADGES}.`,
     });
   }
@@ -67,7 +77,9 @@ export function badgesLus(badges: Badges): BadgeLu[] {
       cle: "reponseRapide",
       nom: "Réponse rapide",
       phrase: phraseReponse(m),
+      court: dureeEnClair(m),
       chiffre: `${dureeEnClair(m)} de délai médian`,
+      origine: "Demandes reçues",
       source: `Calculé par Omega sur les demandes reçues (formulaires, e-mails, messages suivis par Omega) : délai médian avant la première réponse, sur ${PERIODE_BADGES}.`,
     });
   }
@@ -123,7 +135,14 @@ export function adresseDe(f: Filtres): string {
   return s ? `?${s}` : "";
 }
 
-export const nbFiltres = (f: Filtres) => (f.ile ? 1 : 0) + (f.secteur ? 1 : 0) + f.propose.length + f.cherche.length + f.badges.length;
+/** les filtres posés hors de la vue (l'île est une vue, comme les onglets de Linear) */
+export const nbFiltres = (f: Filtres) => (f.secteur ? 1 : 0) + f.propose.length + f.cherche.length + f.badges.length;
+
+/** Les deux badges que l'annuaire connaît, dans l'ordre de la fiche. */
+export const BADGES_CONNUS: { cle: CleBadge; nom: string; origine: string }[] = [
+  { cle: "bonPayeur", nom: "Bon payeur", origine: "Factures FILED" },
+  { cle: "reponseRapide", nom: "Réponse rapide", origine: "Demandes reçues" },
+];
 
 export function filtrer(membres: Membre[], f: Filtres): Membre[] {
   const mots = plat(f.q).split(/\s+/).filter(Boolean);
