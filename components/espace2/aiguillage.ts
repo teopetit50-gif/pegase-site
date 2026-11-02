@@ -116,7 +116,8 @@ export const REGLES: Record<string, Regle> = {
   /* calculé par tiroma_avant_rendez_vous_pour (b3_04), repris par le point du matin (b3_06) */
   tiroma_travaux_labo: tiroma("tiroma_travaux_labo"),
   grp_balances_depots: varelo("grp_balances_depots"),
-  grp_contrats: varelo("grp_contrats"),
+  /* 02/11/2026 — VARELO redécoupé : chaque objet mène à la sous-page qui le montre */
+  grp_contrats: (id) => `${RACINE}/varelo/contrats?contrat=${q(id)}`,
   grp_encours_depots: varelo("grp_encours_depots"),
   grp_receptions: varelo("grp_receptions"),
   grp_ref_objets: varelo("grp_ref_objets"),
