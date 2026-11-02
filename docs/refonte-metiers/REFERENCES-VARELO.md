@@ -39,6 +39,7 @@ Inventaire (contrat de la refonte) : `docs/refonte-metiers/varelo.md`. Préfixe 
 | Groupe | `/espace2/varelo/groupe` (`?societe=`, `?depot=`) | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `groupe-*` | fait |
 | Sources et structure | `/espace2/varelo/sources` (`?societe=`, `?regles=1`) | Linear, Settings › Integrations (catalogue et page d'une intégration) | `linear-integrations.md` | `sources-*` | fait |
 | Finance | `/espace2/varelo/finance` (`?objet=`, `?depot=`) | Plain, Insights (Reporting et rapports) | `plain-insights.md` | `finance-*` | fait |
+| Référentiel | `/espace2/varelo/referentiel` (`?objet=&nature=`, `?vue=lots`, `?vue=decisions`) | Attio, liste People et fiche d'un contact | `attio-people.md` (après import) | `referentiel-*`, `referentiel-fiche-*` | fait |
 
 ### Ce matin → Linear, accueil d'une équipe (`linear-home.md`)
 
@@ -176,3 +177,37 @@ colonne de cartes, comme Plain.
   soldes, pas des flux quotidiens).
 - Badges : « > plafond », « N jours » / « à jour », état des réciproques, en rouge ou vert comme les badges
   d'évolution de Plain.
+
+### Référentiel → Attio, liste People et fiche d'un contact (`attio-people.md`, complément « Après import »)
+
+Relevé Attio refait sur données remplies (40 contacts, 15 entreprises fictifs), rafraîchi avant la page comme le demande
+la consigne. Contenu : blocs 9 (nature, en haut), 10 (compteurs), 11 (liste), 12, 12.a, 12.b (fiche, corrections),
+16, 16.a, 16.b (lots à côté de la liste, dernières décisions, écarter), 21 (passage) ; gestes G2, G3, G5 à G10.
+
+Preuves (Attio n'a pas de carte : sa page part du bord, barre latérale repliée ; on compare les 1128×836 premiers
+pixels de la page à notre carte) : liste 1440 sombre 13,8/255, clair 13,7/255 ; fiche 1440 sombre 8,7/255, clair
+9,2/255. En-tête de 49, barre de vue (boutons de 28, bouton bleu), barre « Sorted by / Filter », grille (en-têtes de
+40, lignes de 36, colonnes de 250, 215, 288, 310, 250, filets, case 16 à rayon 6, pastille avatar + nom à 66), pied
+« count » collé en bas ; fiche : panneau gauche de 432 (nom 18/600, actions de 28, détails en lignes de 34), onglets
+à compteurs, cartes « Points clés » de 86, listes à filets. La liste a moins de lignes que celle de la référence (sept
+objets d'exemple contre 77 contacts) : c'est l'essentiel de l'écart. 390 : Attio n'a pas de mise en page mobile, la
+grille et la fiche défilent à l'horizontale, comme ici.
+
+Écarts restants, expliqués :
+- Colonnes du métier : Objet du groupe (Person), Rattachement (la pastille carrée de « Connection strength » : à valider
+  orange, intragroupe bleu, rattaché ou nom choisi vert, seul gris), Codes locaux (code du groupe en chasse fixe),
+  Sociétés, Mis à jour. Pas de « Add column » ni de « Add calculation » : le pied porte les quatre compteurs d'avant.
+- Les lots et les dernières décisions sont deux vues du sélecteur de vue (Attio range ainsi ses listes), dans la même
+  grille ; « Écarter » et « Décider dans la file » en bout de ligne.
+- Icônes : Attio n'a pas de tracés au relevé ; celles de Linear (sprite relevé) sont reprises, à la même taille (16).
+- Pas d'« Ask Attio », de partage ni d'étoile : « File de validation » à leur place dans l'en-tête.
+- Onglets de la fiche : Vue d'ensemble, Codes, Propositions, puis Encours et Contrats qui mènent aux sous-pages.
+- « Lancer un passage » (le bouton bleu « New Person ») passe par une confirmation, comme la fenêtre d'avant.
+
+## Contrôles
+
+`npx tsc --noEmit`, `npx eslint` sur tous les fichiers touchés, `node outils/verifier-aiguillage.mjs
+/tmp/releve-prod/omega/prod/migrations` (« Chaque repère a sa page. ») et `npm run build` verts à chaque sous-page.
+Ancien écran : `/espace2/varelo?ancien=1` (et `/espace/varelo`, renvoyé vers l'espace 2) rend `EcranVarelo`, qui
+utilise les mêmes crochets. Les sept `objet_type` des repères (`?objet=` sur la racine) mènent chacun à sa sous-page,
+vérifié au navigateur.
