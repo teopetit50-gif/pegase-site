@@ -99,6 +99,43 @@ remplacés à l'affichage, photos masquées) · `1440-reel-clair-fiche.png` · `
 noms, descriptions, comptes Twitter/LinkedIn et nombres d'abonnés remplacés à l'affichage, logos masqués ; pays et années laissés).
 Ici la barre latérale d'Attio est repliée (état de l'espace au moment de la capture).
 
+## Après import (relevé du 02/11)
+
+Les deux CSV ont été importés (15 entreprises, 40 contacts, rattachés à leur entreprise par le domaine ; poste, ville, téléphone remplis ;
+étiquettes et catégories refusées par Attio). La liste compte **77 personnes** et **46 entreprises**. Ajouté à la main sur **Marie Durand**
+(Gérant, Bâtir Antilles) : 3 notes (« Visite de chantier du 28/10 », « Appel du 30/10 — planning », « Devis étanchéité terrasse ») et
+3 tâches (« Relancer pour le devis d'étanchéité », « Commander le carrelage de la salle de bain », « Planifier la réception des travaux »),
+assignées à Teo, échéance aujourd'hui.
+
+Comment les captures montrent les fictifs sans toucher aux vues de Teo : la vue « Recently Contacted People » est triée par dernière
+interaction, donc les contacts importés (sans interaction) sont **en bas** ; la grille est défilée jusqu'en bas. Une seule ligne réelle
+y restait (« Omega », renommée à l'affichage). Un filtre « Email addresses › Domain is example.com » a été essayé puis abandonné
+sans enregistrement (rechargement : vue intacte). Côté Companies, le bas de la liste ne contient que les 15 fictives plus Attio,
+Intercom, Omega.AI et Example Domain (publics).
+
+Nouveaux états relevés :
+
+```
+Connection strength sans échange : pastille grise (sprite, --x---color #77797C) + « No communication » 14/500/20 (#101112 · #f1f2f3)
+« Protected record » (date d'échange d'un enregistrement protégé) 14/500/20 #000 a0.50 · #fff a0.45, comme « No contact »
+Fiche — compteurs des onglets (Emails 0, Notes 3, Tasks 3…) : 10/500/14 #505155 · bg #000 a0.04 · inset 0 0 0 1px #eeeff1 · r 4px · p 0 4px
+Fiche — Activity : « Teo Karczewski created a note <titre> … 1 minute ago » (une ligne par note, la plus récente en haut)
+Fiche — Notes : une ligne par note, titre 14/500/20 #101112 (mesuré) + début du texte en gris (ellipsis) + heure à droite ;
+  « View all » + « + » à droite du titre de section (carte, gris du texte et heure : non mesurés, voir la capture)
+Fiche — Tasks : rond à cocher · « @Marie Durand <texte> » · à droite avatar violet + assignée 12/500/16 #000 a0.63 (mesuré) ·
+  icône + « 1 » (enregistrements liés) · échéance « Today » 12/500/16 **#cf8300** (icône calendrier 12, même couleur, mesurée dans les deux thèmes)
+Fenêtre de note (modale flottante au-dessus de la fiche, non mesurée) : titre « Untitled note », ligne « Marie Durand · Link a meeting »,
+  zone « Start typing your note », modèles ; boutons réduire / agrandir / fermer en haut à droite
+Fenêtre de tâche : « Create task » ; champ prérempli « @Marie Durand » ; pied « Today · Assigned to You · 1 linked record ·
+  Create more (interrupteur) · Cancel ESC · Save ↵ » (bouton bleu #266df0)
+```
+
+Remarque : sur Companies importées, « Foundation date » affiche 1999 partout (valeur d'import, pas un réglage d'Attio).
+
+Captures : `captures/attio-people/1440-reel-{clair,sombre}-importes.png` · `390-{clair,sombre}-importes.png` (liste) ·
+`1440-reel-{clair,sombre}-fiche-marie.png` · `390-{clair,sombre}-fiche-marie.png` ; `captures/attio-companies/1440-reel-{clair,sombre}-importes.png` ·
+`390-{clair,sombre}-importes.png`. Les 390 sont en 780×1688 (le navigateur rend au double à cette largeur).
+
 ## Remplissage prêt à importer
 
 `attio-import-fictif.csv` (40 contacts : prénom, nom, courriel `@example.com`, entreprise, poste, ville, téléphone fictif en `00`,
