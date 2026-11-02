@@ -47,3 +47,7 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible. Liste réduite à 240 (lignes 240×55, titre et sous-ligne tronqués « … »). Volet droit 531×723 (état vide « 5 unread notifications » ou notification ouverte).
 - **768** : tiroir. Liste pleine largeur (768×55), plus de volet droit : ouvrir une notification affiche le ticket en plein écran.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-inbox/1440-reel-sombre.png`, `1440-reel-clair.png`.

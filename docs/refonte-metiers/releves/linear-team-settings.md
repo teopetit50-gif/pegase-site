@@ -115,3 +115,7 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible (défilée sur Features… Your teams), main @244,8 772×724 r 12. Fil « ‹ Teams » en haut à gauche du main. Colonne de 640 centrée (x 310), rangées 640×65. « Team overview › » aligné à droite de la colonne.
 - **768** : tiroir, barre « Settings » de 44, fil « ‹ Teams » dessous. Colonne de 640 à x 64. Rien ne se replie : « 1 member », « Off », « Available on Business » restent.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-team-settings/1440-reel-sombre.png`, `1440-reel-clair.png`.

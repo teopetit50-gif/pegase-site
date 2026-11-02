@@ -173,3 +173,7 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 - **1024** : main 772×724 r 12. Colonne centrée, carte de liste de 640 (x 310), lignes de 64. La colonne ne rétrécit pas (640 fixe, marges 66).
 - **768** : tiroir, barre « Settings ». Carte de 640 à x 64 ; même hauteur de ligne.
 - Captures : `1024-sombre-labels.png`, `768-sombre-labels.png`, `1024-sombre-templates.png`, `768-sombre-templates.png`.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-labels-templates/1440-reel-sombre-labels.png`, `1440-reel-clair-labels.png`, `1440-reel-sombre-templates.png`, `1440-reel-clair-templates.png`.

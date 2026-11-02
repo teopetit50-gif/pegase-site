@@ -224,3 +224,7 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible, main 772×724. La colonne de contenu est recentrée (contenu ≈ 550 px), carte « Latest update » ≈ 560 px. Pas de colonne de détails (le volet s'ouvre par ⌘ I).
 - **768** : tiroir, main 768×988, contenu pleine largeur (marges 42). Bloc Projects : colonnes Name / Health / Priority / Lead / Status ; Target date est masquée.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-initiative/1440-reel-sombre.png`, `1440-reel-clair.png`.

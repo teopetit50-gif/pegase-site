@@ -158,3 +158,7 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible, main 772. Ligne 969×57, plus large que la carte : le tableau défile horizontalement. Grille `[indent] 8 [title] 380 [status] 100 [priority] 56 [owner] 50 [targetDate] 100 [projects] 59 [initiativeHealth] 52 [projectsHealth] 98 [end-padding] 12`. La case à cocher disparaît. Le titre passe de 572 à 380 (résumé tronqué « … »).
 - **768** : tiroir. Ligne 853×57 : la colonne Target disparaît, owner passe à 40. Défilement horizontal (« Active Projects » coupé à droite).
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-initiatives-liste/1440-reel-sombre.png`, `1440-reel-clair.png`.

@@ -91,3 +91,7 @@ Quatre tickets portent une échéance au **15/10/2026** (affichée « Oct 15 »)
 - **Properties** : la pilule de date est un `<input value="Oct 15">` 13px/500, c lch(90.451 1.2 272) en sombre, dans un bouton r 9999px h 28. Icône 16×16 fill lch(58% 73 29), tracé « M11 1C13.2091 1 15 2.79086 15 5V6.25… M9.53033 8.46967L11.5 10.4393L13.4697 8.46967… ».
 - **Activité** : « Wizyy set the due date to Oct 15 · just now », avec la même icône rouge en 14×14.
 - Capture : `1440-reel-sombre-OME-53-en-retard.png`.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-ticket/1440-reel-sombre-OME-19.png`, `1440-reel-clair-OME-19.png` (et `1440-reel-sombre-OME-53-en-retard.png`).

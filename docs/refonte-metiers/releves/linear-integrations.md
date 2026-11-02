@@ -172,3 +172,7 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible, main 772×724 r 12. Colonne de 640 à x 310, carrousel Essentials de 640. Catalogue en grille de 3 × 202,66 px, gap 16 : identique à 1440.
 - **768** : tiroir, barre « Settings ». Colonne de 640 à x 64. Catalogue toujours en 3 colonnes de 202,66 ; le passage à 1 colonne ne se fait qu'à 390 (voir plus haut).
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-integrations/1440-reel-sombre.png`, `1440-reel-clair.png`.

@@ -159,3 +159,7 @@ Quatre tickets portent une échéance au **15/10/2026** (affichée « Oct 15 »)
 - Icône 14×14 fill lch(58% 73 29). Texte « Oct 15 » 12px/450 tertiaire (sombre lch(61.803 1.2 272), clair lch(39.176 1.25 282)).
 - **Pas de groupe « en retard »** : les tickets restent dans leur groupe (Urgent issues / Cycle 1).
 - Survol d'une puce date : fond gris plus soutenu.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-my-issues/1440-reel-sombre.png`, `1440-reel-clair.png`.

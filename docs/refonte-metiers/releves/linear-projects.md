@@ -109,6 +109,7 @@ Puces : 12px/500 · r 9999px · p 0 8px · m 0 4px 4px 0 · h 24 · actives bg l
 ## Captures (`captures/linear-projects/`)
 
 1440 = 800×500 (échelle 0,556, voir linear-home.md) ; 390 = 390×844.
+- **Taille réelle 1440×900** : `1440-reel-sombre-liste.png`, `1440-reel-clair-liste.png`, `1440-reel-sombre-timeline.png`, `1440-reel-clair-timeline.png` (méthode dans linear-home.md).
 - `1440-sombre-liste-survol.png`, `1440-clair-liste-survol.png` (ligne Villa Bellevue survolée)
 - `1440-clair-display-options.png` (menu ouvert)
 - `1440-clair-timeline.png`, `1440-sombre-timeline.png`

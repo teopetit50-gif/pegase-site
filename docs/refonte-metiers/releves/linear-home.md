@@ -235,9 +235,12 @@ Onglets : « Overview », « Documents », « Loops », « Members ». Section :
 
 ## Captures (`captures/linear-home/`)
 
-Le volet du navigateur intégré rend la fenêtre 1440×900 réduite à 800×500 : les captures 1440 sont donc à l'échelle 0,556 (mesures exactes dans ce relevé, captures pour la composition). 1024 → 800×600, 768 → 800×1066, 390 → 390×844 (échelle 1).
+**Captures 1440 à taille réelle (`1440-reel-*.png`, 1440×900, échelle 1)** : utiliser celles-ci pour la superposition pixel à pixel, sur toutes les pages. Méthode : le volet du navigateur intégré rend 1440×900 en 800×500. On pose donc sur `<html>` un `transform: translate(-1,8·x0, -1,8·y0) scale(1.8)` (origine 0 0, `overflow: hidden`), ce qui ne touche pas la mise en page (les media queries voient toujours 1440). On prend ensuite quatre tuiles de 800×500 à l'échelle 1, aux origines (0,0), (640,0), (0,400), (640,400), soit 800×500 px CSS chacune. On les recolle avec PIL sur une toile 1440×900 ; les zones de recouvrement concordent à l'anti-crénelage près (écart maximal de 20/255 en gris sur quelques pixels de texte, contrôlé sur trois pages) ; aucune ligne n'est décalée. Le transform est retiré après chaque prise.
+
+Les anciennes captures `1440-*.png` (sans « reel ») restent à l'échelle 0,556 : bonnes pour la composition, pas pour la superposition. 1024 → 800×600 (0,78), 768 → 800×1066 (1,04), 390 → 390×844 (échelle 1).
 
 - `1440-clair.png`, `1440-clair-survol.png` (ligne « Procédure… » survolée)
 - `1440-sombre-survol.png` (ligne survolée), `1440-sombre-menu.png` (menu « … » ouvert)
+- `1440-reel-sombre.png`, `1440-reel-clair.png` (taille réelle)
 - `1024-sombre.png`, `768-sombre.png`
 - `390-sombre.png`, `390-sombre-tiroir.png`, `390-clair.png`, `390-clair-tiroir.png`

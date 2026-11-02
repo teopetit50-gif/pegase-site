@@ -65,3 +65,7 @@ Quatre tickets portent une échéance au **15/10/2026** (affichée « Oct 15 »)
 - **Carte** : même puce date 73×24 dans la rangée de puces, après la priorité. r 48px · bd 0.5px (sombre lch(20.032 1.93 272), clair lch(86.5 0 282)) · bg = fond de carte (clair lch(100 0 282)).
 - Icône 14×14 fill lch(58% 73 29). Texte « Oct 15 » 12px/450 (clair lch(40 1 282)).
 - Cartes en retard : OME-53 (Triage), OME-28 (Todo), OME-26 et OME-35 (In Progress) ; visibles dans `1440-reel-sombre.png` et `1440-reel-clair.png`.
+
+## Captures 1440 à taille réelle (complément du 01/11/2026)
+
+1440×900 à l'échelle 1, recollées en quatre tuiles (méthode dans `linear-home.md`). À utiliser pour la superposition pixel à pixel : `captures/linear-board/1440-reel-sombre.png`, `1440-reel-clair.png`.
