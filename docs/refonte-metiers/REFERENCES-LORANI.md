@@ -7,7 +7,7 @@
 | Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | écrite (`PageProjet.tsx`, `lor-initiative.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/projet-*`) ; écarts ci-dessous |
 | Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | écrite (`Courrier.tsx`, `lor-inbox.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/courrier-*`) ; écarts ci-dessous |
 | Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | refaite aux jetons et icônes de Linear (`Reglages.tsx`, `lor-reglages.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/reglages-*`) |
-| Honoraires et temps | `/espace2/lorani/honoraires` | Attio, People + fiche | `attio-people.md` | en dernier (relevé Attio refait) |
+| Honoraires et temps | `/espace2/lorani/honoraires` | Attio, People + fiche | `attio-people.md` (après import, 02/11) | écrite (`Honoraires.tsx`, `lor-attio.css`) ; liste et fiche superposées en sombre et clair, liste à 390 (`comparaisons/lorani/honoraires-*`) ; écarts ci-dessous |
 
 ## Fichiers communs (préfixe lor-, propres à Lorani)
 
@@ -92,3 +92,18 @@ Comparaisons : `reglages-1440-sombre-*`, `reglages-1440-clair-*`, `reglages-390-
 - Pas de « Danger zone » (Leave / Retire / Delete) ni de rangée verrouillée « Available on Business » : aucun geste de ce genre sur un projet ; supprimer un projet n'existe pas dans Lorani.
 - La barre latérale des réglages de Linear n'a pas d'équivalent : c'est le cadre de l'espace 2 (rail et sous-menu communs).
 - L'équipe, les lots et les intervenants mènent à la vue « Équipe » de la page du projet (`?partie=equipe`).
+
+## Honoraires et temps → Attio, liste People et fiche d'un contact
+
+Données : le projet « Maison Lemoine » (6 éléments de mission, temps saisis) ; fiche de l'élément « Dossier de permis ».
+Les captures d'Attio sont prises barre latérale repliée (zone de 1440 × 900 à x 0) : la superposition se fait avec une fenêtre de 1744 × 948 (carte de l'espace 2 de 1440 × 900 à x 304, y 48).
+Mesures du relevé reprises : en-tête 49 ; barre de vue 48 (boutons de 28 à x 12) ; barre de tri 49 ; grille en-têtes 40, lignes 36, colonnes 250 · 215 · 288 · 310 · 250, case 16 r 6, pastille de lien r 10 avec avatar 16 ; pied 36 ; fiche : panneau gauche 432, nom 18/600/24, détails en lignes de 32 (libellé 12/500 a.63), cartes « Highlights » 3 × 2 de 86, listes cerclées à lignes de 31 ; jetons d'Attio sombre et clair (#101112 / #fff, filets #1b1c1f / #eeeff1, second a.60 / a.63, discret a.45 / a.50, bleu #266df0).
+Comparaisons : `honoraires-liste-1440-{sombre,clair}-*`, `honoraires-fiche-1440-{sombre,clair}-*`, `honoraires-liste-390-{sombre,clair}-*` (la référence à 390 est rendue au double, ramenée à 390 × 844). À 390, comme Attio, pas de mise en page mobile : la grille garde ses colonnes et défile.
+
+Correspondances : People → éléments de mission du projet ; vue « Recently Contacted People ⌄ » → le projet (menu des projets et de leurs honoraires) ; View settings → Affichage (colonne Taux réalisé) ; Import / Export → Ajouter ⌄ (un élément de mission, F22) ; New Person → Saisir du temps (F23) ; Sorted by → trié par phase ; Filter → état des éléments ; Connection strength → Temps passé (pastille : à venir gris, en cours ou achevé bleu, à surveiller orange, dépassé rouge, facturé vert, les couleurs d'Attio) ; colonnes Honoraires HT, État, Taux réalisé ; « count » → nombre d'éléments et totaux. Fiche : Compose email / Add to list → Saisir du temps / Marquer achevé ou facturé (G44, G45, confirmation) / Ouvrir le projet ; Record Details → Détails ; Lists → Projet ; Highlights → En bref (temps, consommation, honoraires, taux, état, facturation) ; Activity → temps saisis ; Notes → Temps ; Tasks → Appel d'honoraires (coche → Marquer facturé).
+
+Écarts restants, avec leur raison :
+- Les icônes d'Attio ne sont ni dans le relevé ni dans son code chargé sans compte (app.attio.com/web-assets) : celles de la page sont tracées au trait de 1.25 aux mêmes tailles (16, 12) ; à remplacer par les tracés d'Attio dès qu'un relevé d'icônes existe.
+- Pas d'onglets Emails, Calls, Company, Files ni de colonne « + Add column » / « + Add calculation » : un élément de mission n'a ni courriels, ni appels, ni pièces ; les colonnes et les totaux sont fixés.
+- Pas de « Share », « Ask Attio », ni d'étoile et de crayon sur la fiche : sans équivalent dans Lorani ; l'en-tête porte un lien vers le projet.
+- L'avis « 80 % des heures prévues » / « dépassé » (B27) est à droite de la barre de tri : sans place dans la référence.

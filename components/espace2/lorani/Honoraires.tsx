@@ -1,37 +1,41 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   LORANI « Honoraires et temps », sur Settings › Billing de Linear
-   (29/10/2026)
+   LORANI « Honoraires et temps » (refait le 02/11/2026)
 
-   Les honoraires d'un projet, phase par phase, et le temps passé dessus
-   (bloc B27 de l'inventaire docs/refonte-metiers/lorani.md, fenêtres F22
-   et F23, gestes G42 à G45). Le projet est dans l'adresse (?projet=) et se
-   change en tête ; sans projet nommé, le premier qui a des honoraires.
+   Attio, liste People et fiche d'un contact, au 1:1 : relevé
+   docs/refonte-metiers/releves/attio-people.md (01/11, refait après
+   import le 02/11), styles dans ./lor-attio.css (préfixe lor-at-, jetons
+   d'Attio sombre et clair). Une personne d'Attio = un élément de mission
+   du projet (esquisse, APS, APD, permis…) :
 
-     · « Mission » (la carte du plan) : les honoraires HT, le nombre
-       d'éléments, la phase, ce qui est facturé ; « Ajouter un élément »
-       (F22, poserHonoraire) ;
-     · « Phases » (la mise à niveau et sa grille cochée) : un élément par
-       case, coché plein quand il est facturé, coché ambre quand il est
-       achevé et que l'appel d'honoraires reste à émettre ; une case ouvre
-       l'étape suivante (Achevé, puis Facturé : changerHonoraire), après
-       une fenêtre de confirmation qu'elle n'avait pas sur /espace (O11) ;
-     · « Temps passé » (l'usage, au chevron) : heures saisies contre
-       heures prévues, avis à 80 % et au-delà, jauge par élément, derniers
-       temps saisis ; « Saisir des temps » (F23, saisirTemps) ;
-     · « Factures et situations d'honoraires » (Recent invoices) : les
-       éléments achevés (appel à émettre) et facturés.
+     en-tête          « Honoraires » / projet / élément ouvert
+     vue              le projet (« Recently Contacted People ⌄ ») ;
+                      View settings : colonnes affichées
+     New Person       « Saisir du temps » (F23, G42)
+     Import / Export  « Ajouter ⌄ » : un élément de mission (F22, G43)
+     Sorted by        l'ordre des phases ; Filter : l'état des éléments
+     grille           Élément · Temps (pastille de niveau : à venir, en
+                      cours, à surveiller à 80 %, dépassé, facturé) ·
+                      Honoraires HT · État · Taux réalisé ; pied : nombre
+                      d'éléments et totaux
+     fiche            (?element=) panneau de gauche : l'élément, ses gestes
+                      (Saisir du temps, Marquer achevé, Marquer facturé :
+                      G44, G45 après confirmation), ses valeurs ; à droite
+                      Overview : Highlights (temps, taux, honoraires,
+                      prévu, état, facturation), Activity (temps saisis),
+                      Temps (Notes), Appel d'honoraires (Tasks)
+
    Aucun calcul ni aucune fenêtre n'est réécrit : la carte de l'écran
    d'avant (components/espace/lorani/Honoraires.tsx) les fournit par sa
-   prop `habit`, et garde ses deux fenêtres.
-   Gabarit : ../lin/lin.css ; mesures propres : ../lin/linear-billing.css.
+   prop `habit` et garde ses deux fenêtres (F22, F23). Les liens des
+   alertes E12, E13 (« ?projet= ») arrivent ici.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
-import { ArrowUpRight, Check, ChevronDown, ChevronRight } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
@@ -39,66 +43,374 @@ import { dateCourte } from "@/components/espace/format";
 import { PHASES } from "@/components/espace/lorani/etats";
 import CarteHonoraires, { ELEMENTS, type LigneHonoraire, type VueHonoraires } from "@/components/espace/lorani/Honoraires";
 import type { Honoraire, Projet } from "@/components/espace/lorani/types";
-import { Menu } from "../lin/Lin";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
 import "@/components/espace/espace.css";
-import "../lin/lin.css";
-import "../lin/linear-billing.css";
+import "./lor-attio.css";
 
 const CHEMIN = `${RACINE}/lorani/honoraires`;
-const lienProjet = (id: string) => `${RACINE}/lorani/projets/${encodeURIComponent(id)}?partie=projet`;
+const lienProjet = (id: string) => `${RACINE}/lorani/projets/${encodeURIComponent(id)}`;
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`;
 const heures = (n: number) => `${n.toLocaleString("fr-FR", { maximumFractionDigits: 2 })} h`;
 const court = (h: Honoraire) => ELEMENTS.find((e) => e.cle === h.element)?.court ?? h.element.toUpperCase();
 const jour = (iso: string | null) => (iso ? dateCourte(`${iso}T12:00:00`) : "");
-const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
+const pluriel = (n: number, un: string, plusieurs = `${un}s`) => `${n} ${n > 1 ? plusieurs : un}`;
+function depuis(iso: string): string {
+  const j = Math.round((Date.now() - Date.parse(`${iso.slice(0, 10)}T12:00:00`)) / 86_400_000);
+  if (j <= 0) return "aujourd'hui";
+  if (j === 1) return "hier";
+  if (j < 30) return `il y a ${j} jours`;
+  if (j < 60) return "il y a environ 1 mois";
+  if (j < 365) return `il y a ${Math.round(j / 30)} mois`;
+  return "il y a plus d'un an";
+}
 
-/* la coche de 12 de la grille : pleine (facturé), cochée (achevé), à moitié (en cours), vide (à venir) */
-function Coche({ l }: { l: LigneHonoraire }) {
-  const etat = l.statut === "facturee" || l.statut === "achevee" ? l.statut : l.etat === "depasse" ? "depasse" : l.statut;
-  return (
-    <svg className="lbi-coche" data-etat={etat} viewBox="0 0 12 12" aria-hidden="true">
-      {l.statut === "facturee" ? (
-        <>
-          <circle cx="6" cy="6" r="6" fill="currentColor" />
-          <path d="m3.4 6.2 1.8 1.8 3.4-3.6" fill="none" stroke="var(--lin-detail)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-        </>
-      ) : l.statut === "achevee" ? (
-        <path d="m2.2 6.4 2.4 2.4 5.2-5.4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      ) : l.statut === "en_cours" ? (
-        <>
-          <circle cx="6" cy="6" r="5.25" fill="none" stroke="currentColor" strokeWidth="1.3" />
-          <path d="M6 3a3 3 0 0 1 0 6z" fill="currentColor" />
-        </>
-      ) : (
-        <circle cx="6" cy="6" r="5.25" fill="none" stroke="currentColor" strokeWidth="1.3" />
-      )}
+/* le niveau d'un élément, à la manière de « Connection strength » : une pastille de couleur et son libellé */
+type Niveau = { couleur: string; libelle: string };
+function niveau(l: LigneHonoraire): Niveau {
+  if (l.statut === "facturee") return { couleur: "#00D17E", libelle: "Facturé" };
+  if (l.statut === "achevee") return { couleur: "#266DF0", libelle: "Achevé" };
+  if (l.etat === "depasse") return { couleur: "#FF5454", libelle: "Dépassé" };
+  if (l.etat === "a_surveiller") return { couleur: "#F97514", libelle: "À surveiller" };
+  if (l.statut === "en_cours") return { couleur: "#266DF0", libelle: "En cours" };
+  return { couleur: "#77797C", libelle: "À venir" };
+}
+const LIBELLES_ETAT: Record<Honoraire["statut"], string> = { a_venir: "À venir", en_cours: "En cours", achevee: "Achevé, appel à émettre", facturee: "Facturé" };
+const suivant = (l: LigneHonoraire): "achevee" | "facturee" | null => (l.statut === "achevee" ? "facturee" : l.statut === "facturee" ? null : "achevee");
+type AChanger = { ligne: LigneHonoraire; statut: "achevee" | "facturee" } | null;
+
+/* ——— un menu qui se ferme au clic dehors et sur Échap ——— */
+function useMenu() {
+  const [ouvert, setOuvert] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!ouvert) return;
+    const dehors = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOuvert(false);
+    };
+    const echap = (e: KeyboardEvent) => e.key === "Escape" && setOuvert(false);
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [ouvert]);
+  return [ouvert, setOuvert, ref] as const;
+}
+
+/* ——— les icônes d'Attio (tracés de 16 recopiés de son interface, trait 1.25) ——— */
+const Ic = {
+  objet: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <rect x="1.5" y="1.5" width="13" height="13" rx="3.5" fill="currentColor" />
+      <path d="M5 8.2h6M8 5.2v6" stroke="var(--lor-at-fond)" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
+  ),
+  chevron: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="m5 6.5 3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  reglages: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2.5 4.5h3m3 0h5m-11 7h7m3 0h1M7 3v3m3.5 4v3" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  tri: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2.5 4.5h7m-7 3.5h5m-5 3.5h3M12 3.5v9m0 0-2-2m2 2 2-2" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  filtre: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2.5 4.5h11m-9 3.5h7m-5 3.5h3" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  plus: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 3.5v9M3.5 8h9" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  personne: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.25" />
+      <circle cx="8" cy="6.5" r="2.2" fill="currentColor" />
+      <path d="M4.2 12.4a4.2 4.2 0 0 1 7.6 0" fill="currentColor" />
+    </svg>
+  ),
+  horloge: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5.75" fill="none" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M8 5v3.2l2 1.3" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  euro: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M11.5 4.3a4.5 4.5 0 1 0 0 7.4M3 7h6.5M3 9h6" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  etat: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="5.75" fill="none" stroke="currentColor" strokeWidth="1.25" />
+      <path d="m5.6 8.1 1.6 1.6 3.2-3.3" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  jauge: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2.5 11.5a5.5 5.5 0 1 1 11 0" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+      <path d="m8 11.5 2.5-3" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  calendrier: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <rect x="2.5" y="3" width="11" height="10.5" rx="2.5" fill="none" stroke="currentColor" strokeWidth="1.25" />
+      <path d="M2.5 6.5h11M5.5 1.8V4m5-2.2V4" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+    </svg>
+  ),
+  dossier: (
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2.5 4.5a1.5 1.5 0 0 1 1.5-1.5h2.6l1.5 1.5H12a1.5 1.5 0 0 1 1.5 1.5v5.5A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5z" fill="none" stroke="currentColor" strokeWidth="1.25" />
+    </svg>
+  ),
+};
+
+/* ——— la fiche d'un élément (le « record » d'Attio) ——— */
+function Fiche({ v, l, projet, peutEcrire, nommer, demander }: { v: VueHonoraires; l: LigneHonoraire; projet: Projet; peutEcrire: boolean; nommer: (id: string | null | undefined) => string; demander: (l: LigneHonoraire) => void }) {
+  const [onglet, setOnglet] = useState<"overview" | "temps">("overview");
+  const temps = v.temps.filter((t) => t.honoraire_id === l.id);
+  const n = niveau(l);
+  const gris = !peutEcrire || v.envoi;
+  const prochain = suivant(l);
+  const valeurs: { cle: string; icone: React.ReactNode; libelle: string; valeur: React.ReactNode; vide?: boolean }[] = [
+    { cle: "element", icone: Ic.objet, libelle: "Élément", valeur: `${court(l)} · ${v.libelle(l)}` },
+    { cle: "projet", icone: Ic.dossier, libelle: "Projet", valeur: <Link href={lienProjet(projet.id)} className="lor-at-lien">{projet.nom}</Link> },
+    { cle: "montant", icone: Ic.euro, libelle: "Honoraires HT", valeur: euros(l.montant_ht) },
+    { cle: "prevues", icone: Ic.horloge, libelle: "Heures prévues", valeur: l.heures_prevues ? heures(l.heures_prevues) : "Non fixées", vide: !l.heures_prevues },
+    { cle: "etat", icone: Ic.etat, libelle: "État", valeur: LIBELLES_ETAT[l.statut] },
+  ];
+  return (
+    <div className="lor-at-fiche">
+      <aside className="lor-at-gauche" aria-label="L'élément">
+        <div className="lor-at-identite">
+          <span className="lor-at-avatar-grand" aria-hidden="true">
+            {court(l).slice(0, 3)}
+          </span>
+          <h2>{v.libelle(l)}</h2>
+        </div>
+        <div className="lor-at-actions">
+          <button type="button" className="lor-at-bouton" disabled={gris || !v.peutSaisirTemps} onClick={v.ouvrirTemps}>
+            {Ic.horloge}
+            Saisir du temps
+          </button>
+          {prochain ? (
+            <button type="button" className="lor-at-bouton" disabled={gris} onClick={() => demander(l)}>
+              {Ic.etat}
+              {prochain === "facturee" ? "Marquer facturé" : "Marquer achevé"}
+            </button>
+          ) : null}
+          <Link href={lienProjet(projet.id)} className="lor-at-bouton">
+            {Ic.dossier}
+            Ouvrir le projet
+          </Link>
+        </div>
+        <div className="lor-at-section">
+          <h3 className="lor-at-petit-titre">Détails {Ic.chevron}</h3>
+          <dl className="lor-at-details">
+            {valeurs.map((x) => (
+              <div key={x.cle} className="lor-at-detail">
+                <dt>
+                  {x.icone}
+                  {x.libelle}
+                </dt>
+                <dd data-vide={x.vide ? "" : undefined}>{x.valeur}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <div className="lor-at-section lor-at-section--filet">
+          <h3 className="lor-at-petit-titre">Projet {Ic.chevron}</h3>
+          <p className="lor-at-discret">Phase {PHASES[projet.phase]?.toLowerCase() ?? projet.phase} · {pluriel(v.lignes.length, "élément")} de mission</p>
+        </div>
+      </aside>
+      <div className="lor-at-droite">
+        <nav className="lor-at-onglets" aria-label="Vues de l'élément">
+          <button type="button" className="lor-at-onglet" aria-pressed={onglet === "overview"} onClick={() => setOnglet("overview")}>
+            {Ic.objet}
+            Vue d&apos;ensemble
+          </button>
+          <button type="button" className="lor-at-onglet" aria-pressed={onglet === "temps"} onClick={() => setOnglet("temps")}>
+            {Ic.horloge}
+            Temps <span className="lor-at-compteur">{temps.length}</span>
+          </button>
+        </nav>
+        {onglet === "overview" ? (
+          <div className="lor-at-panneau">
+            <h3 className="lor-at-titre-section">En bref</h3>
+            <div className="lor-at-cartes">
+              <div className="lor-at-carte">
+                <span className="lor-at-carte-titre">Temps passé {Ic.horloge}</span>
+                <span className="lor-at-carte-valeur">
+                  <span className="lor-at-pastille" style={{ "--lor-at-pastille": n.couleur } as React.CSSProperties} />
+                  {heures(l.passees)}
+                  {l.heures_prevues ? ` sur ${heures(l.heures_prevues)}` : ""}
+                </span>
+              </div>
+              <div className="lor-at-carte">
+                <span className="lor-at-carte-titre">Consommation {Ic.jauge}</span>
+                <span className="lor-at-carte-valeur" data-vide={l.conso === null ? "" : undefined}>
+                  {l.conso === null ? "Pas d'heures prévues" : `${l.conso} %`}
+                </span>
+              </div>
+              <div className="lor-at-carte">
+                <span className="lor-at-carte-titre">Honoraires HT {Ic.euro}</span>
+                <span className="lor-at-carte-valeur">{euros(l.montant_ht)}</span>
+              </div>
+              <div className="lor-at-carte">
+                <span className="lor-at-carte-titre">Taux réalisé {Ic.euro}</span>
+                <span className="lor-at-carte-valeur" data-vide={l.taux === null ? "" : undefined}>
+                  {l.taux === null ? "Aucun temps saisi" : `${euros(l.taux)} / h`}
+                </span>
+              </div>
+              <div className="lor-at-carte">
+                <span className="lor-at-carte-titre">État {Ic.etat}</span>
+                <span className="lor-at-carte-valeur">{LIBELLES_ETAT[l.statut]}</span>
+              </div>
+              <div className="lor-at-carte">
+                <span className="lor-at-carte-titre">Facturation {Ic.calendrier}</span>
+                <span className="lor-at-carte-valeur" data-vide={l.facturee_le || l.achevee_le ? undefined : ""}>
+                  {l.facturee_le ? `Facturé le ${jour(l.facturee_le)}` : l.achevee_le ? `Achevé le ${jour(l.achevee_le)}` : "Pas encore achevé"}
+                </span>
+              </div>
+            </div>
+
+            <div className="lor-at-tete-section">
+              <h3 className="lor-at-titre-section">Activité</h3>
+              <button type="button" className="lor-at-voir" onClick={() => setOnglet("temps")}>
+                Tout voir
+              </button>
+            </div>
+            <ul className="lor-at-liste">
+              {temps.slice(0, 3).map((t) => (
+                <li key={t.id} className="lor-at-ligne">
+                  <span className="lor-at-mini" aria-hidden="true">
+                    {(nommer(t.membre)[0] ?? "?").toUpperCase()}
+                  </span>
+                  <span className="lor-at-ligne-texte">
+                    {nommer(t.membre)} <span className="lor-at-discret">a saisi</span> {heures(t.heures)}
+                  </span>
+                  <span className="lor-at-quand">{depuis(t.jour)}</span>
+                </li>
+              ))}
+              {!temps.length ? <li className="lor-at-ligne lor-at-discret">Aucun temps saisi sur cet élément.</li> : null}
+            </ul>
+
+            <div className="lor-at-tete-section">
+              <h3 className="lor-at-titre-section">
+                Temps <span className="lor-at-compteur">{temps.length}</span>
+              </h3>
+              <span className="lor-at-tete-droite">
+                <button type="button" className="lor-at-voir" onClick={() => setOnglet("temps")}>
+                  Tout voir
+                </button>
+                <button type="button" className="lor-at-rond" aria-label="Saisir du temps" title="Saisir du temps" disabled={gris || !v.peutSaisirTemps} onClick={v.ouvrirTemps}>
+                  {Ic.plus}
+                </button>
+              </span>
+            </div>
+            <ul className="lor-at-liste">
+              {temps.slice(0, 3).map((t) => (
+                <li key={t.id} className="lor-at-ligne">
+                  <span className="lor-at-mini" aria-hidden="true">
+                    {(nommer(t.membre)[0] ?? "?").toUpperCase()}
+                  </span>
+                  <span className="lor-at-ligne-texte">
+                    {heures(t.heures)} le {jour(t.jour)} <span className="lor-at-discret">{t.note ?? "sans note"}</span>
+                  </span>
+                  <span className="lor-at-quand">{depuis(t.jour)}</span>
+                </li>
+              ))}
+              {!temps.length ? <li className="lor-at-ligne lor-at-discret">Le temps passé se compare aux heures prévues : prévenu à 80 % et à 100 %.</li> : null}
+            </ul>
+
+            <div className="lor-at-tete-section">
+              <h3 className="lor-at-titre-section">
+                Appel d&apos;honoraires <span className="lor-at-compteur">{l.statut === "achevee" ? 1 : 0}</span>
+              </h3>
+            </div>
+            <ul className="lor-at-liste">
+              {l.statut === "achevee" ? (
+                <li className="lor-at-ligne">
+                  <button type="button" className="lor-at-coche" aria-label="Marquer facturé" title="Marquer facturé" disabled={gris} onClick={() => demander(l)} />
+                  <span className="lor-at-ligne-texte">Émettre l&apos;appel d&apos;honoraires de {euros(l.montant_ht)} HT</span>
+                  <span className="lor-at-echeance">
+                    {Ic.calendrier}
+                    {l.achevee_le ? `Depuis le ${jour(l.achevee_le)}` : "Aujourd'hui"}
+                  </span>
+                </li>
+              ) : (
+                <li className="lor-at-ligne lor-at-discret">{l.statut === "facturee" ? `Facturé le ${jour(l.facturee_le)}.` : "L'appel d'honoraires est à émettre quand l'élément est achevé."}</li>
+              )}
+            </ul>
+          </div>
+        ) : (
+          <div className="lor-at-panneau">
+            <div className="lor-at-tete-section">
+              <h3 className="lor-at-titre-section">
+                Temps saisis <span className="lor-at-compteur">{temps.length}</span>
+              </h3>
+              <button type="button" className="lor-at-rond" aria-label="Saisir du temps" title="Saisir du temps" disabled={gris || !v.peutSaisirTemps} onClick={v.ouvrirTemps}>
+                {Ic.plus}
+              </button>
+            </div>
+            <ul className="lor-at-liste">
+              {temps.map((t) => (
+                <li key={t.id} className="lor-at-ligne">
+                  <span className="lor-at-mini" aria-hidden="true">
+                    {(nommer(t.membre)[0] ?? "?").toUpperCase()}
+                  </span>
+                  <span className="lor-at-ligne-texte">
+                    {nommer(t.membre)} · {heures(t.heures)} <span className="lor-at-discret">{t.note ?? ""}</span>
+                  </span>
+                  <span className="lor-at-quand">{jour(t.jour)}</span>
+                </li>
+              ))}
+              {!temps.length ? <li className="lor-at-ligne lor-at-discret">Aucun temps saisi.</li> : null}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
-const LIBELLES_ETAT: Record<Honoraire["statut"], string> = { a_venir: "à venir", en_cours: "en cours", achevee: "achevé, appel d'honoraires à émettre", facturee: "facturé" };
-/* l'étape suivante d'un élément : achevé, puis facturé */
-const suivant = (l: LigneHonoraire): "achevee" | "facturee" | null => (l.statut === "achevee" ? "facturee" : l.statut === "facturee" ? null : "achevee");
-
-type AChanger = { ligne: LigneHonoraire; statut: "achevee" | "facturee" } | null;
-
-/* les quatre cartes de Billing, dessinées avec ce que la carte de l'écran d'avant calcule */
-function Cartes({ v, projet, peutEcrire, nommer }: { v: VueHonoraires; projet: Projet; peutEcrire: boolean; nommer: (id: string | null | undefined) => string }) {
+/* ——— la page : la grille People d'Attio, ou la fiche d'un élément ——— */
+function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonoraires; projet: Projet; projets: Projet[]; totalDe: Record<string, number>; peutEcrire: boolean; nommer: (id: string | null | undefined) => string }) {
   const toast = useToast();
-  const [deplie, setDeplie] = useState(false);
+  const params = useSearchParams();
+  const chemin = usePathname();
+  const [ouvertVue, setOuvertVue, vueRef] = useMenu();
+  const [ouvertReglages, setOuvertReglages, reglagesRef] = useMenu();
+  const [ouvertAjout, setOuvertAjout, ajoutRef] = useMenu();
+  const [ouvertFiltre, setOuvertFiltre, filtreRef] = useMenu();
+  const [voirTaux, setVoirTaux] = useState(true);
+  const [filtre, setFiltre] = useState<Honoraire["statut"] | null>(null);
   const [aChanger, setAChanger] = useState<AChanger>(null);
   const [echec, setEchec] = useState(false);
   const gris = !peutEcrire || v.envoi;
 
-  const factures = v.lignes.filter((l) => l.statut === "achevee" || l.statut === "facturee").sort((a, b) => (b.facturee_le ?? b.achevee_le ?? "").localeCompare(a.facturee_le ?? a.achevee_le ?? ""));
-  const nFacturees = v.lignes.filter((l) => l.statut === "facturee").length;
-  const prochaine = v.lignes.find((l) => l.statut === "achevee") ?? v.lignes.find((l) => l.statut === "en_cours") ?? null;
-  const conso = v.prevues > 0 ? Math.round((100 * v.passees) / v.prevues) : null;
-  const depassees = v.alerte.filter((l) => l.etat === "depasse").length;
-  const aSurveiller = v.alerte.length - depassees;
+  const lien = (q: Record<string, string | null>) => {
+    const p = new URLSearchParams(params.toString());
+    for (const [k, x] of Object.entries(q)) {
+      if (x === null) p.delete(k);
+      else p.set(k, x);
+    }
+    const s = p.toString();
+    return s ? `${chemin}?${s}` : chemin;
+  };
+  const choisie = v.lignes.find((l) => l.id === params.get("element")) ?? null;
+  const lignes = v.lignes.filter((l) => !filtre || l.statut === filtre);
 
   const demander = (ligne: LigneHonoraire) => {
     const statut = suivant(ligne);
@@ -119,180 +431,227 @@ function Cartes({ v, projet, peutEcrire, nommer }: { v: VueHonoraires; projet: P
 
   return (
     <>
-      <fieldset className="lbi-groupe">
-        <legend className="v2-sr">Mission</legend>
+      <header className="lor-at-entete">
+        <div className="lor-at-fil">
+          <span className="lor-at-objet">{Ic.objet}</span>
+          <Link href={lien({ element: null })} className="lor-at-fil-lien">
+            Honoraires
+          </Link>
+          {choisie ? (
+            <>
+              <span className="lor-at-fil-sep">/</span>
+              <span className="lor-at-fil-courant">{v.libelle(choisie)}</span>
+            </>
+          ) : null}
+        </div>
+        <div className="lor-at-entete-droite">
+          <Link href={lienProjet(projet.id)} className="lor-at-bouton">
+            {Ic.dossier}
+            {projet.nom}
+          </Link>
+        </div>
+      </header>
 
-        {/* 1. Mission : la carte du plan */}
-        <section className="lbi-carte lbi-carte--plan" aria-label="Mission">
-          <div className="lbi-plan">
-            <div className="lbi-pile">
-              <span className="lbi-plan-titre">{v.lignes.length ? `${euros(v.total)} HT d'honoraires` : "Aucun élément de mission"}</span>
-              <span className="lbi-sous">
-                {pluriel(v.lignes.length, "élément")} de mission · phase {PHASES[projet.phase] ?? projet.phase} · {euros(v.facture)} facturés
-              </span>
-            </div>
-            <button type="button" className="lbi-btn" disabled={gris} onClick={v.ouvrirElement}>
-              Ajouter un élément
-            </button>
-          </div>
-        </section>
-
-        {/* 2. Phases : la rangée haute et la grille cochée */}
-        <section className="lbi-carte" aria-label="Phases de la mission">
-          <div className="lbi-rangee">
-            <div className="lbi-pile">
-              <span className="lbi-libelle">Phases de la mission</span>
-              <span className="lbi-sous">
-                {nFacturees} facturée{nFacturees > 1 ? "s" : ""} sur {v.lignes.length} · {euros(v.facture)} sur {euros(v.total)} HT
-              </span>
-            </div>
-            <div className="lbi-boutons">
-              <Link className="lbi-btn lbi-btn--32" href={lienProjet(projet.id)}>
-                Voir le projet
-              </Link>
-              {prochaine ? (
-                <button type="button" className="lbi-btn lbi-btn--32 lbi-btn--primaire" disabled={gris} onClick={() => demander(prochaine)}>
-                  {prochaine.statut === "achevee" ? `Facturer ${court(prochaine)}` : `Achever ${court(prochaine)}`}
+      {choisie ? (
+        <Fiche v={v} l={choisie} projet={projet} peutEcrire={peutEcrire} nommer={nommer} demander={demander} />
+      ) : (
+        <>
+          <div className="lor-at-barre-vue">
+            <div className="lor-at-groupe">
+              <div className="lor-at-ancre" ref={vueRef}>
+                <button type="button" className="lor-at-bouton" aria-expanded={ouvertVue} aria-haspopup="menu" onClick={() => setOuvertVue((o) => !o)}>
+                  <span className="lor-at-vue-icone" aria-hidden="true" />
+                  {projet.nom}
+                  {Ic.chevron}
                 </button>
+                {ouvertVue ? (
+                  <div className="lor-at-menu" role="menu" style={{ left: 0, top: 32 }}>
+                    {projets.map((p) => (
+                      <Link key={p.id} role="menuitem" href={`${CHEMIN}?projet=${encodeURIComponent(p.id)}`} scroll={false} className="lor-at-option" aria-current={p.id === projet.id ? "true" : undefined} onClick={() => setOuvertVue(false)}>
+                        <span className="lor-at-option-texte">{p.nom}</span>
+                        <span className="lor-at-discret">{totalDe[p.id] !== undefined ? euros(totalDe[p.id]) : "—"}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+              <div className="lor-at-ancre" ref={reglagesRef}>
+                <button type="button" className="lor-at-bouton" aria-expanded={ouvertReglages} onClick={() => setOuvertReglages((o) => !o)}>
+                  {Ic.reglages}
+                  Affichage
+                  {Ic.chevron}
+                </button>
+                {ouvertReglages ? (
+                  <div className="lor-at-menu" role="dialog" aria-label="Affichage" style={{ left: 0, top: 32 }}>
+                    <label className="lor-at-option">
+                      <input type="checkbox" checked={voirTaux} onChange={(e) => setVoirTaux(e.target.checked)} />
+                      <span className="lor-at-option-texte">Colonne « Taux réalisé »</span>
+                    </label>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+            <div className="lor-at-groupe">
+              <div className="lor-at-ancre" ref={ajoutRef}>
+                <button type="button" className="lor-at-bouton" aria-expanded={ouvertAjout} disabled={gris} onClick={() => setOuvertAjout((o) => !o)}>
+                  {Ic.plus}
+                  Ajouter
+                  {Ic.chevron}
+                </button>
+                {ouvertAjout ? (
+                  <div className="lor-at-menu" role="menu" style={{ right: 0, top: 32 }}>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="lor-at-option"
+                      onClick={() => {
+                        setOuvertAjout(false);
+                        v.ouvrirElement();
+                      }}
+                    >
+                      <span className="lor-at-option-texte">Un élément de mission…</span>
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+              <button type="button" className="lor-at-bouton lor-at-bouton--bleu" disabled={gris || !v.peutSaisirTemps} onClick={v.ouvrirTemps} title={v.peutSaisirTemps ? "Saisir du temps" : "Ajoutez d'abord un élément de mission"}>
+                {Ic.plus}
+                Saisir du temps
+              </button>
+            </div>
+          </div>
+          <div className="lor-at-barre-tri">
+            <span className="lor-at-tri">
+              {Ic.tri}
+              <span className="lor-at-discret-fort">Trié par</span> phase
+            </span>
+            <div className="lor-at-ancre" ref={filtreRef}>
+              <button type="button" className="lor-at-filtre" data-actif={filtre ? "" : undefined} aria-expanded={ouvertFiltre} onClick={() => setOuvertFiltre((o) => !o)}>
+                {Ic.filtre}
+                {filtre ? LIBELLES_ETAT[filtre] : "Filtrer"}
+              </button>
+              {ouvertFiltre ? (
+                <div className="lor-at-menu" role="menu" style={{ left: 0, top: 32 }}>
+                  {([null, "a_venir", "en_cours", "achevee", "facturee"] as (Honoraire["statut"] | null)[]).map((s) => (
+                    <button
+                      key={s ?? "tous"}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={filtre === s}
+                      className="lor-at-option"
+                      onClick={() => {
+                        setFiltre(s);
+                        setOuvertFiltre(false);
+                      }}
+                    >
+                      <span className="lor-at-option-texte">{s ? LIBELLES_ETAT[s] : "Tous les éléments"}</span>
+                      <span className="lor-at-discret">{s ? v.lignes.filter((l) => l.statut === s).length : v.lignes.length}</span>
+                    </button>
+                  ))}
+                </div>
               ) : null}
             </div>
-          </div>
-          {v.lignes.length ? (
-            <ul className="lbi-grille">
-              {v.lignes.map((l) => {
-                const texte = `${court(l)} · ${v.libelle(l)}`;
-                const titre = `${v.libelle(l)} : ${euros(l.montant_ht)} HT, ${LIBELLES_ETAT[l.statut]}`;
-                return (
-                  <li key={l.id}>
-                    {suivant(l) && peutEcrire ? (
-                      <button type="button" className="lbi-phase" title={`${titre}. ${suivant(l) === "facturee" ? "Marquer facturé" : "Marquer achevé"}`} disabled={v.envoi} onClick={() => demander(l)}>
-                        <Coche l={l} />
-                        <span>{texte}</span>
-                      </button>
-                    ) : (
-                      <span className="lbi-phase" title={titre} data-fait={l.statut === "facturee" ? "" : undefined}>
-                        <Coche l={l} />
-                        <span>{texte}</span>
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          ) : (
-            <p className="lbi-rien">Posez les honoraires de chaque phase (esquisse, APS, APD…) pour suivre le temps passé.</p>
-          )}
-        </section>
-
-        {/* 3. Temps passé : l'usage, qui se déplie */}
-        <section className="lbi-carte" aria-label="Temps passé">
-          <div className="lbi-usage-ligne">
-            <button type="button" className="lbi-usage" aria-expanded={deplie} aria-controls="lbi-temps-detail" onClick={() => setDeplie((x) => !x)}>
-              <span className="lbi-pile">
-                <span className="lbi-libelle">Temps passé</span>
-                <span className="lbi-sous">
-                  {heures(v.passees)} sur {heures(v.prevues)} prévues{conso !== null ? ` · ${conso} %` : ""}
-                  {depassees ? (
-                    <span data-teinte="rouge"> · {pluriel(depassees, "élément")} dépassé{depassees > 1 ? "s" : ""}</span>
-                  ) : null}
-                  {aSurveiller ? (
-                    <span data-teinte="jaune"> · {pluriel(aSurveiller, "élément")} à surveiller</span>
-                  ) : null}
-                </span>
+            {v.alerte.length ? (
+              <span className="lor-at-avis" role="status">
+                {v.alerte.map((l) => `${court(l)} : ${l.etat === "depasse" ? "heures prévues dépassées" : "80 % des heures prévues"}`).join(" · ")}
               </span>
-              <ChevronRight className="lbi-chevron" aria-hidden="true" />
-            </button>
-            <button type="button" className="lbi-btn" disabled={!v.peutSaisirTemps || v.envoi} onClick={v.ouvrirTemps}>
-              Saisir des temps
-            </button>
+            ) : null}
           </div>
-          {deplie ? (
-            <div className="lbi-detail" id="lbi-temps-detail">
-              {v.alerte.map((l) => (
-                <p key={l.id} className="lbi-avis" data-teinte={l.etat === "depasse" ? "rouge" : "jaune"}>
-                  {v.libelle(l)} : {heures(l.passees)} pour {heures(l.heures_prevues)} prévues ({l.conso} %){l.etat === "depasse" ? ", les honoraires de la phase sont dépassés" : ", avant la fin de la phase"}
-                  {l.taux ? ` ; taux réalisé ${euros(Math.round(l.taux))} HT de l'heure` : ""}.
-                </p>
-              ))}
-              {v.lignes.length ? (
-                <ul className="lbi-jauges" aria-label="Temps passé par élément">
-                  {v.lignes.map((l) => (
-                    <li key={l.id}>
-                      <span>
+
+
+          <div className="lor-at-grille" role="table" aria-label={`Honoraires de ${projet.nom}`} data-taux={voirTaux ? "" : undefined}>
+            <div className="lor-at-rang lor-at-rang--tete" role="row">
+              <span className="lor-at-cell lor-at-c1" role="columnheader">
+                <span className="lor-at-case" aria-hidden="true" />
+                Élément
+                <button type="button" className="lor-at-plus-col" aria-label="Ajouter un élément de mission" title="Ajouter un élément de mission" disabled={gris} onClick={v.ouvrirElement}>
+                  {Ic.plus}
+                </button>
+              </span>
+              <span className="lor-at-cell" role="columnheader">
+                {Ic.horloge}
+                Temps passé
+              </span>
+              <span className="lor-at-cell" role="columnheader">
+                {Ic.euro}
+                Honoraires HT
+              </span>
+              <span className="lor-at-cell" role="columnheader">
+                {Ic.etat}
+                État
+              </span>
+              {voirTaux ? (
+                <span className="lor-at-cell" role="columnheader">
+                  {Ic.jauge}
+                  Taux réalisé
+                </span>
+              ) : null}
+            </div>
+            {lignes.map((l) => {
+              const n = niveau(l);
+              return (
+                <div key={l.id} className="lor-at-rang" role="row">
+                  <span className="lor-at-cell lor-at-c1" role="cell">
+                    <span className="lor-at-case" aria-hidden="true" />
+                    <Link href={lien({ element: l.id })} scroll={false} className="lor-at-pilule">
+                      <span className="lor-at-mini" aria-hidden="true">
+                        {court(l)[0]}
+                      </span>
+                      <span className="lor-at-pilule-texte">
                         {court(l)} · {v.libelle(l)}
                       </span>
-                      <span className="lbi-jauge" data-etat={l.etat === "a_surveiller" && (l.statut === "achevee" || l.statut === "facturee") ? "ok" : l.etat} role="img" aria-label={l.conso === null ? "sans heures prévues" : `${l.conso} % des heures prévues`}>
-                        <span style={{ width: `${Math.min(100, l.conso ?? 0)}%` }} />
-                      </span>
-                      <span>
-                        {heures(l.passees)} / {heures(l.heures_prevues)}
-                        {l.taux ? ` · ${euros(Math.round(l.taux))} / h` : ""}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="lbi-avis">Aucun élément : le temps se saisit sur un élément de mission.</p>
-              )}
-              {v.temps.length ? (
-                <>
-                  <p className="lbi-sous-titre">Derniers temps saisis ({v.temps.length})</p>
-                  <ul className="lbi-temps">
-                    {v.temps.slice(0, 12).map((t) => {
-                      const e = v.lignes.find((l) => l.id === t.honoraire_id);
-                      return (
-                        <li key={t.id}>
-                          <span>
-                            {heures(t.heures)} · {e ? v.libelle(e) : "élément"} · {nommer(t.membre)}
-                            {t.note ? ` · ${t.note}` : ""}
-                          </span>
-                          <span>{jour(t.jour)}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </>
-              ) : null}
-            </div>
-          ) : null}
-        </section>
-      </fieldset>
-
-      {/* 4. Factures et situations d'honoraires : Recent invoices */}
-      <fieldset className="lbi-groupe">
-        <legend className="v2-sr">Factures et situations d&apos;honoraires</legend>
-        <h3 className="lbi-h3">Factures et situations d&apos;honoraires</h3>
-        <section className="lbi-carte" aria-label="Factures et situations d'honoraires">
-          {factures.length ? (
-            <ul className="lbi-factures">
-              {factures.map((l) => (
-                <li key={l.id} className="lbi-facture">
-                  <span className="lbi-pile">
-                    <span className="lbi-libelle">
-                      {court(l)} · {v.libelle(l)}
-                    </span>
-                    <span className="lbi-sous">
-                      {l.statut === "facturee" ? (
-                        `Facturé${l.facturee_le ? ` le ${jour(l.facturee_le)}` : ""}`
-                      ) : (
-                        <span data-teinte="jaune">Achevé{l.achevee_le ? ` le ${jour(l.achevee_le)}` : ""} · appel d&apos;honoraires à émettre</span>
-                      )}
+                    </Link>
+                  </span>
+                  <span className="lor-at-cell" role="cell" title={l.conso !== null ? `${l.conso} % des heures prévues` : undefined}>
+                    <span className="lor-at-pastille" style={{ "--lor-at-pastille": n.couleur } as React.CSSProperties} aria-hidden="true" />
+                    <span className="lor-at-cell-texte">
+                      {heures(l.passees)}
+                      {l.heures_prevues ? ` sur ${heures(l.heures_prevues)}` : ""}
                     </span>
                   </span>
-                  <span className="lbi-facture-montant">{euros(l.montant_ht)} HT</span>
-                  {l.statut === "achevee" ? (
-                    <button type="button" className="lbi-btn" disabled={gris} onClick={() => demander(l)}>
-                      Marquer facturé
-                    </button>
+                  <span className="lor-at-cell" role="cell">
+                    {euros(l.montant_ht)}
+                  </span>
+                  <span className="lor-at-cell" role="cell" data-vide={l.statut === "a_venir" ? "" : undefined}>
+                    {l.statut === "facturee" ? `Facturé le ${jour(l.facturee_le)}` : l.statut === "achevee" ? `Achevé le ${jour(l.achevee_le)}, appel à émettre` : LIBELLES_ETAT[l.statut]}
+                  </span>
+                  {voirTaux ? (
+                    <span className="lor-at-cell" role="cell" data-vide={l.taux === null ? "" : undefined}>
+                      {l.taux === null ? "Aucun temps" : `${euros(l.taux)} / h`}
+                    </span>
                   ) : null}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="lbi-rien">Aucun élément achevé ni facturé pour l&apos;instant.</p>
-          )}
-        </section>
-      </fieldset>
+                </div>
+              );
+            })}
+            {!lignes.length ? (
+              <div className="lor-at-rang" role="row">
+                <span className="lor-at-cell lor-at-c1 lor-at-discret" role="cell">
+                  {v.lignes.length ? "Aucun élément dans cet état." : "Aucun élément de mission : ajoutez-en un."}
+                </span>
+              </div>
+            ) : null}
+            <div className="lor-at-rang lor-at-rang--pied" role="row">
+              <span className="lor-at-cell lor-at-c1 lor-at-pied" role="cell">
+                {lignes.length} <span className="lor-at-discret">éléments</span>
+              </span>
+              <span className="lor-at-cell lor-at-pied" role="cell">
+                {heures(v.passees)} <span className="lor-at-discret">sur {heures(v.prevues)}</span>
+              </span>
+              <span className="lor-at-cell lor-at-pied" role="cell">
+                {euros(v.total)} <span className="lor-at-discret">HT</span>
+              </span>
+              <span className="lor-at-cell lor-at-pied" role="cell">
+                {euros(v.facture)} <span className="lor-at-discret">facturés</span>
+              </span>
+              {voirTaux ? (
+                <span className="lor-at-cell lor-at-pied" role="cell">
+                  {v.passees > 0 ? euros(v.total / v.passees) : "—"} <span className="lor-at-discret">/ h</span>
+                </span>
+              ) : null}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Achevé / Facturé (G44, G45) : une fenêtre de confirmation avant d'écrire */}
       <Dialog open={!!aChanger} onOpenChange={(o) => !o && !v.envoi && setAChanger(null)}>
@@ -346,69 +705,21 @@ export default function HonorairesTemps() {
   }, [dossier.honoraires]);
   const demande = params.get("projet");
   const projet = projets.find((p) => p.id === demande) ?? projets.find((p) => totalDe[p.id] !== undefined) ?? projets[0] ?? null;
-  const lien = (id: string) => `${CHEMIN}?projet=${encodeURIComponent(id)}`;
 
   return (
-    <div className="lin lbi">
+    <div className="lor-at">
       <h1 className="v2-sr">Honoraires et temps</h1>
-      <div className="lbi-bande" />
-      <div className="lbi-zone">
-        <div className="lbi-colonne">
-          <header className="lbi-tete">
-            <h2 className="lbi-h2">Honoraires et temps</h2>
-            <div className="lbi-tete-ligne">
-              <p className="lbi-aide">
-                {projet ? (
-                  <>
-                    La mission de <Link href={lienProjet(projet.id)}>{projet.nom}</Link>, phase par phase, et le temps passé dessus.
-                  </>
-                ) : (
-                  "Les honoraires d'un projet, phase par phase, et le temps passé dessus."
-                )}
-              </p>
-              {projets.length > 1 ? (
-                <Menu
-                  largeur={260}
-                  bouton={(ouvert, basculer) => (
-                    <>
-                      <button type="button" className="lbi-btn lbi-btn--tete" aria-expanded={ouvert} aria-haspopup="menu" onClick={basculer}>
-                        Changer de projet
-                        <ChevronDown aria-hidden="true" />
-                      </button>
-                    </>
-                  )}
-                >
-                  {(fermer) =>
-                    projets.map((p) => (
-                      <Link key={p.id} href={lien(p.id)} scroll={false} className="lin-menu-option" aria-current={p.id === projet?.id ? "true" : undefined} onClick={fermer}>
-                        <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.nom}</span>
-                        <span className="lin-meta">{totalDe[p.id] !== undefined ? euros(totalDe[p.id]) : "—"}</span>
-                      </Link>
-                    ))
-                  }
-                </Menu>
-              ) : projet ? (
-                <Link className="lbi-btn lbi-btn--tete" href={lienProjet(projet.id)}>
-                  Le projet
-                  <ArrowUpRight aria-hidden="true" />
-                </Link>
-              ) : null}
-            </div>
-          </header>
-
-          {chargement ? (
-            <p className="lbi-rien">Lecture du dossier…</p>
-          ) : erreur ? (
-            <p className="lbi-rien" role="alert">
-              Le dossier n&apos;a pas pu être lu : {erreur}
-            </p>
-          ) : projet ? (
-            <CarteHonoraires key={projet.id} projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} habit={(v) => <Cartes v={v} projet={projet} peutEcrire={peutEcrire} nommer={nommer} />} />
-          ) : (
-            <p className="lbi-rien">Aucun projet : ouvrez-en un depuis la vue d&apos;ensemble pour poser ses honoraires.</p>
-          )}
-        </div>
-      </div>
+      {chargement ? (
+        <p className="lor-at-message">Lecture du dossier…</p>
+      ) : erreur ? (
+        <p className="lor-at-message" role="alert">
+          Le dossier n&apos;a pas pu être lu : {erreur}
+        </p>
+      ) : projet ? (
+        <CarteHonoraires key={projet.id} projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} agir={agir} habit={(v) => <Vue v={v} projet={projet} projets={projets} totalDe={totalDe} peutEcrire={peutEcrire} nommer={nommer} />} />
+      ) : (
+        <p className="lor-at-message">Aucun projet : ouvrez-en un depuis la vue d&apos;ensemble pour poser ses honoraires.</p>
+      )}
     </div>
   );
 }
