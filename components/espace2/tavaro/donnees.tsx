@@ -116,6 +116,16 @@ export default function DonneesTavaro({ children }: { children: React.ReactNode 
   const [erreur, setErreur] = useState<string | null>(null);
   /* le filtre d'agence vaut pour toute la page (inventaire § 8.3-5) ; le contrat ouvert est celui de la page qui le montre */
   const [agence, setAgence] = useState<string | null>(null);
+  /* l'étoile de la vue d'ensemble garde une agence par défaut (localStorage, ./navigateur) */
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      try {
+        const d = localStorage.getItem("espace2:agence:tavaro");
+        if (d) setAgence(d);
+      } catch {}
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, []);
   const [actif, setActif] = useState<string | null>(null);
 
   const monde = source === "exemple" ? local : reel;

@@ -45,6 +45,8 @@ import { useTavaro } from "./donnees";
 import { useAnalyses } from "./analyses";
 import { TavAgences, TavCarte, TavMenu } from "./TavCadre";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
+import { useFavoris } from "./navigateur";
+import { ecrireStockage, useStockage } from "../Collection";
 import "./tav-home.css";
 
 export const BASE = `${RACINE}/tavaro`;
@@ -266,6 +268,10 @@ export default function VueEnsemble() {
     };
   }, [a, deLAgence]);
 
+  const agenceStockee = useStockage("espace2:agence:tavaro");
+  const agenceParDefaut = !!agence && agenceStockee === agence;
+  const favoris = useFavoris();
+
   const copierLien = () => {
     void navigator.clipboard?.writeText(window.location.href).then(
       () => toast("Lien copié"),
@@ -305,6 +311,9 @@ export default function VueEnsemble() {
             <TavIcone nom="Car" style={{ color: "var(--tav-equipe)" }} />
             <span>Location</span>
           </Link>
+          <button type="button" className="tav-rond" aria-pressed={agenceParDefaut} aria-label={agenceParDefaut ? "Ne plus ouvrir sur cette agence" : agence ? "Ouvrir toujours sur cette agence" : "Ouvrir toujours sur toutes les agences"} title={agenceParDefaut ? "Ne plus ouvrir sur cette agence" : "Garder ce choix d'agence à l'ouverture"} onClick={() => { ecrireStockage("espace2:agence:tavaro", agenceParDefaut ? "" : (agence ?? "")); toast(agenceParDefaut ? "La location s'ouvrira sur toutes les agences." : agence ? `La location s'ouvrira sur ${nomAgenceDe(agence).split(" — ").pop()}.` : "La location s'ouvrira sur toutes les agences."); }}>
+            <TavIcone nom={agenceParDefaut ? "Favorite" : "Etoile"} />
+          </button>
           <TavMenu
             libelle="Actions sur la location"
             options={[
@@ -355,6 +364,14 @@ export default function VueEnsemble() {
             </nav>
 
             {avisBase ? <p className="tav-h-aide tav-h-aide--seul">{avisBase}</p> : null}
+
+            {vue !== "questions" && favoris.liste.length ? (
+              <Section id="tavaro-epingles" titre="Épinglés" vide="">
+                {favoris.liste.map((x) => (
+                  <Rangee key={x.cle} icone="Favorite" texte={x.libelle} suite={x.detail} href={x.href} />
+                ))}
+              </Section>
+            ) : null}
 
             {vue === "questions" ? (
               <Section
@@ -434,6 +451,9 @@ export default function VueEnsemble() {
                   <span className="tav-h-libelle">Agences</span>
                   <div className="tav-h-membres">
                     <TavAgences agences={agences} agence={agence} setAgence={setAgence} />
+                    <Link href={`${BASE}/reglages?vue=regles`} className="tav-rond" aria-label="Responsables des remises, par agence" title="Responsables des remises, par agence">
+                      <TavIcone nom="Plus" />
+                    </Link>
                   </div>
                 </div>
               ) : null}

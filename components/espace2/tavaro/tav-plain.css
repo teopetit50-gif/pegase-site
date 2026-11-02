@@ -481,3 +481,10 @@ html[data-v2-theme="light"] .v2 .tav.tav--plain {
     display: none;
   }
 }
+.v2 .tav.tav--plain .tav-p-bouton--suivre svg,
+.v2 .tav.tav--plain .tav-p-bouton:not([disabled]) svg[data-neutre] {
+  color: var(--tav-p-i1);
+}
+.v2 .tav.tav--plain .tav-p-bouton[aria-pressed="true"] svg {
+  color: var(--tav-p-bleu);
+}

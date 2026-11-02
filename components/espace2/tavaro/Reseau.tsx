@@ -43,6 +43,7 @@ import { FenetreOperations } from "./operations";
 import { TavCarte, TavMenu, type OptionMenu } from "./TavCadre";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
+import { exporterCsv, useFavoris } from "./navigateur";
 import "./tav-initiatives.css";
 
 type Onglet = "flotte" | "plan" | "transferts" | "audit";
@@ -69,7 +70,7 @@ type Ligne = {
 };
 const pct = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${Math.round(v * 100)} %`);
 
-function LigneInitiative({ l }: { l: Ligne }) {
+function LigneInitiative({ l, coche, cocher }: { l: Ligne; coche: boolean; cocher: (oui: boolean) => void }) {
   const contenu = (
     <>
       <span className="tav-n-case" aria-hidden="true" />
@@ -99,7 +100,9 @@ function LigneInitiative({ l }: { l: Ligne }) {
     </>
   );
   return (
-    <li>
+    <li className="tav-n-li" data-coche={coche || undefined}>
+      {/* la case « Select initiative » de Linear : la sélection multiple, puis la barre d'actions groupées */}
+      <input type="checkbox" className="tav-n-coche" aria-label={`Sélectionner ${l.nom}`} checked={coche} onChange={(e) => cocher(e.target.checked)} />
       {l.onClick ? (
         <button type="button" className="tav-n-ligne" onClick={l.onClick}>
           {contenu}
@@ -308,6 +311,28 @@ export default function Reseau() {
     }
   }
 
+  /* « Display options » et les en-têtes triables : le tri, gardé dans l'adresse (?tri=) */
+  const tri = params.get("tri");
+  const TRIS: { cle: string; libelle: string; f: (a: Ligne, b: Ligne) => number }[] = [
+    { cle: "nom", libelle: "Nom", f: (a, b) => a.nom.localeCompare(b.nom, "fr") },
+    { cle: "statut", libelle: "Statut", f: (a, b) => a.statut.libelle.localeCompare(b.statut.libelle, "fr") },
+    { cle: "priorite", libelle: "Priorité", f: (a, b) => ["urgent", "haute", "aucune"].indexOf(a.priorite ?? "aucune") - ["urgent", "haute", "aucune"].indexOf(b.priorite ?? "aucune") },
+    { cle: "sante", libelle: "Santé", f: (a, b) => ["rouge", "vide", "vert"].indexOf(a.sante) - ["rouge", "vide", "vert"].indexOf(b.sante) },
+  ];
+  const triChoisi = TRIS.find((x) => x.cle === tri);
+  if (triChoisi) lignes.sort(triChoisi.f);
+  const adresseTri = (cle: string | null) => {
+    const q = new URLSearchParams(params.toString());
+    if (cle) q.set("tri", cle);
+    else q.delete("tri");
+    return `${BASE}/reseau?${q}`;
+  };
+  /* la sélection : exporter ou épingler les lignes cochées */
+  const [coches, setCoches] = useState<Set<string>>(new Set());
+  const cochees = lignes.filter((l) => coches.has(`${onglet}:${l.cle}`));
+  const favoris = useFavoris();
+  const exporterLignes = (ls: Ligne[]) => exporterCsv(`reseau-${onglet}`, ["Nom", "Résumé", "Statut", "Échéance", "Détail", "Santé", "Valeur"], ls.map((l) => [l.nom, l.resume, l.statut.libelle, l.cible ?? "", l.projets ?? "", l.sante, l.actifs ?? ""]));
+
   const optionsAgence: OptionMenu[] = [
     { libelle: "Toutes les agences", icone: agence === null ? "IssueStatusDone" : "Team", action: () => setAgence(null) },
     ...agences.map((a) => ({ libelle: (a.nom ?? a.code).split(" — ").pop() ?? a.code, icone: (agence === a.entite_id ? "IssueStatusDone" : "Team") as NomTavIcone, action: () => setAgence(a.entite_id) })),
@@ -340,30 +365,87 @@ export default function Reseau() {
           </span>
           <span className="tav-pousse" />
           {agences.length > 1 ? <TavMenu libelle="Filtrer par agence" icone="Filtre" alignement="droite" options={optionsAgence} /> : null}
+          <TavMenu
+            libelle="Options d'affichage : trier les lignes"
+            icone="Affichage"
+            alignement="droite"
+            options={[
+              ...TRIS.map((x) => ({ libelle: `Trier par ${x.libelle.toLowerCase()}`, icone: (tri === x.cle ? "IssueStatusDone" : "Filtre") as NomTavIcone, href: adresseTri(x.cle) })),
+              { libelle: "Ordre d'origine", icone: (tri ? "Refresh" : "IssueStatusDone") as NomTavIcone, href: adresseTri(null) },
+              "sep",
+              { libelle: "Exporter l'onglet (CSV)", icone: "Spreadsheet", action: () => exporterLignes(lignes) },
+            ]}
+          />
           <Link href={`${BASE}/reglages`} className="tav-rond tav-rond--plein" aria-label="Réglages" title="Réglages">
             <TavIcone nom="Roue" />
           </Link>
         </nav>
       </header>
       <div className="tav-defile">
-        <div className="tav-n-entete" aria-hidden="true">
+        <div className="tav-n-entete">
           <span />
           <span />
-          <span className="tav-n-col">Nom</span>
-          <span className="tav-n-col">Statut</span>
-          <span className="tav-n-col">Priorité</span>
+          <Link href={adresseTri(tri === "nom" ? null : "nom")} scroll={false} className="tav-n-col tav-n-tri" aria-current={tri === "nom" ? "true" : undefined}>
+            Nom
+          </Link>
+          <Link href={adresseTri(tri === "statut" ? null : "statut")} scroll={false} className="tav-n-col tav-n-tri" aria-current={tri === "statut" ? "true" : undefined}>
+            Statut
+          </Link>
+          <Link href={adresseTri(tri === "priorite" ? null : "priorite")} scroll={false} className="tav-n-col tav-n-tri" aria-current={tri === "priorite" ? "true" : undefined}>
+            Priorité
+          </Link>
           <span className="tav-n-col">Resp.</span>
           <span className="tav-n-col">{onglet === "plan" ? "Décision" : onglet === "transferts" ? "Avant le" : "Échéance"}</span>
           <span className="tav-n-col">{onglet === "flotte" ? "Canal" : onglet === "plan" ? "Flotte" : onglet === "transferts" ? "Véhicules" : "Retours"}</span>
-          <span className="tav-n-col">Santé</span>
+          <Link href={adresseTri(tri === "sante" ? null : "sante")} scroll={false} className="tav-n-col tav-n-tri" aria-current={tri === "sante" ? "true" : undefined}>
+            Santé
+          </Link>
           <span className="tav-n-col">{onglet === "flotte" ? "Cote" : onglet === "plan" ? "Utilisation" : ""}</span>
         </div>
         {avis ? <p className="tav-n-avis">{avis}</p> : null}
         <ul className="tav-n-lignes">
           {lignes.map((l) => (
-            <LigneInitiative key={l.cle} l={l} />
+            <LigneInitiative
+              key={l.cle}
+              l={l}
+              coche={coches.has(`${onglet}:${l.cle}`)}
+              cocher={(oui) =>
+                setCoches((c) => {
+                  const n = new Set(c);
+                  if (oui) n.add(`${onglet}:${l.cle}`);
+                  else n.delete(`${onglet}:${l.cle}`);
+                  return n;
+                })
+              }
+            />
           ))}
         </ul>
+        {cochees.length ? (
+          <div className="tav-n-barre" role="toolbar" aria-label="Actions sur la sélection">
+            <span>
+              {cochees.length} sélectionnée{cochees.length > 1 ? "s" : ""}
+            </span>
+            <button type="button" className="tav-n-barre-bouton" onClick={() => exporterLignes(cochees)}>
+              <TavIcone nom="Spreadsheet" taille={14} />
+              <span>Exporter (CSV)</span>
+            </button>
+            <button
+              type="button"
+              className="tav-n-barre-bouton"
+              onClick={() => {
+                for (const l of cochees) if (!favoris.a(`reseau:${onglet}:${l.cle}`)) favoris.basculer({ cle: `reseau:${onglet}:${l.cle}`, libelle: l.nom, href: `${BASE}/reseau?onglet=${onglet}`, detail: l.statut.libelle });
+                toast(`${cochees.length} ligne(s) épinglée(s) en tête de la vue d'ensemble.`);
+                setCoches(new Set());
+              }}
+            >
+              <TavIcone nom="Etoile" taille={14} />
+              <span>Épingler</span>
+            </button>
+            <button type="button" className="tav-n-barre-bouton" onClick={() => setCoches(new Set())}>
+              <span>Annuler</span>
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <FenetresFlotte f={flotte} />

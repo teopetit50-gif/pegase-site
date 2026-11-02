@@ -35,7 +35,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 
 ### Vue d'ensemble
 
-- **Étoile « Add to favorites »** absente de la ligne 1 : Tavaro n'a pas de favoris ; aucun geste du métier ne s'y range.
+- **Étoile « Add to favorites »** : dessinée ; elle garde le choix d'agence à l'ouverture (voir « Boutons de la référence »).
 - **Plusieurs sections de ressources** (Véhicules inactifs, Réservations à risque, Contrats à risque, Montée en
   gamme) au lieu d'une : ce sont les « sections » de Team resources de Linear (bouton « Add section »), une par
   analyse du matin (B39-B42) ; la page est donc plus longue que la référence (4 rangées chez Linear). Mêmes
@@ -162,6 +162,56 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
   (`poserReglages`, porte existante, sans migration).
 - **B26 (Crit'Air et contrôle technique)** : gardé au Parc et atelier, pas répété ici.
 
+## Boutons de la référence et leur utilité (02/11/2026, décision de Teo : « trouve une utilité aux boutons »)
+
+Chaque bouton de la référence est dessiné et fait une chose réelle. D'abord un geste qui existe (portes inchangées,
+aucune migration) ; sinon le navigateur seulement (`components/espace2/tavaro/navigateur.ts`) : rien n'est écrit en
+base, rien n'est envoyé. Clés : `espace2:favoris:tavaro`, `espace2:suivis:tavaro`, `espace2:reportes:tavaro`,
+`espace2:agence:tavaro`.
+
+| Page | Bouton de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|
+| Vue d'ensemble | étoile « Add to favorites » | garde l'agence choisie à l'ouverture de la location | localStorage `espace2:agence:tavaro`, relu par `donnees.tsx` |
+| Vue d'ensemble | « Add members » (+ près de la puce) | ouvre les responsables des remises, par agence | lien Réglages › Règles |
+| Vue d'ensemble | section des ressources | « Épinglés » : les objets épinglés ailleurs, en tête | `useFavoris` |
+| Contrat (et volet des Retours) | étoile | épingle le contrat en tête de la vue d'ensemble | `useFavoris` |
+| Contrat | cloche (Subscribe) | suit le contrat : il passe en tête des Retours à facturer, marqué « suivi » | `useSuivis` |
+| Contrat | Snooze | reporte le contrat : il quitte les Retours jusqu'à demain, 3 j ou une semaine ; « Voir les retours reportés » dans le « … » | `useReportes` |
+| Contrat | « Copy branch name » | exporte le chiffrage, les factures et les avoirs en CSV | `exporterCsv` |
+| Contrat | « Copy as prompt \| Choose coding tool » | copie le dossier en clair pour l'assistant (complet ou en une ligne) | presse-papier |
+| Contrat | filtre des « Sub-issues » | masque les lignes faites du bloc | état local |
+| Contrat | composeur « Leave a comment » | non repris : aucune porte de Tavaro n'écrit une note, et aucun canal de réponse n'existe | — |
+| Retours à facturer | « … » | Les factures (nouvelle vue), Voir les retours reportés, Exporter la liste affichée (CSV) | `?vue=factures`, `exporterCsv` |
+| Parc et atelier | étoile | épingle la page en tête de la vue d'ensemble | `useFavoris` |
+| Parc et atelier | « Display options » | colonnes affichées, gardées dans l'adresse | `?masquer=` |
+| Parc et atelier | « … » de chaque colonne | exporte les cartes de la colonne en CSV (en plus des chiffres du parc pour la première) | `exporterCsv` |
+| Amendes | étoile de la liste et de l'élément | épingle la page ou l'élément | `useFavoris` |
+| Amendes | Snooze | reporte l'élément (demain, 3 j, veille de l'échéance) ; filtre « Reportés » | `useReportes`, `?reportes=1` |
+| Amendes | barre flottante (Copy URL, Copy ID, Copy as prompt) | copie le lien, la référence, l'élément en clair pour l'assistant | presse-papier |
+| Amendes | « … » | export de la liste affichée en CSV (en plus des créations) | `exporterCsv` |
+| Incidents | « Assigned to me » | Suivre : l'élément passe en tête de son onglet, marqué « suivi » | `useSuivis` |
+| Incidents | « Handle with Agent » | Copier pour l'assistant | presse-papier |
+| Incidents | « More » | Épingler, Reporter (demain, une semaine), Exporter l'onglet (CSV) | `useFavoris`, `useReportes`, `exporterCsv` |
+| Réseau et flotte | cases « Select initiative » | sélection multiple, barre d'actions : Exporter (CSV), Épingler, Annuler | état local, `exporterCsv`, `useFavoris` |
+| Réseau et flotte | en-têtes triables, « Display options » | tri par nom, statut, priorité, santé, gardé dans l'adresse ; export de l'onglet | `?tri=`, `exporterCsv` |
+| Réglages | Filter, Display (barre du filtre) | filtre par famille ; tout déplier / replier, exporter, copier le barème en vigueur au format de publication | état local, `exporterCsv`, presse-papier |
+| Réglages | cases et « … » de ligne | sélection de postes (copier au format du barème, exporter) ; copier la ligne, filtrer sur sa famille | presse-papier, `exporterCsv` |
+
+Aucun de ces boutons n'écrit en base ni n'envoie : aucun n'appelle de confirmation. Les gestes qui écrivent gardent la
+leur (voir les écarts de chaque page).
+
+## Ajouts du 02/11 (soir), dans les pages existantes
+
+- **Retours à facturer, vue « Factures »** (`?vue=factures&factures=a_envoyer|hier|impayees|toutes`) : promesse « factures
+  de restitution échues relancées ». Lignes de l'Inbox, une par facture (référence, locataire, montant, statut, reste dû,
+  relances, échéance dépassée en priorité urgente), total « À encaisser » ; la relance se fait dans le contrat ouvert à
+  droite (`relancerFacture`, confirmation de la fenêtre F07). Les repères `/tavaro/factures` du point du matin (E15, E17)
+  y mènent (`aiguillage.ts`). Capture : `retours-factures-1440-sombre.png`.
+- **Réglages, section « Sources »** (onglet Règles et responsables, une carte-liste de plus) : promesse « votre logiciel
+  reste en place ; Tavaro lit les contrats ». Par source (export du logiciel, PDF lus, connecteur, comptoir, saisie) : nombre
+  de contrats et dernière lecture (`loc_contrats.source`, `maj_le`) ; à vérifier : contrats en écart avec le logiciel
+  (avertissement `ecart_avec_le_logiciel`) et contrats disparus du dernier export (`disparu_le`). Aucune porte ajoutée.
+
 ## Entrées (aiguillage, `components/espace2/aiguillage.ts`)
 
 | objet_type ou lien | Page |
@@ -173,7 +223,7 @@ la racine. Bascule Exemple / Réel : celle de la coquille d'espace 2, lue par `u
 | `loc_vehicules` (lien `/espace`, véhicule inactif), `loc_reservations` | Vue d'ensemble, ancres `#tavaro-inactifs`, `#tavaro-reservations-risque` |
 | `loc_avis_contravention`, `loc_contestations`, `loc_passages_peage` | Amendes, élément ouvert (`?element=avis:<id>`…) |
 | `loc_sinistres` | Incidents, onglet Sinistres, élément ouvert |
-| `/tavaro/facturation`, `/tavaro/factures`, `/tavaro/avoirs` (socle, E13-E19) | Retours à facturer (À valider), Retours à facturer, file « À valider » |
+| `/tavaro/facturation`, `/tavaro/factures`, `/tavaro/avoirs` (socle, E13-E19) | Retours à facturer (À valider), Retours à facturer vue « Factures », file « À valider » |
 
 `node outils/verifier-aiguillage.mjs /tmp/releve-prod/omega/prod/migrations` : « Chaque repère a sa page. »
 

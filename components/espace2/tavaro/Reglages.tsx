@@ -38,6 +38,9 @@ import { FenetresBareme, type DemandeBareme } from "./FenetresBareme";
 import { TavCarte } from "./TavCadre";
 import { TavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
+import { TavMenu, type OptionMenu } from "./TavCadre";
+import { copier as copierTexte, exporterCsv } from "./navigateur";
+import type { LigneBareme } from "@/components/espace/tavaro/types";
 import "./tav-reglages.css";
 
 /* une couleur de pastille par famille de poste (les couleurs d'étiquettes relevées chez Linear) */
@@ -81,6 +84,33 @@ export default function Reglages() {
   }, [baremes]);
   const nomCategorie = (id: string | null) => (id ? (monde?.categories.find((c) => c.id === id)?.code ?? "?") : "toutes");
   const f = filtre.trim().toLowerCase();
+  /* les boutons de la page Labels : filtre par famille, options d'affichage, cases, « … » de ligne */
+  const [familleFiltre, setFamilleFiltre] = useState<string | null>(null);
+  const [coches, setCoches] = useState<Set<string>>(new Set());
+  /* une ligne au format que « Publier un barème » relit (code ; libellé ; famille ; unité ; prix ; régime ; taux ; catégorie) */
+  const auFormat = (l: LigneBareme) => [l.code, l.libelle, l.famille, l.unite, l.prix_eur ?? "", l.regime_tva, l.taux_tva ?? "", l.categorie_id ? nomCategorie(l.categorie_id) : ""].join(" ; ").replace(/( ; )+$/, "");
+  const toutesLignes = (monde?.lignesBareme ?? []).filter((l) => (!f || l.libelle.toLowerCase().includes(f) || l.code.toLowerCase().includes(f)) && (!familleFiltre || l.famille === familleFiltre));
+  const copierLignes = async (ls: LigneBareme[]) => {
+    const ok = await copierTexte(ls.map(auFormat).join("\n"));
+    toast(ok ? `${ls.length} ligne${ls.length > 1 ? "s" : ""} copiée${ls.length > 1 ? "s" : ""} au format du barème : collez-les dans « Publier un barème ».` : "La copie a échoué.", ok ? undefined : "rouge");
+  };
+  const exporterBareme = (ls: LigneBareme[]) => exporterCsv("bareme", ["Barème", "Code", "Libellé", "Famille", "Unité", "Prix", "Régime TVA", "Taux TVA", "Catégorie"], ls.map((l) => [baremes.find((b) => b.id === l.bareme_id)?.libelle ?? "", l.code, l.libelle, FAMILLES_LIGNE[l.famille], UNITES[l.unite], l.prix_eur ?? "", l.regime_tva, l.taux_tva ?? "", nomCategorie(l.categorie_id)]));
+  const optionsFamille: OptionMenu[] = [
+    { libelle: "Toutes les familles", icone: familleFiltre === null ? "IssueStatusDone" : "Label", action: () => setFamilleFiltre(null) },
+    ...Object.entries(FAMILLES_LIGNE).map(([k, v]) => ({ libelle: v, icone: (familleFiltre === k ? "IssueStatusDone" : "Label") as "Label", action: () => setFamilleFiltre(k) })),
+  ];
+  /* section « Sources » : ce que Tavaro lit du logiciel de location (promesse : « votre logiciel reste en place ») */
+  const SOURCES: Record<string, string> = { export: "Export du logiciel de location", pdf: "Contrats PDF lus", connecteur: "Connecteur du logiciel", comptoir: "Saisis au comptoir", saisie: "Saisis à la main" };
+  const contrats = (monde?.dossiers ?? []).map((d) => d.contrat);
+  const parSource = Object.keys(SOURCES)
+    .map((k) => {
+      const l = contrats.filter((c) => c.source === k);
+      const dernier = l.map((c) => c.maj_le).sort().pop() ?? null;
+      return { k, n: l.length, dernier };
+    })
+    .filter((x) => x.n > 0);
+  const disparus = contrats.filter((c) => c.disparu_le).length;
+  const ecarts = contrats.filter((c) => c.avertissements.some((a) => a.code === "ecart_avec_le_logiciel")).length;
 
   const parc = monde?.parc;
   const entites = [...new Set([...(parc?.vehicules ?? []).map((v) => v.entite_id).filter((x): x is string => !!x), ...(parc?.responsables ?? []).map((x) => x.entite_id)])];
@@ -130,6 +160,22 @@ export default function Reglages() {
                 <TavIcone nom="Search" />
                 <input type="search" placeholder="Filtrer par libellé…" value={filtre} onChange={(e) => setFiltre(e.target.value)} />
               </label>
+              <span className="tav-pousse" />
+              <span className="tav-g-outils">
+                <TavMenu libelle={familleFiltre ? `Famille : ${FAMILLES_LIGNE[familleFiltre as keyof typeof FAMILLES_LIGNE]}` : "Filtrer par famille"} icone="Filtre" alignement="droite" options={optionsFamille} />
+                <TavMenu
+                  libelle="Options d'affichage"
+                  icone="Affichage"
+                  alignement="droite"
+                  options={[
+                    { libelle: "Tout déplier", icone: "Folder", action: () => setOuverts(Object.fromEntries(baremes.map((b) => [b.id, true]))) },
+                    { libelle: "Tout replier", icone: "Folder", action: () => setOuverts(Object.fromEntries(baremes.map((b) => [b.id, false]))) },
+                    "sep",
+                    { libelle: "Exporter les lignes affichées (CSV)", icone: "Spreadsheet", action: () => exporterBareme(toutesLignes) },
+                    { libelle: "Copier le barème en vigueur au format de publication", icone: "Page", action: () => void copierLignes((monde?.lignesBareme ?? []).filter((l) => l.bareme_id === enVigueur?.id).sort((x, y) => x.rang - y.rang)) },
+                  ]}
+                />
+              </span>
             </div>
             {!enVigueur ? <p className="tav-g-avis">Aucun barème publié : sans barème en vigueur à la date du départ, aucun retour ne se chiffre. La direction doit en publier un.</p> : null}
             <div className="tav-g-tableau" role="table" aria-label="Lignes des barèmes">
@@ -147,7 +193,7 @@ export default function Reglages() {
                 <span />
               </div>
               {baremes.map((b) => {
-                const lignes = (monde?.lignesBareme ?? []).filter((l) => l.bareme_id === b.id && (!f || l.libelle.toLowerCase().includes(f) || l.code.toLowerCase().includes(f))).sort((x, y) => x.rang - y.rang);
+                const lignes = toutesLignes.filter((l) => l.bareme_id === b.id).sort((x, y) => x.rang - y.rang);
                 const ouvert = ouverts[b.id] ?? b.id === enVigueur?.id;
                 return (
                   <div key={b.id} role="rowgroup">
@@ -172,8 +218,22 @@ export default function Reglages() {
                     </div>
                     {ouvert
                       ? lignes.map((l, i) => (
-                          <div key={l.id} className="tav-g-ligne tav-g-enfant" role="row" data-dernier={i === lignes.length - 1 || undefined}>
-                            <span />
+                          <div key={l.id} className="tav-g-ligne tav-g-enfant" role="row" data-dernier={i === lignes.length - 1 || undefined} data-coche={coches.has(l.id) || undefined}>
+                            <span className="tav-g-case">
+                              <input
+                                type="checkbox"
+                                aria-label={`Sélectionner ${l.libelle}`}
+                                checked={coches.has(l.id)}
+                                onChange={(e) =>
+                                  setCoches((c) => {
+                                    const n = new Set(c);
+                                    if (e.target.checked) n.add(l.id);
+                                    else n.delete(l.id);
+                                    return n;
+                                  })
+                                }
+                              />
+                            </span>
                             <span className="tav-g-nom">
                               <span className="tav-g-pastille" style={{ background: COULEUR[l.famille] ?? "#95a2b3" }} />
                               <span>{l.libelle}</span>
@@ -185,7 +245,16 @@ export default function Reglages() {
                             <span className="tav-g-cellule">{l.regime_tva === "hors_champ" ? "hors champ" : l.taux_tva !== null ? pourcent(l.taux_tva) : "de l'agence"}</span>
                             <span className="tav-g-cellule">{l.prix_eur !== null ? montant(l.prix_eur) : l.famille === "retard" ? "tarif du contrat" : "devis"}</span>
                             <span />
-                            <span />
+                            <span className="tav-g-menu">
+                              <TavMenu
+                                libelle={`Actions sur « ${l.libelle} »`}
+                                alignement="droite"
+                                options={[
+                                  { libelle: "Copier la ligne au format du barème", icone: "Page", action: () => void copierLignes([l]) },
+                                  { libelle: "Filtrer sur sa famille", icone: "Filtre", action: () => setFamilleFiltre(l.famille) },
+                                ]}
+                              />
+                            </span>
                             <span />
                           </div>
                         ))
@@ -194,6 +263,24 @@ export default function Reglages() {
                 );
               })}
             </div>
+            {coches.size ? (
+              <div className="tav-n-barre tav-g-barre" role="toolbar" aria-label="Actions sur la sélection">
+                <span>
+                  {coches.size} ligne{coches.size > 1 ? "s" : ""} sélectionnée{coches.size > 1 ? "s" : ""}
+                </span>
+                <button type="button" className="tav-n-barre-bouton" onClick={() => void copierLignes((monde?.lignesBareme ?? []).filter((l) => coches.has(l.id)))}>
+                  <TavIcone nom="Page" taille={14} />
+                  <span>Copier au format du barème</span>
+                </button>
+                <button type="button" className="tav-n-barre-bouton" onClick={() => exporterBareme((monde?.lignesBareme ?? []).filter((l) => coches.has(l.id)))}>
+                  <TavIcone nom="Spreadsheet" taille={14} />
+                  <span>Exporter (CSV)</span>
+                </button>
+                <button type="button" className="tav-n-barre-bouton" onClick={() => setCoches(new Set())}>
+                  <span>Annuler</span>
+                </button>
+              </div>
+            ) : null}
           </>
         ) : (
           <div className="tav-g-colonne">
@@ -270,6 +357,56 @@ export default function Reglages() {
                     </button>
                   </li>
                 ))}
+              </ul>
+            </section>
+
+            <section className="tav-g-carte" aria-label="Sources">
+              <header className="tav-g-carte-tete">
+                <span>Sources — ce que Tavaro lit de votre logiciel</span>
+              </header>
+              <ul>
+                {parSource.length === 0 ? (
+                  <li className="tav-g-modele">
+                    <span className="tav-g-vignette">
+                      <TavIcone nom="Spreadsheet" />
+                    </span>
+                    <span className="tav-g-modele-texte">
+                      <span className="tav-g-modele-nom">Aucun contrat lu pour l&apos;instant</span>
+                      <span className="tav-g-modele-meta">Votre logiciel reste en place : Tavaro lit ses exports de contrats, les contrats PDF, ou ce que le comptoir saisit.</span>
+                    </span>
+                  </li>
+                ) : (
+                  parSource.map((x) => (
+                    <li key={x.k} className="tav-g-modele">
+                      <span className="tav-g-vignette">
+                        <TavIcone nom={x.k === "pdf" ? "PdfFile" : x.k === "export" || x.k === "connecteur" ? "Spreadsheet" : "Write"} />
+                      </span>
+                      <span className="tav-g-modele-texte">
+                        <span className="tav-g-modele-nom">{SOURCES[x.k]}</span>
+                        <span className="tav-g-modele-meta">
+                          {x.n} contrat{x.n > 1 ? "s" : ""}
+                          {x.dernier ? ` · dernière lecture le ${dateCourte(x.dernier)} à ${new Date(x.dernier).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}` : ""}
+                        </span>
+                      </span>
+                    </li>
+                  ))
+                )}
+                <li className="tav-g-modele">
+                  <span className="tav-g-vignette">
+                    <TavIcone nom="Alert" />
+                  </span>
+                  <span className="tav-g-modele-texte">
+                    <span className="tav-g-modele-nom">À vérifier</span>
+                    <span className="tav-g-modele-meta">
+                      {ecarts} contrat{ecarts > 1 ? "s" : ""} en écart avec le logiciel (une saisie à la main n&apos;est jamais écrasée) · {disparus} contrat{disparus > 1 ? "s" : ""} disparu{disparus > 1 ? "s" : ""} du dernier export
+                    </span>
+                  </span>
+                  {ecarts ? (
+                    <Link href={`${BASE}/retours`} className="tav-rond tav-g-plus" aria-label="Voir les contrats" title="Voir les contrats">
+                      <TavIcone nom="Chevron" />
+                    </Link>
+                  ) : null}
+                </li>
               </ul>
             </section>
 

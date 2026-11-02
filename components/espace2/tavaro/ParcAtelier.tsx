@@ -23,7 +23,7 @@
    fenêtre générique des opérations (./operations).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CalendarClock, ClipboardCheck, TriangleAlert, Wrench } from "lucide-react";
@@ -39,6 +39,7 @@ import { FenetreOperations, NIVEAUX } from "./operations";
 import { TavCarte, TavMenu, type OptionMenu } from "./TavCadre";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
+import { exporterCsv, useFavoris } from "./navigateur";
 import "./tav-board.css";
 
 const MOTIFS: Record<MotifImmobilisation, string> = {
@@ -133,15 +134,27 @@ export function Carte({ id, droite, etat, titre, puces, pied, onClick, libelle, 
   );
 }
 
-export function Colonne({ etat, nom, compte, menu, ajout, children, vide }: { etat: Etat; nom: string; compte: number; menu?: OptionMenu[]; ajout?: { libelle: string; action: () => void; actif: boolean } | null; children: React.ReactNode; vide?: string }) {
+export function Colonne({ etat, nom, compte, menu, ajout, children, vide, masquee }: { etat: Etat; nom: string; compte: number; menu?: OptionMenu[]; ajout?: { libelle: string; action: () => void; actif: boolean } | null; children: React.ReactNode; vide?: string; masquee?: boolean }) {
+  const boite = useRef<HTMLElement>(null);
+  /* le « … » de chaque colonne : exporter ses cartes, telles qu'affichées, en CSV */
+  const exporter = () => {
+    const cartes = [...(boite.current?.querySelectorAll(".tav-b-carte") ?? [])];
+    exporterCsv(
+      `parc-${nom.toLowerCase().replace(/[^a-z0-9à-ÿ]+/gi, "-")}`,
+      ["Véhicule", "Titre", "Détails", "Pied"],
+      cartes.map((c) => [c.querySelector(".tav-b-id")?.textContent ?? "", c.querySelector(".tav-b-titre")?.textContent ?? "", [...c.querySelectorAll(".tav-b-puce")].map((x) => x.textContent).join(" · "), c.querySelector(".tav-b-pied")?.textContent ?? ""]),
+    );
+  };
+  const options: OptionMenu[] = [...(menu ?? []), ...(menu?.length ? (["sep"] as const) : []), { libelle: "Exporter la colonne (CSV)", icone: "Spreadsheet", action: exporter }];
+  if (masquee) return null;
   return (
-    <section className="tav-b-colonne" aria-label={nom}>
+    <section ref={boite} className="tav-b-colonne" aria-label={nom}>
       <header className="tav-b-col-tete">
         <Statut etat={etat} />
         <h2 className="tav-b-col-nom">{nom}</h2>
         <span className="tav-b-col-compte">{compte}</span>
         <span className="tav-pousse" />
-        {menu ? <TavMenu libelle={`Actions sur « ${nom} »`} options={menu} alignement="droite" /> : null}
+        <TavMenu libelle={`Actions sur « ${nom} »`} options={options} alignement="droite" />
         {ajout ? (
           <button type="button" className="tav-rond" aria-label={ajout.libelle} title={ajout.libelle} disabled={!ajout.actif} onClick={ajout.action}>
             <TavIcone nom="Plus" />
@@ -274,6 +287,24 @@ export default function ParcAtelier() {
   const aPlanifier = entretiens.filter((e) => e.statut === "a_planifier");
   const planifies = entretiens.filter((e) => e.statut === "planifie");
   const montrer = (c: "remises" | "atelier") => vue === "tout" || vue === c;
+  /* « Display options » : les colonnes affichées, gardées dans l'adresse (?masquer=) */
+  const favoris = useFavoris();
+  const COLONNES = [
+    { cle: "remises", nom: "À remettre en location" },
+    { cle: "immo", nom: "Immobilisés" },
+    { cle: "a_planifier", nom: "Entretien à planifier" },
+    { cle: "planifie", nom: "Entretien planifié" },
+    { cle: "rappels", nom: "Rappels du constructeur" },
+    { cle: "ct", nom: "Crit'Air et contrôle technique" },
+  ];
+  const masquees = (params.get("masquer") ?? "").split(",").filter(Boolean);
+  const adresseColonnes = (cle: string) => {
+    const m = masquees.includes(cle) ? masquees.filter((x) => x !== cle) : [...masquees, cle];
+    const q = new URLSearchParams(params.toString());
+    if (m.length) q.set("masquer", m.join(","));
+    else q.delete("masquer");
+    return `${BASE}/parc${q.toString() ? `?${q}` : ""}`;
+  };
   /* un repère du point du matin (aiguillage.ts) : ?remise=, ?immobilisation=, ?entretien=, ?rappel=, ?vehicule= */
   const vise = params.get("remise") ?? params.get("immobilisation") ?? params.get("entretien") ?? params.get("rappel") ?? params.get("vehicule");
   useEffect(() => {
@@ -308,6 +339,9 @@ export default function ParcAtelier() {
             ›
           </span>
           <span className="tav-b-page">Parc et atelier</span>
+          <button type="button" className="tav-rond" aria-pressed={favoris.a("page:parc")} aria-label={favoris.a("page:parc") ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} title={favoris.a("page:parc") ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} onClick={() => favoris.basculer({ cle: "page:parc", libelle: "Parc et atelier", href: `${BASE}/parc`, detail: `${enCours.length} remise(s), ${immobilises.length} immobilisé(s)` })}>
+            <TavIcone nom={favoris.a("page:parc") ? "Favorite" : "Etoile"} />
+          </button>
           <TavMenu libelle="Actions sur le parc" options={nouveau} />
           <span className="tav-pousse" />
           <Link href={`${BASE}/amendes`} className="tav-rond" aria-label="Amendes, péages, contestations" title="Amendes, péages, contestations">
@@ -330,6 +364,7 @@ export default function ParcAtelier() {
           </Link>
           <span className="tav-pousse" />
           {agences.length > 1 ? <TavMenu libelle="Filtrer par agence" icone="Filtre" alignement="droite" options={optionsAgence} /> : null}
+          <TavMenu libelle="Options d'affichage : colonnes affichées" icone="Affichage" alignement="droite" options={COLONNES.map((c) => ({ libelle: `${masquees.includes(c.cle) ? "Afficher" : "Masquer"} « ${c.nom} »`, icone: (masquees.includes(c.cle) ? "IssueStatusTodo" : "IssueStatusDone") as NomTavIcone, href: adresseColonnes(c.cle) }))} />
           <button type="button" className="tav-rond tav-b-cadre" aria-label="Contrôle avant de donner les clés" title="Contrôle avant de donner les clés" onClick={() => setControleOuvert(true)}>
             <TavIcone nom="Shield" />
           </button>
@@ -342,6 +377,7 @@ export default function ParcAtelier() {
           <Colonne
             etat="cours"
             nom="À remettre en location"
+            masquee={masquees.includes("remises")}
             compte={enCours.length}
             vide="Dès qu'un véhicule rentre, sa remise en location apparaît ici, avec l'heure du prochain départ."
             menu={[
@@ -394,7 +430,7 @@ export default function ParcAtelier() {
 
         {monte && montrer("atelier") ? (
           <>
-            <Colonne etat="attente" nom="Immobilisés" compte={immobilises.length} vide="Un véhicule chez le carrossier, au garage ou sous rappel du constructeur s'inscrit ici avec sa date de retour." ajout={{ libelle: "Immobiliser un véhicule", actif: agence, action: () => { setErreur(null); setFait(null); setImmo({ vehicule: "", motif: "carrosserie", fin: "", prestataire: "", notes: "" }); } }}>
+            <Colonne etat="attente" nom="Immobilisés" masquee={masquees.includes("immo")} compte={immobilises.length} vide="Un véhicule chez le carrossier, au garage ou sous rappel du constructeur s'inscrit ici avec sa date de retour." ajout={{ libelle: "Immobiliser un véhicule", actif: agence, action: () => { setErreur(null); setFait(null); setImmo({ vehicule: "", motif: "carrosserie", fin: "", prestataire: "", notes: "" }); } }}>
               {immobilises.map((i) => {
                 const depasse = (minutesAvant(i.fin_prevue_le) ?? 1) < 0;
                 const v = vehicule(i.vehicule_id);
@@ -427,6 +463,7 @@ export default function ParcAtelier() {
             ].map((col) => (
               <Colonne
                 key={col.cle}
+                masquee={masquees.includes(col.cle)}
                 etat={col.etat}
                 nom={col.nom}
                 compte={col.liste.length}
@@ -466,7 +503,7 @@ export default function ParcAtelier() {
               </Colonne>
             ))}
 
-            <Colonne etat="tri" nom="Rappels du constructeur" compte={rappels.length} vide="Aucun rappel à faire." ajout={{ libelle: "Enregistrer un rappel", actif: o.direction, action: o.nouveauRappel }}>
+            <Colonne etat="tri" nom="Rappels du constructeur" masquee={masquees.includes("rappels")} compte={rappels.length} vide="Aucun rappel à faire." ajout={{ libelle: "Enregistrer un rappel", actif: o.direction, action: o.nouveauRappel }}>
               {rappels.map((rv) => {
                 const r = o.ops.rappels.find((x) => x.id === rv.rappel_id);
                 return (
@@ -490,7 +527,7 @@ export default function ParcAtelier() {
               })}
             </Colonne>
 
-            <Colonne etat="fait" nom="Crit'Air et contrôle technique" compte={conformes.length}>
+            <Colonne etat="fait" nom="Crit'Air et contrôle technique" masquee={masquees.includes("ct")} compte={conformes.length}>
               {conformes.map((v) => {
                 const x = o.ops.conformite.find((c) => c.vehicule_id === v.id);
                 const ct = x?.ct_valide_jusqu_au ?? null;

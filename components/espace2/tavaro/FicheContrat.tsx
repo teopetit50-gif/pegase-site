@@ -45,6 +45,7 @@ import { MODES_CAUTION, etatDe, libelleZone } from "@/components/espace/tavaro/e
 import { useToast } from "../Toasts";
 import { useTavaro } from "./donnees";
 import { TavMenu } from "./TavCadre";
+import { copier as copierTexte, dansJours, exporterCsv, useFavoris, useReportes, useSuivis } from "./navigateur";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
 import "./tav-ticket.css";
@@ -100,8 +101,10 @@ const ETAT_FACTURE: Record<Facture["statut"], Etat> = { emise: "afaire", envoyee
 /* un bloc « Sub-issues » : bouton de repli, compteur, « + » à droite, rangées de 36 */
 function Bloc({ titre, compte, ajout, children, ouvertDefaut = true }: { titre: string; compte?: string; ajout?: { libelle: string; action: () => void; actif: boolean } | null; children: React.ReactNode; ouvertDefaut?: boolean }) {
   const [ouvert, setOuvert] = useState(ouvertDefaut);
+  /* le filtre des « Sub-issues » de Linear : masquer les lignes faites */
+  const [masquer, setMasquer] = useState(false);
   return (
-    <section className="tav-t-bloc" aria-label={titre}>
+    <section className="tav-t-bloc" aria-label={titre} data-masquer={masquer || undefined}>
       <div className="tav-t-bloc-tete">
         <button type="button" className="tav-t-repli" aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)}>
           <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true" style={{ transform: ouvert ? undefined : "rotate(-90deg)" }}>
@@ -111,6 +114,9 @@ function Bloc({ titre, compte, ajout, children, ouvertDefaut = true }: { titre: 
         </button>
         {compte ? <span className="tav-t-bloc-compte">{compte}</span> : null}
         <span className="tav-pousse" />
+        <button type="button" className="tav-rond tav-rond--plein" aria-pressed={masquer} aria-label={masquer ? "Montrer les lignes faites" : "Masquer les lignes faites"} title={masquer ? "Montrer les lignes faites" : "Masquer les lignes faites"} onClick={() => setMasquer((m) => !m)}>
+          <TavIcone nom="Affichage" />
+        </button>
         {ajout ? (
           <button type="button" className="tav-rond tav-rond--plein" aria-label={ajout.libelle} title={ajout.libelle} disabled={!ajout.actif} onClick={ajout.action}>
             <TavIcone nom="Plus" />
@@ -276,6 +282,45 @@ export default function FicheContrat({ dossier, volet = false, retour }: { dossi
     }
   };
 
+  /* ——— les boutons de la référence sans geste en base : épingler, suivre, reporter, exporter, copier ——— */
+  const favoris = useFavoris();
+  const suivis = useSuivis();
+  const reportes = useReportes();
+  const repere = { cle: `contrat:${c.id}`, libelle: `${c.numero} — ${nomLocataire(locataire)}`, href: `${BASE}/contrats/${encodeURIComponent(c.id)}`, detail: vehicule?.immatriculation };
+  const epingle = favoris.a(repere.cle);
+  const suivi = suivis.a(repere.cle);
+  const reporteJusqua = reportes.jusquA(repere.cle);
+  const reporter = (date: string | null) => {
+    reportes.reporter(repere.cle, date);
+    toast(date ? `${c.numero} quitte les Retours à facturer jusqu'au ${dateCourte(date)}.` : `${c.numero} revient dans les Retours à facturer.`);
+  };
+  const exporterChiffrage = () =>
+    exporterCsv(
+      `contrat-${c.numero}`,
+      ["Type", "Référence", "Libellé", "Statut", "Quantité", "HT", "TTC"],
+      [
+        ...lignes.map((l) => ["Ligne de chiffrage", p ? `v${p.version}` : "", l.libelle, l.statut, l.quantite, l.montant_ht, l.montant_ttc]),
+        ...dossier.factures.map((f) => ["Facture", f.reference, f.nature, STATUTS_FACTURE[f.statut].libelle, "", f.total_ht, f.total_ttc]),
+        ...dossier.avoirs.map((a) => ["Avoir", a.reference ?? "", a.motif, STATUTS_AVOIR[a.statut].libelle, "", a.montant_ht, a.montant_ttc]),
+      ],
+    );
+  const copierPourAssistant = async (court: boolean) => {
+    const resume = court
+      ? `Contrat ${c.numero}, ${nomLocataire(locataire)}${vehicule ? `, ${vehicule.immatriculation}` : ""} : ${p ? `${STATUTS_PROPOSITION[p.statut].libelle.toLowerCase()}, ${montant(p.total_ttc)}` : "pas encore chiffré"}${dossier.factures.length ? `, ${dossier.factures.length} facture(s)` : ""}.`
+      : [
+          `Contrat de location ${c.numero} (${agence?.nom ?? agence?.code ?? "agence"})`,
+          `Locataire : ${nomLocataire(locataire)}${locataire?.type === "professionnel" ? " (professionnel)" : ""}`,
+          `Véhicule : ${vehicule ? `${vehicule.immatriculation}${vehicule.modele ? ` ${vehicule.modele}` : ""}` : "inconnu"}`,
+          description,
+          p ? `Chiffrage v${p.version} : ${STATUTS_PROPOSITION[p.statut].libelle.toLowerCase()}, total ${montant(p.total_ttc)} TTC` : "Chiffrage : pas encore fait",
+          ...lignes.map((l) => `- ${l.libelle} : ${montant(l.montant_ttc)}`),
+          ...dossier.factures.map((f) => `Facture ${f.reference} (${f.nature}) : ${STATUTS_FACTURE[f.statut].libelle.toLowerCase()}, ${montant(f.total_ttc)}, reste dû ${montant(resteDu(f, dossier.avoirs))}`),
+          ...dossier.avoirs.map((a) => `Avoir ${a.reference ?? "en attente"} : ${STATUTS_AVOIR[a.statut].libelle.toLowerCase()}, ${montant(a.montant_ttc)}`),
+        ].join("\n");
+    const ok = await copierTexte(resume);
+    toast(ok ? "Copié pour l'assistant : collez-le dans votre question." : "La copie a échoué.", ok ? undefined : "rouge");
+  };
+
   const titre = `${nomLocataire(locataire)}${vehicule ? ` — ${vehicule.immatriculation}${vehicule.modele ? ` · ${vehicule.modele}` : ""}` : ""}`;
   const forfait = c.km_illimite ? "kilométrage illimité" : c.km_inclus !== null ? `forfait ${nombreFr(c.km_inclus)} km` : c.km_inclus_jour !== null ? `forfait ${nombreFr(c.km_inclus_jour)} km par jour` : "forfait kilométrique inconnu";
   const description = `Départ le ${dateHeure(c.depart_le)}, retour prévu le ${dateHeure(retourPrevu)}${prolongation ? ` (${AMENDEMENTS[prolongation.type].toLowerCase()})` : ""}, ${renduLe ? `rendu le ${dateHeure(renduLe)}` : "pas encore rendu"}. Compteur ${c.km_depart !== null ? `${nombreFr(c.km_depart)} km` : "inconnu"}${c.km_retour !== null ? ` → ${nombreFr(c.km_retour)} km` : ""}, ${forfait}, carburant ${c.politique_carburant ? POLITIQUES[c.politique_carburant].toLowerCase() : "inconnu"}${c.politique_carburant === "seuil" && c.seuil_charge_pct !== null ? ` (${c.seuil_charge_pct} %)` : ""}, ${montant(c.tarif_jour_eur)} par jour, dépôt ${montant(c.depot_eur)}.`;
@@ -305,6 +350,9 @@ export default function FicheContrat({ dossier, volet = false, retour }: { dossi
             </h2>
           </Link>
         </nav>
+        <button type="button" className="tav-rond" aria-pressed={epingle} aria-label={epingle ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} title={epingle ? "Retirer des épinglés" : "Épingler en tête de la vue d'ensemble"} onClick={() => favoris.basculer(repere)}>
+          <TavIcone nom={epingle ? "Favorite" : "Etoile"} />
+        </button>
         <TavMenu
           libelle="Actions sur le contrat"
           options={[
@@ -328,9 +376,20 @@ export default function FicheContrat({ dossier, volet = false, retour }: { dossi
           <button type="button" className="tav-rond" aria-label="Compléter les conditions" title="Compléter les conditions" disabled={!peutAgir || c.statut === "annule"} onClick={() => ouvrir({ type: "completer" })}>
             <TavIcone nom="Write" />
           </button>
-          <Link href="/espace2/validations" className="tav-rond" aria-label="Ouvrir la file « À valider »" title="Ouvrir la file « À valider »">
-            <TavIcone nom="Inbox" />
-          </Link>
+          <button type="button" className="tav-rond" aria-pressed={suivi} aria-label={suivi ? "Ne plus suivre ce contrat" : "Suivre ce contrat (en tête des Retours à facturer)"} title={suivi ? "Ne plus suivre ce contrat" : "Suivre ce contrat : il passe en tête des Retours à facturer"} onClick={() => suivis.basculer(repere)}>
+            <TavIcone nom={suivi ? "Notified" : "Subscribe"} />
+          </button>
+          <TavMenu
+            libelle={reporteJusqua ? `Reporté jusqu'au ${dateCourte(reporteJusqua)}` : "Reporter (quitte la liste des retours jusqu'à la date choisie)"}
+            icone="AlarmClock"
+            alignement="droite"
+            options={[
+              { libelle: "Reporter à demain", icone: "Calendar", action: () => reporter(dansJours(1)) },
+              { libelle: "Reporter de 3 jours", icone: "Calendar", action: () => reporter(dansJours(3)) },
+              { libelle: "Reporter d'une semaine", icone: "Calendar", action: () => reporter(dansJours(7)) },
+              ...(reporteJusqua ? (["sep", { libelle: `Annuler le report (jusqu'au ${dateCourte(reporteJusqua)})`, icone: "Refresh", action: () => reporter(null) }] as const) : []),
+            ]}
+          />
         </div>
       </header>
 
@@ -342,6 +401,24 @@ export default function FicheContrat({ dossier, volet = false, retour }: { dossi
           <button type="button" className="tav-rond tav-rond--plein" aria-label="Copier le numéro du contrat" title="Copier le numéro du contrat" onClick={() => copier(c.numero, "Numéro")}>
             <TavIcone nom="Page" />
           </button>
+          <button type="button" className="tav-rond tav-rond--plein" aria-label="Exporter le chiffrage en CSV" title="Exporter le chiffrage et les factures en CSV" onClick={exporterChiffrage}>
+            <TavIcone nom="Spreadsheet" />
+          </button>
+          <span className="tav-t-double">
+            <button type="button" className="tav-t-double-g" onClick={() => void copierPourAssistant(false)} title="Copier pour l'assistant : le dossier en clair">
+              <TavIcone nom="Agent" taille={14} />
+              <span>Copier pour l&apos;assistant</span>
+            </button>
+            <TavMenu
+              libelle="Choisir ce qui est copié"
+              icone="Chevron"
+              alignement="droite"
+              options={[
+                { libelle: "Le dossier complet", icone: "Page", action: () => void copierPourAssistant(false) },
+                { libelle: "Le résumé en une ligne", icone: "Write", action: () => void copierPourAssistant(true) },
+              ]}
+            />
+          </span>
         </div>
         <div className="tav-t-corps">
           <div className="tav-t-principal">
