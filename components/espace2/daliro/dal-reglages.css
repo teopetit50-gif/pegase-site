@@ -1,0 +1,602 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › Réglages — Linear, Settings › Issue labels et Issue templates,
+   au 1:1 (02/11/2026). Relevé : docs/refonte-metiers/releves/
+   linear-labels-templates.md (clair) ; le sombre est lu sur les captures
+   à taille réelle (1440-reel-sombre-*.png). Préfixe dal-rg-.
+
+   Repères (px CSS, depuis le bord de la carte `main`) :
+     bande       64 vide en haut (16 à 390)
+     titre       p 0 56 12, filet bas 0.5 ; 24/500/32 ls −0.16 ; boutons
+                 32, r 9999, p 0 12, 13/500, écart 8 (primaire #6d78d5)
+     filtre      44 : champ 300×28 à x 50, p 6 25 6 32, loupe 16 à x+10 ;
+                 à droite deux ronds pleins de 28, écart 6
+     tableau     grille 60 / 2fr / 3fr / 75 / 75 / 102 / 82 / 28 / 32
+                 (293,195 et 439,805 chez Linear, carte de 1187) ; en-tête
+                 32 collé, tri 24 r 9999 p 0 6 marge −6, 12/450 tertiaire ;
+                 lignes 44, survol en ::before inset 0 8 r 8 ; pastille 9 à
+                 +2, nom (bouton 29, p 6 10 6 6) à +22, 13/500 secondaire
+     groupe      chevron 16 à x 38, icône 4 points ; enfants décalés de 27,
+                 trait de liaison
+     modèles     colonne 640 centrée, en-tête p 0 16 gap 4 (aide 13/450/22) ;
+                 carte à +32, r 10, contour en ombre ; tête 60 p 16 ;
+                 lignes 64 p 16 gap 12, vignette 32 r 6, séparées par un
+                 filet inset 16
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal.dal-rg-page {
+  --dal-rg-primaire: lch(48 52.26 286.91);
+  --dal-rg-primaire-texte: lch(100 5 286.91);
+  --dal-rg-carte: lch(9.232 0.85 272);
+  --dal-rg-contour: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --dal-rg-filet: lch(100 0 0 / 0.083);
+  --dal-rg-vignette: lch(78.247 3.577 260.65 / 0.16);
+  --dal-rg-survol-li: lch(13.861 1.043 272);
+  --dal-rg-lien: lch(20.032 1.93 272);
+  --dal-rg-case: lch(39.452 1.425 272);
+}
+html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
+  --dal-rg-primaire: lch(53 52.26 286.91);
+  --dal-rg-carte: lch(100 0 282);
+  --dal-rg-contour: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --dal-rg-filet: lch(0 0 0 / 0.088);
+  --dal-rg-vignette: lch(78.247 3.577 260.65 / 0.125);
+  --dal-rg-survol-li: lch(94.44 0.5 282);
+  --dal-rg-lien: lch(86.5 0 282);
+  --dal-rg-case: lch(52.04 0 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal.dal-rg-page {
+    --dal-rg-primaire: lch(53 52.26 286.91);
+    --dal-rg-carte: lch(100 0 282);
+    --dal-rg-contour: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --dal-rg-filet: lch(0 0 0 / 0.088);
+    --dal-rg-vignette: lch(78.247 3.577 260.65 / 0.125);
+    --dal-rg-survol-li: lch(94.44 0.5 282);
+    --dal-rg-lien: lch(86.5 0 282);
+    --dal-rg-case: lch(52.04 0 282);
+  }
+}
+
+.v2 .dal .dal-rg-defile {
+  padding-bottom: 64px;
+  scrollbar-width: thin;
+}
+.v2 .dal .dal-rg-bande {
+  height: 64px;
+}
+
+/* ——— titre et boutons ——— */
+.v2 .dal .dal-rg-titre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* 12 chez Linear, filet de 0.5 compris ; à l'échelle 1 le filet compte pour 1 */
+  padding: 0 56px 11.5px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-rg-h2 {
+  flex: 1;
+  min-width: 0;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-rg-boutons {
+  display: flex;
+  gap: 8px;
+}
+.v2 .dal .dal-rg-btn {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--dal-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .dal .dal-rg-btn:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-rg-btn--plein {
+  background: var(--dal-rg-primaire);
+  color: var(--dal-rg-primaire-texte);
+  box-shadow: lch(0 0 0 / 0.04) 0 1px 1px 0;
+}
+.v2 .dal .dal-rg-btn--plein:hover {
+  background: var(--dal-rg-primaire);
+  filter: brightness(1.08);
+}
+.v2 .dal .dal-rg-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— la barre du filtre ——— */
+.v2 .dal .dal-rg-filtre {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 56px;
+}
+.v2 .dal .dal-rg-recherche {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 300px;
+  height: 28px;
+  margin-left: -6px;
+}
+.v2 .dal .dal-rg-recherche svg {
+  position: absolute;
+  left: 10px;
+  color: var(--dal-t3);
+  pointer-events: none;
+}
+.v2 .dal .dal-rg-champ {
+  width: 100%;
+  height: 28px;
+  padding: 6px 25px 6px 32px;
+  border: 0.5px solid transparent;
+  border-radius: 999px;
+  background: var(--dal-carte);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.v2 .dal .dal-rg-champ::placeholder {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-champ::-webkit-search-cancel-button {
+  display: none;
+}
+.v2 .dal .dal-rg-outils {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.v2 .dal .dal-rg-pop {
+  position: relative;
+  display: inline-flex;
+}
+.v2 .dal .dal-rg-pop .dal-rond {
+  position: relative;
+}
+.v2 .dal .dal-rg-point {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dal-violet);
+}
+.v2 .dal .dal-rg-menu {
+  top: 32px;
+  right: 0;
+  min-width: 220px;
+}
+.v2 .dal .dal-rg-menu-compte {
+  font-size: 12px;
+  color: var(--dal-t3);
+}
+
+/* ——— le tableau ——— */
+.v2 .dal .dal-rg-tableau {
+  --dal-rg-grille: 60px minmax(0, 2fr) minmax(0, 3fr) 75px 75px 102px 82px 28px 32px;
+}
+.v2 .dal .dal-rg-entete,
+.v2 .dal .dal-rg-ligne {
+  display: grid;
+  grid-template-columns: var(--dal-rg-grille);
+  align-items: center;
+}
+.v2 .dal .dal-rg-entete {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 32px;
+  background: var(--dal-carte);
+}
+.v2 .dal .dal-rg-th {
+  min-width: 0;
+}
+.v2 .dal .dal-rg-tri {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  max-width: calc(100% + 6px);
+  margin-left: -6px;
+  padding: 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+}
+.v2 .dal .dal-rg-tri span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-rg-tri:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-rg-ligne {
+  position: relative;
+  height: 44px;
+  isolation: isolate;
+}
+/* le menu « … » ouvert passe au-dessus des lignes suivantes */
+.v2 .dal .dal-rg-ligne:has(.dal-rg-pop[data-ouvert]),
+.v2 .dal .dal-rg-modele:has(.dal-rg-pop[data-ouvert]),
+.v2 .dal .dal-rg-carte-tete:has(.dal-rg-pop[data-ouvert]) {
+  z-index: 5;
+}
+.v2 .dal .dal-rg-carte-tete {
+  position: relative;
+}
+.v2 .dal .dal-rg-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  z-index: -1;
+  border-radius: 8px;
+}
+.v2 .dal .dal-rg-ligne:hover::before,
+.v2 .dal .dal-rg-ligne:focus-within::before {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-rg-c-indent {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+.v2 .dal .dal-rg-c-nom {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding-left: 2px;
+}
+.v2 .dal .dal-rg-ligne[data-enfant] .dal-rg-c-nom {
+  padding-left: 29px;
+}
+.v2 .dal .dal-rg-pastille-boite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 9px;
+  height: 9px;
+}
+.v2 .dal .dal-rg-pastille {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.v2 .dal .dal-rg-icone-groupe {
+  width: 12px;
+  height: 12px;
+  margin: 0 -1.5px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-edit {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  height: 29px;
+  margin-left: 11px;
+  padding: 6px 10px 6px 6px;
+  border: 0.5px solid transparent;
+  border-radius: 7px;
+  text-align: left;
+}
+.v2 .dal .dal-rg-edit:hover {
+  border-color: var(--dal-carte-bord);
+}
+.v2 .dal .dal-rg-groupe .dal-rg-nom {
+  margin-left: 17px;
+}
+.v2 .dal .dal-rg-nom,
+.v2 .dal .dal-rg-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-rg-c-desc {
+  min-width: 0;
+  display: flex;
+}
+.v2 .dal .dal-rg-meta {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-c-menu {
+  display: flex;
+  justify-content: center;
+}
+.v2 .dal .dal-rg-points {
+  width: 32px;
+  height: 32px;
+  opacity: 0;
+}
+.v2 .dal .dal-rg-points svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .dal .dal-rg-ligne:hover .dal-rg-points,
+.v2 .dal .dal-rg-modele:hover .dal-rg-points,
+.v2 .dal .dal-rg-pop[data-ouvert] .dal-rg-points,
+.v2 .dal .dal-rg-points:focus-visible {
+  opacity: 1;
+}
+.v2 .dal .dal-rg-c-menu .dal-rg-menu {
+  min-width: 240px;
+}
+.v2 .dal .dal-rg-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-left: 37px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-chevron[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+/* le trait de liaison d'un enfant : vertical depuis le groupe, coude vers la pastille */
+.v2 .dal .dal-rg-lien {
+  position: absolute;
+  left: 66px;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  border-left: 1px solid var(--dal-rg-lien);
+}
+.v2 .dal .dal-rg-ligne[data-dernier] .dal-rg-lien {
+  bottom: 50%;
+  border-bottom: 1px solid var(--dal-rg-lien);
+  border-bottom-left-radius: 6px;
+}
+.v2 .dal .dal-rg-ligne:not([data-dernier]) .dal-rg-lien::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 14px;
+  border-top: 1px solid var(--dal-rg-lien);
+}
+.v2 .dal .dal-rg-vide {
+  padding: 14px 56px;
+  font-size: 13px;
+  color: var(--dal-t3);
+}
+
+/* ——— l'organisation : colonne de 640 et carte de liste ——— */
+.v2 .dal .dal-rg-colonne {
+  width: 640px;
+  max-width: calc(100% - 32px);
+  margin: 0 auto;
+}
+.v2 .dal .dal-rg-colonne-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 16px;
+}
+.v2 .dal .dal-rg-aide {
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-docs {
+  display: inline;
+  padding: 1px 4px;
+  border-radius: 8px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-rg-docs svg {
+  display: inline-block;
+  margin-left: 2px;
+  vertical-align: -1px;
+}
+.v2 .dal .dal-rg-docs:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-rg-carte {
+  margin-top: 32px;
+  border-radius: 10px;
+  background: var(--dal-rg-carte);
+  box-shadow: var(--dal-rg-contour);
+}
+.v2 .dal .dal-rg-carte-tete {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 60px;
+  padding: 16px;
+  border-bottom: 0.5px solid var(--dal-rg-filet);
+}
+.v2 .dal .dal-rg-carte-titre {
+  flex: 1;
+  letter-spacing: normal;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-rg-plus {
+  width: 24px;
+  height: 24px;
+}
+.v2 .dal .dal-rg-modeles {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .dal .dal-rg-modele {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 64px;
+  padding: 16px;
+}
+.v2 .dal .dal-rg-modele + .dal-rg-modele::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  border-top: 0.5px solid var(--dal-rg-filet);
+}
+.v2 .dal .dal-rg-modele:last-child {
+  border-radius: 0 0 10px 10px;
+}
+.v2 .dal .dal-rg-modele:hover {
+  background: var(--dal-rg-survol-li);
+}
+.v2 .dal .dal-rg-modele-lien {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.v2 .dal .dal-rg-vignette {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--dal-rg-vignette);
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-modele-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.v2 .dal .dal-rg-modele-nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-rg-modele-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-rg-modele .dal-rg-points {
+  width: 24px;
+  height: 24px;
+}
+.v2 .dal .dal-rg-modele .dal-rg-points svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ——— 1024 : « Unité » et « PU HT » masquées (Used in, Issues chez Linear) ——— */
+@media (max-width: 1100px) {
+  .v2 .dal .dal-rg-tableau {
+    --dal-rg-grille: 60px minmax(0, 240fr) minmax(0, 227fr) 102px 82px 28px 32px;
+  }
+  .v2 .dal .dal-rg-c-unite,
+  .v2 .dal .dal-rg-c-prix {
+    display: none;
+  }
+}
+/* ——— 768 : Description masquée aussi ——— */
+@media (max-width: 860px) {
+  .v2 .dal .dal-rg-tableau {
+    --dal-rg-grille: 60px minmax(0, 1fr) 102px 82px 28px 32px;
+  }
+  .v2 .dal .dal-rg-c-desc {
+    display: none;
+  }
+}
+/* ——— 390 : bande 16, marges 22, case et nom seulement ——— */
+@media (max-width: 640px) {
+  .v2 .dal .dal-rg-bande {
+    height: 16px;
+  }
+  .v2 .dal .dal-rg-titre,
+  .v2 .dal .dal-rg-filtre {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .v2 .dal .dal-rg-titre {
+    gap: 8px;
+  }
+  .v2 .dal .dal-rg-btn {
+    height: 36px;
+  }
+  .v2 .dal .dal-rg-recherche {
+    width: 258px;
+  }
+  .v2 .dal .dal-rg-tableau {
+    --dal-rg-grille: 76px minmax(0, 1fr) 28px 32px;
+  }
+  .v2 .dal .dal-rg-c-statut,
+  .v2 .dal .dal-rg-c-date {
+    display: none;
+  }
+  .v2 .dal .dal-rg-points {
+    width: 36px;
+    height: 36px;
+  }
+  .v2 .dal .dal-rg-chevron {
+    margin-left: 53px;
+  }
+  .v2 .dal .dal-rg-lien {
+    left: 82px;
+  }
+  .v2 .dal .dal-rg-colonne {
+    max-width: calc(100% - 44px);
+  }
+  .v2 .dal .dal-rg-carte-tete {
+    height: 50px;
+    padding: 10.67px;
+    gap: 8px;
+  }
+  .v2 .dal .dal-rg-modele {
+    padding: 16px 10.67px;
+    gap: 8px;
+  }
+  .v2 .dal .dal-rg-plus,
+  .v2 .dal .dal-rg-modele .dal-rg-points {
+    width: 28px;
+    height: 28px;
+  }
+}

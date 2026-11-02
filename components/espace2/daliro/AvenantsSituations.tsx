@@ -151,13 +151,13 @@ export default function AvenantsSituations() {
   }, [pret, liste, demanderTous]);
 
   /* en exemple : l'exemple rempli, posé une fois dans les tableaux */
-  const pose = useRef(false);
+  const poses = useRef(new Set<string>());
   useEffect(() => {
-    if (source !== "exemple" || pose.current || !liste.length) return;
-    pose.current = true;
+    if (source !== "exemple") return;
     for (const c of liste) {
       const t = tableau(c.id);
-      if (!t) continue;
+      if (!t || poses.current.has(c.id)) continue;
+      poses.current.add(c.id);
       const avs = AVENANTS_PLUS.filter((a) => a.chantier_id === c.id);
       const sits = SITUATIONS_PLUS.filter((s) => s.chantier_id === c.id);
       const deja = (x: { id: string }) => t.avenants.some((a) => a.id === x.id) || (t.situations ?? []).some((s) => s.id === x.id);
