@@ -2,7 +2,7 @@
 
 | Sous-page | Route | Référence | Relevé | État |
 |---|---|---|---|---|
-| Vue d'ensemble | `/espace2/lorani` | Linear, Projects (liste) | `linear-projects.md` | écrite (`VueEnsemble.tsx`, `lor-projets.css`) ; superposition 1 faite en sombre : géométrie alignée (en-tête, colonnes, lignes) ; restent : capture avec 13 lignes, clair, 390 |
+| Vue d'ensemble | `/espace2/lorani` | Linear, Projects (liste) | `linear-projects.md` | écrite (`VueEnsemble.tsx`, `lor-projets.css`) ; superposée à 13 lignes en sombre, clair et 390 (`comparaisons/lorani/vue-*`) |
 | Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | écrite (`PagePermis.tsx`, `lor-ticket.css`) ; superposée en sombre, clair, 1024 et 390 (`comparaisons/lorani/permis-*`) ; écarts ci-dessous |
 | Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | écrite (`PageProjet.tsx`, `lor-initiative.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/projet-*`) ; écarts ci-dessous |
 | Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | écrite (`Courrier.tsx`, `lor-inbox.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/courrier-*`) ; écarts ci-dessous |
@@ -16,7 +16,7 @@
 
 ## Méthode de superposition utilisée
 
-Le cadre de l'espace 2 (barre 48, rail, sous-menu ; `main` à x 304) n'est pas celui de Linear : on compare la carte. Fenêtre émulée **1491 × 932** pour que `main` fasse 1187 de large comme la carte de Linear ; quatre tuiles 800×500 à l'échelle 1 (transform sur `<html>`, origines (304,48) (691,48) (304,403) (691,403)), recollées en 1187×855 et comparées à `1440-reel-*.png` découpée en (245,9,1187,855). Écart assumé : le cadre de l'espace 2 (commun, hors périmètre).
+Le cadre de l'espace 2 (barre 48, rail, sous-menu ; `main` à x 304) n'est pas celui de Linear : on compare la carte. Fenêtre émulée **1491 × 932** (dans le cloud : 1492 × 904, `outils/lor-capture.mjs`, sans tuiles : l'échelle 1 est native) pour que `main` fasse 1187 de large comme la carte de Linear ; quatre tuiles 800×500 à l'échelle 1 (transform sur `<html>`, origines (304,48) (691,48) (304,403) (691,403)), recollées en 1187×855 et comparées à `1440-reel-*.png` découpée en (245,9,1187,855). Écart assumé : le cadre de l'espace 2 (commun, hors périmètre).
 
 ## Linear, page d'un ticket — mesures prises en direct le 02/11 (sombre)
 
@@ -107,3 +107,8 @@ Correspondances : People → éléments de mission du projet ; vue « Recently C
 - Pas d'onglets Emails, Calls, Company, Files ni de colonne « + Add column » / « + Add calculation » : un élément de mission n'a ni courriels, ni appels, ni pièces ; les colonnes et les totaux sont fixés.
 - Pas de « Share », « Ask Attio », ni d'étoile et de crayon sur la fiche : sans équivalent dans Lorani ; l'en-tête porte un lien vers le projet.
 - L'avis « 80 % des heures prévues » / « dépassé » (B27) est à droite de la barre de tri : sans place dans la référence.
+
+## Vue d'ensemble → Linear, Projects (liste « All projects »), fin de la superposition (02/11, cloud)
+
+Treize lignes comme la capture de référence : sept projets d'agence en phase d'études, sans permis encore, ajoutés aux données d'exemple (`components/espace/lorani/exemples.ts` : Extension Rolland, Local commercial Part-Dieu, Groupe scolaire Jean-Moulin, Villa Bellevue, Immeuble Les Alizés, Rénovation école Bois-Joli, Hangar Morne-Rouge) ; ils s'affichent comme le prévoyait déjà la page (B5 : lignes à 0 %, « Sans permis · phase »). Ils apparaissent aussi dans l'écran d'avant (`?ancien=1`), dans « Projets sans permis ».
+Comparaisons : `vue-1440-sombre-*`, `vue-1440-clair-*`, `vue-390-sombre-*`, `vue-390-clair-*` : lignes, colonnes, en-têtes et icônes superposés ligne à ligne ; écarts de contenu seulement (noms, jalons, santé « Sans permis » au lieu de « No updates », pas de courbe sur les lignes à 0 %).

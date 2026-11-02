@@ -159,7 +159,7 @@ function useMenu() {
       document.removeEventListener("keydown", touche);
     };
   }, [ouvert]);
-  return { ouvert, setOuvert, ref };
+  return [ouvert, setOuvert, ref] as const;
 }
 
 export default function VueEnsemble() {
@@ -183,8 +183,8 @@ export default function VueEnsemble() {
   const [closVisibles, setClosVisibles] = useState(true);
   const [volet, setVolet] = useState(false);
   const [onglet, setOnglet] = useState<Onglet>("sante");
-  const menuFiltre = useMenu();
-  const menuAffichage = useMenu();
+  const [ouvertFiltre, setOuvertFiltre, menuFiltreRef] = useMenu();
+  const [ouvertAffichage, setOuvertAffichage, menuAffichageRef] = useMenu();
   const [recherche, setRecherche] = useState("");
 
   const comptes = useMemo(() => {
@@ -504,16 +504,16 @@ export default function VueEnsemble() {
                 {`${actif.libelle} · ${comptes[actif.cle]}`}
               </Link>
             ) : null}
-            <button type="button" className="lor-rond lor-rond--sourd" aria-label="Ajouter une vue : filtrer par famille" title="Filtrer par famille" onClick={() => menuFiltre.setOuvert(true)}>
+            <button type="button" className="lor-rond lor-rond--sourd" aria-label="Ajouter une vue : filtrer par famille" title="Filtrer par famille" onClick={() => setOuvertFiltre(true)}>
               <IconeNouvelleVue />
             </button>
           </nav>
           <div className="lor-pj-outils">
-            <div ref={menuFiltre.ref}>
-              <button type="button" className="lor-rond lor-rond--plein" aria-label="Filtrer" title="Filtrer" aria-expanded={menuFiltre.ouvert} onClick={() => menuFiltre.setOuvert((o) => !o)}>
+            <div ref={menuFiltreRef}>
+              <button type="button" className="lor-rond lor-rond--plein" aria-label="Filtrer" title="Filtrer" aria-expanded={ouvertFiltre} onClick={() => setOuvertFiltre((o) => !o)}>
                 <IconeFiltre />
               </button>
-              {menuFiltre.ouvert ? (
+              {ouvertFiltre ? (
                 <div className="lor-menu" role="dialog" aria-label="Filtrer" style={{ right: 2.5, top: 40 }}>
                   <div className="lor-menu-champ">
                     <input autoFocus placeholder="Filtrer…" value={recherche} onChange={(e) => setRecherche(e.target.value)} aria-label="Filtrer les familles" />
@@ -524,7 +524,7 @@ export default function VueEnsemble() {
                       .filter((f) => !recherche.trim() || f.libelle.toLocaleLowerCase("fr").includes(recherche.trim().toLocaleLowerCase("fr")))
                       .map((f) => (
                         <li key={f.cle ?? "tous"} role="option" aria-selected={filtre === f.cle}>
-                          <Link href={lien(f.cle as Famille | null)} scroll={false} className="lor-option" data-actif={filtre === f.cle ? "" : undefined} onClick={() => menuFiltre.setOuvert(false)} title={f.sous}>
+                          <Link href={lien(f.cle as Famille | null)} scroll={false} className="lor-option" data-actif={filtre === f.cle ? "" : undefined} onClick={() => setOuvertFiltre(false)} title={f.sous}>
                             {f.cle ? <IconeSanteLor etat={SANTE[f.cle as Famille].etat} /> : <IconeChercher />}
                             <span className="lor-option-libelle">{f.libelle}</span>
                             <span className="lor-option-droite">{f.cle ? comptes[f.cle as Famille] : dossier.permis.length}</span>
@@ -535,11 +535,11 @@ export default function VueEnsemble() {
                 </div>
               ) : null}
             </div>
-            <div ref={menuAffichage.ref}>
-              <button type="button" className="lor-rond lor-rond--plein" aria-label="Affichage" title="Affichage" aria-expanded={menuAffichage.ouvert} onClick={() => menuAffichage.setOuvert((o) => !o)}>
+            <div ref={menuAffichageRef}>
+              <button type="button" className="lor-rond lor-rond--plein" aria-label="Affichage" title="Affichage" aria-expanded={ouvertAffichage} onClick={() => setOuvertAffichage((o) => !o)}>
                 <IconeAffichage />
               </button>
-              {menuAffichage.ouvert ? (
+              {ouvertAffichage ? (
                 <div className="lor-menu lor-pj-affichage" role="dialog" aria-label="Affichage" style={{ right: 2.5, top: 40 }}>
                   <label className="lor-pj-aff-ligne">
                     Tri

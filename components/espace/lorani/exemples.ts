@@ -56,6 +56,15 @@ export const PROJETS_EXEMPLE: Projet[] = [
   projet({ id: P_MERCIERE, nom: "Façade rue Mercière", reference: "25-031", adresse: "31 rue Mercière", code_postal: "69002", commune: "Lyon 2e", code_insee: "69382", parcelles: ["AC 77"], nature: "tertiaire", phase: "det", ouverture_chantier: j(-100) }),
   projet({ id: P_DUBOIS, nom: "Surélévation Dubois", reference: "26-018", adresse: "8 rue Francis-de-Pressensé", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BD 301"], nature: "logement_collectif", phase: "apd",
     controle_tolerances: { hauteur_faitage_m: 0.1 }, controle_familles_coupees: ["re2020"] }),
+  /* 02/11/2026 — sept projets de l'agence en phase d'études, sans permis encore : la vue d'ensemble de l'espace 2
+     (la liste « All projects » de Linear) en montre autant que sa page de référence (13 lignes) */
+  projet({ id: id("b", 6), nom: "Extension Rolland", reference: "26-021", adresse: "5 impasse des Tilleuls", code_postal: "69130", commune: "Écully", code_insee: "69081", parcelles: ["AK 19"], nature: "maison_individuelle", phase: "esq", cree_le: ilYa(30) }),
+  projet({ id: id("b", 7), nom: "Local commercial Part-Dieu", reference: "26-022", adresse: "18 rue Servient", code_postal: "69003", commune: "Lyon 3e", code_insee: "69383", parcelles: ["BH 44"], nature: "tertiaire", phase: "aps", cree_le: ilYa(26) }),
+  projet({ id: id("b", 8), nom: "Groupe scolaire Jean-Moulin", reference: "26-023", adresse: "2 place Jean-Moulin", code_postal: "69200", commune: "Vénissieux", code_insee: "69259", parcelles: ["CE 7"], nature: "erp", marche_public: true, phase: "diag", cree_le: ilYa(22) }),
+  projet({ id: id("b", 9), nom: "Villa Bellevue", reference: "26-024", adresse: "41 chemin de Bellevue", code_postal: "69300", commune: "Caluire-et-Cuire", code_insee: "69034", parcelles: ["AS 88"], nature: "maison_individuelle", phase: "aps", cree_le: ilYa(18) }),
+  projet({ id: id("b", 10), nom: "Immeuble Les Alizés", reference: "26-025", adresse: "9 rue Paul-Bert", code_postal: "69100", commune: "Villeurbanne", code_insee: "69266", parcelles: ["BC 12", "BC 13"], nature: "logement_collectif", phase: "esq", cree_le: ilYa(14) }),
+  projet({ id: id("b", 11), nom: "Rénovation école Bois-Joli", reference: "26-026", adresse: "1 allée du Bois-Joli", code_postal: "69500", commune: "Bron", code_insee: "69029", parcelles: ["AL 3"], nature: "erp", marche_public: true, phase: "diag", cree_le: ilYa(9) }),
+  projet({ id: id("b", 12), nom: "Hangar Morne-Rouge", reference: "26-027", adresse: "Zone artisanale du Morne", code_postal: "69400", commune: "Villefranche-sur-Saône", code_insee: "69264", parcelles: ["ZA 61"], nature: "autre", phase: "esq", cree_le: ilYa(4) }),
 ];
 
 /* ——— les permis et leur calendrier ——— */
