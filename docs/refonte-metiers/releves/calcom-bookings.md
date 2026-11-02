@@ -1,21 +1,71 @@
-# Relevé — Cal.com, Bookings — **INCOMPLET : page restée vide**
+# Relevé — Cal.com, Bookings (Upcoming, Unconfirmed, Recurring, Past, Canceled, détail)
 
-URL : https://app.cal.com/bookings/upcoming (onglets `/unconfirmed`, `/recurring`, `/past`, `/cancelled` ; vue `?view=list|calendar`).
-Relevé le 01/11/2026. Coque, polices, jetons et briques : voir `calcom-availability.md` (mêmes composants).
+URL : https://app.cal.com/bookings/upcoming (onglets `/unconfirmed`, `/recurring`, `/past`, `/cancelled` ; vue `?view=list|calendar` ;
+détail `?uid=<uid>`). Relevé le 01/11/2026, complété le même soir après remplissage. Coque, polices, jetons et briques :
+`calcom-availability.md` (mêmes composants « coss ui », Cal Sans, couleurs converties en hex).
 
-## Pourquoi la page est vide (règle 2 non satisfaite)
+## Ce qui a été créé
 
-Cal.com **refuse toute réservation dont l'invité est en `@example.com`** : `POST /api/book/event` répond
-`400 {"message":"email_domain_cannot_receive_mail"}` (le domaine réservé n'a pas de serveur de courrier). La consigne n'autorise que
-`@example.com` ; je n'ai utilisé aucune autre adresse. **Ce relevé ne couvre donc que les états vides, les onglets, la barre d'outils
-et la vue calendrier.** Les lignes de réservation (Upcoming, Past, Canceled, Unconfirmed, Recurring) restent à relever quand Teo aura
-choisi une adresse de test acceptable (par exemple un alias « +test » de sa propre boîte : à lui de décider, chaque réservation
-envoie aussi un courriel à l'organisateur, c'est-à-dire à lui).
+Cal.com refuse les invités `@example.com` (`400 email_domain_cannot_receive_mail`). Teo a choisi le 01/11 l'alias
+**teopetit50+test@gmail.com** : toutes les réservations utilisent cette adresse (noms d'invités fictifs). Chaque réservation et chaque
+annulation a envoyé un courriel à cette adresse et à l'organisateur (Teo).
 
-Préparé pour ce remplissage (tout **masqué** de la page publique) : 6 types d'événements — Visite de chantier 60 min (7733608),
-Rendez-vous devis 30 (7733612), Point d'avancement 15 (7733613), Consultation technique 45 **sur confirmation** (7733614, pour
-l'onglet Unconfirmed), Suivi hebdomadaire 30 **récurrent ×4** (7733615, pour Recurring), Appel rapide 15 (7733616) sur un horaire
-« Permanence téléphonique 24 h/24 » (2584199) et préavis 0, pour pouvoir créer des réservations qui deviennent « Past » dans l'heure.
+Types d'événements créés et **masqués** de la page publique : Visite de chantier 60 min (7733608), Rendez-vous devis 30 (7733612),
+Point d'avancement 15 (7733613), Consultation technique 45 sur confirmation (7733614), Suivi hebdomadaire 30 récurrent ×4 (7733615),
+Appel rapide 15 (7733616, horaire « Permanence téléphonique 24 h/24 » 2584199, préavis 0).
+Réservations (API `/api/book/event`, `/api/book/recurring-event`, `/api/cancel` avec jeton CSRF) :
+- 5 appels rapides le 01/11 de 21 h 45 à 23 h 00 (heure de Guadeloupe) → passent dans **Past** au fil de la soirée ;
+- 13 à venir du 02/11 au 13/11 (visites, devis, points) ; une 14e (Léa Laurent, 5/11 8 h) refusée car hors horaires ;
+- 3 **Unconfirmed** (Consultation technique : Inès Morel, Maxime Fournier, Sarah Girard) ;
+- 2 séries **Recurring** de 4 (Olivier Faure mardi 11 h, Nadia Boyer jeudi 15 h) ;
+- 5 **Canceled** (Romain Bonnet, Clara Dupont, Mathieu Lambert, Laura Fontaine, Kévin Rousseau ; motif « Annulé par le client »).
+
+## Liste — ligne de réservation (1440×900, clair)
+
+```
+CARTE (coss) 297,79 1094 · bg #fff · bd 1px #0d0d0d a0.08 · r 16px · ombre 0 1px 2px #0000000d
+├─ tête de groupe « Today » / « Next » 1092×44 · p 12px 24px 12px 16px · texte 14/500/20 #696969 · fond = ::before de la carte (#000 a0.03)
+└─ panneau intérieur bg #fff, lignes séparées par un filet 1px #0d0d0d a0.08
+    LIGNE p 16px 24px 16px 16px · gap 16 (hauteur 68 à 108 selon le contenu)
+    ├─ case à cocher 16×16 (bg #fff · bd 1px #141414 a0.10 · r 4px · ombre 0 1px 2px #0000000d)
+    ├─ colonne date 160 (x 340) gap 8 : « Sun, 1 Nov » 14/500/20 #262626 · « 10:00pm - 10:15pm » 14/400/20 #696969 ·
+    │   pastille « 🎥 Join Cal Video » 113×24 (bg #fff · bd 1px #141414 a0.10 · r 8px · p 0 7px · gap 4 · 12/500/16 #262626 · logo 16)
+    ├─ colonne contenu (x 516) : titre bouton « Appel rapide between Wizyy and Murielle Garnier » **14/600/20 #262626** ;
+    │   « You and Murielle Garnier » 14/400/20 #696969 (le nom est un bouton) ; mention « in 4 minutes » **#00a63e** (sombre #05df72) quand c'est imminent ;
+    │   note entre guillemets « "Question sur le devis de la terrasse." » 14/400/20 #696969
+    └─ à droite bouton ⋯ 32×32 (bg #fff · bd #141414 a0.10 · r 10px)
+ligne ouverte (détail affiché) : bg #fafafa
+```
+
+Variantes par onglet :
+- **Unconfirmed** : pas de groupe ; pastille « Unconfirmed » 12/500/16 **#bb4d00 sur #ff9900 a0.08** · r 6px · p 0 3px ; à droite « Reject » (53×24,
+  bouton clair r 8px 12/500) · « Confirm » (63×24, bg #262626 texte #fafafa) · drapeau rouge 32×32 (#c10007) · ⋯ ;
+  la barre latérale affiche un compteur « 3 » à côté de Bookings. Pied de pagination : sélecteur « 10 ↕ » + « rows per page » 14/400 #3c3e44 …
+  « 1-3 of 3 » + ‹ › 28×28.
+- **Recurring** : sous la note, « ↻ 4 events remaining » 12/400/16 #696969 (icône refresh-ccw 16, gap 4) ; pagination « 1-8 of 8 ».
+- **Canceled** : titre **barré** (line-through #262626), lignes de 68 sans mention de temps ; drapeau + ⋯ à droite.
+- **Past** : voir plus bas.
+
+## Détail d'une réservation (clic sur une ligne → `?uid=…`)
+
+Panneau flottant (pas de voile) 512×836 à x 912, y 16 · bg #fff · bd 1px #0d0d0d a0.08 · **r 16px** · ombre `0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d` :
+- tête 64 : pastille « Confirmed » (12/500 #007a55 sur #00bf80 a0.08, r 6px) · à droite ⌃ ⌄ (réservation précédente/suivante) et × (28×28, r 10px) ;
+- titre Cal Sans **20/700/25** #262626 ;
+- sections titrées 12/500/16 **#6b7280** : « When » (« Sunday, November 1, 2026 » 14/500 + « 10:00pm - 10:15pm (Atlantic Standard Time) ») ·
+  « Who » (avatar + « Wizyy » 14/500 + pastille « Host » 10/500 #1447e6 sur #2680ff a0.08 r 4px, courriel 14/400 #696969) ·
+  « Attendees » (avatar initiales « MG », nom, courriel, fuseau « America/Guadeloupe (GMT-4) ») ·
+  « Where » (« Cal Video: » + lien 14/500 #155dfc) · « Additional notes » ;
+- pied 65 : bouton groupé « 🎥 Join Cal Video | ⧉ » (170×32) + ⋯ 32×32.
+Menu ⋯ du détail (183×447, r 10px, items 28 p 4px 8px r 6px 14/400, icônes Lucide 16), groupes titrés :
+« Edit event » : Reschedule booking (clock) · Request reschedule (send) · Edit location (map-pin) · Add guests (user-plus) —
+Add to calendar › (calendar) — « After event » : View recordings (video) · Check for transcripts (file-text) · View session details (info) ·
+Mark as no-show (eye-off) — Report booking (flag, #c10007) — Cancel event (circle-x, #c10007) — Delete booking (trash, #c10007).
+
+## Menu « Filter »
+
+Popover sous le bouton : champ « Search filters… » (loupe) puis « ✦ AI filter », séparateur, Link · Attendee's name · Attendee email ·
+Date range · Created at · Booking UID · Routing trace step · Fuzzy confidence · Match method · Tiebreaker rule… (liste défilante).
+(Styles du popover non mesurés : il se fermait avant la mesure ; voir la capture.)
 
 ## Barre d'outils (1440×900, clair)
 
