@@ -1,0 +1,867 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Réseau Omega › Messages (02/11/2026)
+
+   La COMPOSITION de Slack, relevée sur slack.com (animations de
+   /features/channels) et sur la mise en page connue de l'application :
+     · colonne des conversations de 260 px, lignes de 28 px, sections
+       repliables, non-lu en gras, mentions en pastille ;
+     · en-tête de conversation d'une ligne (48 px, la hauteur de la barre
+       du haut d'Espace 2) ;
+     · messages en gouttière : avatar de 36 px, 8 px d'écart, 8 px / 20 px
+       de marge, messages rapprochés sans en-tête, barre d'actions au
+       survol, séparateurs de jour collés en haut, filet « Nouveaux » ;
+     · fil en colonne de 380 px à droite (au-dessus de 1440 px) ;
+     · composeur à filet en bas, ligne d'outils sous le texte.
+   L'HABIT est entièrement celui d'Espace 2 : jetons --v2-*, police, rayons
+   de 6 / 8 px, filets sans ombre portée (seuls les menus flottants gardent
+   l'ombre de .v2-popover). Le thème sombre vient des jetons.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la disposition ——— */
+.v2 .ms {
+  --ms-liste: 260px;
+  --ms-fil: 380px;
+  display: grid;
+  grid-template-columns: var(--ms-liste) minmax(0, 1fr);
+  height: calc(100dvh - var(--ms-haut, 48px));
+  min-height: 420px;
+  overflow: hidden;
+  background: var(--v2-bg-200);
+}
+@media (min-width: 1440px) {
+  .v2 .ms[data-fil] {
+    grid-template-columns: var(--ms-liste) minmax(0, 1fr) var(--ms-fil);
+  }
+}
+/* entre 1024 et 1439 px, le fil prend la place de la conversation */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .v2 .ms[data-fil] > .ms-conv {
+    display: none;
+  }
+}
+/* sous 1024 px : la liste, puis la conversation (ou son fil) en plein écran */
+@media (max-width: 1023px) {
+  .v2 .ms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .ms[data-ouverte] > .ms-liste,
+  .v2 .ms:not([data-ouverte]) > :is(.ms-conv, .ms-fil),
+  .v2 .ms[data-fil] > .ms-conv {
+    display: none;
+  }
+}
+
+/* ——— la colonne des conversations ——— */
+.v2 .ms-liste {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--v2-a-400);
+  background: var(--v2-bg-200);
+}
+@media (max-width: 1023px) {
+  .v2 .ms-liste {
+    border-right: 0;
+  }
+}
+.v2 .ms-liste-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  height: 48px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2 .ms-liste-tete h2 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.v2 .ms-liste-defile {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 8px 16px;
+}
+.v2 .ms-groupe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1px;
+}
+.v2 .ms-groupe--seul {
+  margin-bottom: 8px;
+}
+.v2 .ms-section + .ms-section {
+  margin-top: 12px;
+}
+.v2 .ms-section-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--v2-gray-900);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.v2 .ms-section-titre:hover {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2 .ms-section-chevron {
+  flex: none;
+  transition: transform 0.15s;
+}
+.v2 .ms-section-titre[aria-expanded="false"] .ms-section-chevron {
+  transform: rotate(-90deg);
+}
+.v2 .ms-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  color: var(--v2-gray-900);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  transition: background 0.15s, color 0.15s;
+}
+.v2 .ms-ligne:hover {
+  background: var(--v2-a-100);
+  color: var(--v2-gray-1000);
+}
+.v2 .ms-ligne[data-non-lu] {
+  color: var(--v2-gray-1000);
+  font-weight: 600;
+}
+.v2 .ms-ligne[aria-current="page"] {
+  background: var(--v2-gray-100);
+  color: var(--v2-gray-1000);
+  font-weight: 500;
+}
+.v2 .ms-ligne-icone {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--v2-gray-900);
+}
+.v2 .ms-ligne-nom {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .ms-pastille {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--v2-blue-700);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+/* ——— les avatars (rendus aussi dans les menus, hors de .ms) ——— */
+.ms-avatar {
+  --ms-taille: 36px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--ms-taille);
+  height: var(--ms-taille);
+  border-radius: 6px;
+  font-family: var(--v2-sans);
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0;
+  user-select: none;
+  background: var(--v2-gray-300);
+  color: var(--v2-gray-1000);
+}
+.ms-avatar[data-taille="16"] { --ms-taille: 16px; font-size: 8px; border-radius: 6px; }
+.ms-avatar[data-taille="20"] { --ms-taille: 20px; font-size: 9px; }
+.ms-avatar[data-taille="24"] { --ms-taille: 24px; font-size: 10px; }
+.ms-avatar[data-taille="72"] { --ms-taille: 72px; font-size: 24px; border-radius: 8px; }
+.ms-avatar[data-teinte="bleu"] { background: var(--v2-blue-200); color: var(--v2-blue-900); }
+.ms-avatar[data-teinte="vert"] { background: var(--v2-green-200); color: var(--v2-green-900); }
+.ms-avatar[data-teinte="ambre"] { background: var(--v2-amber-200); color: var(--v2-amber-900); }
+.ms-avatar[data-teinte="rouge"] { background: var(--v2-red-200); color: var(--v2-red-900); }
+.ms-avatar[data-teinte="vous"] { background: var(--v2-gray-1000); color: var(--v2-bg-100); }
+
+/* la présence : un rond plein en ligne, un anneau creux absent (comme Slack) */
+.ms-presence {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--ms-fond-presence, var(--v2-bg-200));
+  background: var(--ms-fond-presence, var(--v2-bg-200));
+}
+.ms-presence::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 999px;
+  border: 2px solid var(--v2-gray-600);
+}
+.ms-presence[data-etat="en-ligne"]::after {
+  border-color: var(--v2-green-700);
+  background: var(--v2-green-700);
+}
+.ms-presence--seule {
+  position: relative;
+  right: auto;
+  bottom: auto;
+  flex: none;
+  box-shadow: none;
+  background: none;
+}
+.ms-avatar[data-taille="20"] .ms-presence,
+.ms-avatar[data-taille="24"] .ms-presence {
+  width: 8px;
+  height: 8px;
+  right: -2px;
+  bottom: -2px;
+}
+.ms-avatar[data-taille="20"] .ms-presence::after,
+.ms-avatar[data-taille="24"] .ms-presence::after {
+  inset: 0;
+  border-width: 2px;
+}
+.v2-popover .ms-presence,
+.v2-jetons .ms-presence {
+  --ms-fond-presence: var(--v2-bg-eleve, var(--v2-bg-100));
+}
+
+/* ——— la conversation ——— */
+.v2 .ms-conv,
+.v2 .ms-fil {
+  --ms-fond-presence: var(--v2-bg-100);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--v2-bg-100);
+}
+.v2 .ms-fil {
+  border-left: 1px solid var(--v2-a-400);
+}
+@media (max-width: 1439px) {
+  .v2 .ms-fil {
+    border-left: 0;
+  }
+}
+.v2 .ms-conv-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  height: 48px;
+  padding: 0 12px 0 20px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2 .ms-retour {
+  display: none;
+  margin-left: -8px;
+}
+@media (max-width: 1023px) {
+  .v2 .ms-retour {
+    display: inline-flex;
+  }
+  .v2 .ms-conv-tete {
+    padding: 0 8px 0 16px;
+  }
+}
+.v2 .ms-conv-titre {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .ms-conv-titre--prive {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.v2 .ms-conv-titre--prive > div {
+  min-width: 0;
+}
+.v2 .ms-conv-titre h2 {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .ms-conv-titre h2 > span,
+.v2 .ms-conv-titre h2 > a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .ms-conv-titre h2 > svg {
+  flex: none;
+  color: var(--v2-gray-900);
+}
+.v2 .ms-conv-titre h2 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.v2 .ms-conv-sujet {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .ms-conv-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.v2 .ms-pile {
+  gap: 6px;
+  padding: 0 8px 0 4px;
+}
+.v2 .ms-pile-avatars {
+  display: inline-flex;
+}
+.v2 .ms-pile-avatars .ms-avatar {
+  box-shadow: 0 0 0 2px var(--v2-bouton);
+}
+.v2 .ms-pile-avatars .ms-avatar + .ms-avatar {
+  margin-left: -6px;
+}
+.v2 .ms-pile .ms-pile-icone {
+  display: none;
+}
+@media (max-width: 767px) {
+  .v2 .ms-pile-avatars { display: none; }
+  .v2 .ms-pile .ms-pile-icone { display: block; }
+  .v2 .ms-pile { padding: 0 8px; }
+  .v2 .ms-masque-etroit { display: none; }
+}
+
+/* la zone qui défile : l'intro puis les messages, posés en bas quand il y en a peu */
+.v2 .ms-defile {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 12px;
+}
+.v2 .ms-defile > :first-child {
+  margin-top: auto;
+}
+.v2 .ms-attente {
+  height: 120px;
+}
+.v2 .ms-intro {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  padding: 32px 20px 20px;
+}
+.v2 .ms-intro-icone {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: var(--v2-gray-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+}
+.v2 .ms-intro h3 {
+  margin: 4px 0 0;
+  font-family: var(--v2-titre);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.v2 .ms-intro h3 a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.v2 .ms-intro p {
+  margin: 0;
+  max-width: 560px;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+/* les séparateurs : le jour (collé en haut), « Nouveaux », le compte du fil */
+.v2 .ms-jour {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  margin: 8px 0;
+  height: 28px;
+}
+.v2 .ms-jour::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2 .ms-jour span {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+}
+.v2 .ms-nouveaux,
+.v2 .ms-fil-compte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 20px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--v2-blue-900);
+}
+.v2 .ms-nouveaux::before,
+.v2 .ms-fil-compte::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--v2-blue-700);
+}
+.v2 .ms-fil-compte {
+  margin: 8px 20px;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+}
+.v2 .ms-fil-compte::after {
+  border-top-color: var(--v2-a-400);
+}
+
+/* un message */
+.v2 .ms-message {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  column-gap: 8px;
+  padding: 8px 20px;
+  transition: background 0.1s;
+}
+.v2 .ms-message[data-suite] {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.v2 .ms-message:hover,
+.v2 .ms-message:focus-within {
+  background: var(--v2-a-100);
+}
+.v2 .ms-message[data-mention] {
+  background: color-mix(in srgb, var(--v2-blue-700) 7%, transparent);
+  box-shadow: inset 2px 0 0 var(--v2-blue-700);
+}
+.v2 .ms-message[data-fil-ouvert] {
+  background: var(--v2-a-200);
+}
+.v2 .ms-gouttiere {
+  padding-top: 2px;
+}
+.v2 .ms-avatar-lien {
+  display: inline-flex;
+  border-radius: 6px;
+}
+.v2 .ms-heure-suite {
+  display: block;
+  padding-top: 1px;
+  font-size: 11px;
+  line-height: 20px;
+  text-align: right;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+}
+.v2 .ms-message:hover .ms-heure-suite,
+.v2 .ms-message:focus-within .ms-heure-suite {
+  opacity: 1;
+}
+.v2 .ms-tete {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0 8px;
+}
+.v2 .ms-auteur {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--v2-gray-1000);
+}
+.v2 a.ms-auteur:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.v2 .ms-heure {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .ms-texte {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--v2-gray-1000);
+}
+.v2 .ms-mention {
+  padding: 0 2px;
+  border-radius: 6px;
+  background: var(--v2-blue-100);
+  color: var(--v2-blue-900);
+  font-weight: 500;
+}
+.v2 a.ms-mention:hover {
+  background: var(--v2-blue-200);
+}
+.v2 .ms-mention[data-vous] {
+  background: var(--v2-blue-200);
+}
+
+/* les réactions */
+.v2 .ms-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.v2 .ms-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--v2-gray-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.v2 .ms-reaction:hover {
+  box-shadow: 0 0 0 1px var(--v2-a-600);
+}
+.v2 .ms-reaction[aria-pressed="true"] {
+  background: var(--v2-blue-100);
+  box-shadow: 0 0 0 1px var(--v2-blue-700);
+  color: var(--v2-blue-900);
+}
+
+/* le résumé d'un fil, sous le message */
+.v2 .ms-fil-resume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 600px;
+  min-height: 32px;
+  margin: 4px 0 0 -4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+.v2 .ms-fil-resume:hover {
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+}
+.v2 .ms-fil-avatars {
+  display: inline-flex;
+  gap: 4px;
+  flex: none;
+}
+.v2 .ms-fil-nombre {
+  flex: none;
+  font-weight: 600;
+  color: var(--v2-blue-900);
+}
+.v2 .ms-fil-derniere,
+.v2 .ms-fil-voir {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .ms-fil-voir {
+  display: none;
+}
+@media (hover: hover) {
+  .v2 .ms-fil-resume:hover .ms-fil-derniere { display: none; }
+  .v2 .ms-fil-resume:hover .ms-fil-voir { display: inline; }
+}
+@media (max-width: 767px) {
+  .v2 .ms-fil-derniere { display: none; }
+}
+
+/* la barre d'actions, au survol ou au clavier */
+.v2 .ms-actions {
+  position: absolute;
+  top: -14px;
+  right: 20px;
+  z-index: 3;
+  display: none;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+}
+.v2 .ms-message:hover .ms-actions,
+.v2 .ms-message:focus-within .ms-actions {
+  display: flex;
+}
+.v2 .ms-messages > .ms-message:first-child .ms-actions,
+.v2 .ms-jour + .ms-message .ms-actions {
+  top: 4px;
+}
+.v2 .ms-action {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--v2-gray-900);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.v2 .ms-action:hover {
+  background: var(--v2-a-200);
+  color: var(--v2-gray-1000);
+}
+
+/* ——— le composeur ——— */
+.v2 .ms-composeur {
+  position: relative;
+  flex: none;
+  margin: 0 20px 20px;
+  border-radius: 8px;
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+  transition: box-shadow 0.15s;
+}
+.v2 .ms-composeur:focus-within {
+  box-shadow: var(--v2-anneau);
+}
+.v2 .ms-composeur[data-compact] {
+  margin: 0 16px 16px;
+}
+@media (max-width: 767px) {
+  .v2 .ms-composeur {
+    margin: 0 12px 12px;
+  }
+  .v2 .ms-message {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .v2 .ms-intro {
+    padding: 24px 16px 16px;
+  }
+}
+.v2 .ms-saisie {
+  display: block;
+  width: 100%;
+  min-height: 42px;
+  max-height: 200px;
+  padding: 11px 12px 4px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  background: transparent;
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 14px;
+  line-height: 22px;
+}
+.v2 .ms-saisie:focus-visible {
+  box-shadow: none;
+}
+.v2 .ms-saisie::placeholder {
+  color: var(--v2-gray-700);
+}
+.v2 .ms-outils {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 6px;
+}
+.v2 .ms-astuce {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .ms-astuce strong {
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+}
+@media (max-width: 767px), (hover: none) {
+  .v2 .ms-astuce {
+    visibility: hidden;
+  }
+}
+.v2 .ms-envoyer.v2-btn[disabled] {
+  background: transparent;
+  box-shadow: none;
+}
+.v2 .ms-suggestions {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 6px);
+  z-index: 5;
+  width: min(360px, 100%);
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: 6px;
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
+  box-shadow: var(--v2-ombre-menu);
+}
+.v2 .ms-suggestion {
+  --ms-fond-presence: var(--v2-bg-eleve, var(--v2-bg-100));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.v2 .ms-suggestion > span:nth-child(2) {
+  font-weight: 500;
+}
+.v2 .ms-suggestion > .v2-gris {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+.v2 .ms-suggestion[aria-selected="true"] {
+  background: var(--v2-a-200);
+}
+
+/* ——— le menu des membres d'un salon (rendu hors de .ms) ——— */
+.v2-jetons.ms-pop-membres {
+  width: 300px;
+}
+.ms-pop-membres .ms-pop-tete {
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.ms-pop-membres .ms-pop-tete small {
+  font-size: 12px;
+}
+.ms-pop-membres .ms-pop-liste {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  max-height: min(360px, 60dvh);
+  overflow-y: auto;
+}
+.ms-pop-membres .ms-pop-ligne {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.ms-pop-membres a.ms-pop-ligne:hover {
+  background: var(--v2-a-200);
+}
+.ms-pop-membres .ms-pop-nom {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+.ms-pop-membres .ms-pop-nom small {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-pop-membres .v2-gris {
+  color: var(--v2-gray-900);
+}
