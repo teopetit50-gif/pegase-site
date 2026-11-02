@@ -46,6 +46,7 @@ import type { DateLue, Dossier, NatureDateLue, Permis, PieceProjet, Projet } fro
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { chargerBoite, marquerReception, type Reception } from "@/components/espace/filed/receptions";
 import { useMarques, useReports } from "./lor-local";
 import { BoutonReporter } from "./lor-selection";
 import { IconeAffichage, IconeArchive, IconeCalendrierLor, IconeFiltre, IconeLin, IconePoints, IconePrioriteLor, IconeSansResponsable, IconeSprite, IconeStatutTicket, type StatutTicket } from "./lor-icones";
@@ -138,6 +139,19 @@ function depuis(iso: string): string {
   return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short" }).format(new Date(t));
 }
 
+/* les courriels du guichet de l'exemple (fictifs, adresses en example.com) : un sans dossier reconnu (E10), un sans pièce jointe (E11) */
+/* une date d'exemple stable entre le serveur et le navigateur : le jour J − j, à une heure fixe (pas la milliseconde) */
+const ilYa = (j: number, h = 0) => {
+  const d = new Date();
+  d.setHours(9 - h, 0, 0, 0);
+  d.setDate(d.getDate() - j);
+  return d.toISOString();
+};
+const GUICHET_EXEMPLE: Reception[] = [
+  { id: -1, entite_id: null, module: "lorani", canal: "email", boite: "lorani@example.com", identifiant_externe: "exemple-1", de_adresse: "urbanisme@mairie-nantes.example.com", de_nom: "Service urbanisme", sujet: "Votre demande — pièces complémentaires", corps: "Madame, Monsieur,\n\nVotre dossier déposé le 2 octobre est incomplet. Merci de nous adresser les pièces PC6 et PC7 sous trois mois.\n\nLe service urbanisme", pieces: [], detail: {}, statut: "nouvelle", recu_le: ilYa(1, 3) },
+  { id: -2, entite_id: null, module: "lorani", canal: "email", boite: "lorani@example.com", identifiant_externe: "exemple-2", de_adresse: "guichet@vaulx-en-velin.example.com", de_nom: "Guichet unique", sujet: "PC 069 256 26 V0011 — accusé de réception de vos pièces", corps: "Nous accusons réception des pièces complémentaires de votre dossier PC 069 256 26 V0011. L'instruction reprend à cette date.", pieces: [], detail: {}, statut: "nouvelle", recu_le: ilYa(0, 5) },
+];
+
 /* un menu de Linear qui se ferme au clic dehors et sur Échap */
 function useMenu() {
   const [ouvert, setOuvert] = useState(false);
@@ -167,8 +181,38 @@ export default function Courrier() {
   const [ouvertPoints, setOuvertPoints, menuPointsRef] = useMenu();
   const [ouvertFiltre, setOuvertFiltre, menuFiltreRef] = useMenu();
   const [ouvertAff, setOuvertAff, menuAffRef] = useMenu();
+  const [ouvertDeposer, setOuvertDeposer, menuDeposerRef] = useMenu();
   const suivis = useMarques("suivis");
   const reports = useReports();
+  /* les courriels du guichet à ranger (b5_11 : E10 sans dossier reconnu, E11 sans pièce jointe) : la boîte de réception,
+     lue par la porte du module FILED (chargerBoite, toutes les boîtes) et filtrée sur Lorani ; marquerReception pour les ranger */
+  const [guichetReel, setGuichetReel] = useState<Reception[] | null>(null);
+  const [guichetLocal, setGuichetLocal] = useState<Reception[]>(GUICHET_EXEMPLE);
+  const [aEcarter, setAEcarter] = useState<Reception | null>(null);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let vivant = true;
+    chargerBoite("toutes")
+      .then((v) => vivant && setGuichetReel(v.receptions.filter((r) => r.module === "lorani" && r.canal === "email")))
+      .catch(() => vivant && setGuichetReel([]));
+    return () => {
+      vivant = false;
+    };
+  }, [source]);
+  const guichet = (source === "reelle" ? (guichetReel ?? []) : guichetLocal).filter((r) => r.statut === "nouvelle" || r.statut === "lue");
+  const ranger = async (r: Reception, statut: "lue" | "ecartee") => {
+    try {
+      if (source === "reelle") {
+        const nouveau = await marquerReception(r.id, statut);
+        setGuichetReel((l) => (l ?? []).map((x) => (x.id === r.id ? { ...x, statut: nouveau } : x)));
+      } else {
+        setGuichetLocal((l) => l.map((x) => (x.id === r.id ? { ...x, statut: statut === "lue" ? "lue" : "ignoree" } : x)));
+      }
+      toast(statut === "lue" ? "Courriel marqué lu." : "Courriel écarté : il quitte le courrier à ranger.", "vert");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "La base n'a pas répondu.", "rouge");
+    }
+  };
   const o = params.get("onglet");
   const onglet: CleOnglet = estOnglet(o) ? o : "a-confirmer";
   const chargement = source === "reelle" && !pret;
@@ -203,7 +247,9 @@ export default function Courrier() {
       if (!aRanger) continue;
       const projet = projets.get(x.objet_id);
       if (!projet) continue;
-      n.push({ cle: `p:${x.id}`, onglet: "a-ranger", projet, permis: null, piece: x, quand: x.cree_le ?? "", lien: lienDuProjet(projet.id) });
+      /* une situation de travaux lue mais pas rangée (b5_14, E18) se saisit sur le chantier du projet (F25) */
+      const situation = x.type_piece === "lorani_situation_travaux";
+      n.push({ cle: `p:${x.id}`, onglet: "a-ranger", projet, permis: null, piece: x, quand: x.cree_le ?? "", lien: situation ? `${RACINE}/lorani/projets/${encodeURIComponent(projet.id)}?partie=chantier` : lienDuProjet(projet.id) });
     }
     return n;
   }, [dossier]);
@@ -352,6 +398,15 @@ export default function Courrier() {
     }
     if (e.implicite) return { id, titre: titreImplicite(e.implicite), sous: "Le silence de la mairie vaut décision, à confirmer", icone: "AlarmClock", statut: "triage", libelleStatut: "À confirmer" };
     const x = e.piece!;
+    if (x.type_piece === "lorani_situation_travaux")
+      return {
+        id: "Situation",
+        titre: `Situation de travaux à ranger : ${x.nom_fichier}`,
+        sous: x.motif ? `« ${x.motif} »` : "Marché non reconnu ou cumul illisible : saisissez-la sur le chantier",
+        icone: "Spreadsheet",
+        statut: "backlog",
+        libelleStatut: "Situation à ranger",
+      };
     return {
       id,
       titre: `${x.statut === "echec" ? "Courrier illisible" : x.statut === "a_verifier" ? "Lecture à vérifier" : "Courrier non reconnu"} : ${x.nom_fichier}`,
@@ -460,6 +515,53 @@ export default function Courrier() {
         gestes: null as React.ReactNode,
       };
     }
+    const g = choix?.startsWith("g:") ? guichet.find((r) => `g:${r.id}` === choix) : undefined;
+    if (g) {
+      const projetsChoix = dossier.projets;
+      return {
+        id: "Guichet",
+        titre: g.sujet?.trim() || "Courriel sans objet",
+        lien: CHEMIN,
+        pilules: [
+          { cle: "statut", icone: <IconeStatutTicket statut={g.statut === "lue" ? "encours" : "backlog"} />, texte: g.statut === "lue" ? "Lu, à ranger" : "À ranger" },
+          { cle: "de", icone: <IconeSprite nom="Email" />, texte: g.de_nom ? `${g.de_nom} · ${g.de_adresse ?? ""}` : (g.de_adresse ?? "Expéditeur inconnu") },
+          { cle: "recu", icone: <IconeCalendrierLor />, texte: `Reçu le ${dateCourte(g.recu_le)}` },
+          ...(g.pieces.length ? [{ cle: "pj", icone: <IconeSprite nom="Attachment" />, texte: `${g.pieces.length} pièce${g.pieces.length > 1 ? "s" : ""} jointe${g.pieces.length > 1 ? "s" : ""}` }] : []),
+        ] as { cle: string; icone: React.ReactNode; texte: string; href?: string }[],
+        corps: (
+          <>
+            <p>Courriel du guichet que Lorani n&apos;a pas rangé : il ne cite aucun numéro de dossier connu, en cite plusieurs, ou n&apos;a pas de pièce jointe à lire. Lisez-le, puis déposez sa pièce sur le bon projet, ou écartez-le.</p>
+            {g.corps ? <p className="lor-ib-citation lor-ib-corps">{g.corps.slice(0, 1600)}</p> : null}
+            {g.pieces.length ? <p className="lor-ib-sourd">Pièces : {g.pieces.map((x) => x.nom).join(", ")}</p> : null}
+          </>
+        ),
+        gestes: peutEcrire ? (
+          <>
+            <div className="lor-ib-ancre" ref={menuDeposerRef}>
+              <button type="button" className="lor-texte-btn lor-ib-texte" aria-expanded={ouvertDeposer} onClick={() => setOuvertDeposer((o) => !o)} title="Déposer la pièce sur un projet">
+                <IconeLin nom="accepter" />
+                <span>Déposer sur un projet</span>
+              </button>
+              {ouvertDeposer ? (
+                <div className="lor-menu lor-ib-menu" role="menu" style={{ right: 0, top: 34 }}>
+                  <div className="lor-menu-liste">
+                    {projetsChoix.map((p) => (
+                      <Link key={p.id} role="menuitem" href={`${lienProjet(p.id)}&deposer=1`} className="lor-option" onClick={() => { setOuvertDeposer(false); void ranger(g, "lue"); }}>
+                        <span className="lor-option-libelle">{p.nom}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            <button type="button" className="lor-texte-btn lor-ib-texte" onClick={() => setAEcarter(g)} title="Écarter ce courriel">
+              <IconeLin nom="refuser" />
+              <span>Écarter</span>
+            </button>
+          </>
+        ) : null,
+      };
+    }
     if (!choisi) return null;
     const v = vue(choisi);
     const nomPermis = choisi.permis ? titrePermis(choisi.permis, choisi.projet.nom) : null;
@@ -534,6 +636,21 @@ export default function Courrier() {
           </Link>
         </>
       ) : null;
+    } else if (choisi.piece && choisi.piece.type_piece === "lorani_situation_travaux") {
+      const x = choisi.piece;
+      pilules.push({ cle: "recu", icone: <IconeCalendrierLor />, texte: x.cree_le ? `${x.source === "courriel" ? "Reçue" : "Déposée"} le ${dateCourte(x.cree_le)}` : "Sans date" });
+      corps = (
+        <p>
+          Situation de travaux lue sur {x.nom_fichier}
+          {x.source === "courriel" ? ", reçue par courriel" : ""}, mais pas rangée : le marché n&apos;a pas été reconnu, ou le cumul n&apos;a pas pu être lu.{x.motif ? ` Le lecteur dit : « ${x.motif} ».` : ""} Saisissez-la sur le chantier du projet (« Situation reçue ») : elle prend alors sa place dans le contrôle des cumuls et le visa.
+        </p>
+      );
+      gestes = (
+        <Link href={choisi.lien} className="lor-texte-btn lor-ib-texte" title="Saisir la situation sur le chantier du projet">
+          <IconeLin nom="accepter" />
+          <span>Saisir la situation</span>
+        </Link>
+      );
     } else if (choisi.piece) {
       const x = choisi.piece;
       pilules.push({ cle: "recu", icone: <IconeCalendrierLor />, texte: x.cree_le ? `${x.source === "courriel" ? "Reçu" : "Déposé"} le ${dateCourte(x.cree_le)}` : "Sans date" });
@@ -688,6 +805,34 @@ export default function Courrier() {
                   );
                 })
               : null}
+            {guichet.length && onglet !== "a-confirmer" ? (
+              <>
+                <li className="lor-groupe-epingles" aria-hidden="true">
+                  Courriels du guichet · {guichet.length}
+                </li>
+                {guichet.map((r) => (
+                  <li key={`g:${r.id}`}>
+                    <Link href={lienChoix(`g:${r.id}`)} scroll={false} className="lor-ib-ligne" data-choisie={choix === `g:${r.id}` ? "" : undefined} data-lu={r.statut === "lue" ? "" : undefined}>
+                      <span className="lor-ib-avatar" aria-hidden="true">
+                        <IconeSprite nom="Email" />
+                      </span>
+                      <span className="lor-ib-textes">
+                        <span className="lor-ib-l1">
+                          {r.statut === "nouvelle" ? <span className="lor-ib-point" aria-label="Non lu" /> : null}
+                          <span className="lor-ib-id">Guichet</span>
+                          <span className="lor-ib-titre">{r.sujet?.trim() || "Courriel sans objet"}</span>
+                          <IconeStatutTicket statut={r.statut === "lue" ? "encours" : "backlog"} titre="À ranger" />
+                        </span>
+                        <span className="lor-ib-l2">
+                          <span className="lor-ib-sous">{r.de_nom ?? r.de_adresse ?? "Expéditeur inconnu"}{r.pieces.length ? "" : " · sans pièce jointe"}</span>
+                          <time className="lor-ib-quand" dateTime={r.recu_le}>{depuis(r.recu_le)}</time>
+                        </span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </>
+            ) : null}
             {nombreReportes ? (
               <li className="lor-ib-note">
                 <Link href={`${CHEMIN}?${new URLSearchParams({ ...Object.fromEntries(params.entries()), reportes: voirReportes ? "0" : "1" }).toString()}`} scroll={false}>
@@ -910,6 +1055,27 @@ export default function Courrier() {
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={gris} onClick={soumettreImplicite}>
               {envoi ? <Loader variant="spin" /> : null} Confirmer
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* écarter un courriel du guichet le retire du courrier à ranger : confirmation */}
+      <Dialog open={!!aEcarter} onOpenChange={(o) => !o && setAEcarter(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Écarter ce courriel ?</DialogTitle>
+            <DialogDescription>« {aEcarter?.sujet?.trim() || "Courriel sans objet"} » quitte le courrier à ranger. Il reste dans la boîte de réception (marqué écarté), où il peut être remis à lire.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              className="r-btn r-btn--noir"
+              onClick={() => {
+                if (aEcarter) void ranger(aEcarter, "ecartee");
+                setAEcarter(null);
+              }}
+            >
+              Écarter
             </button>
           </DialogFooter>
         </DialogContent>
