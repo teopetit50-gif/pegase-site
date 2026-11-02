@@ -16,6 +16,6 @@
 | Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` |
 
 ## Où en était la session locale (02/11)
-- Vue d'ensemble : liste « All projects » de Linear au 1:1, premier jet puis corrections (nom court, santé sans suffixe) ; `REFERENCES-LORANI.md` créé avec la méthode. Vérifier par superposition.
+- Vue d'ensemble : liste « All projects » de Linear au 1:1, écrite, build Vercel READY, première superposition en sombre alignée. Reste pour elle : la superposition à 13 lignes, le thème clair et le 390. Pour superposer, fenêtre de **1491 px** de large (largeur des captures de référence de cette page) ; la méthode et les mesures prises sur Linear sont dans `REFERENCES-LORANI.md`.
 - Reste : Permis, Projet, Courrier, Réglages, puis Honoraires et temps en dernier (relevé Attio refait), tsc, aiguillage, build.
 - Lis `git log` et `REFERENCES-LORANI.md` de la branche pour le détail.
