@@ -167,3 +167,11 @@ html[data-v2-theme="light"] .v2 .lor-at {
   .v2 .lor-at-cartes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .v2 .lor-at-barre-vue { overflow-x: auto; }
 }
+/* 02/11 : cases cochables (case 16, r 6), « + Add column », « Add calculation » */
+.v2 button.lor-at-case { cursor: default; }
+.v2 .lor-at-case[aria-checked="true"] { background: var(--lor-at-bleu); border-color: var(--lor-at-bleu); box-shadow: inset 0 0 0 3px var(--lor-at-bleu), inset 0 0 0 5px #fff; }
+.v2 .lor-at-ajout-col { color: var(--lor-at-second); justify-content: flex-start; }
+.v2 .lor-at-calcul { display: inline-flex; align-items: center; gap: 4px; }
+.v2 .lor-at-calcul:hover .lor-at-discret { color: var(--lor-at-second); }
+.v2 .lor-at .lor-marque { height: 16px; padding: 0 5px; border-radius: 4px; background: var(--lor-at-actif); color: var(--lor-at-second); font-size: 10px; }
+.v2 .lor-at-identite .lor-rond { margin-left: auto; color: var(--lor-at-second); }
