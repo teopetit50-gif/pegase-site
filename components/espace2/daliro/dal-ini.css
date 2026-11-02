@@ -35,6 +35,7 @@
   --dal-ini-volet-ligne: lch(9.232 0.85 272);
   --dal-ini-segment: lch(13.861 1.043 272);
   --dal-ini-segment-actif: lch(20.032 1.93 272);
+  --dal-ini-segment-piste: lch(13.861 1.043 272);
   --dal-ini-tuile: lch(67.5 38.933 217.444 / 0.175);
   --dal-ini-coche: lch(48.72 1.48 272);
 }
@@ -50,6 +51,7 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
   --dal-ini-volet-ligne: lch(94.44 0.5 282);
   --dal-ini-segment: transparent;
   --dal-ini-segment-actif: lch(94.854 0.5 282);
+  --dal-ini-segment-piste: lch(100 0 282);
   --dal-ini-tuile: lch(67.5 38.933 217.444 / 0.125);
   --dal-ini-coche: lch(52.04 0 282);
 }
@@ -66,6 +68,7 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
     --dal-ini-volet-ligne: lch(94.44 0.5 282);
     --dal-ini-segment: transparent;
   --dal-ini-segment-actif: lch(94.854 0.5 282);
+  --dal-ini-segment-piste: lch(100 0 282);
     --dal-ini-tuile: lch(67.5 38.933 217.444 / 0.125);
     --dal-ini-coche: lch(52.04 0 282);
   }
@@ -545,6 +548,82 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
   width: min(813px, 100%);
   margin: 0 auto;
   padding: 44px 0 40px;
+}
+/* composeur (relevé : 813×172, r 10, bord 0.5 ; segmenté 130×25 en haut à gauche, segment actif
+   72×24 r 9999 p 0 8, 12/500/18 ; champ p 4 16, min 70, 15/450/24 ; pied 52 p 12 14 12 12, bouton
+   24 r 9999 p 0 8 12/500). Sombre : fond 26/255 = lch(9.232), segmenté lch(13.861), actif lch(20.032)
+   (capture 1440-sombre-onglet-activity-volet). */
+.v2 .dal .dal-ini-composeur {
+  display: flex;
+  flex-direction: column;
+  min-height: 172px;
+  margin-bottom: 48px;
+  border: 0.5px solid var(--dal-ini-volet-bord);
+  border-radius: 10px;
+  background: var(--dal-ini-volet);
+}
+.v2 .dal .dal-ini-composeur-segments {
+  display: inline-flex;
+  align-self: flex-start;
+  height: 25px;
+  margin: 12px 0 0 12px;
+  border: 0.5px solid var(--dal-ini-volet-bord);
+  border-radius: 9999px;
+  background: var(--dal-ini-segment-piste);
+  box-shadow: var(--dal-carte-ombre);
+}
+.v2 .dal .dal-ini-composeur-segment {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--dal-ini-volet-t3);
+}
+.v2 .dal .dal-ini-composeur-segment[aria-pressed="true"] {
+  background: var(--dal-ini-segment-actif);
+  box-shadow: var(--dal-ini-volet-bord) 0 0 0 0.5px, var(--dal-carte-ombre);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-ini-composeur-champ {
+  flex: 1;
+  min-height: 70px;
+  padding: 4px 16px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t2);
+  resize: none;
+  outline: none;
+}
+.v2 .dal .dal-ini-composeur-champ::placeholder {
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-ini-composeur-pied {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 52px;
+  padding: 12px 14px 12px 12px;
+}
+.v2 .dal .dal-ini-composeur-envoi {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: var(--dal-ini-segment-piste);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-ini-composeur-envoi:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .v2 .dal .dal-ini-mois {
   display: flex;

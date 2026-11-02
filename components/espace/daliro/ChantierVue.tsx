@@ -73,7 +73,7 @@ type Form =
   | { type: "sur_place"; avenant: Avenant }
   | { type: "preuve"; avenant: Avenant }
   | { type: "terminer"; passage: Passage }
-  | { type: "avenant" }
+  | { type: "avenant"; objet?: string }
   | { type: "chiffrer"; avenant: Avenant }
   | { type: "soumettre"; avenant: Avenant }
   | { type: "signer"; avenant: Avenant }
@@ -113,7 +113,7 @@ export default function ChantierVue({ tableau, source, onLocal, relire, sections
 
   const ouvrir = async (f: Form) => {
     setErreur(null);
-    setChamps(f?.type === "ligne" ? { nature: "ouvrage", unite: "u" } : f?.type === "marche" ? { mode_prix: "forfait" } : f?.type === "chiffrer" ? { mode: prixValides.length ? "bibliotheque" : "saisie", sens: "1", unite: "u" } : f?.type === "signer" ? { date: aujourdhui() } : f?.type === "reponse" ? { reponse: "confirmee" } : f?.type === "avenant" ? { canal: "vocal" } : {});
+    setChamps(f?.type === "ligne" ? { nature: "ouvrage", unite: "u" } : f?.type === "marche" ? { mode_prix: "forfait" } : f?.type === "chiffrer" ? { mode: prixValides.length ? "bibliotheque" : "saisie", sens: "1", unite: "u" } : f?.type === "signer" ? { date: aujourdhui() } : f?.type === "reponse" ? { reponse: "confirmee" } : f?.type === "avenant" ? { canal: "vocal", ...(f.objet ? { objet: f.objet } : {}) } : {});
     setForm(f);
     if (f?.type === "remplacants") {
       setRemplacants(null);

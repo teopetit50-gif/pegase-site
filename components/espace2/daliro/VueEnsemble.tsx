@@ -48,6 +48,8 @@ import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import { jourLocal, resume, type TeinteClair } from "./enClair";
 import { DalCarte, DalMenu } from "./DalCadre";
+import { EtoilePleine } from "./IconesProjet";
+import { useFavoris } from "./navigateur";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import "./dal-home.css";
 
@@ -156,6 +158,12 @@ export default function VueEnsemble() {
     { cle: "a-faire", libelle: "À faire", icone: "Issues" as const, href: `${BASE}/a-faire` },
     { cle: "reglages", libelle: "Réglages", icone: "Roue" as const, href: `${BASE}/reglages` },
   ];
+  /* les épinglés (étoile des pages et des fiches, ./navigateur) : en tête, comme une section de ressources */
+  const favoris = useFavoris();
+  const titreVue = vue === "point" ? "Point du mois" : "Vue d'ensemble";
+  const vueEpinglee = favoris.estEpingle("vue", `daliro-${vue}`);
+  const epingles = favoris.favoris.filter((x) => !(x.type === "vue" && x.id === `daliro-${vue}`));
+  const ICONE_EPINGLE: Record<string, NomDalIcone> = { btp_chantiers: "Project", btp_avenants: "Signature", btp_situations: "Spreadsheet", vue: "CustomView", btp_messages: "Chat", btp_tiers: "Users" };
   const pilules = (avecChevron: boolean) =>
     aller.map((a) => (
       <Link key={a.cle} href={a.href} className="dal-h-pilule">
@@ -177,6 +185,18 @@ export default function VueEnsemble() {
             <DalIcone nom="Crane" style={{ color: "var(--dal-equipe)" }} />
             <span>Chantiers</span>
           </Link>
+          {/* étoile « Add to favorites » → Épingler la vue ouverte : elle rejoint « Épinglés » */}
+          <button
+            type="button"
+            className="dal-rond"
+            role="switch"
+            aria-checked={vueEpinglee}
+            aria-label={vueEpinglee ? `Désépingler « ${titreVue} »` : `Épingler « ${titreVue} »`}
+            title={vueEpinglee ? `Désépingler « ${titreVue} »` : `Épingler « ${titreVue} » dans les épinglés`}
+            onClick={() => favoris.basculer({ type: "vue", id: `daliro-${vue}`, titre: titreVue, href: vue === "point" ? `${BASE}?vue=point` : BASE })}
+          >
+            {vueEpinglee ? <EtoilePleine /> : <DalIcone nom="Etoile" taille={14} />}
+          </button>
           <DalMenu
             libelle="Actions sur les chantiers"
             options={[
@@ -251,6 +271,25 @@ export default function VueEnsemble() {
                 {pilules(false)}
               </nav>
 
+              {epingles.length ? (
+                <section className="dal-h-section" aria-labelledby="dal-h-epingles">
+                  <div className="dal-h-section-tete">
+                    <h2 id="dal-h-epingles" className="dal-h-section-titre">
+                      Épinglés
+                    </h2>
+                  </div>
+                  <ul className="dal-h-liste">
+                    {epingles.map((x) => (
+                      <li key={`${x.type}:${x.id}`}>
+                        <Link href={x.href} className="dal-h-rangee" title="Retirez-le avec l'étoile de sa page">
+                          <DalIcone nom={ICONE_EPINGLE[x.type] ?? "Page"} />
+                          <span className="dal-h-rangee-texte">{x.titre}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
               <section className="dal-h-section" aria-labelledby="dal-h-chantiers">
                 <div className="dal-h-section-tete">
                   <h2 id="dal-h-chantiers" className="dal-h-section-titre">

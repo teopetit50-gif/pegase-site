@@ -100,3 +100,14 @@
 .v2 .dal .dal-fc-gestes .esp-dossier:not(:empty) {
   padding: 8px 16px 0;
 }
+
+/* onglet Lots (Projects) : « Add filter » et « Display options » à gauche du bouton du volet,
+   écart 6 (relevé : 1328, 1362, 1396) */
+.v2 .dal .dal-fc-outils {
+  display: inline-flex;
+  gap: 6px;
+  margin-right: 6px;
+}
+.v2 .dal .dal-fc-outils .dal-rond {
+  position: relative;
+}

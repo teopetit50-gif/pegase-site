@@ -22,7 +22,7 @@ export type OptionMenu = { libelle: string; icone: NomDalIcone; href?: string; a
 /* Le menu s'ouvre sous le bouton, aligné à gauche, 4 px plus bas ; pas
    d'animation (relevé : apparition immédiate). Échap ou un clic dehors le
    referme. */
-export function DalMenu({ libelle, options, icone = "Points", alignement = "gauche" }: { libelle: string; options: OptionMenu[]; icone?: NomDalIcone; alignement?: "gauche" | "droite" }) {
+export function DalMenu({ libelle, options, icone = "Points", alignement = "gauche", plein, actif }: { libelle: string; options: OptionMenu[]; icone?: NomDalIcone; alignement?: "gauche" | "droite"; plein?: boolean; actif?: boolean }) {
   const [ouvert, setOuvert] = useState(false);
   const boite = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -42,8 +42,9 @@ export function DalMenu({ libelle, options, icone = "Points", alignement = "gauc
   }, [ouvert]);
   return (
     <div ref={boite} style={{ position: "relative", display: "inline-flex" }}>
-      <button type="button" className="dal-rond" aria-label={libelle} title={libelle} aria-haspopup="menu" aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)}>
+      <button type="button" className={plein ? "dal-rond dal-rond--plein" : "dal-rond"} aria-label={libelle} title={libelle} aria-haspopup="menu" aria-expanded={ouvert} onClick={() => setOuvert((o) => !o)}>
         <DalIcone nom={icone} />
+        {actif ? <span className="dal-tl-point" /> : null}
       </button>
       {ouvert ? (
         <div className="dal-menu" role="menu" aria-label={libelle} style={alignement === "gauche" ? { top: 32, left: 0 } : { top: 32, right: 0 }}>

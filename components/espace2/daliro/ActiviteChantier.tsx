@@ -11,13 +11,16 @@
    autres faits (confirmations, signatures, ouverture, création) sont des
    lignes d'événement (icône 16, 12/450/16.8, auteur en 500, « · date »).
 
-   Le composeur « Comment | Update » de Linear n'a pas d'équivalent : le fil
-   se remplit par WhatsApp et courriel, rien ne s'y écrit depuis la page.
-   Les gestes d'un message (ouvrir un avenant, écarter) et ses fenêtres
+   Le composeur « Comment | Update » de Linear (02/11, décision de Teo : une
+   utilité à chaque bouton) : « Question » pose la question au chantier
+   (poserQuestion, réponse dans Terrain › Questions) ; « Avenant » ouvre la
+   fenêtre « Ouvrir un avenant » de ChantierVue, l'objet pré-rempli ; le
+   trombone rattache une facture. Le fil, lui, se remplit par WhatsApp et
+   courriel. Les gestes d'un message (ouvrir un avenant, écarter) et ses fenêtres
    restent ceux de FilCarte (prop rendu).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import FilCarte, { type FilRendu } from "@/components/espace/daliro/FilCarte";
 import type { Source } from "@/components/espace/source";
@@ -45,9 +48,69 @@ const nomMois = (cle: string) => {
 
 type Element = { cle: string; quand: string } & ({ genre: "message"; m: MessageChantier } | { genre: "origine"; n: Nouvelle } | { genre: "evenement"; n: Nouvelle });
 
-export function ActiviteChantier({ t, source, relire, ici }: { t: Tableau; source: Source; relire: () => Promise<void>; ici: string }) {
+type Actions = { question: (texte: string) => void; avenant: (objet: string) => void; facture: () => void; avenantPossible: boolean };
+
+export function ActiviteChantier({ t, source, relire, ici, actions }: { t: Tableau; source: Source; relire: () => Promise<void>; ici: string; actions: Actions }) {
   const faits = useMemo(() => chronique(t, ici), [t, ici]);
-  return <FilCarte tableau={t} source={source} relire={relire} rendu={(f) => <Activite f={f} faits={faits} ici={ici} />} />;
+  return (
+    <FilCarte
+      tableau={t}
+      source={source}
+      relire={relire}
+      rendu={(f) => (
+        <div className="dal-ini-activite">
+          <Composeur actions={actions} />
+          <Activite f={f} faits={faits} ici={ici} />
+        </div>
+      )}
+    />
+  );
+}
+
+/* le composeur : segmenté « Question | Avenant », champ, trombone et bouton d'envoi */
+function Composeur({ actions }: { actions: Actions }) {
+  const [mode, setMode] = useState<"question" | "avenant">("question");
+  const [texte, setTexte] = useState("");
+  const pret = texte.trim().length >= 3 && (mode === "question" || actions.avenantPossible);
+  const envoyer = () => {
+    if (!pret) return;
+    if (mode === "question") actions.question(texte.trim());
+    else actions.avenant(texte.trim());
+    setTexte("");
+  };
+  return (
+    <div className="dal-ini-composeur">
+      <div className="dal-ini-composeur-segments" role="group" aria-label="Ce que vous écrivez">
+        <button type="button" className="dal-ini-composeur-segment" aria-pressed={mode === "question"} onClick={() => setMode("question")}>
+          Question
+        </button>
+        <button type="button" className="dal-ini-composeur-segment" aria-pressed={mode === "avenant"} onClick={() => setMode("avenant")} title={actions.avenantPossible ? undefined : "Un avenant se prépare sur un chantier ouvert"}>
+          Avenant
+        </button>
+      </div>
+      <textarea
+        className="dal-ini-composeur-champ"
+        aria-label={mode === "question" ? "Votre question sur le chantier" : "Ce qui est demandé en plus du marché"}
+        placeholder={mode === "question" ? "Posez une question sur ce chantier…" : "Ce qui est demandé en plus du marché…"}
+        value={texte}
+        onChange={(e) => setTexte(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            envoyer();
+          }
+        }}
+      />
+      <div className="dal-ini-composeur-pied">
+        <button type="button" className="dal-ini-reaction" aria-label="Rattacher une facture" title="Rattacher une facture" onClick={actions.facture}>
+          <DalIcone nom="Attachment" taille={16} />
+        </button>
+        <button type="button" className="dal-ini-composeur-envoi" disabled={!pret} onClick={envoyer} title={mode === "question" ? "Poser la question (⌘ Entrée) — la réponse arrive dans Terrain › Questions" : "Ouvrir la fenêtre « Ouvrir un avenant » (⌘ Entrée)"}>
+          {mode === "question" ? "Poser" : "Ouvrir l'avenant…"}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 function Activite({ f, faits, ici }: { f: FilRendu; faits: Nouvelle[]; ici: string }) {
@@ -58,7 +121,7 @@ function Activite({ f, faits, ici }: { f: FilRendu; faits: Nouvelle[]; ici: stri
   const mois = [...new Set(elements.map((e) => cleMois(e.quand)))];
 
   return (
-    <div className="dal-ini-activite">
+    <>
       {f.fait ? <Avis teinte="vert" role="status">{f.fait}</Avis> : null}
       {f.erreur ? <Avis teinte="rouge" role="alert">{f.erreur}</Avis> : null}
       {f.chargement ? <p className="dal-ini-aide">Lecture du fil…</p> : null}
@@ -86,7 +149,7 @@ function Activite({ f, faits, ici }: { f: FilRendu; faits: Nouvelle[]; ici: stri
       ))}
       {!f.chargement && !elements.length ? <p className="dal-ini-aide">Rien encore : les photos, vocaux et messages que le chef d&apos;équipe envoie au numéro WhatsApp de l&apos;entreprise s&apos;affichent ici.</p> : null}
       {f.fenetres}
-    </div>
+    </>
   );
 }
 

@@ -39,7 +39,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ChantierVue, { type FormChantier, type SectionChantier } from "@/components/espace/daliro/ChantierVue";
 import type { StatutChantier } from "@/components/espace/daliro/types";
 import Habille from "@/components/espace2/Habille";
@@ -55,10 +55,13 @@ import { DalIcone } from "./DalIcone";
 import "./dal-initiative.css";
 import { ApercuChantier, VoletChantier } from "./ApercuChantier";
 import { ActiviteChantier } from "./ActiviteChantier";
+import Chantiers from "./Chantiers";
+import { EtoilePleine } from "./IconesProjet";
+import { useFavoris, useSuivis } from "./navigateur";
 
 const BASE = `${RACINE}/daliro`;
 
-type CleOnglet = "apercu" | "terrain" | "argent" | "fil" | "reception";
+type CleOnglet = "apercu" | "fil" | "projets" | "terrain" | "argent" | "reception";
 /* 30/10/2026 : Terrain et Argent montrent une partie à la fois (?partie=, pastilles sous les onglets),
    la plus utile d'abord ; « Tout » rend l'ancienne pile. Les ancres des repères (#planning, #avenants,
    #situations) choisissent leur partie. */
@@ -67,6 +70,8 @@ type CleOnglet = "apercu" | "terrain" | "argent" | "fil" | "reception";
 const ONGLETS: { cle: CleOnglet; libelle: string; sections?: SectionChantier[] }[] = [
   { cle: "apercu", libelle: "Aperçu" },
   { cle: "fil", libelle: "Activité", sections: ["fil"] },
+  /* l'onglet « Projects » de l'Initiative : les lots du chantier sur la frise de Chantiers */
+  { cle: "projets", libelle: "Lots" },
   { cle: "terrain", libelle: "Terrain", sections: ["planning", "controles", "questions", "appro", "meteo"] },
   { cle: "argent", libelle: "Argent", sections: ["avenants", "situations", "marche", "lots", "factures", "heures"] },
   { cle: "reception", libelle: "Réception", sections: ["reception"] },
@@ -112,6 +117,7 @@ export default function FicheChantier({ id }: { id: string }) {
   const { source, pret, erreur, liste, tableau, demander, enLecture, onLocal, relireChantier } = useDaliro();
   const params = useSearchParams();
   const chemin = usePathname();
+  const routeur = useRouter();
   const toast = useToast();
   const large = useLarge();
   const [voletChoisi, setVoletChoisi] = useState<boolean | null>(null);
@@ -145,7 +151,17 @@ export default function FicheChantier({ id }: { id: string }) {
 
   const absent = source === "exemple" ? !t : pret && !t && !enLecture(id) && (!!erreur || !liste.some((c) => c.id === id));
   const chantierListe = liste.find((c) => c.id === id) ?? null;
+  const favoris = useFavoris();
+  const suivis = useSuivis();
+  const epingle = favoris.estEpingle("btp_chantiers", id);
+  const suivi = suivis.estSuivi("btp_chantiers", id);
   const nom = t?.chantier.nom ?? chantierListe?.nom ?? "Chantier";
+  const lienParam = (cle: string, valeur: string | null) => {
+    const p = new URLSearchParams(params.toString());
+    if (valeur === null) p.delete(cle);
+    else p.set(cle, valeur);
+    return `${chemin}?${p.toString()}`;
+  };
   const lienOnglet = (cle: CleOnglet) => (cle === "apercu" ? chemin : `${chemin}?onglet=${cle}`);
   const relire = () => relireChantier(id);
 
@@ -211,7 +227,7 @@ export default function FicheChantier({ id }: { id: string }) {
 
   return (
     <VoletContexte.Provider value={contexte}>
-    <DalCarte className="dal-fc">
+    <DalCarte className="dal-fc dal-tl-page">
     <div className="lin lit">
       <h1 className="v2-sr">{nom}</h1>
 
@@ -229,6 +245,18 @@ export default function FicheChantier({ id }: { id: string }) {
               <span>{nom}</span>
             </span>
           </nav>
+          {/* étoile « Add to favorites » → Épingler : le chantier remonte en tête de la vue d'ensemble */}
+          <button
+            type="button"
+            className="dal-rond"
+            role="switch"
+            aria-checked={epingle}
+            aria-label={epingle ? "Désépingler le chantier" : "Épingler le chantier"}
+            title={epingle ? "Désépingler (retirer des épinglés de la vue d'ensemble)" : "Épingler en tête de la vue d'ensemble"}
+            onClick={() => favoris.basculer({ type: "btp_chantiers", id, titre: nom, href: `${BASE}/chantiers/${encodeURIComponent(id)}` })}
+          >
+            {epingle ? <EtoilePleine /> : <DalIcone nom="Etoile" taille={14} />}
+          </button>
           <DalMenu
             libelle="Actions sur le chantier"
             options={[
@@ -247,6 +275,17 @@ export default function FicheChantier({ id }: { id: string }) {
           <span className="dal-pousse" />
           <button type="button" className="dal-rond dal-fc-24" aria-label="Copier le lien de la page" title="Copier le lien de la page" onClick={copierLien}>
             <DalIcone nom="LienUrl" />
+          </button>
+          {/* cloche « Notifications » → Suivre : ses nouveaux messages passent en tête d'À ranger, marqués « suivi » */}
+          <button
+            type="button"
+            className="dal-rond"
+            aria-pressed={suivi}
+            aria-label={suivi ? "Ne plus suivre le chantier" : "Suivre le chantier"}
+            title={suivi ? "Suivi : ses nouveaux messages passent en tête d'À ranger — ne plus suivre" : "Suivre : ses nouveaux messages passeront en tête d'À ranger"}
+            onClick={() => suivis.basculer({ type: "btp_chantiers", id, titre: nom, href: `${BASE}/chantiers/${encodeURIComponent(id)}` })}
+          >
+            <DalIcone nom={suivi ? "Notified" : "Subscribe"} taille={14} />
           </button>
           <button
             type="button"
@@ -269,6 +308,34 @@ export default function FicheChantier({ id }: { id: string }) {
             <DalIcone nom="CustomView" />
           </Link>
           <span className="dal-pousse" />
+          {onglet === "projets" ? (
+            <span className="dal-fc-outils">
+              <DalMenu
+                libelle="Filtrer les lots"
+                icone="Filtre"
+                plein
+                alignement="droite"
+                actif={!!params.get("lots")}
+                options={[
+                  { libelle: "Tous les lots", icone: "Project", href: lienParam("lots", null) },
+                  { libelle: "En cours", icone: "IssueStatusStarted", href: lienParam("lots", "en_cours") },
+                  { libelle: "À venir", icone: "IssueStatusTodo", href: lienParam("lots", "a_venir") },
+                  { libelle: "Terminés", icone: "IssueStatusDone", href: lienParam("lots", "termine") },
+                ]}
+              />
+              <DalMenu
+                libelle="Options d'affichage"
+                icone="Affichage"
+                plein
+                alignement="droite"
+                options={[
+                  { libelle: "Échelle : mois", icone: "Calendar", href: lienParam("zoom", "mois") },
+                  { libelle: "Échelle : trimestre", icone: "Calendar", href: lienParam("zoom", "trimestre") },
+                  { libelle: "Échelle : année", icone: "Calendar", href: lienParam("zoom", null) },
+                ]}
+              />
+            </span>
+          ) : null}
           <button
             type="button"
             className="dal-rond dal-rond--plein"
@@ -310,14 +377,27 @@ export default function FicheChantier({ id }: { id: string }) {
               <ChantierVue key={`gestes-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={[]} demande={demande} />
             </Habille>
           </div>
-          {onglet === "apercu" || onglet === "fil" ? (
+          {onglet === "projets" ? (
+            <Chantiers lotsDe={id} />
+          ) : onglet === "apercu" || onglet === "fil" ? (
             <div className="dal-ini-corps">
               <div className="dal-ini-zone">
                 {onglet === "apercu" ? (
                   <ApercuChantier t={t} c={chantierListe ?? t.chantier} ici={chemin} ouvrirVolet={() => setVoletChoisi(true)} demander={geste} />
                 ) : (
                   <div id="fil">
-                    <ActiviteChantier t={t} source={source} relire={relire} ici={chemin} />
+                    <ActiviteChantier
+                      t={t}
+                      source={source}
+                      relire={relire}
+                      ici={chemin}
+                      actions={{
+                        question: (texte) => routeur.push(`${chemin}?onglet=terrain&partie=questions&question=${encodeURIComponent(texte)}`),
+                        avenant: (objet) => geste({ type: "avenant", objet }),
+                        facture: () => geste({ type: "facture" }),
+                        avenantPossible: t.chantier.statut === "ouvert" || t.chantier.statut === "suspendu",
+                      }}
+                    />
                   </div>
                 )}
               </div>
