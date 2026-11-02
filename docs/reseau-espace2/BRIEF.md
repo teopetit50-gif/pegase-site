@@ -102,7 +102,7 @@ côte juraient. **On harmonise** :
 |---|---|---|
 | Socle (navigation, titres, palette, `source.ts`, `membres.ts`) | `claude/brave-turing-1vhu5x` | Fusionné. |
 | **Fil** | `claude/brave-turing-1vhu5x` | Fusionné. Schéma visé : `schema-fil.sql` (non appliqué). |
-| **Membres** | `claude/exciting-darwin-65rwta` | Fusionné. Schéma visé : `schema-membres.sql` (non appliqué). |
+| **Membres** | `claude/exciting-darwin-65rwta` | Fusionné, puis **repris le 02/11** (à refusionner). Contenu relevé sur les pages publiques de pappers.be : résultats `https://www.pappers.be/fr/search?q=menuiserie` (champs de la carte, filtres et « Ajouter un filtre » par familles, « Réinitialiser », état « Aucune entreprise trouvée… » avec « Supprimer tous les filtres » / « Annuler le dernier filtre ») et fiche `https://www.pappers.be/fr/company/menuiserie-brahy-0444482209` (en-tête et faits, puis Informations, Activité, Finances → badges, Prospecter dans ce secteur, Informations de contact ; « Accès restreint » → « Non montré par le membre »). Aucune autre référence nécessaire. Habillage : celui des moteurs, kit `components/espace2/lin/` (liste « Projects » de Linear comme Entreprises, page d'un projet comme les tableaux de bord FILED, CASHD, REPUT et OFFLOAD, panneau Détails pour « Ce que je montre au réseau »). tsc, eslint et build verts ; `recette-reseau.mjs` 60/60 ; base réelle vérifiée (état vide commun, aucun membre d'exemple). Schéma visé : `schema-membres.sql` (non appliqué). |
 | **Messages** | `claude/sharp-hopper-hnyhb6` | Fusionné. Schéma visé : `schema-messages.sql` (non appliqué). |
 | **Opportunités** | `claude/beautiful-gates-h31nkp` | Fusionné. Schéma visé : `schema-opportunites.sql` (non appliqué). |
 
