@@ -6,10 +6,10 @@ superposition (différence PIL). Les deux images sont découpées au cadre de
 la carte (Linear : x 244, y 8 ; espace 2 : x 304, y 48), à la même taille.
 
 python3 outils/lor-superpose.py <reference.png> <notre.png> <dossier> <nom> \
-    [--ref x,y] [--notre x,y] [--taille l,h]
+    [--ref x,y] [--notre x,y] [--taille l,h] [--melange]
 
 Écrit dans <dossier> : <nom>-cote.png (référence | nôtre), <nom>-diff.png
-(différence absolue, renforcée ×3), <nom>-melange.png (50 / 50), et imprime
+(différence absolue, renforcée ×3), avec --melange <nom>-melange.png (50 / 50), et imprime
 la part de pixels qui diffèrent de plus de 24 (sur 255) sur un canal.
 """
 import sys
@@ -17,9 +17,13 @@ from PIL import Image, ImageChops
 
 args = sys.argv[1:]
 ref_png, notre_png, dossier, nom = args[:4]
-ref_xy, notre_xy, taille = (244, 8), (304, 48), None
+ref_xy, notre_xy, taille, melange = (244, 8), (304, 48), None, False
 i = 4
 while i < len(args):
+    if args[i] == "--melange":
+        melange = True
+        i += 1
+        continue
     cle, val = args[i], tuple(int(float(v)) for v in args[i + 1].split(","))
     if cle == "--ref":
         ref_xy = val
@@ -44,8 +48,9 @@ cote.save(f"{dossier}/{nom}-cote.png")
 
 diff = ImageChops.difference(a, b)
 diff.point(lambda v: min(255, v * 3)).save(f"{dossier}/{nom}-diff.png")
-Image.blend(a, b, 0.5).save(f"{dossier}/{nom}-melange.png")
+if melange:
+    Image.blend(a, b, 0.5).save(f"{dossier}/{nom}-melange.png")
 
-px = diff.getdata()
+px = diff.get_flattened_data() if hasattr(diff, "get_flattened_data") else diff.getdata()
 ecarts = sum(1 for p in px if max(p) > 24)
 print(f"{nom} : {l}x{h}, {ecarts} pixels en écart ({100 * ecarts / (l * h):.2f} %)")

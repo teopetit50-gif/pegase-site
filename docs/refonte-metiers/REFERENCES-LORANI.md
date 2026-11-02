@@ -4,7 +4,7 @@
 |---|---|---|---|---|
 | Vue d'ensemble | `/espace2/lorani` | Linear, Projects (liste) | `linear-projects.md` | écrite (`VueEnsemble.tsx`, `lor-projets.css`) ; superposition 1 faite en sombre : géométrie alignée (en-tête, colonnes, lignes) ; restent : capture avec 13 lignes, clair, 390 |
 | Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | écrite (`PagePermis.tsx`, `lor-ticket.css`) ; superposée en sombre, clair, 1024 et 390 (`comparaisons/lorani/permis-*`) ; écarts ci-dessous |
-| Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | à faire |
+| Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | écrite (`PageProjet.tsx`, `lor-initiative.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/projet-*`) ; écarts ci-dessous |
 | Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | à faire |
 | Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | à faire |
 | Honoraires et temps | `/espace2/lorani/honoraires` | Attio, People + fiche | `attio-people.md` | en dernier (relevé Attio refait) |
@@ -54,3 +54,18 @@ Correspondances : Sub-issues → étapes du calendrier (statut : fait/passé = D
 - Lignes de sous-tickets : une date à droite (la date de l'étape) à la place de l'avatar d'assigné ; « Unsubscribe » devient « Rappels au chef de projet » (à qui partent les rappels) : gestes et données du métier.
 - Deux sections de propriétés de plus (Échéances, Recours) : blocs B15 et B16 de l'inventaire, sans place dans la référence.
 - Les fenêtres de saisie (F7-F13) sont celles de l'espace 2 (Dialog commun), pas celles de Linear, qui n'en a pas l'équivalent.
+
+## Projet → Linear, page d'une Initiative (Résidence Les Tilleuls)
+
+Données : le projet d'exemple « Surélévation Dubois » (contrôles, pièces, PLU, permis).
+Mesures relues au DOM contre le relevé : onglets à y 52 (8 sous la ligne 1 et non 12 : position mesurée des onglets), défilement à y 88 (p 0 48), colonne 805 centrée, tuile 36 à y 152, titre m-top 12, rangées Properties / Resources (libellé sur 81, pilules 28), carte « Latest update » débordant de 16, Description, section Projects 963 centrée et tableau 1001 (m-left −28) aux colonnes de Linear ; volet ⌘ I de 400 (cartes 388 à x 792, rangées 36, libellé sur 90, segments 28, lignes de 42).
+Comparaisons : `projet-1440-sombre-*`, `projet-1440-clair-*`, `projet-390-sombre-*`, `projet-390-clair-*`. Les pixels en écart viennent du contenu (résumé plus long, carte « Dernier point » d'une ligne, description plus courte : la section Permis remonte).
+
+Correspondances : fil « Initiatives › Résidence » → « Permis › projet » (icône de la nature) ; « … » → nouveau permis, courrier, dossier daté, nouveau projet, honoraires, écran d'avant ; copier le lien ; « + » → permis, courrier, membre, lot, intervenant (F2-F6) ; onglets Overview · Activity · Projects → Vue d'ensemble · Activité · Permis, puis les vues du dossier (Équipe, Urbanisme, Contrôle, Consultation, Chantier, Réception, Assurances : les parties de ProjetCarte en liste, titre 18/500 de la section Projects, lignes de Linear, détail dans le volet) et Honoraires ; Properties → nature (santé du permis le plus pressé), phase, chef de projet, prochaine date, « … » (marché, territoire, ouverture, réception) ; Resources → règlement de la zone du PLU, dossier daté, « + » courrier ; Latest update → dernier compte rendu, sinon le point de Lorani sur le permis le plus pressé (« Update » → Compte rendu, bulle → points en suspens) ; Description → nature, marché, territoire, zone du PLU, pièces exigées ; Projects → les permis du projet groupés par santé (À confirmer, Pièces à fournir…), colonnes Santé, Urgence, Chef, Prochaine date, Avancement ; volet ⌘ I → Propriétés, Avancement (Santé | État | Chefs), Activité.
+
+Écarts restants, avec leur raison :
+- Pas d'étoile ni de cloche (Notifications) dans l'en-tête, pas de « Add new view » : l'espace 2 n'a ni favoris, ni abonnement par projet, ni vues personnelles.
+- Onglet « Permis » en liste et non en Timeline : la frise d'un projet n'a que ses permis (une à trois barres) ; la liste est celle que Linear montre à 390.
+- Les vues du dossier (Équipe…Assurances) gardent les briques de liste de `components/espace2/lin` (My issues de Linear, partagées) recolorées aux jetons de Linear par un pont de variables (`lor-in-pont`) ; elles n'ont pas d'équivalent dans la page d'une Initiative, qui n'a qu'une section Projects.
+- Pas de bouton « réaction » dans la carte « Latest update » ; « Update » ouvre la vue Chantier (le compte rendu se rédige là, F29).
+- Le composeur de l'onglet Activité dépose un courrier (F3) : Lorani n'a pas de commentaires sur un projet.
