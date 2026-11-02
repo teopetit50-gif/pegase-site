@@ -1,0 +1,789 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Réseau Omega — la page Membres (02/11/2026)
+
+   La COMPOSITION vient de pappers.be (résultats de recherche et fiche
+   entreprise, relevés dans Chromium) ; l'HABILLAGE est entièrement celui
+   d'Espace 2 : jetons --v2-* (clair, doux et sombre suivent seuls), filets
+   à --v2-a-400, rayons de 6 px (8 px pour la grande tuile), aucune ombre
+   portée, titres en Manrope (--v2-titre), étiquettes en Source Code Pro
+   (--v2-code), texte en Inter. Aucune couleur, police ni rayon de la
+   référence, et pas d'aplat pleine largeur en tête de fiche.
+
+   Préfixe rm- (réseau, membres) : « mb- » est pris par Tailwind.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— le cadre de page ——— */
+.v2 .rm-page {
+  padding-top: 24px;
+}
+.v2 .rm-etiquette {
+  margin: 0;
+  font-family: var(--v2-code);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 450;
+  text-transform: uppercase;
+  color: var(--v2-gray-600);
+}
+.v2 .rm-titre {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 22px;
+  line-height: 29px;
+  font-weight: 600;
+  letter-spacing: -0.55px;
+  color: var(--v2-gray-1000);
+}
+.v2 .rm-h2,
+.rm-modale-tete .rm-h2 {
+  margin: 0;
+  font-family: var(--v2-titre);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--v2-gray-1000);
+}
+.v2 .rm-tete {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+.v2 .rm-intro {
+  margin: 2px 0 0;
+  max-width: 680px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-sourdine {
+  color: var(--v2-gray-700);
+}
+
+/* ——— la disposition : la liste, et « vous » à droite au large ——— */
+.v2 .rm-disposition {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+@media (min-width: 1280px) {
+  .v2 .rm-disposition {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 24px;
+  }
+  .v2 .rm-colonne-moi {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: 16px;
+  }
+  .v2 .rm-colonne-liste {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+.v2 .rm-colonne-liste {
+  min-width: 0;
+}
+
+/* ——— la recherche et les filtres en pastilles ——— */
+.v2 .rm-recherche-champ {
+  height: 40px;
+}
+.v2 .rm-recherche-champ input::-webkit-search-cancel-button {
+  cursor: pointer;
+}
+.v2 .rm-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 24px;
+}
+.v2 .rm-pastille {
+  gap: 4px;
+  padding: 0 10px;
+  font-size: 13px;
+  max-width: 100%;
+}
+.v2 .rm-pastille > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .rm-pastille svg {
+  color: var(--v2-gray-900);
+}
+.v2 .rm-pastille[data-actif],
+.v2 .rm-pastille[aria-pressed="true"] {
+  box-shadow: 0 0 0 1px var(--v2-blue-700);
+}
+.v2 .rm-pastille[aria-pressed="true"] svg {
+  color: var(--v2-blue-700);
+}
+.v2 .rm-pastille-valeur {
+  color: var(--v2-gray-900);
+}
+.v2 .rm-filtres-separateur {
+  width: 1px;
+  height: 20px;
+  background: var(--v2-a-400);
+}
+.v2 .rm-effacer {
+  color: var(--v2-gray-900);
+}
+.rm-menu-filtre {
+  min-width: 220px;
+  max-width: min(340px, calc(100vw - 32px));
+}
+.rm-menu-filtre .v2-menu {
+  max-height: min(360px, 60vh);
+}
+.rm-menu-item {
+  height: auto;
+  min-height: 36px;
+  padding: 6px 8px;
+  font-size: 13px;
+  line-height: 18px;
+}
+.rm-menu-coche {
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  flex: none;
+  color: var(--v2-blue-700);
+}
+.rm-menu-coche svg {
+  color: inherit;
+}
+
+/* ——— le nombre de résultats ——— */
+.v2 .rm-compte {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+.v2 .rm-compte p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-compte strong {
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— la carte d'un membre (la carte de résultat de pappers) ——— */
+.v2 .rm-cartes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+.v2 .rm-carte-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2 .rm-carte-nom {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.v2 .rm-carte-nom a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--v2-a-600);
+}
+.v2 .rm-carte-secteur {
+  padding-left: 12px;
+  border-left: 1px solid var(--v2-a-400);
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-carte-grille {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+  padding: 16px;
+}
+@media (min-width: 768px) {
+  .v2 .rm-carte-grille {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.v2 .rm-carte-large {
+  grid-column: span 2;
+}
+.v2 .rm-carte-grille dt,
+.v2 .rm-faits dt,
+.v2 .rm-tableau-faits dt {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-carte-grille dd {
+  margin: 4px 0 0;
+  color: var(--v2-gray-1000);
+}
+.v2 .rm-carte-grille dd small {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-carte-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--v2-a-400);
+}
+
+/* ——— le monogramme ——— */
+.rm-monogramme {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--v2-gray-100);
+  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+  font-family: var(--v2-sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--v2-gray-900);
+}
+.rm-monogramme[data-taille="48"] {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+/* ——— les badges vérifiés et leur infobulle ——— */
+.v2 .rm-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2 .rm-bulle-declencheur {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: help;
+  text-align: left;
+}
+.v2 .rm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 1px 8px 1px 6px;
+  border-radius: 999px;
+  background: var(--v2-gray-200);
+  box-shadow: inset 0 0 0 1px var(--v2-a-300);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+  transition: background 0.15s;
+}
+.v2 .rm-bulle-declencheur:hover .rm-badge,
+.v2 .rm-bulle-declencheur[data-pressed] .rm-badge {
+  background: var(--v2-gray-300);
+}
+.v2 .rm-badge svg,
+.v2 .rm-ligne-badge-icone {
+  flex: none;
+  color: var(--v2-blue-700);
+}
+.v2 .rm-bulle-i {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  color: var(--v2-gray-900);
+  transition: color 0.15s, background 0.15s;
+}
+.v2 .rm-bulle-declencheur:hover .rm-bulle-i {
+  color: var(--v2-gray-1000);
+  background: var(--v2-a-200);
+}
+.rm-bulle {
+  display: grid;
+  gap: 4px;
+  max-width: min(300px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--v2-bg-eleve, var(--v2-bg-100));
+  box-shadow: var(--v2-ombre-menu);
+  font-family: var(--v2-sans);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+  outline: none;
+}
+.rm-bulle strong {
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+}
+.rm-bulle[data-entering] {
+  animation: v2-pop-entree var(--v2-popover) var(--v2-swift);
+}
+.rm-bulle[data-exiting] {
+  animation: v2-pop-sortie 0.15s ease forwards;
+}
+
+/* ——— le panneau « Ce que je montre au réseau » ——— */
+.v2 .rm-moi-tete {
+  padding: 14px 16px;
+}
+.v2 .rm-moi-titre-bloc {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+.v2 .rm-moi-resume {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-moi-bascule {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.v2 .rm-moi-bascule .rm-h2 {
+  display: block;
+}
+.v2 .rm-moi-chevron {
+  flex: none;
+  color: var(--v2-gray-900);
+  transition: transform 0.2s var(--v2-doux);
+}
+.v2 .rm-moi-bascule[aria-expanded="true"] .rm-moi-chevron {
+  transform: rotate(180deg);
+}
+.v2 .rm-moi-corps {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border-top: 1px solid var(--v2-a-400);
+}
+.v2 .rm-moi-intro {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-moi-intro strong {
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+}
+.v2 .rm-moi-champs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .v2 .rm-moi-champs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 24px;
+  }
+}
+.v2 .rm-moi-champ .v2-interrupteur {
+  width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+}
+.v2 .rm-moi-champ .v2-interrupteur-rail {
+  margin-top: 2px;
+}
+.v2 .rm-moi-champ-texte {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.v2 .rm-moi-champ-libelle {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+  color: var(--v2-gray-1000);
+}
+.v2 .rm-moi-champ-valeur {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-moi-champ .v2-interrupteur[aria-checked="false"] .rm-moi-champ-valeur {
+  color: var(--v2-gray-700);
+}
+.v2 .rm-moi-champ-aide {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-700);
+}
+.v2 .rm-apercu {
+  display: grid;
+  gap: 8px;
+}
+.v2 .rm-apercu-carte {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--v2-bg-200);
+  box-shadow: inset 0 0 0 1px var(--v2-a-400);
+}
+.v2 .rm-apercu-tete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.v2 .rm-apercu-nom {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+}
+.v2 .rm-apercu-ligne {
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-apercu-ligne > span {
+  color: var(--v2-gray-1000);
+  font-weight: 500;
+}
+.v2 .rm-apercu-vide {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--v2-gray-700);
+}
+.v2 .rm-moi-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-700);
+}
+
+/* ——— la fiche : le fil d'Ariane ——— */
+.v2 .rm-fil {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-fil a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+}
+.v2 .rm-fil a:hover {
+  color: var(--v2-gray-1000);
+}
+.v2 .rm-fil [aria-current] {
+  color: var(--v2-gray-1000);
+}
+
+/* ——— la fiche : la carte d'en-tête, sans aplat pleine largeur ——— */
+.v2 .rm-entete {
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+}
+@media (min-width: 1024px) {
+  .v2 .rm-entete {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 32px;
+    padding: 28px 32px;
+  }
+}
+.v2 .rm-entete-identite {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  gap: 12px 16px;
+}
+.v2 .rm-entete-noms {
+  display: grid;
+  gap: 4px;
+  align-content: center;
+}
+.v2 .rm-entete-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-entete-statut svg {
+  color: var(--v2-blue-700);
+}
+.v2 .rm-entete-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.v2 .rm-faits,
+.v2 .rm-tableau-faits {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.v2 .rm-faits {
+  padding-top: 20px;
+  border-top: 1px solid var(--v2-a-400);
+}
+@media (min-width: 1024px) {
+  .v2 .rm-faits {
+    padding: 0 0 0 32px;
+    border-top: 0;
+    border-left: 1px solid var(--v2-a-400);
+    align-content: center;
+  }
+}
+.v2 .rm-faits > div,
+.v2 .rm-tableau-faits > div {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+.v2 .rm-tableau-faits > div {
+  grid-template-columns: 168px minmax(0, 1fr);
+}
+.v2 .rm-faits dd,
+.v2 .rm-tableau-faits dd {
+  margin: 0;
+  color: var(--v2-gray-1000);
+}
+@media (max-width: 479px) {
+  .v2 .rm-faits > div,
+  .v2 .rm-tableau-faits > div {
+    grid-template-columns: 112px minmax(0, 1fr);
+  }
+}
+
+/* ——— la fiche : les cartes de section, sur deux colonnes ——— */
+.v2 .rm-sections {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .v2 .rm-sections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .v2 .rm-section[data-large] {
+    grid-column: 1 / -1;
+  }
+}
+.v2 .rm-section-tete {
+  display: grid;
+  gap: 2px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--v2-a-400);
+}
+.v2 .rm-section-corps {
+  padding: 12px 16px 16px;
+}
+.v2 .rm-puces {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.v2 .rm-puces li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--v2-a-300);
+}
+.v2 .rm-puces li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.v2 .rm-lignes-badges {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 0;
+  display: grid;
+  gap: 14px;
+}
+.v2 .rm-ligne-badge {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.v2 .rm-ligne-badge-icone {
+  margin-top: 2px;
+}
+.v2 .rm-ligne-badge-texte {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.v2 .rm-ligne-badge-phrase {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+.v2 .rm-ligne-badge-texte small {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+}
+.v2 .rm-section-vide {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+}
+.v2 .rm-section-note {
+  margin: 14px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--v2-a-300);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-700);
+}
+.v2 .rm-tableau-faits {
+  gap: 0;
+}
+.v2 .rm-tableau-faits > div {
+  padding: 7px 0;
+}
+.v2 .rm-voisins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+@media (min-width: 768px) {
+  .v2 .rm-voisins {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.v2 .rm-voisin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  margin: 0 -8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.v2 .rm-voisin:hover {
+  background: var(--v2-a-100);
+}
+.v2 .rm-voisin > span:last-child {
+  display: grid;
+  min-width: 0;
+}
+.v2 .rm-voisin-nom {
+  font-weight: 500;
+}
+.v2 .rm-voisin small {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--v2-gray-900);
+}
+
+/* ——— la fenêtre « Demander une mise en relation » (v2-modale) ——— */
+.rm-modale-corps {
+  gap: 12px;
+}
+.rm-modale-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.rm-modale-texte {
+  margin: 0;
+  color: var(--v2-gray-900);
+}
+.rm-modale-texte strong {
+  font-weight: 600;
+  color: var(--v2-gray-1000);
+}
+.rm-zone {
+  width: 100%;
+  min-height: 84px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--v2-gray-1000);
+  resize: vertical;
+  outline: none;
+}
+.rm-zone:hover {
+  box-shadow: 0 0 0 1px var(--v2-a-500);
+}
+.rm-zone:focus-visible {
+  box-shadow: var(--v2-anneau);
+}
+.rm-zone::placeholder {
+  color: var(--v2-gray-700);
+}
+
+/* sous 768 px, les pastilles passent sur deux lignes : le séparateur n'y sépare plus rien */
+@media (max-width: 767px) {
+  .v2 .rm-filtres-separateur {
+    display: none;
+  }
+}
