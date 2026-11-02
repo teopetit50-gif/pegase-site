@@ -82,3 +82,12 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 - **1024** : barre latérale visible. **La colonne Properties (375 px à droite) disparaît** : les propriétés passent sous le titre en rangée de pilules (Triage · Priority · Assignee · Project · Labels · cycle). Titre pleine largeur (x 259, 743 de large, une ligne). Fil d'Ariane tronqué « Initiativ… › OME-19 … ». Accept / Decline / Duplicate / Snooze réduits à des icônes 28×28.
 - **768** : tiroir. Même disposition à une colonne, titre à x 14, 740 de large.
 - Captures : `1024-sombre-OME-19.png`, `768-sombre-OME-19.png`.
+
+## Échéance dépassée (complément du 01/11/2026)
+
+Quatre tickets portent une échéance au **15/10/2026** (affichée « Oct 15 ») : OME-26, OME-28, OME-35, OME-53. Seule l'icône signale le retard : calendrier barré d'une croix, **fill lch(58% 73 29)** (rouge). Le texte garde sa couleur normale.
+
+- **Saisie** : le champ « Try: 24h, 7 days, Feb 9 » (⇧D) refuse le passé (10/15/2026 devient Oct 15, 2027 ; « 17 days ago » ne propose rien). Il faut passer par le calendrier : clic sur la pilule de date dans Properties → grille (role=grid) avec « Jump to today », « Previous month », « Next month » ; chaque jour est un bouton aria-label « Thursday, October 15th, 2026 ».
+- **Properties** : la pilule de date est un `<input value="Oct 15">` 13px/500, c lch(90.451 1.2 272) en sombre, dans un bouton r 9999px h 28. Icône 16×16 fill lch(58% 73 29), tracé « M11 1C13.2091 1 15 2.79086 15 5V6.25… M9.53033 8.46967L11.5 10.4393L13.4697 8.46967… ».
+- **Activité** : « Wizyy set the due date to Oct 15 · just now », avec la même icône rouge en 14×14.
+- Capture : `1440-reel-sombre-OME-53-en-retard.png`.

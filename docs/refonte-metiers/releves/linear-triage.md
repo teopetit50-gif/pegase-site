@@ -124,3 +124,11 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible, main 772. Liste de 386 à gauche (lignes 386×59) + moitié droite 385×723 (état vide ou élément ouvert). La liste passe de 400 à 386, la moitié droite de 787 à 385.
 - **768** : tiroir. Liste pleine largeur (lignes 768×59), plus de moitié droite : ouvrir un élément remplace la liste.
+
+## Échéance dépassée (complément du 01/11/2026)
+
+Quatre tickets portent une échéance au **15/10/2026** (affichée « Oct 15 ») : OME-26, OME-28, OME-35, OME-53. Seule l'icône signale le retard : calendrier barré d'une croix, **fill lch(58% 73 29)** (rouge). Le texte garde sa couleur normale.
+
+- **Ligne** : pastille 69×20 entre l'auteur et la priorité. r 48px · p 0 6px · bd 0.5px (sombre lch(16.32 1.48 272), clair lch(84.44 0 282)) · bg = fond de carte (sombre lch(5.52 0.4 272), clair lch(97.94 0.5 282)).
+- Icône 14×14 fill lch(58% 73 29). Texte « Oct 15 » 12px/450, m 0 1px 0 6px, couleur tertiaire (sombre lch(61.803 1.2 272), clair lch(39.176 1.25 282)).
+- Ticket concerné : OME-53.

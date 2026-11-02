@@ -57,3 +57,11 @@ Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 80
 
 - **1024** : barre latérale visible. Colonnes de 322 (+ 26 d'écart, et non 348) à partir de x 262 : deux colonnes et demie visibles, défilement horizontal. Puces tronquées « Urgent cha… ».
 - **768** : tiroir. Colonnes de 322 à partir de x 17, deux colonnes visibles. « New issue » devient cloche + « + ». Une carte de sous-ticket affiche le parent sur sa 1re ligne (« OME-59 › Facture fournisseur reçue sans c… »).
+
+## Échéance dépassée (complément du 01/11/2026)
+
+Quatre tickets portent une échéance au **15/10/2026** (affichée « Oct 15 ») : OME-26, OME-28, OME-35, OME-53. Seule l'icône signale le retard : calendrier barré d'une croix, **fill lch(58% 73 29)** (rouge). Le texte garde sa couleur normale.
+
+- **Carte** : même puce date 73×24 dans la rangée de puces, après la priorité. r 48px · bd 0.5px (sombre lch(20.032 1.93 272), clair lch(86.5 0 282)) · bg = fond de carte (clair lch(100 0 282)).
+- Icône 14×14 fill lch(58% 73 29). Texte « Oct 15 » 12px/450 (clair lch(40 1 282)).
+- Cartes en retard : OME-53 (Triage), OME-28 (Todo), OME-26 et OME-35 (In Progress) ; visibles dans `1440-reel-sombre.png` et `1440-reel-clair.png`.
