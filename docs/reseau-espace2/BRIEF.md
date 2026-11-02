@@ -166,21 +166,19 @@ côte juraient. **On harmonise** :
 ### Ce qui jure encore
 
 *Mis à jour le 02/11 au soir, après la réintégration d'Opportunités
-(59835427) et de Membres (a4f27808). Le Fil et les Messages sont en cours
-de reprise sur la DA des moteurs (demande de Teo) ; cette liste se refera
-une fois les quatre réintégrées.*
+(59835427), de Membres (a4f27808) et de Messages (bcb9e135). Le Fil est
+encore en cours de reprise ; cette liste se refera une fois les quatre
+réintégrées.*
 
-- Opportunités et Membres ont maintenant la DA des moteurs : kit `lin/`,
-  barre du titre de 44 px, liste « Projects » et page de projet de Linear
-  pour Membres, colonnes de Linear pour Opportunités. Le Fil et les
-  Messages gardent encore l'habillage d'avant : la rubrique ne sera
-  homogène qu'après leur reprise.
-- L'état vide du Fil tient dans la colonne du fil (moins large, décalé à
-  gauche). Celui des Messages est centré dans une page étroite. Même
-  contenu, mais pas la même largeur.
-- Dans la liste des Messages, le nom d'un interlocuteur ouvre la
-  conversation, pas la fiche. La fiche est à un clic, depuis l'en-tête de
-  la conversation.
+- Opportunités, Membres et Messages ont la DA des moteurs (kit `lin/`).
+  Le Fil garde encore l'habillage d'avant : la rubrique ne sera homogène
+  qu'après sa reprise.
+- Messages ne s'appuie plus sur Slack mais sur les pages publiques de
+  Zulip : une conversation est un sujet dans un salon, ou un message
+  privé ; plus de fils de réponse.
+- Dans « Conversations récentes » (Messages), les participants ne mènent
+  pas à la fiche ; une fois la conversation ouverte, l'interlocuteur y
+  mène.
 
 ### Défaut trouvé hors du réseau (déjà sur `main`)
 
