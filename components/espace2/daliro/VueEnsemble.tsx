@@ -50,6 +50,7 @@ import { jourLocal, resume, type TeinteClair } from "./enClair";
 import { DalCarte, DalMenu } from "./DalCadre";
 import { EtoilePleine } from "./IconesProjet";
 import { useFavoris } from "./navigateur";
+import MeteoSemaine from "./MeteoSemaine";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import "./dal-home.css";
 
@@ -323,6 +324,7 @@ export default function VueEnsemble() {
                   </ul>
                 )}
               </section>
+              <MeteoSemaine />
             </div>
 
             <aside className="dal-h-droite" aria-label="Équipe et raccourcis">

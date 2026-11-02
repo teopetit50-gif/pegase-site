@@ -30,7 +30,7 @@ const jourDe = (iso: string) => { const [a, m, j] = iso.split("-").map(Number); 
 const plus = (iso: string, n: number) => { const d = jourDe(iso); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`; };
 
 /* L'échange en exemple, même règle que public.btp_ordre_meteo : même équipe, intérieur, même durée, jours secs. */
-function echangesExemple(tableau: Tableau, m: MeteoChantier): EchangeMeteo[] {
+export function echangesExemple(tableau: Tableau, m: MeteoChantier): EchangeMeteo[] {
   const sec = (du: string, au: string) => {
     const jours = m.prevision.filter((d) => d.jour >= du && d.jour <= au);
     return jours.length > 0 && jours.every((d) => (d.pluie_mm ?? 0) < 5 && (d.vent_kmh ?? 0) < 40 && (d.tmin ?? 99) >= 0);
@@ -53,7 +53,7 @@ function echangesExemple(tableau: Tableau, m: MeteoChantier): EchangeMeteo[] {
 }
 
 /* L'exemple : une averse après-demain, des rafales le jour suivant. */
-function meteoExemple(tableau: Tableau): MeteoChantier {
+export function meteoExemple(tableau: Tableau): MeteoChantier {
   const auj = aujourdHui();
   const prevision: JourMeteo[] = [0, 1, 2, 3, 4, 5, 6].map((k) => ({
     jour: plus(auj, k), pluie_mm: [0, 0.4, 14.2, 3.1, 0, 0, 1.2][k], rafales_kmh: null, vent_kmh: [14, 20, 27, 45, 23, 12, 17][k],
