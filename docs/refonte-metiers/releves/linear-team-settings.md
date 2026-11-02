@@ -108,3 +108,10 @@ Rien à créer sur cette page sans changer les réglages de l'équipe (interdit)
 ## Captures (`captures/linear-team-settings/`)
 
 `1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible (défilée sur Features… Your teams), main @244,8 772×724 r 12. Fil « ‹ Teams » en haut à gauche du main. Colonne de 640 centrée (x 310), rangées 640×65. « Team overview › » aligné à droite de la colonne.
+- **768** : tiroir, barre « Settings » de 44, fil « ‹ Teams » dessous. Colonne de 640 à x 64. Rien ne se replie : « 1 member », « Off », « Available on Business » restent.

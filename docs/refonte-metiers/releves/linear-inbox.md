@@ -40,3 +40,10 @@ Le titre de l'onglet du navigateur devient « Inbox (5) ».
 ## Captures (`captures/linear-inbox/`)
 
 `1440-sombre-liste.png` (une info-bulle « Go to my issues G then M » traîne en haut à gauche, souris sur la barre latérale), `1440-sombre-notification-ouverte.png`, `1440-clair-notification-ouverte.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible. Liste réduite à 240 (lignes 240×55, titre et sous-ligne tronqués « … »). Volet droit 531×723 (état vide « 5 unread notifications » ou notification ouverte).
+- **768** : tiroir. Liste pleine largeur (768×55), plus de volet droit : ouvrir une notification affiche le ticket en plein écran.

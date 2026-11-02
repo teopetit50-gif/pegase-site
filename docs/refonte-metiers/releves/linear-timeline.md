@@ -109,3 +109,11 @@ Couleurs des icônes de projet relevées : #26b5ce, #5e6ad2, #f0bf00, #4cb782, #
 1. En-tête de carte « Projects » + « New project » ; sous lui l'onglet « All projects » et trois boutons ronds à droite.
 2. Frise annuelle : mois en petites capitales grises, repères de jours tous les 14 jours, pastille violette « OCT 29 » et fine ligne verticale violette qui descend sur toute la hauteur.
 3. À gauche, 9 lignes de projets (icône colorée, nom, 4 petites icônes santé/statut/priorité/lead) ; à droite, barres blanches fines (24px) à bord gris et coins de 6px, nom posé au-dessus de chaque barre.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : la colonne gauche de 320 est conservée. Lignes 771×72. Le reste est une frise défilante (≈ 452 px visibles). « Today » et « Year ▾ » restent à droite.
+- **768** : tiroir. Colonne gauche 320, frise ≈ 448 px. Les projets finis avant la fenêtre affichent « ← Aug 28 ».
+- Captures : `captures/linear-projects/1024-sombre-timeline.png`, `768-sombre-timeline.png`.

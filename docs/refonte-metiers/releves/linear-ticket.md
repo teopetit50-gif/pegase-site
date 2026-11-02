@@ -74,3 +74,11 @@ main @244,8 1188×856
 ## Captures (`captures/linear-ticket/`)
 
 `1440-sombre-OME-19.png`, `1440-clair-OME-19.png`, `1440-clair-OME-31-proprietes.png` (volet de propriétés rempli), `390-sombre-OME-19.png`, `390-clair-OME-19.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible. **La colonne Properties (375 px à droite) disparaît** : les propriétés passent sous le titre en rangée de pilules (Triage · Priority · Assignee · Project · Labels · cycle). Titre pleine largeur (x 259, 743 de large, une ligne). Fil d'Ariane tronqué « Initiativ… › OME-19 … ». Accept / Decline / Duplicate / Snooze réduits à des icônes 28×28.
+- **768** : tiroir. Même disposition à une colonne, titre à x 14, 740 de large.
+- Captures : `1024-sombre-OME-19.png`, `768-sombre-OME-19.png`.

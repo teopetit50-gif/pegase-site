@@ -143,3 +143,10 @@ rgb(235, 87, 87) rouge, rgb(247, 200, 193) rose, rgb(38, 181, 206) bleu-vert, rg
 ## Captures (`captures/linear-my-issues/`)
 
 `1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible, main 772, ligne 771×36. Les puces (étiquettes, projet, cycle, échéance) restent mais se compriment et se tronquent **sans « … »** (le texte est coupé par la puce suivante : « Séc », « Local comme »). Date de création conservée à droite.
+- **768** : tiroir, ligne 768×36. La date de création disparaît, les puces restent tronquées. Groupe « Other active 2 » visible en bas.

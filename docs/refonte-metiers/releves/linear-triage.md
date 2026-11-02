@@ -117,3 +117,10 @@ Tickets en Triage créés par moi (équipe OME, aucune action Accept/Decline fai
 ## Captures (`captures/linear-triage/`)
 
 `1440-sombre-liste-vide-a-droite.png`, `1440-sombre-element-ouvert.png`, `1440-clair-element-ouvert.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible, main 772. Liste de 386 à gauche (lignes 386×59) + moitié droite 385×723 (état vide ou élément ouvert). La liste passe de 400 à 386, la moitié droite de 787 à 385.
+- **768** : tiroir. Liste pleine largeur (lignes 768×59), plus de moitié droite : ouvrir un élément remplace la liste.

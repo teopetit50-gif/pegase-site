@@ -113,3 +113,11 @@ Puces : 12px/500 · r 9999px · p 0 8px · m 0 4px 4px 0 · h 24 · actives bg l
 - `1440-clair-display-options.png` (menu ouvert)
 - `1440-clair-timeline.png`, `1440-sombre-timeline.png`
 - `390-sombre-liste.png`, `390-clair-liste.png`, `390-sombre-timeline.png`
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024×768** : barre latérale visible (244), main @244,8 772×724 r 12. Ligne 771×48, grille `[indent] 8 [title] 364 [health] 50 [priority] 68 [lead] 48 [targetDate] 100 [issues] 49 [status] 28 [end-padding] 8`. La case à cocher disparaît. La santé passe en icône seule (50). Le % et la courbe de statut disparaissent (icône seule, 28).
+- **768×1024** : barre latérale en tiroir (bouton ◧), main 0,0 768×988 r 0. Même grille, [title] 361. « New project » devient « + ». Barre Agent de 36 px en bas.
+- Captures : `1024-sombre-liste.png`, `768-sombre-liste.png`.

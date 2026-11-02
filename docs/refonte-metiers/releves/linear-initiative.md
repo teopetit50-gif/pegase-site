@@ -217,3 +217,10 @@ Repère de lecture à gauche (table des matières) : 3 traits horizontaux à x 2
 - `1440-sombre-volet-details.png`, `1440-clair-volet-details.png`
 - `1440-sombre-onglet-projects-volet.png`, `1440-sombre-onglet-activity-volet.png`
 - `390-sombre.png`, `390-clair.png`, `390-clair-volet-details.png`
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible, main 772×724. La colonne de contenu est recentrée (contenu ≈ 550 px), carte « Latest update » ≈ 560 px. Pas de colonne de détails (le volet s'ouvre par ⌘ I).
+- **768** : tiroir, main 768×988, contenu pleine largeur (marges 42). Bloc Projects : colonnes Name / Health / Priority / Lead / Status ; Target date est masquée.

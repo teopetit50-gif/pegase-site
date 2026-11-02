@@ -50,3 +50,10 @@ main @244,8 1188×856
 ## Captures (`captures/linear-board/`)
 
 `1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible. Colonnes de 322 (+ 26 d'écart, et non 348) à partir de x 262 : deux colonnes et demie visibles, défilement horizontal. Puces tronquées « Urgent cha… ».
+- **768** : tiroir. Colonnes de 322 à partir de x 17, deux colonnes visibles. « New issue » devient cloche + « + ». Une carte de sous-ticket affiche le parent sur sa 1re ligne (« OME-59 › Facture fournisseur reçue sans c… »).

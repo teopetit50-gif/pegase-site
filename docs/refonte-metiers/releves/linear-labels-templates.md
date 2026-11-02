@@ -160,3 +160,16 @@ Contenu : « Avenant à chiffrer », « Confirmation J-2 d'un passage… ».
 ## Captures (`captures/linear-labels-templates/`)
 
 `1440-sombre-labels.png`, `1440-clair-labels.png`, `1440-sombre-templates-survol.png`, `1440-clair-templates-survol.png`, `390-sombre-labels.png`, `390-clair-labels.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+**Labels**
+- **1024** : barre latérale visible (pas de tiroir), main @244,8 772×724 r 12. Grille `[indent] 60 [title] 240 [description] 227 [lastAppliedAt] 102 [createdAt] 82 [menu] 28 [end-padding] 32` : les colonnes « Used in » et « Issues » sont masquées. Cases à cocher visibles à gauche (x ≈ 265).
+- **768** : tiroir (-346, 330 de large), main 768×988 r 0, barre « ◧ ‹ Settings » de 44 en haut. Grille `[indent] 60 [title] 464 [lastAppliedAt] 102 [createdAt] 82 [menu] 28 [end-padding] 32` : Description est masquée aussi. Boutons du haut : Menu, New group, New label.
+
+**Templates**
+- **1024** : main 772×724 r 12. Colonne centrée, carte de liste de 640 (x 310), lignes de 64. La colonne ne rétrécit pas (640 fixe, marges 66).
+- **768** : tiroir, barre « Settings ». Carte de 640 à x 64 ; même hauteur de ligne.
+- Captures : `1024-sombre-labels.png`, `768-sombre-labels.png`, `1024-sombre-templates.png`, `768-sombre-templates.png`.

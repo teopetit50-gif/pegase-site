@@ -165,3 +165,10 @@ Aucune intégration branchée (consigne) : la page est relevée telle quelle —
 ## Captures (`captures/linear-integrations/`)
 
 `1440-sombre-haut.png` (carrousel), `1440-sombre-catalogue.png`, `1440-clair-catalogue.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible, main 772×724 r 12. Colonne de 640 à x 310, carrousel Essentials de 640. Catalogue en grille de 3 × 202,66 px, gap 16 : identique à 1440.
+- **768** : tiroir, barre « Settings ». Colonne de 640 à x 64. Catalogue toujours en 3 colonnes de 202,66 ; le passage à 1 colonne ne se fait qu'à 390 (voir plus haut).

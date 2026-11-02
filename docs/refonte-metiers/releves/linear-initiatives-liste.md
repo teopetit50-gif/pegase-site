@@ -151,3 +151,10 @@ Le bouton n'ouvre pas de fenêtre : une **ligne d'édition** s'insère en tête 
 ## Captures (`captures/linear-initiatives-liste/`)
 
 `1440-sombre.png`, `1440-clair.png`, `390-sombre.png`, `390-clair.png`.
+
+## Paliers 1024 et 768 (complément du 01/11/2026)
+
+Mesures au style calculé, thème sombre. Captures `1024-sombre*.png` (rendue 800×600, échelle 0,78) et `768-sombre*.png` (rendue 800×1066, échelle 1,04).
+
+- **1024** : barre latérale visible, main 772. Ligne 969×57, plus large que la carte : le tableau défile horizontalement. Grille `[indent] 8 [title] 380 [status] 100 [priority] 56 [owner] 50 [targetDate] 100 [projects] 59 [initiativeHealth] 52 [projectsHealth] 98 [end-padding] 12`. La case à cocher disparaît. Le titre passe de 572 à 380 (résumé tronqué « … »).
+- **768** : tiroir. Ligne 853×57 : la colonne Target disparaît, owner passe à 40. Défilement horizontal (« Active Projects » coupé à droite).
