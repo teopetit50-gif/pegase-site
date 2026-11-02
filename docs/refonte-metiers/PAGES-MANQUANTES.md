@@ -83,3 +83,5 @@ sous-page de la fiche d’un dossier (dernière ligne du tableau).
 | Tavaro Pilotage | Pages TAVARO | `claude/pages-tavaro` | en ligne 02/11 |
 | Tiroma Avant les rendez-vous | Pages TIROMA | `claude/pages-tiroma` | faite 02/11 (Linear Triage, superposition 6,3/255 ; `REFERENCES-TIROMA.md`) |
 | Sections ci-dessus | sessions Refonte <MÉTIER> | leurs branches | après les boutons |
+
+Sections (02/11, 21 h 40) : DALIRO fait — météo de la semaine (vue d'ensemble), tâches de commande et de livraison (À faire), lien « Journal des validations » (Réglages). « Affecter ce remplaçant » reste un manque : aucune porte n'écrit l'intervenant d'un passage (migration à décider par Teo).
