@@ -335,7 +335,7 @@ function Faits({ complet, cle }: { complet: DossierComplet; cle: CryptoKey | nul
 
   const titreLecture = choisie ? libelleType(choisie.type) : "Dossier de faits";
   const titre = `Dossier de faits · ${titreLecture.toLowerCase()} : ${clair?.intitule ?? "intitulé chiffré"}${clair?.numero_rg ? ` (RG ${clair.numero_rg})` : ""}`;
-  const doc = r ? htmlAnalyse(r, nomPiece, clair, dateCourte(choisie?.finie_le ?? choisie?.demandee_le ?? null)) : "";
+  const doc = r ? htmlAnalyse(r, nomPiece, clair, (choisie ? dateCourte(choisie.finie_le ?? choisie.demandee_le) : "")) : "";
   const exporterWord = () => {
     if (!r) return;
     const url = URL.createObjectURL(new Blob(["﻿" + doc], { type: "application/msword" }));
@@ -353,7 +353,7 @@ function Faits({ complet, cle }: { complet: DossierComplet; cle: CryptoKey | nul
     const md = f === "markdown";
     const lignes = [
       md ? `# ${titre}` : titre,
-      `Dossier ${clair?.reference ?? ""} · ${libelleType(r.type)} lue le ${dateCourte(choisie?.finie_le ?? null)} · ${r.pieces_lues ?? 0} pièce(s), ${constats.length} constat(s)`,
+      `Dossier ${clair?.reference ?? ""} · ${libelleType(r.type)} lue le ${(choisie?.finie_le ? dateCourte(choisie.finie_le) : "")} · ${r.pieces_lues ?? 0} pièce(s), ${constats.length} constat(s)`,
       "",
       r.resume ?? "",
       "",

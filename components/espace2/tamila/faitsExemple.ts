@@ -128,7 +128,7 @@ export function faitsExemple(dossier: string): { lectures: portes.Analyse[]; res
       },
     ],
   };
-  const base = { sans_source: 0, pieces_non_lues: [], motif: null, resultat_chiffre: null } as const;
+  const base = { sans_source: 0, pieces_non_lues: [] as string[], motif: null, resultat_chiffre: null };
   const lectures: portes.Analyse[] = [
     { ...base, id: `${dossier}-an4`, type: "tamila.prelecture", statut: "en_cours", comptes: null, pieces: [ord, concl, decl], pieces_lues: null, cout_eur: null, demandee_le: heures(0.2), finie_le: null },
     { ...base, id: `${dossier}-an3`, type: "tamila.pieces_citees", statut: "finie", comptes: { info: 3, attention: 0, critique: 0 }, pieces: [concl], pieces_lues: 1, cout_eur: 0.18, demandee_le: heures(1), finie_le: heures(0.5) },
