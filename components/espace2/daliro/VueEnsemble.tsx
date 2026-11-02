@@ -278,7 +278,6 @@ export default function VueEnsemble() {
                         <Link href={`${BASE}/chantiers/${encodeURIComponent(c.id)}`} className="dal-h-rangee">
                           <DalIcone nom="Page" />
                           <span className="dal-h-rangee-texte">{c.nom}</span>
-                          <DalIcone nom="Fleche" className="dal-h-fleche" />
                         </Link>
                       </li>
                     ))}

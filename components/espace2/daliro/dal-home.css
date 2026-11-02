@@ -135,14 +135,6 @@
   line-height: 16px;
   color: var(--dal-t2);
 }
-.v2 .dal .dal-h-fleche {
-  flex: none;
-  width: 14px;
-  height: 14px;
-  margin-left: -2px;
-  color: var(--dal-t3);
-}
-
 /* ——— colonne droite ——— */
 .v2 .dal .dal-h-droite {
   grid-column: 3;
