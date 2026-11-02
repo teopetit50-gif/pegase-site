@@ -138,6 +138,8 @@ html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, va
   grid-template-columns: [indent] 0 [checkbox] 18px [title] minmax(0, 1fr) [health] 50px [priority] 68px [lead] 48px [targetDate] 100px [status] 68px [end-padding] 12px;
 }
 .v2 .lor-in-entetes { height: 32px; }
+/* en étroit, un libellé plus large que sa colonne (« Avancement » sur 28) est rogné dans sa cellule : la page ne défile pas de côté */
+.v2 .lor-in-entetes > span { min-width: 0; overflow: hidden; }
 .v2 .lor-in-tri { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px; border-radius: 9999px; font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; }
 .v2 .lor-in-tri svg { width: 12px; height: 12px; fill: var(--lor-t2); opacity: 0; }
 .v2 .lor-in-tri[data-trie] svg { opacity: 1; }
