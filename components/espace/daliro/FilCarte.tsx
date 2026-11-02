@@ -86,9 +86,23 @@ function Media({ piece, source, auteur, recu }: { piece: PieceMessage; source: S
   return <a href={url} target="_blank" rel="noreferrer">{piece.nom}</a>;
 }
 
-type Props = { tableau: Tableau; source: Source; relire: () => Promise<void> };
+/* 02/11/2026 — la fiche d'un chantier de l'espace 2 dessine le fil à sa façon (l'onglet Activity
+   d'une Initiative de Linear) : elle reçoit les messages et les gestes, la carte garde les portes,
+   l'exemple et les fenêtres */
+export type FilRendu = {
+  messages: MessageChantier[];
+  chargement: boolean;
+  envoi: boolean;
+  fait: string | null;
+  erreur: string | null;
+  ouvrirAvenant: (m: MessageChantier, objet?: string) => void;
+  ecarter: (m: MessageChantier) => void;
+  media: (piece: PieceMessage, auteur: string, recu: string) => React.ReactNode;
+  fenetres: React.ReactNode;
+};
+type Props = { tableau: Tableau; source: Source; relire: () => Promise<void>; rendu?: (f: FilRendu) => React.ReactNode };
 
-export default function FilCarte({ tableau, source, relire }: Props) {
+export default function FilCarte({ tableau, source, relire, rendu }: Props) {
   const c = tableau.chantier;
   const volet = useVolet();
   const [reel, setReel] = useState<MessageChantier[] | null>(null);
@@ -99,6 +113,7 @@ export default function FilCarte({ tableau, source, relire }: Props) {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
+  const [aEcarter, setAEcarter] = useState<MessageChantier | null>(null);
 
   const lire = useCallback(async () => {
     try {
@@ -169,8 +184,40 @@ export default function FilCarte({ tableau, source, relire }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {rendu ? (
+        <Dialog open={!!aEcarter} onOpenChange={(o) => !o && setAEcarter(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Écarter ce message du fil</DialogTitle>
+              <DialogDescription>Le message de {aEcarter?.de_nom ?? "l'expéditeur"} quitte le fil du chantier ; il reste au journal.</DialogDescription>
+            </DialogHeader>
+            <DialogBody>{erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</DialogBody>
+            <DialogFooter>
+              <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => { const m = aEcarter; setAEcarter(null); if (m) void ecarter(m); }}>{envoi ? <Loader variant="spin" /> : null} Écarter</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
     </>
   );
+
+  if (rendu) {
+    return (
+      <>
+        {rendu({
+          messages,
+          chargement,
+          envoi,
+          fait,
+          erreur: avenant ? null : erreur,
+          ouvrirAvenant: (m, o) => { setErreur(null); setObjet(o ?? m.texte ?? ""); setAvenant(m); },
+          ecarter: (m) => { setErreur(null); setAEcarter(m); },
+          media: (piece, auteur, recu) => <Media piece={piece} source={source} auteur={auteur} recu={recu} />,
+          fenetres,
+        })}
+      </>
+    );
+  }
 
 
   /* 30/10/2026 — dans la fiche de l'espace 2 : un message par ligne (qui, ce qu'il dit, ce que Daliro

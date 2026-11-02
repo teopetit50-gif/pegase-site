@@ -535,6 +535,92 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
   color: var(--dal-t3);
 }
 
+/* ——— l'onglet Activité (Activity) : colonne 813, mois, cartes de mise à jour, événements ———
+   Composeur absent (voir ActiviteChantier.tsx) : le premier mois prend sa place, à 44 de
+   l'en-tête ; écarts mesurés sur la capture 1440-sombre-onglet-activity-volet (échelle 0,556) :
+   48 entre deux blocs, titre du mois 18/500 sur 24, carte à 28 sous le titre. */
+.v2 .dal .dal-ini-activite {
+  display: flex;
+  flex-direction: column;
+  width: min(813px, 100%);
+  margin: 0 auto;
+  padding: 44px 0 40px;
+}
+.v2 .dal .dal-ini-mois {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.v2 .dal .dal-ini-mois + .dal-ini-mois {
+  margin-top: 48px;
+}
+.v2 .dal .dal-ini-mois-titre {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-ini-maj--fil {
+  margin: 0;
+  padding: 12px 16px 16px;
+}
+.v2 .dal .dal-ini-maj--fil .dal-ini-meta {
+  height: 16px;
+}
+.v2 .dal .dal-ini-maj--fil .dal-ini-texte {
+  margin-top: 16px;
+}
+.v2 .dal .dal-ini-maj--fil .dal-ini-texte + .dal-ini-texte {
+  margin-top: 8px;
+}
+.v2 .dal .dal-ini-texte--lu {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ini-canal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 10px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ini-canal[data-teinte="on"] {
+  color: var(--dal-sante-on);
+}
+.v2 .dal .dal-ini-canal[data-teinte="risk"] {
+  color: var(--dal-sante-risk);
+}
+.v2 .dal .dal-ini-demandes {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-ini-demande-etat {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ini-lien {
+  color: var(--dal-t1);
+  text-decoration: underline;
+  text-decoration-color: var(--dal-t4);
+  text-underline-offset: 2px;
+}
+.v2 .dal .dal-ini-medias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.v2 .dal .dal-ini-evenement--fil {
+  padding: 4px 16px;
+}
+.v2 .dal .dal-ini-evenement--fil svg {
+  color: var(--dal-t3);
+}
+
 /* ——— le volet de détails (⌘ I) ——— */
 .v2 .dal .dal-ini-volet {
   flex: none;

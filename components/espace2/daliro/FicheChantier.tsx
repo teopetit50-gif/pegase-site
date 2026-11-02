@@ -54,6 +54,7 @@ import { DalCarte, DalMenu } from "./DalCadre";
 import { DalIcone } from "./DalIcone";
 import "./dal-initiative.css";
 import { ApercuChantier, VoletChantier } from "./ApercuChantier";
+import { ActiviteChantier } from "./ActiviteChantier";
 
 const BASE = `${RACINE}/daliro`;
 
@@ -309,10 +310,16 @@ export default function FicheChantier({ id }: { id: string }) {
               <ChantierVue key={`gestes-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={[]} demande={demande} />
             </Habille>
           </div>
-          {onglet === "apercu" ? (
+          {onglet === "apercu" || onglet === "fil" ? (
             <div className="dal-ini-corps">
               <div className="dal-ini-zone">
-                <ApercuChantier t={t} c={chantierListe ?? t.chantier} ici={chemin} ouvrirVolet={() => setVoletChoisi(true)} demander={geste} />
+                {onglet === "apercu" ? (
+                  <ApercuChantier t={t} c={chantierListe ?? t.chantier} ici={chemin} ouvrirVolet={() => setVoletChoisi(true)} demander={geste} />
+                ) : (
+                  <div id="fil">
+                    <ActiviteChantier t={t} source={source} relire={relire} ici={chemin} />
+                  </div>
+                )}
               </div>
               {volet ? <VoletChantier t={t} c={chantierListe ?? t.chantier} ici={chemin} /> : null}
             </div>
