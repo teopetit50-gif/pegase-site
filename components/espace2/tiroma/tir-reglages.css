@@ -400,3 +400,15 @@ html[data-v2-theme="light"] .v2 .tir.tir-rg {
     height: 36px;
   }
 }
+
+/* ——— Journal des accès : recherche et export dans une rangée de la carte ——— */
+.v2 .tir-rg .tir-rg-rangee--outils {
+  gap: 12px;
+}
+.v2 .tir-rg .tir-rg-cherche {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .tir-rg .tir-rg-rangee--outils .tir-rg-bouton {
+  opacity: 1;
+}

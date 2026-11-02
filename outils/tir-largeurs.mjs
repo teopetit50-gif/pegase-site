@@ -2,7 +2,7 @@
 // Serveur `npx next dev -p 3100` lancé ; PLAYWRIGHT_MJS = chemin de playwright si besoin.
 const { chromium } = await import(process.env.PLAYWRIGHT_MJS ?? 'playwright');
 const b = await chromium.launch();
-for (const chemin of ['', '/creneaux', '/creneaux?creneau=9101', '/fauteuils', '/plans', '/pilotage', '/reglages', '/reglages?section=general']) {
+for (const chemin of ['/reglages?section=acces', '/reglages?section=journal', '', '/creneaux', '/creneaux?creneau=9101', '/fauteuils', '/plans', '/pilotage', '/reglages', '/reglages?section=general']) {
   for (const w of [390, 768, 1024, 1440, 1700]) {
     const p = await (await b.newContext({ viewport: { width: w, height: 900 } })).newPage();
     await p.goto('http://localhost:3100/espace2/tiroma' + chemin, { waitUntil: 'networkidle', timeout: 180000 });
