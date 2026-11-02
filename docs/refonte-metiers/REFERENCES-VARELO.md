@@ -38,6 +38,7 @@ Inventaire (contrat de la refonte) : `docs/refonte-metiers/varelo.md`. Préfixe 
 | Opérations | `/espace2/varelo/operations` (`?reception=`, `?echeance=`) | Linear, Board | `linear-board.md` | `operations-*` | fait |
 | Groupe | `/espace2/varelo/groupe` (`?societe=`, `?depot=`) | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `groupe-*` | fait |
 | Sources et structure | `/espace2/varelo/sources` (`?societe=`, `?regles=1`) | Linear, Settings › Integrations (catalogue et page d'une intégration) | `linear-integrations.md` | `sources-*` | fait |
+| Finance | `/espace2/varelo/finance` (`?objet=`, `?depot=`) | Plain, Insights (Reporting et rapports) | `plain-insights.md` | `finance-*` | fait |
 
 ### Ce matin → Linear, accueil d'une équipe (`linear-home.md`)
 
@@ -152,3 +153,26 @@ capture à taille réelle de cette page. 390 : plus de carrousel, chaque section
 - Pas de barre latérale des réglages de Linear : la navigation de l'espace la remplace.
 - « Débrancher » demande une confirmation ; « Installer Varelo » aussi (consigne commune).
 - Les interrupteurs des exports attendus sont en lecture seule : les jeux se choisissent dans la fenêtre « Brancher ».
+
+### Finance → Plain, Insights (`plain-insights.md`)
+
+Contenu : blocs 13 (encours, 13.a-13.e), 15 (réciproques, 15.a, export G34), 6 (caisses, 6.a) ; gestes G15, G29 à
+G34. Repères `grp_ref_objets` (E2 : client au-dessus du plafond) → `?objet=<id>`, `grp_encours_depots` → `?depot=<id>`.
+
+Preuves 1440 (carte Plain à 353) : sombre 9,1/255, clair 8,7/255. Barre de titre de 86 (titre 24/400 et quatre boutons
+bordés de 30), filet, titres de section collants avec chevron, grille de trois cartes à 42 d'écart (texte calé sur le
+titre de section), titre de carte 12/550 et info, valeur 24/400 et suffixe, graphiques de 155 (grillage vertical, barres
+de 15 à rayon 2 teintées selon la valeur, moyenne pointillée et son étiquette, axe à droite), répartitions (barre de 8)
+et rapports en grille (lignes de 42) tombent sur la référence. 390 : titre seul, boutons sur deux lignes à droite, une
+colonne de cartes, comme Plain.
+
+Écarts restants, expliqués :
+- Boutons de la barre : Filtre (société), Déposer (balance âgée, ventes de caisse), Nature (clients ou fournisseurs),
+  Export (CSV des réciproques), dans les briques Filter, Group by, Timeframe et Granularity.
+- Pas de bouton « Ask Agent » sur les cartes ni de pied « Customers helped » : rien de tel dans le métier.
+- Le rapport (tableau) est posé sous ses répartitions dans la même page : chez Plain il est une page voisine
+  (Accounts, Tiers…) ; ici chaque section a le sien, avec les gestes en bout de ligne (Plafond, Proposer, Justifier).
+- Graphiques dessinés en SVG, une barre par société, objet ou magasin (pas de série par jour : les données sont des
+  soldes, pas des flux quotidiens).
+- Badges : « > plafond », « N jours » / « à jour », état des réciproques, en rouge ou vert comme les badges
+  d'évolution de Plain.

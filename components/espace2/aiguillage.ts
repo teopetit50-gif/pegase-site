@@ -58,7 +58,6 @@ const PREFIXES: [string, string][] = [
 const tavaro = objet("tavaro");
 const tamila = objet("tamila");
 const tiroma = objet("tiroma");
-const varelo = objet("varelo");
 
 /* objet_type → page. Une ligne par objet_type écrit par un moteur. */
 export const REGLES: Record<string, Regle> = {
@@ -118,9 +117,10 @@ export const REGLES: Record<string, Regle> = {
   grp_balances_depots: (id) => `${RACINE}/varelo/groupe?depot=${q(id)}`,
   /* 02/11/2026 — VARELO redécoupé : chaque objet mène à la sous-page qui le montre */
   grp_contrats: (id) => `${RACINE}/varelo/contrats?contrat=${q(id)}`,
-  grp_encours_depots: varelo("grp_encours_depots"),
+  grp_encours_depots: (id) => `${RACINE}/varelo/finance?depot=${q(id)}`,
   grp_receptions: (id) => `${RACINE}/varelo/operations?reception=${q(id)}`,
-  grp_ref_objets: varelo("grp_ref_objets"),
+  /* E2 : un client du groupe au-dessus de son plafond d'encours */
+  grp_ref_objets: (id) => `${RACINE}/varelo/finance?objet=${q(id)}`,
   grp_reportings_echeances: (id) => `${RACINE}/varelo/operations?echeance=${q(id)}`,
   /* objet_id porte un entite_id (b1_08) */
   grp_societes: (id) => `${RACINE}/varelo/groupe?societe=${q(id)}`,
