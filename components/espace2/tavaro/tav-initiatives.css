@@ -290,3 +290,22 @@
     display: none;
   }
 }
+
+/* 768 et moins : les quatre onglets défilent dans leur rangée, les ronds restent à droite (pas de défilement de la page) */
+@media (max-width: 768px) {
+  .v2 .tav .tav-n-ligne2 {
+    min-width: 0;
+  }
+  .v2 .tav .tav-n-onglets {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v2 .tav .tav-n-onglets::-webkit-scrollbar {
+    display: none;
+  }
+  .v2 .tav .tav-n-ligne2 > .tav-pousse {
+    display: none;
+  }
+}

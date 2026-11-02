@@ -368,3 +368,13 @@ html[data-v2-theme="light"] .v2 .tav {
     visibility: hidden;
   }
 }
+
+/* une cellule masquée aux petites largeurs ne pousse pas la page de côté */
+.v2 .tav .tav-g-entete,
+.v2 .tav .tav-g-ligne {
+  overflow: hidden;
+}
+.v2 .tav .tav-g-entete > *,
+.v2 .tav .tav-g-ligne > * {
+  min-width: 0;
+}
