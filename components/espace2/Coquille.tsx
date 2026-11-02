@@ -23,7 +23,7 @@
 import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Network, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -36,7 +36,7 @@ import Palette from "./Palette";
 import Assistant from "./Assistant";
 import { PanneauAide, PanneauRetour, type TypeRetour } from "./Retours";
 import { useOuvertes } from "./Collection";
-import { MODULES, MODULES_PRINCIPAUX, RACINE, moduleDe, moduleMetier, porteeDe, titreDe } from "./modules";
+import { MODULES, MODULES_PRINCIPAUX, ONGLETS_RESEAU, RACINE, moduleDe, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
 import { useTheme } from "./theme";
@@ -575,7 +575,9 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       { titre: "Les modules", liens: modules.map((m) => ({ libelle: m.nom, href: `${RACINE}/formation/${m.cle}` })) },
     ],
   };
-  const toutes = [...sections, ...autres, formation, reglages];
+  /* 02/11/2026 — le Réseau Omega : les clients d'Omega entre eux (Fil, Membres, Messages, Opportunités), un groupe du rail sous les fiches */
+  const reseau: Section = { cle: "reseau", titre: "Réseau", sousTitre: "Entre clients Omega", icone: <Network {...R} />, href: `${RACINE}/reseau`, racines: [`${RACINE}/reseau`], groupes: [{ titre: "Réseau Omega", liens: ONGLETS_RESEAU }] };
+  const toutes = [...sections, reseau, ...autres, formation, reglages];
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
   const courante =
     toutes.find((s) => s.racines.some((r) => chemin === r || chemin.startsWith(`${r}/`))) ??
@@ -592,7 +594,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   }
   /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
   const railModules = sections.slice(3, 3 + modules.length);
-  const rail: Section[][] = [[sections[0]], sections.slice(1, 3), railModules, sections.slice(3 + modules.length)].filter((g) => g.length);
+  const rail: Section[][] = [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)].filter((g) => g.length);
   /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
      dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
      et parfois après le survol — le navigateur la pose et l'enlève à sa
