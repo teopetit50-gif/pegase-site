@@ -117,3 +117,21 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
   première tâche 177 (49), ID à 54 — ceux du relevé.
 - **Écarts restants** : piste des onglets à 14 du bord (mesurée sur l'onglet actif) au lieu des 24 du padding relevé ; en exemple, l'état
   de conformité des dix dossiers ajoutés est tiré de leur rang (vigilance un sur deux, une partie non contrôlée un sur trois).
+
+## Pilotage du cabinet — `/espace2/tamila/pilotage`
+
+- **Référence** : Plain, Insights › Reporting. **Relevé** : `plain-insights.md` (+ `plain-commun.md`). Captures `plain-insights/1440-reel-*.png`,
+  `1440-clair-1-overview.png` à `6`, `390-*-chargement.png` (à 390, Plain n'a montré que son état de chargement).
+- **Correspondance** : B13 (une fenêtre à cinq vues dans l'écran d'avant), calculé par `pilotage.ts` inchangé. Filter · Group by ·
+  Timeframe · Granularity → Filtre (un responsable) · Grouper par (responsable, matière, juridiction) · Période (7, 30, 60, 90 jours :
+  fenêtre des graphiques et seuil « sans diligence ») · Coût horaire (L8, gardé dans ce navigateur, `omega.tamila.cout_horaire`).
+  Sections : Overview → Vue d'ensemble (dossiers vivants en courbe, marge du cabinet, sans diligence) ; Support volume → Charge (temps
+  saisi par jour avec la moyenne en pointillés et le signal « Investigate this spike » → « Un jour chargé à regarder », échéances par jour ;
+  répartitions par personne et « Dossiers par … ») ; Marge par dossier (marge, taux réalisé, temps passé) ; Séries, diligence et pièces
+  attendues. Une ligne de répartition qui nomme un dossier mène à sa page (L5). Pied « Customers helped » → « Dossiers suivis » (compteur
+  à volets).
+- **Comparaisons** : `pilotage-1440-{sombre,clair}-{cote,diff,fusion}.png`, `pilotage-390-{sombre,clair}-cote.png`. Mesures : titre 24/30,
+  boutons 30 à y 32, zone à 86, titre de section à 111, première carte à 146 (titre 158, valeur 189, graphique 249) — ceux du relevé.
+- **Écarts restants** : graphiques en SVG dessinés ici aux couleurs et mesures relevées (barres 15 rx 2, #8a94ed / #4252e1 / #d2d6f8, grille
+  bord-2, moyenne pointillée) plutôt que Recharts ; pas de bouton « Ask Agent » sur les cartes (aucun agent dans Tamila) ; à 390, les
+  quatre boutons passent sur trois lignes (libellés plus longs) ; le deuxième titre de section tombe 6 px plus haut.

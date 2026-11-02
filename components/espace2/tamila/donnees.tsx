@@ -26,7 +26,7 @@ import { useSearchParams } from "next/navigation";
 import { useSource, type Source } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { Trousseau, chiffrer, dechiffrer, envelopper, exporterCle, genererCle, importerCle, memoriserPhrase, phraseMemorisee } from "@/components/espace/tamila/chiffrement";
-import { ATTENTES_OBJETS_EXEMPLE, DOSSIERS_EXEMPLE, EXEMPLE_CLIENT, MOI, PERSONNES_EXEMPLE, REGLAGES_EXEMPLE, REGLES_EXEMPLE, attentesExemple, expertisesExemple, honorairesExemple } from "@/components/espace/tamila/exemples";
+import { ATTENTES_OBJETS_EXEMPLE, DOSSIERS_EXEMPLE, EXEMPLE_CLIENT, MOI, PERSONNES_EXEMPLE, REGLAGES_EXEMPLE, REGLES_EXEMPLE, attentesExemple, conformiteExemple, expertisesExemple, honorairesExemple } from "@/components/espace/tamila/exemples";
 import { delaiCourt, joursAvant, type Moi } from "@/components/espace/tamila/regles";
 import { chargerCabinet, chargerDossier, chargerPilotage, cleDossier, coffre, creerDossier, installer, type Cabinet, type EtatCoffre } from "@/components/espace/tamila/portes";
 import { DOSSIERS_PLUS, honorairesPlus } from "./exemplesPlus";
@@ -562,7 +562,10 @@ export default function DonneesTamila({ children }: { children: React.ReactNode 
       honoraires,
       avis: local.flatMap((c) => c.avis.map((a) => ({ dossier_id: a.dossier_id, date_avis: a.date_avis }))),
       pieces: local.flatMap((c) => c.pieces.map((p) => ({ objet_id: p.objet_id, recue_le: p.recue_le, type_piece: p.type_piece }))),
-      vigilances: [],
+      vigilances: local.flatMap((c) => {
+        const v = DOSSIERS_EXEMPLE.some((x) => x.dossier.id === c.dossier.id) ? conformiteExemple(c.dossier.id).vigilance : null;
+        return v ? [v] : [];
+      }),
       expertises: local.flatMap((c) => expertisesExemple(c.dossier.id)),
       attentes: local.flatMap((c) => attentesExemple(c.dossier.id)),
     };

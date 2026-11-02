@@ -1,0 +1,358 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — « Insights › Reporting » de Plain (02/11/2026)
+   Relevé : releves/plain-insights.md (+ plain-commun.md), captures
+   1440-reel-*.png, 1440-clair-1-overview.png … 6, 390-*-chargement.png.
+
+   Barre de titre 86 : h1 Whyte 24/400/32 à 24,30 ; à droite (gap 8, h 30)
+                  boutons bordés (fond fond-1, bord 1 bord-1, r 6, p 6 12,
+                  gap 8 ; libellé 12/550/16, valeur 12/400/16 t2, chevron 14).
+   Zone           filet haut 1 bord-2, p 0 12 120 ; sections gap 12 ; titre
+                  de section collant (p 24 0 12 ; 14/550/20 + chevron 14).
+   Cartes         grille de 3 (2 pour la deuxième rangée), gap 42 ; carte p 12,
+                  r 8, sans fond ; titre 12/550/16 t2 + info 14 icone-2 ;
+                  valeur Whyte 24/400/36 + suffixe 14/400/20 t2 (gap 4).
+   Graphiques     grille verticale 1 bord-2 ; barres 15 (rx 2) #8a94ed, pic
+                  #4252e1, faibles #d2d6f8 ; moyenne en pointillés (3) #cdcddb
+                  (sombre #49474e) + étiquette 10/400/12 ; axes 12/400 t2.
+   Répartition    icône 18 + nom 12/400/16 sur une barre de 8 (r 2) ; valeur
+                  12/550/16 à droite.
+   Pied           « All time » 12/400 + h3 Whyte 20/400/28 + compteur à volets.
+   390            boutons sur deux lignes ; grille d'une colonne.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tamp .tamp-rapport {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .tamp .tamp-rtete {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  height: 86px;
+  padding: 22px 24px 0;
+}
+.v2 .tamp .tamp-rtete h1 {
+  margin-top: 8px;
+  font-size: 24px;
+  line-height: 32px;
+}
+.v2 .tamp .tamp-rboutons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+.v2 .tamp .tamp-borde {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 6px 12px;
+  border: 1px solid var(--p-bord-1);
+  border-radius: 6px;
+  background: var(--p-fond-1);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-1);
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-borde > svg {
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-borde span {
+  font-weight: 400;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-borde input {
+  width: 64px;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid var(--p-bord-2);
+  border-radius: 4px;
+  background: var(--p-fond-2);
+  font: inherit;
+  font-weight: 400;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-rzone {
+  flex: 1;
+  min-height: 0;
+  padding: 0 12px 120px;
+  overflow: auto;
+  border-top: 1px solid var(--p-bord-2);
+}
+.v2 .tamp .tamp-rsection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+.v2 .tamp .tamp-rsection-titre {
+  position: sticky;
+  top: -12px;
+  z-index: 2;
+  /* titre de section : texte à 113 dans la carte, première carte à 146 (relevé) */
+  padding: 24px 0 3px;
+  background: var(--p-carte);
+}
+.v2 .tamp .tamp-rsection-titre button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-rsection-titre svg {
+  color: var(--p-texte-2);
+  transition: transform 0.15s;
+}
+.v2 .tamp .tamp-rsection-titre button[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.v2 .tamp .tamp-rgrille {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 42px;
+}
+.v2 .tamp .tamp-rgrille--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.v2 .tamp .tamp-rcarte {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 8px;
+}
+.v2 .tamp .tamp-rcarte-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  margin-bottom: -19px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-rcarte-tete > svg {
+  color: var(--p-icone-2);
+}
+.v2 .tamp .tamp-rcarte-tete .tamp-signal {
+  margin-left: auto;
+}
+.v2 .tamp .tamp-rvaleur {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--v2-titre);
+  font-size: 24px;
+  line-height: 36px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-rvaleur span {
+  font-family: var(--font-v2-inter), "Inter", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--p-vert-fond, transparent);
+  font-size: 12px;
+  font-weight: 475;
+  color: var(--p-vert-texte-1);
+}
+.v2 .tamp .tamp-signal svg {
+  color: var(--p-vert-icone-1);
+}
+.v2 .tamp .tamp-graphe {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.v2 .tamp .tamp-graphe text {
+  font-family: var(--font-v2-inter), "Inter", sans-serif;
+  fill: var(--p-texte-2);
+}
+.v2 .tamp .tamp-grille-trait {
+  stroke: var(--p-bord-2);
+  stroke-width: 1;
+}
+.v2 .tamp .tamp-moyenne {
+  stroke: var(--p-moyenne);
+  stroke-dasharray: 3;
+}
+.v2 .tamp .tamp-moyenne-etiquette rect {
+  fill: var(--p-fond-1);
+  stroke: var(--p-bord-2);
+}
+.v2 .tamp .tamp-vide-graphe {
+  fill: var(--p-texte-2);
+}
+.v2 .tamp .tamp-repartition {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.v2 .tamp .tamp-rep-ligne {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 4px 12px;
+  color: inherit;
+}
+.v2 .tamp .tamp-rep-nom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 64px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-rep-nom > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-rep-nom svg {
+  flex: none;
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-rep-barre {
+  grid-column: 1;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--p-remplir-1);
+  overflow: hidden;
+}
+.v2 .tamp .tamp-rep-barre span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+.v2 .tamp .tamp-rep-valeur {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-1);
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+.v2 .tamp .tamp-badge[data-ton="rouge"] {
+  background: var(--p-rouge-fond-2);
+  color: var(--p-rouge-texte-1);
+}
+.v2 .tamp .tamp-badge[data-ton="ambre"] {
+  background: var(--p-remplir-1);
+  color: var(--p-jaune-icone-1);
+}
+.v2 .tamp .tamp-encadre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 120px;
+  padding: 16px;
+  border: 1px solid var(--p-bord-1);
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-encadre b {
+  font-weight: 550;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-rpied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  font-size: 12px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-rpied h3 {
+  font-family: var(--v2-titre);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-volets {
+  display: flex;
+  gap: 4px;
+}
+.v2 .tamp .tamp-volets span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 35px;
+  border: 1px solid var(--p-bord-1);
+  border-radius: 4px;
+  background: linear-gradient(var(--p-remplir-1) 50%, var(--p-fond-1) 50%);
+  font-family: var(--v2-titre);
+  font-size: 20px;
+  line-height: 20px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp {
+  --p-moyenne: #49474e;
+  --p-barre: #8a94ed;
+  --p-barre-pic: #4252e1;
+  --p-barre-faible: #d2d6f8;
+}
+html[data-v2-theme="light"] .v2 .tamp {
+  --p-moyenne: #cdcddb;
+}
+
+@media (max-width: 1024px) {
+  .v2 .tamp .tamp-rgrille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .v2 .tamp .tamp-rtete {
+    flex-direction: column;
+    height: auto;
+    padding-bottom: 12px;
+  }
+  .v2 .tamp .tamp-rgrille,
+  .v2 .tamp .tamp-rgrille--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
