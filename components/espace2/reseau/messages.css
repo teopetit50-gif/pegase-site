@@ -1,544 +1,512 @@
 /* ══════════════════════════════════════════════════════════════════════
-   Réseau Omega › Messages (02/11/2026)
+   Réseau Omega › Messages (reprise du 02/11/2026)
 
-   La COMPOSITION de Slack, relevée sur slack.com (animations de
-   /features/channels) et sur la mise en page connue de l'application :
-     · colonne des conversations de 260 px, lignes de 28 px, sections
-       repliables, non-lu en gras, mentions en pastille ;
-     · en-tête de conversation d'une ligne (48 px, la hauteur de la barre
-       du haut d'Espace 2) ;
-     · messages en gouttière : avatar de 36 px, 8 px d'écart, 8 px / 20 px
-       de marge, messages rapprochés sans en-tête, barre d'actions au
-       survol, séparateurs de jour collés en haut, filet « Nouveaux » ;
-     · fil en colonne de 380 px à droite (au-dessus de 1440 px) ;
-     · composeur à filet en bas, ligne d'outils sous le texte.
-   L'HABIT est entièrement celui d'Espace 2 : jetons --v2-*, police, rayons
-   de 6 / 8 px, filets sans ombre portée (seuls les menus flottants gardent
-   l'ombre de .v2-popover). Le thème sombre vient des jetons.
+   Le contenu vient de Zulip (voir messages-messagerie.tsx), l'habillage
+   des pages des cinq moteurs : le kit components/espace2/lin/ (lin.css,
+   jetons --lin-*, sombre et clair). Ce fichier ne pose que ce que le kit
+   n'a pas : la hauteur de la messagerie, les sujets sous un salon, le
+   tableau des conversations récentes, les lignes de message et leurs
+   réactions. Les couleurs viennent toutes des jetons du kit.
+
+   Mesures reprises du kit : têtes de 44, lignes de boîte de 55, rond de
+   32, survol en retrait de 8 et rayon 8, pastilles de 24 à 28, tableau
+   à en-tête de 32 et lignes de 48, fiche ouverte au gabarit Linear
+   (colonne de 591, titre 24/600, colonne de droite de 342).
    ══════════════════════════════════════════════════════════════════════ */
 
-/* ——— la disposition ——— */
-.v2 .ms {
-  --ms-liste: 260px;
-  --ms-fil: 380px;
-  display: grid;
-  grid-template-columns: var(--ms-liste) minmax(0, 1fr);
+/* ——— la messagerie tient la fenêtre : seules ses colonnes défilent ——— */
+.v2 .lin.ms {
   height: calc(100dvh - var(--ms-haut, 48px));
   min-height: 420px;
   overflow: hidden;
-  background: var(--v2-bg-200);
 }
-@media (min-width: 1440px) {
-  .v2 .ms[data-fil] {
-    grid-template-columns: var(--ms-liste) minmax(0, 1fr) var(--ms-fil);
-  }
+.v2 .ms .ms-boite {
+  flex: 1;
+  flex-direction: row;
+  min-height: 0;
 }
-/* entre 1024 et 1439 px, le fil prend la place de la conversation */
+.v2 .ms .ms-liste {
+  width: 360px;
+  min-height: 0;
+  border-right: 0.5px solid var(--lin-trait);
+  border-bottom: 0;
+}
+.v2 .ms .ms-detail {
+  min-height: 0;
+  container-type: inline-size;
+  container-name: ms-detail;
+}
 @media (min-width: 1024px) and (max-width: 1439px) {
-  .v2 .ms[data-fil] > .ms-conv {
-    display: none;
+  .v2 .ms .ms-liste {
+    width: 300px;
   }
 }
-/* sous 1024 px : la liste, puis la conversation (ou son fil) en plein écran */
+.v2 .ms .ms-retour {
+  display: none;
+}
+/* sous 1024 px : la liste, puis la vue ouverte en plein écran */
 @media (max-width: 1023px) {
-  .v2 .ms {
-    grid-template-columns: minmax(0, 1fr);
+  .v2 .ms .ms-liste {
+    width: auto;
+    flex: 1;
+    border-right: 0;
   }
-  .v2 .ms[data-ouverte] > .ms-liste,
-  .v2 .ms:not([data-ouverte]) > :is(.ms-conv, .ms-fil),
-  .v2 .ms[data-fil] > .ms-conv {
+  .v2 .ms[data-ouverte] .ms-liste,
+  .v2 .ms:not([data-ouverte]) .ms-detail {
     display: none;
+  }
+  .v2 .ms .ms-retour {
+    display: inline-grid;
+    margin-left: -6px;
   }
 }
 
+/* l'état vide de la base réelle */
+.v2 .ms .ms-ferme {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
 /* ——— la colonne des conversations ——— */
-.v2 .ms-liste {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  border-right: 1px solid var(--v2-a-400);
-  background: var(--v2-bg-200);
-}
-@media (max-width: 1023px) {
-  .v2 .ms-liste {
-    border-right: 0;
-  }
-}
-.v2 .ms-liste-tete {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex: none;
-  height: 48px;
-  padding: 0 8px 0 16px;
-  border-bottom: 1px solid var(--v2-a-400);
-}
-.v2 .ms-liste-tete h2 {
-  margin: 0;
-  font-family: var(--v2-titre);
-  font-size: 16px;
-  line-height: 24px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
 .v2 .ms-liste-defile {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 8px 8px 16px;
+  padding-bottom: 16px;
 }
-.v2 .ms-groupe {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 1px;
+.v2 .ms .ms-groupe {
+  padding: 4px 0;
 }
-.v2 .ms-groupe--seul {
-  margin-bottom: 8px;
+.v2 .ms .ms-ligne {
+  cursor: pointer;
 }
-.v2 .ms-section + .ms-section {
-  margin-top: 12px;
+.v2 .ms .ms-ligne .lin-boite-l1 {
+  color: var(--lin-texte);
+}
+.v2 .ms .ms-ligne:not([data-non-lu]) .lin-boite-l1 {
+  font-weight: 450;
+}
+.v2 .ms .ms-ligne[data-non-lu] .lin-boite-l1 {
+  color: var(--lin-titre);
+}
+.v2 .ms .lin-boite-droite {
+  align-self: center;
+}
+.v2 .ms-section {
+  margin-top: 6px;
 }
 .v2 .ms-section-titre {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
+  width: calc(100% - 16px);
   height: 28px;
-  padding: 0 8px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--v2-gray-900);
-  font: inherit;
-  font-size: 13px;
+  margin: 0 8px;
+  padding: 0 8px 0 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-second);
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
 }
 .v2 .ms-section-titre:hover {
-  background: var(--v2-a-100);
-  color: var(--v2-gray-1000);
+  background: var(--lin-survol);
+  color: var(--lin-texte);
 }
 .v2 .ms-section-chevron {
-  flex: none;
   transition: transform 0.15s;
 }
 .v2 .ms-section-titre[aria-expanded="false"] .ms-section-chevron {
   transform: rotate(-90deg);
 }
-.v2 .ms-ligne {
+
+/* les sujets du salon ouvert, sous lui (Zulip : la liste des sujets d'un canal) */
+.v2 .ms-sujets {
+  position: relative;
+  margin: 0 0 6px;
+  padding: 0;
+  list-style: none;
+}
+.v2 .ms-sujets::before {
+  content: "";
+  position: absolute;
+  left: 33px;
+  top: 0;
+  bottom: 8px;
+  width: 1px;
+  background: var(--lin-separateur);
+}
+.v2 .ms-sujet {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 6px;
-  color: var(--v2-gray-900);
-  font-size: 14px;
-  letter-spacing: -0.01em;
-  transition: background 0.15s, color 0.15s;
+  height: 30px;
+  margin: 0 8px;
+  padding: 0 10px 0 53px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-second);
 }
-.v2 .ms-ligne:hover {
-  background: var(--v2-a-100);
-  color: var(--v2-gray-1000);
+.v2 .ms-sujet:hover {
+  background: var(--lin-survol);
+  color: var(--lin-texte);
 }
-.v2 .ms-ligne[data-non-lu] {
-  color: var(--v2-gray-1000);
-  font-weight: 600;
-}
-.v2 .ms-ligne[aria-current="page"] {
-  background: var(--v2-gray-100);
-  color: var(--v2-gray-1000);
+.v2 .ms-sujet[data-non-lu] {
+  color: var(--lin-texte);
   font-weight: 500;
 }
-.v2 .ms-ligne-icone {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  width: 20px;
-  height: 20px;
-  color: var(--v2-gray-900);
+.v2 .ms-sujet[aria-current="page"] {
+  background: var(--lin-survol);
+  color: var(--lin-titre);
+  font-weight: 500;
 }
-.v2 .ms-ligne-nom {
+.v2 .ms-sujet:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+}
+.v2 .ms-sujet-titre {
   flex: 1;
   min-width: 0;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.v2 .ms-pastille {
+
+/* le nombre de non-lus ; bleu plein pour une mention de vous ou un message privé */
+.v2 .ms-compte {
   display: inline-grid;
   place-items: center;
-  flex: none;
+  flex-shrink: 0;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;
-  border-radius: 999px;
-  background: var(--v2-blue-700);
-  color: #fff;
+  border-radius: 9999px;
+  background: var(--lin-pastille-active);
+  color: var(--lin-texte);
   font-size: 11px;
-  line-height: 1;
   font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .ms-compte[data-mention] {
+  background: var(--lin-graph-bleu);
+  color: #fff;
 }
 
-/* ——— les avatars (rendus aussi dans les menus, hors de .ms) ——— */
-.ms-avatar {
-  --ms-taille: 36px;
+/* le champ « Filtrer » de la colonne */
+.v2 .ms-filtre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  margin: 8px 12px 0;
+  padding: 0 3px 0 10px;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-champ);
+  color: var(--lin-second);
+}
+.v2 .ms-filtre input,
+.v2 .ms-cherche input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--lin-titre);
+}
+.v2 .ms-filtre input::placeholder,
+.v2 .ms-cherche input::placeholder {
+  color: var(--lin-second);
+}
+.v2 .ms-filtre:focus-within,
+.v2 .ms-cherche:focus-within {
+  border-color: var(--lin-fait);
+}
+
+/* ——— les avatars : ronds, aux couleurs du kit (rendus aussi dans les menus) ——— */
+.v2 .ms-avatar {
+  --ms-taille: 32px;
   position: relative;
   display: inline-grid;
   place-items: center;
-  flex: none;
+  flex-shrink: 0;
   width: var(--ms-taille);
   height: var(--ms-taille);
-  border-radius: 6px;
-  font-family: var(--v2-sans);
-  font-size: 13px;
-  line-height: 1;
+  border-radius: 50%;
+  background: var(--ms-teinte, var(--lin-avatar));
+  color: #fff;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0;
+  line-height: 1;
   user-select: none;
-  background: var(--v2-gray-300);
-  color: var(--v2-gray-1000);
 }
-.ms-avatar[data-taille="16"] { --ms-taille: 16px; font-size: 8px; border-radius: 6px; }
-.ms-avatar[data-taille="20"] { --ms-taille: 20px; font-size: 9px; }
-.ms-avatar[data-taille="24"] { --ms-taille: 24px; font-size: 10px; }
-.ms-avatar[data-taille="72"] { --ms-taille: 72px; font-size: 24px; border-radius: 8px; }
-.ms-avatar[data-teinte="bleu"] { background: var(--v2-blue-200); color: var(--v2-blue-900); }
-.ms-avatar[data-teinte="vert"] { background: var(--v2-green-200); color: var(--v2-green-900); }
-.ms-avatar[data-teinte="ambre"] { background: var(--v2-amber-200); color: var(--v2-amber-900); }
-.ms-avatar[data-teinte="rouge"] { background: var(--v2-red-200); color: var(--v2-red-900); }
-.ms-avatar[data-teinte="vous"] { background: var(--v2-gray-1000); color: var(--v2-bg-100); }
+.v2 .ms-avatar[data-taille="18"] { --ms-taille: 18px; font-size: 8px; }
+.v2 .ms-avatar[data-taille="24"] { --ms-taille: 24px; font-size: 10px; }
+.v2 .ms-avatar[data-taille="40"] { --ms-taille: 40px; font-size: 15px; }
+.v2 .ms-avatar[data-vous] {
+  background: var(--lin-titre);
+  color: var(--lin-fond);
+}
+/* un salon, une vue : l'icône dans un rond teinté, comme l'avatar d'une ligne de boîte */
+.v2 .ms-avatar--salon,
+.v2 .ms-avatar--vue {
+  background: color-mix(in srgb, var(--ms-teinte, var(--lin-second)) 15%, transparent);
+  color: var(--ms-teinte, var(--lin-texte));
+}
+.v2 .ms-avatar--vue {
+  --ms-teinte: var(--lin-graph-bleu);
+}
+.v2 .ms-avatar--salon svg,
+.v2 .ms-avatar--vue svg {
+  width: 55%;
+  height: 55%;
+}
 
-/* la présence : un rond plein en ligne, un anneau creux absent (comme Slack) */
-.ms-presence {
+/* la présence : rond plein en ligne, anneau creux absent */
+.v2 .ms-presence {
   position: absolute;
-  right: -3px;
-  bottom: -3px;
+  right: -2px;
+  bottom: -2px;
   width: 10px;
   height: 10px;
-  border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--ms-fond-presence, var(--v2-bg-200));
-  background: var(--ms-fond-presence, var(--v2-bg-200));
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--lin-fond);
+  background: var(--lin-fond);
 }
-.ms-presence::after {
+.v2 .ms-presence::after,
+.v2 .ms-point-presence {
   content: "";
   position: absolute;
   inset: 1px;
-  border-radius: 999px;
-  border: 2px solid var(--v2-gray-600);
+  border-radius: 50%;
+  border: 2px solid var(--lin-second);
 }
-.ms-presence[data-etat="en-ligne"]::after {
-  border-color: var(--v2-green-700);
-  background: var(--v2-green-700);
+.v2 .ms-presence[data-etat="en-ligne"]::after,
+.v2 .ms-point-presence[data-etat="en-ligne"] {
+  border-color: var(--lin-vert);
+  background: var(--lin-vert);
 }
-.ms-presence--seule {
-  position: relative;
-  right: auto;
-  bottom: auto;
-  flex: none;
-  box-shadow: none;
-  background: none;
+.v2 .ms-avatar[data-taille="18"] .ms-presence {
+  width: 7px;
+  height: 7px;
+  right: -1px;
+  bottom: -1px;
+  box-shadow: 0 0 0 1.5px var(--lin-fond);
 }
-.ms-avatar[data-taille="20"] .ms-presence,
-.ms-avatar[data-taille="24"] .ms-presence {
-  width: 8px;
-  height: 8px;
-  right: -2px;
-  bottom: -2px;
-}
-.ms-avatar[data-taille="20"] .ms-presence::after,
-.ms-avatar[data-taille="24"] .ms-presence::after {
+.v2 .ms-avatar[data-taille="18"] .ms-presence::after {
   inset: 0;
-  border-width: 2px;
+  border-width: 1.5px;
 }
-.v2-popover .ms-presence,
-.v2-jetons .ms-presence {
-  --ms-fond-presence: var(--v2-bg-eleve, var(--v2-bg-100));
+.v2 .lin-menu .ms-presence {
+  box-shadow: 0 0 0 1.5px var(--lin-menu);
+  background: var(--lin-menu);
+}
+.v2 .ms-point-presence {
+  position: relative;
+  inset: auto;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
 }
 
-/* ——— la conversation ——— */
-.v2 .ms-conv,
-.v2 .ms-fil {
-  --ms-fond-presence: var(--v2-bg-100);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  background: var(--v2-bg-100);
+/* ——— la vue ouverte ——— */
+.v2 .ms-detail > .lin-tete {
+  gap: 4px;
 }
-.v2 .ms-fil {
-  border-left: 1px solid var(--v2-a-400);
-}
-@media (max-width: 1439px) {
-  .v2 .ms-fil {
-    border-left: 0;
-  }
-}
-.v2 .ms-conv-tete {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-  height: 48px;
-  padding: 0 12px 0 20px;
-  border-bottom: 1px solid var(--v2-a-400);
-}
-.v2 .ms-retour {
-  display: none;
-  margin-left: -8px;
-}
-@media (max-width: 1023px) {
-  .v2 .ms-retour {
-    display: inline-flex;
-  }
-  .v2 .ms-conv-tete {
-    padding: 0 8px 0 16px;
-  }
-}
-.v2 .ms-conv-titre {
-  flex: 1;
-  min-width: 0;
-}
-.v2 .ms-conv-titre--prive {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.v2 .ms-conv-titre--prive > div {
-  min-width: 0;
-}
-.v2 .ms-conv-titre h2 {
-  display: flex;
+.v2 .ms-tete-ref {
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin: 0;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
   white-space: nowrap;
-  overflow: hidden;
 }
-.v2 .ms-conv-titre h2 > span,
-.v2 .ms-conv-titre h2 > a {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.v2 .ms-tete-ref svg {
+  width: 14px;
+  height: 14px;
 }
-.v2 .ms-conv-titre h2 > svg {
-  flex: none;
-  color: var(--v2-gray-900);
+.v2 a.ms-tete-ref:hover {
+  color: var(--lin-texte);
 }
-.v2 .ms-conv-titre h2 a:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+.v2 .ms-tete-ref + .lin-fil-sep {
+  margin: 0 2px 0 6px;
 }
-.v2 .ms-conv-sujet {
-  margin: 0;
-  font-size: 12px;
-  line-height: 16px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.v2 .ms-tete-ref + .ms-tete-nom {
+  margin-left: 6px;
 }
-.v2 .ms-conv-droite {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
+.v2 .lin-fil-sep + .ms-tete-nom {
+  margin-left: 2px;
 }
-.v2 .ms-pile {
-  gap: 6px;
-  padding: 0 8px 0 4px;
+.v2 .ms .ms-tete-h {
+  margin: 0 6px 0 4px;
 }
-.v2 .ms-pile-avatars {
-  display: inline-flex;
+.v2 a.ms-tete-nom:hover {
+  color: var(--lin-titre);
 }
-.v2 .ms-pile-avatars .ms-avatar {
-  box-shadow: 0 0 0 2px var(--v2-bouton);
+.v2 .ms-qui {
+  height: 28px;
 }
-.v2 .ms-pile-avatars .ms-avatar + .ms-avatar {
-  margin-left: -6px;
-}
-.v2 .ms-pile .ms-pile-icone {
-  display: none;
-}
-@media (max-width: 767px) {
-  .v2 .ms-pile-avatars { display: none; }
-  .v2 .ms-pile .ms-pile-icone { display: block; }
-  .v2 .ms-pile { padding: 0 8px; }
-  .v2 .ms-masque-etroit { display: none; }
-}
-
-/* la zone qui défile : l'intro puis les messages, posés en bas quand il y en a peu */
 .v2 .ms-defile {
   flex: 1;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding-bottom: 12px;
 }
-.v2 .ms-defile > :first-child {
-  margin-top: auto;
+.v2 .ms .ms-ticket {
+  min-height: 100%;
 }
-.v2 .ms-attente {
-  height: 120px;
+.v2 .ms .ms-corps {
+  padding-top: 40px;
 }
-.v2 .ms-intro {
-  display: grid;
-  justify-items: start;
-  gap: 8px;
-  padding: 32px 20px 20px;
-}
-.v2 .ms-intro-icone {
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: var(--v2-gray-100);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  color: var(--v2-gray-1000);
-}
-.v2 .ms-intro h3 {
-  margin: 4px 0 0;
-  font-family: var(--v2-titre);
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-.v2 .ms-intro h3 a:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.v2 .ms-intro p {
-  margin: 0;
-  max-width: 560px;
-  font-size: 14px;
-  line-height: 21px;
-}
-
-/* les séparateurs : le jour (collé en haut), « Nouveaux », le compte du fil */
-.v2 .ms-jour {
+.v2 .ms .ms-cote {
   position: sticky;
   top: 0;
-  z-index: 2;
-  display: flex;
-  justify-content: center;
-  margin: 8px 0;
-  height: 28px;
+  padding-top: 56px;
 }
-.v2 .ms-jour::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 1px solid var(--v2-a-400);
+/* la colonne de droite n'apparaît que si la conversation garde sa largeur de lecture */
+@container ms-detail (max-width: 959px) {
+  .v2 .ms .ms-cote {
+    display: none;
+  }
+  .v2 .ms .ms-ticket {
+    padding: 0 24px 32px;
+  }
+  .v2 .ms .ms-corps {
+    max-width: 680px;
+  }
 }
-.v2 .ms-jour span {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: var(--v2-bg-100);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--v2-gray-1000);
+@container ms-detail (max-width: 560px) {
+  .v2 .ms .ms-ticket {
+    padding: 0 16px 24px;
+  }
+  .v2 .ms .ms-corps {
+    padding-top: 24px;
+  }
+  .v2 .ms .lin-ticket-titre {
+    font-size: 20px;
+    line-height: 28px;
+  }
 }
-.v2 .ms-nouveaux,
-.v2 .ms-fil-compte {
+.v2 .ms-titre-prive {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 4px 20px;
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 600;
-  color: var(--v2-blue-900);
+  gap: 12px;
 }
-.v2 .ms-nouveaux::before,
-.v2 .ms-fil-compte::after {
-  content: "";
-  flex: 1;
-  border-top: 1px solid var(--v2-blue-700);
+.v2 .ms-titre-prive a:hover,
+.v2 a.ms-lien:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
-.v2 .ms-fil-compte {
-  margin: 8px 20px;
+.v2 .ms .lin-ticket-desc {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--lin-second);
+}
+.v2 a.ms-lien {
+  color: var(--lin-texte);
   font-weight: 500;
-  color: var(--v2-gray-900);
 }
-.v2 .ms-fil-compte::after {
-  border-top-color: var(--v2-a-400);
+.v2 .ms-attente {
+  height: 160px;
+}
+.v2 .ms-pilule-sujet span:last-child {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* un message */
+/* les sujets d'un salon (les sous-éléments d'un ticket Linear) */
+.v2 .ms-sujets-salon .lin-ticket-sous-ligne {
+  cursor: pointer;
+}
+.v2 .ms-sujets-salon .lin-ticket-sous-ligne:not([data-non-lu]) .lin-ticket-sous-nom {
+  font-weight: 450;
+}
+.v2 .ms-sans-point {
+  width: 8px;
+  flex-shrink: 0;
+}
+
+/* ——— les messages (Zulip : avatar, nom, heure, texte ; les suivants d'un même auteur sans en-tête) ——— */
+.v2 .ms-messages {
+  margin-top: 6px;
+}
+.v2 .ms-jour {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-titre);
+}
+.v2 .ms-jour::after,
+.v2 .ms-nouveaux::before {
+  content: "";
+  flex: 1;
+  border-top: 0.5px solid var(--lin-separateur);
+}
+.v2 .ms-messages > .ms-jour:first-child {
+  margin-top: 4px;
+}
+.v2 .ms-nouveaux {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  color: var(--lin-graph-bleu);
+}
+.v2 .ms-nouveaux::before {
+  border-top-color: var(--lin-graph-bleu);
+}
 .v2 .ms-message {
   position: relative;
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  column-gap: 8px;
-  padding: 8px 20px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: 12px;
+  margin: 0 -8px;
+  padding: 8px;
+  border-radius: 8px;
   transition: background 0.1s;
 }
 .v2 .ms-message[data-suite] {
-  padding-top: 2px;
-  padding-bottom: 2px;
+  padding-top: 0;
 }
 .v2 .ms-message:hover,
 .v2 .ms-message:focus-within {
-  background: var(--v2-a-100);
+  background: var(--lin-survol);
 }
 .v2 .ms-message[data-mention] {
-  background: color-mix(in srgb, var(--v2-blue-700) 7%, transparent);
-  box-shadow: inset 2px 0 0 var(--v2-blue-700);
-}
-.v2 .ms-message[data-fil-ouvert] {
-  background: var(--v2-a-200);
-}
-.v2 .ms-gouttiere {
-  padding-top: 2px;
+  background: color-mix(in srgb, var(--lin-graph-bleu) 9%, transparent);
+  box-shadow: inset 2px 0 0 var(--lin-graph-bleu);
 }
 .v2 .ms-avatar-lien {
   display: inline-flex;
-  border-radius: 6px;
+  border-radius: 50%;
 }
-.v2 .ms-heure-suite {
-  display: block;
-  padding-top: 1px;
-  font-size: 11px;
-  line-height: 20px;
-  text-align: right;
-  color: var(--v2-gray-900);
-  font-variant-numeric: tabular-nums;
-  opacity: 0;
-}
-.v2 .ms-message:hover .ms-heure-suite,
-.v2 .ms-message:focus-within .ms-heure-suite {
-  opacity: 1;
-}
-.v2 .ms-tete {
+.v2 .ms-message-tete {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0 8px;
 }
 .v2 .ms-auteur {
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--v2-gray-1000);
+  line-height: 18px;
+  color: var(--lin-titre);
 }
 .v2 a.ms-auteur:hover {
   text-decoration: underline;
@@ -546,322 +514,337 @@
 }
 .v2 .ms-heure {
   font-size: 12px;
-  line-height: 16px;
-  color: var(--v2-gray-900);
+  font-weight: 450;
+  color: var(--lin-second);
   font-variant-numeric: tabular-nums;
 }
 .v2 .ms-texte {
-  margin: 0;
+  margin: 2px 0 0;
   font-size: 14px;
-  line-height: 22px;
+  font-weight: 400;
+  line-height: 21px;
+  color: var(--lin-texte);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  color: var(--v2-gray-1000);
 }
 .v2 .ms-mention {
-  padding: 0 2px;
+  padding: 0 3px;
   border-radius: 6px;
-  background: var(--v2-blue-100);
-  color: var(--v2-blue-900);
+  background: color-mix(in srgb, var(--lin-graph-bleu) 16%, transparent);
+  color: var(--lin-titre);
   font-weight: 500;
 }
 .v2 a.ms-mention:hover {
-  background: var(--v2-blue-200);
-}
-.v2 .ms-mention[data-vous] {
-  background: var(--v2-blue-200);
+  background: color-mix(in srgb, var(--lin-graph-bleu) 26%, transparent);
 }
 
-/* les réactions */
+/* les réactions, en pastilles comme celles des cartes du kit */
 .v2 .ms-reactions {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 .v2 .ms-reaction {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   height: 24px;
   padding: 0 8px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--v2-gray-100);
-  box-shadow: 0 0 0 1px var(--v2-a-400);
-  color: var(--v2-gray-1000);
-  font: inherit;
+  border-radius: 9999px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-composeur);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 450;
+  color: var(--lin-second);
   cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
 }
 .v2 .ms-reaction:hover {
-  box-shadow: 0 0 0 1px var(--v2-a-600);
+  color: var(--lin-texte);
+  border-color: var(--lin-second);
 }
 .v2 .ms-reaction[aria-pressed="true"] {
-  background: var(--v2-blue-100);
-  box-shadow: 0 0 0 1px var(--v2-blue-700);
-  color: var(--v2-blue-900);
+  border-color: var(--lin-graph-bleu);
+  background: color-mix(in srgb, var(--lin-graph-bleu) 14%, transparent);
+  color: var(--lin-titre);
+}
+.v2 .ms-reaction:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: 1px;
 }
 
-/* le résumé d'un fil, sous le message */
-.v2 .ms-fil-resume {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  max-width: 600px;
-  min-height: 32px;
-  margin: 4px 0 0 -4px;
-  padding: 4px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  font: inherit;
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s;
-}
-.v2 .ms-fil-resume:hover {
-  background: var(--v2-bg-100);
-  box-shadow: 0 0 0 1px var(--v2-a-500);
-}
-.v2 .ms-fil-avatars {
-  display: inline-flex;
-  gap: 4px;
-  flex: none;
-}
-.v2 .ms-fil-nombre {
-  flex: none;
-  font-weight: 600;
-  color: var(--v2-blue-900);
-}
-.v2 .ms-fil-derniere,
-.v2 .ms-fil-voir {
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.v2 .ms-fil-voir {
-  display: none;
-}
-@media (hover: hover) {
-  .v2 .ms-fil-resume:hover .ms-fil-derniere { display: none; }
-  .v2 .ms-fil-resume:hover .ms-fil-voir { display: inline; }
-}
-@media (max-width: 767px) {
-  .v2 .ms-fil-derniere { display: none; }
-}
-
-/* la barre d'actions, au survol ou au clavier */
+/* réagir : au survol ou au clavier, en haut à droite du message */
 .v2 .ms-actions {
   position: absolute;
-  top: -14px;
-  right: 20px;
-  z-index: 3;
+  top: -12px;
+  right: 8px;
+  z-index: 2;
   display: none;
   align-items: center;
-  gap: 2px;
   padding: 2px;
-  border-radius: 6px;
-  background: var(--v2-bg-eleve, var(--v2-bg-100));
-  box-shadow: 0 0 0 1px var(--v2-a-500);
+  border-radius: 9999px;
+  border: 0.5px solid var(--lin-menu-trait);
+  background: var(--lin-menu);
 }
 .v2 .ms-message:hover .ms-actions,
 .v2 .ms-message:focus-within .ms-actions {
   display: flex;
 }
 .v2 .ms-messages > .ms-message:first-child .ms-actions,
-.v2 .ms-jour + .ms-message .ms-actions {
-  top: 4px;
+.v2 .ms-jour + .ms-message .ms-actions,
+.v2 .ms-nouveaux + .ms-message .ms-actions {
+  top: 6px;
 }
-.v2 .ms-action {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--v2-gray-900);
-  font: inherit;
+.v2 .ms-actions-icone {
+  width: 14px;
+  height: 14px;
+  margin: 0 4px 0 8px;
+  color: var(--lin-second);
+}
+.v2 .ms .ms-action {
   font-size: 14px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
 }
-.v2 .ms-action:hover {
-  background: var(--v2-a-200);
-  color: var(--v2-gray-1000);
+@media (hover: none) {
+  .v2 .ms-actions {
+    position: static;
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 6px;
+  }
+  .v2 .ms-message:not(:focus-within) .ms-actions {
+    display: none;
+  }
 }
 
-/* ——— le composeur ——— */
-.v2 .ms-composeur {
+/* ——— le composeur (lin-ticket-composeur) ——— */
+.v2 .ms .ms-composeur {
   position: relative;
-  flex: none;
-  margin: 0 20px 20px;
-  border-radius: 8px;
-  background: var(--v2-bg-100);
-  box-shadow: 0 0 0 1px var(--v2-a-500);
-  transition: box-shadow 0.15s;
+  margin-top: 16px;
 }
-.v2 .ms-composeur:focus-within {
-  box-shadow: var(--v2-anneau);
-}
-.v2 .ms-composeur[data-compact] {
-  margin: 0 16px 16px;
-}
-@media (max-width: 767px) {
-  .v2 .ms-composeur {
-    margin: 0 12px 12px;
-  }
-  .v2 .ms-message {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  .v2 .ms-intro {
-    padding: 24px 16px 16px;
-  }
-}
-.v2 .ms-saisie {
+.v2 .ms-composeur-titre {
   display: block;
   width: 100%;
-  min-height: 42px;
-  max-height: 200px;
-  padding: 11px 12px 4px;
+  margin: 0 0 8px;
+  padding: 0 0 8px;
   border: 0;
+  border-bottom: 0.5px solid var(--lin-composeur-trait);
   outline: 0;
-  resize: none;
   background: transparent;
-  color: var(--v2-gray-1000);
   font: inherit;
-  font-size: 14px;
-  line-height: 22px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--lin-titre);
 }
-.v2 .ms-saisie:focus-visible {
+.v2 .ms-composeur-titre::placeholder {
+  color: var(--lin-second);
+  font-weight: 500;
+}
+.v2 .ms-composeur-titre:focus-visible {
   box-shadow: none;
+  border-bottom-color: var(--lin-fait);
 }
-.v2 .ms-saisie::placeholder {
-  color: var(--v2-gray-700);
-}
-.v2 .ms-outils {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 6px 6px;
+.v2 .ms .ms-composeur-pied {
+  justify-content: flex-start;
+  margin-left: -6px;
 }
 .v2 .ms-astuce {
   flex: 1;
   min-width: 0;
   font-size: 12px;
-  line-height: 16px;
+  color: var(--lin-second);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.v2 .ms-astuce strong {
-  font-weight: 500;
-  color: var(--v2-gray-1000);
 }
 @media (max-width: 767px), (hover: none) {
   .v2 .ms-astuce {
     visibility: hidden;
   }
 }
-.v2 .ms-envoyer.v2-btn[disabled] {
-  background: transparent;
-  box-shadow: none;
+.v2 .ms .lin-ticket-envoyer:not(:disabled) {
+  background: var(--lin-graph-bleu);
+  color: #fff;
 }
-.v2 .ms-suggestions {
-  position: absolute;
-  left: 0;
+.v2 .ms .ms-suggestions {
+  top: auto;
   bottom: calc(100% + 6px);
-  z-index: 5;
-  width: min(360px, 100%);
+  left: 0;
+  right: auto;
+  min-width: min(320px, 100%);
   margin: 0;
-  padding: 4px;
+  padding: 4px 0;
   list-style: none;
-  border-radius: 6px;
-  background: var(--v2-bg-eleve, var(--v2-bg-100));
-  box-shadow: var(--v2-ombre-menu);
 }
-.v2 .ms-suggestion {
-  --ms-fond-presence: var(--v2-bg-eleve, var(--v2-bg-100));
+.v2 .ms .ms-suggestion {
+  cursor: pointer;
+}
+.v2 .ms .ms-suggestion[aria-selected="true"] {
+  background: var(--lin-pastille-active);
+  color: var(--lin-titre);
+}
+
+/* ——— les menus (nouveau message privé, membres d'un salon) ——— */
+.v2 .ms-menu-membres {
+  max-height: min(420px, 60dvh);
+  overflow-y: auto;
+  padding-bottom: 2px;
+}
+.v2 .ms-menu-membres .lin-menu-option {
+  cursor: pointer;
+}
+.v2 .ms-menu-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .ms-menu-vous {
+  cursor: default;
+}
+.v2 .ms-menu-vous:hover {
+  background: transparent;
+}
+
+/* ——— « Conversations récentes » (Zulip : Recent conversations) ——— */
+.v2 .ms-outils {
+  margin: 8px 0 6px;
+}
+.v2 .ms-cherche {
   display: flex;
   align-items: center;
   gap: 8px;
   height: 32px;
-  padding: 0 8px;
-  border-radius: 6px;
-  font-size: 13px;
-  cursor: pointer;
+  margin: 0 14px 6px 16px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 0.5px solid var(--lin-trait);
+  background: var(--lin-champ);
+  color: var(--lin-second);
+}
+.v2 .ms-recentes {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 24px;
+}
+.v2 .ms-recentes-tete,
+.v2 .ms-recentes-ligne {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) 104px 64px;
+  column-gap: 6px;
+  align-items: center;
+  padding: 0 14px 0 16px;
+}
+.v2 .ms-recentes-tete {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  background: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .ms-recentes-tete > span {
+  padding-left: 6px;
   white-space: nowrap;
 }
-.v2 .ms-suggestion > span:nth-child(2) {
-  font-weight: 500;
-}
-.v2 .ms-suggestion > .v2-gris {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.v2 .ms-recentes-ligne {
+  position: relative;
+  height: 48px;
   font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  cursor: pointer;
 }
-.v2 .ms-suggestion[aria-selected="true"] {
-  background: var(--v2-a-200);
+.v2 .ms-recentes-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  border-radius: 8px;
 }
-
-/* ——— le menu des membres d'un salon (rendu hors de .ms) ——— */
-.v2-jetons.ms-pop-membres {
-  width: 300px;
+.v2 .ms-recentes-ligne:hover::before {
+  background: var(--lin-survol);
 }
-.ms-pop-membres .ms-pop-tete {
-  display: grid;
-  gap: 2px;
-  padding: 12px 14px 10px;
-  border-bottom: 1px solid var(--v2-a-400);
+.v2 .ms-recentes-ligne:focus-visible {
+  outline: 2px solid var(--lin-fait);
+  outline-offset: -2px;
+  border-radius: 8px;
 }
-.ms-pop-membres .ms-pop-tete small {
-  font-size: 12px;
-}
-.ms-pop-membres .ms-pop-liste {
-  list-style: none;
-  margin: 0;
-  padding: 4px;
-  max-height: min(360px, 60dvh);
-  overflow-y: auto;
-}
-.ms-pop-membres .ms-pop-ligne {
+.v2 .ms-recentes-ligne > * {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-height: 40px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  color: inherit;
-  text-decoration: none;
-  transition: background 0.15s;
-}
-.ms-pop-membres a.ms-pop-ligne:hover {
-  background: var(--v2-a-200);
-}
-.ms-pop-membres .ms-pop-nom {
-  flex: 1;
+  gap: 8px;
   min-width: 0;
-  display: grid;
-  font-size: 13px;
-  line-height: 18px;
-  font-weight: 500;
+  padding-left: 6px;
 }
-.ms-pop-membres .ms-pop-nom small {
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 400;
+.v2 .ms-col-salon {
+  color: var(--lin-second);
   white-space: nowrap;
+}
+.v2 .ms-col-salon > span:last-child,
+.v2 .ms-col-titre-texte {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.ms-pop-membres .v2-gris {
-  color: var(--v2-gray-900);
+.v2 .ms-col-titre {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--lin-texte);
+}
+.v2 .ms-recentes-ligne[data-non-lu] .ms-col-titre {
+  font-weight: 500;
+  color: var(--lin-titre);
+}
+.v2 .ms-col-heure {
+  justify-content: flex-end;
+  padding-right: 6px;
+  color: var(--lin-second);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.v2 .ms-recentes-tete .ms-col-heure {
+  display: flex;
+}
+.v2 .ms-pile {
+  display: inline-flex;
+  align-items: center;
+}
+.v2 .ms-pile .ms-avatar {
+  box-shadow: 0 0 0 1.5px var(--lin-fond);
+}
+.v2 .ms-pile .ms-avatar + .ms-avatar {
+  margin-left: -4px;
+}
+.v2 .ms-pile-plus {
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--lin-second);
+}
+@container ms-detail (max-width: 620px) {
+  .v2 .ms-recentes-tete,
+  .v2 .ms-recentes-ligne {
+    grid-template-columns: 96px minmax(0, 1fr) 56px;
+  }
+  .v2 .ms-recentes .ms-col-participants {
+    display: none;
+  }
+}
+@container ms-detail (max-width: 440px) {
+  .v2 .ms-recentes-tete,
+  .v2 .ms-recentes-ligne {
+    grid-template-columns: minmax(0, 1fr) 56px;
+  }
+  .v2 .ms-recentes-tete > :first-child {
+    display: none;
+  }
+  .v2 .ms-recentes .ms-col-salon {
+    display: none;
+  }
+  .v2 .ms-outils {
+    overflow-x: auto;
+  }
 }

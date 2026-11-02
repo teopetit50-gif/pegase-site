@@ -1,5 +1,7 @@
 -- ══════════════════════════════════════════════════════════════════════
--- Réseau Omega › Messages — le schéma visé (02/11/2026)
+-- Réseau Omega › Messages — le schéma visé (02/11/2026, revu à la reprise
+-- du soir : le modèle de Zulip, « salon › sujet », remplace les fils de
+-- réponse à la Slack)
 --
 -- RÉDIGÉ, PAS APPLIQUÉ. Aucune de ces tables n'existe en base : tant
 -- qu'elles n'y sont pas, la page /espace2/reseau/messages montre en
@@ -9,8 +11,10 @@
 -- Ce que la page attend de la base :
 --   · des salons (par île, par secteur, et « Alertes ») et des messages
 --     privés entre deux entreprises membres ;
---   · des messages, des réponses en fil (parent_id), des réactions, des
---     mentions (d'un membre, ou de l'organisation qui lit) ;
+--   · dans un salon, des SUJETS : chaque demande ouvre le sien, qu'on lit
+--     et qu'on reprend séparément (Zulip, « Introduction to topics ») ;
+--   · des messages, des réactions, des mentions (d'un membre, ou de
+--     l'organisation qui lit) ;
 --   · un « lu jusqu'à » par lecteur et par conversation, d'où les
 --     compteurs de non-lus et le filet « Nouveaux » ;
 --   · la présence (Supabase Realtime, voir la note en fin de fichier).
@@ -60,12 +64,22 @@ create table if not exists public.reseau_participants (
 );
 create index if not exists reseau_participants_client on public.reseau_participants (client_id);
 
--- ——— les messages, et les réponses en fil (parent_id) ———
+-- ——— les sujets d'un salon (Zulip : « topics ») ———
+create table if not exists public.reseau_sujets (
+  id uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null references public.reseau_conversations(id) on delete cascade,
+  titre text not null check (length(btrim(titre)) between 1 and 80),
+  ouvert_par uuid not null references public.clients(id) on delete cascade,
+  cree_le timestamptz not null default now(),
+  -- un même titre ne s'ouvre qu'une fois par salon : écrire dans un titre existant reprend le sujet
+  constraint reseau_sujets_titre unique (conversation_id, titre)
+);
+
+-- ——— les messages : dans un sujet d'un salon, ou dans un privé (sujet_id vide) ———
 create table if not exists public.reseau_messages (
   id uuid primary key default gen_random_uuid(),
   conversation_id uuid not null references public.reseau_conversations(id) on delete cascade,
-  -- un fil n'a qu'un niveau, comme chez Slack : une réponse ne reçoit pas de réponse
-  parent_id uuid references public.reseau_messages(id) on delete cascade,
+  sujet_id uuid references public.reseau_sujets(id) on delete cascade,
   client_id uuid not null references public.clients(id) on delete cascade,
   auteur_user uuid references auth.users(id) on delete set null,
   texte text not null check (length(btrim(texte)) between 1 and 4000),
@@ -75,8 +89,8 @@ create table if not exists public.reseau_messages (
   modifie_le timestamptz,
   supprime_le timestamptz
 );
-create index if not exists reseau_messages_fil on public.reseau_messages (conversation_id, cree_le) where parent_id is null;
-create index if not exists reseau_messages_reponses on public.reseau_messages (parent_id, cree_le) where parent_id is not null;
+create index if not exists reseau_messages_conv on public.reseau_messages (conversation_id, cree_le);
+create index if not exists reseau_messages_sujet on public.reseau_messages (sujet_id, cree_le) where sujet_id is not null;
 create index if not exists reseau_messages_mentions on public.reseau_messages using gin (mentions);
 
 -- ——— les réactions : une par entreprise, emoji et message ———
@@ -88,12 +102,15 @@ create table if not exists public.reseau_reactions (
   primary key (message_id, client_id, emoji)
 );
 
--- ——— « lu jusqu'à » : par UTILISATEUR (deux personnes d'une même entreprise ne lisent pas au même rythme) ———
+-- ——— « lu jusqu'à » : par UTILISATEUR (deux personnes d'une même entreprise ne
+-- lisent pas au même rythme), par sujet dans un salon, par conversation pour un privé ———
 create table if not exists public.reseau_lectures (
   conversation_id uuid not null references public.reseau_conversations(id) on delete cascade,
+  -- le sujet lu ; '00000000-0000-0000-0000-000000000000' pour un privé (une clé primaire n'admet pas de vide)
+  sujet_id uuid not null default '00000000-0000-0000-0000-000000000000',
   user_id uuid not null references auth.users(id) on delete cascade,
   lu_jusqu_a timestamptz not null default now(),
-  primary key (conversation_id, user_id)
+  primary key (conversation_id, sujet_id, user_id)
 );
 
 -- ══ Qui voit quoi (RLS) ═══════════════════════════════════════════════
@@ -120,6 +137,7 @@ revoke all on function private.reseau_mes_conversations() from public;
 
 alter table public.reseau_conversations enable row level security;
 alter table public.reseau_participants enable row level security;
+alter table public.reseau_sujets enable row level security;
 alter table public.reseau_messages enable row level security;
 alter table public.reseau_reactions enable row level security;
 alter table public.reseau_lectures enable row level security;
@@ -131,6 +149,10 @@ do $$ begin
   end if;
   if not exists (select 1 from pg_policies where tablename = 'reseau_participants' and policyname = 'reseau : les participants de mes salons') then
     create policy "reseau : les participants de mes salons" on public.reseau_participants
+      for select to authenticated using (conversation_id in (select private.reseau_mes_conversations()));
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'reseau_sujets' and policyname = 'reseau : les sujets de mes salons') then
+    create policy "reseau : les sujets de mes salons" on public.reseau_sujets
       for select to authenticated using (conversation_id in (select private.reseau_mes_conversations()));
   end if;
   if not exists (select 1 from pg_policies where tablename = 'reseau_messages' and policyname = 'reseau : les messages de mes conversations') then
@@ -147,33 +169,46 @@ do $$ begin
   end if;
 end $$;
 
-grant select on public.reseau_conversations, public.reseau_participants, public.reseau_messages, public.reseau_reactions, public.reseau_lectures to authenticated;
+grant select on public.reseau_conversations, public.reseau_participants, public.reseau_sujets, public.reseau_messages, public.reseau_reactions, public.reseau_lectures to authenticated;
 
 -- ══ Les portes d'écriture ═════════════════════════════════════════════
 
--- envoyer : un message, ou une réponse en fil ; p_client est l'entreprise
--- au nom de laquelle on écrit (l'une de mes_clients(), membre du réseau)
-create or replace function public.reseau_envoyer(p_conversation uuid, p_client uuid, p_texte text, p_parent uuid default null)
+-- envoyer : un message dans un sujet d'un salon (p_sujet), ou dans un privé
+-- (p_sujet vide) ; dans un salon, p_titre ouvre un nouveau sujet (ou reprend
+-- celui qui porte déjà ce titre). p_client est l'entreprise au nom de
+-- laquelle on écrit (l'une de mes_clients(), membre du réseau).
+create or replace function public.reseau_envoyer(p_conversation uuid, p_client uuid, p_texte text, p_sujet uuid default null, p_titre text default null)
 returns uuid
 language plpgsql security definer set search_path = '' as $$
-declare v_id uuid; v_mentions uuid[];
+declare v_id uuid; v_mentions uuid[]; v_genre text; v_sujet uuid := p_sujet;
 begin
   if p_client not in (select private.mes_clients()) then raise exception 'entreprise hors de votre compte'; end if;
   if p_client not in (select m.client_id from public.reseau_membres m) then raise exception 'entreprise hors du réseau'; end if;
   if p_conversation not in (select private.reseau_mes_conversations()) then raise exception 'conversation inconnue'; end if;
-  if p_parent is not null and not exists (
-    select 1 from public.reseau_messages m where m.id = p_parent and m.conversation_id = p_conversation and m.parent_id is null
-  ) then raise exception 'fil inconnu'; end if;
+  select c.genre into v_genre from public.reseau_conversations c where c.id = p_conversation;
+  if v_genre = 'salon' then
+    if v_sujet is null then
+      if coalesce(btrim(p_titre), '') = '' then raise exception 'un message de salon va dans un sujet'; end if;
+      insert into public.reseau_sujets (conversation_id, titre, ouvert_par) values (p_conversation, btrim(p_titre), p_client)
+      on conflict (conversation_id, titre) do nothing;
+      select t.id into v_sujet from public.reseau_sujets t where t.conversation_id = p_conversation and t.titre = btrim(p_titre);
+    elsif not exists (select 1 from public.reseau_sujets t where t.id = v_sujet and t.conversation_id = p_conversation) then
+      raise exception 'sujet inconnu';
+    end if;
+  elsif v_sujet is not null then
+    raise exception 'un privé n''a pas de sujet';
+  end if;
   -- les @slug du texte qui désignent un membre du réseau
   select coalesce(array_agg(distinct m.client_id), '{}') into v_mentions
   from regexp_matches(p_texte, '@([a-z0-9-]+)', 'g') as x(t)
   join public.reseau_membres m on m.slug = x.t[1];
-  insert into public.reseau_messages (conversation_id, parent_id, client_id, auteur_user, texte, mentions)
-  values (p_conversation, p_parent, p_client, auth.uid(), btrim(p_texte), v_mentions)
+  insert into public.reseau_messages (conversation_id, sujet_id, client_id, auteur_user, texte, mentions)
+  values (p_conversation, v_sujet, p_client, auth.uid(), btrim(p_texte), v_mentions)
   returning id into v_id;
   -- écrire, c'est avoir lu
-  insert into public.reseau_lectures (conversation_id, user_id, lu_jusqu_a) values (p_conversation, auth.uid(), now())
-  on conflict (conversation_id, user_id) do update set lu_jusqu_a = excluded.lu_jusqu_a;
+  insert into public.reseau_lectures (conversation_id, sujet_id, user_id, lu_jusqu_a)
+  values (p_conversation, coalesce(v_sujet, '00000000-0000-0000-0000-000000000000'), auth.uid(), now())
+  on conflict (conversation_id, sujet_id, user_id) do update set lu_jusqu_a = excluded.lu_jusqu_a;
   return v_id;
 end $$;
 
@@ -207,32 +242,39 @@ begin
   if not found then insert into public.reseau_reactions (message_id, client_id, emoji) values (p_message, p_client, p_emoji); end if;
 end $$;
 
--- marquer lu : à l'ouverture d'une conversation
-create or replace function public.reseau_marquer_lu(p_conversation uuid)
+-- marquer lu : à l'ouverture d'un sujet ou d'un privé (p_sujet vide)
+create or replace function public.reseau_marquer_lu(p_conversation uuid, p_sujet uuid default null)
 returns void
 language sql security definer set search_path = '' as $$
-  insert into public.reseau_lectures (conversation_id, user_id, lu_jusqu_a)
-  select p_conversation, auth.uid(), now() where p_conversation in (select private.reseau_mes_conversations())
-  on conflict (conversation_id, user_id) do update set lu_jusqu_a = excluded.lu_jusqu_a
+  insert into public.reseau_lectures (conversation_id, sujet_id, user_id, lu_jusqu_a)
+  select p_conversation, coalesce(p_sujet, '00000000-0000-0000-0000-000000000000'), auth.uid(), now()
+  where p_conversation in (select private.reseau_mes_conversations())
+  on conflict (conversation_id, sujet_id, user_id) do update set lu_jusqu_a = excluded.lu_jusqu_a
 $$;
 
--- la colonne des conversations : non-lus et mentions de MON entreprise, d'une requête
+-- la colonne et les « Conversations récentes » : une ligne par sujet de salon et
+-- par privé, avec les non-lus et les mentions de MON entreprise, d'une requête
 create or replace function public.reseau_conversations_liste(p_client uuid)
-returns table (conversation_id uuid, non_lus integer, mentions integer, dernier timestamptz)
+returns table (conversation_id uuid, sujet_id uuid, non_lus integer, mentions integer, dernier timestamptz, participants uuid[])
 language sql stable security definer set search_path = '' as $$
-  select c.id,
-         count(m.id) filter (where m.cree_le > coalesce(l.lu_jusqu_a, '-infinity') and m.client_id <> p_client)::int,
-         count(m.id) filter (where m.cree_le > coalesce(l.lu_jusqu_a, '-infinity') and p_client = any (m.mentions))::int,
-         max(m.cree_le)
-  from public.reseau_conversations c
-  left join public.reseau_lectures l on l.conversation_id = c.id and l.user_id = auth.uid()
-  left join public.reseau_messages m on m.conversation_id = c.id and m.parent_id is null and m.supprime_le is null
-  where c.id in (select private.reseau_mes_conversations()) and p_client in (select private.mes_clients())
-  group by c.id, l.lu_jusqu_a
+  select m.conversation_id, m.sujet_id,
+         count(*) filter (where m.cree_le > coalesce(l.lu_jusqu_a, '-infinity') and m.client_id <> p_client)::int,
+         count(*) filter (where m.cree_le > coalesce(l.lu_jusqu_a, '-infinity') and p_client = any (m.mentions))::int,
+         max(m.cree_le),
+         -- les dernières entreprises à avoir écrit, la plus récente en tête (colonne « Participants » de Zulip)
+         (array_agg(m.client_id order by m.cree_le desc))[1:4]
+  from public.reseau_messages m
+  left join public.reseau_lectures l
+    on l.conversation_id = m.conversation_id and l.user_id = auth.uid()
+   and l.sujet_id = coalesce(m.sujet_id, '00000000-0000-0000-0000-000000000000')
+  where m.conversation_id in (select private.reseau_mes_conversations())
+    and m.supprime_le is null
+    and p_client in (select private.mes_clients())
+  group by m.conversation_id, m.sujet_id, l.lu_jusqu_a
 $$;
 
-revoke all on function public.reseau_envoyer(uuid, uuid, text, uuid), public.reseau_ouvrir_prive(uuid, text), public.reseau_reagir(uuid, uuid, text), public.reseau_marquer_lu(uuid), public.reseau_conversations_liste(uuid) from public, anon;
-grant execute on function public.reseau_envoyer(uuid, uuid, text, uuid), public.reseau_ouvrir_prive(uuid, text), public.reseau_reagir(uuid, uuid, text), public.reseau_marquer_lu(uuid), public.reseau_conversations_liste(uuid) to authenticated;
+revoke all on function public.reseau_envoyer(uuid, uuid, text, uuid, text), public.reseau_ouvrir_prive(uuid, text), public.reseau_reagir(uuid, uuid, text), public.reseau_marquer_lu(uuid, uuid), public.reseau_conversations_liste(uuid) from public, anon;
+grant execute on function public.reseau_envoyer(uuid, uuid, text, uuid, text), public.reseau_ouvrir_prive(uuid, text), public.reseau_reagir(uuid, uuid, text), public.reseau_marquer_lu(uuid, uuid), public.reseau_conversations_liste(uuid) to authenticated;
 
 -- ——— les salons de départ (sans participants : on les rejoint à l'entrée dans le réseau) ———
 insert into public.reseau_conversations (genre, slug, nom, categorie, sujet) values

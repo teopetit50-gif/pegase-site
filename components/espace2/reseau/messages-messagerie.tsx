@@ -1,31 +1,53 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   Réseau Omega › Messages — le chat entre patrons (02/11/2026)
+   Réseau Omega › Messages — la messagerie entre patrons
+   (reprise du 02/11/2026, demande de Teo : plus de Slack)
 
-   Composition de Slack (la colonne des conversations, la conversation, le
-   fil à droite, le composeur en bas), habillée ENTIÈREMENT avec le système
-   d'Espace 2 : jetons --v2-*, v2-btn, menus de ui.tsx, police d'Espace 2,
-   rayons de 6 / 8 px, filets sans ombre. Le thème sombre suit.
+   RÉFÉRENCE (pages publiques, sans compte ni connexion) : Zulip.
+     · https://chat.zulip.org/ : la vue publique de la communauté Zulip,
+       sa vue d'arrivée « Recent conversations » et la barre de gauche
+       (vues, dossiers de canaux, canaux, sujets du canal ouvert) ;
+     · https://chat.zulip.org/#narrow/channel/101-design : un canal et un
+       de ses sujets (barre « canal › sujet », messages, composeur) ;
+     · https://zulip.com/help/direct-messages,
+       https://zulip.com/help/recent-conversations,
+       https://zulip.com/help/introduction-to-topics,
+       https://zulip.com/help/emoji-reactions,
+       https://zulip.com/help/mention-a-user-or-group,
+       https://zulip.com/help/status-and-availability : les messages
+       privés (cachés dans la vue publique), les filtres des conversations
+       récentes, les sujets, les réactions, les mentions, la présence.
+   Pourquoi Zulip : une conversation y est un SUJET dans un salon, ou un
+   message privé. Des salons par île et par secteur où chaque demande
+   ouvre son propre sujet, c'est exactement le besoin du réseau.
+
+   HABILLAGE : celui des pages des cinq moteurs, kit components/espace2/lin/
+   (lin.css, jetons --lin-*) : la boîte des moteurs (REPUT › Base de
+   connaissances, CASHD › Débiteurs et relances, FILED › Boîte de
+   réception) : liste de 400 à gauche, fiche ouverte à droite au gabarit
+   d'un ticket Linear. Sombre et clair par les jetons du kit.
 
    « Vous » est l'organisation connectée (OrganisationContexte, « CAMA »
    en données d'exemple), jamais un des 12 membres.
 
-   L'adresse porte la conversation : ?salon=<id> ou ?a=<slug> (message
-   privé entre vous et ce membre, ouvert même sans échange encore). Les
-   changements passent par history.pushState, que le routeur de Next
-   suit (useSearchParams) : le bouton « précédent » du navigateur marche.
-   Sous 1024 px, la liste d'abord, puis la conversation en plein écran,
-   avec un retour qui remet l'adresse à jour.
+   L'ADRESSE porte la vue : ?vue=recentes, ?salon=<id>,
+   ?salon=<id>&sujet=<id>, ?a=<slug> (message privé entre vous et ce
+   membre, ouvert même sans échange). Les changements passent par
+   history.pushState, que le routeur de Next suit (useSearchParams) :
+   « précédent » marche. Sans paramètre : les conversations récentes sur
+   un grand écran, la liste seule sous 1024 px ; sous 1024 px, une vue
+   ouverte prend tout l'écran, et sa flèche ramène à la liste en remettant
+   l'adresse à jour.
 
-   Exemple ou réel : en « Données d'exemple », les membres fictifs et les
-   conversations de messages-donnees.ts, et l'envoi reste dans l'état de la
-   page. En « Base réelle », un état vide honnête : le réseau n'a encore
-   aucune table (docs/reseau-espace2/schema-messages.sql).
+   EXEMPLE OU RÉEL : en « Données d'exemple », les conversations de
+   messages-donnees.ts, l'envoi en état local (messages-etat.ts). En
+   « Base réelle », l'état vide commun du réseau (reseau-vide.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
+import "../lin/lin.css";
 import "./messages.css";
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { MessagesSquare } from "lucide-react";
 import { useSource } from "@/components/espace/source";
@@ -34,9 +56,11 @@ import { useAujourdhui } from "../horloge";
 import { reseauEnExemple } from "./source";
 import { ReseauVide } from "./reseau-vide";
 import { MEMBRES } from "./membres";
-import { PRIVES, SALONS, VOUS, mentionsVous, type Message } from "./messages-donnees";
-import { heureMaintenant } from "./messages-commun";
-import ListeConversations from "./messages-liste";
+import { SALONS } from "./messages-donnees";
+import { RACINE_MESSAGES } from "./messages-commun";
+import { cleSujet, clePrive, useMessagerie } from "./messages-etat";
+import ListeConversations, { type Ici } from "./messages-liste";
+import Recentes from "./messages-recentes";
 import Conversation, { type Ouverte } from "./messages-conversation";
 
 const LARGE = "(min-width: 1024px)";
@@ -51,9 +75,13 @@ export default function Messagerie() {
   const { source } = useSource();
   if (!reseauEnExemple(source))
     return (
-      <div className="v2-page v2-page--etroite">
-        <h1 className="v2-sr">Messages du réseau</h1>
-        <ReseauVide icone={MessagesSquare} page="Les messages privés et les salons par île et par secteur y arriveront avec les premiers membres." />
+      <div className="lin ms">
+        <header className="lin-tete">
+          <h1 className="lin-tete-titre">Messages</h1>
+        </header>
+        <div className="ms-ferme">
+          <ReseauVide icone={MessagesSquare} page="Les messages privés et les salons par île et par secteur y arriveront avec les premiers membres." />
+        </div>
       </div>
     );
   return <MessagerieExemple />;
@@ -62,96 +90,73 @@ export default function Messagerie() {
 function MessagerieExemple() {
   const { nom: nomVous } = useOrganisation();
   const minuit = useAujourdhui();
-  const chemin = usePathname() ?? "/espace2/reseau/messages";
+  const chemin = usePathname() ?? RACINE_MESSAGES;
   const params = useSearchParams();
   const large = useSyncExternalStore(abonnerLarge, lireLarge, () => true);
+  const etat = useMessagerie();
 
-  /* ——— les conversations, et ce qui a été lu, envoyé, réagi pendant la visite ——— */
-  const [messages, setMessages] = useState<Record<string, Message[]>>(() => ({
-    ...Object.fromEntries(SALONS.map((s) => [`s:${s.id}`, s.messages])),
-    ...Object.fromEntries(PRIVES.map((p) => [`p:${p.slug}`, p.messages])),
-  }));
-  const [lus, setLus] = useState<Record<string, true>>({});
-  const [ajoutes, setAjoutes] = useState<string[]>([]);
-  const nonLusDepart = useMemo(() => new Map<string, number>([...SALONS.map((s) => [`s:${s.id}`, s.nonLus] as const), ...PRIVES.map((p) => [`p:${p.slug}`, p.nonLus] as const)]), []);
-  const etat = useCallback(
-    (cle: string) => {
-      if (lus[cle]) return { cle, nonLus: 0, mentions: 0 };
-      const n = nonLusDepart.get(cle) ?? 0;
-      return { cle, nonLus: n, mentions: mentionsVous(messages[cle] ?? [], n) };
-    },
-    [lus, nonLusDepart, messages],
-  );
-
-  /* ——— la conversation choisie, lue dans l'adresse ——— */
+  /* ——— la vue, lue dans l'adresse ——— */
   const a = params.get("a");
-  const salonParam = params.get("salon");
-  const choisie = a && MEMBRES.some((m) => m.slug === a) ? `p:${a}` : salonParam && SALONS.some((s) => s.id === salonParam) ? `s:${salonParam}` : null;
-  /* sur un grand écran, sans choix, le premier salon de l'île est ouvert ; sur un petit, la liste */
-  const active = choisie ?? (large ? "s:guadeloupe" : null);
+  const salonId = params.get("salon");
+  const sujetId = params.get("sujet");
+  const salon = SALONS.find((s) => s.id === salonId);
+  const sujets = salon ? etat.sujets(salon) : [];
+  const sujet = sujets.find((t) => t.id === sujetId);
+  const choisie: Ici =
+    a && MEMBRES.some((m) => m.slug === a)
+      ? { vue: "prive", slug: a }
+      : salon && sujet
+        ? { vue: "sujet", salon: salon.id, sujet: sujet.id }
+        : salon
+          ? { vue: "salon", salon: salon.id }
+          : params.get("vue") === "recentes"
+            ? { vue: "recentes" }
+            : { vue: null };
+  /* sur un grand écran, sans choix : les conversations récentes, comme la vue d'arrivée de Zulip */
+  const ici: Ici = choisie.vue === null && large ? { vue: "recentes" } : choisie;
+  const cle = ici.vue === "sujet" ? cleSujet(ici.salon!, ici.sujet!) : ici.vue === "prive" ? clePrive(ici.slug!) : null;
 
   /* en ouvrant une conversation : on retient combien étaient nouveaux (le
-     filet « Nouveaux »), puis elle passe en lue ; le fil ouvert se ferme */
+     filet « Nouveaux »), puis elle passe en lue ; un privé commencé par
+     ?a= rejoint la liste */
   const [vue, setVue] = useState<string | null>(null);
   const [nouveaux, setNouveaux] = useState(0);
-  const [fil, setFil] = useState<string | null>(null);
-  if (vue !== active) {
-    setVue(active);
-    setFil(null);
-    if (active) {
-      setNouveaux(etat(active).nonLus);
-      if (!lus[active]) setLus((l) => ({ ...l, [active]: true }));
-      if (active.startsWith("p:") && !PRIVES.some((p) => `p:${p.slug}` === active) && !ajoutes.includes(active.slice(2))) setAjoutes((x) => [active.slice(2), ...x]);
-    }
+  if (vue !== cle) {
+    setVue(cle);
+    setNouveaux(cle ? etat.nonLus(cle) : 0);
+    if (cle) etat.marquerLu(cle);
+    if (ici.vue === "prive") etat.ouvrirPrive(ici.slug!);
   }
 
-  const prives = [...ajoutes, ...PRIVES.map((p) => p.slug).filter((s) => !ajoutes.includes(s))];
-
-  const ouvrir = (cle: string) => {
-    const [genre, id] = [cle.slice(0, 1), cle.slice(2)];
-    window.history.pushState(null, "", `${chemin}?${genre === "p" ? "a" : "salon"}=${encodeURIComponent(id)}`);
-  };
+  const aller = (href: string) => window.history.pushState(null, "", `${chemin}${href}`);
   const retour = () => window.history.pushState(null, "", chemin);
 
-  /* ——— les gestes, en état local (données d'exemple) ——— */
-  const nouvelId = () => `n${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-  const modifier = (cle: string, f: (liste: Message[]) => Message[]) => setMessages((t) => ({ ...t, [cle]: f(t[cle] ?? []) }));
+  const totalNonLus = etat.tousLesSujets.reduce((n, t) => n + t.nonLus, 0) + etat.prives.reduce((n, p) => n + p.nonLus, 0);
+
+  const conv: Ouverte | null =
+    ici.vue === "sujet" && salon && sujet
+      ? { genre: "sujet", cle: cle!, salon, sujet, autres: sujets.filter((t) => t.id !== sujet.id) }
+      : ici.vue === "salon" && salon
+        ? { genre: "salon", salon, sujets }
+        : ici.vue === "prive"
+          ? { genre: "prive", cle: cle!, slug: ici.slug!, messages: etat.messagesDe(cle!) }
+          : null;
+
   const actions = {
+    aller,
+    retour,
     envoyer: (texte: string) => {
-      if (!active) return;
-      modifier(active, (l) => [...l, { id: nouvelId(), auteur: VOUS, jour: 0, heure: heureMaintenant(), texte }]);
+      if (!cle) return;
+      etat.envoyer(cle, texte);
       setNouveaux(0);
     },
-    repondre: (id: string, texte: string) => {
-      if (!active) return;
-      modifier(active, (l) => l.map((x) => (x.id === id ? { ...x, reponses: [...(x.reponses ?? []), { id: nouvelId(), auteur: VOUS, jour: 0, heure: heureMaintenant(), texte }] } : x)));
+    creerSujet: (titre: string, texte: string) => {
+      if (!salon) return;
+      const id = etat.creerSujet(salon.id, titre, texte);
+      aller(`?salon=${salon.id}&sujet=${id}`);
     },
-    reagir: (id: string, emoji: string) => {
-      if (!active) return;
-      const basculer = (x: Message): Message => {
-        if (x.id !== id) return x.reponses ? { ...x, reponses: x.reponses.map(basculer) } : x;
-        const rs = x.reactions ?? [];
-        const r = rs.find((y) => y.emoji === emoji);
-        const suivantes = !r
-          ? [...rs, { emoji, qui: [VOUS] }]
-          : rs
-              .map((y) => (y.emoji !== emoji ? y : { ...y, qui: y.qui.includes(VOUS) ? y.qui.filter((q) => q !== VOUS) : [...y.qui, VOUS] }))
-              .filter((y) => y.qui.length);
-        return { ...x, reactions: suivantes };
-      };
-      modifier(active, (l) => l.map(basculer));
-    },
-    ouvrirFil: (id: string) => setFil(id),
+    reagir: (id: string, emoji: string) => cle && etat.reagir(cle, id, emoji),
   };
-
-  const conv: Ouverte | null = active
-    ? active.startsWith("s:")
-      ? (() => {
-          const salon = SALONS.find((s) => `s:${s.id}` === active)!;
-          return { cle: active, salon, messages: messages[active] ?? [], membres: salon.membres };
-        })()
-      : { cle: active, slug: active.slice(2), messages: messages[active] ?? [], membres: [active.slice(2)] }
-    : null;
 
   /* la messagerie occupe la hauteur de la fenêtre sous ce qui la précède
      (la barre du haut, et le ruban « Données d'exemple » qui passe à la
@@ -173,12 +178,15 @@ function MessagerieExemple() {
   }, []);
 
   return (
-    <div className="ms" ref={racine} data-ouverte={choisie ? "" : undefined} data-fil={fil ? "" : undefined}>
-      <h1 className="v2-sr">Messages du réseau</h1>
-      <ListeConversations salons={SALONS} prives={prives} etat={etat} active={active} ouvrir={ouvrir} nomVous={nomVous} />
-      {conv ? (
-        <Conversation key={conv.cle} conv={conv} nomVous={nomVous} minuit={minuit} nouveaux={nouveaux} fil={fil} fermerFil={() => setFil(null)} retour={retour} actions={actions} />
-      ) : null}
+    <div className="lin ms" ref={racine} data-ouverte={choisie.vue ? "" : undefined}>
+      <div className="lin-boite ms-boite">
+        <ListeConversations etat={etat} ici={ici} aller={aller} nomVous={nomVous} minuit={minuit} totalNonLus={totalNonLus} />
+        {ici.vue === "recentes" ? (
+          <Recentes etat={etat} aller={aller} retour={retour} nomVous={nomVous} minuit={minuit} />
+        ) : conv ? (
+          <Conversation key={conv.genre === "salon" ? `s:${conv.salon.id}` : conv.cle} conv={conv} nomVous={nomVous} minuit={minuit} nouveaux={nouveaux} actions={actions} />
+        ) : null}
+      </div>
     </div>
   );
 }
