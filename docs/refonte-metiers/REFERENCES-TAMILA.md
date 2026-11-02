@@ -44,3 +44,24 @@ Relevés : branche `claude/refs-linear-49bf64` (Linear, `plain-tasks`, `plain-te
   que le relevé (relatives à la carte : 9/52, 9/88,5, lignes 44, priorité 43, identifiant 67).
 - **Écarts restants** : le contenu (textes, nombre de puces par ligne) ; couleurs du cercle « Todo » et du triangle de repli en
   sombre lues sur la capture (217 et 51), le relevé ne donnant que le clair.
+
+## Arrivées — `/espace2/tamila/arrivees`
+
+- **Référence** : Linear, Triage (liste + élément ouvert). **Relevé** : `linear-triage.md`. Captures `linear-triage/1440-reel-*.png`,
+  `1440-sombre-element-ouvert.png`, `390-*.png`.
+- **Correspondance** : la file = les avis RPVA reçus par courriel à rattacher (B7) ; ligne : sujet, n° RG cité (identifiant),
+  expéditeur, priorité tirée de l'effacement de la copie en clair (7 jours), « il y a ». Élément ouvert (`?avis=<id>`) : fil, titre,
+  pilules (À rattacher, type supposé, dossier proposé par le même n° RG, pièces jointes, effacement), texte du courriel, Activité
+  (envoi, avertissement de transit en clair), et le rattachement (B8, G7) à la place de la boîte de commentaire. Barre de triage
+  Accept · Decline · Duplicate · Snooze → Rattacher · Écarter · Écarter comme doublon · Écarter, déjà saisi à la main (G8 ; chaque
+  écart passe par une fenêtre de confirmation, motif modifiable). Filtre : tous / dossier proposé / sans dossier lisible ; Affichage :
+  les plus récents / effacés le plus tôt. Étoile : favori gardé dans ce navigateur. État vide : l'illustration de Linear, prise telle
+  quelle sur les captures de référence (`public/espace2/tamila/triage-vide-*.png`), « N avis à rattacher ».
+- **Comparaisons** : `arrivees-1440-{sombre,clair}-{cote,diff,fusion}.png` (moitié droite vide, écart moyen 6/255),
+  `arrivees-1440-sombre-ouvert-cote.png` (élément ouvert, côte à côte avec `1440-sombre-element-ouvert.png`),
+  `arrivees-390-{sombre,clair}-cote.png`. Mesures : titre 19/14,5, lignes 9/53 384×59, titre de ligne 23/63, deuxième ligne 85,
+  titre de l'élément ouvert (bloc) à 98, pilules à 170, description à 219 — ceux du relevé.
+- **Écarts restants** : pas de sous-tickets, de réactions ni de bouton double « Copy as prompt | Choose coding tool » (rien de tel dans
+  le métier) ; la barre flottante garde deux boutons ronds (ouvrir le dossier proposé, copier le n° RG) ; icônes de la barre de triage :
+  `Resolved`, `StatusCanceled`, `StatusDuplicate`, `AlarmClock` du sprite (les icônes exactes Accept/Decline/Snooze ne sont pas
+  relevées) ; l'état vide est centré dans une carte plus basse de 20 px (illustration 8 px plus haut).

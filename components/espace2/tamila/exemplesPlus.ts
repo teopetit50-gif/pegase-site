@@ -14,6 +14,8 @@
 
 import { dans, ilYa } from "@/components/espace/exemples/socle";
 import { DOSSIERS_EXEMPLE, HADDAD, MOI, ROUSSEAU } from "@/components/espace/tamila/exemples";
+import { EXEMPLE as AVIS_ENTRANTS_EXEMPLE } from "@/components/espace/tamila/AvisEntrantsTamila";
+import type { AvisEntrant } from "@/components/espace/tamila/portes";
 import type { Audience, Delai, DossierComplet, Honoraires } from "@/components/espace/tamila/types";
 
 const BASE = DOSSIERS_EXEMPLE[0];
@@ -130,3 +132,41 @@ export function honorairesPlus(dossier: string): Honoraires | null {
     : [];
   return { convention, conventions: [convention], temps, provisions: [], factures };
 }
+
+/* ——— les avis RPVA reçus par courriel, en exemple (la file de Triage de Linear en montre 16) : les deux de
+   l'écran d'avant, plus quatorze qui citent le n° RG des dossiers ci-dessus ou n'en citent aucun ——— */
+
+const AVIS: [string, string, string, number, number][] = [
+  ["Cour d'appel de Paris — Ordonnance du conseiller de la mise en état", "rpva_ordonnance_mee", "2026-0441", 3, 1],
+  ["Cour d'appel de Lyon — Avis de déclaration d'appel", "rpva_declaration_appel", "2026-0436", 5, 1],
+  ["Cour d'appel de Versailles — Notification de conclusions d'intimé", "rpva_conclusions", "2026-0425", 7, 2],
+  ["Cour d'appel de Paris — Avis de fixation à bref délai", "rpva_avis_fixation", "2026-0419", 9, 1],
+  ["Cour d'appel de Rouen — Accusé de dépôt de conclusions", "rpva_accuse_depot", "2026-0407", 11, 1],
+  ["Cour d'appel de Douai — Avis de renvoi de l'audience", "rpva_avis_fixation", "2026-0395", 20, 1],
+  ["Cour d'appel de Bordeaux — Ordonnance de clôture", "rpva_ordonnance_mee", "2026-0388", 26, 1],
+  ["Cour d'appel de Nîmes — Notification de conclusions d'appelant", "rpva_conclusions", "2026-0371", 30, 3],
+  ["Cour d'appel de Paris — Avis de fixation de plaidoiries", "rpva_avis_fixation", "2026-0362", 34, 1],
+  ["Cour d'appel de Montpellier — Accusé de dépôt de la déclaration", "rpva_accuse_depot", "2026-0350", 41, 1],
+  ["Notification e-barreau : message du greffe", "", "", 48, 0],
+  ["Cour d'appel de Lyon — Avis de constitution du confrère adverse", "rpva_conclusions", "2026-0436", 52, 1],
+  ["Cour d'appel de Versailles — Ordonnance d'injonction de rencontrer un médiateur", "rpva_ordonnance_mee", "2026-0425", 70, 2],
+  ["Cour d'appel de Paris — Avis de radiation", "", "", 96, 1],
+];
+
+export const AVIS_ENTRANTS_PLUS: AvisEntrant[] = [
+  ...AVIS_ENTRANTS_EXEMPLE,
+  ...AVIS.map(([sujet, type, ref, heures, pieces], i): AvisEntrant => {
+    const d = DOSSIERS_PLUS.find((c) => c.clair?.reference === ref);
+    const rg = d?.clair?.numero_rg;
+    return {
+      id: `00000000-0000-4000-8000-0000000000${(0xf0 + i).toString(16)}`, reception_id: 10 + i, recu_le: new Date(Date.now() - heures * 3600_000).toISOString(), type_suppose: type || null,
+      nb_pieces: pieces, statut: "a_rattacher", expire_le: new Date(Date.now() + 7 * 86_400_000 - heures * 3600_000).toISOString(),
+      reception: {
+        sujet: rg ? `${sujet} — RG ${rg}` : sujet,
+        corps: rg ? `${sujet}. Affaire enrôlée sous le n° RG ${rg}. Le présent avis vaut notification ; la pièce est jointe au format PDF.` : `${sujet}. Aucun numéro de rôle n'est cité dans ce message.`,
+        de_nom: "e-barreau", de_adresse: "notification@e-barreau.fr",
+        pieces: Array.from({ length: pieces }, (_, k) => ({ nom: `avis-${10 + i}-${k + 1}.pdf`, mime: "application/pdf", taille: 40_000 + k * 9_000, chemin: "exemple" })),
+      },
+    };
+  }),
+];
