@@ -1,0 +1,470 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › À faire — My issues de Linear (02/11/2026). Mesures :
+   docs/refonte-metiers/releves/linear-my-issues.md (1440×900, origine
+   carte 245,9) ; le volet de détails : linear-initiative.md (« Volet de
+   détails »). Couleurs : jetons dal- (./dal.css) et, quand le relevé en
+   donne de propres à cette page, les valeurs ci-dessous. Préfixe dal-mi-.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal.dal-mi-page {
+  --dal-mi-groupe-nom: lch(90.826 1.425 272);
+  --dal-mi-groupe-compte: lch(63.304 1.425 272);
+  --dal-mi-groupe-dates: lch(39.452 1.425 272);
+  /* chevron de repli : sombre, mesuré sur 1440-reel-sombre.png (crête rgb 53) ; clair #c9c9c9 (relevé) */
+  --dal-mi-chevron: rgb(53, 53, 53);
+  --dal-mi-puce-bord: lch(16.32 1.48 272);
+  /* « Todo » : mesuré sur les captures réelles (crête rgb 217 en sombre, 158 en clair) */
+  --dal-mi-todo: rgb(217, 217, 217);
+  --dal-mi-cours: #f0bf00;
+  --dal-mi-urgent: lch(66 80 48);
+  --dal-mi-retard: lch(58% 73 29);
+  --dal-mi-vcarte: lch(12.72 0.85 272);
+  --dal-mi-vcarte-bord: transparent;
+  --dal-mi-vcarte-ombre: lch(0 0 0 / 0.125) 0 3px 8px 0, lch(0 0 0 / 0.125) 0 2px 5px 0, lch(0 0 0 / 0.125) 0 1px 1px 0;
+  --dal-mi-vlibelle: lch(63.304 1.425 272);
+}
+html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
+  --dal-mi-groupe-nom: lch(18.888 1.25 282);
+  --dal-mi-groupe-compte: lch(37.776 1.25 282);
+  --dal-mi-groupe-dates: lch(62.33 1.25 282);
+  --dal-mi-chevron: #c9c9c9;
+  --dal-mi-puce-bord: lch(84.44 0 282);
+  --dal-mi-todo: rgb(158, 158, 158);
+  --dal-mi-vcarte: lch(100 0 282);
+  --dal-mi-vcarte-bord: lch(91.9 0 282);
+  --dal-mi-vcarte-ombre: lch(0 0 0 / 0.02) 0 6px 18px 0, lch(0 0 0 / 0.04) 0 3px 9px 0, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --dal-mi-vlibelle: lch(40 1 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal.dal-mi-page {
+    --dal-mi-groupe-nom: lch(18.888 1.25 282);
+    --dal-mi-groupe-compte: lch(37.776 1.25 282);
+    --dal-mi-groupe-dates: lch(62.33 1.25 282);
+    --dal-mi-chevron: #c9c9c9;
+    --dal-mi-puce-bord: lch(84.44 0 282);
+    --dal-mi-todo: rgb(158, 158, 158);
+    --dal-mi-vcarte: lch(100 0 282);
+    --dal-mi-vcarte-bord: lch(91.9 0 282);
+    --dal-mi-vcarte-ombre: lch(0 0 0 / 0.02) 0 6px 18px 0, lch(0 0 0 / 0.04) 0 3px 9px 0, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --dal-mi-vlibelle: lch(40 1 282);
+  }
+}
+
+/* ——— l'en-tête : « My issues » puis les onglets et trois ronds ——— */
+.v2 .dal .dal-mi-titre {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding-left: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: normal;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-mi-onglets {
+  display: flex;
+  gap: 8px;
+}
+.v2 .dal .dal-mi-ronds {
+  display: flex;
+  gap: 6px;
+}
+.v2 .dal .dal-mi-menu-boite {
+  position: relative;
+  display: inline-flex;
+}
+.v2 .dal .dal-mi-menu-libelle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-mi-menu-coche {
+  color: var(--dal-menu-icone);
+}
+
+/* ——— la liste et le volet ——— */
+.v2 .dal .dal-mi {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.v2 .dal .dal-mi-liste {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+.v2 .dal .dal-mi-groupe {
+  padding-bottom: 2px;
+}
+.v2 .dal .dal-mi-groupe-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0 8px 2px;
+  padding: 0 8px 0 6px;
+  border-radius: 8px;
+  background: var(--dal-groupe);
+  font-size: 13px;
+}
+.v2 .dal .dal-mi-replier {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 9999px;
+  color: var(--dal-mi-chevron);
+}
+.v2 .dal .dal-mi-groupe-icone {
+  flex: none;
+  color: var(--dal-mi-groupe-compte);
+}
+.v2 .dal .dal-mi-groupe-nom {
+  padding: 0 2px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: var(--dal-mi-groupe-nom);
+  white-space: nowrap;
+}
+.v2 .dal .dal-mi-groupe-compte {
+  font-weight: 450;
+  color: var(--dal-mi-groupe-compte);
+}
+.v2 .dal .dal-mi-groupe-dates {
+  font-weight: 450;
+  color: var(--dal-mi-groupe-dates);
+  white-space: nowrap;
+}
+
+/* la ligne : grille de Linear, fond de survol en ::before */
+.v2 .dal .dal-mi-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: [indent] 8px [checkbox] 18px [priority] 16px [identifier] 55px [status] 16px [title] minmax(0, 1fr) [createdAt] 60px [end-padding] 18px;
+  column-gap: 8px;
+  align-items: center;
+  height: 44px;
+  color: var(--dal-t1);
+  transition: color 0.15s;
+  isolation: isolate;
+}
+.v2 .dal .dal-mi-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  z-index: -1;
+  border-radius: 8px;
+}
+.v2 .dal .dal-mi-ligne:hover::before {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-mi-ligne[aria-current]::before {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-mi-prio {
+  grid-column: priority;
+  display: inline-flex;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-mi-prio[data-urgente] {
+  color: var(--dal-mi-urgent);
+}
+.v2 .dal .dal-mi-id {
+  grid-column: identifier;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-mi-etat {
+  grid-column: status;
+  display: inline-flex;
+  justify-content: center;
+  color: var(--dal-mi-todo);
+}
+.v2 .dal .dal-mi-etat--cours {
+  color: var(--dal-mi-cours);
+}
+.v2 .dal .dal-mi-etat--revue {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-mi-titre-cellule {
+  grid-column: title;
+  /* relevé : la cellule du titre fait 945 pour une colonne de 940 (l'avatar finit à 1340) */
+  margin-right: -5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.v2 .dal .dal-mi-nom {
+  /* le titre cède d'abord ; plus étroit (volet ouvert, 1024), les puces se tronquent aussi, sans « … » (relevé 1024) */
+  flex: 0 100 auto;
+  min-width: min(30%, 220px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+}
+.v2 .dal .dal-mi-puces {
+  flex: 0 1 auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+}
+.v2 .dal .dal-mi-puce {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0.5px solid var(--dal-mi-puce-bord);
+  border-radius: 48px;
+  background: var(--dal-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+}
+.v2 .dal .dal-mi-puce svg {
+  flex: none;
+}
+.v2 .dal .dal-mi-pastille {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+.v2 .dal .dal-mi-pastille span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.v2 .dal .dal-mi-retard {
+  color: var(--dal-mi-retard);
+}
+.v2 .dal .dal-mi-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 600;
+  color: #fff;
+}
+.v2 .dal .dal-mi-sans {
+  flex: none;
+  margin-left: 8px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-mi-date {
+  grid-column: createdAt;
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+}
+.v2 .dal .dal-mi-squelette {
+  display: block;
+  height: 12px;
+  border-radius: 4px;
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-mi-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 120px 24px;
+  font-size: 13px;
+  color: var(--dal-t3);
+  text-align: center;
+}
+.v2 .dal .dal-mi-vide strong {
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-mi-avis {
+  padding: 12px 24px;
+  font-size: 12px;
+  color: var(--dal-t3);
+}
+
+/* ——— le volet de détails : 400 à droite, cartes empilées (page d'une Initiative) ——— */
+.v2 .dal .dal-mi-volet {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 400px;
+  padding: 0 8px 8px 4px;
+  overflow: auto;
+}
+.v2 .dal .dal-mi-vcarte {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 0.5px solid var(--dal-mi-vcarte-bord);
+  border-radius: 10px;
+  background: var(--dal-mi-vcarte);
+  box-shadow: var(--dal-mi-vcarte-ombre);
+}
+.v2 .dal .dal-mi-vtete {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+}
+.v2 .dal .dal-mi-vtitre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-mi-vlibelle);
+}
+.v2 .dal .dal-mi-vnom {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  letter-spacing: normal;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-mi-vdate {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-mi-vlibelle);
+}
+.v2 .dal .dal-mi-vdate[data-retard] {
+  color: var(--dal-mi-retard);
+}
+.v2 .dal .dal-mi-vdesc {
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 19.5px;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-mi-geste {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  margin-top: 4px;
+  padding: 0 10px 0 6px;
+  border-radius: 9999px;
+  background: var(--dal-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-mi-geste:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-mi-props {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal .dal-mi-prop {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  align-items: center;
+  min-height: 36px;
+}
+.v2 .dal .dal-mi-prop dt {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-mi-vlibelle);
+}
+.v2 .dal .dal-mi-prop dd {
+  margin: 0;
+  min-width: 0;
+}
+.v2 .dal .dal-mi-valeur {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 28px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t1);
+}
+.v2 .dal a.dal-mi-valeur:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-mi-valeur svg {
+  flex: none;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-mi-valeur > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-mi-valeur .dal-mi-prio,
+.v2 .dal .dal-mi-valeur .dal-mi-etat {
+  grid-column: auto;
+}
+.v2 .dal .dal-mi-valeur .dal-mi-prio[data-urgente] svg {
+  color: var(--dal-mi-urgent);
+}
+.v2 .dal .dal-mi-valeur .dal-mi-etat--cours svg {
+  color: var(--dal-mi-cours);
+}
+
+/* ——— 1024 : les puces restent, le volet se pose par-dessus ——— */
+@media (max-width: 1180px) {
+  .v2 .dal .dal-mi-volet {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+  }
+}
+
+/* ——— 768 et moins : priorité, état, titre et avatar seulement (relevé, 390) ——— */
+@media (max-width: 768px) {
+  .v2 .dal .dal-mi-liste {
+    overflow: visible;
+  }
+  .v2 .dal .dal-mi-ligne {
+    grid-template-columns: [indent] 2px [checkbox] 0px [priority] 16px [status] 16px [title] minmax(0, 1fr) [end-padding] 15px;
+  }
+  .v2 .dal .dal-mi-id,
+  .v2 .dal .dal-mi-puces,
+  .v2 .dal .dal-mi-date,
+  .v2 .dal .dal-mi-groupe-dates {
+    display: none;
+  }
+  .v2 .dal .dal-mi-titre-cellule {
+    justify-content: space-between;
+    margin-right: 0;
+  }
+  .v2 .dal .dal-mi-volet {
+    position: absolute;
+    top: 8px;
+    left: 44px;
+    right: 10px;
+    bottom: auto;
+    width: auto;
+    padding: 0;
+  }
+}

@@ -8,7 +8,8 @@
    sous la RLS ; le socle numérote, date, rappelle. */
 
 import { useMemo, useState } from "react";
-import { ClipboardCheck } from "lucide-react";
+import { ClipboardCheck, Plus } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, Texte, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -38,6 +39,7 @@ export default function Reserves({ projet, dossier, peutEcrire, agir }: {
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
+  const volet = useVolet();
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const reserves = useMemo(() => dossier.reserves.filter((r) => r.projet_id === projet.id).sort((a, b) => (a.statut === "ouverte" ? 0 : 1) - (b.statut === "ouverte" ? 0 : 1) || a.numero - b.numero), [dossier.reserves, projet.id]);
   const ouvertes = reserves.filter((r) => r.statut === "ouverte");
@@ -85,53 +87,8 @@ export default function Reserves({ projet, dossier, peutEcrire, agir }: {
   const reserveOk = nr.intitule.trim().length > 0 && /^\d{4}-\d{2}-\d{2}$/.test(nr.constatee_le) && (!nr.lever_avant || nr.lever_avant >= nr.constatee_le);
   const leveeOk = form?.type === "lever" && (form.statut === "levee" ? /^\d{4}-\d{2}-\d{2}$/.test(nl.date) : nl.motif.trim().length >= 3);
 
-  return (
-    <div className="esp-carte-corps">
-      <div className="esp-section-titre">
-        <span>Réception et réserves</span>
-        <span className="esp-item-haut">
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNrec(projet.reception_le ?? ""); ouvrir({ type: "reception" }); }}>{projet.reception_le ? "Date de réception" : "Prononcer la réception"}</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNr({ lot_id: lots[0]?.id ?? "", intitule: "", localisation: "", origine: projet.reception_le ? (finGpa && auj <= finGpa && projet.reception_le < auj ? "gpa" : "reception") : "opr", constatee_le: auj, lever_avant: "" }); ouvrir({ type: "reserve" }); }}>Nouvelle réserve</button>
-        </span>
-      </div>
-      <p className="lor-sous" role="status">
-        {projet.reception_le && finGpa
-          ? `Réception le ${jour(projet.reception_le)} · garantie de parfait achèvement jusqu’au ${jour(finGpa)}${finGpa < auj ? " (terminée)" : ""}. `
-          : "Réception non prononcée. "}
-        {reserves.length ? `${ouvertes.length} réserve${ouvertes.length > 1 ? "s" : ""} non levée${ouvertes.length > 1 ? "s" : ""} sur ${reserves.length}.` : "Aucune réserve."}
-      </p>
-      {finGpa && ouvertes.length && finGpa >= auj && finGpa <= plusJours(auj, 60) ? (
-        <Avis teinte="ambre">La garantie de parfait achèvement prend fin le {jour(finGpa)} avec {ouvertes.length} réserve{ouvertes.length > 1 ? "s" : ""} non levée{ouvertes.length > 1 ? "s" : ""} : mettez l’entreprise en demeure, et conservez la retenue de garantie par opposition motivée.</Avis>
-      ) : null}
-
-      {reserves.map((r) => {
-        const lot = lots.find((l) => l.id === r.lot_id);
-        const retard = r.statut === "ouverte" && !!r.lever_avant && r.lever_avant < auj;
-        return (
-          <div key={r.id} className="lor-reserve" data-statut={r.statut} data-retard={retard || undefined}>
-            <div className="lor-situation-tete">
-              <strong>Réserve n° {r.numero}{lot ? ` · lot ${lot.numero}` : ""}</strong>
-              <Pastille teinte={r.statut === "levee" ? "vert" : r.statut === "contestee" ? "gris" : retard ? "rouge" : "ambre"}>
-                {r.statut === "levee" ? `Levée le ${jour(r.levee_le)}` : r.statut === "contestee" ? "Contestée" : retard ? `À lever depuis le ${jour(r.lever_avant)}` : r.lever_avant ? `À lever avant le ${jour(r.lever_avant)}` : "Ouverte"}
-              </Pastille>
-            </div>
-            <div>{r.intitule}</div>
-            <div className="lor-sous">{[r.localisation, `constatée le ${jour(r.constatee_le)} (${ORIGINES[r.origine]})`, r.motif ? `motif : ${r.motif}` : null].filter(Boolean).join(" · ")}</div>
-            <div className="esp-actions">
-              {r.statut === "ouverte" ? (
-                <>
-                  <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNl({ date: auj, motif: "" }); ouvrir({ type: "lever", reserve: r, statut: "levee" }); }}>Constater la levée</button>
-                  <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNl({ date: auj, motif: "" }); ouvrir({ type: "lever", reserve: r, statut: "contestee" }); }}>Contestée</button>
-                </>
-              ) : (
-                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => void rouvrir(r)}>Rouvrir</button>
-              )}
-            </div>
-          </div>
-        );
-      })}
-      {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-
+  const fenetres = (
+    <>
       {/* ——— la réception ——— */}
       <Dialog open={form?.type === "reception"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -228,6 +185,167 @@ export default function Reserves({ projet, dossier, peutEcrire, agir }: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : une réserve par ligne, groupées par où elles en sont (en retard,
+     ouvertes, contestées, levées) ; constat, origine, motif et gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const etat = (r: Reserve) => {
+      const retard = r.statut === "ouverte" && !!r.lever_avant && r.lever_avant < auj;
+      const t = r.statut === "levee" ? "vert" : r.statut === "contestee" ? "gris" : retard ? "rouge" : "jaune";
+      const l = r.statut === "levee" ? `Levée le ${jour(r.levee_le)}` : r.statut === "contestee" ? "Contestée" : retard ? `À lever depuis le ${jour(r.lever_avant)}` : r.lever_avant ? `À lever avant le ${jour(r.lever_avant)}` : "Ouverte";
+      return { retard, t: t as "vert" | "gris" | "rouge" | "jaune", l };
+    };
+    const groupes = [
+      { cle: "retard", nom: "En retard", rs: reserves.filter((r) => etat(r).retard) },
+      { cle: "ouverte", nom: "Ouvertes", rs: reserves.filter((r) => r.statut === "ouverte" && !etat(r).retard) },
+      { cle: "contestee", nom: "Contestées", rs: reserves.filter((r) => r.statut === "contestee") },
+      { cle: "levee", nom: "Levées", rs: reserves.filter((r) => r.statut === "levee") },
+    ];
+    const quand = (r: Reserve) =>
+      r.statut === "levee" ? { d: r.levee_le, t: "Levée le" } : r.statut === "ouverte" && r.lever_avant ? { d: r.lever_avant, t: "À lever avant le" } : { d: r.constatee_le, t: "Constatée le" };
+    const gpaProche = !!finGpa && ouvertes.length > 0 && finGpa >= auj && finGpa <= plusJours(auj, 60);
+    return (
+      <Partie
+        titre="Réception et réserves"
+        compte={reserves.length ? `${ouvertes.length} non levée${ouvertes.length > 1 ? "s" : ""} sur ${reserves.length}` : null}
+        gestes={
+          <>
+            <Bouton icone={<ClipboardCheck aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => { setNrec(projet.reception_le ?? ""); ouvrir({ type: "reception" }); }}>
+              {projet.reception_le ? "Date de réception" : "Prononcer la réception"}
+            </Bouton>
+            <Bouton icone={<Plus aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => { setNr({ lot_id: lots[0]?.id ?? "", intitule: "", localisation: "", origine: projet.reception_le ? (finGpa && auj <= finGpa && projet.reception_le < auj ? "gpa" : "reception") : "opr", constatee_le: auj, lever_avant: "" }); ouvrir({ type: "reserve" }); }}>
+              Nouvelle réserve
+            </Bouton>
+          </>
+        }
+        avis={gpaProche || (erreur && !form) ? (
+          <>
+            {gpaProche ? <Avis teinte="ambre">La garantie de parfait achèvement prend fin le {jour(finGpa)} avec {ouvertes.length} réserve{ouvertes.length > 1 ? "s" : ""} non levée{ouvertes.length > 1 ? "s" : ""} : mettez l’entreprise en demeure, et conservez la retenue de garantie par opposition motivée.</Avis> : null}
+            {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </>
+        ) : null}
+      >
+        <p className="lvp-resume" role="status">
+          {projet.reception_le && finGpa
+            ? `Réception le ${jour(projet.reception_le)} · garantie de parfait achèvement jusqu’au ${jour(finGpa)}${finGpa < auj ? " (terminée)" : ""}.`
+            : "Réception non prononcée."}
+        </p>
+        {reserves.length ? (
+          <Liste>
+            {groupes.map((g) =>
+              g.rs.length ? (
+                <Groupe key={g.cle} nom={g.nom} compte={g.rs.length}>
+                  {g.rs.map((r) => {
+                    const lot = lots.find((l) => l.id === r.lot_id);
+                    const e = etat(r);
+                    const q = quand(r);
+                    return (
+                      <Ligne
+                        key={r.id}
+                        cle={`reserve:${r.id}`}
+                        libelle={`Réserve n° ${r.numero}, ${r.intitule}, ${e.l}`}
+                        icone={<span data-teinte={e.t} className="lvp-icone-teinte"><ClipboardCheck /></span>}
+                        id={`n° ${r.numero}`}
+                        titre={r.intitule}
+                        second={[lot ? `lot ${lot.numero}` : null, r.localisation].filter(Boolean).join(" · ") || null}
+                        droite={<Pilule teinte={e.t} icone={<Point teinte={e.t} />}>{r.statut === "levee" ? "Levée" : r.statut === "contestee" ? "Contestée" : e.retard ? "En retard" : "Ouverte"}</Pilule>}
+                        date={q.d ? jourCourt(q.d) : null}
+                        dateTitre={q.d ? `${q.t} ${jour(q.d)}` : undefined}
+                      />
+                    );
+                  })}
+                </Groupe>
+              ) : null,
+            )}
+          </Liste>
+        ) : (
+          <Vide>Aucune réserve.</Vide>
+        )}
+        {reserves.map((r) => {
+          const lot = lots.find((l) => l.id === r.lot_id);
+          const e = etat(r);
+          return (
+            <Detail key={r.id} cle={`reserve:${r.id}`} titre={`Réserve n° ${r.numero}`} sous={r.intitule}>
+              <Rangees>
+                <Rangee libelle="État" teinte={e.t}>
+                  <Point teinte={e.t} />
+                  {e.l}
+                </Rangee>
+                <Rangee libelle="Lot">{lot ? `${lot.numero} · ${lot.intitule}` : "Sans lot"}</Rangee>
+                {r.localisation ? <Rangee libelle="Localisation">{r.localisation}</Rangee> : null}
+                <Rangee libelle="Constatée">le {jour(r.constatee_le)} ({ORIGINES[r.origine]})</Rangee>
+                {r.lever_avant ? <Rangee libelle="À lever" teinte={e.retard ? "rouge" : undefined}>avant le {jour(r.lever_avant)}</Rangee> : null}
+                {r.levee_le ? <Rangee libelle="Levée">le {jour(r.levee_le)}</Rangee> : null}
+              </Rangees>
+              {r.motif ? <Texte citation>{r.statut === "contestee" ? "Motif" : "Observation"} : « {r.motif} »</Texte> : null}
+              <Gestes>
+                {r.statut === "ouverte" ? (
+                  <>
+                    <Bouton fort disabled={!peutEcrire || envoi} onClick={() => { setNl({ date: auj, motif: "" }); ouvrir({ type: "lever", reserve: r, statut: "levee" }); }}>Constater la levée</Bouton>
+                    <Bouton disabled={!peutEcrire || envoi} onClick={() => { setNl({ date: auj, motif: "" }); ouvrir({ type: "lever", reserve: r, statut: "contestee" }); }}>Contestée</Bouton>
+                  </>
+                ) : (
+                  <Bouton disabled={!peutEcrire || envoi} onClick={() => void rouvrir(r)}>Rouvrir</Bouton>
+                )}
+              </Gestes>
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
+
+  return (
+    <div className="esp-carte-corps">
+      <div className="esp-section-titre">
+        <span>Réception et réserves</span>
+        <span className="esp-item-haut">
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNrec(projet.reception_le ?? ""); ouvrir({ type: "reception" }); }}>{projet.reception_le ? "Date de réception" : "Prononcer la réception"}</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNr({ lot_id: lots[0]?.id ?? "", intitule: "", localisation: "", origine: projet.reception_le ? (finGpa && auj <= finGpa && projet.reception_le < auj ? "gpa" : "reception") : "opr", constatee_le: auj, lever_avant: "" }); ouvrir({ type: "reserve" }); }}>Nouvelle réserve</button>
+        </span>
+      </div>
+      <p className="lor-sous" role="status">
+        {projet.reception_le && finGpa
+          ? `Réception le ${jour(projet.reception_le)} · garantie de parfait achèvement jusqu’au ${jour(finGpa)}${finGpa < auj ? " (terminée)" : ""}. `
+          : "Réception non prononcée. "}
+        {reserves.length ? `${ouvertes.length} réserve${ouvertes.length > 1 ? "s" : ""} non levée${ouvertes.length > 1 ? "s" : ""} sur ${reserves.length}.` : "Aucune réserve."}
+      </p>
+      {finGpa && ouvertes.length && finGpa >= auj && finGpa <= plusJours(auj, 60) ? (
+        <Avis teinte="ambre">La garantie de parfait achèvement prend fin le {jour(finGpa)} avec {ouvertes.length} réserve{ouvertes.length > 1 ? "s" : ""} non levée{ouvertes.length > 1 ? "s" : ""} : mettez l’entreprise en demeure, et conservez la retenue de garantie par opposition motivée.</Avis>
+      ) : null}
+
+      {reserves.map((r) => {
+        const lot = lots.find((l) => l.id === r.lot_id);
+        const retard = r.statut === "ouverte" && !!r.lever_avant && r.lever_avant < auj;
+        return (
+          <div key={r.id} className="lor-reserve" data-statut={r.statut} data-retard={retard || undefined}>
+            <div className="lor-situation-tete">
+              <strong>Réserve n° {r.numero}{lot ? ` · lot ${lot.numero}` : ""}</strong>
+              <Pastille teinte={r.statut === "levee" ? "vert" : r.statut === "contestee" ? "gris" : retard ? "rouge" : "ambre"}>
+                {r.statut === "levee" ? `Levée le ${jour(r.levee_le)}` : r.statut === "contestee" ? "Contestée" : retard ? `À lever depuis le ${jour(r.lever_avant)}` : r.lever_avant ? `À lever avant le ${jour(r.lever_avant)}` : "Ouverte"}
+              </Pastille>
+            </div>
+            <div>{r.intitule}</div>
+            <div className="lor-sous">{[r.localisation, `constatée le ${jour(r.constatee_le)} (${ORIGINES[r.origine]})`, r.motif ? `motif : ${r.motif}` : null].filter(Boolean).join(" · ")}</div>
+            <div className="esp-actions">
+              {r.statut === "ouverte" ? (
+                <>
+                  <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNl({ date: auj, motif: "" }); ouvrir({ type: "lever", reserve: r, statut: "levee" }); }}>Constater la levée</button>
+                  <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => { setNl({ date: auj, motif: "" }); ouvrir({ type: "lever", reserve: r, statut: "contestee" }); }}>Contestée</button>
+                </>
+              ) : (
+                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => void rouvrir(r)}>Rouvrir</button>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+
+      {fenetres}
     </div>
   );
 }

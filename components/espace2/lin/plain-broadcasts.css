@@ -308,6 +308,9 @@ html[data-v2-theme="light"] .v2 .lin.pbc {
 
 /* ——— le tableau : 16 sous les onglets, sans cadre ——— */
 .v2 .lin .pbc-cadre {
+  /* relatif : le libellé « Actions » réservé aux lecteurs d'écran (v2-sr, absolu) reste dans le cadre qui
+     défile, au lieu d'élargir la page (993 de large à 390 sans cela) */
+  position: relative;
   margin-top: 16px;
 }
 .v2 .lin .pbc-table {

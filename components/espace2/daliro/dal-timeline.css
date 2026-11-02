@@ -1,0 +1,433 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › Chantiers — Linear, Projects en Timeline, au 1:1 (01/11/2026).
+   Relevés : docs/refonte-metiers/releves/linear-timeline.md (clair) et le
+   complément Timeline de linear-projects.md (sombre et clair). Préfixe
+   dal-tl-.
+
+   Repères (px CSS) :
+     ligne 1     titre 13/500 secondaire à 18 du bord ; « Nouveau » 28 de
+                 haut, padding 0 10 0 8, 12/500 tertiaire, icône 14
+     ligne 2     onglet de vue + rond ; à droite trois ronds pleins, écart 6
+     règle       32 de haut (mois 11/500 capitales tertiaire, jours 11/500
+                 quaternaire), pastille du jour #6d78d5 r 8 p 1 4 ; ligne
+                 du jour 1 px dégradée, opacité .6
+     lignes      72 ; colonne gauche 320 collée, padding-left 8, bloc
+                 padding-right 10, écart 6 ; icône 28 r 8 p 6 ; nom 13/500 ;
+                 quatre ronds de 28
+     barres      24 de haut à y+24, r 6 (0 6 6 0 sans début), bordure 0.5 ;
+                 libellé au-dessus à y+5, 13/500 secondaire
+     commandes   coin haut droit : padding 5 10 5 36, écart 4, fond en
+                 dégradé ; « Aujourd'hui » et « Année ▾ » 24, p 0 8, 12/500
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal.dal-tl-page {
+  --dal-barre: lch(11.82 2.2 272);
+  --dal-barre-bord: lch(27.12 1.48 272);
+  --dal-barre-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --dal-barre-survol: lch(13.861 1.139 272);
+  --dal-barre-survol-bord: lch(100 0 0 / 0.15);
+  --dal-mois-trait: lch(9.232 0.85 272);
+  --dal-auj-bas: lch(53 52.26 286.91 / 0.15);
+}
+html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
+  --dal-barre: lch(100 0.5 282);
+  --dal-barre-bord: lch(84.44 0 282);
+  --dal-barre-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --dal-barre-survol: lch(94.854 0.5 282);
+  --dal-barre-survol-bord: lch(0 0 0 / 0.15);
+  --dal-mois-trait: lch(95.24 0 282);
+  --dal-auj-bas: color(xyz-d50 0.7447 0.7634 0.7152);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal.dal-tl-page {
+    --dal-barre: lch(100 0.5 282);
+    --dal-barre-bord: lch(84.44 0 282);
+    --dal-barre-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --dal-barre-survol: lch(94.854 0.5 282);
+    --dal-barre-survol-bord: lch(0 0 0 / 0.15);
+    --dal-mois-trait: lch(95.24 0 282);
+    --dal-auj-bas: color(xyz-d50 0.7447 0.7634 0.7152);
+  }
+}
+
+.v2 .dal .dal-tl-titre {
+  padding-left: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tl-quota {
+  margin-right: 8px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tl-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .dal .dal-tl-nouveau:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tl-outils {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .dal .dal-tl-pop {
+  position: relative;
+  display: inline-flex;
+}
+.v2 .dal .dal-tl-pop .dal-rond {
+  position: relative;
+}
+.v2 .dal .dal-tl-point {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dal-violet);
+}
+.v2 .dal .dal-tl-menu {
+  top: 32px;
+  right: 0;
+  min-width: 260px;
+}
+.v2 .dal .dal-tl-menu-titre {
+  padding: 4px 14px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tl-champ {
+  display: block;
+  width: 100%;
+  height: 36px;
+  padding: 10px 14px 9px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--dal-menu-texte);
+  outline: none;
+}
+.v2 .dal .dal-tl-champ::placeholder {
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-tl-compte {
+  font-size: 12px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tl-note {
+  padding: 0 18px 8px;
+  font-size: 12px;
+  color: var(--dal-rouge);
+}
+
+/* ——— la frise ——— */
+.v2 .dal .dal-tl-cadre {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.v2 .dal .dal-tl-principal {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+.v2 .dal .dal-tl-zone {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+.v2 .dal .dal-tl-vide {
+  padding: 24px 18px;
+  font-size: 13px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tl-lien {
+  color: var(--dal-t1);
+  text-decoration: underline;
+}
+/* les traits des mois et du jour descendent jusqu'au bas de la carte, comme chez
+   Linear (768 de haut), même quand les lignes s'arrêtent plus tôt */
+.v2 .dal .dal-tl-toile {
+  position: relative;
+  min-height: 100%;
+}
+.v2 .dal .dal-tl-regle {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 32px;
+  background: var(--dal-carte);
+}
+.v2 .dal .dal-tl-mois,
+.v2 .dal .dal-tl-jour,
+.v2 .dal .dal-tl-auj {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.v2 .dal .dal-tl-mois {
+  top: 0;
+  color: var(--dal-t3);
+  text-transform: uppercase;
+}
+.v2 .dal .dal-tl-jour {
+  top: 16px;
+  color: var(--dal-t4);
+  transform: translateX(-50%);
+}
+.v2 .dal .dal-tl-auj {
+  top: 17px;
+  height: 15px;
+  padding: 1px 4px;
+  line-height: 13px;
+  border-radius: 8px;
+  background: var(--dal-violet);
+  color: #fffeff;
+  text-transform: uppercase;
+  transform: translateX(-50%);
+}
+.v2 .dal .dal-tl-mois-trait {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  border-right: 1px dashed var(--dal-mois-trait);
+}
+.v2 .dal .dal-tl-auj-trait {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 1px;
+  background: linear-gradient(0deg, var(--dal-auj-bas) 0%, lch(53 52.26 286.91) 100%);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.v2 .dal .dal-tl-ligne {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 72px;
+}
+.v2 .dal .dal-tl-avant {
+  position: absolute;
+  top: 28px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 16px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--dal-t1);
+  white-space: nowrap;
+}
+.v2 .dal .dal-tl-avant-date {
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-tl-cellule {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  width: 320px;
+  height: 72px;
+  background: var(--dal-carte);
+}
+/* capture de Linear (1440, sombre) : icône du projet à 13 du bord de la carte, nom à 45,
+   premier bouton rond à 173 ; le bloc du nom fait 166 */
+.v2 .dal .dal-tl-cellule-bloc {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 72px;
+  padding-right: 18px;
+}
+.v2 .dal .dal-tl-nom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0 2px 12px;
+}
+.v2 .dal .dal-tl-icone {
+  display: inline-flex;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.15s, border 0.15s;
+}
+.v2 .dal .dal-tl-nom-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tl-nom:hover .dal-tl-nom-texte {
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-tl-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tl-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--dal-t4);
+  color: var(--dal-carte);
+  font-size: 8px;
+  font-weight: 600;
+}
+.v2 .dal .dal-tl-libelle-voie {
+  position: absolute;
+  top: 5px;
+  display: flex;
+  height: 16px;
+  pointer-events: none;
+}
+.v2 .dal .dal-tl-libelle {
+  position: sticky;
+  flex: none;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-t2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.v2 .dal .dal-tl-barre {
+  position: absolute;
+  top: 24px;
+  height: 24px;
+  padding: 0;
+  background: var(--dal-barre);
+  border: 0.5px solid var(--dal-barre-bord);
+  border-radius: 6px;
+  box-shadow: var(--dal-barre-ombre);
+}
+.v2 .dal .dal-tl-barre[data-ouverte] {
+  border-radius: 0 6px 6px 0;
+}
+.v2 .dal .dal-tl-barre:hover,
+.v2 .dal .dal-tl-barre[data-choisie] {
+  background: var(--dal-barre-survol);
+  border-color: var(--dal-barre-survol-bord);
+}
+.v2 .dal .dal-tl-jalon {
+  position: absolute;
+  top: 28px;
+  z-index: 1;
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  color: lch(80 90 85);
+  cursor: grab;
+  touch-action: none;
+}
+.v2 .dal .dal-tl-jalon:disabled {
+  color: lch(48 59.31 288.43);
+  cursor: pointer;
+}
+.v2 .dal .dal-tl-jalon[data-glisse] {
+  cursor: grabbing;
+  z-index: 3;
+}
+.v2 .dal .dal-tl-jalon[data-choisi] {
+  outline: 2px solid var(--dal-violet);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
+
+.v2 .dal .dal-tl-commandes {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 5px 10px 5px 36px;
+  background: linear-gradient(to left, var(--dal-carte) 70%, transparent);
+}
+.v2 .dal .dal-tl-commande {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--dal-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tl-commande:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tl-volet {
+  min-height: 0;
+  display: flex;
+  border-left: 0.5px solid var(--dal-carte-bord);
+}
+
+/* ——— 640 et moins (capture 390-sombre-timeline de Linear, 01/11) : la frise reste, la
+   colonne gauche de 320 la couvre ; boutons de 32, « Nouveau chantier » réduit à « + » ——— */
+@media (max-width: 640px) {
+  .v2 .dal .dal-tl-quota,
+  .v2 .dal .dal-tl-nouveau span,
+  .v2 .dal .dal-tl-commandes > .dal-tl-pop {
+    display: none;
+  }
+  .v2 .dal .dal-tl-nouveau {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  .v2 .dal .dal-tl-volet {
+    position: fixed;
+    inset: 48px 0 0 0;
+    z-index: 30;
+    background: var(--dal-carte);
+  }
+}

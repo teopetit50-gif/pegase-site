@@ -75,11 +75,15 @@ export const REGLES: Record<string, Regle> = {
   /* REPUT — la page Demandes ouvre une demande (TableauReput, « ?demande= ») */
   reput_demandes: (id) => `${RACINE}/reput?demande=${q(id)}`,
 
-  /* LORANI — l'écran actuel lit « ?permis= » et « ?projet= » (EcranLorani) */
-  lorani_permis: (id) => `${RACINE}/lorani?permis=${q(id)}`,
-  lorani_projets: (id) => `${RACINE}/lorani?projet=${q(id)}`,
-  /* le même projet, au singulier, dans les demandes de Lorani */
-  lorani_projet: (id) => `${RACINE}/lorani?projet=${q(id)}`,
+  /* LORANI, refait le 29/10/2026 : la page d'un permis, celle d'un projet ; les anciens
+     liens « /espace/lorani?permis= » et « ?projet= » (alertes, courriels déjà partis) y
+     sont renvoyés par la racine (app/espace2/lorani/page.tsx) */
+  lorani_permis: (id) => `${RACINE}/lorani/permis/${q(id)}`,
+  lorani_projets: (id) => `${RACINE}/lorani/projets/${q(id)}`,
+  /* le même projet, au singulier, dans les demandes de Lorani. Le point du matin
+     l'écrit aussi à côté d'un lien « ?permis= » (lorani_ligne_du_point) : ce lien
+     nomme le permis de la ligne, il l'emporte sur le projet */
+  lorani_projet: (id, r) => (r.lien && /[?&]permis=/.test(r.lien) ? null : `${RACINE}/lorani/projets/${q(id)}`),
   /* une question restée sans réponse (b5_25) : son lien porte déjà « ?projet= », il l'emporte */
   lorani_point: () => null,
 

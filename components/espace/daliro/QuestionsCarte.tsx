@@ -14,6 +14,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { MessageCircleQuestionMark } from "lucide-react";
+import { Bouton, Detail, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, Texte, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Loader } from "@/components/ui/loader";
 import type { Source } from "../source";
 import { dateCourte, dateHeure, montant } from "../format";
@@ -66,6 +67,7 @@ export function reponseExemple(t: Tableau, question: string, aujourdhui: string)
 type Props = { tableau: Tableau; source: Source; aujourdhui: string };
 
 export default function QuestionsCarte({ tableau, source, aujourdhui }: Props) {
+  const volet = useVolet();
   const c = tableau.chantier;
   const [texte, setTexte] = useState("");
   const [liste, setListe] = useState<QuestionChantier[]>([]);
@@ -104,6 +106,77 @@ export default function QuestionsCarte({ tableau, source, aujourdhui }: Props) {
     try { await poserQuestion(c.id, question); setTexte(""); await relire(); }
     catch (e) { setErreur(e instanceof Error ? e.message : "La base n'a pas répondu."); }
     finally { setEnvoi(false); }
+  }
+
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les questions proposées en pastilles, le champ, puis
+     une question par ligne ; la réponse et ce qu'elle a lu dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const etat = (q: QuestionChantier) =>
+      q.statut === "en_attente" ? { t: "bleu" as const, l: "Réponse dans la minute" }
+      : q.statut === "echec" ? { t: "rouge" as const, l: "Sans réponse" }
+      : q.couverte ? { t: "vert" as const, l: "Lu dans le chantier" }
+      : { t: "jaune" as const, l: "À vérifier" };
+    return (
+      <Partie titre="Questions sur le chantier">
+        {ferme ? (
+          <Vide>L&apos;assistant est compris dans la formule {formuleQuiOuvre("questions")}.</Vide>
+        ) : (
+          <>
+            <p className="lvp-resume">
+              Une réponse lue dans ce chantier seulement : marché, avenants, planning, contrôles, fil{tableau.voit_prix ? "" : " (sans les prix : votre compte ne les voit pas)"}. Un chiffre qu&apos;elle ne trouve pas dans le chantier est marqué à vérifier.
+            </p>
+            <form className="lvp-question" onSubmit={(e) => { e.preventDefault(); void poser(texte); }}>
+              <textarea className="lvp-question-champ" rows={2} maxLength={1000} aria-label="Votre question" value={texte} onChange={(e) => setTexte(e.target.value)} placeholder="Quand passe l'électricien ? Qu'est-ce qui reste à facturer ?" />
+              <div className="lvp-question-pied">
+                <div className="lvp-gestes lvp-gestes--gauche" role="group" aria-label="Questions proposées">
+                  {QUESTIONS_DEMO.map((q) => (
+                    <Bouton key={q} disabled={envoi} onClick={() => void poser(q)}>{q}</Bouton>
+                  ))}
+                </div>
+                <Bouton fort type="submit" disabled={envoi || texte.trim().length < 3}>
+                  {envoi ? <Loader variant="spin" /> : null} Demander
+                </Bouton>
+              </div>
+            </form>
+            {erreur ? <div className="lvp-avis"><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
+            {liste.length ? (
+              <Liste>
+                <Groupe nom="Questions posées" compte={liste.length}>
+                  {liste.map((q) => {
+                    const e = etat(q);
+                    return (
+                      <Ligne key={q.id} cle={`question:${q.id}`} libelle={q.question} icone={<MessageCircleQuestionMark />} titre={q.question} second={q.statut === "repondue" ? q.reponse?.split("\n")[0] : null} droite={<Pilule teinte={e.t} icone={<Point teinte={e.t} />}>{e.l}</Pilule>} date={q.repondu_le ? jourCourt(q.repondu_le) : null} />
+                    );
+                  })}
+                </Groupe>
+              </Liste>
+            ) : null}
+            {liste.map((q) => {
+              const e = etat(q);
+              return (
+                <Detail key={q.id} cle={`question:${q.id}`} titre={q.question} sous={q.repondu_le ? dateHeure(q.repondu_le) : source !== "reelle" ? "Exemple" : undefined}>
+                  <Rangees>
+                    <Rangee libelle="Réponse" teinte={e.t}>{e.l}</Rangee>
+                  </Rangees>
+                  {q.statut === "en_attente" ? (
+                    <Texte>Daliro lit le chantier…</Texte>
+                  ) : q.statut === "echec" ? (
+                    <Texte>{motifLisible(q.motif)}</Texte>
+                  ) : (
+                    <>
+                      <p className="lvp-texte lvp-texte--long">{q.reponse}</p>
+                      {q.raison && !q.couverte ? <div className="lvp-note"><div>{q.raison}</div></div> : null}
+                      <div className="lvp-note"><div>{q.sources.length ? `Lu : ${q.sources.join(" · ")}` : "Aucune source citée"}</div></div>
+                    </>
+                  )}
+                </Detail>
+              );
+            })}
+          </>
+        )}
+      </Partie>
+    );
   }
 
   return (

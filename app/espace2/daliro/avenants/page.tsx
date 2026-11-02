@@ -3,9 +3,10 @@ import { Suspense } from "react";
 import AvenantsSituations from "@/components/espace2/daliro/AvenantsSituations";
 
 /* /espace2/daliro/avenants — les avenants et les situations de travaux de
-   tous les chantiers DALIRO, sur la page « Broadcasts » de Plain (29/10/2026) :
-   deux familles (?vue=situations), les états en onglets (?onglet=), un
-   élément ouvert par ?avenant=<id> ou ?situation=<id> (l'aiguillage y mène). */
+   tous les chantiers DALIRO, sur le Board de Linear au 1:1 (02/11/2026,
+   linear-board.md) : deux onglets (?vue=situations), une colonne par état,
+   l'élément ouvert dans le volet par ?avenant=<id> ou ?situation=<id>
+   (l'aiguillage y mène). */
 
 export const metadata: Metadata = {
   title: "Avenants et situations",

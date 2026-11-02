@@ -1,0 +1,281 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO, vue d'ensemble — Linear, accueil d'une équipe (onglet Overview),
+   au 1:1 (01/11/2026). Relevé : docs/refonte-metiers/releves/linear-home.md
+   (1440×900 sombre et clair, paliers 1024, 768, 390). Préfixe dal-h-.
+
+   Repères (px CSS, depuis le bord de la carte) :
+     ligne 1     fil à 18 (icône 16, écart 6, 13/450) ; ronds de 28, écart 4 ;
+                 « copier le lien » à 8 du bord droit
+     ligne 2     onglets de 28 à 8 du bord, écart 8, padding 0 10, 12/500
+     corps       grille 1fr · 700 · 220 · 1fr, écart 48
+     principal   padding 24 0 0, padding-right 12 ; tuile 36 rayon 6 (icône 24),
+                 titre 24/600/32 −0.16 à 12 ; description 15/450/23 à 4 + 16
+                 du titre, 4 dessous ; section à 24
+     section     déborde de 12 à gauche, padding 6 0 ; titre 18/500 ; deux
+                 ronds pleins de 28, écart 4 ; liste à 16 ; rangées de 40
+                 (+2), padding 0 12, écart 6, rayon 8 ; texte 13/500/16
+     droite      padding-top 32, bloc 8 8 24 0, sections à 24 ; libellé
+                 13/500 ; rangées à 12 ; pilules de 28, écart 8, padding
+                 5 8 5 6, marge −7, écart 4, icône 16 dans 18
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal .dal-h-corps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 700px 220px minmax(0, 1fr);
+  column-gap: 48px;
+  align-items: start;
+}
+.v2 .dal .dal-h-principal {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 12px 48px 0;
+  min-width: 0;
+}
+.v2 .dal .dal-h-titre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 36px;
+}
+.v2 .dal .dal-h-tuile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--dal-equipe-fond);
+  color: var(--dal-equipe);
+}
+.v2 .dal .dal-h-nom {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-h-description {
+  margin-top: 4px;
+  padding: 16px 0 4px;
+}
+.v2 .dal .dal-h-description p {
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--dal-t2);
+}
+
+/* les liens « Aller à » repliés sous la description (1024 et moins) */
+.v2 .dal .dal-h-replis {
+  display: none;
+}
+
+.v2 .dal .dal-h-section {
+  margin: 24px -12px 0;
+  padding: 6px 0;
+  border-radius: 8px;
+}
+.v2 .dal .dal-h-section-tete {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 2px 0 12px;
+}
+.v2 .dal .dal-h-section-titre {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: normal;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-h-section .dal-rond {
+  background: var(--dal-bouton);
+}
+.v2 .dal .dal-h-aide {
+  padding: 8px 12px 0;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 23px;
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-h-liste {
+  margin-top: 16px;
+}
+.v2 .dal .dal-h-liste > li {
+  padding-bottom: 2px;
+}
+.v2 .dal .dal-h-rangee {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--dal-t1);
+  transition: color 0.15s;
+}
+.v2 .dal .dal-h-rangee:hover {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-h-rangee > svg:first-child {
+  flex: none;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-h-rangee-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-t2);
+}
+/* ——— colonne droite ——— */
+.v2 .dal .dal-h-droite {
+  grid-column: 3;
+  position: sticky;
+  top: 0;
+  padding-top: 32px;
+}
+.v2 .dal .dal-h-droite-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px 8px 24px 0;
+}
+.v2 .dal .dal-h-droite-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .dal .dal-h-libelle {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 15.5px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-h-membres {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+}
+.v2 .dal .dal-h-membre {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  margin-left: -4px;
+  padding: 4px 8px 4px 4px;
+  border-radius: 9999px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-h-membre:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-h-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--dal-equipe);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+.v2 .dal .dal-h-membres .dal-rond {
+  opacity: 0;
+}
+.v2 .dal .dal-h-membres:hover .dal-rond,
+.v2 .dal .dal-h-membres .dal-rond:focus-visible {
+  opacity: 1;
+}
+.v2 .dal .dal-h-aller {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.v2 .dal .dal-h-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  margin-left: -7px;
+  padding: 5px 8px 5px 6px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+.v2 .dal .dal-h-pilule:hover,
+.v2 .dal .dal-h-pilule:focus-visible {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-h-pilule-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-h-pilule-compte {
+  color: var(--dal-t3);
+  font-weight: 450;
+}
+.v2 .dal .dal-h-pilule .dal-h-chevron {
+  width: 14px;
+  height: 14px;
+  color: var(--dal-t3);
+  opacity: 0;
+}
+.v2 .dal .dal-h-pilule:hover .dal-h-chevron {
+  opacity: 1;
+}
+
+/* ——— 1024 et moins : la colonne droite s'efface, ses liens passent sous la description ——— */
+@media (max-width: 1024px) {
+  .v2 .dal .dal-h-corps {
+    display: block;
+    padding: 0 32px;
+  }
+  .v2 .dal .dal-h-principal {
+    max-width: 700px;
+    margin: 0 auto;
+    padding-right: 0;
+  }
+  .v2 .dal .dal-h-droite {
+    display: none;
+  }
+  .v2 .dal .dal-h-replis {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 12px;
+  }
+  .v2 .dal .dal-h-replis .dal-h-pilule {
+    height: 26px;
+    margin-left: 0;
+    padding: 4px 8px 4px 6px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .dal .dal-h-section .dal-rond {
+    width: 32px;
+    height: 32px;
+  }
+  .v2 .dal .dal-h-section-tete {
+    height: 32px;
+  }
+}
