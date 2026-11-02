@@ -1,0 +1,1144 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO — Pilotage : Plain, Insights › Reporting au 1:1 (02/11/2026)
+   Relevés : docs/refonte-metiers/releves/plain-commun.md (jetons, carte,
+   menus) et plain-insights.md (branche refs-plain-attio-cal). Préfixe
+   tav-pi, propre à Tavaro. Mêmes valeurs que le Pilotage de Tiroma
+   (tir-plain.css, tir-insights.css), recopiées ici pour que les deux
+   métiers évoluent séparément.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav-pi {
+  /* sombre (plain-commun.md, colonne de droite) */
+  --pl-fond-1: #1a191b;
+  --pl-fond-2: #121113;
+  --pl-texte-1: #eeeef0;
+  --pl-texte-2: #b5b2bc;
+  --pl-icone-1: #98979f;
+  --pl-icone-2: #72707b;
+  --pl-rempli-1: #232225;
+  --pl-rempli-2: #2b292d;
+  --pl-rempli-3: #323035;
+  --pl-bord-1: #2b292d;
+  --pl-bord-2: #323035;
+  --pl-bord-3: #49474e;
+  --pl-plein-1: #eeeef0;
+  --pl-texte-sur-plein: #121113;
+  --pl-bleu-plein: #5159e5;
+  --pl-bleu-icone: #5696ff;
+  --pl-bleu-rempli-1: #1c214e;
+  --pl-bleu-texte-2: #9dafff;
+  --pl-vert-icone: #18b562;
+  --pl-jaune-fond-2: #2c2207;
+  --pl-jaune-texte-1: #fde8b3;
+  --pl-jaune-texte-2: #b5b2bc;
+  --pl-rouge-icone: #f3625c;
+  --pl-vide: #625f69;
+  --pl-barre-vide: #49474e;
+  --pl-carte-ombre: rgba(32, 39, 44, 0.08) 0 1px 0, rgba(32, 39, 44, 0.08) 0 2px 5px, rgba(255, 255, 255, 0.02) 1px 1px 2px inset, rgba(255, 255, 255, 0.1) 0 0 1px inset;
+  --pl-menu-ombre: rgba(32, 39, 44, 0.24) 0 1px 2px, rgba(32, 39, 44, 0.08) 0 2px 6px 2px, rgba(32, 39, 44, 0.08) 0 2px 8px;
+  --pl-filet: #323035;
+  --pl-survol: #121113;
+  --pl-kbd-texte: #b5b2bc;
+  --pl-kbd-fond: #2b292d;
+  --pl-kbd-bord: #49474e;
+  --pl-message: #232225;
+  --pl-pastille-fond: #232225;
+  --pl-pastille-bord: #323035;
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--pl-fond-2);
+  color: var(--pl-texte-1);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+html[data-v2-theme="light"] .v2 .tav-pi {
+  --pl-fond-1: #fff;
+  --pl-fond-2: #f9f9fc;
+  --pl-texte-1: #1f1f28;
+  --pl-texte-2: #636370;
+  --pl-icone-1: #8e8e9c;
+  --pl-icone-2: #adadb7;
+  --pl-rempli-1: #f0f0f5;
+  --pl-rempli-2: #e7e7ef;
+  --pl-rempli-3: #e0e0e9;
+  --pl-bord-1: #e7e7ef;
+  --pl-bord-2: #e0e0e9;
+  --pl-bord-3: #cdcddb;
+  --pl-plein-1: #1f1f28;
+  --pl-texte-sur-plein: #fff;
+  --pl-bleu-plein: #525cdb;
+  --pl-bleu-icone: #448bff;
+  --pl-bleu-rempli-1: #eef2ff;
+  --pl-bleu-texte-2: #4a52d1;
+  --pl-vert-icone: #00ab5f;
+  --pl-jaune-fond-2: #fffae9;
+  --pl-jaune-texte-1: #453a1e;
+  --pl-jaune-texte-2: #987100;
+  --pl-rouge-icone: #f14e4b;
+  --pl-vide: #babaca;
+  --pl-barre-vide: #cdcddb;
+  --pl-carte-ombre: 0 0 0 1px #20272c14, 0 1px 1px #20272c14;
+  --pl-filet: #e0e0e9;
+  --pl-survol: #f9f9fc;
+  --pl-kbd-texte: #636370;
+  --pl-kbd-fond: #fff;
+  --pl-kbd-bord: #e7e7ef;
+  --pl-message: #f9f9fc;
+  --pl-pastille-fond: #fff;
+  --pl-pastille-bord: #e7e7ef;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav-pi {
+    --pl-fond-1: #fff;
+    --pl-fond-2: #f9f9fc;
+    --pl-texte-1: #1f1f28;
+    --pl-texte-2: #636370;
+    --pl-icone-1: #8e8e9c;
+    --pl-icone-2: #adadb7;
+    --pl-rempli-1: #f0f0f5;
+    --pl-rempli-2: #e7e7ef;
+    --pl-rempli-3: #e0e0e9;
+    --pl-bord-1: #e7e7ef;
+    --pl-bord-2: #e0e0e9;
+    --pl-bord-3: #cdcddb;
+    --pl-plein-1: #1f1f28;
+    --pl-texte-sur-plein: #fff;
+    --pl-bleu-plein: #525cdb;
+    --pl-bleu-icone: #448bff;
+    --pl-bleu-rempli-1: #eef2ff;
+    --pl-bleu-texte-2: #4a52d1;
+    --pl-vert-icone: #00ab5f;
+    --pl-jaune-fond-2: #fffae9;
+    --pl-jaune-texte-1: #453a1e;
+    --pl-jaune-texte-2: #987100;
+    --pl-rouge-icone: #f14e4b;
+    --pl-vide: #babaca;
+    --pl-barre-vide: #cdcddb;
+    --pl-carte-ombre: 0 0 0 1px #20272c14, 0 1px 1px #20272c14;
+    --pl-filet: #e0e0e9;
+    --pl-survol: #f9f9fc;
+    --pl-kbd-texte: #636370;
+    --pl-kbd-fond: #fff;
+    --pl-kbd-bord: #e7e7ef;
+    --pl-message: #f9f9fc;
+    --pl-pastille-fond: #fff;
+    --pl-pastille-bord: #e7e7ef;
+  }
+}
+
+.v2 .tav-pi *,
+.v2 .tav-pi *::before,
+.v2 .tav-pi *::after {
+  box-sizing: border-box;
+}
+.v2 .tav-pi :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.v2 .tav-pi :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .tav-pi :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .tav-pi :focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #525cdb;
+}
+
+/* ——— la carte <main> ——— */
+.v2 .tav-pi .pl-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 48px - 16px);
+  background: var(--pl-fond-1);
+  border-radius: 12px;
+  box-shadow: var(--pl-carte-ombre);
+  overflow: hidden;
+}
+
+/* ——— briques partagées ——— */
+.v2 .tav-pi .pl-fantome {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+  white-space: nowrap;
+}
+.v2 .tav-pi .pl-fantome > svg {
+  color: var(--pl-icone-1);
+}
+.v2 .tav-pi .pl-fantome:hover,
+.v2 .tav-pi .pl-fantome[aria-expanded="true"] {
+  background: var(--pl-rempli-1);
+}
+.v2 .tav-pi .pl-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  padding: 0 2px;
+  border: 1px solid var(--pl-kbd-bord);
+  border-radius: 4px;
+  background: var(--pl-kbd-fond);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-kbd-texte);
+}
+.v2 .tav-pi .pl-icone-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--pl-icone-1);
+}
+.v2 .tav-pi .pl-icone-bouton:hover {
+  background: var(--pl-rempli-1);
+}
+.v2 .tav-pi .pl-pastille {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--pl-texte-1);
+  white-space: nowrap;
+  isolation: isolate;
+}
+.v2 .tav-pi .pl-pastille::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 5px;
+  background: var(--pl-pastille-fond);
+  z-index: -1;
+}
+.v2 .tav-pi .pl-pastille::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--pl-pastille-bord);
+  border-radius: 6px;
+  z-index: -1;
+}
+.v2 .tav-pi .pl-pastille > svg {
+  flex: none;
+  color: var(--pl-icone-1);
+}
+.v2 .tav-pi .pl-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 550;
+  color: #fff;
+}
+.v2 .tav-pi .pl-menu {
+  position: absolute;
+  z-index: 40;
+  min-width: 200px;
+  padding: 4px 0;
+  background: var(--pl-fond-1);
+  border-radius: 10px;
+  box-shadow: var(--pl-menu-ombre);
+}
+.v2 .tav-pi .pl-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 8px);
+  height: 28px;
+  margin: 0 4px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: left;
+  color: var(--pl-texte-1);
+  white-space: nowrap;
+}
+.v2 .tav-pi .pl-menu-item > svg {
+  flex: none;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .pl-menu-item:hover,
+.v2 .tav-pi .pl-menu-item[aria-checked="true"] {
+  background: var(--pl-rempli-1);
+}
+.v2 .tav-pi .pl-menu-item[data-danger] {
+  color: var(--pl-rouge-icone);
+}
+.v2 .tav-pi .pl-menu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--pl-bord-1);
+}
+.v2 .tav-pi .pl-menu-titre {
+  padding: 6px 10px 2px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .pl-secondaire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: var(--pl-fond-1);
+  box-shadow: #161a2614 0 0 0 1px inset, #ffffff33 0 0 3px 1px inset, #0000001f 0 -1px 2px inset;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+  white-space: nowrap;
+}
+.v2 .tav-pi .pl-secondaire:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .tav-pi .pl-primaire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 6px;
+  background: var(--pl-plein-1);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-sur-plein);
+  white-space: nowrap;
+}
+.v2 .tav-pi .pl-primaire:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .tav-pi .pl-champ {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 6px;
+  background: var(--pl-fond-1);
+  font: inherit;
+  font-size: 14px;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .pl-champ:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #525cdb;
+}
+.v2 .tav-pi .pl-vide {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-vide);
+}
+
+/* ——— 768 et moins : la carte prend toute la largeur sans rayon, la page défile en entier ——— */
+@media (max-width: 768px) {
+  .v2 .tav-pi {
+    padding: 0;
+    background: var(--pl-fond-1);
+  }
+  .v2 .tav-pi .pl-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+}
+.v2 .tav-pi {
+  --in-grille: #323035;
+  --in-raye-1: #1a191b;
+  --in-raye-2: #121113;
+  --in-axe: #b5b2bc;
+  --in-moyenne: #49474e;
+  --in-badge-haut-fond: #18100f;
+  --in-badge-haut-texte: #ffd2cc;
+  --in-badge-bas-fond: #0c130e;
+  --in-badge-bas-texte: #b2f2c0;
+}
+html[data-v2-theme="light"] .v2 .tav-pi {
+  --in-grille: #e0e0e9;
+  --in-raye-1: #fff;
+  --in-raye-2: #f9f9fc;
+  --in-axe: #636370;
+  --in-moyenne: #cdcddb;
+  --in-badge-haut-fond: #fff7f7;
+  --in-badge-haut-texte: #651818;
+  --in-badge-bas-fond: #f3fcf5;
+  --in-badge-bas-texte: #074022;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav-pi {
+    --in-grille: #e0e0e9;
+    --in-raye-1: #fff;
+    --in-raye-2: #f9f9fc;
+    --in-axe: #636370;
+    --in-moyenne: #cdcddb;
+    --in-badge-haut-fond: #fff7f7;
+    --in-badge-haut-texte: #651818;
+    --in-badge-bas-fond: #f3fcf5;
+    --in-badge-bas-texte: #074022;
+  }
+}
+
+/* barre de titre 86 : h1 Whyte 24/400/32 à 24,30 ; boutons bordés 30 à droite (gap 8), 24 du bord */
+.v2 .tav-pi .in-tete {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  height: 86px;
+  padding: 30px 24px 0;
+}
+.v2 .tav-pi .in-h1 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+.v2 .tav-pi .in-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 6px 12px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 6px;
+  background: var(--pl-fond-1);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-bouton > svg {
+  flex: none;
+  color: var(--pl-icone-1);
+}
+.v2 .tav-pi .in-bouton-lib {
+  font-weight: 550;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-bouton-val {
+  font-weight: 400;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-menu .pl-menu-item {
+  height: 36px;
+  padding: 8px;
+  font-size: 14px;
+}
+.v2 .tav-pi .in-menu--36 .in-menu-deux {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  height: 54px;
+  line-height: 20px;
+}
+.v2 .tav-pi .in-menu-deux span + span {
+  font-size: 12px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-indispo {
+  color: var(--pl-texte-2);
+}
+
+/* zone défilante : filet haut, p 0 24 120 ; sections, titre collant */
+.v2 .tav-pi .in-defile {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 0 24px 120px;
+  border-top: 1px solid var(--pl-bord-2);
+}
+.v2 .tav-pi .in-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .tav-pi .in-section-titre {
+  position: sticky;
+  top: -12px;
+  z-index: 3;
+  height: 60px;
+  padding: 26px 0 12px;
+  background: var(--pl-fond-1);
+}
+.v2 .tav-pi .in-section-titre button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-section-titre h2 {
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+}
+.v2 .tav-pi .in-section-titre svg {
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-grille {
+  display: grid;
+  gap: 42px;
+}
+.v2 .tav-pi .in-grille--3 {
+  grid-template-columns: repeat(3, minmax(0, 315.66px));
+}
+.v2 .tav-pi .in-grille--2 {
+  grid-template-columns: repeat(2, minmax(0, 494.5px));
+}
+/* carte : p 12, r 8, sans fond ni bordure ; gap 24 */
+.v2 .tav-pi .in-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 4px 0 12px;
+  border-radius: 8px;
+}
+.v2 .tav-pi .in-carte-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-carte-tete svg {
+  color: var(--pl-icone-2);
+}
+.v2 .tav-pi .in-valeur {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-top: -16px;
+}
+.v2 .tav-pi .in-valeur-chiffre {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 36px;
+  color: var(--pl-texte-1);
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-valeur-suffixe {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-graphe {
+  display: block;
+  max-width: 100%;
+  overflow: visible;
+}
+.v2 .tav-pi .in-axe-y {
+  font-size: 14px;
+  fill: var(--in-axe);
+}
+.v2 .tav-pi .in-axe-x {
+  font-size: 12px;
+  fill: var(--in-axe);
+}
+.v2 .tav-pi .in-moy {
+  display: inline-flex;
+  gap: 2px;
+  padding: 0 4px 2px;
+  border: 1px solid var(--pl-bord-2);
+  border-radius: 4px;
+  background: var(--pl-fond-1);
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-moy strong {
+  font-weight: 400;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-note,
+.v2 .tav-pi .in-texte {
+  margin-top: -12px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-texte {
+  margin: 0 0 8px;
+}
+/* répartition : 5 lignes ; icône 18 + nom 12/400/16 au-dessus d'une barre de 8 r 2 ; valeur 12/550 à droite */
+.v2 .tav-pi .in-repartition {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.v2 .tav-pi .in-rep-ligne {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 8px;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+.v2 .tav-pi .in-rep-haut {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 64px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+  min-width: 0;
+}
+.v2 .tav-pi .in-rep-nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-rep-barre {
+  grid-column: 1;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--pl-rempli-1);
+  overflow: hidden;
+}
+.v2 .tav-pi .in-rep-barre span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+.v2 .tav-pi .in-rep-val {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-badge {
+  padding: 1px 4px 1px 1px;
+  border-radius: 4px;
+  background: var(--pl-rempli-1);
+  font-weight: 400;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-badge--haut {
+  background: var(--in-badge-haut-fond);
+  color: var(--in-badge-haut-texte);
+}
+.v2 .tav-pi .in-badge--bas {
+  background: var(--in-badge-bas-fond);
+  color: var(--in-badge-bas-texte);
+}
+.v2 .tav-pi .in-vide-boite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 24px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 8px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-vide-boite strong {
+  font-weight: 550;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-lien {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-bleu-texte-2);
+}
+.v2 .tav-pi .in-erreur {
+  font-size: 12px;
+  color: var(--pl-rouge-icone);
+}
+/* tableau en grille CSS (pas de <table>) : lignes de 42, p 4 20, gap 0 16 ; en-têtes 12/550 ; 1re cellule 12/550 */
+.v2 .tav-pi .in-tableau {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.v2 .tav-pi .in-tab-ligne {
+  display: grid;
+  grid-template-columns: var(--in-cols);
+  align-items: center;
+  column-gap: 16px;
+  min-height: 42px;
+  padding: 4px 20px;
+  border-top: 1px solid var(--pl-bord-1);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-tab-ligne > span,
+.v2 .tav-pi .in-tab-ligne > a {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tav-pi .in-tab-tete {
+  border-top: 0;
+  font-weight: 550;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-tab-total {
+  font-weight: 550;
+  background: var(--pl-fond-2);
+}
+.v2 .tav-pi .in-tab-objet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 8px 0;
+  font-weight: 550;
+}
+.v2 .tav-pi .in-tab-objet svg {
+  flex: none;
+  color: var(--pl-icone-1);
+}
+.v2 .tav-pi .in-tab-ligne > span:has(.pl-ancre) {
+  overflow: visible;
+  justify-self: end;
+}
+.v2 .tav-pi .in-prevu {
+  color: var(--pl-texte-2);
+  font-style: italic;
+}
+.v2 .tav-pi .in-sous {
+  color: #e79d00;
+}
+.v2 .tav-pi .in-edition {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .tav-pi .in-edition .pl-champ {
+  width: 64px;
+  height: 26px;
+  font-size: 12px;
+}
+.v2 .tav-pi .in-section + .in-section {
+  margin-top: 24px;
+}
+/* pied : « Customers helped » Whyte 20/400/28 et compteur à volets (demi-cases 28×17,5) */
+.v2 .tav-pi .in-pied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: 48px;
+  padding: 24px 0;
+}
+.v2 .tav-pi .in-pied-sur {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-pied-titre {
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 28px;
+}
+.v2 .tav-pi .in-volets {
+  display: inline-flex;
+  gap: 4px;
+}
+.v2 .tav-pi .in-volet {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 35px;
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 4px;
+  background: linear-gradient(var(--pl-fond-2) 50%, var(--pl-fond-1) 50%);
+  font-size: 20px;
+  line-height: 20px;
+}
+.v2 .tav-pi .in-volet::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 0.5px solid var(--pl-bord-1);
+}
+
+/* ——— 390 : boutons sur deux lignes à droite, grille d'une colonne ——— */
+@media (max-width: 768px) {
+  .v2 .tav-pi .in-tete {
+    flex-direction: column;
+    height: auto;
+    padding: 16px;
+  }
+  .v2 .tav-pi .in-defile {
+    padding: 0 16px 80px;
+  }
+  .v2 .tav-pi .in-grille--3,
+  .v2 .tav-pi .in-grille--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .v2 .tav-pi .in-tableau {
+    overflow-x: auto;
+  }
+  .v2 .tav-pi .in-tab-ligne {
+    min-width: 720px;
+  }
+}
+
+/* ——— « Ask Agent » (26×26, icône verte, libellé au survol), pastille « Investigate this spike » ——— */
+.v2 .tav-pi .in-carte-tete .pl-pousse {
+  flex: 1;
+}
+.v2 .tav-pi .in-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  min-width: 26px;
+  padding: 0 5px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 475;
+  color: var(--pl-vert-icone);
+}
+.v2 .tav-pi .in-agent-lib {
+  display: none;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-agent:hover,
+.v2 .tav-pi .in-agent:focus-visible {
+  background: var(--pl-rempli-1);
+}
+.v2 .tav-pi .in-agent:hover .in-agent-lib,
+.v2 .tav-pi .in-agent:focus-visible .in-agent-lib {
+  display: inline;
+}
+.v2 .tav-pi .in-pique {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  background: #e2f9e8;
+  font-size: 12px;
+  font-weight: 475;
+  color: #074022;
+  white-space: nowrap;
+}
+/* carte de chaleur */
+.v2 .tav-pi .in-chaleur {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .tav-pi .in-chaleur-grille {
+  display: grid;
+  row-gap: 1.5px;
+  column-gap: 1.5px;
+}
+.v2 .tav-pi .in-chaleur-ligne {
+  display: contents;
+}
+.v2 .tav-pi .in-chaleur-nom,
+.v2 .tav-pi .in-chaleur-x {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--in-axe);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tav-pi .in-chaleur-case {
+  height: 18.8px;
+  border-radius: 2px;
+  border: 1px solid var(--in-grille);
+  background: var(--pl-fond-1);
+}
+.v2 .tav-pi .in-chaleur-case[data-palier="0"] { background: color-mix(in oklab, #5c67f4 12%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tav-pi .in-chaleur-case[data-palier="1"] { background: color-mix(in oklab, #5c67f4 32%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tav-pi .in-chaleur-case[data-palier="2"] { background: color-mix(in oklab, #5c67f4 52%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tav-pi .in-chaleur-case[data-palier="3"] { background: color-mix(in oklab, #5c67f4 76%, var(--pl-fond-1)); border-color: transparent; }
+.v2 .tav-pi .in-chaleur-case[data-palier="4"] { background: #5c67f4; border-color: transparent; }
+.v2 .tav-pi .in-chaleur-legende {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-chaleur-legende span:first-child {
+  margin-right: 6px;
+}
+.v2 .tav-pi .in-chaleur-legende span:last-child {
+  margin-left: 6px;
+}
+.v2 .tav-pi .in-chaleur-case--10 {
+  width: 10px;
+  height: 10px;
+}
+/* outils de tableau : recherche (« Search accounts ») et téléchargement 24 */
+.v2 .tav-pi .in-outils {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.v2 .tav-pi .in-recherche {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 320px;
+  max-width: 100%;
+  height: 40px;
+}
+.v2 .tav-pi .in-recherche svg {
+  position: absolute;
+  left: 12px;
+  color: var(--pl-icone-1);
+}
+.v2 .tav-pi .in-recherche input {
+  width: 100%;
+  height: 40px;
+  padding: 9px 12px 9px 38px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--pl-rempli-1);
+  font: inherit;
+  font-size: 14px;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-recherche input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #525cdb;
+}
+.v2 .tav-pi .in-telecharger {
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+}
+/* barre « Ask Sidekick Agent » flottante, centrée en bas de la carte */
+.v2 .tav-pi .pl-carte {
+  position: relative;
+}
+.v2 .tav-pi .in-sidekick {
+  position: absolute;
+  left: 50%;
+  bottom: 17px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  transform: translateX(-50%);
+  border: 1px solid var(--pl-bord-1);
+  border-radius: 12px;
+  background: var(--pl-fond-1);
+  box-shadow: rgba(0, 0, 0, 0.05) 0 1px 12px, rgba(0, 0, 0, 0.05) 0 0.5px 4px;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-sidekick-question {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .in-sidekick-question strong {
+  font-weight: 550;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-sidekick-question:hover {
+  background: var(--pl-rempli-1);
+}
+@media (max-width: 768px) {
+  .v2 .tav-pi .in-sidekick-question span {
+    display: none;
+  }
+}
+.v2 .tav-pi .pfl-vide {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--pl-texte-2);
+}
+.v2 .tav-pi .pfl-vide a {
+  color: var(--pl-texte-1);
+  text-decoration: underline;
+}
+
+/* ——— propre au Pilotage de Tavaro : les gestes du métier sans place dans la référence ——— */
+.v2 .tav-pi .in-grille > div {
+  min-width: 0;
+}
+.v2 .tav-pi .in-aide {
+  display: inline-flex;
+}
+/* « No data » de Plain : icône 14 + 12/400/16 text-neutral-2, centré sur la grille vide */
+.v2 .tav-pi .in-sans-donnee {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pl-texte-2);
+}
+/* étoile : même rond que « Ask Agent » (26×26), jaune quand la carte est épinglée */
+.v2 .tav-pi .in-epingle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: var(--pl-icone-2);
+}
+.v2 .tav-pi .in-epingle:hover {
+  background: var(--pl-rempli-1);
+}
+.v2 .tav-pi .in-epingle--actif {
+  color: #ffcb14;
+}
+.v2 .tav-pi .in-epingles {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tav-pi .in-epingles-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 4px 20px;
+  border-bottom: 1px solid var(--pl-bord-1);
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .tav-pi .in-epingles-ligne > svg {
+  flex: none;
+  color: #ffcb14;
+}
+.v2 .tav-pi .in-epingles-detail {
+  flex: 1;
+  min-width: 0;
+  color: var(--pl-texte-2);
+}
+/* sélection du tableau : barre de boutons bordés au gabarit des boutons du haut */
+.v2 .tav-pi .in-selection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 8px;
+}
+.v2 .tav-pi .in-selection-compte {
+  margin-right: 4px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--pl-texte-1);
+}
+.v2 .tav-pi .in-case {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: #5c67f4;
+  cursor: pointer;
+}
+.v2 .tav-pi .in-tab-ligne[data-choisi] {
+  background: var(--pl-rempli-1);
+}
+.v2 .tav-pi button.in-tab-objet {
+  text-align: left;
+}
+.v2 .tav-pi .in-tab-gestes {
+  display: inline-flex;
+  gap: 12px;
+}
+/* cotes reprises sur la superposition avec 1440-reel-*.png : en-tête de carte à 164 du haut de la carte
+   (et non 168), valeur à 197 (et non 205) */
+.v2 .tav-pi .in-carte {
+  padding-top: 0;
+}
+.v2 .tav-pi .in-valeur {
+  margin-top: -20px;
+}
+/* colonnes étroites (1024) : le titre et l'avis cèdent la place aux ronds, jamais de débord */
+.v2 .tav-pi .in-carte-tete {
+  min-width: 0;
+}
+.v2 .tav-pi .in-carte-tete > span:first-child,
+.v2 .tav-pi .in-pique {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tav-pi .in-pique > svg,
+.v2 .tav-pi .in-epingle,
+.v2 .tav-pi .in-agent,
+.v2 .tav-pi .in-aide {
+  flex: none;
+}

@@ -96,11 +96,55 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Réglages et avis", href: `${RACINE}/reput/reglages` },
     { libelle: "Urgences et escalade", href: `${RACINE}/reput/urgences` },
   ]),
-  m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building),
-  m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront),
-  m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp),
-  m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile),
-  m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock),
+  /* 02/11/2026 — refonte : sept sous-pages, chacune la copie d'une page réelle (docs/refonte-metiers/cloud/VARELO.md) */
+  m("varelo", "VARELO", "Référentiel du groupe", "Sociétés, lots et objets du groupe", Building, [
+    { libelle: "Ce matin", href: `${RACINE}/varelo`, exact: true },
+    { libelle: "Référentiel", href: `${RACINE}/varelo/referentiel` },
+    { libelle: "Finance", href: `${RACINE}/varelo/finance` },
+    { libelle: "Contrats", href: `${RACINE}/varelo/contrats` },
+    { libelle: "Opérations", href: `${RACINE}/varelo/operations` },
+    { libelle: "Groupe", href: `${RACINE}/varelo/groupe` },
+    { libelle: "Sources et structure", href: `${RACINE}/varelo/sources` },
+  ]),
+  /* 02/11/2026 — refonte de TAVARO : une sous-page par usage (docs/refonte-metiers/cloud/TAVARO.md) */
+  m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/tavaro`, exact: true },
+    { libelle: "Retours à facturer", href: `${RACINE}/tavaro/retours` },
+    { libelle: "Parc et atelier", href: `${RACINE}/tavaro/parc` },
+    { libelle: "Amendes, péages, contestations", href: `${RACINE}/tavaro/amendes` },
+    { libelle: "Incidents", href: `${RACINE}/tavaro/incidents` },
+    { libelle: "Réseau et flotte", href: `${RACINE}/tavaro/reseau` },
+    { libelle: "Pilotage", href: `${RACINE}/tavaro/pilotage` },
+    { libelle: "Réglages", href: `${RACINE}/tavaro/reglages` },
+  ]),
+  /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
+  m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/lorani`, exact: true },
+    { libelle: "Courrier à ranger", href: `${RACINE}/lorani/courrier` },
+    { libelle: "Questions et réponses", href: `${RACINE}/lorani/questions` },
+    { libelle: "À viser", href: `${RACINE}/lorani/a-viser` },
+    { libelle: "Honoraires et temps", href: `${RACINE}/lorani/honoraires` },
+    { libelle: "Réglages", href: `${RACINE}/lorani/reglages` },
+  ]),
+  /* 02/11/2026 — refonte : une page par usage (docs/refonte-metiers/cloud/TIROMA.md) */
+  m("tiroma", "TIROMA", "Cabinet dentaire", "Créneaux, fauteuils et liste d'attente", Smile, [
+    { libelle: "Aujourd'hui", href: `${RACINE}/tiroma`, exact: true },
+    { libelle: "Créneaux et appels", href: `${RACINE}/tiroma/creneaux` },
+    { libelle: "Fauteuils", href: `${RACINE}/tiroma/fauteuils` },
+    { libelle: "Plans et devis", href: `${RACINE}/tiroma/plans` },
+    { libelle: "Avant les rendez-vous", href: `${RACINE}/tiroma/avant` },
+    { libelle: "Pilotage", href: `${RACINE}/tiroma/pilotage` },
+    { libelle: "Réglages", href: `${RACINE}/tiroma/reglages` },
+  ]),
+  /* 30/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
+  m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock, [
+    { libelle: "Vue d'ensemble", href: `${RACINE}/tamila`, exact: true },
+    { libelle: "Arrivées", href: `${RACINE}/tamila/arrivees` },
+    { libelle: "Honoraires du cabinet", href: `${RACINE}/tamila/honoraires` },
+    { libelle: "Pilotage", href: `${RACINE}/tamila/pilotage` },
+    { libelle: "Conformité du cabinet", href: `${RACINE}/tamila/conformite` },
+    { libelle: "Réglages", href: `${RACINE}/tamila/reglages` },
+  ]),
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("daliro", "DALIRO", "Chantiers", "Chantiers, envois et accords", HardHat, [
     { libelle: "Vue d'ensemble", href: `${RACINE}/daliro`, exact: true },
@@ -108,6 +152,7 @@ export const MODULES: ModuleV2[] = [
     { libelle: "À ranger", href: `${RACINE}/daliro/a-ranger` },
     { libelle: "À faire", href: `${RACINE}/daliro/a-faire` },
     { libelle: "Avenants et situations", href: `${RACINE}/daliro/avenants` },
+    { libelle: "Approvisionnement", href: `${RACINE}/daliro/approvisionnement` },
     { libelle: "Annuaire", href: `${RACINE}/daliro/annuaire` },
     { libelle: "Équipes", href: `${RACINE}/daliro/equipes` },
     { libelle: "Réglages", href: `${RACINE}/daliro/reglages` },

@@ -52,7 +52,7 @@ function euros(v: number | null | undefined): string {
 
 const SOURCES_COTE: [SourceCote, string][] = [["argus", "Argus"], ["reprise_concession", "Reprise d'une concession"], ["saisie", "Estimation interne"], ["autre", "Autre"]];
 
-function DialogueCote({ vehicule, fermer, noter }: { vehicule: VehiculePlan | null; fermer: () => void; noter: (v: VehiculePlan, valeur: number, source: SourceCote) => Promise<void> }) {
+export function DialogueCote({ vehicule, fermer, noter }: { vehicule: VehiculePlan | null; fermer: () => void; noter: (v: VehiculePlan, valeur: number, source: SourceCote) => Promise<void> }) {
   const [valeur, setValeur] = useState("");
   const [source, setSource] = useState<SourceCote>("argus");
   const [occupe, setOccupe] = useState(false);
@@ -112,7 +112,7 @@ function DialogueCote({ vehicule, fermer, noter }: { vehicule: VehiculePlan | nu
   );
 }
 
-function DialogueControle({ contrat, fermer, noter }: { contrat: ContratRisque | null; fermer: () => void; noter: (c: ContratRisque, i: Conformite, p: Conformite, r: boolean | null) => Promise<void> }) {
+export function DialogueControle({ contrat, fermer, noter }: { contrat: ContratRisque | null; fermer: () => void; noter: (c: ContratRisque, i: Conformite, p: Conformite, r: boolean | null) => Promise<void> }) {
   const [identite, setIdentite] = useState<Conformite>("conforme");
   const [permis, setPermis] = useState<Conformite>("conforme");
   const [recent, setRecent] = useState<"oui" | "non" | "inconnu">("inconnu");

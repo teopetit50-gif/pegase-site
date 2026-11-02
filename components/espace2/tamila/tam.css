@@ -1,0 +1,530 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — le socle des copies 1:1 de Linear (02/11/2026, règles de Teo :
+   docs/refonte-metiers/REGLES.md). Préfixe tam-, propre à Tamila : le
+   gabarit partagé components/espace2/lin n'est pas touché.
+
+   Jetons : les couleurs calculées de Linear, thème sombre et clair, telles
+   que relevées (releves/linear-*.md, session références du 01/11), les
+   mêmes que le socle dal- de Daliro (copie-daliro-056765). Aucune n'est
+   estimée ; là où un relevé ne donne qu'un thème, la ligne le dit.
+
+   Cadre : la carte `main` de Linear (linear-my-issues.md) — rayon 12,
+   bordure 0.5, ombre double en clair, simple en sombre. Elle se pose dans
+   le <main> de la coquille d'espace2 (barre du haut 48, barres latérales
+   304), qui tient la place de la barre latérale de Linear (244) : elle
+   n'appartient pas à la page copiée. Marges 8 8 8 0 (Linear : 8 8 36 0,
+   les 28 du bas portent la barre « Agent », absente ici).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tam {
+  /* sombre */
+  --tam-app: lch(2.595 0.4 272);
+  --tam-carte: lch(5.52 0.4 272);
+  --tam-carte-bord: lch(13.08 1.48 272);
+  --tam-carte-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tam-t1: lch(100 0 272);
+  --tam-t2: lch(90.451 1.2 272);
+  --tam-t3: lch(61.803 1.2 272);
+  --tam-t4: lch(39.452 1.425 272);
+  --tam-actif: lch(16.706 0.979 272);
+  --tam-inactif: lch(10.149 0.593 272);
+  --tam-bouton: lch(10.149 0.689 272);
+  --tam-survol: lch(9.345 0.85 272);
+  --tam-survol-onglet: lch(13.861 1.043 272);
+  --tam-groupe: lch(9.232 0.85 272);
+  --tam-puce-bord: lch(16.32 1.48 272);
+  --tam-menu: lch(12.72 0.85 272);
+  --tam-menu-bord: lch(25.68 1.93 272);
+  --tam-menu-ombre: lch(0 0 0 / 0.125) 0 3px 8px 0, lch(0 0 0 / 0.125) 0 2px 5px 0, lch(0 0 0 / 0.125) 0 1px 1px 0;
+  --tam-menu-texte: lch(91.178 1.425 272);
+  --tam-menu-icone: lch(64.714 1.425 272);
+  --tam-menu-survol: lch(20.032 1.93 272);
+  --tam-equipe: lch(60.135 63.97 86.502);
+  --tam-equipe-fond: lch(60.135 63.97 86.502 / 0.175);
+  --tam-rouge: lch(58% 73 29);
+  --tam-violet: #6d78d5;
+  /* ligne ouverte à droite (linear-triage.md : clair lch(92.94 0.5 282) ; sombre non relevé : le pas du survol d'onglet) */
+  --tam-choisi: lch(13.861 1.043 272);
+  /* puces (étiquette, projet, cycle, échéance) : bord 0.5 (linear-my-issues.md) */
+  --tam-puce-texte: lch(61.803 1.2 272);
+  /* en-tête de groupe (linear-my-issues.md, complément 01/11) */
+  --tam-groupe-libelle: lch(90.826 1.425 272);
+  --tam-groupe-compte: lch(63.304 1.425 272);
+  --tam-groupe-dates: lch(39.452 1.425 272);
+  /* case à cocher 14×14 (bd 1px, clair #7c7c7c ; sombre non relevé : t4) */
+  --tam-case: lch(39.452 1.425 272);
+  --tam-urgent: lch(66 80 48);
+  /* cercle « Todo » et triangle de repli : sombre lu sur 1440-reel-sombre.png (217 et 51), clair relevé (#a6a6a6, #c9c9c9) */
+  --tam-todo: lch(86.9 0 272);
+  --tam-replier: lch(21 0 272);
+  --tam-en-cours: lch(80 90 85);
+  --tam-fait: #5e6ad2;
+  --tam-triage: #ff7336;
+  --tam-vert: lch(67.2 64.37 141.95);
+  --tam-bleu: rgb(38, 181, 206);
+  --tam-bleu-fond: lch(67.5 38.933 217.444 / 0.175);
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--tam-app);
+  color: var(--tam-t1);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-v2-theme="light"] .v2 .tam {
+  --tam-app: lch(94.44 0.5 282);
+  --tam-carte: lch(97.94 0.5 282);
+  --tam-carte-bord: lch(89.84 0 282);
+  --tam-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tam-t1: lch(9.794 0 282);
+  --tam-t2: lch(19.588 1.25 282);
+  --tam-t3: lch(39.176 1.25 282);
+  --tam-t4: lch(64.64 1.25 282);
+  --tam-actif: lch(93.483 0.5 282);
+  --tam-inactif: lch(99.997 0.5 282);
+  --tam-bouton: lch(99.997 0.5 282);
+  --tam-survol: lch(94.44 0.5 282);
+  --tam-survol-onglet: lch(94.854 0.5 282);
+  --tam-groupe: lch(94.44 0.5 282);
+  --tam-puce-bord: lch(86.5 0 282);
+  --tam-menu: lch(100 0 282);
+  --tam-menu-bord: lch(86.5 0 282);
+  --tam-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+  --tam-menu-texte: lch(9.794 0 282);
+  --tam-menu-icone: lch(39.176 1.25 282);
+  --tam-menu-survol: lch(94.854 0.5 282);
+  --tam-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+  --tam-choisi: lch(92.94 0.5 282);
+  --tam-puce-texte: lch(39.176 1.25 282);
+  --tam-groupe-libelle: lch(18.888 1.25 282);
+  --tam-groupe-compte: lch(37.776 1.25 282);
+  --tam-groupe-dates: lch(62.33 1.25 282);
+  --tam-case: #7c7c7c;
+  --tam-todo: #a6a6a6;
+  --tam-replier: #c9c9c9;
+  --tam-vert: lch(60 64.37 141.95);
+  --tam-bleu-fond: lch(67.5 38.933 217.444 / 0.125);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tam {
+    --tam-app: lch(94.44 0.5 282);
+    --tam-carte: lch(97.94 0.5 282);
+    --tam-carte-bord: lch(89.84 0 282);
+    --tam-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tam-t1: lch(9.794 0 282);
+    --tam-t2: lch(19.588 1.25 282);
+    --tam-t3: lch(39.176 1.25 282);
+    --tam-t4: lch(64.64 1.25 282);
+    --tam-actif: lch(93.483 0.5 282);
+    --tam-inactif: lch(99.997 0.5 282);
+    --tam-bouton: lch(99.997 0.5 282);
+    --tam-survol: lch(94.44 0.5 282);
+    --tam-survol-onglet: lch(94.854 0.5 282);
+    --tam-groupe: lch(94.44 0.5 282);
+    --tam-puce-bord: lch(86.5 0 282);
+    --tam-menu: lch(100 0 282);
+    --tam-menu-bord: lch(86.5 0 282);
+    --tam-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+    --tam-menu-texte: lch(9.794 0 282);
+    --tam-menu-icone: lch(39.176 1.25 282);
+    --tam-menu-survol: lch(94.854 0.5 282);
+    --tam-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+    --tam-choisi: lch(92.94 0.5 282);
+    --tam-puce-texte: lch(39.176 1.25 282);
+    --tam-groupe-libelle: lch(18.888 1.25 282);
+    --tam-groupe-compte: lch(37.776 1.25 282);
+    --tam-groupe-dates: lch(62.33 1.25 282);
+    --tam-case: #7c7c7c;
+    --tam-todo: #a6a6a6;
+    --tam-replier: #c9c9c9;
+  --tam-todo: #a6a6a6;
+  --tam-replier: #c9c9c9;
+    --tam-vert: lch(60 64.37 141.95);
+    --tam-bleu-fond: lch(67.5 38.933 217.444 / 0.125);
+  }
+}
+
+.v2 .tam *,
+.v2 .tam *::before,
+.v2 .tam *::after {
+  box-sizing: border-box;
+}
+.v2 .tam :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.v2 .tam :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .tam :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ——— la carte ——— */
+.v2 .tam .tam-carte {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 48px - 16px);
+  background: var(--tam-carte);
+  border: 0.5px solid var(--tam-carte-bord);
+  border-radius: 12px;
+  box-shadow: var(--tam-carte-ombre);
+  overflow: hidden;
+}
+.v2 .tam .tam-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ——— l'en-tête : ligne du titre (44, filet bas) puis ligne des onglets (44) ——— */
+.v2 .tam .tam-tete {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tam .tam-ligne1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  height: 44px;
+  padding: 7px 8px 0;
+  border-bottom: 0.5px solid var(--tam-carte-bord);
+}
+.v2 .tam .tam-ligne2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  height: 43.5px;
+  padding: 7px 8px 0;
+}
+.v2 .tam .tam-fil {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tam-t1);
+  white-space: nowrap;
+}
+.v2 .tam .tam-fil svg {
+  flex: none;
+}
+.v2 .tam .tam-pousse {
+  flex: 1;
+}
+.v2 .tam .tam-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0 2px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t2);
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .tam .tam-rond svg {
+  width: 14px;
+  height: 14px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-rond:hover,
+.v2 .tam .tam-rond[aria-expanded="true"] {
+  background: var(--tam-survol-onglet);
+}
+.v2 .tam .tam-rond--plein {
+  background: var(--tam-bouton);
+}
+.v2 .tam .tam-onglet {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tam-inactif);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t3);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .tam .tam-onglet:hover {
+  background: var(--tam-survol-onglet);
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-onglet[aria-current="page"],
+.v2 .tam .tam-onglet[aria-selected="true"] {
+  background: var(--tam-actif);
+  color: var(--tam-t1);
+}
+.v2 .tam :focus-visible {
+  outline: 2px solid var(--tam-violet);
+  outline-offset: -1px;
+}
+
+/* ——— le menu « … » (Team actions, linear-home.md) ——— */
+.v2 .tam .tam-menu {
+  position: absolute;
+  z-index: 40;
+  min-width: 175px;
+  padding: 6px 0;
+  background: var(--tam-menu);
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 12px;
+  box-shadow: var(--tam-menu-ombre);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: var(--tam-menu-texte);
+}
+.v2 .tam .tam-menu-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 32px;
+  padding: 0 18px 0 14px;
+  font-weight: 450;
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .tam .tam-menu-option::before {
+  content: "";
+  position: absolute;
+  inset: 0 6px;
+  border-radius: 8px;
+  z-index: -1;
+}
+.v2 .tam .tam-menu-option:hover::before,
+.v2 .tam .tam-menu-option:focus-visible::before {
+  background: var(--tam-menu-survol);
+}
+.v2 .tam .tam-menu-option {
+  isolation: isolate;
+}
+.v2 .tam .tam-menu-option svg {
+  flex: none;
+  color: var(--tam-menu-icone);
+}
+.v2 .tam .tam-menu-sep {
+  height: 0.5px;
+  margin: 6px 0;
+  background: var(--tam-menu-bord);
+}
+
+/* ——— 768 et moins : la carte s'efface (Linear la pose plein écran) ——— */
+@media (max-width: 768px) {
+  .v2 .tam {
+    padding: 0;
+    background: var(--tam-carte);
+  }
+  .v2 .tam .tam-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .v2 .tam .tam-defile {
+    overflow: visible;
+  }
+  .v2 .tam .tam-rond,
+  .v2 .tam .tam-onglet {
+    height: 32px;
+  }
+  .v2 .tam .tam-rond {
+    width: 32px;
+  }
+}
+
+
+/* ——— l'avatar (18×18 rond) ——— */
+.v2 .tam .tam-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1;
+}
+.v2 .tam .tam-sans-avatar {
+  flex: none;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-menu-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— la fenêtre d'un geste (TamFenetre.tsx) : jetons du menu de Linear ——— */
+.v2 .tam.tam-voile {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 0;
+  padding: 12vh 16px 16px;
+  background: lch(0 0 0 / 0.4);
+}
+.v2 .tam .tam-fenetre {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 560px;
+  max-height: 76vh;
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 12px;
+  background: var(--tam-menu);
+  box-shadow: var(--tam-menu-ombre);
+  color: var(--tam-menu-texte);
+}
+.v2 .tam .tam-fenetre--large {
+  max-width: 760px;
+}
+.v2 .tam .tam-fenetre-tete {
+  padding: 16px 18px 8px;
+}
+.v2 .tam .tam-fenetre-tete h2 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--tam-t1);
+}
+.v2 .tam .tam-fenetre-tete p {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-fenetre-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 18px 16px;
+  overflow: auto;
+}
+.v2 .tam .tam-fenetre-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 0.5px solid var(--tam-menu-bord);
+}
+.v2 .tam .tam-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-champ-libelle {
+  font-weight: 500;
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-champ-aide {
+  color: var(--tam-t3);
+  line-height: 16px;
+}
+.v2 .tam .tam-champ :is(input, select, textarea) {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 8px;
+  background: var(--tam-carte);
+  font: inherit;
+  font-size: 13px;
+  color: var(--tam-t1);
+  outline: none;
+}
+.v2 .tam .tam-champ :is(input, select, textarea):focus {
+  border-color: var(--tam-violet);
+}
+.v2 .tam .tam-champs-ligne {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.v2 .tam .tam-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 9999px;
+  background: var(--tam-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t2);
+  white-space: nowrap;
+}
+.v2 .tam .tam-bouton:hover {
+  background: var(--tam-survol-onglet);
+  color: var(--tam-t1);
+}
+.v2 .tam .tam-bouton--principal {
+  border-color: transparent;
+  background: var(--tam-violet);
+  color: #fff;
+}
+.v2 .tam .tam-bouton--principal:hover {
+  background: var(--tam-violet);
+  color: #fff;
+  filter: brightness(1.08);
+}
+.v2 .tam .tam-bouton--danger {
+  border-color: transparent;
+  background: var(--tam-rouge);
+  color: #fff;
+}
+.v2 .tam .tam-bouton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .tam .tam-note {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--tam-groupe);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 17px;
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-note[data-teinte="rouge"] {
+  color: var(--tam-rouge);
+}
+@media (max-width: 520px) {
+  .v2 .tam .tam-champs-ligne {
+    grid-template-columns: 1fr;
+  }
+}

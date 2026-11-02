@@ -8,7 +8,8 @@
    réponse préparée. */
 
 import { useEffect, useState } from "react";
-import { ExternalLink, MapPin } from "lucide-react";
+import { ExternalLink, FileText, Landmark, MapPin } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point as PointLin, Rangee, Rangees, SousLigne, SousListe, Vide, useVolet } from "@/components/espace2/lin/Volet";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
@@ -47,6 +48,7 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
+  const volet = useVolet();
   const plu = dossier.plu.find((x) => x.projet_id === projet.id) ?? null;
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -93,6 +95,156 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
   };
 
   const z = plu?.zones[0];
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les zones touchées, les servitudes par catégorie et les prescriptions,
+     une par ligne ; document, localisation, règlement et servitudes en détail dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const trouve = plu?.statut === "trouve" && !!z;
+    const cx = plu ? lireComplements(plu) : null;
+    const lus = !!plu?.complements_statut && plu.complements_statut !== "a_faire" && plu.complements_statut !== "en_cours";
+    const reglement = trouve && plu?.reglement_url ? (
+      <a className="lvp-bouton" style={{ textDecoration: "none" }} href={plu.reglement_url} target="_blank" rel="noopener noreferrer">
+        <ExternalLink aria-hidden="true" /> Règlement de la zone (PDF)
+      </a>
+    ) : null;
+    return (
+      <Partie
+        titre="Règles d’urbanisme"
+        compte={trouve && plu?.zone ? `zone ${plu.zone}` : null}
+        gestes={
+          <>
+            {reglement}
+            <Bouton icone={<MapPin aria-hidden="true" />} disabled={!peutEcrire || envoi || enCours || !localisable} onClick={() => void chercher()}>
+              {plu ? "Chercher à nouveau" : "Trouver le PLU"}
+            </Bouton>
+          </>
+        }
+        avis={
+          (plu && !enCours && !trouve) || (trouve && lus && (plu?.secteur_protege || cx?.ppr)) || erreur ? (
+            <>
+              {plu && !enCours && !trouve ? <Avis teinte={plu.statut === "erreur" ? "rouge" : "ambre"}>{plu.erreur ?? ETAPES[plu.statut]}</Avis> : null}
+              {trouve && lus && plu?.secteur_protege ? <Avis teinte="ambre">Secteur protégé : l’avis de l’architecte des Bâtiments de France est requis et le délai d’instruction est majoré (C. urb., art. R423-24).</Avis> : null}
+              {trouve && lus && cx?.ppr ? <Avis teinte="ambre">Plan de prévention des risques : son règlement s’impose au projet (C. env., art. L562-4).</Avis> : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </>
+          ) : null
+        }
+      >
+        {!plu ? (
+          <Vide>
+            {localisable
+              ? "Lorani localise l’adresse (ou la parcelle) et demande au Géoportail de l’urbanisme la zone, le document d’urbanisme et le règlement qui s’appliquent."
+              : "Renseignez l’adresse ou une parcelle du projet : Lorani y cherchera la zone du PLU et son règlement."}
+          </Vide>
+        ) : enCours ? (
+          <p className="lvp-resume" role="status">
+            <Loader variant="spin" /> {ETAPES[plu.statut]}
+            {suivis >= SUIVIS_MAX ? " Le service tarde : Lorani reprendra la recherche toutes les cinq minutes." : ""}
+          </p>
+        ) : trouve && z && cx ? (
+          <>
+            <p className="lvp-resume">
+              {[plu.document?.titre, plu.document?.du_type].filter(Boolean).join(" · ")}
+              {plu.document ? ". " : ""}
+              Localisé {plu.methode === "parcelle" ? "par la parcelle" : "par l’adresse"} : {plu.point_libelle ?? "—"}
+              {plu.point_score !== null && plu.methode === "adresse" ? ` (confiance ${Math.round(plu.point_score * 100)} %)` : ""} · le {dateCourte(plu.trouve_le ?? plu.demande_le)}.
+            </p>
+            {plu.complements_statut === "en_cours" ? (
+              <p className="lvp-resume" role="status"><Loader variant="spin" /> Servitudes et risques en cours de lecture (Géoportail de l’urbanisme, Géorisques)…</p>
+            ) : lus ? (
+              <p className="lvp-resume">
+                {cx.sup.length ? `${cx.sup.length} servitude${cx.sup.length > 1 ? "s" : ""} d’utilité publique à cet endroit.` : "Aucune servitude d’utilité publique publiée à cet endroit."}
+                {cx.risques.length ? ` Risques : ${cx.risques.join(" · ")}.` : ""}
+                {cx.r.erreurs?.length ? ` Non lus : ${cx.r.erreurs.join(" ; ")}.` : ""}
+              </p>
+            ) : null}
+            <Liste>
+              <Groupe nom="Zones" compte={plu.zones.length}>
+                {plu.zones.map((x, i) => (
+                  <Ligne
+                    key={i}
+                    cle={`plu-zone:${i}`}
+                    libelle={`Zone ${x.libelle ?? ""}${x.libelong ? `, ${x.libelong}` : ""}`}
+                    icone={<MapPin />}
+                    id={x.libelle ?? undefined}
+                    titre={x.libelong || `Zone ${x.libelle ?? ""}`}
+                    second={x.typezone ? TYPES_ZONE[x.typezone] ?? `zone ${x.typezone}` : null}
+                    droite={<Pilule teinte={i === 0 ? "bleu" : "gris"} icone={<PointLin teinte={i === 0 ? "bleu" : "gris"} />}>{i === 0 ? "Zone du projet" : "Touchée aussi"}</Pilule>}
+                  />
+                ))}
+              </Groupe>
+              {lus && cx.groupes.size ? (
+                <Groupe nom="Servitudes d’utilité publique" compte={cx.sup.length}>
+                  {[...cx.groupes.entries()].map(([cat, noms]) => (
+                    <Ligne
+                      key={cat}
+                      cle={`plu-servitude:${cat}`}
+                      libelle={`${cat}, ${noms.length} servitude${noms.length > 1 ? "s" : ""}`}
+                      icone={<Landmark />}
+                      id={cx.sup.find((s) => s.libelle_categorie === cat)?.categorie}
+                      titre={cat}
+                      second={`${noms.slice(0, 6).join(", ")}${noms.length > 6 ? `, et ${noms.length - 6} autre${noms.length - 6 > 1 ? "s" : ""}` : ""}`}
+                      date={noms.length > 1 ? String(noms.length) : null}
+                    />
+                  ))}
+                </Groupe>
+              ) : null}
+              {plu.prescriptions.length ? (
+                <Groupe nom="Prescriptions à cet endroit" compte={plu.prescriptions.length}>
+                  {plu.prescriptions.map((x, i) => (
+                    <Ligne key={i} cle={`plu-prescription:${i}`} libelle={x.libelle ?? "Prescription"} icone={<FileText />} id={x.typepsc ?? undefined} titre={x.libelle ?? "Prescription"} />
+                  ))}
+                </Groupe>
+              ) : null}
+            </Liste>
+
+            {/* ——— une zone : le document, la localisation et le règlement ——— */}
+            {plu.zones.map((x, i) => (
+              <Detail key={i} cle={`plu-zone:${i}`} titre={`Zone ${x.libelle ?? ""}`} sous={x.libelong}>
+                <Rangees>
+                  {x.typezone ? <Rangee libelle="Type">{TYPES_ZONE[x.typezone] ?? `zone ${x.typezone}`}</Rangee> : null}
+                  {plu.document ? <Rangee libelle="Document">{[plu.document.titre, plu.document.du_type].filter(Boolean).join(" · ") || "—"}</Rangee> : null}
+                  <Rangee libelle="Localisé">
+                    {plu.methode === "parcelle" ? "par la parcelle" : "par l’adresse"} : {plu.point_libelle ?? "—"}
+                    {plu.point_score !== null && plu.methode === "adresse" ? ` (confiance ${Math.round(plu.point_score * 100)} %)` : ""}
+                  </Rangee>
+                  <Rangee libelle="Le">{dateCourte(plu.trouve_le ?? plu.demande_le)}</Rangee>
+                </Rangees>
+                {i === 0 ? (
+                  plu.reglement_url ? (
+                    <Gestes>{reglement}</Gestes>
+                  ) : (
+                    <div className="lvp-note"><div>Le Géoportail ne donne pas de lien direct vers le règlement de ce document : déposez-le comme pièce « Règlement du PLU ».</div></div>
+                  )
+                ) : null}
+              </Detail>
+            ))}
+
+            {/* ——— une catégorie de servitudes : chacune, avec son assiette et son acte ——— */}
+            {lus ? [...cx.groupes.keys()].map((cat) => (
+              <Detail key={cat} cle={`plu-servitude:${cat}`} titre={cat} sous="Servitude d’utilité publique (Géoportail de l’urbanisme)">
+                <SousListe>
+                  {cx.sup.filter((s) => s.libelle_categorie === cat).map((s, i) => (
+                    <SousLigne key={i} titre={s.nom ?? s.categorie} second={[s.assiette, s.acte].filter(Boolean).join(" · ") || undefined} valeur={s.categorie} />
+                  ))}
+                </SousListe>
+              </Detail>
+            )) : null}
+
+            {/* ——— une prescription ——— */}
+            {plu.prescriptions.map((x, i) => (
+              <Detail key={i} cle={`plu-prescription:${i}`} titre={x.libelle ?? "Prescription"} sous="Prescription du document d’urbanisme à cet endroit">
+                <Rangees>
+                  <Rangee libelle="Type">{[x.typepsc, x.stypepsc].filter(Boolean).join(" · ") || "—"}</Rangee>
+                </Rangees>
+              </Detail>
+            ))}
+          </>
+        ) : null}
+      </Partie>
+    );
+  }
+
   return (
     <div className="esp-carte-corps">
       <div className="esp-section-titre">
@@ -157,11 +309,10 @@ export default function PluProjet({ projet, dossier, peutEcrire, agir }: {
 }
 
 /* Les servitudes d'utilité publique et les risques (b5_23). */
-function ServitudesRisques({ plu }: { plu: Plu }) {
+/* les servitudes rangées par catégorie, le plan de prévention des risques, les risques en phrases (les deux rendus) */
+function lireComplements(plu: Plu) {
   const sup = plu.servitudes ?? [];
   const r = plu.risques ?? {};
-  if (plu.complements_statut === "en_cours") return <p className="lor-sous" role="status"><Loader variant="spin" /> Servitudes et risques en cours de lecture (Géoportail de l’urbanisme, Géorisques)…</p>;
-  if (!plu.complements_statut || plu.complements_statut === "a_faire") return null;
   const groupes = new Map<string, string[]>();
   for (const s of sup) groupes.set(s.libelle_categorie, [...(groupes.get(s.libelle_categorie) ?? []), s.nom ?? s.categorie]);
   const ppr = sup.some((s) => s.categorie === "PM1" || s.categorie === "PM3");
@@ -171,6 +322,13 @@ function ServitudesRisques({ plu }: { plu: Plu }) {
     r.argiles ? `argiles : ${r.argiles.toLowerCase()}` : null,
     r.radon ? `radon : potentiel de catégorie ${r.radon}` : null,
   ].filter(Boolean);
+  return { sup, r, groupes, ppr, risques };
+}
+
+function ServitudesRisques({ plu }: { plu: Plu }) {
+  if (plu.complements_statut === "en_cours") return <p className="lor-sous" role="status"><Loader variant="spin" /> Servitudes et risques en cours de lecture (Géoportail de l’urbanisme, Géorisques)…</p>;
+  if (!plu.complements_statut || plu.complements_statut === "a_faire") return null;
+  const { sup, r, groupes, ppr, risques } = lireComplements(plu);
   return (
     <div className="lor-servitudes">
       {plu.secteur_protege ? <Avis teinte="ambre">Secteur protégé : l’avis de l’architecte des Bâtiments de France est requis et le délai d’instruction est majoré (C. urb., art. R423-24).</Avis> : null}

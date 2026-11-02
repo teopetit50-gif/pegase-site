@@ -1,0 +1,351 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — le Triage de Linear (02/11/2026)
+   Relevé : releves/linear-triage.md (29/10 et complément du 01/11),
+   captures 1440-reel-*.png (liste, moitié droite vide), 390-*.png.
+
+   Carte          flex : liste 400 (filet droit 0,5) + détail.
+   Liste          en-tête 44 (filet bas 0,5, p 0 8 : titre 13/500 t2, étoile
+                  28 ; Filtre + Affichage 28 à droite, gap 4) ; défilement
+                  p 8 0 ; ligne a 400×59 → div 384×59 (marges 8), r 8,
+                  p 0 14 ; colonne gap 6, p 10 0 ; ligne 1 (16) : titre
+                  13/500 t1 tronqué + identifiant 13/450 −0,26 t3 ; ligne 2
+                  (15, gap 10) : avatar 16 + nom 12/450 t3, à droite puce
+                  d'échéance 20 (p 0 6), priorité 16, « il y a » 12/450 t3.
+   Détail         en-tête 44 (fil r 6 p 2 4 → h2 13/500 t2 ; étoile, « … » ;
+                  barre de triage : 4 ronds 28, gap 6) ; corps : colonne
+                  p 21,75 14 0 ; titre 24/600/32 −0,16 t1 ; pilules 24
+                  (gap 6, p 10 0 ; fond bouton, r 9999, p 0 8 0 6, 12/500,
+                  libellé 12/450) ; description 15/450/24 −0,1 t2 ;
+                  « Activity » 15/600/23 ; boîte de commentaire (r 8,
+                  p 12 16, bord 0,5, ombre).
+   Vide           centré : (illustration), « N issues to triage » 13/500
+                  t2, bouton 24 (r 9999, p 0 8 0 6, 12/500), écart 12.
+   1024           liste 386 + moitié droite.  ≤ 768 : liste seule, ouvrir
+                  un élément la remplace.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tam .tam-triage {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.v2 .tam .tam-tri-liste {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 400px;
+  border-right: 0.5px solid var(--tam-carte-bord);
+}
+.v2 .tam .tam-tri-tete {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px;
+  border-bottom: 0.5px solid var(--tam-carte-bord);
+}
+.v2 .tam .tam-tri-tete h2 {
+  padding: 0 4px 0 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t2);
+  white-space: nowrap;
+}
+.v2 .tam .tam-tri-defile {
+  flex: 1;
+  min-height: 0;
+  padding: 8px 0;
+  overflow: auto;
+}
+.v2 .tam .tam-tri-ligne {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 59px;
+  margin: 0 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--tam-t1);
+  isolation: isolate;
+  transition: color 0.15s;
+}
+.v2 .tam .tam-tri-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  z-index: -1;
+}
+@media (any-hover: hover) and (any-pointer: fine) {
+  .v2 .tam .tam-tri-ligne:hover::before {
+    background: var(--tam-survol);
+  }
+}
+.v2 .tam .tam-tri-ligne[aria-current="true"]::before {
+  background: var(--tam-choisi);
+}
+.v2 .tam .tam-tri-l1,
+.v2 .tam .tam-tri-l2 {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.v2 .tam .tam-tri-l1 {
+  gap: 6px;
+  height: 16px;
+}
+.v2 .tam .tam-tri-l2 {
+  gap: 10px;
+  height: 15px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-tri-titre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tam .tam-tri-id {
+  flex: none;
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-tri-auteur {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .tam .tam-tri-l2 .tam-avatar,
+.v2 .tam .tam-tri-l2 .tam-sans-avatar {
+  width: 16px;
+  height: 16px;
+}
+.v2 .tam .tam-tri-l2 .tam-puce {
+  height: 20px;
+  padding: 0 6px;
+  gap: 6px;
+  margin-right: -4px;
+}
+.v2 .tam .tam-tri-prio {
+  display: flex;
+  flex: none;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-tri-prio[data-p="Priority1"] {
+  color: var(--tam-urgent);
+}
+.v2 .tam .tam-tri-quand {
+  flex: none;
+}
+
+/* ——— le détail ——— */
+.v2 .tam .tam-tri-detail {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .tam .tam-tri-fil {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0 2px;
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t2);
+  white-space: nowrap;
+}
+.v2 .tam .tam-tri-fil h2 {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+}
+.v2 .tam .tam-tri-fil span {
+  letter-spacing: -0.26px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-tri-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.v2 .tam .tam-tri-barre {
+  display: flex;
+  flex: none;
+  justify-content: flex-end;
+  gap: 6px;
+  height: 44px;
+  padding: 8px 12px 8px 0;
+}
+.v2 .tam .tam-tri-corps {
+  flex: 1;
+  min-height: 0;
+  padding: 0 14px 24px 0;
+  overflow: auto;
+}
+/* titre : bloc à 98 dans la carte (p 6 → texte à 104, relevé 659,112) ; pilules à 160 ; description à 219 */
+.v2 .tam .tam-tri-colonne {
+  padding: 9px 0 0 14px;
+}
+.v2 .tam .tam-tri-grand {
+  padding: 6px 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--tam-t1);
+  margin-bottom: 18px;
+}
+.v2 .tam .tam-pilules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0;
+}
+.v2 .tam .tam-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tam-bouton);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 12px;
+  color: var(--tam-t3);
+  white-space: nowrap;
+}
+.v2 .tam .tam-pilule span {
+  font-weight: 450;
+}
+.v2 .tam .tam-pilule[data-valeur] span {
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-pilule svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tam-tri-texte {
+  margin: 5px -14px 0;
+  padding: 10px 14px 16px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--tam-t2);
+  white-space: pre-wrap;
+}
+.v2 .tam .tam-tri-h3 {
+  margin-top: 24px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--tam-t1);
+}
+.v2 .tam .tam-evenement {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0 4px 1px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-evenement b {
+  font-weight: 500;
+}
+.v2 .tam .tam-composeur {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px -8px 0;
+  padding: 12px 16px;
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 8px;
+  background: var(--tam-menu);
+  box-shadow: var(--tam-carte-ombre);
+}
+.v2 .tam .tam-composeur-pied {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ——— la moitié droite vide ——— */
+.v2 .tam .tam-tri-vide {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-tri-illu {
+  margin-bottom: 6px;
+}
+.v2 .tam .tam-tri-illu--clair,
+html[data-v2-theme="light"] .v2 .tam .tam-tri-illu--sombre {
+  display: none;
+}
+html[data-v2-theme="light"] .v2 .tam .tam-tri-illu--clair {
+  display: block;
+}
+.v2 .tam .tam-tri-vide .tam-pilule {
+  margin-top: 8px;
+}
+.v2 .tam .tam-tri-retour {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .v2 .tam .tam-tri-liste {
+    width: 386px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tam .tam-triage {
+    display: block;
+  }
+  .v2 .tam .tam-tri-liste {
+    width: 100%;
+    border-right: 0;
+  }
+  .v2 .tam .tam-tri-vide {
+    display: none;
+  }
+  .v2 .tam .tam-triage[data-ouvert="true"] .tam-tri-liste {
+    display: none;
+  }
+  .v2 .tam .tam-tri-tete {
+    padding: 0 12px 0 8px;
+  }
+  .v2 .tam .tam-tri-retour {
+    display: inline-flex;
+  }
+  .v2 .tam .tam-pilule {
+    height: 28px;
+  }
+}

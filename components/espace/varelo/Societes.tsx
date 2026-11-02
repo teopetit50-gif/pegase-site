@@ -45,7 +45,11 @@ const cleDe = (nom: string) =>
     .replace(/_+$/, "")
     .slice(0, 40) || "pole";
 
-export default function Societes({ donnees, actions, majLocal, onDepot }: { donnees: Donnees; actions: Actions; majLocal: (f: (d: Donnees) => Donnees) => void; onDepot: () => void }) {
+type Props = { donnees: Donnees; actions: Actions; majLocal: (f: (d: Donnees) => Donnees) => void; onDepot: () => void };
+
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useStructure({ donnees, actions, majLocal }: Omit<Props, "onDepot">) {
   const parPole = useMemo(() => {
     const groupes: { pole: Pole | null; societes: Societe[] }[] = donnees.poles.map((p) => ({ pole: p, societes: donnees.societes.filter((s) => s.pole_id === p.id) }));
     const sans = donnees.societes.filter((s) => !s.pole_id || !donnees.poles.some((p) => p.id === s.pole_id));
@@ -123,6 +127,12 @@ export default function Societes({ donnees, actions, majLocal, onDepot }: { donn
     }
   };
 
+  return { parPole, codesParSociete, dialogue, setDialogue, nomPole, setNomPole, nom, setNom, siren, setSiren, territoire, setTerritoire, pole, setPole, logiciel, setLogiciel, nomenclature, setNomenclature, envoi, setEnvoi, erreur, setErreur, fait, setFait, ouvrir, sirenPropre, sirenOk, pret, envoyer };
+}
+
+export default function Societes({ donnees, actions, majLocal, onDepot }: Props) {
+  const h = useStructure({ donnees, actions, majLocal });
+  const { parPole, codesParSociete, fait, ouvrir } = h;
   return (
     <section className="esp-carte" aria-label="Sociétés et pôles">
       <div className="esp-carte-tete">
@@ -170,60 +180,69 @@ export default function Societes({ donnees, actions, majLocal, onDepot }: { donn
         </div>
       ) : null}
 
-      <Dialog open={!!dialogue} onOpenChange={(o) => !o && !envoi && setDialogue(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone>{dialogue === "pole" ? <FolderPlus width={18} height={18} aria-hidden="true" /> : <Building2 width={18} height={18} aria-hidden="true" />}</DialogIcone>
-            <DialogTitle>{dialogue === "pole" ? "Créer un pôle" : "Inscrire une société au groupe"}</DialogTitle>
-            <DialogDescription>{dialogue === "pole" ? "Un pôle range des sociétés (distribution, logistique, services…) ; il n'a pas d'effet sur le calcul." : "La société devient une entité du groupe. Son territoire fixe son fuseau et ses délais ; on ne suppose jamais la métropole."}</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              {dialogue === "pole" ? (
-                <label className="rv-libelle">Nom du pôle <span className="esp-obligatoire">(obligatoire)</span>
-                  <input className="rv-champ" value={nomPole} maxLength={120} onChange={(e) => setNomPole(e.target.value)} />
-                  {nomPole.trim() ? <span className="vrl-paire-sous">clé : {cleDe(nomPole)}</span> : null}
-                </label>
-              ) : (
-                <>
-                  <label className="rv-libelle">Nom de la société <span className="esp-obligatoire">(obligatoire)</span>
-                    <input className="rv-champ" value={nom} maxLength={200} onChange={(e) => setNom(e.target.value)} />
-                  </label>
-                  <div className="esp-form-ligne">
-                    <label className="rv-libelle">SIREN
-                      <input className="rv-champ" value={siren} inputMode="numeric" placeholder="9 chiffres" onChange={(e) => setSiren(e.target.value)} aria-invalid={!sirenOk} />
-                      {!sirenOk ? <span className="vrl-paire-sous" style={{ color: "var(--esp-rouge)" }}>Un SIREN a neuf chiffres.</span> : null}
-                    </label>
-                    <label className="rv-libelle">Territoire <span className="esp-obligatoire">(obligatoire)</span>
-                      <select className="rv-champ" value={territoire} onChange={(e) => setTerritoire(e.target.value)}>
-                        {TERRITOIRES.map((t) => <option key={t.code} value={t.code}>{t.libelle} ({t.fuseau})</option>)}
-                      </select>
-                    </label>
-                  </div>
-                  <div className="esp-form-ligne">
-                    <label className="rv-libelle">Pôle
-                      <select className="rv-champ" value={pole} onChange={(e) => setPole(e.target.value)}>
-                        <option value="">Sans pôle</option>
-                        {donnees.poles.map((p) => <option key={p.id} value={p.id}>{p.nom}</option>)}
-                      </select>
-                    </label>
-                    <label className="rv-libelle">Logiciel de gestion
-                      <input className="rv-champ" value={logiciel} maxLength={120} placeholder="Sage, EBP, Cegid, tableur…" onChange={(e) => setLogiciel(e.target.value)} />
-                    </label>
-                  </div>
-                  <label className="rv-libelle">Nomenclature des codes
-                    <input className="rv-champ" value={nomenclature} maxLength={200} placeholder="Ce que veulent dire ses codes (plan 2019, trois lettres…)" onChange={(e) => setNomenclature(e.target.value)} />
-                  </label>
-                </>
-              )}
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!pret || envoi} onClick={envoyer}>{envoi ? <Loader variant="spin" /> : null} {dialogue === "pole" ? "Créer le pôle" : "Inscrire la société"}</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DialogueStructure h={h} donnees={donnees} />
     </section>
+  );
+}
+
+/* 02/11/2026 — la fenêtre « Créer un pôle » / « Inscrire une société » (17.a, 17.b), exportée pour
+   la sous-page « Sources et structure » */
+export function DialogueStructure({ h, donnees }: { h: ReturnType<typeof useStructure>; donnees: Donnees }) {
+  const { dialogue, setDialogue, envoi, nomPole, setNomPole, nom, setNom, siren, setSiren, sirenOk, territoire, setTerritoire, pole, setPole, logiciel, setLogiciel, nomenclature, setNomenclature, erreur, pret, envoyer } = h;
+  return (
+    <Dialog open={!!dialogue} onOpenChange={(o) => !o && !envoi && setDialogue(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone>{dialogue === "pole" ? <FolderPlus width={18} height={18} aria-hidden="true" /> : <Building2 width={18} height={18} aria-hidden="true" />}</DialogIcone>
+          <DialogTitle>{dialogue === "pole" ? "Créer un pôle" : "Inscrire une société au groupe"}</DialogTitle>
+          <DialogDescription>{dialogue === "pole" ? "Un pôle range des sociétés (distribution, logistique, services…) ; il n'a pas d'effet sur le calcul." : "La société devient une entité du groupe. Son territoire fixe son fuseau et ses délais ; on ne suppose jamais la métropole."}</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            {dialogue === "pole" ? (
+              <label className="rv-libelle">Nom du pôle <span className="esp-obligatoire">(obligatoire)</span>
+                <input className="rv-champ" value={nomPole} maxLength={120} onChange={(e) => setNomPole(e.target.value)} />
+                {nomPole.trim() ? <span className="vrl-paire-sous">clé : {cleDe(nomPole)}</span> : null}
+              </label>
+            ) : (
+              <>
+                <label className="rv-libelle">Nom de la société <span className="esp-obligatoire">(obligatoire)</span>
+                  <input className="rv-champ" value={nom} maxLength={200} onChange={(e) => setNom(e.target.value)} />
+                </label>
+                <div className="esp-form-ligne">
+                  <label className="rv-libelle">SIREN
+                    <input className="rv-champ" value={siren} inputMode="numeric" placeholder="9 chiffres" onChange={(e) => setSiren(e.target.value)} aria-invalid={!sirenOk} />
+                    {!sirenOk ? <span className="vrl-paire-sous" style={{ color: "var(--esp-rouge)" }}>Un SIREN a neuf chiffres.</span> : null}
+                  </label>
+                  <label className="rv-libelle">Territoire <span className="esp-obligatoire">(obligatoire)</span>
+                    <select className="rv-champ" value={territoire} onChange={(e) => setTerritoire(e.target.value)}>
+                      {TERRITOIRES.map((t) => <option key={t.code} value={t.code}>{t.libelle} ({t.fuseau})</option>)}
+                    </select>
+                  </label>
+                </div>
+                <div className="esp-form-ligne">
+                  <label className="rv-libelle">Pôle
+                    <select className="rv-champ" value={pole} onChange={(e) => setPole(e.target.value)}>
+                      <option value="">Sans pôle</option>
+                      {donnees.poles.map((p) => <option key={p.id} value={p.id}>{p.nom}</option>)}
+                    </select>
+                  </label>
+                  <label className="rv-libelle">Logiciel de gestion
+                    <input className="rv-champ" value={logiciel} maxLength={120} placeholder="Sage, EBP, Cegid, tableur…" onChange={(e) => setLogiciel(e.target.value)} />
+                  </label>
+                </div>
+                <label className="rv-libelle">Nomenclature des codes
+                  <input className="rv-champ" value={nomenclature} maxLength={200} placeholder="Ce que veulent dire ses codes (plan 2019, trois lettres…)" onChange={(e) => setNomenclature(e.target.value)} />
+                </label>
+              </>
+            )}
+            {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={!pret || envoi} onClick={envoyer}>{envoi ? <Loader variant="spin" /> : null} {dialogue === "pole" ? "Créer le pôle" : "Inscrire la société"}</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -101,7 +101,10 @@ const TYPE_DE: Record<GenreProposition, TypeActionRef> = {
   renommer: "renommer_objet",
 };
 
-export default function EcranVarelo() {
+/* 02/11/2026 — la logique de l'écran, en crochet : l'écran ci-dessous (gardé sous
+   « ?ancien=1 ») et les sous-pages de /espace2/varelo (components/espace2/varelo/donnees)
+   partagent le même état et les mêmes gestes. */
+export function useReferentielVarelo() {
   const { source } = useSource();
   const [local, setLocal] = useState<Donnees>({ installation: INSTALLATION_EXEMPLE, poles: POLES_EXEMPLE, societes: SOCIETES_EXEMPLE, codes: CODES_EXEMPLE, objets: OBJETS_EXEMPLE, propositions: PROPOSITIONS_EXEMPLE, demandes: DEMANDES_EXEMPLE, etat: null });
   const [reel, setReel] = useState<Donnees | null>(null);
@@ -426,6 +429,13 @@ export default function EcranVarelo() {
 
   const majLocal = useCallback((f: (d: Donnees) => Donnees) => setLocal((prev) => f(prev)), []);
 
+  return { source, local, setLocal, reel, contexteReel, erreur, setErreur, fait, setFait, nature, setNature, recherche, setRecherche, choix, setChoix, charger, relire, donnees, contexte, client_id, peutGerer, peutValider, codesParObjet, attenteParObjet, objets, choisi, objet, compteurs, lotsOuverts, proposer, ecarter, depot, setDepot, deposer, passage, setPassage, lancer, exportEnCours, telecharger, installe, installerIci, actions, majLocal };
+}
+
+export type ReferentielVarelo = ReturnType<typeof useReferentielVarelo>;
+
+export default function EcranVarelo() {
+  const { source, reel, erreur, fait, codesParObjet, attenteParObjet, setFait, nature, setNature, recherche, setRecherche, setChoix, relire, donnees, contexte, client_id, peutGerer, peutValider, objets, choisi, objet, compteurs, lotsOuverts, depot, setDepot, deposer, passage, setPassage, lancer, exportEnCours, telecharger, installe, installerIci, actions, majLocal } = useReferentielVarelo();
   return (
     <>
       <div className="esp-tete" data-arrivee="">

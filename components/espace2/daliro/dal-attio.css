@@ -1,0 +1,1018 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › Annuaire — copie 1:1 de la liste People d'Attio et de la fiche
+   d'un contact (02/11/2026, règles de Teo : docs/refonte-metiers/REGLES.md).
+   Préfixe dat-.
+
+   Relevé : docs/refonte-metiers/releves/attio-people.md (branche
+   claude/refs-plain-attio-cal-a3a72b, « Après import ») et les captures
+   1440-reel-{clair,sombre}-importes.png (liste), -fiche-marie.png (fiche).
+   Ce que le relevé ne chiffre pas est lu au pixel sur ces captures, à
+   taille réelle : positions (grille, barres, cartes « Highlights »), teinte
+   violette des colonnes calculées (#fbf8ff · #18171f, filets #f4f1f8 ·
+   #19181e), soulignement de l'onglet actif (#333 · #cccdcf).
+
+   Cadre : Attio n'a pas de carte ; sa page occupe toute la zone à droite de
+   la barre latérale (repliée sur les captures). Ici, tout le <main> de la
+   coquille d'espace2. Police : Inter (celle de la coquille, variable).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dat {
+  --a-fond: #ffffff;
+  --a-texte: #101112;
+  --a-second: rgb(0 0 0 / 0.63);
+  --a-vide: rgb(0 0 0 / 0.5);
+  --a-filet: #eeeff1;
+  --a-lien: #266df0;
+  --a-bouton-ombre: inset 0 0 0 1px transparent, 0 0 2px #1c284030, 0 1px 3px #0000000a;
+  --a-tri-ombre: inset 0 0 0 1px #e6e7ea;
+  --a-filtre: rgb(0 0 0 / 0.02);
+  --a-teinte: #fbf8ff;
+  --a-teinte-filet: #f4f1f8;
+  --a-case-bord: rgb(0 0 0 / 0.09);
+  --a-avatar: #ececec;
+  --a-avatar-icone: #979797;
+  --a-actif: rgb(0 0 0 / 0.04);
+  --a-onglet-trait: #333333;
+  --a-compteur: #505155;
+  --a-echeance: #cf8300;
+  --a-survol: rgb(0 0 0 / 0.03);
+  --a-menu-ombre: 0 0 0 1px #1c28400f, 0 4px 12px #1c28401a, 0 1px 3px #0000000a;
+  --a-entete: #ffffff;
+
+  min-height: calc(100dvh - 48px);
+  background: var(--a-fond);
+  color: var(--a-texte);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  -webkit-font-smoothing: antialiased;
+}
+html:not([data-v2-theme="light"]) .v2 .dat {
+  --a-fond: #101112;
+  --a-texte: #f1f2f3;
+  --a-second: rgb(255 255 255 / 0.6);
+  --a-vide: rgb(255 255 255 / 0.45);
+  --a-filet: #1b1c1f;
+  --a-lien: #4e8cfc;
+  --a-bouton-ombre: inset 0 0 0 1px #212224;
+  --a-tri-ombre: inset 0 0 0 1px #212224;
+  --a-filtre: rgb(255 255 255 / 0.02);
+  --a-teinte: #18171f;
+  --a-teinte-filet: #19181e;
+  --a-case-bord: rgb(255 255 255 / 0.1);
+  --a-avatar: #323335;
+  --a-avatar-icone: #6c6d6f;
+  --a-actif: rgb(255 255 255 / 0.05);
+  --a-onglet-trait: #cccdcf;
+  --a-compteur: #a1a2a5;
+  --a-survol: rgb(255 255 255 / 0.03);
+  --a-menu-ombre: inset 0 0 0 1px #212224, 0 4px 12px #0000004d;
+  /* en-têtes de la grille en sombre : #131416, lu au pixel */
+  --a-entete: #131416;
+}
+
+.v2 .dat *,
+.v2 .dat *::before,
+.v2 .dat *::after {
+  box-sizing: border-box;
+}
+.v2 .dat :where(button, input) {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+}
+.v2 .dat :where(button) {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.v2 .dat :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .dat svg {
+  flex: none;
+}
+
+/* ——— l'en-tête de page (49) ——— */
+.v2 .dat-entete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 49px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--a-filet);
+  white-space: nowrap;
+}
+.v2 .dat-objet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: #266df0;
+  color: #fff;
+}
+.v2 .dat-fil {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .dat-fil a {
+  color: var(--a-second);
+}
+.v2 .dat-fil a:hover {
+  color: var(--a-texte);
+}
+.v2 .dat-fil-sep {
+  color: var(--a-vide);
+}
+.v2 .dat-fil-nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ——— barres de vue et de tri (48 chacune, filet bas) ——— */
+.v2 .dat-barre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 49px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--a-filet);
+}
+.v2 .dat-bouton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: var(--a-fond);
+  box-shadow: var(--a-bouton-ombre);
+  color: var(--a-texte);
+  white-space: nowrap;
+}
+.v2 .dat-bouton--tri {
+  padding: 4px 8px;
+  box-shadow: var(--a-tri-ombre);
+}
+.v2 .dat-bouton-faible {
+  color: var(--a-second);
+}
+.v2 .dat-bouton--filtre {
+  padding: 4px 8px;
+  background: var(--a-filtre);
+  box-shadow: none;
+  color: var(--a-vide);
+}
+.v2 .dat-bouton--filtre.dat-actif {
+  color: var(--a-texte);
+  box-shadow: var(--a-tri-ombre);
+}
+.v2 .dat-bouton .dat-chevron {
+  color: var(--a-second);
+}
+.v2 .dat-bouton svg,
+.v2 .dat-icone-bouton svg,
+.v2 .dat-th svg,
+.v2 .dat-menu-option svg {
+  color: inherit;
+}
+.v2 .dat-bouton:disabled,
+.v2 .dat-bouton[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+/* « + New Person » : bleu d'Attio (relevé : bg #266df0, texte #fff) */
+.v2 .dat-bouton-bleu {
+  background: #266df0;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f;
+  padding: 4px 8px 4px 6px;
+}
+.v2 .dat-pousse {
+  flex: 1;
+}
+.v2 .dat-icone-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--a-second);
+}
+.v2 .dat-icone-bouton:hover,
+.v2 .dat-icone-bouton[data-actif] {
+  background: var(--a-actif);
+  color: var(--a-texte);
+}
+.v2 .dat-icone-bouton[data-actif] svg {
+  color: #f5a524;
+}
+.v2 .dat-entete .dat-icone-bouton {
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+}
+/* l'avatar sans photo d'Attio : sa version claire ou sombre */
+.v2 .dat-avatar-ph {
+  display: inline-flex;
+  flex: none;
+}
+.v2 .dat-avatar-ph .dat-sombre {
+  display: none;
+}
+html:not([data-v2-theme="light"]) .v2 .dat-avatar-ph .dat-clair {
+  display: none;
+}
+html:not([data-v2-theme="light"]) .v2 .dat-avatar-ph .dat-sombre {
+  display: inline;
+}
+.v2 .dat-menu-sep {
+  height: 1px;
+  margin: 4px -4px;
+  background: var(--a-filet);
+}
+.v2 .dat-menu-option:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .dat-vue-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: #3dbd73;
+  color: #fff;
+}
+.v2 .dat-sep-v {
+  width: 1px;
+  height: 16px;
+  margin: 0 -2px;
+  background: var(--a-filet);
+}
+
+/* ——— menus ——— */
+.v2 .dat-menu-boite {
+  position: relative;
+}
+.v2 .dat-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 30;
+  min-width: 220px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--a-fond);
+  box-shadow: var(--a-menu-ombre);
+}
+.v2 .dat-menu-titre {
+  padding: 6px 8px 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .dat-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .dat-menu-option:hover,
+.v2 .dat-menu-option:focus-visible {
+  background: var(--a-actif);
+  outline: none;
+}
+.v2 .dat-menu-option[aria-checked="true"]::after {
+  content: "✓";
+  margin-left: auto;
+  color: var(--a-second);
+}
+.v2 .dat-menu-champ {
+  width: 100%;
+  height: 32px;
+  margin-bottom: 4px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--a-filtre);
+  box-shadow: var(--a-tri-ombre);
+  outline: none;
+}
+
+/* ——— la grille (en-têtes 40, lignes 36) ——— */
+.v2 .dat-grille-boite {
+  position: relative;
+  overflow: auto;
+  height: calc(100dvh - 48px - 49px - 49px - 49px);
+}
+.v2 .dat-grille {
+  display: grid;
+  grid-template-columns: 250px 215px 288px 310px 250px;
+  min-width: max-content;
+  min-height: 100%;
+}
+.v2 .dat-reste > div {
+  border-right: 1px solid var(--a-filet);
+}
+.v2 .dat-rangee {
+  display: contents;
+}
+.v2 .dat-th,
+.v2 .dat-td {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-right: 1px solid var(--a-filet);
+  border-bottom: 1px solid var(--a-filet);
+  background: var(--a-fond);
+}
+.v2 .dat-th {
+  background: var(--a-entete);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 40px;
+  gap: 6px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+/* la case à cocher (16, r 6, bord #000 a0.09) à x 16, la pastille du nom à x 40 */
+.v2 .dat-th:first-child,
+.v2 .dat-td:first-child {
+  padding-left: 16px;
+  gap: 0;
+}
+.v2 .dat-case {
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0 8px 0 0;
+  border-radius: 6px;
+  border: 1px solid var(--a-case-bord);
+  background: var(--a-fond);
+  cursor: pointer;
+}
+.v2 .dat-th .dat-case {
+  margin-right: 14px;
+}
+.v2 .dat-case:checked {
+  background: #266df0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 8.2l2.3 2.3 4.7-5' fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 14px no-repeat;
+  border-color: #266df0;
+}
+.v2 .dat-th-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  color: var(--a-second);
+  opacity: 0.8;
+}
+.v2 .dat-th-bouton:hover,
+.v2 .dat-th-bouton[data-actif] {
+  opacity: 1;
+  background: var(--a-actif);
+  color: var(--a-texte);
+}
+.v2 .dat-th-plus {
+  margin-left: auto;
+}
+.v2 .dat-th-texte + .dat-th-bouton {
+  margin-left: auto;
+}
+.v2 .dat-ajout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px;
+  border-radius: 6px;
+  color: var(--a-vide);
+  white-space: nowrap;
+}
+.v2 .dat-ajout:hover {
+  background: var(--a-actif);
+  color: var(--a-texte);
+}
+.v2 .dat-th-ajout {
+  border-right: 0;
+}
+.v2 .dat-calcul {
+  color: var(--a-texte);
+}
+/* la colonne Entreprise reste à gauche au défilement ; la colonne épinglée juste après (250) */
+.v2 .dat-fige {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.v2 .dat-th.dat-fige {
+  z-index: 3;
+}
+.v2 .dat-fige-2 {
+  left: 250px;
+  box-shadow: 1px 0 0 var(--a-filet);
+}
+.v2 .dat-reste > .dat-fige {
+  background: var(--a-fond);
+}
+.v2 .dat-groupe {
+  gap: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+  background: var(--a-entete);
+}
+.v2 .dat-groupe-texte {
+  position: sticky;
+  left: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .dat-td-reste {
+  border-right: 0;
+}
+.v2 .dat-th svg {
+  width: 16px;
+  height: 16px;
+  color: var(--a-second);
+}
+.v2 .dat-th-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dat-td {
+  height: 36px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+.v2 .dat-td[data-calcule] {
+  background: var(--a-teinte);
+  border-color: var(--a-teinte-filet);
+}
+.v2 .dat-td[data-vide] {
+  color: var(--a-vide);
+}
+.v2 .dat-td-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dat-rangee:hover .dat-td {
+  background-image: linear-gradient(var(--a-survol), var(--a-survol));
+}
+.v2 .dat-personne {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 24px;
+  padding: 2px 6px 2px 4px;
+  border-radius: 10px;
+}
+.v2 .dat-personne:hover {
+  background: var(--a-actif);
+}
+.v2 .dat-personne span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dat-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--a-avatar);
+  color: var(--a-avatar-icone);
+}
+.v2 .dat-force {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+/* la pastille déborde de 5 px dans la marge de la cellule (rect à x 261 pour une colonne à 250, relevé au pixel) */
+.v2 .dat-td .dat-force svg {
+  margin-left: -5px;
+}
+.v2 .dat-pied {
+  display: contents;
+}
+.v2 .dat-pied > div.dat-fige {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+}
+.v2 .dat-pied > div.dat-fige-2 {
+  left: 250px;
+}
+.v2 .dat-pied > div {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 37px;
+  padding: 0 14px;
+  border-top: 1px solid var(--a-filet);
+  border-right: 1px solid var(--a-filet);
+  background: var(--a-fond);
+  white-space: nowrap;
+}
+.v2 .dat-pied-vide {
+  color: var(--a-vide);
+}
+.v2 .dat-vide {
+  margin: 0;
+  padding: 16px;
+  color: var(--a-vide);
+}
+
+/* ——— la fiche ——— */
+.v2 .dat-fiche {
+  display: grid;
+  grid-template-columns: 432px minmax(0, 1fr);
+  min-height: calc(100dvh - 48px - 49px);
+}
+.v2 .dat-gauche {
+  border-right: 1px solid var(--a-filet);
+  min-width: 0;
+}
+.v2 .dat-ident {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 0 12px;
+}
+.v2 .dat-ident .dat-avatar {
+  width: 32px;
+  height: 32px;
+}
+.v2 .dat-ident-nom {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.2px;
+}
+.v2 .dat-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 12px 12px 11px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--a-filet);
+}
+.v2 .dat-actions .dat-bouton {
+  padding: 4px 8px 4px 6px;
+}
+.v2 .dat-actions .dat-bouton[aria-disabled="true"] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.v2 .dat-bloc {
+  padding: 13px 16px 16px;
+  border-bottom: 1px solid var(--a-filet);
+}
+.v2 .dat-bloc-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 20px;
+  margin-bottom: 7px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .dat-bloc-tete button,
+.v2 .dat-bloc-tete a {
+  color: var(--a-second);
+}
+.v2 .dat-details {
+  margin: 0;
+  padding: 0;
+}
+.v2 .dat-detail {
+  display: grid;
+  /* la colonne des libellés vaut 34 % du panneau : 136 px sur 432, 98 sur 320 (captures 1440 et 390) */
+  grid-template-columns: 34% minmax(0, 1fr);
+  align-items: center;
+  height: 32px;
+  margin-bottom: 2px;
+}
+.v2 .dat-detail dt {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .dat-detail dt svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .dat-detail dd {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dat-detail dd[data-vide],
+.v2 .dat-detail dd[data-vide] .dat-valeur-bouton {
+  color: var(--a-vide);
+}
+.v2 .dat-dt-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dat-valeur-bouton {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+  color: var(--a-texte);
+}
+.v2 .dat-champ-ligne {
+  width: 100%;
+  height: 28px;
+  padding: 0 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--a-filtre);
+  box-shadow: var(--a-tri-ombre);
+  outline: none;
+}
+.v2 .dat-lien {
+  color: var(--a-lien);
+}
+.v2 .dat-lien:hover {
+  text-decoration: underline;
+}
+.v2 .dat-voir {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: rgb(0 0 0 / 0.55);
+}
+html:not([data-v2-theme="light"]) .v2 .dat-voir {
+  color: rgb(255 255 255 / 0.55);
+}
+.v2 .dat-pastilles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2 .dat-pastilles a {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  box-shadow: var(--a-bouton-ombre);
+}
+.v2 .dat-vide-texte {
+  margin: 0;
+  color: var(--a-vide);
+}
+
+.v2 .dat-droite {
+  min-width: 0;
+}
+.v2 .dat-onglets {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 45px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--a-filet);
+  overflow-x: auto;
+}
+.v2 .dat-onglet {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 9px;
+  color: var(--a-second);
+  white-space: nowrap;
+}
+.v2 .dat-onglet[aria-current="page"] {
+  color: var(--a-texte);
+}
+.v2 .dat-onglet[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--a-onglet-trait);
+}
+.v2 .dat-onglet-sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 8px;
+  background: var(--a-filet);
+}
+.v2 .dat-compteur {
+  display: inline-flex;
+  align-items: center;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--a-compteur);
+  background: var(--a-actif);
+  box-shadow: inset 0 0 0 1px var(--a-filet);
+}
+.v2 .dat-corps {
+  padding: 24px 20px 40px;
+}
+.v2 .dat-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  margin: 0 0 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--a-second);
+}
+.v2 .dat-titre-droite {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .dat-titre-droite a,
+.v2 .dat-titre-droite button {
+  color: var(--a-second);
+}
+.v2 .dat-cartes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 30px;
+}
+.v2 .dat-carte {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 86px;
+  padding: 10px 12px;
+  border: 1px solid var(--a-filet);
+  border-radius: 8px;
+  min-width: 0;
+}
+.v2 .dat-carte-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+}
+.v2 .dat-carte-tete svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .dat-carte-valeur {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dat-carte-valeur[data-vide] {
+  color: var(--a-vide);
+}
+.v2 .dat-carte-sous {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-second);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dat-boite {
+  margin: 0 0 32px;
+  padding: 4px 0;
+  list-style: none;
+  border: 1px solid var(--a-filet);
+  border-radius: 8px;
+}
+.v2 .dat-ligne {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 31px;
+  padding: 0 12px;
+  white-space: nowrap;
+  min-width: 0;
+}
+.v2 .dat-boite[data-haute] .dat-ligne {
+  height: 32px;
+}
+.v2 .dat-ligne:hover {
+  background: var(--a-survol);
+}
+.v2 .dat-ligne .dat-avatar {
+  width: 16px;
+  height: 16px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #fff;
+  background: #4fb5ea;
+}
+.v2 .dat-ligne-faible {
+  color: var(--a-second);
+}
+.v2 .dat-ligne-gris {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--a-second);
+  font-weight: 400;
+}
+.v2 .dat-ligne-fin {
+  margin-left: auto;
+  padding-left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--a-vide);
+}
+.v2 .dat-ligne-titre {
+  flex: none;
+}
+.v2 .dat-rond {
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0 2px 0 0;
+  border-radius: 9999px;
+  border: 1px solid var(--a-case-bord);
+  background: var(--a-fond);
+  cursor: pointer;
+}
+.v2 .dat-rond:checked {
+  background: #266df0;
+  border-color: #266df0;
+}
+.v2 .dat-ligne-fin > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .dat-echeance {
+  color: var(--a-echeance);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+/* une section vide (« Emails 0 ») : pas de boîte, l'écart de la référence (32) */
+.v2 .dat-espace {
+  height: 24px;
+}
+.v2 .dat-redaction {
+  margin: 0 0 16px;
+  padding: 8px;
+  border: 1px solid var(--a-filet);
+  border-radius: 8px;
+}
+.v2 .dat-zone {
+  height: 96px;
+  padding: 6px 8px;
+  resize: vertical;
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+}
+.v2 .dat-redaction-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.v2 .dat-lien-rouge {
+  color: #e5484d;
+  font-size: 12px;
+}
+.v2 .dat-lien-gris {
+  color: var(--a-second);
+}
+.v2 .dat-ligne .dat-icone-bouton {
+  width: 20px;
+  height: 20px;
+}
+/* la barre d'actions d'une sélection, flottante en bas, comme celle d'Attio */
+.v2 .dat-selection {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 40;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--a-fond);
+  box-shadow: var(--a-menu-ombre);
+  white-space: nowrap;
+}
+.v2 .dat-selection-nb {
+  padding: 0 8px;
+  color: var(--a-second);
+}
+.v2 .dat-note {
+  margin: 0;
+  padding: 8px 16px;
+  color: var(--a-vide);
+}
+
+/* Attio n'a pas de mise en page mobile : à 390, la grille garde ses
+   colonnes et défile à l'horizontale ; la fiche garde ses deux panneaux,
+   le gauche à 320, le droit coupé (relevé, « 390×844 »). */
+@media (max-width: 768px) {
+  /* les boutons d'action après le premier ne gardent que leur icône (capture 390-sombre-fiche-marie) */
+  .v2 .dat-actions .dat-bouton + .dat-bouton .dat-bouton-texte {
+    display: none;
+  }
+  .v2 .dat-actions .dat-bouton + .dat-bouton {
+    padding: 4px 6px;
+  }
+  .v2 .dat-fiche {
+    grid-template-columns: 320px 432px;
+    overflow-x: auto;
+  }
+  .v2 .dat-barre {
+    overflow-x: auto;
+  }
+}
+
+/* « Collapse sidebar » d'Attio : le volet des pages de la coquille se replie, le rail reste (ce navigateur) */
+@media (min-width: 768px) {
+  html[data-dat-replie] .v2-app {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  html[data-dat-replie] .v2-laterale--fixe {
+    overflow: hidden;
+  }
+}
+/* sous 768, la coquille range ses pages dans un tiroir : rien à replier, le bouton s'efface */
+@media (max-width: 767px) {
+  .v2 .dat-entete > .dat-icone-bouton {
+    display: none;
+  }
+}

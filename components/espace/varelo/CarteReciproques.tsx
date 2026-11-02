@@ -43,7 +43,9 @@ type Props = {
   onFait: (message: string) => void;
 };
 
-export default function Reciproques({ source, contexte, client_id, onFait }: Props) {
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useReciproquesGroupe({ source, contexte, client_id, onFait }: Props) {
   const [locales, setLocales] = useState<Reciproque[]>(RECIPROQUES_EXEMPLE);
   const [reelles, setReelles] = useState<Reciproque[] | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -111,6 +113,11 @@ export default function Reciproques({ source, contexte, client_id, onFait }: Pro
     }
   }, [source, client_id, locales, onFait]);
 
+  return { locales, setLocales, reelles, setReelles, erreur, setErreur, charger, liste, compte, role, peutJustifier, peutExporter, cible, setCible, justifier, exportEnCours, setExportEnCours, telecharger };
+}
+
+export default function Reciproques({ source, contexte, client_id, onFait }: Props) {
+  const { reelles, erreur, liste, compte, peutJustifier, peutExporter, cible, setCible, justifier, exportEnCours, telecharger } = useReciproquesGroupe({ source, contexte, client_id, onFait });
   return (
     <section id="vrl-reciproques" className="esp-carte" aria-label="Comptes réciproques intragroupe" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
@@ -183,7 +190,7 @@ export default function Reciproques({ source, contexte, client_id, onFait }: Pro
   );
 }
 
-function DialogueJustification({ r, onFermer, justifier, onFait }: { r: Reciproque; onFermer: () => void; justifier: (r: Reciproque, c: CategorieEcart, m: string) => Promise<void>; onFait: (m: string) => void }) {
+export function DialogueJustification({ r, onFermer, justifier, onFait }: { r: Reciproque; onFermer: () => void; justifier: (r: Reciproque, c: CategorieEcart, m: string) => Promise<void>; onFait: (m: string) => void }) {
   const [categorie, setCategorie] = useState<CategorieEcart>("en_transit");
   const [motif, setMotif] = useState("");
   const [envoi, setEnvoi] = useState(false);

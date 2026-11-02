@@ -38,7 +38,7 @@ type Props = {
   onRattache: (dossier: string) => void;
 };
 
-const MOTIFS_ECART: Record<string, string> = { pas_un_avis: "Ce n'est pas un avis RPVA", doublon: "Doublon d'un avis déjà rattaché", autre_cabinet: "Destiné à un autre cabinet", deja_saisi: "Déjà saisi à la main" };
+export const MOTIFS_ECART: Record<string, string> = { pas_un_avis: "Ce n'est pas un avis RPVA", doublon: "Doublon d'un avis déjà rattaché", autre_cabinet: "Destiné à un autre cabinet", deja_saisi: "Déjà saisi à la main" };
 
 /** Le n° RG cité par un courriel e-barreau : « RG 26/01234 », « N° RG : 26/01234 », ou un motif AA/NNNNN isolé. */
 export function rgCite(texte: string | null | undefined): string | null {
@@ -49,7 +49,7 @@ export function rgCite(texte: string | null | undefined): string | null {
 const normaliserRg = (rg: string) => rg.replace(/[^0-9/]/g, "");
 
 /* En exemple : deux avis en attente, l'un cite le RG du dossier 2026-0412. */
-const EXEMPLE: portes.AvisEntrant[] = [
+export const EXEMPLE: portes.AvisEntrant[] = [
   {
     id: "00000000-0000-4000-8000-0000000000e1", reception_id: 1, recu_le: new Date(Date.now() - 2 * 3600_000).toISOString(), type_suppose: "rpva_avis_fixation", nb_pieces: 1, statut: "a_rattacher",
     expire_le: new Date(Date.now() + 7 * 86_400_000).toISOString(),

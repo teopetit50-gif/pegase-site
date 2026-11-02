@@ -18,7 +18,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ListChecks, PackageCheck, Plus } from "lucide-react";
+import { ListChecks, Package, PackageCheck, Plus } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, Texte, Vide, jourCourt, teinte, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { aujourdHui } from "../exemples/socle";
@@ -118,6 +119,7 @@ function exemple(tableau: Tableau): Omit<Commande, "echeances">[] {
 type Form = { type: "nouvelle" } | { type: "commandee"; k: Commande } | { type: "recue"; k: Commande } | { type: "rendu"; k: Commande } | { type: "annuler"; k: Commande } | null;
 
 export default function ApproCarte({ tableau, source }: { tableau: Tableau; source: Source }) {
+  const volet = useVolet();
   const bons = ouverte(tableau, "bons_livraison");
   const retours = ouverte(tableau, "retours");
   const listeOuverte = ouverte(tableau, "liste_cadencee");
@@ -263,55 +265,8 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
   const aSurveiller = commandes.filter((k) => ["a_commander_vite", "commande_en_retard", "livraison_tardive", "livraison_attendue"].includes(k.echeances.etat) || k.echeances.retour === "a_rendre").length;
   const devisVerifie = a?.devis_verifie ?? tableau.marches.some((m) => m.statut === "verifie");
 
-  return (
-    <section className="esp-carte" aria-label="Approvisionnement">
-      <div className="esp-carte-tete">
-        <div className="esp-section-titre" style={{ margin: 0 }}>
-          Approvisionnement — {commandes.filter((k) => k.statut !== "annulee").length} commande{commandes.filter((k) => k.statut !== "annulee").length > 1 ? "s" : ""}{aSurveiller ? `, ${aSurveiller} à surveiller` : ""}
-        </div>
-        <div className="esp-actions" style={{ marginTop: 0 }}>
-          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours || !devisVerifie || !listeOuverte} onClick={() => void liste()}
-                  title={!listeOuverte ? `Comprise dans la formule ${formuleQuiOuvre("liste_cadencee")}` : !devisVerifie ? "La liste se prépare depuis le marché vérifié" : undefined}>
-            <ListChecks width={14} height={14} aria-hidden="true" /> Préparer la liste depuis le devis
-          </button>
-          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours} onClick={() => ouvrir({ type: "nouvelle" }, { delai: "5" })}>
-            <Plus width={14} height={14} aria-hidden="true" /> Nouvelle commande
-          </button>
-        </div>
-      </div>
-      {fait ? <div style={{ marginBottom: 10 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
-      {erreur && !form ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
-      {chargement ? <Loader variant="spin" /> : commandes.length ? (
-        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Commandes du chantier (tableau qui défile)">
-          <table className="esp-tableau">
-            <thead><tr><th>Quoi</th><th>Fournisseur</th><th>Pour</th><th>Commander avant</th><th>Livraison</th><th>État</th><th></th></tr></thead>
-            <tbody>
-              {commandes.map((k) => (
-                <tr key={k.id}>
-                  <td>{k.objet}{k.quantite_texte ? <div className="esp-kpi-sous">{k.quantite_texte}{k.ligne_marche_id ? " · du devis" : ""}</div> : null}
-                    {k.a_retourner ? <div className="esp-kpi-sous">{k.echeances.retour === "rendu" ? `rendu le ${dateCourte(k.retourne_le)}` : `à rendre le ${dateCourte(k.echeances.retour_prevu)}`}</div> : null}</td>
-                  <td>{k.fournisseur_nom ?? <span className="esp-obligatoire">à choisir</span>}<div className="esp-kpi-sous">délai {k.delai_jours} j ouvrés{k.reference ? ` · ${k.reference}` : ""}</div></td>
-                  <td>{k.passage_tache ? <>« {k.passage_tache} »</> : "—"}{k.echeances.besoin_le ? <div className="esp-kpi-sous">besoin le {dateCourte(k.echeances.besoin_le)}</div> : null}</td>
-                  <td>{k.statut === "a_commander" ? dateCourte(k.echeances.commander_avant) : k.commandee_le ? <span className="esp-kpi-sous">commandé le {dateCourte(k.commandee_le)}</span> : "—"}</td>
-                  <td>{k.livree_le ? `reçue le ${dateCourte(k.livree_le)}` : k.livraison_prevue ? `promise le ${dateCourte(k.livraison_prevue)}` : "—"}
-                    {k.echeances.livrer_le && k.statut !== "livree" && k.statut !== "annulee" ? <div className="esp-kpi-sous">à livrer le {dateCourte(k.echeances.livrer_le)}, veille de la pose</div> : null}
-                    {k.echeances.quantite_livree != null ? <div className="esp-kpi-sous">reçu {qte(k.echeances.quantite_livree, k.unite)}{k.quantite != null ? ` sur ${qte(k.quantite, k.unite)}` : ""}
-                      {k.echeances.ecart ? <> · <Pastille teinte="ambre" contour>{k.echeances.ecart < 0 ? `manque ${qte(-k.echeances.ecart, k.unite)}` : `${qte(k.echeances.ecart, k.unite)} en trop`}</Pastille></> : null}</div> : null}
-                    {(k.livraisons ?? []).filter((l) => l.bon_reference).length ? <div className="esp-kpi-sous">bon{(k.livraisons ?? []).filter((l) => l.bon_reference).length > 1 ? "s" : ""} {(k.livraisons ?? []).map((l) => l.bon_reference).filter(Boolean).join(", ")}</div> : null}</td>
-                  <td><Pastille teinte={ETATS[k.echeances.etat].teinte}>{ETATS[k.echeances.etat].libelle}</Pastille>{k.echeances.retour === "a_rendre" ? <div><Pastille teinte="rouge" contour>À rendre</Pastille></div> : null}{k.motif ? <div className="esp-kpi-sous">{k.motif}</div> : null}</td>
-                  <td>
-                    {k.statut === "a_commander" || k.statut === "commandee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "commandee", k }, { le: k.commandee_le ?? auj, promise: k.livraison_prevue ?? "", reference: k.reference ?? "" })}>{k.statut === "a_commander" ? "Noter commandée" : "Changer la date promise"}</button></div> : null}
-                    {k.statut === "commandee" || k.statut === "livree_partielle" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recue", k }, { le: auj, complete: "oui" })}>Noter reçue</button></div> : null}
-                    {retours && k.a_retourner && !k.retourne_le && (k.statut === "livree" || k.statut === "livree_partielle") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "rendu", k }, { le: auj })}>Noter rendu</button></div> : null}
-                    {k.statut !== "livree" && k.statut !== "annulee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "annuler", k })}>Annuler</button></div> : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : <p className="esp-kpi-sous">Aucune commande : ajoutez ce qu&apos;il faut commander pour chaque passage, avec le délai du fournisseur ; Daliro dit quand commander.</p>}
-
+  const fenetres = (
+    <>
       <Dialog open={form !== null} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
           <DialogHeader>
@@ -375,6 +330,198 @@ export default function ApproCarte({ tableau, source }: { tableau: Tableau; sour
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : une commande par ligne, groupées par où elles en sont ;
+     dates, livraisons et gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const famille = (k: Commande) =>
+      k.statut === "annulee" ? "annulee" : k.statut === "livree" || k.statut === "livree_partielle" ? "livree" : k.statut === "a_commander" ? "a_commander" : "commandee";
+    const groupes = [
+      { cle: "a_commander", nom: "À commander" },
+      { cle: "commandee", nom: "Commandées" },
+      { cle: "livree", nom: "Livrées" },
+      { cle: "annulee", nom: "Annulées" },
+    ];
+    const quand = (k: Commande) =>
+      k.statut === "a_commander" ? { d: k.echeances.commander_avant, t: "Commander avant le" }
+      : k.livree_le ? { d: k.livree_le, t: "Reçue le" }
+      : k.livraison_prevue ? { d: k.livraison_prevue, t: "Livraison promise le" }
+      : { d: k.echeances.livrer_le, t: "À livrer le" };
+    const bonsDe = (k: Commande) => (k.livraisons ?? []).map((l) => l.bon_reference).filter(Boolean);
+    return (
+      <Partie
+        titre="Approvisionnement"
+        compte={commandes.length ? `${commandes.filter((k) => k.statut !== "annulee").length} commande${commandes.filter((k) => k.statut !== "annulee").length > 1 ? "s" : ""}${aSurveiller ? ` · ${aSurveiller} à surveiller` : ""}` : null}
+        gestes={
+          <>
+            <Bouton icone={<ListChecks aria-hidden="true" />} disabled={envoi || !enCours || !devisVerifie || !listeOuverte} onClick={() => void liste()} title={!listeOuverte ? `Comprise dans la formule ${formuleQuiOuvre("liste_cadencee")}` : !devisVerifie ? "La liste se prépare depuis le marché vérifié" : undefined}>
+              Préparer la liste depuis le devis
+            </Bouton>
+            <Bouton icone={<Plus aria-hidden="true" />} disabled={envoi || !enCours} onClick={() => ouvrir({ type: "nouvelle" }, { delai: "5" })}>
+              Nouvelle commande
+            </Bouton>
+          </>
+        }
+        avis={fait || (erreur && !form) ? <>{fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}{erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</> : null}
+      >
+        {chargement ? (
+          <Loader variant="spin" />
+        ) : commandes.length ? (
+          <Liste>
+            {groupes.map((g) => {
+              const ks = commandes.filter((k) => famille(k) === g.cle);
+              return ks.length ? (
+                <Groupe key={g.cle} nom={g.nom} compte={ks.length}>
+                  {ks.map((k) => {
+                    const e = ETATS[k.echeances.etat];
+                    const q = quand(k);
+                    return (
+                      <Ligne
+                        key={k.id}
+                        cle={`commande:${k.id}`}
+                        libelle={`${k.objet}, ${e.libelle}`}
+                        icone={<Package />}
+                        id={k.lot_code ?? undefined}
+                        titre={k.objet}
+                        second={k.fournisseur_nom ?? "fournisseur à choisir"}
+                        droite={
+                          <>
+                            <Pilule teinte={teinte(e.teinte)} icone={<Point teinte={teinte(e.teinte)} />}>{e.libelle}</Pilule>
+                            {k.echeances.retour === "a_rendre" ? <Pilule teinte="rouge">À rendre</Pilule> : null}
+                          </>
+                        }
+                        date={q.d ? jourCourt(q.d) : null}
+                        dateTitre={q.d ? `${q.t} ${dateCourte(q.d)}` : undefined}
+                      />
+                    );
+                  })}
+                </Groupe>
+              ) : null;
+            })}
+          </Liste>
+        ) : (
+          <Vide>Aucune commande : ajoutez ce qu&apos;il faut commander pour chaque passage, avec le délai du fournisseur ; Daliro dit quand commander.</Vide>
+        )}
+        {commandes.map((k) => {
+          const e = ETATS[k.echeances.etat];
+          const bl = bonsDe(k);
+          const commander = k.statut === "a_commander" || k.statut === "commandee";
+          const recevoir = k.statut === "commandee" || k.statut === "livree_partielle";
+          const rendre = retours && k.a_retourner && !k.retourne_le && (k.statut === "livree" || k.statut === "livree_partielle");
+          const annuler = k.statut !== "livree" && k.statut !== "annulee";
+          return (
+            <Detail key={k.id} cle={`commande:${k.id}`} titre={k.objet} sous={[k.quantite_texte, k.ligne_marche_id ? "du devis" : null, k.lot_code ? `lot ${k.lot_code}` : null].filter(Boolean).join(" · ") || undefined}>
+              <Rangees>
+                <Rangee libelle="État" teinte={teinte(e.teinte)}>
+                  <Point teinte={teinte(e.teinte)} />
+                  {e.libelle}
+                </Rangee>
+                <Rangee libelle="Fournisseur">
+                  {k.fournisseur_nom ?? "À choisir"} · délai {k.delai_jours} j ouvrés{k.reference ? ` · ${k.reference}` : ""}
+                </Rangee>
+                <Rangee libelle="Pour">
+                  {k.passage_tache ? `« ${k.passage_tache} »` : "Une date de besoin"}
+                  {k.echeances.besoin_le ? ` · le ${dateCourte(k.echeances.besoin_le)}` : ""}
+                </Rangee>
+                {k.statut === "a_commander" ? (
+                  <Rangee libelle="Commander" teinte={k.echeances.etat === "commande_en_retard" ? "rouge" : k.echeances.etat === "a_commander_vite" ? "jaune" : undefined}>
+                    avant le {dateCourte(k.echeances.commander_avant)}
+                  </Rangee>
+                ) : k.commandee_le ? (
+                  <Rangee libelle="Commandée">le {dateCourte(k.commandee_le)}</Rangee>
+                ) : null}
+                <Rangee libelle="Livraison">
+                  {k.livree_le ? `reçue le ${dateCourte(k.livree_le)}` : k.livraison_prevue ? `promise le ${dateCourte(k.livraison_prevue)}` : "—"}
+                  {k.echeances.livrer_le && k.statut !== "livree" && k.statut !== "annulee" ? ` · à livrer le ${dateCourte(k.echeances.livrer_le)}, veille de la pose` : ""}
+                </Rangee>
+                {k.echeances.quantite_livree != null ? (
+                  <Rangee libelle="Reçu" teinte={k.echeances.ecart ? "jaune" : undefined}>
+                    {qte(k.echeances.quantite_livree, k.unite)}
+                    {k.quantite != null ? ` sur ${qte(k.quantite, k.unite)}` : ""}
+                    {k.echeances.ecart ? ` · ${k.echeances.ecart < 0 ? `manque ${qte(-k.echeances.ecart, k.unite)}` : `${qte(k.echeances.ecart, k.unite)} en trop`}` : ""}
+                  </Rangee>
+                ) : null}
+                {bl.length ? <Rangee libelle={bl.length > 1 ? "Bons" : "Bon"}>{bl.join(", ")}</Rangee> : null}
+                {k.a_retourner ? (
+                  <Rangee libelle="Retour" teinte={k.echeances.retour === "a_rendre" ? "rouge" : undefined}>
+                    {k.echeances.retour === "rendu" ? `rendu le ${dateCourte(k.retourne_le)}` : `à rendre le ${dateCourte(k.echeances.retour_prevu)}`}
+                  </Rangee>
+                ) : null}
+              </Rangees>
+              {k.motif ? <Texte citation>{k.motif}</Texte> : null}
+              {commander || recevoir || rendre || annuler ? (
+                <Gestes>
+                  {recevoir ? <Bouton fort onClick={() => ouvrir({ type: "recue", k }, { le: auj, complete: "oui" })}>Noter reçue</Bouton> : null}
+                  {commander ? (
+                    <Bouton fort={k.statut === "a_commander"} onClick={() => ouvrir({ type: "commandee", k }, { le: k.commandee_le ?? auj, promise: k.livraison_prevue ?? "", reference: k.reference ?? "" })}>
+                      {k.statut === "a_commander" ? "Noter commandée" : "Changer la date promise"}
+                    </Bouton>
+                  ) : null}
+                  {rendre ? <Bouton onClick={() => ouvrir({ type: "rendu", k }, { le: auj })}>Noter rendu</Bouton> : null}
+                  {annuler ? <Bouton onClick={() => ouvrir({ type: "annuler", k })}>Annuler</Bouton> : null}
+                </Gestes>
+              ) : null}
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
+
+  return (
+    <section className="esp-carte" aria-label="Approvisionnement">
+      <div className="esp-carte-tete">
+        <div className="esp-section-titre" style={{ margin: 0 }}>
+          Approvisionnement — {commandes.filter((k) => k.statut !== "annulee").length} commande{commandes.filter((k) => k.statut !== "annulee").length > 1 ? "s" : ""}{aSurveiller ? `, ${aSurveiller} à surveiller` : ""}
+        </div>
+        <div className="esp-actions" style={{ marginTop: 0 }}>
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours || !devisVerifie || !listeOuverte} onClick={() => void liste()}
+                  title={!listeOuverte ? `Comprise dans la formule ${formuleQuiOuvre("liste_cadencee")}` : !devisVerifie ? "La liste se prépare depuis le marché vérifié" : undefined}>
+            <ListChecks width={14} height={14} aria-hidden="true" /> Préparer la liste depuis le devis
+          </button>
+          <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !enCours} onClick={() => ouvrir({ type: "nouvelle" }, { delai: "5" })}>
+            <Plus width={14} height={14} aria-hidden="true" /> Nouvelle commande
+          </button>
+        </div>
+      </div>
+      {fait ? <div style={{ marginBottom: 10 }}><Avis teinte="vert" role="status">{fait}</Avis></div> : null}
+      {erreur && !form ? <div style={{ marginBottom: 10 }}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
+      {chargement ? <Loader variant="spin" /> : commandes.length ? (
+        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Commandes du chantier (tableau qui défile)">
+          <table className="esp-tableau">
+            <thead><tr><th>Quoi</th><th>Fournisseur</th><th>Pour</th><th>Commander avant</th><th>Livraison</th><th>État</th><th></th></tr></thead>
+            <tbody>
+              {commandes.map((k) => (
+                <tr key={k.id}>
+                  <td>{k.objet}{k.quantite_texte ? <div className="esp-kpi-sous">{k.quantite_texte}{k.ligne_marche_id ? " · du devis" : ""}</div> : null}
+                    {k.a_retourner ? <div className="esp-kpi-sous">{k.echeances.retour === "rendu" ? `rendu le ${dateCourte(k.retourne_le)}` : `à rendre le ${dateCourte(k.echeances.retour_prevu)}`}</div> : null}</td>
+                  <td>{k.fournisseur_nom ?? <span className="esp-obligatoire">à choisir</span>}<div className="esp-kpi-sous">délai {k.delai_jours} j ouvrés{k.reference ? ` · ${k.reference}` : ""}</div></td>
+                  <td>{k.passage_tache ? <>« {k.passage_tache} »</> : "—"}{k.echeances.besoin_le ? <div className="esp-kpi-sous">besoin le {dateCourte(k.echeances.besoin_le)}</div> : null}</td>
+                  <td>{k.statut === "a_commander" ? dateCourte(k.echeances.commander_avant) : k.commandee_le ? <span className="esp-kpi-sous">commandé le {dateCourte(k.commandee_le)}</span> : "—"}</td>
+                  <td>{k.livree_le ? `reçue le ${dateCourte(k.livree_le)}` : k.livraison_prevue ? `promise le ${dateCourte(k.livraison_prevue)}` : "—"}
+                    {k.echeances.livrer_le && k.statut !== "livree" && k.statut !== "annulee" ? <div className="esp-kpi-sous">à livrer le {dateCourte(k.echeances.livrer_le)}, veille de la pose</div> : null}
+                    {k.echeances.quantite_livree != null ? <div className="esp-kpi-sous">reçu {qte(k.echeances.quantite_livree, k.unite)}{k.quantite != null ? ` sur ${qte(k.quantite, k.unite)}` : ""}
+                      {k.echeances.ecart ? <> · <Pastille teinte="ambre" contour>{k.echeances.ecart < 0 ? `manque ${qte(-k.echeances.ecart, k.unite)}` : `${qte(k.echeances.ecart, k.unite)} en trop`}</Pastille></> : null}</div> : null}
+                    {(k.livraisons ?? []).filter((l) => l.bon_reference).length ? <div className="esp-kpi-sous">bon{(k.livraisons ?? []).filter((l) => l.bon_reference).length > 1 ? "s" : ""} {(k.livraisons ?? []).map((l) => l.bon_reference).filter(Boolean).join(", ")}</div> : null}</td>
+                  <td><Pastille teinte={ETATS[k.echeances.etat].teinte}>{ETATS[k.echeances.etat].libelle}</Pastille>{k.echeances.retour === "a_rendre" ? <div><Pastille teinte="rouge" contour>À rendre</Pastille></div> : null}{k.motif ? <div className="esp-kpi-sous">{k.motif}</div> : null}</td>
+                  <td>
+                    {k.statut === "a_commander" || k.statut === "commandee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "commandee", k }, { le: k.commandee_le ?? auj, promise: k.livraison_prevue ?? "", reference: k.reference ?? "" })}>{k.statut === "a_commander" ? "Noter commandée" : "Changer la date promise"}</button></div> : null}
+                    {k.statut === "commandee" || k.statut === "livree_partielle" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "recue", k }, { le: auj, complete: "oui" })}>Noter reçue</button></div> : null}
+                    {retours && k.a_retourner && !k.retourne_le && (k.statut === "livree" || k.statut === "livree_partielle") ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "rendu", k }, { le: auj })}>Noter rendu</button></div> : null}
+                    {k.statut !== "livree" && k.statut !== "annulee" ? <div><button type="button" className="esp-lien-bouton" onClick={() => ouvrir({ type: "annuler", k })}>Annuler</button></div> : null}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : <p className="esp-kpi-sous">Aucune commande : ajoutez ce qu&apos;il faut commander pour chaque passage, avec le délai du fournisseur ; Daliro dit quand commander.</p>}
+
+      {fenetres}
     </section>
   );
 }

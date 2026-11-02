@@ -1,0 +1,555 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › Avenants et situations — Linear, Board, au 1:1 (02/11/2026).
+   Relevé : docs/refonte-metiers/releves/linear-board.md ; ce qu'il ne
+   chiffre pas est mesuré sur ses captures à taille réelle
+   (captures/linear-board/1440-reel-*.png, échelle 1). Préfixe dal-bd-.
+
+   Repères (px CSS, depuis le coin de la carte `main`) :
+     ligne 1     fil : icône 16 à 19, « Chantiers » 13/500 secondaire,
+                 chevron 14 tertiaire, page 13/500 primaire ; à droite cloche
+                 28, « Nouvel avenant » 28 (p 0 10 0 8, 12/500, icône 14)
+     ligne 2     onglets, rond « vues » ; à droite trois ronds pleins (écart
+                 6) — Affichage cerclé de violet et pointé quand modifié
+     tableau     à y 88 ; colonnes : fond 340 (contenu 324) au pas de 348,
+                 la première à x 9 ; fond dégradé du fond de l'app, r 8
+     colonne     en-tête 50 : icône d'état 14 à x+5, nom 13/500 secondaire,
+                 compte 13 tertiaire ; « … » et « + » 28 au bord droit
+     carte       322, r 8, p 8 ; à 8 sous l'en-tête, écart 8
+                 l1 18 : identifiant 12/450 tertiaire (x+3), avatar 18
+                 titre +4 : état 14 (x+3), écart 7, 13/500/16 primaire, 2 lignes
+                 puces +10 : 24, r 48, p 0 8, bord 0.5, écart 4, rangées 4
+                 pied +9 : 12/450 tertiaire, 18 de haut
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal.dal-bd-page {
+  --dal-bd-carte: lch(9.232 0.85 272);
+  --dal-bd-carte-ombre: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --dal-bd-titre: lch(100 0 272);
+  --dal-bd-second: lch(61.803 1.2 272);
+  --dal-bd-puce-bord: lch(16.32 1.48 272);
+  --dal-bd-colonne-haut: lch(2.595 0.4 272 / 0.33);
+  --dal-bd-colonne-bas: lch(2.595 0.4 272 / 0.17);
+  --dal-bd-triage: rgb(255 138 103);
+  --dal-bd-backlog: #bec2c8;
+  --dal-bd-todo: #e2e2e2;
+  --dal-bd-started: rgb(214 205 38);
+  --dal-bd-done: lch(48 59.31 288.43);
+  --dal-bd-canceled: #95a2b3;
+  --dal-bd-urgent: rgb(244 131 71);
+  --dal-bd-avatar: lch(39.452 1.425 272);
+}
+html[data-v2-theme="light"] .v2 .dal.dal-bd-page {
+  --dal-bd-carte: lch(100 0 282);
+  --dal-bd-carte-ombre: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --dal-bd-titre: lch(10 0 282);
+  --dal-bd-second: lch(40 1 282);
+  --dal-bd-puce-bord: lch(86.5 0 282);
+  --dal-bd-colonne-haut: lch(94.44 0.5 282 / 0.45);
+  --dal-bd-colonne-bas: lch(94.44 0.5 282 / 0.22);
+  --dal-bd-triage: rgb(236 106 72);
+  --dal-bd-backlog: #a3a3a3;
+  --dal-bd-todo: #a0a0a0;
+  --dal-bd-started: rgb(214 204 44);
+  --dal-bd-urgent: rgb(224 103 60);
+  --dal-bd-avatar: lch(64.64 1.25 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal.dal-bd-page {
+    --dal-bd-carte: lch(100 0 282);
+    --dal-bd-carte-ombre: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --dal-bd-titre: lch(10 0 282);
+    --dal-bd-second: lch(40 1 282);
+    --dal-bd-puce-bord: lch(86.5 0 282);
+    --dal-bd-colonne-haut: lch(94.44 0.5 282 / 0.45);
+    --dal-bd-colonne-bas: lch(94.44 0.5 282 / 0.22);
+    --dal-bd-triage: rgb(236 106 72);
+    --dal-bd-backlog: #a3a3a3;
+    --dal-bd-todo: #a0a0a0;
+    --dal-bd-started: rgb(214 204 44);
+    --dal-bd-urgent: rgb(224 103 60);
+    --dal-bd-avatar: lch(64.64 1.25 282);
+  }
+}
+
+/* ——— ligne 1 : le fil « Équipe › Issues » ——— */
+.v2 .dal .dal-bd-fil {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 28px;
+  padding-left: 10px;
+}
+.v2 .dal .dal-bd-fil-equipe {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 0 0 4px;
+  margin-left: -4px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+}
+.v2 .dal .dal-bd-fil-equipe:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-bd-fil-icone {
+  flex: none;
+  color: var(--dal-equipe);
+}
+.v2 .dal .dal-bd-fil-sep {
+  flex: none;
+  margin: 0 2px 0 4px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-fil-ici {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-bd-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .dal .dal-bd-nouveau:hover,
+.v2 .dal .dal-bd-nouveau[aria-expanded="true"] {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+
+/* l'étoile (épingler la vue) suit le fil ; pleine et jaune une fois épinglée ; cloche pleine une fois suivie */
+.v2 .dal .dal-bd-etoile {
+  margin-left: 0;
+}
+.v2 .dal .dal-rond[data-actif] svg {
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-rond:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— ligne 2 ——— */
+.v2 .dal .dal-bd-ligne2 {
+  gap: 8px;
+}
+.v2 .dal .dal-bd-vues svg {
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-bd-outils {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .dal .dal-bd-pop {
+  position: relative;
+  display: inline-flex;
+}
+.v2 .dal .dal-bd-pop .dal-rond {
+  position: relative;
+}
+.v2 .dal .dal-rond[data-modifie] {
+  border-color: var(--dal-violet);
+}
+.v2 .dal .dal-bd-point {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dal-violet);
+}
+.v2 .dal .dal-bd-menu {
+  top: 32px;
+  right: 0;
+  min-width: 260px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.v2 .dal .dal-bd-menu-titre {
+  padding: 4px 14px 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-menu-aide {
+  max-width: 260px;
+  padding: 2px 14px 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dal-t3);
+  white-space: normal;
+}
+.v2 .dal .dal-bd-menu .dal-menu-option {
+  max-width: 380px;
+}
+.v2 .dal .dal-bd-menu-ident {
+  flex: none;
+  font-size: 12px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-menu-titre-el {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-bd-menu-compte {
+  font-size: 12px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-champ {
+  display: block;
+  width: 100%;
+  height: 36px;
+  padding: 10px 14px 9px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--dal-menu-texte);
+  outline: none;
+}
+.v2 .dal .dal-bd-champ::placeholder {
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-bd-contextuel {
+  position: fixed;
+  min-width: 200px;
+}
+.v2 .dal .dal-bd-note,
+.v2 .dal .dal-bd-vide {
+  padding: 16px 18px;
+  font-size: 13px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-note {
+  padding: 0 18px 8px;
+  font-size: 12px;
+  color: var(--dal-rouge);
+}
+
+/* ——— le tableau : défile en largeur, une colonne par état ——— */
+.v2 .dal .dal-bd-corps {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.v2 .dal .dal-bd-tableau {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  padding: 0 8px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.v2 .dal .dal-bd-colonne {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  min-height: 100%;
+  height: max-content;
+  padding: 0 8px 8px;
+  border-radius: 8px 8px 0 0;
+  background: linear-gradient(to bottom, var(--dal-bd-colonne-haut), var(--dal-bd-colonne-bas));
+}
+.v2 .dal .dal-bd-colonne[data-masquee] {
+  opacity: 0.85;
+}
+.v2 .dal .dal-bd-colonne[data-survol] {
+  box-shadow: inset 0 0 0 1px var(--dal-violet);
+}
+.v2 .dal .dal-bd-colonne-tete {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  flex: none;
+  height: 50px;
+  padding-left: 5px;
+}
+.v2 .dal .dal-bd-colonne-tete > .dal-bd-etat {
+  margin-right: 10px;
+}
+.v2 .dal .dal-bd-colonne-nom {
+  margin: 0 8px 0 1px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+}
+.v2 .dal .dal-bd-colonne-compte {
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-bd-colonne-tete .dal-bd-plus {
+  margin-right: -3px;
+}
+.v2 .dal .dal-bd-colonne-tete .dal-bd-pop:last-child .dal-bd-plus {
+  margin-right: 0;
+}
+.v2 .dal .dal-bd-colonne-vide {
+  padding: 4px 4px 0;
+  font-size: 12px;
+  color: var(--dal-t4);
+}
+.v2 .dal .dal-bd-cartes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* les couleurs d'état (statuts de Linear) */
+.v2 .dal .dal-bd-etat {
+  flex: none;
+}
+.v2 .dal .dal-bd-etat[data-etat="triage"] {
+  color: var(--dal-bd-triage);
+}
+.v2 .dal .dal-bd-etat[data-etat="backlog"] {
+  color: var(--dal-bd-backlog);
+}
+.v2 .dal .dal-bd-etat[data-etat="todo"] {
+  color: var(--dal-bd-todo);
+}
+.v2 .dal .dal-bd-etat[data-etat="started"] {
+  color: var(--dal-bd-started);
+}
+.v2 .dal .dal-bd-etat[data-etat="done"] {
+  color: var(--dal-bd-done);
+}
+.v2 .dal .dal-bd-etat[data-etat="canceled"] {
+  color: var(--dal-bd-canceled);
+}
+
+/* ——— la carte ——— */
+.v2 .dal .dal-bd-carte {
+  display: flex;
+  flex-direction: column;
+  width: 322px;
+  margin: 0 1px;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--dal-bd-carte);
+  box-shadow: var(--dal-bd-carte-ombre);
+  color: var(--dal-bd-titre);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.v2 .dal .dal-bd-carte[aria-current="true"] {
+  box-shadow: var(--dal-bd-carte-ombre), 0 0 0 1px var(--dal-violet);
+}
+.v2 .dal .dal-bd-carte[data-glisse] {
+  opacity: 0.5;
+}
+.v2 .dal .dal-bd-carte-l1 {
+  display: flex;
+  align-items: center;
+  height: 18px;
+  padding-left: 3px;
+}
+.v2 .dal .dal-bd-ident {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-bd-second);
+  white-space: nowrap;
+}
+.v2 .dal .dal-bd-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  color: var(--dal-bd-avatar);
+}
+.v2 .dal .dal-bd-avatar svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .dal .dal-bd-initiales {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--dal-t4);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  color: var(--dal-carte);
+}
+.v2 .dal .dal-bd-carte-titre {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 4px;
+  padding-left: 3px;
+}
+.v2 .dal .dal-bd-carte-titre > .dal-bd-etat {
+  margin-top: 1px;
+}
+.v2 .dal .dal-bd-carte-texte {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-bd-titre);
+}
+.v2 .dal .dal-bd-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+.v2 .dal .dal-bd-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 24px;
+  padding: 0 8px;
+  border: 0.5px solid var(--dal-bd-puce-bord);
+  border-radius: 48px;
+  background: var(--dal-bd-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-bd-second);
+  white-space: nowrap;
+}
+.v2 .dal .dal-bd-puce[data-carre] {
+  justify-content: center;
+  width: 24px;
+  padding: 0;
+}
+.v2 .dal .dal-bd-puce svg {
+  flex: none;
+  color: var(--dal-bd-second);
+}
+.v2 .dal .dal-bd-puce[data-urgence] svg {
+  color: var(--dal-bd-urgent);
+}
+.v2 .dal .dal-bd-puce[data-retard] svg {
+  color: var(--dal-rouge);
+}
+.v2 .dal .dal-bd-puce-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-bd-pastille-boite {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.v2 .dal .dal-bd-pastille {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.v2 .dal .dal-bd-pied {
+  display: flex;
+  align-items: center;
+  height: 18px;
+  margin: 8px 0 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-bd-second);
+}
+
+/* ——— le volet de détail : celui de la fiche du chantier (lit-volet, 400) ——— */
+.v2 .dal .dal-bd-volet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: none;
+  width: 400px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 8px 8px 4px;
+  scrollbar-width: thin;
+}
+.v2 .dal .dal-bd-hote {
+  display: none;
+}
+
+/* ——— 1024 : colonnes de 322 au pas de 348 ——— */
+@media (max-width: 1100px) {
+  .v2 .dal .dal-bd-volet {
+    position: fixed;
+    right: 0;
+    top: 48px;
+    bottom: 0;
+    z-index: 30;
+    padding: 8px;
+    background: var(--dal-carte);
+    border-left: 0.5px solid var(--dal-carte-bord);
+  }
+}
+
+/* ——— 768 et moins : carte plein écran, colonnes depuis x 17 ——— */
+@media (max-width: 768px) {
+  .v2 .dal .dal-bd-corps {
+    min-height: calc(100dvh - 48px - 88px);
+  }
+  .v2 .dal .dal-bd-tableau {
+    padding: 0 9px;
+    min-height: calc(100dvh - 48px - 96px);
+  }
+  .v2 .dal .dal-bd-volet {
+    left: 0;
+    width: auto;
+  }
+}
+@media (max-width: 480px) {
+  /* capture 390 du Board de Linear : onglets à 4 l'un de l'autre (8 à 1440) ; la ligne tient
+     dans les 390 sans déborder */
+  .v2 .dal .dal-bd-ligne2 {
+    gap: 4px;
+  }
+  .v2 .dal .dal-bd-colonne {
+    width: 290px;
+  }
+  .v2 .dal .dal-bd-carte {
+    width: 264px;
+    margin: 0 4px 0 1px;
+  }
+  .v2 .dal .dal-bd-nouveau span {
+    display: none;
+  }
+  .v2 .dal .dal-bd-nouveau {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+}

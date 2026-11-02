@@ -69,7 +69,9 @@ type Props = {
 const PAR_PAGE = 12;
 const COLONNES_MONTANT = ["non_echu", "echu_30", "echu_60", "echu_90", "echu_plus", "echu", "total"];
 
-export default function Encours({ source, contexte, client_id, nature, societes, codes, objets, onOuvrir, onFait, inscrireExemple, relireReferentiel }: Props) {
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useEncoursGroupe({ source, contexte, client_id, nature, codes, objets, inscrireExemple, relireReferentiel }: Omit<Props, "societes" | "onOuvrir" | "onFait">) {
   /* ——— exemple, en mémoire ——— */
   const [brutes, setBrutes] = useState<BrutEncours[]>(LIGNES_BRUTES_EXEMPLE);
   const [arretes, setArretes] = useState<ArreteExemple[]>(ARRETES_EXEMPLE);
@@ -224,6 +226,11 @@ export default function Encours({ source, contexte, client_id, nature, societes,
     [source, client_id, charger, relireReferentiel, codes, arretes, inscrireExemple],
   );
 
+  return { brutes, setBrutes, arretes, setArretes, plafondsLocaux, setPlafondsLocaux, reel, setReel, erreur, setErreur, charger, exemple, vue, groupe, courants, nonRanges, totaux, tout, setTout, visibles, peutDeposer, peutPlafond, peutProposer, decisionDe, proposer, proposition, setProposition, proposerIci, libelle, plafond, setPlafond, reglerIci, depot, setDepot, deposerIci };
+}
+
+export default function Encours({ source, contexte, client_id, nature, societes, codes, objets, onOuvrir, onFait, inscrireExemple, relireReferentiel }: Props) {
+  const { reel, erreur, groupe, courants, nonRanges, totaux, tout, setTout, visibles, peutDeposer, peutPlafond, peutProposer, decisionDe, proposition, setProposition, proposerIci, libelle, plafond, setPlafond, reglerIci, depot, setDepot, deposerIci } = useEncoursGroupe({ source, contexte, client_id, nature, codes, objets, inscrireExemple, relireReferentiel });
   return (
     <section id="vrl-encours" className="esp-carte" aria-label={`Encours du groupe, ${libelle.des}`} style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
@@ -359,7 +366,7 @@ export default function Encours({ source, contexte, client_id, nature, societes,
 }
 
 /* ——— régler le plafond d'un client du groupe ——— */
-function DialoguePlafond({ g, proposer = false, onFermer, regler, onFait }: { g: EncoursGroupe; proposer?: boolean; onFermer: () => void; regler: (g: EncoursGroupe, plafond: number | null, echu: number | null, motif: string) => Promise<boolean>; onFait: (m: string) => void }) {
+export function DialoguePlafond({ g, proposer = false, onFermer, regler, onFait }: { g: EncoursGroupe; proposer?: boolean; onFermer: () => void; regler: (g: EncoursGroupe, plafond: number | null, echu: number | null, motif: string) => Promise<boolean>; onFait: (m: string) => void }) {
   const [valeur, setValeur] = useState(g.plafond !== null ? String(g.plafond).replace(".", ",") : "");
   const [echu, setEchu] = useState(g.plafond_echu !== null ? String(g.plafond_echu).replace(".", ",") : "");
   const [motif, setMotif] = useState("");
@@ -424,7 +431,7 @@ function DialoguePlafond({ g, proposer = false, onFermer, regler, onFait }: { g:
 }
 
 /* ——— déposer la balance âgée d'une société ——— */
-function DialogueBalance({ ouvert, onFermer, societes, natureDefaut, deposer, onFait }: {
+export function DialogueBalance({ ouvert, onFermer, societes, natureDefaut, deposer, onFait }: {
   ouvert: boolean;
   onFermer: () => void;
   societes: Societe[];

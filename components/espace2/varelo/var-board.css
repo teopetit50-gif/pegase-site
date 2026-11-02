@@ -1,0 +1,284 @@
+/* ══════════════════════════════════════════════════════════════════════
+   VARELO, Opérations — Linear, Board (vue Board de « All issues »), au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/linear-board.md ;
+   positions lues sur captures/linear-board/1440-reel-*.png (carte 244,8).
+   Préfixe var-b-.
+
+   Repères (px CSS, depuis le bord de la carte) :
+     colonnes   zone de dépôt de 340 (colonne de 324 + 8 de chaque côté),
+                pas de 348 ; première colonne à 17 ; fond transparent en
+                sombre, lch(94.44 0.5 282) en clair, rayon 8
+     en-tête    324×50 : icône d'état 14 à 5, nom 13/500 à 12 + 2, compte
+                13 tertiaire ; « … » et « + » ronds de 28 à droite
+     cartes     322 de large, écart 8, première à 9 sous l'en-tête ;
+                p 8 ; ligne 1 (identifiant 12/450, avatar 18) de 15 ;
+                titre 13/500/16 sur 2 lignes au plus, à 5 ; puces de 24
+                (rayon 48, p 0 8, bord 0.5, 12/450), à 10, écart 4 ;
+                pied 12/450 sur 22,5, à 8 — carte de 132,5 pour un titre
+                de deux lignes et une rangée de puces (mesuré)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .var .var-b-plateau {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  height: 100%;
+  padding: 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.v2 .var .var-b-zone {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  width: 340px;
+  max-height: 100%;
+  padding: 0 8px 8px;
+  border-radius: 8px;
+}
+html[data-v2-theme="light"] .v2 .var .var-b-zone {
+  background: lch(94.44 0.5 282);
+}
+.v2 .var .var-b-entete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 50px;
+  padding: 4px 0 0 1px;
+}
+.v2 .var .var-b-entete > svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-left: 4px;
+}
+.v2 .var .var-b-nom-col {
+  margin-left: 2px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--var-t2);
+  white-space: nowrap;
+}
+html[data-v2-theme="light"] .v2 .var .var-b-nom-col {
+  color: var(--var-t1);
+}
+.v2 .var .var-b-compte {
+  margin-left: -4px;
+  font-size: 13px;
+  color: var(--var-t3);
+}
+.v2 .var .var-b-entete .var-pousse {
+  flex: 1;
+}
+.v2 .var .var-b-entete-actions {
+  display: flex;
+  gap: 0;
+  margin-right: -2px;
+}
+.v2 .var .var-b-pile {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 9px 1px 1px;
+  overflow-y: auto;
+}
+.v2 .var .var-b-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 322px;
+  padding: 8px;
+  border-radius: 8px;
+  background: lch(9.232 0.85 272);
+  box-shadow: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  text-align: left;
+  color: var(--var-t1);
+  transition: color 0.15s;
+  cursor: pointer;
+}
+html[data-v2-theme="light"] .v2 .var .var-b-carte {
+  background: lch(100 0 282);
+  box-shadow: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+}
+.v2 .var .var-b-l1 {
+  display: flex;
+  align-items: center;
+  height: 15px;
+  padding: 0 4px 0 5px;
+  font-size: 12px;
+  font-weight: 450;
+  color: lch(61.803 1.2 272);
+}
+html[data-v2-theme="light"] .v2 .var .var-b-l1,
+html[data-v2-theme="light"] .v2 .var .var-b-pied,
+html[data-v2-theme="light"] .v2 .var .var-b-puce {
+  color: lch(40 1 282);
+}
+.v2 .var .var-b-l1 .var-pousse {
+  flex: 1;
+}
+.v2 .var .var-b-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin: -2px 0 -1px;
+  border-radius: 50%;
+  background: var(--var-equipe);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+}
+.v2 .var .var-b-avatar--vide {
+  background: none;
+  color: var(--var-t3);
+}
+.v2 .var .var-b-titre {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 5px;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--var-t1);
+}
+.v2 .var .var-b-titre > svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+}
+.v2 .var .var-b-titre > span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.v2 .var .var-b-puces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+.v2 .var .var-b-puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  max-width: 100%;
+  padding: 0 8px;
+  border: 0.5px solid var(--var-puce-bord);
+  border-radius: 48px;
+  font-size: 12px;
+  font-weight: 450;
+  color: lch(61.803 1.2 272);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .var .var-b-puce > svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+.v2 .var .var-b-puce--carre {
+  width: 24px;
+  padding: 0;
+  justify-content: center;
+}
+.v2 .var .var-b-point {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.v2 .var .var-b-pied {
+  display: flex;
+  align-items: center;
+  height: 22.5px;
+  margin-top: 8px;
+  padding: 0 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: lch(61.803 1.2 272);
+}
+.v2 .var .var-b-plus {
+  padding: 4px 4px 0;
+  font-size: 12px;
+  color: var(--var-t3);
+}
+.v2 .var .var-b-plus button {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+}
+.v2 .var .var-b-plus button:hover {
+  background: var(--var-survol-onglet);
+}
+.v2 .var .var-b-carte-menu {
+  top: 36px;
+  left: 8px;
+}
+
+/* en-tête de page (ligne 2) : les trois ronds d'outils à droite */
+.v2 .var .var-b-outils {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  position: relative;
+}
+.v2 .var .var-b-outils .var-rond {
+  background: var(--var-bouton);
+  border-color: var(--var-carte-bord);
+}
+.v2 .var .var-b-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--var-t3);
+}
+.v2 .var .var-b-nouveau svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .var .var-b-nouveau:hover,
+.v2 .var .var-b-nouveau[aria-expanded="true"] {
+  color: var(--var-t1);
+  background: var(--var-survol-onglet);
+}
+.v2 .var .var-b-fil-sep {
+  color: var(--var-t3);
+}
+
+@media (max-width: 1024px) {
+  .v2 .var .var-b-zone {
+    width: 338px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .var .var-b-plateau {
+    height: auto;
+    min-height: calc(100dvh - 48px - 88px);
+  }
+  .v2 .var .var-b-pile {
+    overflow: visible;
+  }
+}
+@media (max-width: 480px) {
+  .v2 .var .var-b-zone {
+    width: 290px;
+  }
+  .v2 .var .var-b-carte {
+    width: 264px;
+  }
+}

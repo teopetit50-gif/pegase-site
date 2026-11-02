@@ -1,0 +1,412 @@
+/* ══════════════════════════════════════════════════════════════════════
+   VARELO, Finance — Plain, Insights (Reporting et ses rapports), au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/plain-insights.md ;
+   jetons et briques : plain-commun.md, ./var-plain.css. Préfixe var-n-.
+
+   Repères (px CSS, depuis le bord de la carte) : barre de titre de 86, h1
+   24/400/32 à 24,30 ; boutons bordés de 30 à droite, écart 8 ; zone
+   défilante sous un filet, p 0 24 120 ; titre de section collant 60
+   (p 24 0 12), 14/550 + chevron 14 ; grille de cartes 3 colonnes, écart
+   42 ; carte p 12, sans fond : titre 12/550/16 gris + info 14, valeur
+   24/400/36 + suffixe 14/400/20, graphique de 155 ; répartition : nom
+   12/400, barre de 8 rayon 2, valeur 12/550 et badge ; rapport en grille,
+   lignes de 42, p 4 20.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .var.var--plain .var-n-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.v2 .var.var--plain .var-n-tete {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  height: 86px;
+  padding: 30px 24px 0;
+}
+.v2 .var.var--plain .var-n-h1 {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--p-t1);
+  white-space: nowrap;
+}
+.v2 .var.var--plain .var-n-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 2px;
+}
+.v2 .var.var--plain .var-n-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 6px 12px;
+  border: 1px solid var(--p-b1);
+  border-radius: 6px;
+  background: var(--p-fond);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-t1);
+  white-space: nowrap;
+}
+.v2 .var.var--plain .var-n-bouton > svg {
+  width: 18px;
+  height: 18px;
+  color: var(--p-i1);
+}
+.v2 .var.var--plain .var-n-bouton .var-n-valeur-bouton {
+  font-weight: 400;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-bouton .var-n-chevron {
+  width: 14px;
+  height: 14px;
+  margin-left: -4px;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-bouton:hover,
+.v2 .var.var--plain .var-n-bouton[aria-expanded="true"] {
+  background: var(--p-f1);
+}
+.v2 .var.var--plain .var-n-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 24px 120px;
+  border-top: 1px solid var(--p-b2);
+}
+.v2 .var.var--plain .var-n-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .var.var--plain .var-n-section-tete {
+  position: sticky;
+  top: -12px;
+  z-index: 3;
+  padding: 24px 0 12px;
+  background: var(--p-fond);
+}
+.v2 .var.var--plain .var-n-section-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--p-t1);
+}
+.v2 .var.var--plain .var-n-section-titre svg {
+  width: 14px;
+  height: 14px;
+  color: var(--p-t2);
+  transition: transform 0.15s;
+}
+.v2 .var.var--plain .var-n-section-titre[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.v2 .var.var--plain .var-n-grille {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 42px;
+  /* le texte des cartes (p 12) tombe sur celui du titre de section (capture) */
+  margin: 0 -12px;
+}
+.v2 .var.var--plain .var-n-grille--deux {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.v2 .var.var--plain .var-n-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 8px;
+}
+.v2 .var.var--plain .var-n-carte--large {
+  grid-column: 1 / -1;
+}
+.v2 .var.var--plain .var-n-carte-tete {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.v2 .var.var--plain .var-n-carte-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-carte-titre svg {
+  width: 14px;
+  height: 14px;
+  color: var(--p-i2);
+}
+.v2 .var.var--plain .var-n-carte-titre .var-n-droite {
+  margin-left: auto;
+}
+.v2 .var.var--plain .var-n-valeur {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 36px;
+  color: var(--p-t1);
+}
+.v2 .var.var--plain .var-n-valeur small {
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-graphe {
+  width: 100%;
+  height: 155px;
+  overflow: visible;
+  font-size: 12px;
+}
+.v2 .var.var--plain .var-n-graphe text {
+  fill: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-grillage {
+  stroke: var(--p-b2);
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-n-grillage {
+  stroke: #323035;
+}
+.v2 .var.var--plain .var-n-moyenne {
+  stroke: #cdcddb;
+  stroke-dasharray: 3;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-n-moyenne {
+  stroke: #49474e;
+}
+.v2 .var.var--plain .var-n-etiquette {
+  fill: var(--p-fond);
+  stroke: var(--p-b2);
+}
+.v2 .var.var--plain .var-n-sans {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 155px;
+  border-bottom: 1px solid var(--p-b2);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-t2);
+}
+
+/* répartition */
+.v2 .var.var--plain .var-n-repart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .var.var--plain .var-n-repart li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  align-items: end;
+}
+.v2 .var.var--plain .var-n-repart-nom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-right: 64px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-t1);
+}
+.v2 .var.var--plain .var-n-repart-nom > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--plain .var-n-repart-nom svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+.v2 .var.var--plain .var-n-barre {
+  grid-column: 1;
+  height: 8px;
+  margin-top: 4px;
+  border-radius: 2px;
+  background: var(--p-b3);
+}
+.v2 .var.var--plain .var-n-repart-valeur {
+  grid-row: 1 / 3;
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-t1);
+  white-space: nowrap;
+}
+.v2 .var.var--plain .var-n-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 4px 1px 4px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  background: var(--p-f1);
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-badge[data-teinte="rouge"] {
+  background: #fff7f7;
+  color: #651818;
+}
+.v2 .var.var--plain .var-n-badge[data-teinte="vert"] {
+  background: #f3fcf5;
+  color: #074022;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-n-badge[data-teinte="rouge"] {
+  background: #201312;
+  color: #ffd2cc;
+}
+html:not([data-v2-theme="light"]) .v2 .var.var--plain .var-n-badge[data-teinte="vert"] {
+  background: #121b14;
+  color: #b2f2c0;
+}
+.v2 .var.var--plain .var-n-encadre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 120px;
+  padding: 16px;
+  border: 1px solid var(--p-b1);
+  border-radius: 8px;
+  text-align: center;
+}
+.v2 .var.var--plain .var-n-encadre strong {
+  font-size: 14px;
+  font-weight: 550;
+}
+.v2 .var.var--plain .var-n-encadre p {
+  font-size: 14px;
+  color: var(--p-t2);
+}
+
+/* rapport (Accounts, Tiers…) : tableau en grille, lignes de 42 */
+.v2 .var.var--plain .var-n-rapport {
+  min-width: 0;
+  overflow-x: auto;
+}
+.v2 .var.var--plain .var-n-rapport-outils {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.v2 .var.var--plain .var-n-ligne {
+  display: grid;
+  column-gap: 16px;
+  align-items: center;
+  min-height: 42px;
+  padding: 4px 20px;
+  border-bottom: 1px solid var(--p-b1);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-t1);
+}
+.v2 .var.var--plain .var-n-ligne[data-vise] {
+  background: var(--p-f1);
+}
+.v2 .var.var--plain .var-n-ligne--tete {
+  font-weight: 550;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-ligne--tete > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .var.var--plain .var-n-ligne--pied {
+  border-bottom: 0;
+  font-weight: 550;
+  text-transform: uppercase;
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-cellule-nom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 8px 8px 12px;
+  margin-left: -12px;
+  border-radius: 6px;
+  font-weight: 550;
+  text-align: left;
+}
+.v2 .var.var--plain button.var-n-cellule-nom:hover {
+  background: var(--p-f1);
+}
+.v2 .var.var--plain .var-n-cellule-nom svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--p-i1);
+}
+.v2 .var.var--plain .var-n-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .var.var--plain .var-n-gris {
+  color: var(--p-t2);
+}
+.v2 .var.var--plain .var-n-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.v2 .var.var--plain .var-n-actions .var-p-second {
+  height: 26px;
+  padding: 5px 8px;
+}
+.v2 .var.var--plain .var-n-plus {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+}
+.v2 .var.var--plain .var-n-plus .var-p-second {
+  height: 26px;
+  padding: 5px 8px;
+}
+
+@media (max-width: 768px) {
+  .v2 .var.var--plain .var-n-tete {
+    flex-direction: column;
+    height: auto;
+    padding: 16px 16px 16px;
+  }
+  .v2 .var.var--plain .var-n-defile {
+    padding: 0 16px 120px;
+    overflow: visible;
+  }
+  .v2 .var.var--plain .var-n-grille,
+  .v2 .var.var--plain .var-n-grille--deux {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

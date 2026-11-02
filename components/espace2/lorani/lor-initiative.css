@@ -1,0 +1,285 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI › la page d'un projet = Linear, page d'une Initiative, au 1:1
+   (02/11/2026)
+
+   Relevé : releves/linear-initiative.md (29/10, complété le 01/11, sombre
+   et clair). Repères depuis le bord de la carte (1187 de large à 1440) :
+     en-tête      ligne 1 : 44, p 0 8, filet bas 0.5 ; maillon 24 (r 8,
+                  p 0 5 0 4), lien courant (r 6, p 2 4, m −2 −4) → icône 16 +
+                  nom 13/500 ; à droite lien 24, ronds 28, gap 4
+                  ligne 2 (y 52) : onglets 28 (r 9999, p 0 10, 12/500), gap 4,
+                  à x 9 ; « Open details » 28 à droite ; en-tête 87.5 en tout
+     défilement   y 88, p 0 48 ; colonne 805 centrée (x 192)
+     colonne      tuile 36 à y 152 (r 6, couleur à 12,5 % / 17,5 %) ; titre
+                  m-top 12, 24/600/32 ls −0.16 ; résumé p 4 0, 15/450/23 ;
+                  rangées Properties / Resources : 28 de haut, 16 puis 12
+                  d'écart, libellé 13/500 t3 sur 81, pilules r 9999 p 3 6
+                  gap 8 (icône–texte) et 4 (entre pilules), 13/500 t2
+     Latest update carte 837 (−16 de chaque côté), r 10, p 8 16 16, bord
+                  0.5 ; méta 13/450 ; texte 15/450/24, m-top 20 ;
+                  bouton commentaires 37 × 28 (r 30, p 5 10)
+     Description  r 12, p 10 16 0 ; texte 15/450/24 (p 16 14, m 0 −14)
+     Projects     section 963 centrée, h3 18/500 (p 6 0), tableau 1001
+                  (m-left −28) : [indent] 0 [checkbox] 18 [title] 1fr
+                  [health] 50 [priority] 68 [lead] 48 [targetDate] 100
+                  [status] 68 [end-padding] 12, gap 6 ; groupes 32 (11/450,
+                  filet 0.5) ; lignes 36 (r 8)
+     volet ⌘ I    400 de large (p-left 4) ; cartes 388, gap 8, p 12, r 10 ;
+                  rangées 36 (libellé 12/450 sur 90) ; segments 28
+                  (r 9999, p 4 12, m 2) ; lignes de répartition 42 (r 8, p 0 10)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lor-in {
+  --lor-in-bord-maj: lch(27.12 1.48 272);
+  --lor-in-filet-groupe: lch(18.48 1.48 272);
+  display: flex; flex-direction: column; min-height: calc(100dvh - 48px);
+}
+html[data-v2-theme="light"] .v2 .lor-in { --lor-in-bord-maj: lch(84.44 0 282); --lor-in-filet-groupe: lch(88.49 0 282); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lor-in { --lor-in-bord-maj: lch(84.44 0 282); --lor-in-filet-groupe: lch(88.49 0 282); }
+}
+
+/* ——— en-tête ——— */
+.v2 .lor-in-tete { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; }
+.v2 .lor-in-l1 { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 44px; padding: 0 8px; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-in-l1-gauche { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.v2 .lor-in-l1-droite { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.v2 .lor-in-fil { display: flex; align-items: center; min-width: 0; padding-left: 6px; font-size: 13px; font-weight: 500; }
+.v2 .lor-in-maillon { display: inline-flex; align-items: center; height: 24px; padding: 0 5px 0 4px; border-radius: 8px; color: var(--lor-t2); white-space: nowrap; }
+.v2 .lor-in-maillon:hover, .v2 .lor-in-courant:hover { background: var(--lor-onglet-actif); }
+.v2 .lor-in-sep { margin: -2px 3px 0 4px; color: var(--lor-t3); }
+.v2 .lor-in-courant { display: flex; min-width: 0; padding: 2px 4px; border-radius: 6px; }
+.v2 .lor-in-courant h2 { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; font-weight: 500; line-height: 20px; color: var(--lor-t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-in-courant h2 svg { width: 16px; height: 16px; }
+.v2 .lor-in-ancre { position: relative; }
+.v2 .lor-in-menu { min-width: 250px; }
+.v2 .lor-in-menu .lor-option:disabled { opacity: 0.5; }
+.v2 .lor-in-rond-24 { width: 24px; height: 24px; }
+.v2 .lor-in-l1 .lor-rond:disabled { opacity: 0.5; }
+.v2 .lor-in-l2 { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 28px; padding: 0 8px 0 9px; }
+.v2 .lor-in-onglets { display: flex; align-items: center; gap: 4px; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.v2 .lor-in-onglets::-webkit-scrollbar { display: none; }
+.v2 .lor-in-details-btn { background: var(--lor-volet-onglet); }
+.v2 .lor-in-details-btn[aria-expanded="true"] { background: var(--lor-onglet-actif); color: var(--lor-t2); }
+.v2 .lor-in-alerte { margin: 12px 48px 0; font-size: 13px; color: var(--lor-hors); }
+.v2 .lor-in-absent { padding: 24px 22px; font-size: 13px; color: var(--lor-t3); }
+.v2 .lor-in-absent a { color: var(--lor-t2); text-decoration: underline; }
+
+/* ——— corps : défilement et volet ——— */
+.v2 .lor-in-corps { flex: 1; display: flex; min-height: 0; margin-top: 8px; }
+.v2 .lor-in-defile { flex: 1; min-width: 0; padding: 0 48px 48px; container-type: inline-size; }
+.v2 .lor-in-colonne { max-width: 805px; margin: 0 auto; padding-top: 64px; }
+
+.v2 .lor-in-tuile {
+  display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 6px;
+  background: color-mix(in lch, var(--lor-in-tuile) 17.5%, transparent);
+}
+html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, var(--lor-in-tuile) 12.5%, transparent); }
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lor-in-tuile { background: color-mix(in lch, var(--lor-in-tuile) 12.5%, transparent); }
+}
+.v2 .lor-in-titre { margin-top: 12px; font-size: 24px; font-weight: 600; line-height: 32px; letter-spacing: -0.16px; color: var(--lor-t1); }
+.v2 .lor-in-resume { padding: 4px 0; font-size: 15px; font-weight: 450; line-height: 23px; letter-spacing: -0.1px; color: var(--lor-t2); }
+
+.v2 .lor-in-rang { display: flex; align-items: flex-start; margin-top: 12px; }
+.v2 .lor-in-resume + .lor-in-rang { margin-top: 16px; }
+.v2 .lor-in-rang h3 { flex-shrink: 0; width: 81px; padding: 6px 0; font-size: 13px; font-weight: 500; line-height: 16px; color: var(--lor-t3); }
+.v2 .lor-in-pilules { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; min-width: 0; }
+.v2 .lor-in-pilule {
+  display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 3px 6px; border-radius: 9999px; border: 0.5px solid transparent;
+  font-size: 13px; font-weight: 500; color: var(--lor-t2); white-space: nowrap;
+}
+.v2 .lor-in-pilule svg { width: 16px; height: 16px; fill: var(--lor-t3); }
+.v2 .lor-in-pilule[data-vide] { color: var(--lor-t3); }
+.v2 a.lor-in-pilule:hover, .v2 button.lor-in-pilule:hover:not(:disabled) { background: var(--lor-onglet-actif); color: var(--lor-t1); }
+.v2 .lor-in-pilules .lor-rond:disabled { opacity: 0.5; }
+
+.v2 .lor-in-avatar {
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 9999px;
+  background: var(--lor-onglet-actif); color: var(--lor-t2); font-size: 8px; font-weight: 600; line-height: 1;
+}
+
+/* la carte « Latest update » */
+.v2 .lor-in-maj { margin: 16px -16px 0; padding: 8px 16px 16px; border-radius: 10px; border: 0.5px solid var(--lor-in-bord-maj); }
+.v2 .lor-in-maj-tete { display: flex; align-items: center; justify-content: space-between; }
+.v2 .lor-in-maj-tete h3 { padding: 6px 0; font-size: 13px; font-weight: 500; line-height: 16px; color: var(--lor-t3); }
+.v2 .lor-in-maj-bouton { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px 0 8px; border-radius: 9999px; font-size: 13px; font-weight: 500; color: var(--lor-t3); }
+.v2 .lor-in-maj-bouton svg { width: 14px; height: 14px; }
+.v2 .lor-in-maj-bouton:hover { background: var(--lor-onglet-actif); color: var(--lor-t2); }
+.v2 .lor-in-maj-bloc { display: flex; flex-direction: column; padding-top: 4px; }
+.v2 .lor-in-maj-meta { display: flex; align-items: center; gap: 8px; height: 16px; margin-top: 10px; font-size: 13px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-in-sante { display: inline-flex; align-items: center; gap: 8px; color: var(--lor-bien); }
+.v2 .lor-in-sante[data-etat="risque"] { color: var(--lor-risque); }
+.v2 .lor-in-sante[data-etat="hors"] { color: var(--lor-hors); }
+.v2 .lor-in-sante[data-etat="aucune"] { color: var(--lor-t3); }
+.v2 .lor-in-maj-texte { margin-top: 20px; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-t2); }
+.v2 .lor-in-sourd { color: var(--lor-t3); }
+.v2 .lor-in-maj-actions { display: flex; gap: 6px; margin-top: 16px; }
+.v2 .lor-in-com { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 5px 10px; border-radius: 30px; background: var(--lor-rond); font-size: 12px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-in-com svg { width: 16px; height: 16px; fill: var(--lor-t3); }
+
+/* Description */
+.v2 .lor-in-description { margin: 12px -16px 0; padding: 10px 16px 0; border-radius: 12px; }
+.v2 .lor-in-description h3 { font-size: 13px; font-weight: 500; line-height: 16px; color: var(--lor-t3); }
+.v2 .lor-in-description-texte { margin: 0 -14px; padding: 16px 14px; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-t2); }
+
+/* Projects → les permis du projet */
+.v2 .lor-in-projets { width: 963px; max-width: calc(100cqw); margin: 92px 0 0 calc((805px - 963px) / 2); padding-bottom: 40px; }
+@container (max-width: 1000px) { .v2 .lor-in-projets { width: auto; margin-left: 0; } }
+.v2 .lor-in-projets-tete { display: flex; align-items: center; justify-content: space-between; }
+.v2 .lor-in-projets-tete h3 { padding: 6px 0; font-size: 18px; font-weight: 500; line-height: 22px; color: var(--lor-t2); }
+.v2 .lor-in-projets-outils { display: flex; gap: 6px; }
+.v2 .lor-in-projets-outils .lor-rond:disabled { opacity: 0.5; }
+.v2 .lor-in-coche { display: flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; font-size: 13px; font-weight: 450; color: var(--lor-menu-texte); }
+.v2 .lor-in-coche input { accent-color: var(--lor-fait); margin: 0; }
+.v2 .lor-in-tableau { margin: 4px 0 0 -28px; width: calc(100% + 56px); max-width: calc(100% + 28px); }
+.v2 .lor-in-grille {
+  display: grid; align-items: center; column-gap: 6px;
+  grid-template-columns: [indent] 0 [checkbox] 18px [title] minmax(0, 1fr) [health] 50px [priority] 68px [lead] 48px [targetDate] 100px [status] 68px [end-padding] 12px;
+}
+.v2 .lor-in-entetes { height: 32px; }
+/* en étroit, un libellé plus large que sa colonne (« Avancement » sur 28) est rogné dans sa cellule : la page ne défile pas de côté */
+.v2 .lor-in-entetes > span { min-width: 0; overflow: hidden; }
+.v2 .lor-in-tri { display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px; border-radius: 9999px; font-size: 12px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; }
+.v2 .lor-in-tri svg { width: 12px; height: 12px; fill: var(--lor-t2); opacity: 0; }
+.v2 .lor-in-tri[data-trie] svg { opacity: 1; }
+.v2 .lor-in-entete-fixe { padding-right: 12px; font-size: 12px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-in-c-case { grid-column: checkbox; display: flex; opacity: 0; }
+.v2 .lor-in-c-titre { grid-column: title; min-width: 0; }
+.v2 .lor-in-c-sante { grid-column: health; }
+.v2 .lor-in-c-prio { grid-column: priority; }
+.v2 .lor-in-c-chef { grid-column: lead; display: flex; }
+.v2 .lor-in-c-date { grid-column: targetDate; min-width: 0; }
+.v2 .lor-in-c-statut { grid-column: status; }
+.v2 .lor-in-entetes .lor-in-c-titre { padding-left: 22px; }
+.v2 .lor-in-groupe { display: flex; align-items: center; gap: 6px; height: 32px; border-radius: 8px; }
+.v2 .lor-in-replier { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 9999px; color: var(--lor-t4); }
+.v2 .lor-in-replier svg { width: 16px; height: 16px; transition: transform 0.15s; }
+.v2 .lor-in-replier[aria-expanded="true"] svg { transform: rotate(90deg); }
+.v2 .lor-in-groupe h3 { font-size: 11px; font-weight: 450; color: var(--lor-t3); white-space: nowrap; }
+.v2 .lor-in-groupe-filet { flex: 1; border-bottom: 0.5px solid var(--lor-in-filet-groupe); }
+.v2 .lor-in-groupe-plus { display: flex; justify-content: flex-end; width: 32px; background: var(--lor-carte); }
+.v2 .lor-in-ligne { position: relative; isolation: isolate; height: 36px; border-radius: 8px; color: var(--lor-t1); }
+.v2 .lor-in-ligne::before { content: ""; position: absolute; inset: 0; border-radius: 8px; z-index: -1; }
+.v2 .lor-in-ligne:hover::before { background: var(--lor-survol); }
+.v2 .lor-in-ligne:hover .lor-in-c-case { opacity: 1; }
+.v2 .lor-in-case { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--lor-case); }
+.v2 .lor-in-nom { display: flex; align-items: center; gap: 6px; }
+.v2 .lor-in-icone-ligne { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; }
+.v2 .lor-in-nom-texte { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; }
+.v2 .lor-in-nombre { font-size: 12px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-in-rond-cell { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; }
+.v2 .lor-in-date { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; font-size: 12px; font-weight: 450; color: var(--lor-t2); white-space: nowrap; }
+.v2 .lor-in-date span { overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-in-statut { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 3px 6px; font-size: 12px; font-weight: 450; color: var(--lor-t2); white-space: nowrap; }
+.v2 .lor-in-vide { padding: 8px 6px; font-size: 13px; color: var(--lor-t3); }
+
+/* ——— Activité ——— */
+.v2 .lor-in-colonne--activite { max-width: 813px; padding-top: 48px; }
+.v2 .lor-in-composeur {
+  display: flex; flex-direction: column; width: 100%; min-height: 172px; text-align: left;
+  background: var(--lor-menu); border: 0.5px solid var(--lor-menu-trait); border-radius: 10px;
+}
+.v2 .lor-in-composeur:disabled { opacity: 0.6; }
+.v2 .lor-in-segmente { display: inline-flex; align-self: flex-start; margin: 12px 0 0 12px; padding: 0.5px; border-radius: 9999px; border: 0.5px solid var(--lor-menu-trait); }
+.v2 .lor-in-segmente span { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 9999px; font-size: 12px; font-weight: 500; line-height: 18px; color: var(--lor-volet-onglet-texte); }
+.v2 .lor-in-segmente span[data-actif] { background: var(--lor-volet-onglet-actif); color: var(--lor-t1); }
+.v2 .lor-in-composeur-texte { flex: 1; padding: 4px 16px; min-height: 70px; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-t4); }
+.v2 .lor-in-composeur-pied { display: flex; align-items: center; justify-content: flex-end; gap: 12px; height: 52px; padding: 12px 14px 12px 12px; }
+.v2 .lor-in-rond-28 { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; color: var(--lor-t3); }
+.v2 .lor-in-rond-28 svg { width: 16px; height: 16px; }
+.v2 .lor-in-composeur-btn { display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 9999px; background: var(--lor-rond); font-size: 12px; font-weight: 500; color: var(--lor-t2); }
+.v2 .lor-in-mois { margin-top: 24px; }
+.v2 .lor-in-mois h3 { margin-bottom: 8px; font-size: 18px; font-weight: 500; color: var(--lor-t2); text-transform: capitalize; }
+.v2 .lor-in-ev { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0 4px 16px; font-size: 12px; font-weight: 450; line-height: 16.8px; color: var(--lor-t3); }
+.v2 .lor-in-ev-qui { font-weight: 500; color: var(--lor-t2); }
+
+/* ——— vues du dossier : les parties en liste (briques de ../lin), aux jetons de Linear ——— */
+.v2 .lor-in-large { max-width: 1001px; margin: 0 auto; padding-top: 32px; }
+.v2 .lor-in-note { margin-top: 16px; font-size: 12px; color: var(--lor-t3); }
+.v2 .lor-in-vue .v2-page { padding: 0; }
+/* le pont : les couleurs de lin.css (« dashboard ») remplacées par celles de Linear (lor.css) */
+.v2 .lor .lin.lor-in-pont {
+  --lin-fond: var(--lor-carte);
+  --lin-trait: var(--lor-trait-carte);
+  --lin-survol: var(--lor-survol);
+  --lin-groupe: var(--lor-survol);
+  --lin-pastille: var(--lor-onglet);
+  --lin-pastille-active: var(--lor-onglet-actif);
+  --lin-bouton: var(--lor-rond);
+  --lin-icone: var(--lor-t2);
+  --lin-titre: var(--lor-t1);
+  --lin-texte: var(--lor-t2);
+  --lin-texte-groupe: var(--lor-t2);
+  --lin-second: var(--lor-t3);
+  --lin-compte: var(--lor-t3);
+  --lin-cercle: var(--lor-planifie);
+  --lin-en-cours: var(--lor-cours);
+  --lin-fait: var(--lor-fait);
+  --lin-annule: var(--lor-annule);
+  --lin-carte: var(--lor-menu);
+  --lin-detail: var(--lor-menu);
+  --lin-detail-trait: var(--lor-menu-trait);
+  --lin-onglet-detail: var(--lor-volet-onglet);
+  --lin-onglet-detail-actif: var(--lor-volet-onglet-actif);
+  --lin-onglet-detail-texte: var(--lor-volet-onglet-texte);
+  --lin-menu: var(--lor-menu);
+  --lin-menu-trait: var(--lor-menu-trait);
+  --lin-ombre-menu: var(--lor-menu-ombre);
+  --lin-vert: var(--lor-bien);
+  --lin-jaune: var(--lor-risque);
+  --lin-rouge: var(--lor-hors);
+  --lin-menu-fond: var(--lor-menu);
+  --lin-menu-bord: var(--lor-menu-trait);
+  --lin-menu-sep: var(--lor-menu-sep);
+  --lin-menu-survol: var(--lor-menu-survol);
+  --lin-menu-texte: var(--lor-menu-texte);
+  --lin-menu-gris: var(--lor-menu-gris);
+  --lin-separateur: var(--lor-in-filet-groupe);
+  --lin-composeur: var(--lor-volet);
+  --lin-composeur-trait: var(--lor-volet-trait);
+  min-height: 0; background: transparent;
+}
+
+/* ——— le volet de détails (⌘ I) ——— */
+.v2 .lor-in-volet { flex: 0 0 400px; display: flex; flex-direction: column; gap: 8px; padding: 0 8px 8px 4px; min-height: 0; background: transparent; }
+.v2 .lor-in-volet > .lvp-cible:empty { display: none; }
+.v2 .lor-in-carte { padding: 12px; border-radius: 10px; background: var(--lor-menu); border: 0.5px solid var(--lor-menu-trait); box-shadow: var(--lor-menu-ombre); }
+.v2 .lor-in-carte-tete { display: flex; align-items: center; gap: 3px; height: 28px; padding: 0 8px; margin-left: -8px; border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--lor-volet-onglet-texte); }
+.v2 .lor-in-carte-tete svg { width: 16px; height: 16px; fill: currentColor; }
+.v2 .lor-in-voir { margin-left: auto; font-size: 12px; font-weight: 450; color: var(--lor-volet-onglet-texte); }
+.v2 .lor-in-voir:hover { color: var(--lor-t1); }
+.v2 .lor-in-rangee { display: grid; grid-template-columns: 90px minmax(0, 1fr); align-items: center; height: 36px; }
+.v2 .lor-in-rangee-libelle { font-size: 12px; font-weight: 450; color: var(--lor-volet-onglet-texte); }
+.v2 .lor-in-rangee-valeur { display: inline-flex; align-items: center; gap: 8px; justify-self: start; max-width: 100%; height: 28px; padding: 3px 6px; border-radius: 9999px; font-size: 12px; font-weight: 450; color: var(--lor-volet-texte); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lor-in-rangee-valeur svg { width: 16px; height: 16px; fill: var(--lor-t3); }
+.v2 .lor-in-rangee-valeur[data-vide] { color: var(--lor-volet-onglet-texte); }
+.v2 button.lor-in-rangee-valeur:hover:not(:disabled) { background: var(--lor-menu-survol); }
+.v2 .lor-in-segments { display: flex; gap: 6px; margin: 4px 0 8px; }
+.v2 .lor-in-segment { flex: 1; height: 28px; padding: 4px 12px; margin: 2px; border-radius: 9999px; font-size: 12px; font-weight: 500; color: var(--lor-volet-onglet-texte); background: var(--lor-volet-onglet); }
+.v2 .lor-in-segment[aria-selected="true"] { background: var(--lor-volet-onglet-actif); color: var(--lor-t1); }
+.v2 .lor-in-repartition { display: flex; flex-direction: column; gap: 6px; }
+.v2 .lor-in-repart { display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 10px; border-radius: 8px; background: var(--lor-volet); font-size: 13px; font-weight: 450; color: var(--lor-t2); }
+.v2 .lor-in-repart-libelle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-in-repart-n { font-variant-numeric: tabular-nums; }
+.v2 .lor-in-ev-petits { display: flex; flex-direction: column; gap: 8px; padding: 4px 0 2px; font-size: 12px; font-weight: 450; line-height: 16.8px; color: var(--lor-volet-onglet-texte); }
+
+@container (max-width: 640px) {
+  .v2 .lor-in-grille { grid-template-columns: [indent] 2px [checkbox] 0 [title] minmax(0, 1fr) [health] 50px [priority] 0 [lead] 0 [targetDate] 0 [status] 28px [end-padding] 12px; }
+  .v2 .lor-in-c-prio, .v2 .lor-in-c-chef, .v2 .lor-in-c-date { display: none; }
+  .v2 .lor-in-statut > span { display: none; }
+  .v2 .lor-in-tableau { margin-left: -6px; width: calc(100% + 12px); }
+}
+@media (max-width: 900px) {
+  .v2 .lor-in-defile { padding: 0 40px 40px; }
+  .v2 .lor-in-volet { position: fixed; z-index: 40; top: 104px; left: 44px; right: 8px; max-width: 336px; padding: 0; }
+  .v2 .lor-in-maj { margin: 16px -12px 0; padding: 8px 12px 12px; }
+}
+@media (max-width: 480px) {
+  /* 390 : le libellé de rangée passe au-dessus de ses pilules (relevé, « À 390×844 ») */
+  .v2 .lor-in-rang { flex-direction: column; }
+  .v2 .lor-in-rang h3 { width: auto; }
+}
+/* l'habit de l'écran repris (Habille) ne pose ni marge ni fond dans une vue du dossier : la section commence sous les onglets */
+.v2 .lor-in-vue .v2-page:has(> #ecran.resa) { max-width: none; padding: 0; }
+.v2 .lor-in-vue #ecran.resa { padding: 0; margin: 0; max-width: none; width: auto; background: transparent; border: 0; box-shadow: none; }

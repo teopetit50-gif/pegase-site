@@ -8,7 +8,8 @@
    saisies s'appliquent en mémoire, avec le même contrôle refait dans le navigateur. */
 
 import { useMemo, useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { CalendarDays, Layers, Plus, ShieldCheck } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, SousLigne, SousListe, Texte, Vide, jourCourt, teinte, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -64,6 +65,7 @@ export default function Assurances({ projet, dossier, peutEcrire, agir }: {
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
+  const volet = useVolet();
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const entreprises = useMemo(() => dossier.intervenants.filter((i) => i.projet_id === projet.id && i.actif && i.nature === "entreprise"), [dossier.intervenants, projet.id]);
   const attestations = useMemo(() => dossier.attestations.filter((a) => a.projet_id === projet.id)
@@ -129,77 +131,8 @@ export default function Assurances({ projet, dossier, peutEcrire, agir }: {
   const attestationOk = form?.type === "attestation" && na.assureur.trim().length > 0 && (!na.debut || !na.fin || na.fin >= na.debut) && plafondOk;
   const sansAttestation = lots.filter((l) => !attestations.some((a) => a.lot_id === l.id));
 
-  return (
-    <div className="esp-carte-corps">
-      <div className="esp-section-titre">
-        <span>Assurances décennales des entreprises</span>
-        <span className="esp-item-haut">
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNo(projet.ouverture_chantier ?? ""); ouvrir({ type: "ouverture" }); }}>Ouverture du chantier</button>
-          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !entreprises.length} onClick={() => ouvrirAttestation(null)}>Saisir une attestation</button>
-        </span>
-      </div>
-      <p className="lor-sous">
-        {projet.ouverture_chantier
-          ? `Chantier ouvert le ${jour(projet.ouverture_chantier)} : chaque attestation doit couvrir cette date.`
-          : "Date d’ouverture du chantier non renseignée : les attestations sont contrôlées à la date du jour."}
-        {" "}Déposez une attestation comme « Attestation décennale d’une entreprise » : Lorani la lit et la contrôle seul.
-      </p>
-
-      {!entreprises.length && !attestations.length ? (
-        <div className="lor-tableau-vide">Aucune entreprise parmi les intervenants : ajoutez les entreprises retenues (avec leur lot et leur SIREN), puis leurs attestations.</div>
-      ) : null}
-
-      {attestations.map((a) => {
-        const ent = dossier.intervenants.find((i) => i.id === a.intervenant_id);
-        const lot = lots.find((l) => l.id === a.lot_id);
-        return (
-          <div key={a.id} className="lor-constat" data-gravite={a.statut === "conforme" ? undefined : "bloquant"}>
-            <div className="lor-situation-tete">
-              <Pastille teinte={STATUTS[a.statut].teinte}>{STATUTS[a.statut].libelle}</Pastille>
-              <strong>{lot ? `Lot ${lot.numero} · ` : ""}{ent?.organisme ?? a.assure ?? "Entreprise à rattacher"}</strong>
-            </div>
-            <div className="lor-sous">
-              {[a.assureur, a.numero_police ? `contrat ${a.numero_police}` : null, a.debut || a.fin ? `du ${jour(a.debut)} au ${jour(a.fin)}` : null, a.plafond_eur ? `plafond ${euros(a.plafond_eur)}` : null].filter(Boolean).join(" · ")}
-            </div>
-            <div className="lor-sous">Activités garanties : {a.activites.length ? a.activites.map(libelleActivite).join(", ") : "aucune lue"}.</div>
-            {a.constats.length ? (
-              <ul className="lor-citations" aria-label="Ce que le contrôle relève">
-                {a.constats.map((c, i) => <li key={i}><strong>{c.gravite === "bloquant" ? "Bloquant" : c.gravite === "majeur" ? "Majeur" : "À noter"} :</strong> {c.texte}</li>)}
-              </ul>
-            ) : null}
-            {a.statut === "expiree" ? <Avis teinte="rouge">Échue le {jour(a.fin)} : demandez à l’entreprise l’attestation de la période en cours.</Avis> : null}
-            <div className="esp-actions">
-              <span className="esp-kpi-sous">{a.verifie_le ? `Contrôlée le ${jour(a.verifie_le)}` : ""}{a.piece_id ? " · lue sur la pièce déposée" : " · saisie à la main"}</span>
-              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirAttestation(a)}>Corriger</button>
-            </div>
-          </div>
-        );
-      })}
-
-      {lots.length ? (
-        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Activités requises par lot">
-          <table className="esp-tableau lor-chantier">
-            <thead>
-              <tr><th scope="col">Lot</th><th scope="col">Activités requises</th><th scope="col">Attestation</th></tr>
-            </thead>
-            <tbody>
-              {lots.map((l) => (
-                <tr key={l.id}>
-                  <td><strong>{l.numero}</strong> {l.intitule}</td>
-                  <td>
-                    {l.activites_requises.length ? l.activites_requises.map(libelleActivite).join(", ") : <span className="esp-kpi-sous">non renseignées</span>}{" "}
-                    <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNl(l.activites_requises); ouvrir({ type: "activites", lot: l }); }} aria-label={`Modifier les activités du lot ${l.numero}`}>Modifier</button>
-                  </td>
-                  <td>{sansAttestation.includes(l) ? <span className="esp-kpi-sous">aucune</span> : STATUTS[attestations.find((a) => a.lot_id === l.id)!.statut].libelle}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-
-      {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-
+  const fenetres = (
+    <>
       {/* ——— saisir ou corriger une attestation ——— */}
       <Dialog open={form?.type === "attestation"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -302,6 +235,243 @@ export default function Assurances({ projet, dossier, peutEcrire, agir }: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : une attestation par ligne, groupées par ce qu'en dit le contrôle
+     (à reprendre, à vérifier, conformes), puis les lots et leurs activités requises ; police, période, plafond,
+     constats et gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const GRAVITES: Record<ConstatAttestation["gravite"], { libelle: string; teinte: "rouge" | "jaune" | "gris" }> = {
+      bloquant: { libelle: "Bloquant", teinte: "rouge" },
+      majeur: { libelle: "Majeur", teinte: "jaune" },
+      mineur: { libelle: "À noter", teinte: "gris" },
+    };
+    const groupes = [
+      { cle: "reprendre", nom: "À reprendre", as: attestations.filter((a) => a.statut === "non_conforme" || a.statut === "expiree") },
+      { cle: "verifier", nom: "À vérifier", as: attestations.filter((a) => a.statut === "a_verifier") },
+      { cle: "conforme", nom: "Conformes", as: attestations.filter((a) => a.statut === "conforme") },
+    ];
+    const aReprendre = groupes[0].as.length;
+    const nomDe = (a: Attestation) => dossier.intervenants.find((i) => i.id === a.intervenant_id)?.organisme ?? a.assure ?? "Entreprise à rattacher";
+    return (
+      <>
+        <Partie
+          titre="Assurances décennales des entreprises"
+          compte={attestations.length ? `${attestations.length} attestation${attestations.length > 1 ? "s" : ""}${aReprendre ? ` · ${aReprendre} à reprendre` : ""}` : null}
+          gestes={
+            <>
+              <Bouton icone={<CalendarDays aria-hidden="true" />} disabled={!peutEcrire || envoi} onClick={() => { setNo(projet.ouverture_chantier ?? ""); ouvrir({ type: "ouverture" }); }}>
+                Ouverture du chantier
+              </Bouton>
+              <Bouton icone={<Plus aria-hidden="true" />} disabled={!peutEcrire || envoi || !entreprises.length} onClick={() => ouvrirAttestation(null)}>
+                Saisir une attestation
+              </Bouton>
+            </>
+          }
+          avis={erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+        >
+          <p className="lvp-resume">
+            {projet.ouverture_chantier
+              ? `Chantier ouvert le ${jour(projet.ouverture_chantier)} : chaque attestation doit couvrir cette date.`
+              : "Date d’ouverture du chantier non renseignée : les attestations sont contrôlées à la date du jour."}
+            {" "}Déposez une attestation comme « Attestation décennale d’une entreprise » : Lorani la lit et la contrôle seul.
+          </p>
+          {attestations.length ? (
+            <Liste>
+              {groupes.map((g) =>
+                g.as.length ? (
+                  <Groupe key={g.cle} nom={g.nom} compte={g.as.length}>
+                    {g.as.map((a) => {
+                      const lot = lots.find((l) => l.id === a.lot_id);
+                      const st = STATUTS[a.statut];
+                      return (
+                        <Ligne
+                          key={a.id}
+                          cle={`attestation:${a.id}`}
+                          libelle={`${nomDe(a)}${lot ? `, lot ${lot.numero}` : ""}, ${st.libelle}`}
+                          icone={<span data-teinte={teinte(st.teinte)} className="lvp-icone-teinte"><ShieldCheck /></span>}
+                          id={lot ? `Lot ${lot.numero}` : undefined}
+                          titre={nomDe(a)}
+                          second={[a.assureur, a.plafond_eur ? `plafond ${euros(a.plafond_eur)}` : null].filter(Boolean).join(" · ") || null}
+                          droite={
+                            <>
+                              <Pilule teinte={teinte(st.teinte)} icone={<Point teinte={teinte(st.teinte)} />}>{st.libelle}</Pilule>
+                              {a.constats.length ? <Pilule>{a.constats.length} constat{a.constats.length > 1 ? "s" : ""}</Pilule> : null}
+                            </>
+                          }
+                          date={a.fin ? jourCourt(a.fin) : null}
+                          dateTitre={a.fin ? `Valable jusqu’au ${jour(a.fin)}` : undefined}
+                        />
+                      );
+                    })}
+                  </Groupe>
+                ) : null,
+              )}
+            </Liste>
+          ) : !entreprises.length ? (
+            <Vide>Aucune entreprise parmi les intervenants : ajoutez les entreprises retenues (avec leur lot et leur SIREN), puis leurs attestations.</Vide>
+          ) : (
+            <Vide>Aucune attestation.</Vide>
+          )}
+          {attestations.map((a) => {
+            const lot = lots.find((l) => l.id === a.lot_id);
+            const st = STATUTS[a.statut];
+            return (
+              <Detail key={a.id} cle={`attestation:${a.id}`} titre={nomDe(a)} sous={lot ? `Lot ${lot.numero} · ${lot.intitule}` : "Sans lot"}>
+                <Rangees>
+                  <Rangee libelle="Statut" teinte={teinte(st.teinte)}>
+                    <Point teinte={teinte(st.teinte)} />
+                    {st.libelle}
+                  </Rangee>
+                  <Rangee libelle="Assureur">{a.assureur ?? "—"}</Rangee>
+                  {a.numero_police ? <Rangee libelle="Contrat">{a.numero_police}</Rangee> : null}
+                  {a.debut || a.fin ? <Rangee libelle="Validité" teinte={a.statut === "expiree" ? "rouge" : undefined}>du {jour(a.debut)} au {jour(a.fin)}</Rangee> : null}
+                  {a.plafond_eur ? <Rangee libelle="Plafond">{euros(a.plafond_eur)}</Rangee> : null}
+                  <Rangee libelle="Activités">{a.activites.length ? a.activites.map(libelleActivite).join(", ") : "aucune lue"}</Rangee>
+                  <Rangee libelle="Contrôle">{a.verifie_le ? `le ${jour(a.verifie_le)} · ` : ""}{a.piece_id ? "lue sur la pièce déposée" : "saisie à la main"}</Rangee>
+                </Rangees>
+                {a.statut === "expiree" ? <Texte>Échue le {jour(a.fin)} : demandez à l’entreprise l’attestation de la période en cours.</Texte> : null}
+                {a.constats.length ? (
+                  <SousListe titre="Ce que le contrôle relève">
+                    {a.constats.map((c, i) => (
+                      <SousLigne key={i} titre={c.texte} valeur={GRAVITES[c.gravite].libelle} teinte={GRAVITES[c.gravite].teinte} />
+                    ))}
+                  </SousListe>
+                ) : null}
+                <Gestes>
+                  <Bouton disabled={!peutEcrire || envoi} onClick={() => ouvrirAttestation(a)}>Corriger</Bouton>
+                </Gestes>
+              </Detail>
+            );
+          })}
+          {fenetres}
+        </Partie>
+        {lots.length ? (
+          <Partie titre="Activités requises par lot" compte={sansAttestation.length ? `${sansAttestation.length} sans attestation` : null}>
+            <Liste>
+              {[
+                { cle: "sans", nom: "Sans attestation", ls: lots.filter((l) => sansAttestation.includes(l)) },
+                { cle: "avec", nom: "Avec attestation", ls: lots.filter((l) => !sansAttestation.includes(l)) },
+              ].map((g) =>
+                g.ls.length ? (
+                  <Groupe key={g.cle} nom={g.nom} compte={g.ls.length}>
+                    {g.ls.map((l) => {
+                      const a = attestations.find((x) => x.lot_id === l.id);
+                      const t = a ? teinte(STATUTS[a.statut].teinte) : "gris";
+                      return (
+                        <Ligne
+                          key={l.id}
+                          cle={`lot-assurance:${l.id}`}
+                          libelle={`Lot ${l.numero}, ${l.intitule}, ${a ? STATUTS[a.statut].libelle : "aucune attestation"}`}
+                          icone={<Layers />}
+                          id={`Lot ${l.numero}`}
+                          titre={l.intitule}
+                          second={l.activites_requises.length ? l.activites_requises.map(libelleActivite).join(", ") : "activités non renseignées"}
+                          droite={<Pilule teinte={t} icone={<Point teinte={t} />}>{a ? STATUTS[a.statut].libelle : "Aucune"}</Pilule>}
+                        />
+                      );
+                    })}
+                  </Groupe>
+                ) : null,
+              )}
+            </Liste>
+            {lots.map((l) => {
+              const a = attestations.find((x) => x.lot_id === l.id);
+              return (
+                <Detail key={l.id} cle={`lot-assurance:${l.id}`} titre={`Lot ${l.numero}`} sous={l.intitule}>
+                  <Rangees>
+                    <Rangee libelle="Activités" teinte={l.activites_requises.length ? undefined : "gris"}>
+                      {l.activites_requises.length ? l.activites_requises.map(libelleActivite).join(", ") : "non renseignées"}
+                    </Rangee>
+                    <Rangee libelle="Attestation" teinte={a ? teinte(STATUTS[a.statut].teinte) : "gris"}>
+                      {a ? `${STATUTS[a.statut].libelle} · ${nomDe(a)}` : "aucune"}
+                    </Rangee>
+                  </Rangees>
+                  <Gestes>
+                    <Bouton disabled={!peutEcrire || envoi} onClick={() => { setNl(l.activites_requises); ouvrir({ type: "activites", lot: l }); }}>Modifier les activités</Bouton>
+                  </Gestes>
+                </Detail>
+              );
+            })}
+          </Partie>
+        ) : null}
+      </>
+    );
+  }
+
+  return (
+    <div className="esp-carte-corps">
+      <div className="esp-section-titre">
+        <span>Assurances décennales des entreprises</span>
+        <span className="esp-item-haut">
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNo(projet.ouverture_chantier ?? ""); ouvrir({ type: "ouverture" }); }}>Ouverture du chantier</button>
+          <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi || !entreprises.length} onClick={() => ouvrirAttestation(null)}>Saisir une attestation</button>
+        </span>
+      </div>
+      <p className="lor-sous">
+        {projet.ouverture_chantier
+          ? `Chantier ouvert le ${jour(projet.ouverture_chantier)} : chaque attestation doit couvrir cette date.`
+          : "Date d’ouverture du chantier non renseignée : les attestations sont contrôlées à la date du jour."}
+        {" "}Déposez une attestation comme « Attestation décennale d’une entreprise » : Lorani la lit et la contrôle seul.
+      </p>
+
+      {!entreprises.length && !attestations.length ? (
+        <div className="lor-tableau-vide">Aucune entreprise parmi les intervenants : ajoutez les entreprises retenues (avec leur lot et leur SIREN), puis leurs attestations.</div>
+      ) : null}
+
+      {attestations.map((a) => {
+        const ent = dossier.intervenants.find((i) => i.id === a.intervenant_id);
+        const lot = lots.find((l) => l.id === a.lot_id);
+        return (
+          <div key={a.id} className="lor-constat" data-gravite={a.statut === "conforme" ? undefined : "bloquant"}>
+            <div className="lor-situation-tete">
+              <Pastille teinte={STATUTS[a.statut].teinte}>{STATUTS[a.statut].libelle}</Pastille>
+              <strong>{lot ? `Lot ${lot.numero} · ` : ""}{ent?.organisme ?? a.assure ?? "Entreprise à rattacher"}</strong>
+            </div>
+            <div className="lor-sous">
+              {[a.assureur, a.numero_police ? `contrat ${a.numero_police}` : null, a.debut || a.fin ? `du ${jour(a.debut)} au ${jour(a.fin)}` : null, a.plafond_eur ? `plafond ${euros(a.plafond_eur)}` : null].filter(Boolean).join(" · ")}
+            </div>
+            <div className="lor-sous">Activités garanties : {a.activites.length ? a.activites.map(libelleActivite).join(", ") : "aucune lue"}.</div>
+            {a.constats.length ? (
+              <ul className="lor-citations" aria-label="Ce que le contrôle relève">
+                {a.constats.map((c, i) => <li key={i}><strong>{c.gravite === "bloquant" ? "Bloquant" : c.gravite === "majeur" ? "Majeur" : "À noter"} :</strong> {c.texte}</li>)}
+              </ul>
+            ) : null}
+            {a.statut === "expiree" ? <Avis teinte="rouge">Échue le {jour(a.fin)} : demandez à l’entreprise l’attestation de la période en cours.</Avis> : null}
+            <div className="esp-actions">
+              <span className="esp-kpi-sous">{a.verifie_le ? `Contrôlée le ${jour(a.verifie_le)}` : ""}{a.piece_id ? " · lue sur la pièce déposée" : " · saisie à la main"}</span>
+              <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi} onClick={() => ouvrirAttestation(a)}>Corriger</button>
+            </div>
+          </div>
+        );
+      })}
+
+      {lots.length ? (
+        <div className="esp-tableau-cadre" tabIndex={0} role="region" aria-label="Activités requises par lot">
+          <table className="esp-tableau lor-chantier">
+            <thead>
+              <tr><th scope="col">Lot</th><th scope="col">Activités requises</th><th scope="col">Attestation</th></tr>
+            </thead>
+            <tbody>
+              {lots.map((l) => (
+                <tr key={l.id}>
+                  <td><strong>{l.numero}</strong> {l.intitule}</td>
+                  <td>
+                    {l.activites_requises.length ? l.activites_requises.map(libelleActivite).join(", ") : <span className="esp-kpi-sous">non renseignées</span>}{" "}
+                    <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNl(l.activites_requises); ouvrir({ type: "activites", lot: l }); }} aria-label={`Modifier les activités du lot ${l.numero}`}>Modifier</button>
+                  </td>
+                  <td>{sansAttestation.includes(l) ? <span className="esp-kpi-sous">aucune</span> : STATUTS[attestations.find((a) => a.lot_id === l.id)!.statut].libelle}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
+
+      {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+
+      {fenetres}
     </div>
   );
 }

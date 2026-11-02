@@ -643,6 +643,8 @@
   .v2 .lin .ltr-liste {
     width: auto;
     flex: 1;
+    /* sans cela, la liste garde la largeur de sa plus longue ligne (446 à 390) */
+    min-width: 0;
     border-right: 0;
   }
   .v2 .lin.ltr[data-ouvert] .ltr-liste {

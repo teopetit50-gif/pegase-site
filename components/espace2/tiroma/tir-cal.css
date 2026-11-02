@@ -1,0 +1,764 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA — Fauteuils : Bookings de Cal.com au 1:1 (02/11/2026)
+   Relevés : docs/refonte-metiers/releves/calcom-bookings.md (liste, détail,
+   barre d'outils) et calcom-availability.md (coque, polices, jetons ;
+   branche refs-plain-attio-cal). Carte <main> de Cal.com : 256,8 1176×852,
+   r 16 ; contenu à 41 du bord. Police : Cal Sans (OFL), une seule graisse
+   chez Google Fonts (400) : les 500/600/700 du relevé sont synthétisées.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tir-cal {
+  /* sombre */
+  --cal-page: #111111;
+  --cal-carte: #141414;
+  --cal-carte-bord: rgba(255, 255, 255, 0.05);
+  --cal-bord: rgba(255, 255, 255, 0.06);
+  --cal-bord-bouton: rgba(255, 255, 255, 0.1);
+  --cal-fort: #f5f5f5;
+  --cal-second: #818181;
+  --cal-titre: #fafafa;
+  --cal-groupe: rgba(255, 255, 255, 0.03);
+  --cal-segment: rgba(255, 255, 255, 0.04);
+  --cal-indicateur: rgba(255, 255, 255, 0.08);
+  --cal-inactif: rgba(255, 255, 255, 0.6);
+  --cal-ouverte: #1a1a1a;
+  --cal-vert: #05df72;
+  --cal-plein: #f5f5f5;
+  --cal-plein-texte: #141414;
+  --cal-rouge: #ff6467;
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--cal-page);
+  color: var(--cal-fort);
+  font-family: var(--font-tir-cal), "Cal Sans", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+html[data-v2-theme="light"] .v2 .tir-cal {
+  --cal-page: #fafafa;
+  --cal-carte: #ffffff;
+  --cal-carte-bord: rgba(17, 17, 17, 0.06);
+  --cal-bord: rgba(13, 13, 13, 0.08);
+  --cal-bord-bouton: rgba(20, 20, 20, 0.1);
+  --cal-fort: #262626;
+  --cal-second: #696969;
+  --cal-titre: #070a0d;
+  --cal-groupe: rgba(0, 0, 0, 0.03);
+  --cal-segment: rgba(26, 26, 26, 0.04);
+  --cal-indicateur: #ffffff;
+  --cal-inactif: oklab(0.522 0 0 / 0.72);
+  --cal-ouverte: #fafafa;
+  --cal-vert: #00a63e;
+  --cal-plein: #262626;
+  --cal-plein-texte: #fafafa;
+  --cal-rouge: #c10007;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tir-cal {
+    --cal-page: #fafafa;
+    --cal-carte: #ffffff;
+    --cal-carte-bord: rgba(17, 17, 17, 0.06);
+    --cal-bord: rgba(13, 13, 13, 0.08);
+    --cal-bord-bouton: rgba(20, 20, 20, 0.1);
+    --cal-fort: #262626;
+    --cal-second: #696969;
+    --cal-titre: #070a0d;
+    --cal-groupe: rgba(0, 0, 0, 0.03);
+    --cal-segment: rgba(26, 26, 26, 0.04);
+    --cal-indicateur: #ffffff;
+    --cal-inactif: oklab(0.522 0 0 / 0.72);
+    --cal-ouverte: #fafafa;
+    --cal-vert: #00a63e;
+    --cal-plein: #262626;
+    --cal-plein-texte: #fafafa;
+    --cal-rouge: #c10007;
+  }
+}
+.v2 .tir-cal *,
+.v2 .tir-cal *::before,
+.v2 .tir-cal *::after {
+  box-sizing: border-box;
+}
+.v2 .tir-cal :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.v2 .tir-cal :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .tir-cal :where(h2, h3, p) {
+  margin: 0;
+}
+.v2 .tir-cal .cal-pousse {
+  flex: 1;
+}
+
+/* ——— carte <main> : bd 1px, r 16, ombre ; contenu à 41 du bord ——— */
+.v2 .tir-cal .cal-carte {
+  position: relative;
+  height: calc(100dvh - 48px - 16px);
+  border: 1px solid var(--cal-carte-bord);
+  border-radius: 16px;
+  background: var(--cal-carte);
+  box-shadow: 0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d;
+  overflow: hidden;
+}
+.v2 .tir-cal .cal-defile {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 24px 40px 40px;
+}
+
+/* ——— barre d'outils (y 33) : contrôle segmenté 30 · Filter 28 · à droite boutons et bascule de vue ——— */
+.v2 .tir-cal .cal-outils {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  margin-bottom: 16px;
+}
+.v2 .tir-cal .cal-segment {
+  position: relative;
+  display: inline-flex;
+  gap: 2px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--cal-segment);
+}
+.v2 .tir-cal .cal-segment-item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--cal-inactif);
+  white-space: nowrap;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.v2 .tir-cal .cal-segment-item[aria-current="page"],
+.v2 .tir-cal .cal-segment-item[aria-checked="true"] {
+  background: var(--cal-indicateur);
+  box-shadow: 0 1px 2px #0000000d;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-segment--icones .cal-segment-item {
+  width: 26px;
+  padding: 0;
+}
+.v2 .tir-cal .cal-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--cal-bord-bouton);
+  border-radius: 10px;
+  background: var(--cal-carte);
+  box-shadow: 0 1px 2px #0000000d;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--cal-fort);
+  white-space: nowrap;
+}
+.v2 .tir-cal .cal-bouton:disabled {
+  opacity: 0.64;
+  cursor: default;
+}
+.v2 .tir-cal .cal-bouton--plein {
+  border-color: transparent;
+  background: var(--cal-plein);
+  color: var(--cal-plein-texte);
+  box-shadow: inset 0 1px 0 #ffffff29, 0 1px 2px #26262640;
+}
+.v2 .tir-cal .cal-bouton--petit {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .tir-cal .cal-bouton[role="radio"][aria-checked="true"] {
+  border-color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-icone-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-icone-bouton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.v2 .tir-cal .cal-icone-bouton--bord {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cal-bord-bouton);
+  background: var(--cal-carte);
+  box-shadow: 0 1px 2px #0000000d;
+}
+
+/* ——— carte de liste : bd 1px a0.08, r 16, ombre ; tête de groupe 44 (p 12 24 12 16) sur fond a0.03 ——— */
+.v2 .tir-cal .cal-liste {
+  position: relative;
+  border: 1px solid var(--cal-bord);
+  border-radius: 16px;
+  background: var(--cal-groupe);
+  box-shadow: 0 1px 2px #0000000d;
+  overflow: hidden;
+}
+.v2 .tir-cal .cal-groupe-tete {
+  height: 44px;
+  padding: 12px 24px 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-panneau-int {
+  background: var(--cal-carte);
+  border-top: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-groupe:first-child > .cal-panneau-int:first-child {
+  border-top: 0;
+}
+.v2 .tir-cal .cal-groupe + .cal-groupe .cal-groupe-tete {
+  border-top: 1px solid var(--cal-bord);
+}
+/* ligne : p 16 24 16 16, gap 16 ; case 16 · date 160 · contenu · ⋯ 32 */
+.v2 .tir-cal .cal-ligne {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 24px 16px 16px;
+  border-bottom: 1px solid var(--cal-bord);
+  cursor: pointer;
+}
+.v2 .tir-cal .cal-ligne:last-child {
+  border-bottom: 0;
+}
+.v2 .tir-cal .cal-ligne[data-ouverte],
+.v2 .tir-cal .cal-ligne:hover {
+  background: var(--cal-ouverte);
+}
+.v2 .tir-cal .cal-case {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px -5px 0 0;
+  border: 1px solid var(--cal-bord-bouton);
+  border-radius: 4px;
+  background: var(--cal-carte);
+  box-shadow: 0 1px 2px #0000000d;
+}
+.v2 .tir-cal .cal-date {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 160px;
+}
+.v2 .tir-cal .cal-date-jour {
+  font-weight: 500;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-date-heures {
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  margin-top: 4px;
+  padding: 0 7px;
+  border: 1px solid var(--cal-bord-bouton);
+  border-radius: 8px;
+  background: var(--cal-carte);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--cal-fort);
+  white-space: nowrap;
+}
+.v2 .tir-cal .cal-badge--orange svg {
+  color: #bb4d00;
+}
+.v2 .tir-cal .cal-badge--rouge svg {
+  color: var(--cal-rouge);
+}
+.v2 .tir-cal .cal-badge--vert svg {
+  color: var(--cal-vert);
+}
+.v2 .tir-cal .cal-contenu {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Cal Sans n'a qu'une graisse chez Google Fonts : le 600 est synthétisé, un peu d'air garde la lecture */
+.v2 .tir-cal .cal-titre {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-qui,
+.v2 .tir-cal .cal-note {
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-mention {
+  color: var(--cal-vert);
+}
+.v2 .tir-cal .cal-sous {
+  white-space: pre-line;
+  font-size: 13px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-droite {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+}
+.v2 .tir-cal .cal-ancre {
+  position: relative;
+  display: inline-flex;
+}
+/* menu ⋯ : bd 1px a0.08, r 10, items 28 (p 4 8, r 6), 14/400/20 */
+.v2 .tir-cal .cal-menu {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-width: 183px;
+  padding: 4px;
+  border: 1px solid var(--cal-bord);
+  border-radius: 10px;
+  background: var(--cal-carte);
+  box-shadow: 0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d;
+}
+.v2 .tir-cal .cal-menu-item {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .tir-cal .cal-menu-item:hover {
+  background: var(--cal-segment);
+}
+.v2 .tir-cal .cal-menu-item--rouge {
+  color: var(--cal-rouge);
+}
+
+/* ——— état vide : encadré bd a0.08, r 14, p 80 24 ; pastille 36 ; titre Cal Sans 20/700/28 ——— */
+.v2 .tir-cal .cal-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 80px 24px;
+  border: 1px solid var(--cal-bord);
+  border-radius: 14px;
+  text-align: center;
+}
+.v2 .tir-cal .cal-vide-icone {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--cal-bord);
+  border-radius: 8px;
+  background: var(--cal-carte);
+  box-shadow: 0 1px 3px #0000000d, 0 1px 2px -1px #0000000d;
+}
+.v2 .tir-cal .cal-vide h3 {
+  margin-top: -8px;
+  letter-spacing: 0.5px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  color: var(--cal-titre);
+}
+.v2 .tir-cal .cal-vide p {
+  max-width: 384px;
+  margin-top: -16px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-etat {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-etat a {
+  color: var(--cal-fort);
+  text-decoration: underline;
+}
+
+/* ——— panneau de détail flottant (sans voile) 512, r 16, x 912 y 16 ——— */
+.v2 .tir-cal .cal-panneau {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  width: 512px;
+  max-width: calc(100% - 16px);
+  border: 1px solid var(--cal-bord);
+  border-radius: 16px;
+  background: var(--cal-carte);
+  box-shadow: 0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d;
+}
+.v2 .tir-cal .cal-panneau-tete {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 64px;
+  padding: 0 16px 0 24px;
+}
+.v2 .tir-cal .cal-pastille {
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 6px;
+  background: rgba(0, 191, 128, 0.08);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: #007a55;
+}
+.v2 .tir-cal .cal-pastille--orange {
+  background: rgba(255, 153, 0, 0.08);
+  color: #bb4d00;
+}
+.v2 .tir-cal .cal-pastille--rouge {
+  background: rgba(255, 0, 0, 0.08);
+  color: var(--cal-rouge);
+}
+.v2 .tir-cal .cal-panneau-titre {
+  padding: 0 24px;
+  letter-spacing: 0.5px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 25px;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-panneau-corps {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px 24px;
+}
+.v2 .tir-cal .cal-section h3 {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: #6b7280;
+}
+.v2 .tir-cal .cal-section p {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+}
+.v2 .tir-cal .cal-section strong {
+  font-weight: 500;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-section span {
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-panneau-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 65px;
+  align-items: center;
+  padding: 0 24px;
+  border-top: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+.v2 .tir-cal .cal-champ input,
+.v2 .tir-cal .cal-champ select {
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--cal-bord-bouton);
+  border-radius: 10px;
+  background: var(--cal-carte);
+  color: var(--cal-fort);
+  font: inherit;
+  font-size: 14px;
+}
+.v2 .tir-cal .cal-choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2 .tir-cal .cal-aide {
+  font-size: 13px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-ok {
+  color: var(--cal-vert);
+}
+.v2 .tir-cal .cal-erreur {
+  color: var(--cal-rouge);
+}
+
+/* ——— 390 : liste pleine largeur, bascule de vue sous les onglets ——— */
+@media (max-width: 768px) {
+  .v2 .tir-cal {
+    padding: 0;
+  }
+  .v2 .tir-cal .cal-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border-radius: 0;
+    border: 0;
+  }
+  .v2 .tir-cal .cal-defile {
+    padding: 16px;
+  }
+  .v2 .tir-cal .cal-outils {
+    flex-wrap: wrap;
+    height: auto;
+  }
+  .v2 .tir-cal .cal-segment:not(.cal-segment--icones) {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .v2 .tir-cal .cal-ligne {
+    flex-wrap: wrap;
+  }
+  .v2 .tir-cal .cal-case {
+    display: none;
+  }
+  .v2 .tir-cal .cal-date {
+    width: 100%;
+  }
+  .v2 .tir-cal .cal-panneau {
+    position: fixed;
+    inset: 48px 0 0 0;
+    width: auto;
+    max-width: none;
+    border-radius: 0;
+  }
+}
+
+/* ——— cases cochées, barre d'actions groupées, filtre, vues enregistrées, groupe de boutons du pied, calendrier ——— */
+.v2 .tir-cal .cal-case {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.v2 .tir-cal .cal-case[data-coche] {
+  background: var(--cal-plein);
+  border-color: var(--cal-plein);
+  color: var(--cal-plein-texte);
+}
+.v2 .tir-cal .cal-lot {
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  transform: translateX(-50%);
+  border: 1px solid var(--cal-bord);
+  border-radius: 12px;
+  background: var(--cal-carte);
+  box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a;
+  white-space: nowrap;
+}
+.v2 .tir-cal .cal-lot-compte,
+.v2 .tir-cal .cal-avis {
+  padding: 0 6px;
+  font-size: 13px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-filtre-val {
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-vues {
+  font-weight: 400;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-menu--gauche {
+  left: 0;
+  right: auto;
+}
+.v2 .tir-cal .cal-menu--haut {
+  top: auto;
+  bottom: 40px;
+}
+.v2 .tir-cal .cal-menu-titre {
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+.v2 .tir-cal .cal-menu-item--vide {
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-menu-ligne {
+  display: flex;
+  align-items: center;
+}
+.v2 .tir-cal .cal-menu-ligne .cal-menu-item {
+  flex: 1;
+}
+.v2 .tir-cal .cal-menu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--cal-bord);
+}
+.v2 .tir-cal .cal-groupe-boutons {
+  display: inline-flex;
+}
+.v2 .tir-cal .cal-bouton--groupe-g {
+  border-radius: 10px 0 0 10px;
+}
+.v2 .tir-cal .cal-bouton--groupe-d {
+  border-radius: 0 10px 10px 0;
+  border-left: 0;
+}
+.v2 .tir-cal .cal-calendrier {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.v2 .tir-cal .cal-cal-barre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .tir-cal .cal-cal-mois {
+  margin-left: 4px;
+  font-weight: 500;
+}
+.v2 .tir-cal .cal-cal-grille {
+  display: grid;
+  grid-template-columns: 64px repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--cal-bord);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.v2 .tir-cal .cal-cal-coin {
+  padding: 8px 10px 8px 0;
+  text-align: right;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 14px;
+  letter-spacing: 0.25px;
+  color: var(--cal-second);
+  border-bottom: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-cal-jour {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--cal-second);
+  border-bottom: 1px solid var(--cal-bord);
+  border-left: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-cal-num {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-cal-num--auj {
+  background: var(--cal-plein);
+  color: var(--cal-plein-texte);
+}
+.v2 .tir-cal .cal-cal-rangee {
+  display: contents;
+}
+.v2 .tir-cal .cal-cal-heure {
+  padding: 8px 10px 0 0;
+  text-align: right;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--cal-second);
+  border-bottom: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-cal-case {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 128px;
+  padding: 4px;
+  border-bottom: 1px solid var(--cal-bord);
+  border-left: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-cal-evt {
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--cal-segment);
+  border-left: 3px solid var(--cal-second);
+  text-align: left;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--cal-fort);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.v2 .tir-cal .cal-cal-evt--orange {
+  border-left-color: #ff9900;
+}
+.v2 .tir-cal .cal-cal-evt--rouge {
+  border-left-color: var(--cal-rouge);
+}
+.v2 .tir-cal .cal-cal-evt--vert {
+  border-left-color: var(--cal-vert);
+}

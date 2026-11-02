@@ -1,0 +1,311 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, réseau et flotte — Linear, liste des Initiatives, au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/
+   linear-initiatives-liste.md (1440×900 sombre et clair, paliers 1024,
+   768, 390). Préfixe tav-n-.
+
+   Repères : ligne 1 (44) titre 13/500 à 18 du bord, « New initiative » 28
+   (p 0 10 0 8, icône 14, 12/500 tertiaire) ; ligne 2 (44) onglets 28 au
+   pas de 6 à 8 du bord, ronds 28 à droite ; en-tête de colonnes 32
+   (12/450 tertiaire) ; lignes de 57 (r 8, survol en ::before inset 0 8),
+   grille 8 · 20 · titre · 100 · 56 · 50 · 100 · 59 · 52 · 98 · 12, écart 6 ;
+   titre : icône 28 (r 8, p 6, 16) puis nom 13/500 secondaire et résumé
+   13/450 tertiaire (15.5 chacun, à 18 l'un de l'autre) ; statut pilule 28
+   (r 9999, p 3 6, icône 16, libellé 12/450 primaire à 8) ; santé 28
+   (icône 14) ; date 12/450 primaire ; projets icône 16 + 12/450.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  --tav-n-grille: 8px 20px minmax(0, 1fr) 100px 56px 50px 100px 59px 52px 98px 12px;
+  --tav-n-projets: #5e6ad2;
+  --tav-n-jaune: #f0bf00;
+  --tav-n-vert: #26a644;
+}
+
+.v2 .tav .tav-n-ligne1 {
+  align-items: center;
+  padding: 0 8px 0 18px;
+}
+.v2 .tav .tav-n-page {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-n-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-n-nouveau:hover:not(:disabled) {
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-n-nouveau:disabled {
+  opacity: 0.5;
+}
+.v2 .tav .tav-n-ligne2 {
+  align-items: center;
+  padding-top: 0;
+  gap: 6px;
+}
+.v2 .tav .tav-n-onglets {
+  display: flex;
+  gap: 6px;
+}
+
+/* ——— en-tête de colonnes et lignes ——— */
+.v2 .tav .tav-n-entete,
+.v2 .tav .tav-n-ligne {
+  display: grid;
+  grid-template-columns: var(--tav-n-grille);
+  column-gap: 6px;
+  align-items: center;
+}
+.v2 .tav .tav-n-entete {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  background: var(--tav-carte);
+}
+.v2 .tav .tav-n-col {
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tav .tav-n-entete > .tav-n-col:nth-child(3) {
+  padding-left: 6px;
+}
+.v2 .tav .tav-n-avis {
+  padding: 8px 18px 12px 53px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 18px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-n-lignes {
+  padding-bottom: 8px;
+}
+.v2 .tav .tav-n-ligne {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 57px;
+  border-radius: 8px;
+  text-align: left;
+  color: var(--tav-t1);
+  transition: color 0.15s;
+}
+.v2 .tav .tav-n-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  z-index: -1;
+  border-radius: 8px;
+}
+.v2 .tav button.tav-n-ligne:hover::before {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-n-case {
+  grid-column: 2;
+}
+.v2 .tav .tav-n-titre {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .tav .tav-n-icone {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-n-textes {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+  min-width: 0;
+}
+.v2 .tav .tav-n-nom,
+.v2 .tav .tav-n-resume {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 15.5px;
+}
+.v2 .tav .tav-n-nom {
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-n-resume {
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-n-statut {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t1);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .tav .tav-n-statut svg {
+  flex: none;
+  margin-right: 8px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-n-statut[data-teinte="jaune"] svg {
+  color: var(--tav-n-jaune);
+}
+.v2 .tav .tav-n-statut[data-teinte="violet"] svg {
+  color: var(--tav-t-fait);
+}
+.v2 .tav .tav-n-statut[data-teinte="rouge"] svg {
+  color: var(--tav-t-rouge);
+}
+.v2 .tav .tav-n-prio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-n-prio[data-prio="urgent"] {
+  color: var(--tav-t-triage);
+}
+.v2 .tav .tav-n-cible {
+  padding: 0 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-n-projets {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 2px 4px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+  white-space: nowrap;
+}
+.v2 .tav .tav-n-projets svg {
+  flex: none;
+  color: var(--tav-n-projets);
+}
+.v2 .tav .tav-n-projets span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tav .tav-n-sante {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+.v2 .tav .tav-n-sante > span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px dotted var(--tav-t4);
+}
+.v2 .tav .tav-n-sante[data-sante="vert"] > span {
+  border: 0;
+  background: color-mix(in srgb, #28a744 25%, transparent);
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, #28a744 25%, transparent), inset 0 0 0 14px transparent;
+  background-image: radial-gradient(circle, var(--tav-n-vert) 0 2.5px, transparent 3px);
+}
+.v2 .tav .tav-n-sante[data-sante="rouge"] > span {
+  border: 0;
+  background: color-mix(in srgb, #eb5757 25%, transparent);
+  background-image: radial-gradient(circle, #eb5757 0 2.5px, transparent 3px);
+}
+.v2 .tav .tav-n-actifs {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+
+@media (max-width: 1024px) {
+  .v2 .tav {
+    --tav-n-grille: 8px 0 minmax(300px, 1fr) 100px 56px 50px 100px 59px 52px 98px 12px;
+  }
+  .v2 .tav .tav-defile {
+    overflow-x: auto;
+  }
+  .v2 .tav .tav-n-entete,
+  .v2 .tav .tav-n-lignes {
+    min-width: 969px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tav {
+    --tav-n-grille: 8px 0 minmax(0, 1fr) 0 0 0 0 0 28px 0 12px;
+  }
+  .v2 .tav .tav-n-entete {
+    display: none;
+  }
+  .v2 .tav .tav-n-entete,
+  .v2 .tav .tav-n-lignes {
+    min-width: 0;
+  }
+  .v2 .tav :is(.tav-n-statut, .tav-n-prio, .tav-n-owner, .tav-n-cible, .tav-n-projets, .tav-n-actifs) {
+    display: none;
+  }
+  .v2 .tav .tav-n-ligne {
+    column-gap: 6px;
+  }
+  .v2 .tav .tav-n-nouveau span {
+    display: none;
+  }
+}
+
+/* 768 et moins : les quatre onglets défilent dans leur rangée, les ronds restent à droite (pas de défilement de la page) */
+@media (max-width: 768px) {
+  .v2 .tav .tav-n-ligne2 {
+    min-width: 0;
+  }
+  .v2 .tav .tav-n-onglets {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v2 .tav .tav-n-onglets::-webkit-scrollbar {
+    display: none;
+  }
+  .v2 .tav .tav-n-ligne2 > .tav-pousse {
+    display: none;
+  }
+}

@@ -54,7 +54,35 @@ type Props = {
   relire: () => Promise<void>;
   /* la référence en clair d'un autre dossier du cabinet, si on la connaît (contrôle des conflits) */
   referenceDe?: (dossier: string) => string | null;
+  /* 02/11/2026, refonte des pages métiers : l'espace 2 dessine lui-même le dossier (copie de la page d'une
+     Initiative de Linear) ; ce composant ne rend alors que ses fenêtres de gestes, pilotées par `rendu`. */
+  rendu?: (api: ApiDossier) => React.ReactNode;
 };
+
+/* ce que le dessin de l'espace 2 peut demander au dossier : ouvrir une fenêtre de geste (avec des champs
+   pré-remplis), faire un geste simple, et les droits calculés ici */
+export type ApiDossier = {
+  ouvrir: (form: NonNullable<Form>, champs?: Record<string, string>) => void;
+  simple: (action: () => Promise<unknown>, local: () => DossierComplet, message: string) => Promise<void>;
+  telecharger: (x: { id: string; chemin: string | null }) => Promise<void>;
+  exporterAgenda: () => void;
+  exporterJournal: () => void;
+  bordereau: () => void;
+  peutEcrire: boolean;
+  peutGerer: boolean;
+  avocat: boolean;
+  associe: boolean;
+  gerant: boolean;
+  clairLisible: boolean;
+  partiesLisibles: boolean;
+  envoi: boolean;
+  erreur: string | null;
+  fait: string | null;
+  peutDecider: (dem: DemandeTamila) => boolean;
+  regleDe: (code: string | null) => RegleProcedure | undefined;
+  nomDe: (id: string | null | undefined) => string;
+};
+export type FormDossier = NonNullable<Form>;
 
 type Form =
   | { type: "partie" }
@@ -82,7 +110,7 @@ const maintenant = () => new Date().toISOString();
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const CHIFFRE = "\\x01" + "00".repeat(28);
 
-export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire, referenceDe = () => null }: Props) {
+export default function DossierTamila({ complet, source, moi, personnes, regles, reglages, cle, clientId, onLocal, relire, referenceDe = () => null, rendu }: Props) {
   const { dossier: d, clair, parties, appel, delais, audiences, avis, membres, murailles, exports, pieces, lectures, demandes } = complet;
   /* les événements dont le temps se propose à la saisie (b4_12) */
   const evenementsTemps = useMemo(() => ({ audiences, delais, avis }), [audiences, delais, avis]);
@@ -508,6 +536,265 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
     renvoyer: "Renvoyer, tenir ou annuler l'audience", avis: "Saisir un avis RPVA", membre: "Ajouter une personne au dossier", muraille: "Poser une muraille", decider: "Décider", cloture: "Demander la clôture", export: "Exporter le dossier", piece: "Déposer une pièce",
   };
 
+  /* ——— le dialogue du geste en cours ——— */
+  const dialogue = (
+  <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
+    <DialogContent>
+      {form ? (
+        <>
+          <DialogHeader>
+            <DialogIcone>{form.type === "muraille" ? <ShieldOff width={18} height={18} aria-hidden="true" /> : form.type === "cloture" ? <Lock width={18} height={18} aria-hidden="true" /> : <Gavel width={18} height={18} aria-hidden="true" />}</DialogIcone>
+            <DialogTitle>{dialogueTitre[form.type]}</DialogTitle>
+            <DialogDescription>
+              {form.type === "partie" ? "Le nom et le courriel sont chiffrés dans votre navigateur avant de partir. Le domicile du client fixe l'augmentation des délais." : null}
+              {form.type === "appel" ? "La date de la déclaration d'appel fixe le régime (décret 2023-1391) ; le siège de la cour, son calendrier." : null}
+              {form.type === "delai_regle" ? "Tamila calcule l'échéance avec la règle, le départ, la cour et le domicile du client ; un avocat la confirme." : null}
+              {form.type === "delai_date" ? "Une date fixée par le juge (calendrier, ordonnance, avis) : posée telle quelle. Saisie par un avocat, elle est confirmée d'office." : null}
+              {form.type === "confirmer" ? `${form.demande.resume}. Chaque délai est confirmé par un avocat qui voit le dossier.` : null}
+              {form.type === "decider" ? form.demande.resume : null}
+              {form.type === "corriger" ? "Le calcul reste tel quel ; la date retenue devient celle que vous saisissez, avec son motif." : null}
+              {form.type === "interrompre" ? "Seuls les délais pour conclure s'interrompent (art. 915-3 ; ancien art. 910-2). À la reprise, vous saisirez la nouvelle date." : null}
+              {form.type === "annuler" ? "Un délai ne se retire jamais : il s'annule avec son motif, et reste au dossier." : null}
+              {form.type === "acte" ? "L'acte déposé clôt le délai. Sans accusé de dépôt RPVA rattaché, la déclaration revient à un avocat." : null}
+              {form.type === "audience" ? "L'audience est posée au dossier ; l'avocat qui plaide est un avocat du cabinet." : null}
+              {form.type === "renvoyer" ? `${NATURES_AUDIENCE[form.audience.nature]} du ${dateHeure(form.audience.date_heure)}.` : null}
+              {form.type === "avis" ? "Saisi à la main, l'avis est appliqué comme s'il avait été lu : délais posés, audience ajoutée, appel orienté." : null}
+              {form.type === "membre" ? "Un stagiaire entre en lecteur ; le responsable d'un dossier est un avocat. Un accès peut être borné dans le temps." : null}
+              {form.type === "muraille" ? "La personne écartée ne voit plus rien du dossier et ne peut plus y être ajoutée. La levée revient au gérant, par décision." : null}
+              {form.type === "cloture" ? `Un associé décide. Une fois clos, le dossier est effacé ${reglages?.delai_cloture_jours ?? 7} jours plus tard, à 3 h : pièces, parties, clé. Vous gardez l'export téléchargé.` : null}
+              {form.type === "export" ? "L'archive (pièces, chronologie, délais, journal) est préparée par le serveur, puis disponible quelques jours. Exporter est une lecture tracée." : null}
+              {form.type === "residence" ? "Le domicile de la partie ; pour le client, il décide de l'augmentation des délais (art. 915-4)." : null}
+              {form.type === "piece" ? "Une pièce du dossier : conclusions, bordereau, pièce adverse, avis RPVA… Chiffrée avant de partir ; lue par le lecteur quand le coffre lui rendra la clé." : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {form.type === "partie" ? (
+                <>
+                  <label className="rv-libelle">Nom <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" value={champ("nom")} onChange={(e) => poser("nom", e.target.value)} /></label>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Qualité<select className="rv-champ" value={champ("qualite", "client")} onChange={(e) => poser("qualite", e.target.value)}>{(Object.keys(QUALITES) as (keyof typeof QUALITES)[]).map((q) => <option key={q} value={q}>{QUALITES[q]}</option>)}</select></label>
+                    <label className="rv-libelle">Rôle dans la procédure<select className="rv-champ" value={champ("role")} onChange={(e) => poser("role", e.target.value)}><option value="">—</option>{(Object.keys(ROLES_PROCEDURE) as (keyof typeof ROLES_PROCEDURE)[]).map((r) => <option key={r} value={r}>{ROLES_PROCEDURE[r]}</option>)}</select></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Demeure<select className="rv-champ" value={champ("residence", "metropole")} onChange={(e) => poser("residence", e.target.value)}>{RESIDENCES.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}</select></label>
+                    <label className="rv-libelle">Courriel<input className="rv-champ" value={champ("courriel")} onChange={(e) => poser("courriel", e.target.value)} /></label>
+                  </div>
+                </>
+              ) : null}
+              {form.type === "residence" ? (
+                <label className="rv-libelle">Demeure<select className="rv-champ" value={champ("residence", form.partie.residence)} onChange={(e) => poser("residence", e.target.value)}>{RESIDENCES.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}</select></label>
+              ) : null}
+              {form.type === "appel" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Déclaration d&apos;appel le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("introduit", aujourdhui())} onChange={(e) => poser("introduit", e.target.value)} /></label>
+                    <label className="rv-libelle">Le client est<select className="rv-champ" value={champ("role", "appelant")} onChange={(e) => poser("role", e.target.value)}>{(Object.keys(ROLES_PROCEDURE) as (keyof typeof ROLES_PROCEDURE)[]).map((r) => <option key={r} value={r}>{ROLES_PROCEDURE[r]}</option>)}</select></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Procédure<select className="rv-champ" value={champ("procedure", "a_orienter")} onChange={(e) => poser("procedure", e.target.value)}>{(Object.keys(PROCEDURES) as (keyof typeof PROCEDURES)[]).map((p) => <option key={p} value={p}>{PROCEDURES[p]}</option>)}</select></label>
+                    <label className="rv-libelle">Siège de la cour<select className="rv-champ" value={champ("territoire", d.territoire ?? "metropole")} onChange={(e) => poser("territoire", e.target.value)}>{TERRITOIRES.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}</select></label>
+                  </div>
+                  <Avis teinte="bleu">Régime : {regimeAppel(champ("introduit", aujourdhui())) === "cpc" ? "CPC depuis le 01/09/2024" : "CPC antérieur au 01/09/2024"}. {appel && delais.some((t) => t.nature === "regle" && t.statut !== "annule") ? "Des délais sont posés : annulez-les avant de changer la date." : "La déclaration fait courir les délais de l'appelant (art. 908)."}</Avis>
+                </>
+              ) : null}
+              {form.type === "delai_regle" ? (
+                <>
+                  <label className="rv-libelle">Règle<select className="rv-champ" value={champ("regle", reglesApplicables[0]?.code ?? "")} onChange={(e) => { poser("regle", e.target.value); setCalcul(null); }}>{(reglesApplicables.length ? reglesApplicables : regles).map((r) => <option key={r.code} value={r.code}>{r.libelle_court} — art. {r.article}</option>)}</select></label>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Départ du délai<input className="rv-champ" type="date" value={champ("depart", aujourdhui())} onChange={(e) => { poser("depart", e.target.value); setCalcul(null); }} /></label>
+                    <label className="rv-libelle">Le client demeure<select className="rv-champ" value={champ("residence", residenceClient)} onChange={(e) => { poser("residence", e.target.value); setCalcul(null); }}>{RESIDENCES.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}</select></label>
+                  </div>
+                  <div className="esp-actions"><button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={calculer}>Calculer la date</button></div>
+                  {calcul ? <div className="tam-calcul"><b>Échéance : {dateCourte(calcul.echeance)}.</b> {calcul.detail}{calcul.alternatives?.length ? <span className="tam-calcul-source">Autres dates : {calcul.alternatives.map((a) => dateCourte(a.echeance)).join(", ")}.</span> : null}</div> : null}
+                </>
+              ) : null}
+              {form.type === "delai_date" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Date fixée <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("echeance", aujourdhui())} onChange={(e) => poser("echeance", e.target.value)} /></label>
+                    <label className="rv-libelle">Acte attendu<select className="rv-champ" value={champ("acte", "autre")} onChange={(e) => poser("acte", e.target.value)}>{(Object.keys(ACTES) as (keyof typeof ACTES)[]).map((a) => <option key={a} value={a}>{ACTES[a]}</option>)}</select></label>
+                  </div>
+                  <label className="rv-libelle">Source<select className="rv-champ" value={champ("source", "saisie")} onChange={(e) => poser("source", e.target.value)}><option value="calendrier_de_procedure">Calendrier de procédure</option><option value="ordonnance">Ordonnance du conseiller de la mise en état</option><option value="avis">Avis du greffe</option><option value="saisie">Saisie au dossier</option></select></label>
+                </>
+              ) : null}
+              {form.type === "confirmer" || form.type === "decider" ? (
+                <>
+                  <label className="rv-libelle">Décision<select className="rv-champ" value={champ("decision", "approuve")} onChange={(e) => poser("decision", e.target.value)}><option value="approuve">Approuver</option><option value="rejete">Refuser</option></select></label>
+                  <label className="rv-libelle">Commentaire<textarea className="rv-champ" value={champ("commentaire")} onChange={(e) => poser("commentaire", e.target.value)} /></label>
+                  {form.type === "confirmer" && form.delai.calcul ? <div className="tam-calcul">{form.delai.calcul.detail}</div> : null}
+                </>
+              ) : null}
+              {form.type === "corriger" ? (
+                <div className="esp-form-ligne">
+                  <label className="rv-libelle">Date retenue <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("echeance", form.delai.echeance_retenue)} onChange={(e) => poser("echeance", e.target.value)} /></label>
+                  <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", "date_notifiee")} onChange={(e) => poser("motif", e.target.value)}>{MOTIFS_CORRECTION.map(([c, l]) => <option key={c} value={c}>{l}</option>)}</select></label>
+                </div>
+              ) : null}
+              {form.type === "interrompre" ? (
+                <div className="esp-form-ligne">
+                  <label className="rv-libelle">Cause<select className="rv-champ" value={champ("motif", "mediation")} onChange={(e) => poser("motif", e.target.value)}>{MOTIFS_INTERRUPTION.map(([c, l]) => <option key={c} value={c}>{l}</option>)}</select></label>
+                  <label className="rv-libelle">Depuis le<input className="rv-champ" type="date" value={champ("depuis", aujourdhui())} onChange={(e) => poser("depuis", e.target.value)} /></label>
+                </div>
+              ) : null}
+              {form.type === "annuler" ? (
+                <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", "desistement")} onChange={(e) => poser("motif", e.target.value)}>{MOTIFS_ANNULATION.map(([c, l]) => <option key={c} value={c}>{l}</option>)}</select></label>
+              ) : null}
+              {form.type === "acte" ? (
+                <>
+                  <label className="rv-libelle">Déposé le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("depose", aujourdhui())} onChange={(e) => poser("depose", e.target.value)} /></label>
+                  {champ("depose", aujourdhui()) > form.delai.echeance_retenue ? <Avis teinte="rouge">Après l&apos;échéance du {dateCourte(form.delai.echeance_retenue)} : le délai sera clos, et une alerte critique levée.</Avis> : null}
+                </>
+              ) : null}
+              {form.type === "audience" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Date <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("date", aujourdhui())} onChange={(e) => poser("date", e.target.value)} /></label>
+                    <label className="rv-libelle">Heure (vide si inconnue)<input className="rv-champ" type="time" value={champ("heure", "14:00")} onChange={(e) => poser("heure", e.target.value)} /></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Nature<select className="rv-champ" value={champ("nature", "mise_en_etat")} onChange={(e) => poser("nature", e.target.value)}>{(Object.keys(NATURES_AUDIENCE) as (keyof typeof NATURES_AUDIENCE)[]).map((n) => <option key={n} value={n}>{NATURES_AUDIENCE[n]}</option>)}</select></label>
+                    <label className="rv-libelle">Avocat qui plaide<select className="rv-champ" value={champ("avocat")} onChange={(e) => poser("avocat", e.target.value)}><option value="">—</option>{personnes.filter((p) => ["gerant", "admin", "valideur"].includes(p.role)).map((p) => <option key={p.user_id} value={p.user_id}>{p.nom}</option>)}</select></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Juridiction<input className="rv-champ" value={champ("juridiction", d.juridiction ?? "")} onChange={(e) => poser("juridiction", e.target.value)} /></label>
+                    <label className="rv-libelle">Chambre<input className="rv-champ" value={champ("chambre")} onChange={(e) => poser("chambre", e.target.value)} placeholder="Pôle 4 – chambre 5" /></label>
+                  </div>
+                </>
+              ) : null}
+              {form.type === "renvoyer" ? (
+                <>
+                  <label className="rv-libelle">Devenir<select className="rv-champ" value={champ("statut", "renvoyee")} onChange={(e) => poser("statut", e.target.value)}><option value="renvoyee">Renvoyée à une autre date</option><option value="tenue">Tenue</option><option value="annulee">Annulée</option></select></label>
+                  {champ("statut", "renvoyee") === "renvoyee" ? (
+                    <div className="esp-form-ligne">
+                      <label className="rv-libelle">Nouvelle date <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("date")} onChange={(e) => poser("date", e.target.value)} /></label>
+                      <label className="rv-libelle">Heure<input className="rv-champ" type="time" value={champ("heure", "14:00")} onChange={(e) => poser("heure", e.target.value)} /></label>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+              {form.type === "avis" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Type d&apos;avis<select className="rv-champ" value={champ("type", "rpva_avis_audience")} onChange={(e) => poser("type", e.target.value)}>{(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((t) => <option key={t} value={t}>{TYPES_AVIS[t]}</option>)}</select></label>
+                    <label className="rv-libelle">Date de l&apos;avis <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("date_avis", aujourdhui())} onChange={(e) => poser("date_avis", e.target.value)} /></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Date d&apos;audience<input className="rv-champ" type="date" value={champ("date_audience")} onChange={(e) => poser("date_audience", e.target.value)} /></label>
+                    <label className="rv-libelle">Heure<input className="rv-champ" type="time" value={champ("heure_audience", "09:00")} onChange={(e) => poser("heure_audience", e.target.value)} /></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Date limite (ordonnance)<input className="rv-champ" type="date" value={champ("date_limite")} onChange={(e) => poser("date_limite", e.target.value)} /></label>
+                    <label className="rv-libelle">Clôture prévisible<input className="rv-champ" type="date" value={champ("date_cloture")} onChange={(e) => poser("date_cloture", e.target.value)} /></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Partie visée<select className="rv-champ" value={champ("partie")} onChange={(e) => poser("partie", e.target.value)}><option value="">—</option><option value="appelant">Appelant</option><option value="intime">Intimé</option><option value="intervenant">Intervenant</option></select></label>
+                    <label className="rv-libelle">Rang des conclusions<input className="rv-champ" inputMode="numeric" value={champ("rang")} onChange={(e) => poser("rang", e.target.value)} /></label>
+                  </div>
+                  {champ("type", "rpva_avis_audience") === "rpva_accuse_depot" ? (
+                    <div className="esp-form-ligne">
+                      <label className="rv-libelle">Déposé le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("depose_le")} onChange={(e) => poser("depose_le", e.target.value)} /></label>
+                      <label className="rv-libelle">Heure<input className="rv-champ" type="time" value={champ("heure_depot", "12:00")} onChange={(e) => poser("heure_depot", e.target.value)} /></label>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+              {form.type === "membre" ? (
+                <>
+                  <label className="rv-libelle">Personne <span className="esp-obligatoire">(obligatoire)</span><select className="rv-champ" value={champ("user")} onChange={(e) => poser("user", e.target.value)}><option value="">Choisir…</option>{personnes.filter((p) => !murailles.some((m) => m.user_id === p.user_id && !m.leve_le)).map((p) => <option key={p.user_id} value={p.user_id}>{p.nom} — {ROLES_CABINET[p.role]}</option>)}</select></label>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Rôle dans le dossier<select className="rv-champ" value={champ("role", "intervenant")} onChange={(e) => poser("role", e.target.value)}><option value="responsable">Responsable (un avocat)</option><option value="intervenant">Intervenant</option><option value="lecteur">Lecteur</option></select></label>
+                    <label className="rv-libelle">Jusqu&apos;au (facultatif)<input className="rv-champ" type="date" value={champ("jusqu")} onChange={(e) => poser("jusqu", e.target.value)} /></label>
+                  </div>
+                </>
+              ) : null}
+              {form.type === "muraille" ? (
+                <>
+                  <label className="rv-libelle">Personne écartée <span className="esp-obligatoire">(obligatoire)</span><select className="rv-champ" value={champ("user")} onChange={(e) => poser("user", e.target.value)}><option value="">Choisir…</option>{personnes.filter((p) => p.user_id !== moi?.user_id).map((p) => <option key={p.user_id} value={p.user_id}>{p.nom} — {ROLES_CABINET[p.role]}</option>)}</select></label>
+                  <label className="rv-libelle">Motif (chiffré, lu par les associés)<textarea className="rv-champ" value={champ("motif")} onChange={(e) => poser("motif", e.target.value)} placeholder="Conflit d'intérêts : ancien conseil de la partie adverse." /></label>
+                  {source === "reelle" && !cle && champ("motif").trim() ? <Avis teinte="ambre">Sans la phrase du cabinet, le motif ne peut pas être chiffré : la muraille sera posée sans motif.</Avis> : null}
+                </>
+              ) : null}
+              {form.type === "cloture" ? <Avis teinte="ambre"><strong>Le contenu sera effacé</strong> {reglages?.delai_cloture_jours ?? 7} jours après l&apos;approbation. Téléchargez l&apos;export avant.</Avis> : null}
+              {form.type === "export" ? <Avis teinte="bleu">L&apos;export est tracé au journal des accès, comme toute lecture.</Avis> : null}
+              {form.type === "piece" ? (
+                <>
+                  <div>
+                    <span className="rv-libelle">Fichier <span className="esp-obligatoire">(obligatoire)</span></span>
+                    <div className="esp-fichier">
+                      <input id="tam-piece-fichier" type="file" className="esp-fichier-natif" accept=".pdf,.png,.jpg,.jpeg,.docx,.eml,.msg" onChange={(e) => setFichier(e.target.files?.[0] ?? null)} />
+                      <label htmlFor="tam-piece-fichier" className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{fichier ? "Changer de fichier" : "Choisir un fichier"}</label>
+                      <span className="esp-kpi-sous">{fichier ? `${fichier.name} · ${Math.round(fichier.size / 1024)} Ko` : "PDF, image, courriel ou document."}</span>
+                    </div>
+                  </div>
+                  <label className="rv-libelle">Nature (facultatif)
+                    <select className="rv-champ" value={champ("type_piece")} onChange={(e) => poser("type_piece", e.target.value)}>
+                      <option value="">À déterminer</option>
+                      <option value="conclusions">Conclusions</option>
+                      <option value="bordereau">Bordereau de communication</option>
+                      <option value="piece_adverse">Pièce adverse</option>
+                      <option value="expertise">Rapport d&apos;expertise</option>
+                      <option value="constat">Constat</option>
+                      <option value="courriel">Courriel</option>
+                      {(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((t) => <option key={t} value={t}>{TYPES_AVIS[t]} (avis RPVA)</option>)}
+                    </select>
+                  </label>
+                  <Avis teinte="bleu">La pièce est chiffrée ici, dans votre navigateur, avec la clé du dossier ; seul l&apos;octet chiffré part au coffre, et son empreinte est celle du chiffré.</Avis>
+                </>
+              ) : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button
+              type="button"
+              className={`r-btn ${form.type === "annuler" || form.type === "muraille" || form.type === "cloture" ? "r-btn--rouge" : "r-btn--noir"}`}
+              disabled={envoi || (form.type === "piece" && !fichier) || (form.type === "partie" && champ("nom").trim().length < 2) || ((form.type === "membre" || form.type === "muraille") && !champ("user")) || (form.type === "renvoyer" && champ("statut", "renvoyee") === "renvoyee" && !champ("date")) || (form.type === "avis" && champ("type", "rpva_avis_audience") === "rpva_accuse_depot" && !champ("depose_le"))}
+              onClick={soumettre}
+            >
+              {envoi ? <Loader variant="spin" /> : null}{" "}
+              {form.type === "confirmer" || form.type === "decider" ? (champ("decision", "approuve") === "approuve" ? "Approuver" : "Refuser") : form.type === "cloture" ? "Demander la clôture" : form.type === "export" ? "Demander l'export" : form.type === "piece" ? "Chiffrer et déposer" : form.type === "muraille" ? "Poser la muraille" : form.type === "annuler" ? "Annuler le délai" : "Enregistrer"}
+            </button>
+          </DialogFooter>
+        </>
+      ) : null}
+    </DialogContent>
+  </Dialog>
+  );
+  const fenetreBordereau = bordereau ? (
+          <BordereauImprimable
+            ouvert onFermer={() => setBordereau(false)} pieces={pieces} entete={reglages?.facture_entete ?? {}}
+            dossier={{ reference: clair?.reference ?? "Dossier", intitule: clair?.intitule ?? "", numero_rg: clair?.numero_rg ?? null, juridiction: d.juridiction ?? null }}
+            pour={parties.filter((p) => p.qualite === "client").map((p) => complet.partiesClair[p.id]?.nom ?? "").filter(Boolean)}
+            contre={parties.filter((p) => p.qualite === "adverse").map((p) => complet.partiesClair[p.id]?.nom ?? "").filter(Boolean)}
+          />
+        ) : null;
+
+  if (rendu) {
+    const api: ApiDossier = {
+      ouvrir: (x, champs) => {
+        ouvrir(x);
+        if (champs) setF(champs);
+      },
+      simple: gesteSimple,
+      telecharger,
+      exporterAgenda,
+      exporterJournal,
+      bordereau: () => setBordereau(true),
+      peutEcrire, peutGerer, avocat, associe, gerant, clairLisible, partiesLisibles, envoi, erreur: form ? null : erreur, fait,
+      peutDecider,
+      regleDe: (code) => regles.find((r) => r.code === code),
+      nomDe,
+    };
+    return (
+      <>
+        {rendu(api)}
+        {fenetreBordereau}
+        {dialogue}
+      </>
+    );
+  }
+
   return (
     <div className="esp-dossier">
       {fait ? <Avis teinte="vert" role="status"><strong>C&apos;est fait.</strong> {fait}</Avis> : null}
@@ -743,14 +1030,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
           <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || (source === "reelle" && !cle)} title={source === "reelle" && !cle ? "La phrase du cabinet est nécessaire pour chiffrer la pièce" : undefined} onClick={() => ouvrir({ type: "piece" })}><Upload width={14} height={14} aria-hidden="true" /> Déposer</button>
           </div>
         </div>
-        {bordereau ? (
-          <BordereauImprimable
-            ouvert onFermer={() => setBordereau(false)} pieces={pieces} entete={reglages?.facture_entete ?? {}}
-            dossier={{ reference: clair?.reference ?? "Dossier", intitule: clair?.intitule ?? "", numero_rg: clair?.numero_rg ?? null, juridiction: d.juridiction ?? null }}
-            pour={parties.filter((p) => p.qualite === "client").map((p) => complet.partiesClair[p.id]?.nom ?? "").filter(Boolean)}
-            contre={parties.filter((p) => p.qualite === "adverse").map((p) => complet.partiesClair[p.id]?.nom ?? "").filter(Boolean)}
-          />
-        ) : null}
+        {fenetreBordereau}
         <div className="esp-carte-corps">
           {pieces.length === 0 ? <p className="esp-kpi-sous">Aucune pièce. Chaque pièce est chiffrée dans votre navigateur avec la clé du dossier avant de partir ; le socle n&apos;en voit que des octets.</p> : pieces.map((pc) => (
             <div key={pc.id} className="tam-ligne">
@@ -905,229 +1185,7 @@ export default function DossierTamila({ complet, source, moi, personnes, regles,
         </div>
       </section>
 
-      {/* ——— le dialogue du geste en cours ——— */}
-      <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          {form ? (
-            <>
-              <DialogHeader>
-                <DialogIcone>{form.type === "muraille" ? <ShieldOff width={18} height={18} aria-hidden="true" /> : form.type === "cloture" ? <Lock width={18} height={18} aria-hidden="true" /> : <Gavel width={18} height={18} aria-hidden="true" />}</DialogIcone>
-                <DialogTitle>{dialogueTitre[form.type]}</DialogTitle>
-                <DialogDescription>
-                  {form.type === "partie" ? "Le nom et le courriel sont chiffrés dans votre navigateur avant de partir. Le domicile du client fixe l'augmentation des délais." : null}
-                  {form.type === "appel" ? "La date de la déclaration d'appel fixe le régime (décret 2023-1391) ; le siège de la cour, son calendrier." : null}
-                  {form.type === "delai_regle" ? "Tamila calcule l'échéance avec la règle, le départ, la cour et le domicile du client ; un avocat la confirme." : null}
-                  {form.type === "delai_date" ? "Une date fixée par le juge (calendrier, ordonnance, avis) : posée telle quelle. Saisie par un avocat, elle est confirmée d'office." : null}
-                  {form.type === "confirmer" ? `${form.demande.resume}. Chaque délai est confirmé par un avocat qui voit le dossier.` : null}
-                  {form.type === "decider" ? form.demande.resume : null}
-                  {form.type === "corriger" ? "Le calcul reste tel quel ; la date retenue devient celle que vous saisissez, avec son motif." : null}
-                  {form.type === "interrompre" ? "Seuls les délais pour conclure s'interrompent (art. 915-3 ; ancien art. 910-2). À la reprise, vous saisirez la nouvelle date." : null}
-                  {form.type === "annuler" ? "Un délai ne se retire jamais : il s'annule avec son motif, et reste au dossier." : null}
-                  {form.type === "acte" ? "L'acte déposé clôt le délai. Sans accusé de dépôt RPVA rattaché, la déclaration revient à un avocat." : null}
-                  {form.type === "audience" ? "L'audience est posée au dossier ; l'avocat qui plaide est un avocat du cabinet." : null}
-                  {form.type === "renvoyer" ? `${NATURES_AUDIENCE[form.audience.nature]} du ${dateHeure(form.audience.date_heure)}.` : null}
-                  {form.type === "avis" ? "Saisi à la main, l'avis est appliqué comme s'il avait été lu : délais posés, audience ajoutée, appel orienté." : null}
-                  {form.type === "membre" ? "Un stagiaire entre en lecteur ; le responsable d'un dossier est un avocat. Un accès peut être borné dans le temps." : null}
-                  {form.type === "muraille" ? "La personne écartée ne voit plus rien du dossier et ne peut plus y être ajoutée. La levée revient au gérant, par décision." : null}
-                  {form.type === "cloture" ? `Un associé décide. Une fois clos, le dossier est effacé ${reglages?.delai_cloture_jours ?? 7} jours plus tard, à 3 h : pièces, parties, clé. Vous gardez l'export téléchargé.` : null}
-                  {form.type === "export" ? "L'archive (pièces, chronologie, délais, journal) est préparée par le serveur, puis disponible quelques jours. Exporter est une lecture tracée." : null}
-                  {form.type === "residence" ? "Le domicile de la partie ; pour le client, il décide de l'augmentation des délais (art. 915-4)." : null}
-                  {form.type === "piece" ? "Une pièce du dossier : conclusions, bordereau, pièce adverse, avis RPVA… Chiffrée avant de partir ; lue par le lecteur quand le coffre lui rendra la clé." : null}
-                </DialogDescription>
-              </DialogHeader>
-              <DialogBody>
-                <div className="esp-form">
-                  {form.type === "partie" ? (
-                    <>
-                      <label className="rv-libelle">Nom <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" value={champ("nom")} onChange={(e) => poser("nom", e.target.value)} /></label>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Qualité<select className="rv-champ" value={champ("qualite", "client")} onChange={(e) => poser("qualite", e.target.value)}>{(Object.keys(QUALITES) as (keyof typeof QUALITES)[]).map((q) => <option key={q} value={q}>{QUALITES[q]}</option>)}</select></label>
-                        <label className="rv-libelle">Rôle dans la procédure<select className="rv-champ" value={champ("role")} onChange={(e) => poser("role", e.target.value)}><option value="">—</option>{(Object.keys(ROLES_PROCEDURE) as (keyof typeof ROLES_PROCEDURE)[]).map((r) => <option key={r} value={r}>{ROLES_PROCEDURE[r]}</option>)}</select></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Demeure<select className="rv-champ" value={champ("residence", "metropole")} onChange={(e) => poser("residence", e.target.value)}>{RESIDENCES.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}</select></label>
-                        <label className="rv-libelle">Courriel<input className="rv-champ" value={champ("courriel")} onChange={(e) => poser("courriel", e.target.value)} /></label>
-                      </div>
-                    </>
-                  ) : null}
-                  {form.type === "residence" ? (
-                    <label className="rv-libelle">Demeure<select className="rv-champ" value={champ("residence", form.partie.residence)} onChange={(e) => poser("residence", e.target.value)}>{RESIDENCES.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}</select></label>
-                  ) : null}
-                  {form.type === "appel" ? (
-                    <>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Déclaration d&apos;appel le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("introduit", aujourdhui())} onChange={(e) => poser("introduit", e.target.value)} /></label>
-                        <label className="rv-libelle">Le client est<select className="rv-champ" value={champ("role", "appelant")} onChange={(e) => poser("role", e.target.value)}>{(Object.keys(ROLES_PROCEDURE) as (keyof typeof ROLES_PROCEDURE)[]).map((r) => <option key={r} value={r}>{ROLES_PROCEDURE[r]}</option>)}</select></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Procédure<select className="rv-champ" value={champ("procedure", "a_orienter")} onChange={(e) => poser("procedure", e.target.value)}>{(Object.keys(PROCEDURES) as (keyof typeof PROCEDURES)[]).map((p) => <option key={p} value={p}>{PROCEDURES[p]}</option>)}</select></label>
-                        <label className="rv-libelle">Siège de la cour<select className="rv-champ" value={champ("territoire", d.territoire ?? "metropole")} onChange={(e) => poser("territoire", e.target.value)}>{TERRITOIRES.map((t) => <option key={t.code} value={t.code}>{t.libelle}</option>)}</select></label>
-                      </div>
-                      <Avis teinte="bleu">Régime : {regimeAppel(champ("introduit", aujourdhui())) === "cpc" ? "CPC depuis le 01/09/2024" : "CPC antérieur au 01/09/2024"}. {appel && delais.some((t) => t.nature === "regle" && t.statut !== "annule") ? "Des délais sont posés : annulez-les avant de changer la date." : "La déclaration fait courir les délais de l'appelant (art. 908)."}</Avis>
-                    </>
-                  ) : null}
-                  {form.type === "delai_regle" ? (
-                    <>
-                      <label className="rv-libelle">Règle<select className="rv-champ" value={champ("regle", reglesApplicables[0]?.code ?? "")} onChange={(e) => { poser("regle", e.target.value); setCalcul(null); }}>{(reglesApplicables.length ? reglesApplicables : regles).map((r) => <option key={r.code} value={r.code}>{r.libelle_court} — art. {r.article}</option>)}</select></label>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Départ du délai<input className="rv-champ" type="date" value={champ("depart", aujourdhui())} onChange={(e) => { poser("depart", e.target.value); setCalcul(null); }} /></label>
-                        <label className="rv-libelle">Le client demeure<select className="rv-champ" value={champ("residence", residenceClient)} onChange={(e) => { poser("residence", e.target.value); setCalcul(null); }}>{RESIDENCES.map((r) => <option key={r.code} value={r.code}>{r.libelle}</option>)}</select></label>
-                      </div>
-                      <div className="esp-actions"><button type="button" className="r-btn r-btn--fil r-btn--petit" onClick={calculer}>Calculer la date</button></div>
-                      {calcul ? <div className="tam-calcul"><b>Échéance : {dateCourte(calcul.echeance)}.</b> {calcul.detail}{calcul.alternatives?.length ? <span className="tam-calcul-source">Autres dates : {calcul.alternatives.map((a) => dateCourte(a.echeance)).join(", ")}.</span> : null}</div> : null}
-                    </>
-                  ) : null}
-                  {form.type === "delai_date" ? (
-                    <>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Date fixée <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("echeance", aujourdhui())} onChange={(e) => poser("echeance", e.target.value)} /></label>
-                        <label className="rv-libelle">Acte attendu<select className="rv-champ" value={champ("acte", "autre")} onChange={(e) => poser("acte", e.target.value)}>{(Object.keys(ACTES) as (keyof typeof ACTES)[]).map((a) => <option key={a} value={a}>{ACTES[a]}</option>)}</select></label>
-                      </div>
-                      <label className="rv-libelle">Source<select className="rv-champ" value={champ("source", "saisie")} onChange={(e) => poser("source", e.target.value)}><option value="calendrier_de_procedure">Calendrier de procédure</option><option value="ordonnance">Ordonnance du conseiller de la mise en état</option><option value="avis">Avis du greffe</option><option value="saisie">Saisie au dossier</option></select></label>
-                    </>
-                  ) : null}
-                  {form.type === "confirmer" || form.type === "decider" ? (
-                    <>
-                      <label className="rv-libelle">Décision<select className="rv-champ" value={champ("decision", "approuve")} onChange={(e) => poser("decision", e.target.value)}><option value="approuve">Approuver</option><option value="rejete">Refuser</option></select></label>
-                      <label className="rv-libelle">Commentaire<textarea className="rv-champ" value={champ("commentaire")} onChange={(e) => poser("commentaire", e.target.value)} /></label>
-                      {form.type === "confirmer" && form.delai.calcul ? <div className="tam-calcul">{form.delai.calcul.detail}</div> : null}
-                    </>
-                  ) : null}
-                  {form.type === "corriger" ? (
-                    <div className="esp-form-ligne">
-                      <label className="rv-libelle">Date retenue <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("echeance", form.delai.echeance_retenue)} onChange={(e) => poser("echeance", e.target.value)} /></label>
-                      <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", "date_notifiee")} onChange={(e) => poser("motif", e.target.value)}>{MOTIFS_CORRECTION.map(([c, l]) => <option key={c} value={c}>{l}</option>)}</select></label>
-                    </div>
-                  ) : null}
-                  {form.type === "interrompre" ? (
-                    <div className="esp-form-ligne">
-                      <label className="rv-libelle">Cause<select className="rv-champ" value={champ("motif", "mediation")} onChange={(e) => poser("motif", e.target.value)}>{MOTIFS_INTERRUPTION.map(([c, l]) => <option key={c} value={c}>{l}</option>)}</select></label>
-                      <label className="rv-libelle">Depuis le<input className="rv-champ" type="date" value={champ("depuis", aujourdhui())} onChange={(e) => poser("depuis", e.target.value)} /></label>
-                    </div>
-                  ) : null}
-                  {form.type === "annuler" ? (
-                    <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", "desistement")} onChange={(e) => poser("motif", e.target.value)}>{MOTIFS_ANNULATION.map(([c, l]) => <option key={c} value={c}>{l}</option>)}</select></label>
-                  ) : null}
-                  {form.type === "acte" ? (
-                    <>
-                      <label className="rv-libelle">Déposé le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("depose", aujourdhui())} onChange={(e) => poser("depose", e.target.value)} /></label>
-                      {champ("depose", aujourdhui()) > form.delai.echeance_retenue ? <Avis teinte="rouge">Après l&apos;échéance du {dateCourte(form.delai.echeance_retenue)} : le délai sera clos, et une alerte critique levée.</Avis> : null}
-                    </>
-                  ) : null}
-                  {form.type === "audience" ? (
-                    <>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Date <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("date", aujourdhui())} onChange={(e) => poser("date", e.target.value)} /></label>
-                        <label className="rv-libelle">Heure (vide si inconnue)<input className="rv-champ" type="time" value={champ("heure", "14:00")} onChange={(e) => poser("heure", e.target.value)} /></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Nature<select className="rv-champ" value={champ("nature", "mise_en_etat")} onChange={(e) => poser("nature", e.target.value)}>{(Object.keys(NATURES_AUDIENCE) as (keyof typeof NATURES_AUDIENCE)[]).map((n) => <option key={n} value={n}>{NATURES_AUDIENCE[n]}</option>)}</select></label>
-                        <label className="rv-libelle">Avocat qui plaide<select className="rv-champ" value={champ("avocat")} onChange={(e) => poser("avocat", e.target.value)}><option value="">—</option>{personnes.filter((p) => ["gerant", "admin", "valideur"].includes(p.role)).map((p) => <option key={p.user_id} value={p.user_id}>{p.nom}</option>)}</select></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Juridiction<input className="rv-champ" value={champ("juridiction", d.juridiction ?? "")} onChange={(e) => poser("juridiction", e.target.value)} /></label>
-                        <label className="rv-libelle">Chambre<input className="rv-champ" value={champ("chambre")} onChange={(e) => poser("chambre", e.target.value)} placeholder="Pôle 4 – chambre 5" /></label>
-                      </div>
-                    </>
-                  ) : null}
-                  {form.type === "renvoyer" ? (
-                    <>
-                      <label className="rv-libelle">Devenir<select className="rv-champ" value={champ("statut", "renvoyee")} onChange={(e) => poser("statut", e.target.value)}><option value="renvoyee">Renvoyée à une autre date</option><option value="tenue">Tenue</option><option value="annulee">Annulée</option></select></label>
-                      {champ("statut", "renvoyee") === "renvoyee" ? (
-                        <div className="esp-form-ligne">
-                          <label className="rv-libelle">Nouvelle date <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("date")} onChange={(e) => poser("date", e.target.value)} /></label>
-                          <label className="rv-libelle">Heure<input className="rv-champ" type="time" value={champ("heure", "14:00")} onChange={(e) => poser("heure", e.target.value)} /></label>
-                        </div>
-                      ) : null}
-                    </>
-                  ) : null}
-                  {form.type === "avis" ? (
-                    <>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Type d&apos;avis<select className="rv-champ" value={champ("type", "rpva_avis_audience")} onChange={(e) => poser("type", e.target.value)}>{(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((t) => <option key={t} value={t}>{TYPES_AVIS[t]}</option>)}</select></label>
-                        <label className="rv-libelle">Date de l&apos;avis <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("date_avis", aujourdhui())} onChange={(e) => poser("date_avis", e.target.value)} /></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Date d&apos;audience<input className="rv-champ" type="date" value={champ("date_audience")} onChange={(e) => poser("date_audience", e.target.value)} /></label>
-                        <label className="rv-libelle">Heure<input className="rv-champ" type="time" value={champ("heure_audience", "09:00")} onChange={(e) => poser("heure_audience", e.target.value)} /></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Date limite (ordonnance)<input className="rv-champ" type="date" value={champ("date_limite")} onChange={(e) => poser("date_limite", e.target.value)} /></label>
-                        <label className="rv-libelle">Clôture prévisible<input className="rv-champ" type="date" value={champ("date_cloture")} onChange={(e) => poser("date_cloture", e.target.value)} /></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Partie visée<select className="rv-champ" value={champ("partie")} onChange={(e) => poser("partie", e.target.value)}><option value="">—</option><option value="appelant">Appelant</option><option value="intime">Intimé</option><option value="intervenant">Intervenant</option></select></label>
-                        <label className="rv-libelle">Rang des conclusions<input className="rv-champ" inputMode="numeric" value={champ("rang")} onChange={(e) => poser("rang", e.target.value)} /></label>
-                      </div>
-                      {champ("type", "rpva_avis_audience") === "rpva_accuse_depot" ? (
-                        <div className="esp-form-ligne">
-                          <label className="rv-libelle">Déposé le <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" type="date" value={champ("depose_le")} onChange={(e) => poser("depose_le", e.target.value)} /></label>
-                          <label className="rv-libelle">Heure<input className="rv-champ" type="time" value={champ("heure_depot", "12:00")} onChange={(e) => poser("heure_depot", e.target.value)} /></label>
-                        </div>
-                      ) : null}
-                    </>
-                  ) : null}
-                  {form.type === "membre" ? (
-                    <>
-                      <label className="rv-libelle">Personne <span className="esp-obligatoire">(obligatoire)</span><select className="rv-champ" value={champ("user")} onChange={(e) => poser("user", e.target.value)}><option value="">Choisir…</option>{personnes.filter((p) => !murailles.some((m) => m.user_id === p.user_id && !m.leve_le)).map((p) => <option key={p.user_id} value={p.user_id}>{p.nom} — {ROLES_CABINET[p.role]}</option>)}</select></label>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Rôle dans le dossier<select className="rv-champ" value={champ("role", "intervenant")} onChange={(e) => poser("role", e.target.value)}><option value="responsable">Responsable (un avocat)</option><option value="intervenant">Intervenant</option><option value="lecteur">Lecteur</option></select></label>
-                        <label className="rv-libelle">Jusqu&apos;au (facultatif)<input className="rv-champ" type="date" value={champ("jusqu")} onChange={(e) => poser("jusqu", e.target.value)} /></label>
-                      </div>
-                    </>
-                  ) : null}
-                  {form.type === "muraille" ? (
-                    <>
-                      <label className="rv-libelle">Personne écartée <span className="esp-obligatoire">(obligatoire)</span><select className="rv-champ" value={champ("user")} onChange={(e) => poser("user", e.target.value)}><option value="">Choisir…</option>{personnes.filter((p) => p.user_id !== moi?.user_id).map((p) => <option key={p.user_id} value={p.user_id}>{p.nom} — {ROLES_CABINET[p.role]}</option>)}</select></label>
-                      <label className="rv-libelle">Motif (chiffré, lu par les associés)<textarea className="rv-champ" value={champ("motif")} onChange={(e) => poser("motif", e.target.value)} placeholder="Conflit d'intérêts : ancien conseil de la partie adverse." /></label>
-                      {source === "reelle" && !cle && champ("motif").trim() ? <Avis teinte="ambre">Sans la phrase du cabinet, le motif ne peut pas être chiffré : la muraille sera posée sans motif.</Avis> : null}
-                    </>
-                  ) : null}
-                  {form.type === "cloture" ? <Avis teinte="ambre"><strong>Le contenu sera effacé</strong> {reglages?.delai_cloture_jours ?? 7} jours après l&apos;approbation. Téléchargez l&apos;export avant.</Avis> : null}
-                  {form.type === "export" ? <Avis teinte="bleu">L&apos;export est tracé au journal des accès, comme toute lecture.</Avis> : null}
-                  {form.type === "piece" ? (
-                    <>
-                      <div>
-                        <span className="rv-libelle">Fichier <span className="esp-obligatoire">(obligatoire)</span></span>
-                        <div className="esp-fichier">
-                          <input id="tam-piece-fichier" type="file" className="esp-fichier-natif" accept=".pdf,.png,.jpg,.jpeg,.docx,.eml,.msg" onChange={(e) => setFichier(e.target.files?.[0] ?? null)} />
-                          <label htmlFor="tam-piece-fichier" className="r-btn r-btn--fil r-btn--petit" style={{ cursor: "pointer" }}>{fichier ? "Changer de fichier" : "Choisir un fichier"}</label>
-                          <span className="esp-kpi-sous">{fichier ? `${fichier.name} · ${Math.round(fichier.size / 1024)} Ko` : "PDF, image, courriel ou document."}</span>
-                        </div>
-                      </div>
-                      <label className="rv-libelle">Nature (facultatif)
-                        <select className="rv-champ" value={champ("type_piece")} onChange={(e) => poser("type_piece", e.target.value)}>
-                          <option value="">À déterminer</option>
-                          <option value="conclusions">Conclusions</option>
-                          <option value="bordereau">Bordereau de communication</option>
-                          <option value="piece_adverse">Pièce adverse</option>
-                          <option value="expertise">Rapport d&apos;expertise</option>
-                          <option value="constat">Constat</option>
-                          <option value="courriel">Courriel</option>
-                          {(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((t) => <option key={t} value={t}>{TYPES_AVIS[t]} (avis RPVA)</option>)}
-                        </select>
-                      </label>
-                      <Avis teinte="bleu">La pièce est chiffrée ici, dans votre navigateur, avec la clé du dossier ; seul l&apos;octet chiffré part au coffre, et son empreinte est celle du chiffré.</Avis>
-                    </>
-                  ) : null}
-                  {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-                </div>
-              </DialogBody>
-              <DialogFooter>
-                <button
-                  type="button"
-                  className={`r-btn ${form.type === "annuler" || form.type === "muraille" || form.type === "cloture" ? "r-btn--rouge" : "r-btn--noir"}`}
-                  disabled={envoi || (form.type === "piece" && !fichier) || (form.type === "partie" && champ("nom").trim().length < 2) || ((form.type === "membre" || form.type === "muraille") && !champ("user")) || (form.type === "renvoyer" && champ("statut", "renvoyee") === "renvoyee" && !champ("date")) || (form.type === "avis" && champ("type", "rpva_avis_audience") === "rpva_accuse_depot" && !champ("depose_le"))}
-                  onClick={soumettre}
-                >
-                  {envoi ? <Loader variant="spin" /> : null}{" "}
-                  {form.type === "confirmer" || form.type === "decider" ? (champ("decision", "approuve") === "approuve" ? "Approuver" : "Refuser") : form.type === "cloture" ? "Demander la clôture" : form.type === "export" ? "Demander l'export" : form.type === "piece" ? "Chiffrer et déposer" : form.type === "muraille" ? "Poser la muraille" : form.type === "annuler" ? "Annuler le délai" : "Enregistrer"}
-                </button>
-              </DialogFooter>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {dialogue}
     </div>
   );
 }

@@ -1,0 +1,483 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, incidents — Plain, Tasks (liste + détail), au 1:1 (02/11/2026).
+   Relevés : docs/refonte-metiers/releves/plain-tasks.md et plain-commun.md
+   (session références Plain, 1440×900 sombre et clair, 390). Préfixe
+   tav-p- ; la carte prend les jetons de Plain (pas ceux de Linear).
+
+   Repères : carte r 12 ; colonne p 24 24 120 ; en-tête h1 24/400/32 (Whyte
+   chez Plain, Inter ici) ; onglets : contrôle segmenté 36 (r 8, p 2, gap 8,
+   piste fill-neutral-1), onglet 32 (r 6, p 0 8, icône 18 + 14/550/20 +
+   compte 12/400/16), filet bas 1 border-neutral-2, p 0 24 12 ; « Add new
+   task » 48 (p 12 24, 14/550/20 text-neutral-2) ; lignes 49 (filet haut
+   1 border-neutral-1), grille 18 · 1fr · auto · 40, écart 8 12, p 0 24 ;
+   identifiant 12/475/16, titre 14/550/20 ; pastille du compte 24 (r 6,
+   12/400/20, vignette 18 r 4, icône 12) ; avatar 18 r 4 dans 32.
+   Détail : 360, p 16, gap 16 ; tête 32 (identifiant 12/550/16) ; titre
+   24/400/32 ; « Created » 14/400/20 ; dl gap 4 16, dt 12/550/32.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav.tav--plain {
+  --tav-p-fond: #1a191b;
+  --tav-p-app: #121113;
+  --tav-p-ombre: rgba(32, 39, 44, 0.08) 0 1px 0, rgba(32, 39, 44, 0.08) 0 2px 5px, rgba(255, 255, 255, 0.02) 1px 1px 2px inset, rgba(255, 255, 255, 0.1) 0 0 1px inset;
+  --tav-p-t1: #eeeef0;
+  --tav-p-t2: #b5b2bc;
+  --tav-p-i1: #98979f;
+  --tav-p-f1: #232225;
+  --tav-p-f2: #2b292d;
+  --tav-p-b1: #2b292d;
+  --tav-p-b2: #323035;
+  --tav-p-bleu: #5696ff;
+  --tav-p-vert: #18b562;
+  --tav-p-ouverte: #0e111f;
+  --tav-p-pastille: #232225;
+  --tav-p-pastille-bord: #323035;
+  --tav-p-menu-ombre: rgba(32, 39, 44, 0.24) 0 1px 2px, rgba(32, 39, 44, 0.08) 0 2px 6px 2px, rgba(32, 39, 44, 0.08) 0 2px 8px;
+  background: var(--tav-p-app);
+}
+html[data-v2-theme="light"] .v2 .tav.tav--plain {
+  --tav-p-fond: #fff;
+  --tav-p-app: #f9f9fc;
+  --tav-p-ombre: 0 0 0 1px #20272c14, 0 1px 1px #20272c14;
+  --tav-p-t1: #1f1f28;
+  --tav-p-t2: #636370;
+  --tav-p-i1: #8e8e9c;
+  --tav-p-f1: #f0f0f5;
+  --tav-p-f2: #e7e7ef;
+  --tav-p-b1: #e7e7ef;
+  --tav-p-b2: #e0e0e9;
+  --tav-p-bleu: #448bff;
+  --tav-p-vert: #00ab5f;
+  --tav-p-ouverte: #f7f9ff;
+  --tav-p-pastille: #fff;
+  --tav-p-pastille-bord: #e7e7ef;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav.tav--plain {
+    --tav-p-fond: #fff;
+    --tav-p-app: #f9f9fc;
+    --tav-p-ombre: 0 0 0 1px #20272c14, 0 1px 1px #20272c14;
+    --tav-p-t1: #1f1f28;
+    --tav-p-t2: #636370;
+    --tav-p-i1: #8e8e9c;
+    --tav-p-f1: #f0f0f5;
+    --tav-p-f2: #e7e7ef;
+    --tav-p-b1: #e7e7ef;
+    --tav-p-b2: #e0e0e9;
+    --tav-p-bleu: #448bff;
+    --tav-p-vert: #00ab5f;
+    --tav-p-ouverte: #f7f9ff;
+    --tav-p-pastille: #fff;
+    --tav-p-pastille-bord: #e7e7ef;
+  }
+}
+
+.v2 .tav.tav--plain .tav-p-carte {
+  flex-direction: row;
+  background: var(--tav-p-fond);
+  border: 0;
+  box-shadow: var(--tav-p-ombre);
+  color: var(--tav-p-t1);
+  font-size: 14px;
+  line-height: 20px;
+}
+.v2 .tav.tav--plain .tav-p-colonne {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  padding: 24px 0 120px;
+}
+.v2 .tav.tav--plain .tav-p-carte[data-detail] .tav-p-colonne {
+  flex: 0 1 719px;
+  border-right: 1px solid var(--tav-p-b1);
+}
+.v2 .tav.tav--plain .tav-p-tete {
+  display: flex;
+  align-items: center;
+  height: 56px;
+  padding: 0 24px 24px;
+}
+.v2 .tav.tav--plain .tav-p-h1 {
+  flex: 1;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-rond:hover {
+  background: var(--tav-p-f1);
+}
+.v2 .tav.tav--plain .tav-p-onglets {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 49px;
+  padding: 0 24px 12px;
+  border-bottom: 1px solid var(--tav-p-b2);
+  background: var(--tav-p-fond);
+}
+.v2 .tav.tav--plain .tav-p-segment {
+  display: flex;
+  gap: 8px;
+  height: 36px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--tav-p-f1);
+}
+.v2 .tav.tav--plain .tav-p-onglet {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--tav-p-t2);
+  white-space: nowrap;
+}
+.v2 .tav.tav--plain .tav-p-onglet:hover {
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-onglet[aria-selected="true"] {
+  background: var(--tav-p-f2);
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-onglet .tav-p-case {
+  color: var(--tav-p-bleu);
+}
+.v2 .tav.tav--plain .tav-p-compte {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-tri {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding-right: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-tri .tav-rond {
+  color: var(--tav-p-i1);
+}
+.v2 .tav.tav--plain .tav-p-avis {
+  padding: 12px 24px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--tav-p-t2);
+  border-bottom: 1px solid var(--tav-p-b1);
+}
+.v2 .tav.tav--plain .tav-p-ajout {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  height: 48px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--tav-p-t2);
+  text-align: left;
+}
+.v2 .tav.tav--plain .tav-p-ajout:hover:not(:disabled) {
+  background: var(--tav-p-f1);
+}
+.v2 .tav.tav--plain .tav-p-ajout svg {
+  color: var(--tav-p-i1);
+}
+.v2 .tav.tav--plain .tav-p-lignes > li {
+  border-top: 1px solid var(--tav-p-b1);
+}
+.v2 .tav.tav--plain .tav-p-lignes > li[data-ouverte] {
+  border-top-color: var(--tav-p-ouverte);
+}
+.v2 .tav.tav--plain .tav-p-ligne {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto 40px;
+  align-items: center;
+  gap: 8px 12px;
+  height: 48px;
+  padding: 0 24px;
+}
+.v2 .tav.tav--plain .tav-p-ligne:hover {
+  background: var(--tav-p-f1);
+}
+.v2 .tav.tav--plain .tav-p-ligne[aria-current="true"] {
+  background: var(--tav-p-ouverte);
+}
+.v2 .tav.tav--plain .tav-p-case-boite {
+  display: inline-flex;
+  color: var(--tav-p-bleu);
+}
+.v2 .tav.tav--plain .tav-p-case-boite[data-faite],
+.v2 .tav.tav--plain .tav-p-case[data-faite] {
+  color: var(--tav-p-vert);
+}
+.v2 .tav.tav--plain .tav-p-titre {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .tav.tav--plain .tav-p-id {
+  flex: none;
+  font-size: 12px;
+  font-weight: 475;
+  line-height: 16px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-nom[data-faite] {
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-pastille {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  border-radius: 6px;
+  border: 1px solid var(--tav-p-pastille-bord);
+  background: var(--tav-p-pastille);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--tav-p-t1);
+  white-space: nowrap;
+}
+.v2 .tav.tav--plain .tav-p-vignette {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  color: var(--tav-p-i1);
+}
+.v2 .tav.tav--plain .tav-p-avatar {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: #bbffed;
+  color: #074022;
+  font-size: 11px;
+  font-weight: 550;
+}
+
+/* ——— détail ——— */
+.v2 .tav.tav--plain .tav-p-detail {
+  flex: 0 0 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  overflow: auto;
+}
+.v2 .tav.tav--plain .tav-p-detail-tete {
+  display: flex;
+  align-items: center;
+  height: 32px;
+}
+.v2 .tav.tav--plain .tav-p-detail-id {
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .tav.tav--plain .tav-p-etat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-etat .tav-p-case {
+  color: var(--tav-p-bleu);
+}
+.v2 .tav.tav--plain .tav-p-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-bouton svg {
+  color: var(--tav-p-vert);
+}
+.v2 .tav.tav--plain .tav-p-bouton:hover:not(:disabled) {
+  background: var(--tav-p-f1);
+}
+.v2 .tav.tav--plain .tav-p-bouton:disabled {
+  opacity: 0.5;
+}
+.v2 .tav.tav--plain .tav-p-detail-titre {
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-cree {
+  margin-top: -12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-description {
+  padding: 4px 0 8px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-p-description p + p,
+.v2 .tav.tav--plain .tav-p-recours {
+  margin-top: 8px;
+}
+.v2 .tav.tav--plain .tav-p-recours summary {
+  cursor: pointer;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-recours pre {
+  margin-top: 6px;
+  white-space: pre-wrap;
+  font: inherit;
+  font-size: 12px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-filet {
+  margin: 0 -16px;
+  border: 0;
+  border-top: 1px solid var(--tav-p-b1);
+}
+.v2 .tav.tav--plain .tav-p-dl {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.v2 .tav.tav--plain .tav-p-dl-ligne {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  column-gap: 16px;
+}
+.v2 .tav.tav--plain .tav-p-dl dt {
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 32px;
+  color: var(--tav-p-t2);
+}
+.v2 .tav.tav--plain .tav-p-dl dd {
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--tav-p-t1);
+}
+
+/* ——— le menu de Plain (role=menu) ——— */
+.v2 .tav.tav--plain .tav-menu {
+  padding: 4px 0;
+  border: 0;
+  border-radius: 10px;
+  background: var(--tav-p-fond);
+  box-shadow: var(--tav-p-menu-ombre);
+  color: var(--tav-p-t1);
+}
+.v2 .tav.tav--plain .tav-menu-option {
+  height: 28px;
+  margin: 0 4px;
+  width: calc(100% - 8px);
+  padding: 0 6px;
+  gap: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.v2 .tav.tav--plain .tav-menu-option::before {
+  inset: 0;
+  border-radius: 6px;
+}
+.v2 .tav.tav--plain .tav-menu-option:hover::before {
+  background: var(--tav-p-f1);
+}
+
+@media (max-width: 768px) {
+  .v2 .tav.tav--plain .tav-p-carte[data-detail] .tav-p-colonne {
+    display: none;
+  }
+  .v2 .tav.tav--plain .tav-p-detail {
+    flex: 1;
+  }
+  .v2 .tav.tav--plain .tav-p-pastille {
+    display: none;
+  }
+  .v2 .tav.tav--plain .tav-p-ligne {
+    grid-template-columns: 18px minmax(0, 1fr) 40px;
+    height: auto;
+    min-height: 48px;
+    padding: 8px 24px;
+  }
+  .v2 .tav.tav--plain .tav-p-colonne {
+    padding-top: 16px;
+  }
+}
+
+/* 390 : le segment et le filtre d'agence passent sur deux rangées plutôt que de sortir de la carte */
+@media (max-width: 480px) {
+  .v2 .tav.tav--plain .tav-p-onglets {
+    flex-wrap: wrap;
+    height: auto;
+    row-gap: 8px;
+  }
+  .v2 .tav.tav--plain .tav-p-onglets > .tav-pousse {
+    display: none;
+  }
+}

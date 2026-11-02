@@ -9,7 +9,8 @@
    lignes chargées. */
 
 import { useMemo, useState } from "react";
-import { FileSignature } from "lucide-react";
+import { FileSignature, HardHat } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, SousLigne, SousListe, Texte, jourCourt, teinte, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
@@ -65,6 +66,7 @@ export default function OrdresService({ projet, dossier, peutEcrire, agir }: {
   peutEcrire: boolean;
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
+  const volet = useVolet();
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id), [dossier.lots, projet.id]);
   const marches = useMemo(() => dossier.marches.filter((m) => m.projet_id === projet.id && m.actif)
     .sort((a, b) => (lots.find((l) => l.id === a.lot_id)?.numero ?? "").localeCompare(lots.find((l) => l.id === b.lot_id)?.numero ?? "")), [dossier.marches, projet.id, lots]);
@@ -124,58 +126,9 @@ export default function OrdresService({ projet, dossier, peutEcrire, agir }: {
   const delaiOk = !nd.trim() || (Number.isInteger(nombre(nd)) && nombre(nd) >= 1 && nombre(nd) <= 3650);
 
   if (!marches.length) return null;
-  return (
-    <div className="esp-carte-corps">
-      <div className="esp-section-titre"><span>Ordres de service</span></div>
-      {marches.map((m) => {
-        const inc = incidence(m, os);
-        const liste = os.filter((o) => o.marche_id === m.id).sort((a, b) => a.numero - b.numero);
-        const lot = lots.find((l) => l.id === m.lot_id);
-        return (
-          <div key={m.id} className="lor-os">
-            <div className="lor-situation-tete">
-              <strong>Lot {lot?.numero ?? "—"} · {m.titulaire}</strong>
-              {inc.enArret ? <Pastille teinte="ambre">Chantier à l’arrêt</Pastille> : null}
-              <span className="esp-item-haut">
-                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNd(m.delai_execution_jours ? String(m.delai_execution_jours) : ""); ouvrir({ type: "delai", marche: m }); }}>Délai du marché</button>
-                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNo({ nature: liste.some((o) => o.nature === "demarrage") ? "travaux_modificatifs" : "demarrage", objet: "", emis_le: auj, notifie_le: "", montant: "", jours: "" }); ouvrir({ type: "os", marche: m }); }}>Émettre un OS</button>
-              </span>
-            </div>
-            <div className="lor-sous">
-              {euros(inc.montant)} HT à date ({inc.part > 0 ? "+" : ""}{inc.part.toLocaleString("fr-FR")} % du marché initial de {euros(m.montant_ht)}{m.avenants_ht ? `, avenants compris` : ""})
-              {" · "}{m.delai_execution_jours ? `délai ${m.delai_execution_jours} j` : "délai du marché non renseigné"}
-              {inc.osJours ? ` ${inc.osJours > 0 ? "+" : ""}${inc.osJours} j d’OS` : ""}{inc.arretJours ? ` + ${inc.arretJours} j d’arrêt` : ""}
-              {" · "}{m.demarrage_le ? `démarré le ${jour(m.demarrage_le)}` : "pas d’OS de démarrage"}
-              {inc.fin ? ` · fin contractuelle le ${jour(inc.fin)}` : ""}
-            </div>
-            {Math.abs(inc.part) > seuil ? (
-              <Avis teinte="ambre">
-                OS cumulés : {inc.part > 0 ? "+" : ""}{inc.part.toLocaleString("fr-FR")} % du marché initial.{" "}
-                {projet.marche_public ? "Au-delà de 15 %, la modification d’un marché public de travaux est à examiner (CCP, art. R2194-8)." : "Un avenant est à envisager."}
-              </Avis>
-            ) : null}
-            {liste.length ? (
-              <ul className="lor-liste">
-                {liste.map((o) => (
-                  <li key={o.id}>
-                    <span><strong>OS n° {o.numero}</strong> · {NATURES[o.nature]} · {o.objet}</span>
-                    <span className="esp-kpi-sous">
-                      {" "}émis le {jour(o.emis_le)}{o.notifie_le ? `, notifié le ${jour(o.notifie_le)}` : ""}
-                      {o.montant_ht ? ` · ${o.montant_ht > 0 ? "+" : ""}${euros(o.montant_ht)} HT` : ""}{o.delai_jours ? ` · ${o.delai_jours > 0 ? "+" : ""}${o.delai_jours} j` : ""}
-                      {o.statut === "emis" && o.reserves_jusquau ? ` · réserves de l’entreprise possibles jusqu’au ${jour(o.reserves_jusquau)}` : ""}
-                      {o.reserves_entreprise ? ` · réserves : ${o.reserves_entreprise}` : ""}
-                    </span>{" "}
-                    <Pastille teinte={STATUTS[o.statut].teinte}>{STATUTS[o.statut].libelle}</Pastille>{" "}
-                    {o.statut === "emis" ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNs({ statut: "signe", reserves: "" }); ouvrir({ type: "statut", os: o }); }}>Retour de l’entreprise</button> : null}
-                  </li>
-                ))}
-              </ul>
-            ) : <div className="lor-tableau-vide">Aucun ordre de service.</div>}
-          </div>
-        );
-      })}
-      {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
 
+  const fenetres = (
+    <>
       {/* ——— émettre un OS ——— */}
       <Dialog open={form?.type === "os"} onOpenChange={(o) => !o && setForm(null)}>
         <DialogContent>
@@ -273,6 +226,210 @@ export default function OrdresService({ projet, dossier, peutEcrire, agir }: {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </>
+  );
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : les marchés et leur incidence, puis les OS en attente du retour de
+     l'entreprise, signés et refusés, un par ligne ; incidence, délais, réserves et gestes dans le volet
+     (../../espace2/lin/Volet.tsx). Sans marché, rien, comme avant : la partie Chantier le dit déjà. */
+  if (volet) {
+    const lotDe = (id: string) => lots.find((l) => l.id === id);
+    const marcheDe = (id: string) => marches.find((m) => m.id === id);
+    const triees = [...os].filter((o) => !!marcheDe(o.marche_id)).sort((a, b) => (lotDe(marcheDe(a.marche_id)?.lot_id ?? "")?.numero ?? "").localeCompare(lotDe(marcheDe(b.marche_id)?.lot_id ?? "")?.numero ?? "") || a.numero - b.numero);
+    const groupes: { nom: string; liste: OrdreService[] }[] = [
+      { nom: "En attente du retour de l’entreprise", liste: triees.filter((o) => o.statut === "emis") },
+      { nom: "Signés", liste: triees.filter((o) => o.statut === "signe" || o.statut === "signe_reserves") },
+      { nom: "Refusés", liste: triees.filter((o) => o.statut === "refuse") },
+    ];
+    const signe = (n: number) => (n > 0 ? "+" : "");
+    const attente = groupes[0].liste.length;
+    return (
+      <Partie
+        titre="Ordres de service"
+        compte={`${triees.length} OS${attente ? ` · ${attente} en attente de retour` : ""}`}
+        avis={erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+      >
+        <Liste>
+          <Groupe nom="Marchés" compte={marches.length}>
+            {marches.map((m) => {
+              const inc = incidence(m, os);
+              const lot = lotDe(m.lot_id);
+              const alerte = Math.abs(inc.part) > seuil;
+              return (
+                <Ligne
+                  key={m.id}
+                  cle={`os-marche:${m.id}`}
+                  libelle={`Lot ${lot?.numero ?? "—"}, ${m.titulaire}, ${euros(inc.montant)} HT à date`}
+                  icone={<HardHat />}
+                  id={`lot ${lot?.numero ?? "—"}`}
+                  titre={m.titulaire}
+                  second={inc.fin ? `fin contractuelle le ${jour(inc.fin)}` : m.delai_execution_jours ? "pas d’OS de démarrage" : "délai du marché non renseigné"}
+                  droite={
+                    <>
+                      {inc.enArret ? <Pilule teinte="jaune" icone={<Point teinte="jaune" />}>Chantier à l’arrêt</Pilule> : null}
+                      <Pilule teinte={alerte ? "jaune" : "gris"} title="Part du marché initial">{signe(inc.part)}{inc.part.toLocaleString("fr-FR")} %</Pilule>
+                    </>
+                  }
+                  date={euros(inc.montant)}
+                  dateTitre="Montant HT à date"
+                />
+              );
+            })}
+          </Groupe>
+          {groupes.map((g) =>
+            g.liste.length ? (
+              <Groupe key={g.nom} nom={g.nom} compte={g.liste.length}>
+                {g.liste.map((o) => {
+                  const m = marcheDe(o.marche_id);
+                  const t = teinte(STATUTS[o.statut].teinte);
+                  return (
+                    <Ligne
+                      key={o.id}
+                      cle={`os:${o.id}`}
+                      libelle={`OS n° ${o.numero}, lot ${lotDe(m?.lot_id ?? "")?.numero ?? "—"}, ${NATURES[o.nature]}, ${o.objet}, ${STATUTS[o.statut].libelle}`}
+                      icone={<FileSignature />}
+                      id={`OS ${o.numero}`}
+                      titre={o.objet}
+                      second={`lot ${lotDe(m?.lot_id ?? "")?.numero ?? "—"} · ${NATURES[o.nature]}`}
+                      droite={<Pilule teinte={t} icone={<Point teinte={t} />}>{STATUTS[o.statut].libelle}</Pilule>}
+                      date={jourCourt(o.notifie_le ?? o.emis_le)}
+                      dateTitre={o.notifie_le ? "Notifié le" : "Émis le"}
+                    />
+                  );
+                })}
+              </Groupe>
+            ) : null,
+          )}
+        </Liste>
+
+        {marches.map((m) => {
+          const inc = incidence(m, os);
+          const liste = os.filter((o) => o.marche_id === m.id).sort((a, b) => a.numero - b.numero);
+          const lot = lotDe(m.lot_id);
+          const alerte = Math.abs(inc.part) > seuil;
+          return (
+            <Detail key={m.id} cle={`os-marche:${m.id}`} titre={`Lot ${lot?.numero ?? "—"} · ${m.titulaire}`} sous={lot?.intitule}>
+              <Rangees>
+                <Rangee libelle="À date">{euros(inc.montant)} HT</Rangee>
+                <Rangee libelle="Marché initial">{euros(m.montant_ht)}{m.avenants_ht ? ", avenants en plus" : ""}</Rangee>
+                <Rangee libelle="Écart" teinte={alerte ? "jaune" : undefined}>{signe(inc.part)}{inc.part.toLocaleString("fr-FR")} % du marché initial{m.avenants_ht ? ", avenants compris" : ""}</Rangee>
+                <Rangee libelle="Délai">
+                  {m.delai_execution_jours ? `${m.delai_execution_jours} j` : "Non renseigné"}
+                  {inc.osJours ? ` ${signe(inc.osJours)}${inc.osJours} j d’OS` : ""}{inc.arretJours ? ` + ${inc.arretJours} j d’arrêt` : ""}
+                </Rangee>
+                <Rangee libelle="Démarrage">{m.demarrage_le ? `Le ${jour(m.demarrage_le)}` : "Pas d’OS de démarrage"}</Rangee>
+                {inc.fin ? <Rangee libelle="Fin contract.">{jour(inc.fin)}</Rangee> : null}
+                {inc.enArret ? <Rangee libelle="État" teinte="jaune">Chantier à l’arrêt</Rangee> : null}
+              </Rangees>
+              {alerte ? (
+                <Texte>
+                  OS cumulés : {signe(inc.part)}{inc.part.toLocaleString("fr-FR")} % du marché initial.{" "}
+                  {projet.marche_public ? "Au-delà de 15 %, la modification d’un marché public de travaux est à examiner (CCP, art. R2194-8)." : "Un avenant est à envisager."}
+                </Texte>
+              ) : null}
+              <SousListe titre={`Ordres de service (${liste.length})`}>
+                {liste.length ? (
+                  liste.map((o) => (
+                    <SousLigne
+                      key={o.id}
+                      teinte={teinte(STATUTS[o.statut].teinte)}
+                      titre={`OS n° ${o.numero} · ${NATURES[o.nature]}`}
+                      second={o.objet}
+                      valeur={STATUTS[o.statut].libelle}
+                    />
+                  ))
+                ) : (
+                  <SousLigne titre="Aucun ordre de service." />
+                )}
+              </SousListe>
+              <Gestes>
+                <Bouton fort disabled={!peutEcrire || envoi} onClick={() => { setNo({ nature: liste.some((o) => o.nature === "demarrage") ? "travaux_modificatifs" : "demarrage", objet: "", emis_le: auj, notifie_le: "", montant: "", jours: "" }); ouvrir({ type: "os", marche: m }); }}>Émettre un OS</Bouton>
+                <Bouton disabled={!peutEcrire || envoi} onClick={() => { setNd(m.delai_execution_jours ? String(m.delai_execution_jours) : ""); ouvrir({ type: "delai", marche: m }); }}>Délai du marché</Bouton>
+              </Gestes>
+            </Detail>
+          );
+        })}
+        {triees.map((o) => {
+          const m = marcheDe(o.marche_id);
+          const t = teinte(STATUTS[o.statut].teinte);
+          return (
+            <Detail key={o.id} cle={`os:${o.id}`} titre={`OS n° ${o.numero} · ${NATURES[o.nature]}`} sous={m ? `Lot ${lotDe(m.lot_id)?.numero ?? "—"} · ${m.titulaire}` : undefined}>
+              <Texte citation>{o.objet}</Texte>
+              <Rangees>
+                <Rangee libelle="Statut" teinte={t}>{STATUTS[o.statut].libelle}</Rangee>
+                <Rangee libelle="Émis le">{jour(o.emis_le)}</Rangee>
+                <Rangee libelle="Notifié le">{o.notifie_le ? jour(o.notifie_le) : "—"}</Rangee>
+                {o.montant_ht ? <Rangee libelle="Incidence HT">{signe(o.montant_ht)}{euros(o.montant_ht)}</Rangee> : null}
+                {o.delai_jours ? <Rangee libelle="Délai">{signe(o.delai_jours)}{o.delai_jours} j</Rangee> : null}
+                {o.statut === "emis" && o.reserves_jusquau ? <Rangee libelle="Réserves">Possibles jusqu’au {jour(o.reserves_jusquau)}</Rangee> : null}
+              </Rangees>
+              {o.reserves_entreprise ? <Texte citation>Réserves : {o.reserves_entreprise}</Texte> : null}
+              {o.statut === "emis" ? (
+                <Gestes>
+                  <Bouton fort disabled={!peutEcrire || envoi} onClick={() => { setNs({ statut: "signe", reserves: "" }); ouvrir({ type: "statut", os: o }); }}>Retour de l’entreprise</Bouton>
+                </Gestes>
+              ) : null}
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
+
+  return (
+    <div className="esp-carte-corps">
+      <div className="esp-section-titre"><span>Ordres de service</span></div>
+      {marches.map((m) => {
+        const inc = incidence(m, os);
+        const liste = os.filter((o) => o.marche_id === m.id).sort((a, b) => a.numero - b.numero);
+        const lot = lots.find((l) => l.id === m.lot_id);
+        return (
+          <div key={m.id} className="lor-os">
+            <div className="lor-situation-tete">
+              <strong>Lot {lot?.numero ?? "—"} · {m.titulaire}</strong>
+              {inc.enArret ? <Pastille teinte="ambre">Chantier à l’arrêt</Pastille> : null}
+              <span className="esp-item-haut">
+                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNd(m.delai_execution_jours ? String(m.delai_execution_jours) : ""); ouvrir({ type: "delai", marche: m }); }}>Délai du marché</button>
+                <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNo({ nature: liste.some((o) => o.nature === "demarrage") ? "travaux_modificatifs" : "demarrage", objet: "", emis_le: auj, notifie_le: "", montant: "", jours: "" }); ouvrir({ type: "os", marche: m }); }}>Émettre un OS</button>
+              </span>
+            </div>
+            <div className="lor-sous">
+              {euros(inc.montant)} HT à date ({inc.part > 0 ? "+" : ""}{inc.part.toLocaleString("fr-FR")} % du marché initial de {euros(m.montant_ht)}{m.avenants_ht ? `, avenants compris` : ""})
+              {" · "}{m.delai_execution_jours ? `délai ${m.delai_execution_jours} j` : "délai du marché non renseigné"}
+              {inc.osJours ? ` ${inc.osJours > 0 ? "+" : ""}${inc.osJours} j d’OS` : ""}{inc.arretJours ? ` + ${inc.arretJours} j d’arrêt` : ""}
+              {" · "}{m.demarrage_le ? `démarré le ${jour(m.demarrage_le)}` : "pas d’OS de démarrage"}
+              {inc.fin ? ` · fin contractuelle le ${jour(inc.fin)}` : ""}
+            </div>
+            {Math.abs(inc.part) > seuil ? (
+              <Avis teinte="ambre">
+                OS cumulés : {inc.part > 0 ? "+" : ""}{inc.part.toLocaleString("fr-FR")} % du marché initial.{" "}
+                {projet.marche_public ? "Au-delà de 15 %, la modification d’un marché public de travaux est à examiner (CCP, art. R2194-8)." : "Un avenant est à envisager."}
+              </Avis>
+            ) : null}
+            {liste.length ? (
+              <ul className="lor-liste">
+                {liste.map((o) => (
+                  <li key={o.id}>
+                    <span><strong>OS n° {o.numero}</strong> · {NATURES[o.nature]} · {o.objet}</span>
+                    <span className="esp-kpi-sous">
+                      {" "}émis le {jour(o.emis_le)}{o.notifie_le ? `, notifié le ${jour(o.notifie_le)}` : ""}
+                      {o.montant_ht ? ` · ${o.montant_ht > 0 ? "+" : ""}${euros(o.montant_ht)} HT` : ""}{o.delai_jours ? ` · ${o.delai_jours > 0 ? "+" : ""}${o.delai_jours} j` : ""}
+                      {o.statut === "emis" && o.reserves_jusquau ? ` · réserves de l’entreprise possibles jusqu’au ${jour(o.reserves_jusquau)}` : ""}
+                      {o.reserves_entreprise ? ` · réserves : ${o.reserves_entreprise}` : ""}
+                    </span>{" "}
+                    <Pastille teinte={STATUTS[o.statut].teinte}>{STATUTS[o.statut].libelle}</Pastille>{" "}
+                    {o.statut === "emis" ? <button type="button" className="esp-lien-bouton" disabled={!peutEcrire || envoi} onClick={() => { setNs({ statut: "signe", reserves: "" }); ouvrir({ type: "statut", os: o }); }}>Retour de l’entreprise</button> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : <div className="lor-tableau-vide">Aucun ordre de service.</div>}
+          </div>
+        );
+      })}
+      {erreur && !form ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+
+      {fenetres}
     </div>
   );
 }

@@ -67,5 +67,5 @@ export function useDeplacer(aujourdhui: string) {
   const heures = (p: Passage, hd: string | null, hf: string | null) => {
     void poser(p, p.chantier_id, p.debut.slice(0, 10), p.fin.slice(0, 10), hd, hf, hd ? `de ${hd.replace(":", " h ")} à ${(hf ?? "").replace(":", " h ")}` : "sans heures");
   };
-  return { changer, heures };
+  return { changer, heures, poser };
 }

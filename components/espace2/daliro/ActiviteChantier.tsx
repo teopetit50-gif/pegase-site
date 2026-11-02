@@ -1,0 +1,248 @@
+"use client";
+
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › fiche d'un chantier : l'onglet Activité, copie de l'onglet
+   « Activity » d'une Initiative de Linear (02/11/2026, relevé
+   linear-initiative.md § Onglet Activity ; styles ./dal-ini.css).
+
+   Colonne de 813 centrée ; regroupement par mois (« Novembre ») ; chaque
+   message du terrain (fil du chantier, origine d'un avenant) est une carte
+   de mise à jour (pastille, avatar, auteur, date, texte, actions) ; les
+   autres faits (confirmations, signatures, ouverture, création) sont des
+   lignes d'événement (icône 16, 12/450/16.8, auteur en 500, « · date »).
+
+   Le composeur « Comment | Update » de Linear (02/11, décision de Teo : une
+   utilité à chaque bouton) : « Question » pose la question au chantier
+   (poserQuestion, réponse dans Terrain › Questions) ; « Avenant » ouvre la
+   fenêtre « Ouvrir un avenant » de ChantierVue, l'objet pré-rempli ; le
+   trombone rattache une facture. Le fil, lui, se remplit par WhatsApp et
+   courriel. Les gestes d'un message (ouvrir un avenant, écarter) et ses fenêtres
+   restent ceux de FilCarte (prop rendu).
+   ══════════════════════════════════════════════════════════════════════ */
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import FilCarte, { type FilRendu } from "@/components/espace/daliro/FilCarte";
+import type { Source } from "@/components/espace/source";
+import type { MessageChantier, Tableau } from "@/components/espace/daliro/types";
+import { dateHeure } from "@/components/espace/format";
+import { Avis } from "@/components/espace/ui";
+import { DalIcone } from "./DalIcone";
+import { chronique, initiales, type Nouvelle } from "./ApercuChantier";
+import "./dal-ini.css";
+
+const MOIS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+const MOIS_COURT = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+const CANAL: Record<string, string> = { whatsapp: "WhatsApp", sms: "SMS", email: "Courriel", courriel: "Courriel" };
+
+/* « Oct 29 » de Linear : « 29 oct. » */
+const jourMois = (iso: string) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : `${d.getDate()} ${MOIS_COURT[d.getMonth()]}`;
+};
+const cleMois = (iso: string) => iso.slice(0, 7);
+const nomMois = (cle: string) => {
+  const [a, m] = cle.split("-").map(Number);
+  return `${MOIS[m - 1]}${a !== new Date().getFullYear() ? ` ${a}` : ""}`;
+};
+
+type Element = { cle: string; quand: string } & ({ genre: "message"; m: MessageChantier } | { genre: "origine"; n: Nouvelle } | { genre: "evenement"; n: Nouvelle });
+
+type Actions = { question: (texte: string) => void; avenant: (objet: string) => void; facture: () => void; avenantPossible: boolean };
+
+export function ActiviteChantier({ t, source, relire, ici, actions }: { t: Tableau; source: Source; relire: () => Promise<void>; ici: string; actions: Actions }) {
+  const faits = useMemo(() => chronique(t, ici), [t, ici]);
+  return (
+    <FilCarte
+      tableau={t}
+      source={source}
+      relire={relire}
+      rendu={(f) => (
+        <div className="dal-ini-activite">
+          <Composeur actions={actions} />
+          <Activite f={f} faits={faits} ici={ici} />
+        </div>
+      )}
+    />
+  );
+}
+
+/* le composeur : segmenté « Question | Avenant », champ, trombone et bouton d'envoi */
+function Composeur({ actions }: { actions: Actions }) {
+  const [mode, setMode] = useState<"question" | "avenant">("question");
+  const [texte, setTexte] = useState("");
+  const pret = texte.trim().length >= 3 && (mode === "question" || actions.avenantPossible);
+  const envoyer = () => {
+    if (!pret) return;
+    if (mode === "question") actions.question(texte.trim());
+    else actions.avenant(texte.trim());
+    setTexte("");
+  };
+  return (
+    <div className="dal-ini-composeur">
+      <div className="dal-ini-composeur-segments" role="group" aria-label="Ce que vous écrivez">
+        <button type="button" className="dal-ini-composeur-segment" aria-pressed={mode === "question"} onClick={() => setMode("question")}>
+          Question
+        </button>
+        <button type="button" className="dal-ini-composeur-segment" aria-pressed={mode === "avenant"} onClick={() => setMode("avenant")} title={actions.avenantPossible ? undefined : "Un avenant se prépare sur un chantier ouvert"}>
+          Avenant
+        </button>
+      </div>
+      <textarea
+        className="dal-ini-composeur-champ"
+        aria-label={mode === "question" ? "Votre question sur le chantier" : "Ce qui est demandé en plus du marché"}
+        placeholder={mode === "question" ? "Posez une question sur ce chantier…" : "Ce qui est demandé en plus du marché…"}
+        value={texte}
+        onChange={(e) => setTexte(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            e.preventDefault();
+            envoyer();
+          }
+        }}
+      />
+      <div className="dal-ini-composeur-pied">
+        <button type="button" className="dal-ini-reaction" aria-label="Rattacher une facture" title="Rattacher une facture" onClick={actions.facture}>
+          <DalIcone nom="Attachment" taille={16} />
+        </button>
+        <button type="button" className="dal-ini-composeur-envoi" disabled={!pret} onClick={envoyer} title={mode === "question" ? "Poser la question (⌘ Entrée) — la réponse arrive dans Terrain › Questions" : "Ouvrir la fenêtre « Ouvrir un avenant » (⌘ Entrée)"}>
+          {mode === "question" ? "Poser" : "Ouvrir l'avenant…"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Activite({ f, faits, ici }: { f: FilRendu; faits: Nouvelle[]; ici: string }) {
+  const elements: Element[] = [
+    ...f.messages.map((m) => ({ cle: `f-${m.id}`, quand: m.recu_le, genre: "message" as const, m })),
+    ...faits.map((n) => ({ cle: n.cle, quand: n.quand, genre: n.genre === "message" ? ("origine" as const) : ("evenement" as const), n })),
+  ].sort((a, b) => b.quand.localeCompare(a.quand));
+  const mois = [...new Set(elements.map((e) => cleMois(e.quand)))];
+
+  return (
+    <>
+      {f.fait ? <Avis teinte="vert" role="status">{f.fait}</Avis> : null}
+      {f.erreur ? <Avis teinte="rouge" role="alert">{f.erreur}</Avis> : null}
+      {f.chargement ? <p className="dal-ini-aide">Lecture du fil…</p> : null}
+      {mois.map((cle) => (
+        <section key={cle} className="dal-ini-mois" aria-label={nomMois(cle)}>
+          <h3 className="dal-ini-mois-titre">{nomMois(cle)}</h3>
+          {elements
+            .filter((e) => cleMois(e.quand) === cle)
+            .map((e) =>
+              e.genre === "message" ? (
+                <CarteMessage key={e.cle} m={e.m} f={f} />
+              ) : e.genre === "origine" ? (
+                <CarteOrigine key={e.cle} n={e.n} ici={ici} />
+              ) : (
+                <div key={e.cle} className="dal-ini-evenement dal-ini-evenement--fil">
+                  <DalIcone nom={e.n.genre === "confirmation" ? "Calendar" : e.n.cle === "cree" ? "Created" : e.n.etat === "Signé" ? "Signature" : "Crane"} />
+                  <span>
+                    {e.n.auteur ? <strong>{e.n.auteur}</strong> : null} {e.n.auteur ? e.n.texte : e.n.texte.charAt(0).toUpperCase() + e.n.texte.slice(1)}
+                    <span title={dateHeure(e.n.quand)}> · {jourMois(e.n.quand)}</span>
+                  </span>
+                </div>
+              ),
+            )}
+        </section>
+      ))}
+      {!f.chargement && !elements.length ? <p className="dal-ini-aide">Rien encore : les photos, vocaux et messages que le chef d&apos;équipe envoie au numéro WhatsApp de l&apos;entreprise s&apos;affichent ici.</p> : null}
+      {f.fenetres}
+    </>
+  );
+}
+
+function CarteMessage({ m, f }: { m: MessageChantier; f: FilRendu }) {
+  const auteur = m.de_nom ?? m.de_adresse ?? "Expéditeur inconnu";
+  const recu = dateHeure(m.recu_le);
+  const demandes = m.lecture?.demandes ?? [];
+  const transcriptions = (m.lecture?.medias ?? []).filter((x) => x.transcription);
+  const aConfirmer = demandes.filter((d) => !d.verifiee).length;
+  return (
+    <article className="dal-ini-maj dal-ini-maj--fil" aria-label={`Message de ${auteur}, ${recu}`}>
+      <div className="dal-ini-meta">
+        <span className="dal-ini-canal" data-teinte={aConfirmer ? "risk" : m.avenant_id ? "on" : undefined}>
+          <DalIcone nom={m.pieces.some((p) => p.vocal) ? "Mic" : m.pieces.length ? "Image" : "Chat"} />
+          {CANAL[m.canal] ?? "Message"}
+        </span>
+        <span className="dal-ini-avatar">{initiales(auteur) || "?"}</span>
+        <span className="dal-ini-auteur">{auteur}</span>
+        <span className="dal-ini-quand" title={recu}>
+          {jourMois(m.recu_le)}
+        </span>
+      </div>
+      {m.texte ? <p className="dal-ini-texte">« {m.texte} »</p> : null}
+      {transcriptions.map((x) => (
+        <p key={x.n} className="dal-ini-texte">
+          Vocal{x.duree_s ? ` (${x.duree_s} s)` : ""} : « {x.transcription} »
+        </p>
+      ))}
+      {m.lecture?.resume ? <p className="dal-ini-texte dal-ini-texte--lu">Lu par Daliro : {m.lecture.resume}</p> : null}
+      {demandes.length ? (
+        <ul className="dal-ini-demandes">
+          {demandes.map((d, k) => (
+            <li key={k}>
+              {d.nature === "avancement"
+                ? `Avancement${d.lot_code ? ` (lot ${d.lot_code})` : ""} : ${d.ouvrage ?? d.texte ?? "ouvrage non nommé"}${d.pourcentage != null ? `, ${d.pourcentage} %` : ""}`
+                : `${d.nature === "travail_supplementaire" ? "Travail supplémentaire" : d.nature === "probleme" ? "Problème" : d.nature === "question" ? "Question" : "Information"} : ${d.texte ?? ""}${d.quantite != null ? `, ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`}
+              <span className="dal-ini-demande-etat"> · {d.verifiee ? "vérifié" : "à confirmer"}</span>
+              {d.nature === "travail_supplementaire" && !d.verifiee && !m.avenant_id ? (
+                <>
+                  {" "}
+                  <button type="button" className="dal-ini-lien" disabled={f.envoi} onClick={() => f.ouvrirAvenant(m, `${d.texte ?? ""}${d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`)}>
+                    Ouvrir l&apos;avenant
+                  </button>
+                </>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {m.pieces.length ? <div className="dal-ini-medias">{m.pieces.map((x) => <span key={x.chemin}>{f.media(x, auteur, recu)}</span>)}</div> : null}
+      <div className="dal-ini-actions">
+        {!m.avenant_id ? (
+          <button type="button" className="dal-ini-commentaires" disabled={f.envoi} aria-label="Ouvrir un avenant depuis ce message" title="Ouvrir un avenant depuis ce message" onClick={() => f.ouvrirAvenant(m)}>
+            <DalIcone nom="Signature" />
+          </button>
+        ) : (
+          <span className="dal-ini-commentaires" title="Un avenant est ouvert depuis ce message">
+            <DalIcone nom="Signature" />
+          </span>
+        )}
+        <button type="button" className="dal-ini-reaction" disabled={f.envoi} aria-label="Écarter ce message du fil" title="Écarter ce message du fil" onClick={() => f.ecarter(m)}>
+          <DalIcone nom="Archive" taille={14} />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+/* un message du terrain à l'origine d'un avenant (tiré de l'avenant) */
+function CarteOrigine({ n, ici }: { n: Nouvelle; ici: string }) {
+  return (
+    <article className="dal-ini-maj dal-ini-maj--fil" aria-label={`Message de ${n.auteur ?? "l'expéditeur"}`}>
+      <div className="dal-ini-meta">
+        <span className="dal-ini-canal" data-teinte="on">
+          <DalIcone nom="Chat" />
+          {n.etat}
+        </span>
+        {n.auteur ? (
+          <>
+            <span className="dal-ini-avatar">{initiales(n.auteur) || "?"}</span>
+            <span className="dal-ini-auteur">{n.auteur}</span>
+          </>
+        ) : null}
+        <span className="dal-ini-quand" title={dateHeure(n.quand)}>
+          {jourMois(n.quand)}
+        </span>
+      </div>
+      <p className="dal-ini-texte">« {n.texte} »</p>
+      <div className="dal-ini-actions">
+        <Link href={n.lien === ici ? ici : n.lien} className="dal-ini-commentaires" aria-label={n.lienLibelle} title={n.lienLibelle}>
+          <DalIcone nom="Signature" />
+        </Link>
+      </div>
+    </article>
+  );
+}

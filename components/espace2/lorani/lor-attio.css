@@ -1,0 +1,169 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LORANI › Honoraires et temps = Attio, liste People et fiche d'un
+   contact, au 1:1 (02/11/2026)
+
+   Relevé : releves/attio-people.md (01/11, après import le 02/11), dans
+   le dépôt des références Plain / Attio / Cal.com. Attio suit le thème du
+   système. Repères depuis le bord de la zone (barre latérale repliée) :
+     police       Inter 14/500/20, interlettre −0.07 ; petits libellés
+                  12/500/16 ; compteurs 10/500/14
+     couleurs     fond #fff · #101112 ; texte #101112 · #f1f2f3 ; second
+                  #000 a.63 · #fff a.60 ; discret #000 a.50 · #fff a.45 ;
+                  filets #eeeff1 · #1b1c1f ; lien #266df0 · #4e8cfc ; bouton
+                  bleu #266df0
+     en-tête      49, p 0 12, filet bas ; icône d'objet + fil 14/500
+     barres       vue : 48 (boutons de 28 à x 12, filet bas) ; tri : 49
+                  (« Sorted by » blanc cerclé, « Filter » a.02 discret)
+     grille       en-têtes 40, lignes 36, filets droit et bas ; cellule p 8
+                  12 0 ; case 16 (r 6, bord a.09) ; colonnes 250 · 215 · 288
+                  · 310 · 250 ; pastille de lien p 2 6 2 4, r 10, avatar 16,
+                  gap 6 ; pied 36
+     fiche        panneau gauche 432 (nom 18/600/24, boutons 28, détails :
+                  lignes de 32, libellé 12/500 a.63 sur 114, valeur 14/500) ;
+                  droite : onglets soulignés, « Highlights » 3 × 2 cartes de
+                  86 (gap 9, p 10 12), listes en cartes cerclées (lignes 31)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lor-at {
+  --lor-at-fond: #101112;
+  --lor-at-texte: #f1f2f3;
+  --lor-at-second: rgb(255 255 255 / 0.6);
+  --lor-at-discret: rgb(255 255 255 / 0.45);
+  --lor-at-filet: #1b1c1f;
+  --lor-at-lien: #4e8cfc;
+  --lor-at-bleu: #266df0;
+  --lor-at-bouton: #101112;
+  --lor-at-bouton-ombre: inset 0 0 0 1px #212224;
+  --lor-at-actif: rgb(255 255 255 / 0.05);
+  --lor-at-carte: #17181a;
+  --lor-at-menu: #17181a;
+  --lor-at-echeance: #cf8300;
+  min-height: calc(100dvh - 48px);
+  background: var(--lor-at-fond);
+  color: var(--lor-at-texte);
+  font-family: var(--font-v2-inter), "Inter", system-ui, sans-serif;
+  font-size: 14px; font-weight: 500; line-height: 20px; letter-spacing: -0.07px;
+}
+html[data-v2-theme="light"] .v2 .lor-at {
+  --lor-at-fond: #ffffff; --lor-at-texte: #101112; --lor-at-second: rgb(0 0 0 / 0.63); --lor-at-discret: rgb(0 0 0 / 0.5); --lor-at-filet: #eeeff1; --lor-at-lien: #266df0;
+  --lor-at-bouton: #ffffff; --lor-at-bouton-ombre: inset 0 0 0 1px transparent, 0 0 2px #1c284030, 0 1px 3px #0000000a; --lor-at-actif: rgb(0 0 0 / 0.04); --lor-at-carte: #fbfbfb; --lor-at-menu: #ffffff;
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lor-at {
+    --lor-at-fond: #ffffff; --lor-at-texte: #101112; --lor-at-second: rgb(0 0 0 / 0.63); --lor-at-discret: rgb(0 0 0 / 0.5); --lor-at-filet: #eeeff1; --lor-at-lien: #266df0;
+    --lor-at-bouton: #ffffff; --lor-at-bouton-ombre: inset 0 0 0 1px transparent, 0 0 2px #1c284030, 0 1px 3px #0000000a; --lor-at-actif: rgb(0 0 0 / 0.04); --lor-at-carte: #fbfbfb; --lor-at-menu: #ffffff;
+  }
+}
+.v2 .lor-at :where(a) { color: inherit; text-decoration: none; }
+.v2 .lor-at :where(button) { font: inherit; letter-spacing: inherit; color: inherit; background: none; border: 0; margin: 0; padding: 0; cursor: default; }
+.v2 .lor-at :where(h2, h3, p, ul, li, dl, dt, dd) { margin: 0; padding: 0; list-style: none; font: inherit; }
+.v2 .lor-at svg { width: 16px; height: 16px; flex-shrink: 0; }
+.v2 .lor-at-message { padding: 24px; color: var(--lor-at-discret); }
+.v2 .lor-at-discret { color: var(--lor-at-discret); }
+.v2 .lor-at-discret-fort { color: var(--lor-at-second); margin-right: 4px; }
+.v2 .lor-at-lien { color: var(--lor-at-lien); }
+
+/* ——— en-tête et barres ——— */
+.v2 .lor-at-entete { display: flex; align-items: center; justify-content: space-between; height: 49px; padding: 0 12px; border-bottom: 1px solid var(--lor-at-filet); }
+.v2 .lor-at-fil { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.v2 .lor-at-objet { display: inline-flex; color: var(--lor-at-bleu); }
+.v2 .lor-at-fil-sep { color: var(--lor-at-discret); }
+.v2 .lor-at-fil-lien { color: var(--lor-at-second); }
+.v2 .lor-at-fil-lien:only-child, .v2 .lor-at-fil-lien:last-child { color: var(--lor-at-texte); }
+.v2 .lor-at-fil-courant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-entete-droite { display: flex; align-items: center; gap: 8px; }
+.v2 .lor-at-barre-vue { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 48px; padding: 0 12px; border-bottom: 1px solid var(--lor-at-filet); }
+.v2 .lor-at-barre-tri { display: flex; align-items: center; gap: 8px; height: 49px; padding: 0 12px; overflow: hidden; }
+.v2 .lor-at-groupe { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.v2 .lor-at-ancre { position: relative; }
+.v2 .lor-at-bouton {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 4px 6px; border-radius: 8px; white-space: nowrap;
+  background: var(--lor-at-bouton); box-shadow: var(--lor-at-bouton-ombre); color: var(--lor-at-texte);
+}
+.v2 .lor-at-bouton:disabled { opacity: 0.5; }
+.v2 .lor-at-bouton--bleu { background: var(--lor-at-bleu); color: #fff; box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f; padding: 4px 8px 4px 6px; }
+.v2 .lor-at-vue-icone { width: 16px; height: 16px; border-radius: 4px; background: #00d17e; }
+.v2 .lor-at-tri { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; flex-shrink: 0; height: 28px; padding: 4px 8px 4px 6px; border-radius: 8px; background: var(--lor-at-bouton); box-shadow: inset 0 0 0 1px var(--lor-at-filet); }
+.v2 .lor-at-filtre { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 4px 8px 4px 6px; border-radius: 8px; background: rgb(0 0 0 / 0.02); color: var(--lor-at-discret); }
+.v2 .lor-at-filtre[data-actif] { color: var(--lor-at-texte); box-shadow: inset 0 0 0 1px var(--lor-at-filet); }
+.v2 .lor-at-menu { position: absolute; z-index: 60; min-width: 240px; padding: 4px; border-radius: 10px; background: var(--lor-at-menu); box-shadow: var(--lor-at-bouton-ombre), 0 8px 24px #00000026; }
+.v2 .lor-at-option { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; padding: 0 8px; border-radius: 6px; text-align: left; }
+.v2 .lor-at-option:hover, .v2 .lor-at-option[aria-current="true"] { background: var(--lor-at-actif); }
+.v2 .lor-at-option-texte { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-avis { margin-left: auto; font-size: 12px; line-height: 16px; color: #f97514; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ——— la grille ——— */
+.v2 .lor-at-grille { --lor-at-cols: 250px 215px 288px 310px; overflow-x: auto; }
+.v2 .lor-at-grille[data-taux] { --lor-at-cols: 250px 215px 288px 310px 250px; }
+.v2 .lor-at-rang { display: grid; grid-template-columns: var(--lor-at-cols) 1fr; min-width: max-content; height: 36px; }
+.v2 .lor-at-rang::after { content: ""; border-bottom: 1px solid var(--lor-at-filet); }
+.v2 .lor-at-rang--tete { height: 40px; border-top: 1px solid var(--lor-at-filet); }
+.v2 .lor-at-cell { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 0 12px; border-right: 1px solid var(--lor-at-filet); border-bottom: 1px solid var(--lor-at-filet); white-space: nowrap; overflow: hidden; }
+.v2 .lor-at-cell[data-vide] { color: var(--lor-at-discret); }
+.v2 .lor-at-rang--tete .lor-at-cell svg { color: var(--lor-at-second); }
+.v2 .lor-at-c1 { gap: 14px; padding-left: 16px; }
+.v2 .lor-at-case { flex-shrink: 0; width: 16px; height: 16px; border-radius: 6px; border: 1px solid rgb(127 127 127 / 0.18); background: var(--lor-at-fond); }
+.v2 .lor-at-plus-col { display: inline-flex; margin-left: auto; color: var(--lor-at-second); }
+.v2 .lor-at-pilule { display: inline-flex; align-items: center; gap: 6px; min-width: 0; height: 24px; margin-left: -4px; padding: 2px 6px 2px 4px; border-radius: 10px; }
+.v2 .lor-at-pilule:hover { background: var(--lor-at-actif); }
+.v2 .lor-at-pilule-texte, .v2 .lor-at-cell-texte { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-mini { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--lor-at-actif); box-shadow: inset 0 0 0 1px var(--lor-at-filet); font-size: 9px; font-weight: 600; line-height: 1; color: var(--lor-at-second); }
+.v2 .lor-at-pastille { flex-shrink: 0; position: relative; width: 16px; height: 16px; }
+.v2 .lor-at-pastille::before { content: ""; position: absolute; left: 4px; top: 4px; width: 8px; height: 8px; border-radius: 3px; background: var(--lor-at-pastille); }
+.v2 .lor-at-rang--pied { height: 36px; }
+.v2 .lor-at-rang--pied .lor-at-cell { justify-content: flex-end; border-bottom: 0; gap: 4px; }
+.v2 .lor-at-rang--pied::after { border-bottom: 0; }
+
+/* ——— la fiche ——— */
+.v2 .lor-at-fiche { display: flex; min-height: calc(100dvh - 48px - 49px); }
+.v2 .lor-at-gauche { flex: 0 0 432px; min-width: 0; border-right: 1px solid var(--lor-at-filet); }
+.v2 .lor-at-identite { display: flex; align-items: center; gap: 12px; padding: 8px 16px 0 12px; height: 42px; box-sizing: content-box; }
+.v2 .lor-at-identite h2 { font-size: 18px; font-weight: 600; line-height: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-avatar-grand { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--lor-at-actif); box-shadow: inset 0 0 0 1px var(--lor-at-filet); font-size: 10px; font-weight: 600; color: var(--lor-at-second); }
+.v2 .lor-at-actions { display: flex; gap: 8px; padding: 4px 12px 0; overflow: hidden; }
+.v2 .lor-at-section { padding: 29px 16px 18px; }
+.v2 .lor-at-section--filet { border-top: 1px solid var(--lor-at-filet); }
+.v2 .lor-at-petit-titre { display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-second); }
+.v2 .lor-at-petit-titre svg { width: 12px; height: 12px; }
+.v2 .lor-at-details { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
+.v2 .lor-at-detail { display: grid; grid-template-columns: 114px minmax(0, 1fr); align-items: center; gap: 22px; height: 32px; }
+.v2 .lor-at-detail dt { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-second); white-space: nowrap; }
+.v2 .lor-at-detail dt svg { color: var(--lor-at-second); }
+.v2 .lor-at-detail dd { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-detail dd[data-vide] { color: var(--lor-at-discret); }
+.v2 .lor-at-section .lor-at-discret { margin-top: 12px; }
+
+.v2 .lor-at-droite { flex: 1; min-width: 0; }
+.v2 .lor-at-onglets { display: flex; align-items: flex-end; gap: 4px; height: 44px; padding: 0 12px; border-bottom: 1px solid var(--lor-at-filet); overflow-x: auto; }
+.v2 .lor-at-onglet { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 8px; border-bottom: 2px solid transparent; color: var(--lor-at-second); white-space: nowrap; }
+.v2 .lor-at-onglet[aria-pressed="true"] { color: var(--lor-at-texte); border-bottom-color: var(--lor-at-texte); }
+.v2 .lor-at-compteur { display: inline-flex; align-items: center; height: 14px; padding: 0 4px; border-radius: 4px; background: var(--lor-at-actif); box-shadow: inset 0 0 0 1px var(--lor-at-filet); font-size: 10px; font-weight: 500; line-height: 14px; color: var(--lor-at-second); }
+.v2 .lor-at-panneau { padding: 22px 20px 40px; }
+.v2 .lor-at-titre-section { display: flex; align-items: center; gap: 6px; padding-left: 12px; color: var(--lor-at-second); }
+.v2 .lor-at-tete-section .lor-at-titre-section { padding-left: 0; }
+.v2 .lor-at-cartes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 9px; margin-top: 10px; }
+.v2 .lor-at-carte { display: flex; flex-direction: column; justify-content: space-between; height: 86px; padding: 10px 12px 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--lor-at-filet); }
+.v2 .lor-at-carte-titre { display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-second); }
+.v2 .lor-at-carte-titre svg { color: var(--lor-at-second); }
+.v2 .lor-at-carte-valeur { display: flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-carte-valeur[data-vide] { color: var(--lor-at-discret); }
+.v2 .lor-at-tete-section { display: flex; align-items: center; justify-content: space-between; margin-top: 34px; padding: 0 12px; }
+.v2 .lor-at-tete-droite { display: flex; align-items: center; gap: 12px; }
+.v2 .lor-at-voir { font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-second); }
+.v2 .lor-at-rond { display: inline-flex; color: var(--lor-at-second); }
+.v2 .lor-at-rond:disabled { opacity: 0.5; }
+.v2 .lor-at-liste { display: flex; flex-direction: column; margin-top: 10px; padding: 4px 0; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--lor-at-filet); }
+.v2 .lor-at-ligne { display: flex; align-items: center; gap: 8px; height: 31px; padding: 0 12px; min-width: 0; }
+.v2 .lor-at-ligne-texte { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2 .lor-at-quand { flex-shrink: 0; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-discret); }
+.v2 .lor-at-coche { flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1px var(--lor-at-discret); }
+.v2 .lor-at-coche:hover:not(:disabled) { background: var(--lor-at-actif); }
+.v2 .lor-at-echeance { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-echeance); white-space: nowrap; }
+.v2 .lor-at-echeance svg { width: 12px; height: 12px; }
+
+@media (max-width: 900px) {
+  .v2 .lor-at-fiche { flex-direction: column; }
+  .v2 .lor-at-gauche { flex: none; border-right: 0; border-bottom: 1px solid var(--lor-at-filet); }
+  .v2 .lor-at-cartes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .v2 .lor-at-barre-vue { overflow-x: auto; }
+}

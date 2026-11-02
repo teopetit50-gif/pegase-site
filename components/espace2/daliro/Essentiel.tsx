@@ -22,7 +22,9 @@ import { montant } from "@/components/espace/format";
 import type { Tableau } from "@/components/espace/daliro/types";
 import { CONFIRMATION_CLAIRE, ecartJours, phrasesChantier, qui, quand, type Phrase } from "./enClair";
 
-export default function Essentiel({ t, onglet, auj }: { t: Tableau; onglet: "terrain" | "argent"; auj: string }) {
+/* 30/10/2026 : les parties de la fiche sont des listes ; Argent ne garde que ses quatre chiffres
+   (phrases={false}), Terrain plus rien (ses listes disent déjà ce qui attend) */
+export default function Essentiel({ t, onglet, auj, phrases: avecPhrases = true }: { t: Tableau; onglet: "terrain" | "argent"; auj: string; phrases?: boolean }) {
   const c = t.chantier;
   const toutes = phrasesChantier(c, t, auj);
 
@@ -65,7 +67,7 @@ export default function Essentiel({ t, onglet, auj }: { t: Tableau; onglet: "ter
       ) : (
         <p className="lit-essentiel-note">Les montants sont réservés aux comptes qui voient les prix.</p>
       )}
-      <Phrases phrases={phrases} vide="Aucun avenant ni aucune situation n'attend quelqu'un." />
+      {avecPhrases ? <Phrases phrases={phrases} vide="Aucun avenant ni aucune situation n'attend quelqu'un." /> : null}
     </section>
   );
 }

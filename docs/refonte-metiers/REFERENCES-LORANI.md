@@ -1,0 +1,159 @@
+# LORANI — sous-pages et pages de référence (en cours, 02/11/2026, reprise dans le cloud)
+
+| Sous-page | Route | Référence | Relevé | État |
+|---|---|---|---|---|
+| Vue d'ensemble | `/espace2/lorani` | Linear, Projects (liste) | `linear-projects.md` | écrite (`VueEnsemble.tsx`, `lor-projets.css`) ; superposée à 13 lignes en sombre, clair et 390 (`comparaisons/lorani/vue-*`) |
+| Permis | `/espace2/lorani/permis/[id]` | Linear, page d'un ticket | `linear-ticket.md` | écrite (`PagePermis.tsx`, `lor-ticket.css`) ; superposée en sombre, clair, 1024 et 390 (`comparaisons/lorani/permis-*`) ; écarts ci-dessous |
+| Projet | `/espace2/lorani/projets/[id]` | Linear, page d'une Initiative | `linear-initiative.md` | écrite (`PageProjet.tsx`, `lor-initiative.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/projet-*`) ; écarts ci-dessous |
+| Courrier à ranger | `/espace2/lorani/courrier` | Linear, Inbox | `linear-inbox.md` | écrite (`Courrier.tsx`, `lor-inbox.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/courrier-*`) ; écarts ci-dessous |
+| Réglages | `/espace2/lorani/reglages` | Linear, Settings › Team | `linear-team-settings.md` | refaite aux jetons et icônes de Linear (`Reglages.tsx`, `lor-reglages.css`) ; superposée en sombre, clair et 390 (`comparaisons/lorani/reglages-*`) |
+| Honoraires et temps | `/espace2/lorani/honoraires` | Attio, People + fiche | `attio-people.md` (après import, 02/11) | écrite (`Honoraires.tsx`, `lor-attio.css`) ; liste et fiche superposées en sombre et clair, liste à 390 (`comparaisons/lorani/honoraires-*`) ; écarts ci-dessous |
+
+## Fichiers communs (préfixe lor-, propres à Lorani)
+
+- `components/espace2/lorani/lor.css` : jetons Linear sombre ET clair (règle 3 du 01/11 ; remplace pour Lorani les couleurs « dashboard » de `lin/lin.css`), boutons ronds, pastille de vue, menu de Linear (Add filter).
+- `lor-sprite.ts` (346 symboles → sous-ensemble utilisé, tels quels), `lor-icones.tsx` (icônes en ligne recopiées du DOM de Linear : santé, priorité, statut hexagone, calendrier, jalon, courbe, boutons d'en-tête, flèche de tri).
+
+## Méthode de superposition utilisée
+
+Le cadre de l'espace 2 (barre 48, rail, sous-menu ; `main` à x 304) n'est pas celui de Linear : on compare la carte. Fenêtre émulée **1491 × 932** (dans le cloud : 1492 × 904, `outils/lor-capture.mjs`, sans tuiles : l'échelle 1 est native) pour que `main` fasse 1187 de large comme la carte de Linear ; quatre tuiles 800×500 à l'échelle 1 (transform sur `<html>`, origines (304,48) (691,48) (304,403) (691,403)), recollées en 1187×855 et comparées à `1440-reel-*.png` découpée en (245,9,1187,855). Écart assumé : le cadre de l'espace 2 (commun, hors périmètre).
+
+## Linear, page d'un ticket — mesures prises en direct le 02/11 (sombre)
+
+- En-tête 44 (p 0 12 0 8, filet 0.5) ; fil : a (r 6, p 2 4, m −2 −4) → h2 13/500 t2, « OME-19 » inline-flex m-right 5.6 ; étoile et « … » 28 ; à droite boutons texte 28 (p 0 10 0 8, icône 14 m-right 6, 12/500 t2) gap 6.
+- Barre d'outils absolue top 43.5, 44 de haut, p 8 12 8 0 : ronds 28 pleins gap 6 (lien, ID, branche) + bouton double 56.5 (r 9999 0 0 9999 / 0 9999 9999 0, séparateur 0.5×20 m 4 0).
+- Corps : grille `1fr minmax(0,80ch) minmax(0, clamp(280px, 26.087cqw + 66.087px, 400px)) 1fr`, column-gap `clamp(16px, 8.696cqw - 55.304px, 56px)` (667.5 + 375.7 à 1187).
+- Colonne : p-top 21.75, p-left 14 ; titre m 32 0 8, p 6 0, 24/600/32 ls −0.16 ; description m-bottom 10 (p 10 14 16, m 0 −14), 15/450/24 ls −0.1 ; réactions + trombone 28 (m 0 0 14 −6).
+- Sous-tickets (m-left −6) : en-tête 32 (p 0 8 4 0, m-bottom 4) : bouton repli 24 (p 0 12 0 6, triangle 14 m-right 3, « Sub-issues » 12/500 t3) gap 8, jauge 14 + « 0/5 » 12/450 gap 6 ; à droite ronds pleins 28 (affichage, +) gap 6. Lignes 36, grille `[indent] 0 [checkbox] 22 [status] 16 [title] 1fr [end-padding] 6`, gap 8 ; case opacity 0 ; statut 14 ; titre 13/500 t1, gap 8 ; avatar « non assigné » 18 m-right 3.
+- Filet 0.5 lch(18.48 1.48 272), m 16 0 18. « Activity » h3 15/600/23 t1 ; « Unsubscribe » 32 (p 0 12, 12/500 t3) ; abonnés 32.
+- Événement : m-top 16 ; ligne r 8 p 5 0 ; avatar 14 dans pastille 36×18 (p 2 11, fond carte) ; texte 12/450/16.8 t3 ; « · » 600.
+- Carte commentaire : m 0 −8, p-bottom 18 ; bg lch(9.232 0.85 272), bd 0.5 lch(16.793 1.93 272), r 8, ombre lch(0 0 0/.3) 0 .5px 1px 1px ; tête p 16 gap 6 : avatar 18 gap 9, auteur 13/500 t1, date 13/450 lch(63.304 1.425 272) gap 8 ; boutons au survol 28 ; corps 15/450/24 ls −0.1 lch(90.826 1.425 272) ; pied : filet 0.5, form p 11 16, avatar 18 m 3 9 0 0.
+- Formulaire « Leave a comment » : r 8 p 12 16, mêmes fond et bord.
+- Propriétés : p-top 21.75 + 51 ; sections p 0 0 10 4, m-bottom 20 ; h3 13/500 t3 p 0 8 ; liste p 8 2 2, gap 4 ; pilule 28 (r 9999, p 0 10 0 6, gap 6, icône 16 ou 14, 13/500 t2 ; vide = t3).
+- SVG des boutons (étoile, …, Accept, Decline, Duplicate, ClockOutline, lien, ID, branche, prompt, chevron, réaction, trombone, triangle, +) : relevés dans le DOM le 02/11 ; à reprendre de `linear-commun` ou du relevé quand ils y sont.
+
+## Outils de la reprise dans le cloud (02/11)
+
+- `outils/lor-capture.mjs` : capture Playwright (chromium headless, échelle 1, `colorScheme` sombre ou clair). Fenêtre **1492 × 904** : la carte de l'espace 2 (x 304, y 48) a alors la taille de celle de Linear (1188 × 856 à x 244, y 8).
+- `outils/lor-superpose.py` : découpe les deux cartes au même cadre, écrit `<nom>-cote.png` (référence | nôtre) et `<nom>-diff.png` (différence ×3), compte les pixels en écart.
+- `outils/lor-mesure.mjs` : rectangles et styles calculés d'une sous-page, depuis le coin de la carte, pour se lire contre le relevé.
+- `outils/lor-icones-linear.py` + `.json` → `components/espace2/lorani/lor-icones-linear.ts` : les icônes absentes des relevés (Accept, Decline, Copy issue ID, branche, Copy as prompt, chevron, triangle, réaction, flèche d'envoi, statuts d'un ticket), recopiées du bundle public de Linear (static.linear.app) en suivant les import/export depuis le module de la page (`IssueDetailsPaneSidebar`).
+- `outils/lor-sprite.py` : ajoute des symboles du sprite à `lor-sprite.ts` (ClockOutline, Starred).
+
+## Permis → Linear, page d'un ticket (OME-19)
+
+Données : le permis d'exemple « PCMI Maison Lemoine » (5 étapes au calendrier comme les 5 sous-tickets d'OME-19, 3 dates lues à confirmer comme les 3 commentaires).
+Mesures relues au DOM (`lor-mesure.mjs`) contre le relevé : titre à x 62 / y 97.75 de la carte, colonne 668 + propriétés 376 à x 764, gap 48, sous-tickets à x 56 en lignes de 36, filet à 16/18, carte de commentaire à x 54 (m 0 −8), « Properties » à y 116.8 → toutes au demi-pixel du relevé.
+Comparaisons : `permis-1440-sombre-*`, `permis-1440-clair-*`, `permis-390-sombre-*`, `permis-390-clair-*` (cote + diff). Les pixels en écart viennent du contenu (titre, description et étapes plus longs, dates dans les lignes, plus d'événements), pas de la géométrie : zones superposées une à une (en-tête, colonne, sous-tickets, activité, carte de commentaire) au pixel près.
+
+Correspondances : Sub-issues → étapes du calendrier (statut : fait/passé = Done, à venir = Todo, en cours/en retard = In Progress, à confirmer = Triage, en attente = Backlog) ; Accept/Decline → la première chose qui attend un membre (décision implicite : Confirmer / Saisir la décision ; date lue : Confirmer / Écarter) ; Snooze → échéances et rappels ; « … » → Régime, saisies, projet, dépôt de courrier, écran d'avant ; barre d'outils → copier le lien, le numéro, la référence du projet, « Saisir ce qui est arrivé » et son menu ; commentaires → décision implicite et dates lues (pied « Leave a reply… » = Confirmer, Decline = Écarter) ; « Leave a comment… » → déposer un courrier ; Properties → état, urgence, chef de projet, quatre dates ; Labels → régime ; Project → projet ; deux sections du même dessin : Échéances, Recours.
+
+Écarts restants, avec leur raison :
+- Pas d'étoile (Add to favorites) dans l'en-tête : l'espace 2 n'a pas de favoris, un bouton sans effet serait un faux geste.
+- Pas de « Mark as duplicate » : un permis n'a pas de doublon.
+- Lignes de sous-tickets : une date à droite (la date de l'étape) à la place de l'avatar d'assigné ; « Unsubscribe » devient « Rappels au chef de projet » (à qui partent les rappels) : gestes et données du métier.
+- Deux sections de propriétés de plus (Échéances, Recours) : blocs B15 et B16 de l'inventaire, sans place dans la référence.
+- Les fenêtres de saisie (F7-F13) sont celles de l'espace 2 (Dialog commun), pas celles de Linear, qui n'en a pas l'équivalent.
+
+## Projet → Linear, page d'une Initiative (Résidence Les Tilleuls)
+
+Données : le projet d'exemple « Surélévation Dubois » (contrôles, pièces, PLU, permis).
+Mesures relues au DOM contre le relevé : onglets à y 52 (8 sous la ligne 1 et non 12 : position mesurée des onglets), défilement à y 88 (p 0 48), colonne 805 centrée, tuile 36 à y 152, titre m-top 12, rangées Properties / Resources (libellé sur 81, pilules 28), carte « Latest update » débordant de 16, Description, section Projects 963 centrée et tableau 1001 (m-left −28) aux colonnes de Linear ; volet ⌘ I de 400 (cartes 388 à x 792, rangées 36, libellé sur 90, segments 28, lignes de 42).
+Comparaisons : `projet-1440-sombre-*`, `projet-1440-clair-*`, `projet-390-sombre-*`, `projet-390-clair-*`. Les pixels en écart viennent du contenu (résumé plus long, carte « Dernier point » d'une ligne, description plus courte : la section Permis remonte).
+
+Correspondances : fil « Initiatives › Résidence » → « Permis › projet » (icône de la nature) ; « … » → nouveau permis, courrier, dossier daté, nouveau projet, honoraires, écran d'avant ; copier le lien ; « + » → permis, courrier, membre, lot, intervenant (F2-F6) ; onglets Overview · Activity · Projects → Vue d'ensemble · Activité · Permis, puis les vues du dossier (Équipe, Urbanisme, Contrôle, Consultation, Chantier, Réception, Assurances : les parties de ProjetCarte en liste, titre 18/500 de la section Projects, lignes de Linear, détail dans le volet) et Honoraires ; Properties → nature (santé du permis le plus pressé), phase, chef de projet, prochaine date, « … » (marché, territoire, ouverture, réception) ; Resources → règlement de la zone du PLU, dossier daté, « + » courrier ; Latest update → dernier compte rendu, sinon le point de Lorani sur le permis le plus pressé (« Update » → Compte rendu, bulle → points en suspens) ; Description → nature, marché, territoire, zone du PLU, pièces exigées ; Projects → les permis du projet groupés par santé (À confirmer, Pièces à fournir…), colonnes Santé, Urgence, Chef, Prochaine date, Avancement ; volet ⌘ I → Propriétés, Avancement (Santé | État | Chefs), Activité.
+
+Écarts restants, avec leur raison :
+- Pas d'étoile ni de cloche (Notifications) dans l'en-tête, pas de « Add new view » : l'espace 2 n'a ni favoris, ni abonnement par projet, ni vues personnelles.
+- Onglet « Permis » en liste et non en Timeline : la frise d'un projet n'a que ses permis (une à trois barres) ; la liste est celle que Linear montre à 390.
+- Les vues du dossier (Équipe…Assurances) gardent les briques de liste de `components/espace2/lin` (My issues de Linear, partagées) recolorées aux jetons de Linear par un pont de variables (`lor-in-pont`) ; elles n'ont pas d'équivalent dans la page d'une Initiative, qui n'a qu'une section Projects.
+- Pas de bouton « réaction » dans la carte « Latest update » ; « Update » ouvre la vue Chantier (le compte rendu se rédige là, F29).
+- Le composeur de l'onglet Activité dépose un courrier (F3) : Lorani n'a pas de commentaires sur un projet.
+
+## Courrier à ranger → Linear, Inbox
+
+Données : les deux éléments à traiter de l'exemple (une date lue, une décision implicite) et, avec le bouton d'archives (`?traites=1`), les dates lues déjà confirmées ou écartées en lignes « lues » (comme les 6 notifications lues de la capture).
+Mesures relues au DOM : liste de 400 et filet droit ; en-tête 44 (titre à x 18) ; lignes de 55 à y 52, fond de survol en retrait de 8 ; avatar 32 à x 16 ; textes à x 60 ; pastille non lue à y 67-75 (capture : 68-75) ; ligne 1 de 17, ligne 2 de 16 ; état vide : illustration de Linear (EmptyInboxIcon, 105 × 100) et compte, centrés sur la hauteur.
+Comparaisons : `courrier-1440-sombre-*`, `courrier-1440-clair-*`, `courrier-390-sombre-*`, `courrier-390-clair-*`. Les pixels en écart viennent du nombre de lignes (2 à traiter + 5 traitées contre 5 + 6) et de leurs textes.
+
+Correspondances : notification non lue → courrier à traiter (date lue à confirmer : statut Triage ; à ranger : Backlog ; lecture à vérifier : In Progress ; illisible : Canceled) ; « You asked to be reminded… » → ce qu'il faut faire ; priorité → urgence de la prochaine date du permis ; heure → âge de la lecture ; avatar rappel → icône du sprite selon la nature de la date (dépôt, délai, demande de pièces, décision, affichage, courrier) sur le même fond violet ; archives → courriers traités ; Filter → À confirmer / À ranger / Tous ; Display → afficher les traités ; « … » → déposer un courrier sur un projet ; ticket ouvert à droite → le courrier ouvert (titre, pilules, lecture et citations), Accept / Decline → Confirmer / Écarter (F7, F8), décision implicite : Confirmer (F9) / Saisir la décision (page du permis).
+
+Écarts restants, avec leur raison :
+- Le courrier ouvert n'a pas la barre d'outils (copier le lien, l'identifiant, la branche) ni la colonne d'activité du ticket : un courrier n'a pas de page propre, ses liens mènent au permis et au projet (pilules).
+- Pas de « Snooze » ni d'archivage d'une notification : un courrier se traite (confirmer, écarter) ou se saisit à la main, il ne se met pas de côté.
+
+## Réglages → Linear, Settings › Team (Omega)
+
+La page existait déjà sur Settings › Team (29/10) mais avec les couleurs « dashboard » de `lin/lin.css` et des icônes Lucide. Reprise le 02/11 : feuille propre `lor-reglages.css` (préfixe lor-rg-), jetons de Linear (`lor.css` + cartes, anneaux, cases et textes seconds relevés en sombre et clair), icônes du sprite de Linear (Members, Brick, Users, Page, Gears, Judge, Euro, Signature, Stopwatch, Calendar, Shield, Project), chevrons de Linear.
+Mesures relues au DOM, égales au relevé : lien retour à x 9, y 11 ; colonne 640 à x 274 ; titre à y 65 ; première carte à y 157 ; h3 « Permis » à y 400 ; rangées de 65. À 390 : colonne à 22, rangées p 16 10.67, texte sur plusieurs lignes, 24 entre sections (capture `390-clair`).
+Comparaisons : `reglages-1440-sombre-*`, `reglages-1440-clair-*`, `reglages-390-sombre-*`, `reglages-390-clair-*`. Écarts : le contenu (sections Permis, Contrôle, Honoraires, Chantier, Assurances à la place d'Issues / Workflow / AI / Team hierarchy).
+
+Écarts restants, avec leur raison :
+- Pas de « Danger zone » (Leave / Retire / Delete) ni de rangée verrouillée « Available on Business » : aucun geste de ce genre sur un projet ; supprimer un projet n'existe pas dans Lorani.
+- La barre latérale des réglages de Linear n'a pas d'équivalent : c'est le cadre de l'espace 2 (rail et sous-menu communs).
+- L'équipe, les lots et les intervenants mènent à la vue « Équipe » de la page du projet (`?partie=equipe`).
+
+## Honoraires et temps → Attio, liste People et fiche d'un contact
+
+Données : le projet « Maison Lemoine » (6 éléments de mission, temps saisis) ; fiche de l'élément « Dossier de permis ».
+Les captures d'Attio sont prises barre latérale repliée (zone de 1440 × 900 à x 0) : la superposition se fait avec une fenêtre de 1744 × 948 (carte de l'espace 2 de 1440 × 900 à x 304, y 48).
+Mesures du relevé reprises : en-tête 49 ; barre de vue 48 (boutons de 28 à x 12) ; barre de tri 49 ; grille en-têtes 40, lignes 36, colonnes 250 · 215 · 288 · 310 · 250, case 16 r 6, pastille de lien r 10 avec avatar 16 ; pied 36 ; fiche : panneau gauche 432, nom 18/600/24, détails en lignes de 32 (libellé 12/500 a.63), cartes « Highlights » 3 × 2 de 86, listes cerclées à lignes de 31 ; jetons d'Attio sombre et clair (#101112 / #fff, filets #1b1c1f / #eeeff1, second a.60 / a.63, discret a.45 / a.50, bleu #266df0).
+Comparaisons : `honoraires-liste-1440-{sombre,clair}-*`, `honoraires-fiche-1440-{sombre,clair}-*`, `honoraires-liste-390-{sombre,clair}-*` (la référence à 390 est rendue au double, ramenée à 390 × 844). À 390, comme Attio, pas de mise en page mobile : la grille garde ses colonnes et défile.
+
+Correspondances : People → éléments de mission du projet ; vue « Recently Contacted People ⌄ » → le projet (menu des projets et de leurs honoraires) ; View settings → Affichage (colonne Taux réalisé) ; Import / Export → Ajouter ⌄ (un élément de mission, F22) ; New Person → Saisir du temps (F23) ; Sorted by → trié par phase ; Filter → état des éléments ; Connection strength → Temps passé (pastille : à venir gris, en cours ou achevé bleu, à surveiller orange, dépassé rouge, facturé vert, les couleurs d'Attio) ; colonnes Honoraires HT, État, Taux réalisé ; « count » → nombre d'éléments et totaux. Fiche : Compose email / Add to list → Saisir du temps / Marquer achevé ou facturé (G44, G45, confirmation) / Ouvrir le projet ; Record Details → Détails ; Lists → Projet ; Highlights → En bref (temps, consommation, honoraires, taux, état, facturation) ; Activity → temps saisis ; Notes → Temps ; Tasks → Appel d'honoraires (coche → Marquer facturé).
+
+Écarts restants, avec leur raison :
+- Les icônes d'Attio ne sont ni dans le relevé ni dans son code chargé sans compte (app.attio.com/web-assets) : celles de la page sont tracées au trait de 1.25 aux mêmes tailles (16, 12) ; à remplacer par les tracés d'Attio dès qu'un relevé d'icônes existe.
+- Pas d'onglets Emails, Calls, Company, Files ni de colonne « + Add column » / « + Add calculation » : un élément de mission n'a ni courriels, ni appels, ni pièces ; les colonnes et les totaux sont fixés.
+- Pas de « Share », « Ask Attio », ni d'étoile et de crayon sur la fiche : sans équivalent dans Lorani ; l'en-tête porte un lien vers le projet.
+- L'avis « 80 % des heures prévues » / « dépassé » (B27) est à droite de la barre de tri : sans place dans la référence.
+
+## Vue d'ensemble → Linear, Projects (liste « All projects »), fin de la superposition (02/11, cloud)
+
+Treize lignes comme la capture de référence : sept projets d'agence en phase d'études, sans permis encore, ajoutés aux données d'exemple (`components/espace/lorani/exemples.ts` : Extension Rolland, Local commercial Part-Dieu, Groupe scolaire Jean-Moulin, Villa Bellevue, Immeuble Les Alizés, Rénovation école Bois-Joli, Hangar Morne-Rouge) ; ils s'affichent comme le prévoyait déjà la page (B5 : lignes à 0 %, « Sans permis · phase »). Ils apparaissent aussi dans l'écran d'avant (`?ancien=1`), dans « Projets sans permis ».
+Comparaisons : `vue-1440-sombre-*`, `vue-1440-clair-*`, `vue-390-sombre-*`, `vue-390-clair-*` : lignes, colonnes, en-têtes et icônes superposés ligne à ligne ; écarts de contenu seulement (noms, jalons, santé « Sans permis » au lieu de « No updates », pas de courbe sur les lignes à 0 %).
+
+## Pages nouvelles du 02/11 (soir) — branche `claude/pages-lorani` (plan `PAGES-MANQUANTES.md`)
+
+| Page | Route | Référence | Relevé | État |
+|---|---|---|---|---|
+| Questions et réponses | `/espace2/lorani/questions` | Plain, Threads (liste « All threads » et fil ouvert) | `plain-threads.md`, `plain-commun.md` | écrite (`Questions.tsx`, `lor-plain.css`) ; superposée en sombre et clair à 1440 (liste et fil ouvert) et à 390 (`comparaisons/lorani/questions-*`) |
+| À viser | `/espace2/lorani/a-viser` | Linear, My issues (« Assigned ») | `linear-my-issues.md` | écrite (`AViser.tsx`, `lor-viser.css`) ; superposée en sombre et clair à 1440 et à 390 (`comparaisons/lorani/a-viser-*`) |
+
+Choix tranchés en autonomie (Teo absent, consigne de la coordinatrice) :
+- Référence prise telle que proposée par le plan (Plain, Threads), non encore prise par Lorani : une question = un fil (destinataire, âge, extrait, état).
+- Données : `lorani_points` de nature `question` ou `action` (b5_20, b5_25), tous projets ; portes `ajouterPoints` et `majPoint` seulement, `portes.ts` inchangé, aucune migration.
+- Exemple : le dossier commun n'a que quatre points ; `exemples-suivi.ts` (fichier nouveau) ajoute en mémoire, à l'ouverture de la page sur l'exemple, 13 questions fictives sur les projets d'exemple (7 sans réponse depuis 8 jours, 5 en attente, 2 réponses reçues, 1 soldée) pour un contenu de même longueur que la capture (7 + 6 fils). `exemples.ts` n'est pas touché.
+- Aiguillage : `lorani_point` (ligne « Questions sans réponse » du point du matin, b5_25) mène désormais à `/espace2/lorani/questions?point=<id>` (avant : `null`, le lien `?projet=` menait au projet, où la question pouvait n'être visible nulle part, O6). `verifier-aiguillage.mjs` vert.
+
+Superposition : fenêtre **1391 × 948** (carte de l'espace 2 à x 304, y 56, de la taille de la carte de Plain 1079 × 884 à x 353, y 8 ; `outils/lor-pages-capture.mjs`). Lignes de 67, filets à 0,5, grille 32 · 18 · 300 · 355,5 · 76 · 84 · 113,5 · 94, en-têtes de groupe de 32 espacés de 24, en-tête de 34 à 24 du haut, pastilles de 24 : superposés ligne à ligne (`questions-1440-{sombre,clair}-diff.png`). Fil ouvert : fenêtre 1687 × 948 pour que la carte du fil ait la largeur de celle de Plain (1375) ; volet de détails de 384 au même x (`questions-fil-1440-*`). 390 : cartes de fil comme Plain (`questions-390-*`).
+
+Correspondances : groupes Needs first response / Needs next response / Investigating → « Sans réponse depuis 8 jours » (ce que le point du matin remonte) / « En attente de réponse » / « Réponse reçue, à solder » (+ « Soldées » par Affichage) ; compte → projet ; client → destinataire ; tier → lot (ou rôle du destinataire) ; réf. « T-8 » → compte rendu d'origine (« CR 2 », « Directe », « Action ») ; étiquettes → nature, « Point du matin », « Échéance passée » ; priorité → urgence (échéance passée = Urgent, plus de 15 jours = Haute) ; SLA → échéance ; canal + « 1h ago » → origine + âge ; assigné → chef de projet. Filters (F) → Projet, Destinataire, Nature, Urgence (sous-menus cochables, puces de filtre actif, « Tout effacer ») ; Display (V) → grouper par état ou par projet, soldées, actions, export CSV. Fil ouvert : question, événements (compte rendu, échéance, point du matin), réponse, note interne « Suivi de Lorani » (jaune, comme la note de Plain), bandeau d'état ; barre Y (état) · Réponse reçue R · Solder S · Plus (reporter l'échéance, relancer par courriel dans la messagerie de l'utilisateur, copier le texte de relance, rouvrir, ouvrir le chantier, CSV) ; Sidekick Agent B → « Copier pour l'assistant » B ; volet : Détails, Destinataire (Customer details), Liens.
+
+Écarts restants, avec leur raison :
+- Bouton « Nouvelle question N » dans l'en-tête : Plain crée un fil depuis sa barre latérale (hors page copiée) ; geste G34 hors compte rendu.
+- Barre de sélection (Solder, Reporter, CSV, Copier pour l'assistant) : Plain ne la montre pas dans le relevé ; même dessin que sa barre d'action flottante.
+- Sous-titre du premier groupe (« Elles remontent au point du matin… ») : à la place de celui des « Test threads » de Plain.
+- Pas de « Tasks » ni de « Add link » dans le volet, pas de composeur Reply / Note : Lorani n'envoie rien aux intervenants et n'a ni tâches ni notes sur un point ; « Réponse reçue » note la réponse arrivée ailleurs.
+- La colonne liste de 400 du fil ouvert n'apparaît qu'à partir de 1700 de large : dans le cadre de l'espace 2, elle ne tient pas à 1440 (Plain l'omet aussi quand le fil est ouvert par son adresse, comme ici avec `?point=`).
+- Titre en Inter 400 au lieu de Whyte (licence payante).
+
+### À viser → Linear, My issues (« Assigned »)
+
+Choix : référence du plan, non prise par Lorani. Groupes de Linear (Urgent issues, Cycle 1 « Oct 28 → Nov 10 », Cycle 2) → **En retard**, **Cette semaine** (dates), **Semaine prochaine** (dates), Plus tard, Sans date (+ « Traités depuis 30 jours » par l'affichage). Une ligne = une chose à viser ou à lever avant une date, tous projets confondus : situations à viser (`lorani_situations`, échéance `a_viser_avant`), documents à viser (`lorani_visas`, date butoir calée sur la commande, b5_15, b5_25), réserves ouvertes (`lorani_reserves.lever_avant`) et décennales qui expirent sous 30 jours (`lorani_attestations.fin`). `public.delais` n'est pas lu par `chargerDossier` : la date affichée est celle de la ligne, la même que l'échéance que le registre suit ; aucune lecture nouvelle.
+
+Mesures relues au DOM contre le relevé (depuis la carte) : identifiant à x 66 (relevé 67), titre à 153 (154), premier en-tête de groupe à y 87,5 (88), première ligne à 123,5 (124) ; lignes de 44, en-têtes de 36 (m 0 8, r 8) ; grille `[indent] 8 [checkbox] 18 [priority] 16 [identifier] 55 [status] 16 [title] 1fr [createdAt] 60 [end-padding] 18`, gap 8 ; puces 24 r 48 bd 0.5 ; à 390 la grille réduite du relevé (ni identifiant, ni puces, ni date ; « 2 de plus ▾ » ; « + » seul). Fenêtre 1492 × 904 (méthode de la vue d'ensemble). Exemple : `exemples-suivi.ts` ajoute en mémoire 8 visas, 1 situation et 1 réserve fictifs (17 lignes visibles comme la capture).
+
+Correspondances : onglets Assigned · Created · Subscribed · Activity → Tout · Situations · Visas · Réserves et assurances (`?onglet=`) ; priorité → proximité de l'échéance (retard = Urgent) ; identifiant « OME-21 » → « SIT 3 », « VISA B » (indice), « RÉS 4 », « DÉC » ; statut → à faire / visé / refusé ; puces étiquette, projet, cycle, échéance → lot (pastille de couleur), projet (lien vers son chantier), montant cumulé ou date de commande ou localisation ou assureur, échéance (calendrier barré rouge si passée) ; avatar → chef de projet ; date de création → reçu ou constaté le. « New issue » → **Document à viser** (`recevoirDocument`, F27 ; raccourci C) ; « + » de groupe → la même fenêtre ; filtre → projets ; affichage → grouper par échéance ou par projet, traités ; troisième rond → export CSV. Clic sur une ligne : **Viser / Rectifier** la situation (`viserSituation`, F26, avec marché, cumul, précédente, avancement, dépassement) ; **Rendre l'avis** VSO / VAO / refusé (`rendreVisa`, F28) ; **Lever** la réserve (confirmation) ou **Reporter** sa date (`changerReserve`) ; décennale → vue Assurances du projet. Sélection (case au survol) : barre flottante « Viser sans observation » (confirmation), CSV, Copier pour l'assistant, Échap.
+
+Écarts restants, avec leur raison :
+- Pas de page « ticket » au clic : une situation, un visa, une réserve n'ont pas de page propre ; le geste s'ouvre dans la fenêtre commune de l'espace 2 (F26, F28), le chantier du projet est à un clic (puce projet).
+- Troisième rond (« Open details » chez Linear) = export CSV : la page n'a pas de volet de détails.
+- Une décennale n'a pas de geste ici : aucune porte ne la renouvelle ; la ligne mène à la vue Assurances du projet.
+- Pas de groupe « Cycle » : Lorani n'a pas de cycles ; les plages de dates sont les semaines.
+
+### Ce qui n'a pas pu être fait (02/11)
+
+- Aucun nouveau relevé (pas d'accès aux comptes de Teo) : les deux pages reposent sur les relevés existants ; le popover Display de Plain n'est pas relevé en détail, il est rendu avec la brique « Popover » de `plain-commun.md`.
+- Pas de relance envoyée par Lorani : aucune porte n'envoie un courriel à un intervenant ; « Relancer par courriel » ouvre la messagerie de l'utilisateur (mailto), qui l'envoie lui-même.
+- Le délai « 7 ou 15 jours » des situations n'est pas recalculé ici : il est posé par la base (`delai_verification_jours` du marché, b5_13).

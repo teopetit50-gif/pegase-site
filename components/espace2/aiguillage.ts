@@ -33,6 +33,8 @@ export type Repere = {
   objet_id?: string | null;
   /* le payload d'une demande (FILED : le fournisseur d'un IBAN) */
   payload?: Record<string, unknown> | null;
+  /* le texte d'une ligne du point du matin (DALIRO : une ligne d'approvisionnement nomme son chantier) */
+  texte?: string | null;
 };
 
 type Regle = (id: string, r: Repere) => string | null;
@@ -55,10 +57,9 @@ const PREFIXES: [string, string][] = [
   ["grp_", "varelo"],
 ];
 
-const tavaro = objet("tavaro");
-const tamila = objet("tamila");
-const tiroma = objet("tiroma");
-const varelo = objet("varelo");
+
+/* les phrases des lignes d'approvisionnement du point du matin (omega/modules/daliro/migrations/b6_23_appro_suite.sql) */
+const APPRO = /devait être commandé avant le|: commandez « | n'est pas noté reçu|» promis le .* où il le faut|devait repartir le|au bon de livraison : relancez/;
 
 /* objet_type → page. Une ligne par objet_type écrit par un moteur. */
 export const REGLES: Record<string, Regle> = {
@@ -75,49 +76,75 @@ export const REGLES: Record<string, Regle> = {
   /* REPUT — la page Demandes ouvre une demande (TableauReput, « ?demande= ») */
   reput_demandes: (id) => `${RACINE}/reput?demande=${q(id)}`,
 
-  /* LORANI — l'écran actuel lit « ?permis= » et « ?projet= » (EcranLorani) */
-  lorani_permis: (id) => `${RACINE}/lorani?permis=${q(id)}`,
-  lorani_projets: (id) => `${RACINE}/lorani?projet=${q(id)}`,
-  /* le même projet, au singulier, dans les demandes de Lorani */
-  lorani_projet: (id) => `${RACINE}/lorani?projet=${q(id)}`,
-  /* une question restée sans réponse (b5_25) : son lien porte déjà « ?projet= », il l'emporte */
-  lorani_point: () => null,
+  /* LORANI, refait le 29/10/2026 : la page d'un permis, celle d'un projet ; les anciens
+     liens « /espace/lorani?permis= » et « ?projet= » (alertes, courriels déjà partis) y
+     sont renvoyés par la racine (app/espace2/lorani/page.tsx) */
+  lorani_permis: (id) => `${RACINE}/lorani/permis/${q(id)}`,
+  lorani_projets: (id) => `${RACINE}/lorani/projets/${q(id)}`,
+  /* le même projet, au singulier, dans les demandes de Lorani. Le point du matin
+     l'écrit aussi à côté d'un lien « ?permis= » (lorani_ligne_du_point) : ce lien
+     nomme le permis de la ligne, il l'emporte sur le projet */
+  lorani_projet: (id, r) => (r.lien && /[?&]permis=/.test(r.lien) ? null : `${RACINE}/lorani/projets/${q(id)}`),
+  /* une question restée sans réponse (b5_25, point du matin) : elle s'ouvre dans Questions et
+     réponses (02/11/2026 ; avant, son lien « ?projet= » menait au projet, où elle pouvait
+     n'être visible nulle part, O6 de l'inventaire) */
+  lorani_point: (id) => `${RACINE}/lorani/questions?point=${q(id)}`,
 
   /* une décision de Varelo à valider (b1_15) : la page À valider ne sait pas encore ouvrir une demande donnée */
   demandes_validation: () => `${RACINE}/validations`,
 
   /* TAVARO, TAMILA, TIROMA, VARELO — « ?objet= », lu par les pages refaites */
   /* DALIRO, refait le 29/10/2026 : la fiche du chantier, la page des avenants et situations, la page À faire */
-  btp_chantiers: (id) => `${RACINE}/daliro/chantiers/${q(id)}`,
+  /* les lignes d'approvisionnement du point du matin (b6_23, E07 à E12) nomment le chantier de la
+     commande : elles mènent à l'Approvisionnement filtré sur lui (02/11/2026) ; les autres à sa fiche */
+  btp_chantiers: (id, r) => (r.texte && APPRO.test(r.texte) ? `${RACINE}/daliro/approvisionnement?chantier=${q(id)}` : `${RACINE}/daliro/chantiers/${q(id)}`),
   btp_avenants: (id) => `${RACINE}/daliro/avenants?avenant=${q(id)}`,
   btp_avenant: (id) => `${RACINE}/daliro/avenants?avenant=${q(id)}`,
   btp_situations: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
   btp_situation: (id) => `${RACINE}/daliro/avenants?situation=${q(id)}`,
   btp_passages: (id) => `${RACINE}/daliro/a-faire?passage=${q(id)}`,
-  loc_contrats: tavaro("loc_contrats"),
-  loc_reservations: tavaro("loc_reservations"),
-  loc_vehicules: tavaro("loc_vehicules"),
+  /* TAVARO, refait le 02/11/2026 : la page d'un contrat ; une proposition, une facture ou un
+     avoir (demandes à valider) ouvre son contrat dans les Retours à facturer, qui le retrouvent */
+  loc_contrats: (id) => `${RACINE}/tavaro/contrats/${q(id)}`,
+  loc_propositions: (id) => `${RACINE}/tavaro/retours?proposition=${q(id)}`,
+  loc_factures: (id) => `${RACINE}/tavaro/retours?facture=${q(id)}`,
+  loc_avoirs: (id) => `${RACINE}/tavaro/retours?avoir=${q(id)}`,
+  /* le courrier de recours d'un sinistre (demande « envoi.email », b2_12) : son dossier dans les Incidents */
+  loc_sinistres: (id) => `${RACINE}/tavaro/incidents?onglet=sinistres&element=${q(id)}`,
+  loc_reservations: () => `${RACINE}/tavaro#tavaro-reservations-risque`,
+  /* le même véhicule, deux cartes : le contrôle technique (b2_18, lien /espace2) est au parc,
+     le véhicule inactif (b3t_04, lien /espace) dans les analyses de la vue d'ensemble */
+  loc_vehicules: (id, r) => (r.lien?.startsWith(RACINE) ? `${RACINE}/tavaro/parc?vehicule=${q(id)}` : `${RACINE}/tavaro#tavaro-inactifs`),
   /* le point du matin de production (b2_18) */
-  loc_avis_contravention: tavaro("loc_avis_contravention"),
-  loc_contestations: tavaro("loc_contestations"),
-  loc_entretiens: tavaro("loc_entretiens"),
-  loc_immobilisations: tavaro("loc_immobilisations"),
-  loc_passages_peage: tavaro("loc_passages_peage"),
-  loc_rappels_vehicules: tavaro("loc_rappels_vehicules"),
-  loc_remises: tavaro("loc_remises"),
-  tamila_dossier: tamila("tamila_dossier"),
-  tiroma_evenements_agenda: tiroma("tiroma_evenements_agenda"),
-  tiroma_fauteuils: tiroma("tiroma_fauteuils"),
-  tiroma_plans: tiroma("tiroma_plans"),
+  loc_avis_contravention: (id) => `${RACINE}/tavaro/amendes?element=avis:${q(id)}`,
+  loc_contestations: (id) => `${RACINE}/tavaro/amendes?element=contestation:${q(id)}`,
+  loc_entretiens: (id) => `${RACINE}/tavaro/parc?entretien=${q(id)}`,
+  loc_immobilisations: (id) => `${RACINE}/tavaro/parc?immobilisation=${q(id)}`,
+  loc_passages_peage: (id) => `${RACINE}/tavaro/amendes?element=peage:${q(id)}`,
+  loc_rappels_vehicules: (id) => `${RACINE}/tavaro/parc?rappel=${q(id)}`,
+  loc_remises: (id) => `${RACINE}/tavaro/parc?remise=${q(id)}`,
+  /* TAMILA, refait le 30/10/2026 : la page du dossier (les demandes à valider ; le point du matin ne nomme aucun dossier) */
+  tamila_dossier: (id) => `${RACINE}/tamila/dossiers/${q(id)}`,
+  /* TIROMA, refait le 02/11/2026 (docs/refonte-metiers/cloud/TIROMA.md) : le créneau libéré
+     ouvre son fil (Créneaux et appels), le plan sa carte (Plans et devis), le fauteuil sa
+     journée (Fauteuils) ; un travail de laboratoire et une entente ODF ouvrent leur vérification
+     (Avant les rendez-vous, 02/11/2026, docs/refonte-metiers/PAGES-MANQUANTES.md) */
+  tiroma_evenements_agenda: (id) => `${RACINE}/tiroma/creneaux?creneau=${q(id)}`,
+  tiroma_fauteuils: (id) => `${RACINE}/tiroma/fauteuils?fauteuil=${q(id)}`,
+  tiroma_plans: (id) => `${RACINE}/tiroma/plans?plan=${q(id)}`,
   /* calculé par tiroma_avant_rendez_vous_pour (b3_04), repris par le point du matin (b3_06) */
-  tiroma_travaux_labo: tiroma("tiroma_travaux_labo"),
-  grp_balances_depots: varelo("grp_balances_depots"),
-  grp_contrats: varelo("grp_contrats"),
-  grp_encours_depots: varelo("grp_encours_depots"),
-  grp_receptions: varelo("grp_receptions"),
-  grp_ref_objets: varelo("grp_ref_objets"),
-  grp_reportings_echeances: varelo("grp_reportings_echeances"),
-  grp_societes: varelo("grp_societes"),
+  tiroma_ententes_odf: (id) => `${RACINE}/tiroma/avant?verif=${q(id)}`,
+  tiroma_travaux_labo: (id) => `${RACINE}/tiroma/avant?verif=${q(id)}`,
+  grp_balances_depots: (id) => `${RACINE}/varelo/groupe?depot=${q(id)}`,
+  /* 02/11/2026 — VARELO redécoupé : chaque objet mène à la sous-page qui le montre */
+  grp_contrats: (id) => `${RACINE}/varelo/contrats?contrat=${q(id)}`,
+  grp_encours_depots: (id) => `${RACINE}/varelo/finance?depot=${q(id)}`,
+  grp_receptions: (id) => `${RACINE}/varelo/operations?reception=${q(id)}`,
+  /* E2 : un client du groupe au-dessus de son plafond d'encours */
+  grp_ref_objets: (id) => `${RACINE}/varelo/finance?objet=${q(id)}`,
+  grp_reportings_echeances: (id) => `${RACINE}/varelo/operations?echeance=${q(id)}`,
+  /* objet_id porte un entite_id (b1_08) */
+  grp_societes: (id) => `${RACINE}/varelo/groupe?societe=${q(id)}`,
 };
 
 export function moduleDeObjet(objet_type: string | null | undefined): string | null {
@@ -129,8 +156,18 @@ export function moduleDeObjet(objet_type: string | null | undefined): string | n
    Le point du matin de Tavaro (lot 2a, omega/SOCLE-EXTRAITS-TAVARO.sql)
    écrit « /tavaro/factures », sans /espace : une route qui n'a jamais
    existé. Un lien qui commence par le nom d'un module mène à sa page. */
+/* les repères historiques du point du matin de Tavaro (E13-E19) : la facturation des retours
+   et les factures mènent aux Retours à facturer, les avoirs à décider à la file « À valider » */
+const TAVARO_SOCLE: Record<string, string> = {
+  "/tavaro/facturation": `${RACINE}/tavaro/retours?famille=a_valider`,
+  "/tavaro/factures": `${RACINE}/tavaro/retours`,
+  "/tavaro/avoirs": `${RACINE}/validations`,
+};
+
 function versEspace2(lien: string): string | null {
   if (lien.startsWith(RACINE)) return lien;
+  const socle = TAVARO_SOCLE[lien.split("?")[0]];
+  if (socle) return socle;
   if (/^\/espace(\/|\?|$)/.test(lien)) return lien.includes("ancien=1") ? lien : lien.replace(/^\/espace/, RACINE);
   const nu = lien.match(/^\/([a-z0-9]+)[^?]*(\?.*)?$/);
   return nu && moduleDe(nu[1]) ? `${RACINE}/${nu[1]}${nu[2] ?? ""}` : null;

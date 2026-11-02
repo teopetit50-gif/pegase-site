@@ -1,0 +1,594 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO, fiche d'un contrat — Linear, page d'un ticket (OME-19), au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/linear-ticket.md
+   (1440×900 sombre et clair, paliers 1024, 768, 390). Préfixe tav-t-.
+
+   Repères (px CSS, depuis le bord de la carte) :
+     en-tête     44, filet bas 0.5 ; fil : lien 24 (r 8, p 0 5 0 4), « › »
+                 13/500 tertiaire (m −2 8 0), ticket 20 (r 6, p 2 4) 13/500 ;
+                 à droite boutons « Accept » 28 (12/500, r 9999, p 0 10 0 8)
+     outils      44 flottante à droite : ronds pleins de 28
+     principal   à 47 du bord, 667.5 de large, contenu à 14 ; titre 24/600/32
+                 −0.16 ; description 15/450/24 −0.1 (p 10 14 16, m 0 −14) ;
+                 deux ronds 28 ; « Sub-issues » à 8 : en-tête 32 (repli 24,
+                 r 9999, p 0 12 0 6, 12/500 tertiaire ; compte 12/450),
+                 rangées 36 (r 8, statut 14 à 39, titre 13/500 à 62) ;
+                 filet 0.5 ; « Activity » 15/600/23 ; événements 12/450/16.8
+                 tertiaires, avatar 14 ; carte commentaire r 8, bd 0.5
+     propriétés  à 763 du bord, 375.7 de large, collante ; titres 13/500
+                 tertiaires (p 0 8) ; pilules 28 (r 9999, p 0 10 0 6, écart
+                 6, 13/500 secondaire, vide tertiaire), pas de 32 ;
+                 étiquettes 23 (p 0 8, pastille 9)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  --tav-t-com: lch(9.232 0.85 272);
+  --tav-t-com-bord: lch(16.793 1.93 272);
+  --tav-t-com-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tav-t-com-texte: lch(90.826 1.425 272);
+  --tav-t-com-date: lch(63.304 1.425 272);
+  --tav-t-triage: lch(66 80 48);
+  --tav-t-encours: lch(80 90 85);
+  --tav-t-fait: lch(48 59.31 288.43);
+  --tav-t-rouge: lch(58% 73 29);
+  --tav-t-selection: lch(12.4 1.2 272);
+}
+html[data-v2-theme="light"] .v2 .tav {
+  --tav-t-com: lch(100 0 282);
+  --tav-t-com-bord: lch(91.9 0 282);
+  --tav-t-com-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tav-t-com-texte: lch(20 1 282);
+  --tav-t-com-date: lch(40 1 282);
+  --tav-t-selection: lch(92.94 0.5 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav {
+    --tav-t-com: lch(100 0 282);
+    --tav-t-com-bord: lch(91.9 0 282);
+    --tav-t-com-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tav-t-com-texte: lch(20 1 282);
+    --tav-t-com-date: lch(40 1 282);
+    --tav-t-selection: lch(92.94 0.5 282);
+  }
+}
+
+.v2 .tav .tav-t {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ——— en-tête ——— */
+.v2 .tav .tav-t-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px 0 10px;
+  border-bottom: 0.5px solid var(--tav-carte-bord);
+}
+.v2 .tav .tav-t-fil {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.v2 .tav .tav-t-fil-lien {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 5px 0 4px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-t-fil-lien:hover,
+.v2 .tav .tav-t-fil-ticket:hover {
+  background: var(--tav-survol-onglet);
+}
+.v2 .tav .tav-t-fil-sep {
+  margin: -2px 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-fil-ticket {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  height: 20px;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.v2 .tav .tav-t-fil-ticket h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-t-fil-id {
+  display: inline-flex;
+  margin-right: 5.6px;
+}
+.v2 .tav .tav-t-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .tav .tav-t-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.v2 .tav .tav-t-action svg {
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-action:hover:not(:disabled) {
+  background: var(--tav-survol-onglet);
+}
+.v2 .tav :is(.tav-t-action, .tav-rond, .tav-t-pilule):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— corps : la barre d'outils flotte en haut à droite ——— */
+.v2 .tav .tav-t-defile {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.v2 .tav .tav-t-outils {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+.v2 .tav .tav-rond--plein {
+  background: var(--tav-bouton);
+}
+.v2 .tav .tav-t-corps {
+  display: flex;
+  align-items: flex-start;
+  gap: 48.5px;
+  padding: 0 48px 48px 47px;
+}
+.v2 .tav .tav-t-principal {
+  flex: 1 1 667.5px;
+  min-width: 0;
+  max-width: 667.5px;
+  padding-top: 59px;
+}
+.v2 .tav .tav-t-titre {
+  padding: 0 14px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-t-description {
+  margin-top: 14px;
+  padding: 10px 14px 16px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-t-description p + p {
+  margin-top: 8px;
+}
+.v2 .tav .tav-t-attention {
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-petits {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 0 0;
+  margin: 8px 0 0 0;
+}
+.v2 .tav .tav-t-replis {
+  display: none;
+}
+
+/* ——— blocs « Sub-issues » ——— */
+.v2 .tav .tav-t-bloc {
+  margin: 0 0 8px 8px;
+}
+.v2 .tav .tav-t-petits + .tav-t-bloc {
+  margin-top: 0;
+}
+.v2 .tav .tav-t-bloc-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+}
+.v2 .tav .tav-t-repli {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 12px 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-repli:hover {
+  background: var(--tav-survol-onglet);
+}
+.v2 .tav .tav-t-bloc-compte {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-rangees {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tav .tav-t-rangee {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 9px;
+  width: 100%;
+  height: 36px;
+  padding: 0 8px 0 39px;
+  border-radius: 8px;
+  text-align: left;
+  color: var(--tav-t1);
+}
+.v2 .tav button.tav-t-rangee:hover,
+.v2 .tav .tav-t-rangee[aria-expanded="true"] {
+  background: var(--tav-survol);
+}
+.v2 .tav .tav-t-rangee-icone {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-rangee-titre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-t-rangee-droite {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tav-t3);
+  white-space: nowrap;
+}
+.v2 .tav .tav-t-gris {
+  font-weight: 450;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-rouge {
+  color: var(--tav-t-rouge);
+}
+.v2 .tav .tav-t-statut[data-etat="fait"] {
+  color: var(--tav-t-fait);
+}
+.v2 .tav .tav-t-statut[data-etat="cours"] {
+  color: var(--tav-t-encours);
+}
+.v2 .tav .tav-t-statut[data-etat="tri"] {
+  color: var(--tav-t-triage);
+}
+.v2 .tav .tav-t-statut[data-etat="afaire"],
+.v2 .tav .tav-t-statut[data-etat="annule"] {
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-detail {
+  margin: 4px 0 8px 39px;
+  padding: 12px 14px;
+  border: 0.5px solid var(--tav-t-com-bord);
+  border-radius: 8px;
+  background: var(--tav-t-com);
+  box-shadow: var(--tav-t-com-ombre);
+  font-size: 13px;
+}
+.v2 .tav .tav-t-detail .tav-t-rangee {
+  padding-left: 8px;
+}
+.v2 .tav .tav-t-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.v2 .tav .tav-t-electronique :where(button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tav-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+
+/* ——— activité ——— */
+.v2 .tav .tav-t-filet {
+  height: 0;
+  margin: 20px 0 0 14px;
+  border: 0;
+  border-top: 0.5px solid var(--tav-carte-bord);
+}
+.v2 .tav .tav-t-activite-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  margin-top: 20px;
+  padding: 0 14px;
+}
+.v2 .tav .tav-t-activite-tete h3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-t-journal {
+  font-size: 12px;
+  font-weight: 500;
+}
+.v2 .tav .tav-t-evenements {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 14px 0 18px;
+}
+.v2 .tav .tav-t-evenement {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-evenement svg {
+  flex: none;
+  margin-right: 4px;
+}
+.v2 .tav .tav-t-evenement > span[aria-hidden="true"] {
+  font-weight: 600;
+}
+.v2 .tav .tav-t-qui {
+  font-weight: 500;
+}
+.v2 .tav .tav-t-commentaire {
+  margin: 18px 0 0 6px;
+  padding: 12px 16px;
+  border: 0.5px solid var(--tav-t-com-bord);
+  border-radius: 8px;
+  background: var(--tav-t-com);
+  box-shadow: var(--tav-t-com-ombre);
+}
+.v2 .tav .tav-t-commentaire-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.v2 .tav .tav-t-commentaire-tete strong {
+  font-weight: 500;
+  color: var(--tav-t1);
+}
+.v2 .tav .tav-t-commentaire-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--tav-actif);
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-t-commentaire-date {
+  font-weight: 450;
+  color: var(--tav-t-com-date);
+}
+.v2 .tav .tav-t-commentaire-corps {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--tav-t-com-texte);
+}
+.v2 .tav .tav-t-lien {
+  color: var(--tav-t1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ——— propriétés ——— */
+.v2 .tav .tav-t-proprietes {
+  position: sticky;
+  top: 0;
+  flex: 0 0 375.7px;
+  display: flex;
+  flex-direction: column;
+  padding: 75px 0 0 6px;
+  min-width: 0;
+}
+.v2 .tav .tav-t-prop-titre {
+  height: 16px;
+  margin-bottom: 10px;
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-prop-liste,
+.v2 .tav .tav-t-prop-etiquettes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 33px;
+}
+.v2 .tav .tav-t-prop-etiquettes {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding-left: 6px;
+}
+.v2 .tav .tav-t-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  white-space: nowrap;
+}
+.v2 .tav .tav-t-pilule > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .tav .tav-t-pilule svg {
+  flex: none;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-t-pilule[data-vide] {
+  color: var(--tav-t3);
+}
+.v2 .tav button.tav-t-pilule:hover:not(:disabled) {
+  background: var(--tav-survol-onglet);
+}
+.v2 .tav .tav-t-gestes .tav-t-pilule {
+  background: var(--tav-bouton);
+}
+.v2 .tav .tav-t-etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 23px;
+  padding: 0 8px;
+  border: 0.5px solid var(--tav-puce-bord);
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-t-pastille {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* ——— volet (ticket ouvert à droite de l'Inbox) : mêmes briques, une colonne ——— */
+.v2 .tav .tav-t[data-volet] .tav-t-corps {
+  padding: 0 14px 48px 0;
+}
+.v2 .tav .tav-t[data-volet] .tav-t-principal {
+  max-width: none;
+  padding: 21.75px 0 0 14px;
+}
+.v2 .tav .tav-t[data-volet] .tav-t-proprietes {
+  display: none;
+}
+.v2 .tav .tav-t[data-volet] .tav-t-replis {
+  display: flex;
+}
+.v2 .tav .tav-t[data-volet] .tav-t-outils {
+  display: none;
+}
+
+/* ——— 1024 et moins : la colonne des propriétés passe sous le titre ——— */
+.v2 .tav .tav-t-replis {
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px 0;
+}
+.v2 .tav .tav-t-replis .tav-t-pilule {
+  height: 24px;
+  padding: 0 8px 0 6px;
+  background: var(--tav-bouton);
+  font-size: 12px;
+}
+.v2 .tav .tav-t-replis .tav-t-pilule svg {
+  width: 14px;
+  height: 14px;
+}
+@media (max-width: 1024px) {
+  .v2 .tav .tav-t-proprietes {
+    display: none;
+  }
+  .v2 .tav .tav-t-replis {
+    display: flex;
+  }
+  .v2 .tav .tav-t-corps {
+    padding: 0 14px 48px 0;
+  }
+  .v2 .tav .tav-t-principal {
+    max-width: none;
+  }
+  .v2 .tav .tav-t-action span {
+    display: none;
+  }
+  .v2 .tav .tav-t-action {
+    width: 28px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tav .tav-t-replis .tav-t-pilule {
+    height: 28px;
+  }
+  .v2 .tav .tav-t-rangee {
+    padding-left: 12px;
+  }
+  .v2 .tav .tav-t-rangee-droite {
+    display: none;
+  }
+  .v2 .tav .tav-t-detail {
+    margin-left: 0;
+  }
+  .v2 .tav .tav-t-defile {
+    overflow: visible;
+  }
+}
+.v2 .tav .tav-t-statut {
+  display: inline-flex;
+}

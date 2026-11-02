@@ -46,7 +46,9 @@ type Props = { source: Source; contexte: Contexte | null; client_id: string; soc
 type Filtre = "a_faire" | "faits" | "tous";
 const nouvelId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
-export default function Reportings({ source, contexte, client_id, societes, onFait }: Props) {
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useReportingsGroupe({ source, contexte, client_id, onFait }: Omit<Props, "societes">) {
   const [obligations, setObligations] = useState<Obligation[]>(OBLIGATIONS_EXEMPLE);
   const [faits, setFaits] = useState<Record<string, Fait>>(FAITS_EXEMPLE);
   const [reels, setReels] = useState<Du[] | null>(null);
@@ -128,6 +130,11 @@ export default function Reportings({ source, contexte, client_id, societes, onFa
     [source, charger, onFait],
   );
 
+  return { obligations, setObligations, faits, setFaits, reels, setReels, erreur, setErreur, filtre, setFiltre, charger, tous, liste, compte, role, moi, peutSaisir, peutMarquer, peutArreter, ajout, setAjout, cible, setCible, enregistrer, marquer, arreter };
+}
+
+export default function Reportings({ source, contexte, client_id, societes, onFait }: Props) {
+  const { reels, erreur, filtre, setFiltre, liste, compte, moi, peutSaisir, peutMarquer, peutArreter, ajout, setAjout, cible, setCible, enregistrer, marquer, arreter } = useReportingsGroupe({ source, contexte, client_id, onFait });
   return (
     <section id="vrl-reportings" className="esp-carte" aria-label="Reportings dus" style={{ marginBottom: 16 }}>
       <div className="esp-carte-tete">
@@ -215,7 +222,7 @@ export default function Reportings({ source, contexte, client_id, societes, onFa
   );
 }
 
-function DialogueAjout({ societes, moi, onFermer, enregistrer, onFait }: {
+export function DialogueAjout({ societes, moi, onFermer, enregistrer, onFait }: {
   societes: Societe[];
   moi: string | null;
   onFermer: () => void;
@@ -311,7 +318,7 @@ function DialogueAjout({ societes, moi, onFermer, enregistrer, onFait }: {
   );
 }
 
-function DialogueMarquer({ d, onFermer, marquer, onFait }: { d: Du; onFermer: () => void; marquer: (d: Du, s: "envoye" | "dispense", date: string, note: string) => Promise<void>; onFait: (m: string) => void }) {
+export function DialogueMarquer({ d, onFermer, marquer, onFait }: { d: Du; onFermer: () => void; marquer: (d: Du, s: "envoye" | "dispense", date: string, note: string) => Promise<void>; onFait: (m: string) => void }) {
   const jour = aujourdhui();
   const [statut, setStatut] = useState<"envoye" | "dispense">("envoye");
   const [date, setDate] = useState(jour);

@@ -1,0 +1,357 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — le socle des copies 1:1 de Plain (02/11/2026). Préfixe tamp-.
+
+   Jetons : les variables --color-* de Plain relevées au getComputedStyle
+   (releves/plain-commun.md), clair et sombre. Plain suit le thème du
+   système ; ici, le thème d'espace2 (html[data-v2-theme]).
+
+   Cadre : la carte <main> de Plain — zone p 8px, carte r 12px ; clair :
+   fond #fff, ombre 0 0 0 1px #20272c14, 0 1px 1px #20272c14 ; sombre :
+   fond #1a191b et l'ombre relevée. La barre latérale de Plain (345)
+   n'appartient pas à la page copiée : la coquille d'espace2 (304) en
+   tient la place. Polices : Inter (graisse « medium » = 550) ; Whyte
+   (commerciale, Dinamo) → --v2-titre (Manrope, OFL), substitut retenu par
+   les copies Plain d'espace2 (components/espace2/lin/plain-*.css).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tamp {
+  /* sombre */
+  --p-fond-1: #1a191b;
+  --p-fond-2: #121113;
+  --p-texte-1: #eeeef0;
+  --p-texte-2: #b5b2bc;
+  --p-icone-1: #98979f;
+  --p-icone-2: #72707b;
+  --p-remplir-1: #232225;
+  --p-remplir-2: #2b292d;
+  --p-remplir-3: #323035;
+  --p-bord-1: #2b292d;
+  --p-bord-2: #323035;
+  --p-bord-3: #49474e;
+  --p-plein-1: #eeeef0;
+  --p-bleu-texte-2: #9dafff;
+  --p-bleu-icone-1: #5696ff;
+  --p-bleu-fond-2: #0e111f;
+  --p-bleu-plein: #5c67f4;
+  --p-bleu-focus: #5159e5;
+  --p-vert-icone-1: #18b562;
+  --p-vert-plein-2: #00c770;
+  --p-vert-texte-1: #b2f2c0;
+  --p-rouge-icone-1: #f3625c;
+  --p-rouge-fond-2: #18100f;
+  --p-rouge-texte-1: #ffd2cc;
+  --p-jaune-icone-1: #d28f19;
+  --p-neutre-8: #625f69;
+  --p-vide: #625f69;
+  --p-non: #49474e;
+  --p-carte: #1a191b;
+  --p-carte-ombre: rgba(32, 39, 44, 0.08) 0 1px 0, rgba(32, 39, 44, 0.08) 0 2px 5px, rgba(255, 255, 255, 0.02) 1px 1px 2px inset, rgba(255, 255, 255, 0.1) 0 0 1px inset;
+  --p-bouton-ombre: rgba(32, 39, 44, 0.08) 0 1px 0, rgba(32, 39, 44, 0.08) 0 2px 5px, rgba(22, 26, 38, 0.08) 0 0 0 1px inset, rgba(255, 255, 255, 0.12) 0 0 1px 1px inset, rgba(0, 0, 0, 0.12) 0 -1px 1px inset;
+  --p-menu-ombre: rgba(32, 39, 44, 0.24) 0 1px 2px, rgba(32, 39, 44, 0.08) 0 2px 6px 2px, rgba(32, 39, 44, 0.08) 0 2px 8px;
+  --p-pastille-fond: #232225;
+  --p-pastille-bord: #323035;
+  --p-kbd: #b5b2bc;
+  --p-kbd-fond: #2b292d;
+  --p-kbd-bord: #49474e;
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--p-fond-2);
+  color: var(--p-texte-1);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-v2-theme="light"] .v2 .tamp {
+  --p-fond-1: #fff;
+  --p-fond-2: #f9f9fc;
+  --p-texte-1: #1f1f28;
+  --p-texte-2: #636370;
+  --p-icone-1: #8e8e9c;
+  --p-icone-2: #adadb7;
+  --p-remplir-1: #f0f0f5;
+  --p-remplir-2: #e7e7ef;
+  --p-remplir-3: #e0e0e9;
+  --p-bord-1: #e7e7ef;
+  --p-bord-2: #e0e0e9;
+  --p-bord-3: #cdcddb;
+  --p-plein-1: #1f1f28;
+  --p-bleu-texte-2: #4a52d1;
+  --p-bleu-icone-1: #448bff;
+  --p-bleu-fond-2: #f7f9ff;
+  --p-bleu-focus: #525cdb;
+  --p-vert-icone-1: #00ab5f;
+  --p-vert-texte-1: #074022;
+  --p-rouge-icone-1: #f14e4b;
+  --p-rouge-fond-2: #fff7f7;
+  --p-rouge-texte-1: #651818;
+  --p-jaune-icone-1: #e79d00;
+  --p-neutre-8: #babaca;
+  --p-vide: #babaca;
+  --p-non: #cdcddb;
+  --p-carte: #fff;
+  --p-carte-ombre: 0 0 0 1px #20272c14, 0 1px 1px #20272c14;
+  --p-bouton-ombre: #161a2614 0 0 0 1px inset, #ffffff33 0 0 3px 1px inset, #0000001f 0 -1px 2px inset;
+  --p-pastille-fond: #fff;
+  --p-pastille-bord: #e7e7ef;
+  --p-kbd: #636370;
+  --p-kbd-fond: #fff;
+  --p-kbd-bord: #e7e7ef;
+}
+
+.v2 .tamp *,
+.v2 .tamp *::before,
+.v2 .tamp *::after {
+  box-sizing: border-box;
+}
+.v2 .tamp :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.v2 .tamp :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .tamp :where(h1, h2, h3, p, ul, ol, dl, dd) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .tamp :focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--p-bleu-focus);
+}
+
+.v2 .tamp .tamp-carte {
+  position: relative;
+  display: flex;
+  height: calc(100dvh - 48px - 16px);
+  background: var(--p-carte);
+  border-radius: 12px;
+  box-shadow: var(--p-carte-ombre);
+  overflow: hidden;
+}
+
+/* ——— briques partagées (plain-commun.md) ——— */
+.v2 .tamp .tamp-titre {
+  font-family: var(--v2-titre);
+  font-weight: 400;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-fantome {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-1);
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-fantome:hover {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-fantome svg {
+  flex: none;
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-secondaire {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 8px 12px 8px 8px;
+  border-radius: 6px;
+  background: var(--p-fond-1);
+  box-shadow: var(--p-bouton-ombre);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-1);
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-secondaire svg {
+  flex: none;
+  color: var(--p-icone-2);
+}
+.v2 .tamp .tamp-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 7px;
+  border-radius: 6px;
+  color: var(--p-icone-2);
+}
+.v2 .tamp .tamp-icone:hover {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 2px;
+  border: 1px solid var(--p-kbd-bord);
+  border-radius: 4px;
+  background: var(--p-kbd-fond);
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-kbd);
+}
+.v2 .tamp .tamp-recherche {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 320px;
+  height: 40px;
+}
+.v2 .tamp .tamp-recherche svg {
+  position: absolute;
+  left: 12px;
+  color: var(--p-icone-1);
+  pointer-events: none;
+}
+.v2 .tamp .tamp-recherche input {
+  width: 100%;
+  height: 40px;
+  padding: 9px 12px 9px 38px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--p-fond-1);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--p-texte-1);
+  outline: none;
+}
+.v2 .tamp .tamp-recherche input::placeholder {
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-menu {
+  position: absolute;
+  z-index: 40;
+  padding: 4px 0;
+  border-radius: 10px;
+  background: var(--p-fond-1);
+  box-shadow: var(--p-menu-ombre);
+}
+.v2 .tamp .tamp-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 8px);
+  min-height: 28px;
+  margin: 0 4px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--p-texte-1);
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-menu-option:hover,
+.v2 .tamp .tamp-menu-option:focus-visible {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-menu-option svg {
+  flex: none;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-menu-option--grand {
+  min-height: 36px;
+  padding: 8px;
+  font-size: 14px;
+}
+.v2 .tamp .tamp-menu-sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--p-bord-1);
+}
+.v2 .tamp .tamp-pastille {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 0 8px 0 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--p-texte-1);
+  white-space: nowrap;
+  isolation: isolate;
+}
+.v2 .tamp .tamp-pastille::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: 5px;
+  background: var(--p-pastille-fond);
+  z-index: -1;
+}
+.v2 .tamp .tamp-pastille::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--p-pastille-bord);
+  border-radius: 6px;
+  pointer-events: none;
+}
+.v2 .tamp .tamp-pastille--nue {
+  padding: 0 8px;
+}
+.v2 .tamp .tamp-vide {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-vide);
+}
+.v2 .tamp .tamp-oui {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-oui::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--p-vert-plein-2);
+}
+.v2 .tamp .tamp-oui[data-non]::before {
+  background: var(--p-non);
+}
+
+/* ——— 768 et moins : la carte prend la page, sans rayon (plain-commun.md, paliers) ——— */
+@media (max-width: 768px) {
+  .v2 .tamp {
+    padding: 0;
+    background: var(--p-carte);
+  }
+  .v2 .tamp .tamp-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+}

@@ -1,0 +1,188 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Settings › Team de Linear, au 1:1 (29/10/2026). Relevé au
+   getComputedStyle, fenêtre 1440 × 900 puis 390 × 844 :
+   docs/refonte-metiers/releves/linear-team-settings.md.
+   Préfixe de classes : lts-. Première page : LORANI, les réglages d'un
+   projet (/espace2/lorani/reglages, components/espace2/lorani/Reglages.tsx).
+
+   Couleurs : les jetons --lin-* de ./lin.css (clair et sombre). Tout le
+   reste — hauteurs, marges, rayons, polices, graisses — est la mesure de
+   Linear, recopiée.
+
+   Repères (px, depuis le bord du panneau) :
+     barre haute       collante, 80 de haut, dégradé du fond (plein sur 40,
+                       transparent à 80) ; lien retour 28 à x 8, y 11 :
+                       padding 0 8, chevron 14, 13/500, 6 d'écart
+     colonne           640 centrée, zone padding 0 40 ; 64 sous le haut
+     en-tête           padding 0 16, écart 4 ; titre 24/500/32 −0.16 ;
+                       ligne de 24 : aide 13/450/22 et bouton 24 à droite
+                       (padding 0 6 0 8, 12/500, icône 14)
+     sections          32 sous l'en-tête, 48 entre elles ; titre 15/500/23,
+                       padding 0 16, 16 au-dessus de la carte, 12 au-dessus
+                       du titre
+     carte             rayon 10, anneau 0.5 et ombres en box-shadow
+     rangée            65 : padding 16, écart 12 ; case 32 rayon 6, icône 16 ;
+                       titre 13/500, description 12/450 (3 d'écart, « … ») ;
+                       valeur 12/450 ; chevron 16 ; trait 0.5 en retrait de 16
+     survol            fond de la rangée ; coins arrondis aux extrémités
+     390               zone padding 0 22 ; rangées padding 16 10.67 ; la
+                       description passe à la ligne ; bouton de l'en-tête 28
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .lin.lts {
+  display: block;
+  padding-bottom: 64px;
+  --lts-ombre-carte: var(--lin-anneau), 0 0.5px 1px 1px lch(0 0 0 / 0.3);
+  --lts-case: var(--lin-onglet-detail);
+}
+html[data-v2-theme="light"] .v2 .lin.lts {
+  --lts-ombre-carte: 0 0 0 0.5px lch(0 0 0 / 0.09), 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .lin.lts {
+    --lts-ombre-carte: 0 0 0 0.5px lch(0 0 0 / 0.09), 0 3px 6px -2px lch(0 0 0 / 0.02), 0 1px 1px 0 lch(0 0 0 / 0.04);
+  }
+}
+
+/* ——— la barre haute collante et le lien retour ——— */
+.v2 .lts-barre {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 80px;
+  margin-bottom: -80px;
+  padding: 11px 8px 0;
+  background: linear-gradient(var(--lin-fond) 40px, transparent 80px);
+  pointer-events: none;
+}
+.v2 .lts-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+  pointer-events: auto;
+  transition: background 0.1s, color 0.1s;
+}
+.v2 .lts-retour svg { width: 14px; height: 14px; }
+.v2 .lts-retour:hover { background: var(--lin-survol); color: var(--lin-titre); }
+.v2 .lts-retour:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; }
+
+/* ——— la colonne de 640 ——— */
+.v2 .lts-zone { padding: 64px 40px 0; }
+.v2 .lts-colonne { max-width: 640px; margin: 0 auto; }
+
+/* l'en-tête : titre, puis la ligne d'aide et son bouton */
+.v2 .lts-tete { display: flex; flex-direction: column; gap: 4px; padding: 0 16px; }
+.v2 .lin .lts-titre {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--lin-titre);
+}
+.v2 .lts-sous { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 24px; }
+.v2 .lts-aide { margin: 0; min-width: 0; font-size: 13px; font-weight: 450; line-height: 22px; color: var(--lin-second); }
+.v2 .lts-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0 6px 0 8px;
+  border-radius: 9999px;
+  border: 0.5px solid transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .lts-bouton svg { width: 14px; height: 14px; color: var(--lin-second); }
+.v2 .lts-bouton:hover { background: var(--lin-survol); }
+.v2 .lts-bouton:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; }
+
+/* les sections : 32 sous l'en-tête, 48 entre elles */
+.v2 .lts-sections { display: flex; flex-direction: column; gap: 48px; margin-top: 32px; }
+.v2 .lts-section { margin: 0; padding: 0; border: 0; min-width: 0; }
+.v2 .lts-section + .lts-section { padding-top: 12px; }
+.v2 .lin .lts-h3 { margin: 0 0 16px; padding: 0 16px; font-size: 15px; font-weight: 500; line-height: 23px; color: var(--lin-titre); }
+
+/* ——— la carte et ses rangées de 65 ——— */
+.v2 .lts-carte {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: 10px;
+  background: var(--lin-detail);
+  box-shadow: var(--lts-ombre-carte);
+}
+.v2 .lts-carte > li { position: relative; }
+.v2 .lts-carte > li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 0;
+  border-top: 0.5px solid var(--lin-trait);
+  pointer-events: none;
+}
+.v2 .lts-rangee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 65px;
+  padding: 16px;
+  transition: background 0.1s;
+}
+.v2 .lts-carte > li:first-child > .lts-rangee { border-radius: 10px 10px 0 0; }
+.v2 .lts-carte > li:last-child > .lts-rangee { border-radius: 0 0 10px 10px; }
+.v2 .lts-carte > li:only-child > .lts-rangee { border-radius: 10px; }
+.v2 a.lts-rangee:hover { background: var(--lin-survol); }
+.v2 a.lts-rangee:focus-visible { outline: 2px solid var(--lin-fait); outline-offset: -2px; }
+
+.v2 .lts-case {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  margin: 0;
+  border-radius: 6px;
+  background: var(--lts-case);
+  color: var(--lin-second);
+}
+.v2 .lts-case svg { width: 16px; height: 16px; }
+.v2 .lts-textes { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.v2 .lts-nom { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; line-height: 15.5px; color: var(--lin-titre); }
+.v2 .lts-desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 450; line-height: 14.5px; color: var(--lin-second); }
+.v2 .lts-droite { display: flex; align-items: center; gap: 4px; flex-shrink: 0; max-width: 45%; }
+.v2 .lts-valeur { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 450; color: var(--lin-second); font-variant-numeric: tabular-nums; }
+.v2 .lts-valeur[data-teinte] { color: var(--lin-teinte); }
+.v2 .lts-chevron { width: 16px; height: 16px; flex-shrink: 0; color: var(--lin-second); }
+
+/* une rangée sans geste (rien à régler ici) : pas de chevron, pas de survol */
+.v2 .lts-rangee--muette .lts-nom { font-weight: 450; color: var(--lin-second); }
+
+.v2 .lts-vide { margin: 0; padding: 48px 16px; font-size: 13px; color: var(--lin-second); text-align: center; }
+.v2 .lts-note { margin: 16px 16px 0; font-size: 12px; line-height: 18px; color: var(--lin-rouge); }
+
+/* ——— 390 ——— */
+@container principale (max-width: 640px) {
+  .v2 .lts-zone { padding: 64px 22px 0; }
+  .v2 .lts-sous { align-items: flex-start; }
+  .v2 .lts-bouton { height: 28px; }
+  .v2 .lts-rangee { padding: 16px 10.67px; }
+  .v2 .lts-desc { white-space: normal; overflow: visible; }
+  .v2 .lts-droite { max-width: 40%; }
+}

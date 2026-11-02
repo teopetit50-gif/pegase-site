@@ -1,80 +1,56 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   DALIRO › Chantiers (29/10/2026) : la page Projects de Linear en
-   affichage « Timeline », au 1:1 (relevé : docs/refonte-metiers/releves/
-   linear-timeline.md ; la frise : ./Frise.tsx, ../lin/linear-timeline.css).
+   DALIRO › Chantiers — Linear, Projects en affichage Timeline, au 1:1
+   (01/11/2026, règles de Teo : docs/refonte-metiers/REGLES.md). Relevés :
+   docs/refonte-metiers/releves/linear-timeline.md (29/10, clair) et le
+   complément Timeline de linear-projects.md (01/11, sombre et clair).
+   Styles : ./dal.css (cadre) et ./dal-timeline.css (préfixe dal-tl-).
 
-   Une ligne par chantier (useDaliro().liste, la même liste que l'écran de
-   /espace, btp_liste_chantiers) : à gauche l'icône du statut, le nom, la
-   santé (sa famille : bloqué, avenant à signer, passage à confirmer, en
-   cours), l'avancement de l'étape, le maître d'ouvrage ; à droite la barre
-   du début à la fin prévue, le lot en cours et le prochain passage (un
-   losange de la teinte de sa confirmation). Sans dates, la ligne reste,
-   sans barre, comme chez Linear.
-
-   Ce que l'écran d'avant faisait, et où c'est ici (inventaire daliro.md) :
-     B01  le titre, « Nouveau chantier » (F01, la même fenêtre que la Vue
-          d'ensemble, G01 par useDaliro().creer, puis la fiche du nouveau
-          chantier), la bascule exemple / réel (menu du cadre)
-     B03  les compteurs → pastilles de la barre d'outils, une par famille,
-          comptées comme le filtre (exclusives) ; le quota « x / quota »
-          dans la barre du titre ; ?famille= garde le filtre (la Vue
-          d'ensemble y renvoie)
-     B07  l'erreur de la base réelle, sous la barre d'outils
-     B08  la liste : triée par famille puis par nom ; la recherche par nom
-          ou commune (le bouton Filtre) ; un clic ouvre la fiche
-   Zoom de la frise : ?zoom=mois|trimestre|annee.
-
-   30/10/2026, choix de Teo (« celui de Float, exactement le même ») : la
-   page s'ouvre sur le planning (./Planning, le Schedule de Float : une
-   ligne par intervenant, les jours en colonnes, un bloc par passage à la
-   couleur de son chantier) ; la frise reste à un clic (?vue=frise).
-   ?semaine=<lundi> choisit la première semaine (un passage ouvert depuis
-   ailleurs, ?passage=, montre la sienne), ?echelle=mois resserre,
-   ?qui=equipes|sous-traitants filtre les lignes.
-   Un bloc glissé ou tiré dans le planning, ou les heures d'un passage
-   posées dans l'aperçu (poser, plus bas) : en base réelle, la porte
-   btp_deplacer_passage (b6_82) ; en exemple, la même règle en mémoire.
-
-   30/10/2026 — la frise qu'on touche (Teo : « le mec peut cliquer et
-   accéder aux fiches ») :
-     · Mois par défaut : on voit les semaines qui viennent, pas une année
-       presque vide ;
-     · sous chaque nom, la phrase la plus pressée du chantier (./enClair)
-       à la place des trois ronds sans texte (santé, avancement, maître
-       d'ouvrage) : il reste l'avancement et le maître d'ouvrage ;
-     · sur chaque barre, un pavé par passage prévu, de la couleur de la
-       réponse de l'intervenant (confirmé, sans réponse, refusé…) ;
-     · un clic sur la barre ou sur un pavé ouvre l'aperçu à droite
-       (./ApercuFrise : ce qu'il faut faire, les trois semaines à venir,
-       les portes de la fiche), sans quitter la frise. ?apercu=<chantier>,
-       ?passage=<passage> ; Échap referme. Le nom, à gauche, mène toujours
-       droit à la fiche.
+   Le planning façon Float (./Planning) et l'ancienne frise (./Frise)
+   disparaissent de cette page. Ce qu'ils portaient, rangé là où Linear
+   range ce genre de chose :
+     · une ligne par chantier (B08), triée par famille puis par nom ; à
+       gauche le nom (un clic : la fiche) et les quatre ronds de Linear —
+       santé = sa famille (B03), statut = l'hexagone rempli de l'avancement,
+       priorité = l'urgence de sa phrase la plus pressée (./enClair),
+       responsable = le maître d'ouvrage ;
+     · à droite la barre du début à la fin prévue, le nom au-dessus ; un
+       clic sur la barre ouvre le volet (Open sidebar, ./ApercuFrise) ;
+     · chaque passage prévu est un jalon (losange du sprite) posé sur la
+       barre : un clic l'ouvre dans le volet ; le glisser le déplace, le
+       glisser avec Maj l'étire (./deplacer, porte btp_deplacer_passage) ;
+       ses heures se posent dans le volet ;
+     · les familles et la recherche sont dans le bouton Filtre ; le zoom
+       (Mois, Trimestre, Année) dans « Année ▾ » et Display options ;
+       « Nouveau chantier » (F01, G01) à droite du titre.
+   Adresse : ?famille=, ?zoom=mois|trimestre (Année par défaut, comme la
+   référence), ?apercu=<chantier>, ?passage=<passage>.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { Check, CheckCheck, CircleDashed, Clock, HardHat, ListFilter, Plus, Send, UserRound, X } from "lucide-react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { HardHat } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { RACINE } from "@/components/espace2/modules";
 import { dateCourte } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
-import { CONFIRMATIONS, EXECUTIONS, FAMILLES, STATUTS_CHANTIER, type Famille } from "@/components/espace/daliro/etats";
+import { FAMILLES, STATUTS_CHANTIER, type Famille } from "@/components/espace/daliro/etats";
 import { famille } from "@/components/espace/daliro/liste";
-import type { Chantier, Confirmation, Passage, StatutChantier, Tableau } from "@/components/espace/daliro/types";
-import { Menu } from "../lin/Lin";
-import { IconeStatutProjet, type EtatProjet } from "../lin/icones";
+import type { Chantier, Passage, StatutChantier } from "@/components/espace/daliro/types";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
-import Frise, { estZoom, type LigneFrise, type PastilleFrise, type TeinteFrise, type Zoom } from "./Frise";
 import ApercuFrise from "./ApercuFrise";
-import Planning, { estDensite, lundiDe } from "./Planning";
 import { useDeplacer } from "./deplacer";
-import { CONFIRMATION_CLAIRE, jourLocal, qui, quand, resume } from "./enClair";
-import "@/components/espace/espace.css";
+import { jourLocal, qui, quand, resume, type TeinteClair } from "./enClair";
+import { DalCarte } from "./DalCadre";
+import { DalIcone } from "./DalIcone";
+import { IconePriorite, IconeSante, IconeStatut, NOM_PRIORITE } from "./IconesProjet";
+import { COULEUR_LOT, STATUT_LOT, lignesLots, type LigneLot } from "./ApercuChantier";
+import "../lin/lin.css";
+import "./dal-timeline.css";
 
 const MO_TYPES = [
   { cle: "professionnel", libelle: "Professionnel (promoteur, SCI, entreprise)" },
@@ -89,34 +65,53 @@ const PLACES = [
 const VIDE: NouveauChantier = { nom: "", reference: "", adresse: "", code_postal: "", commune: "", maitre_ouvrage_type: "professionnel", place_client: "titulaire", maitre_ouvrage_id: "" };
 
 const ORDRE: Record<Famille, number> = { bloque: 0, a_signer: 1, a_confirmer: 2, ouvert: 3 };
-/* les familles dites comme sur un chantier (les compteurs de la barre d'outils) */
 const FAMILLE_CLAIRE: Record<Famille, string> = { bloque: "Bloqués", a_signer: "Avenant à faire signer", a_confirmer: "Intervenant à relancer", ouvert: "En cours" };
-const ETAT: Record<StatutChantier, EtatProjet> = { preparation: "planifie", ouvert: "en-cours", suspendu: "en-cours", receptionne: "fait", clos: "fait", annule: "annule" };
-const teinteDe = (t: string): TeinteFrise => (t === "rouge" || t === "ambre" || t === "bleu" || t === "vert" ? t : "gris");
 const estFamille = (v: string | null): v is Famille => v === "bloque" || v === "a_signer" || v === "a_confirmer" || v === "ouvert";
-const initiales = (nom: string) =>
+
+/* l'échelle : px par jour (Année = relevé, 77,5 px le mois) */
+type Zoom = "mois" | "trimestre" | "annee";
+const ZOOMS: { cle: Zoom; libelle: string; px: number; pas: number }[] = [
+  { cle: "mois", libelle: "Mois", px: 24, pas: 7 },
+  { cle: "trimestre", libelle: "Trimestre", px: 8, pas: 14 },
+  { cle: "annee", libelle: "Année", px: 2.5, pas: 14 },
+];
+const MOIS = ["JANV.", "FÉVR.", "MARS", "AVR.", "MAI", "JUIN", "JUIL.", "AOÛT", "SEPT.", "OCT.", "NOV.", "DÉC."];
+const JOUR = 86_400_000;
+const jourCourt = (j: number) => {
+  const d = new Date(j * JOUR);
+  return `${d.getUTCDate()} ${MOIS[d.getUTCMonth()].toLowerCase()}`;
+};
+const versJour = (iso: string) => Math.floor(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10)) / JOUR);
+/* la colonne gauche (relevé : 320) ; la ligne d'aujourd'hui au milieu de la carte, à 1,5 px près
+   (captures de Linear : 595 sur une carte de 1187, 387,7 sur 772, 386,4 sur 768, 197 sur 390) */
+const GAUCHE = 320;
+const AUJ_DECALAGE = 1.5;
+const LIGNE = 72;
+
+/* couleur de l'icône de projet, par statut (couleurs relevées sur les icônes de projet de Linear) */
+const COULEUR_STATUT: Record<StatutChantier, string> = { preparation: "#f0bf00", ouvert: "#4cb782", suspendu: "#e78f41", receptionne: "#5e6ad2", clos: "#a2a6ac", annule: "#a2a6ac" };
+/* santé : la famille du chantier (On track / At risk / Off track / No updates) */
+const SANTE: Record<Famille, "off" | "risk" | "on"> = { bloque: "off", a_signer: "risk", a_confirmer: "risk", ouvert: "on" };
+/* priorité : l'urgence de sa phrase la plus pressée */
+const PRIORITE: Record<TeinteClair, 0 | 1 | 2 | 3 | 4> = { rouge: 1, ambre: 2, bleu: 3, gris: 4, vert: 0 };
+
+const initialesDe = (nom: string) =>
   nom
     .replace(/[^\p{L}\s-]/gu, " ")
     .trim()
     .split(/\s+/)
-    .filter((m) => m.length > 1 || /\p{Lu}/u.test(m))
+    .filter((m) => m.length > 1)
     .slice(0, 2)
     .map((m) => m[0]?.toUpperCase() ?? "")
     .join("");
 
-/* l'avancement de l'étape : un anneau de 16, rempli à proportion */
-function Avancement({ pct }: { pct: number | null }) {
-  const r = 6;
-  const c = 2 * Math.PI * r;
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true">
-      <circle cx="8" cy="8" r={r} fill="none" stroke="currentColor" strokeOpacity="0.3" strokeWidth="2" />
-      {pct ? <circle cx="8" cy="8" r={r} fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray={`${(c * Math.min(100, pct)) / 100} ${c}`} transform="rotate(-90 8 8)" strokeLinecap="round" /> : null}
-    </svg>
-  );
-}
+/* un jalon glissé : on suit le pointeur, et au lâcher on pose le nouveau jour */
+type Glisse = { id: string; x0: number; dx: number; etirer: boolean; bouge: boolean };
 
-export default function Chantiers() {
+/* lotsDe : la frise montée dans la fiche d'un chantier (onglet « Projets » de l'Initiative de
+   Linear, 02/11/2026) — une ligne par lot du chantier, sa barre du premier au dernier passage,
+   ses passages en jalons (mêmes gestes : glisser, Maj pour étirer, ouvrir) ; sans l'en-tête */
+export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
   const { source, pret, erreur, liste, quota, maitresOuvrage, creer, tableau, demanderTous, enLecture } = useDaliro();
   const toast = useToast();
   const params = useSearchParams();
@@ -124,11 +119,11 @@ export default function Chantiers() {
   const chemin = usePathname();
   const [q, setQ] = useState("");
   const aujourdhui = useMemo(() => jourLocal(), []);
+  const auj = versJour(aujourdhui);
 
   const filtre = estFamille(params.get("famille")) ? (params.get("famille") as Famille) : null;
   const zParam = params.get("zoom");
-  const zoom: Zoom = estZoom(zParam) ? zParam : "mois";
-  const vueFrise = params.get("vue") === "frise";
+  const zoom = ZOOMS.find((z) => z.cle === zParam) ?? ZOOMS[2];
   const apercuId = params.get("apercu");
   const passageId = params.get("passage");
   const lien = (modif: Record<string, string | null>) => {
@@ -140,14 +135,13 @@ export default function Chantiers() {
     const s = p.toString();
     return `${chemin}${s ? `?${s}` : ""}`;
   };
+  const ouvrir = (modif: Record<string, string | null>) => routeur.replace(lien(modif), { scroll: false });
+  const fermer = () => ouvrir({ apercu: null, passage: null });
 
-  /* les passages de la frise sont dans les tableaux : en base réelle, on les lit tous, une fois */
+  /* les passages sont dans les tableaux : en base réelle, on les lit tous, une fois */
   useEffect(() => {
     if (source === "reelle" && pret) demanderTous();
   }, [source, pret, demanderTous]);
-
-  const ouvrir = (modif: Record<string, string | null>) => routeur.replace(lien(modif), { scroll: false });
-  const fermer = () => ouvrir({ apercu: null, passage: null });
   useEffect(() => {
     if (!apercuId && !passageId) return;
     const touche = (e: KeyboardEvent) => {
@@ -158,7 +152,6 @@ export default function Chantiers() {
     return () => window.removeEventListener("keydown", touche);
   });
 
-  /* l'élément ouvert : le passage dit son chantier */
   const passageOuvert = useMemo(() => {
     if (!passageId) return null;
     for (const c of liste) {
@@ -168,10 +161,6 @@ export default function Chantiers() {
     return null;
   }, [passageId, liste, tableau]);
   const chantierOuvert = liste.find((c) => c.id === (passageOuvert?.chantier_id ?? apercuId)) ?? null;
-  const sParam = params.get("semaine");
-  const lundi = sParam && /^\d{4}-\d{2}-\d{2}$/.test(sParam) ? lundiDe(sParam) : lundiDe(passageOuvert?.debut ?? aujourdhui);
-
-  /* un bloc du planning glissé ou tiré, ou ses heures posées dans l'aperçu : ./deplacer (partagé avec Équipes) */
   const { changer, heures } = useDeplacer(aujourdhui);
 
   const tries = useMemo(
@@ -191,7 +180,8 @@ export default function Chantiers() {
     }
     return c;
   }, [liste]);
-  /* F01 : nouveau chantier, la fenêtre de la Vue d'ensemble (G01) */
+
+  /* F01 : nouveau chantier (G01) */
   const [nouveau, setNouveau] = useState(params.get("nouveau") === "1");
   const [envoi, setEnvoi] = useState(false);
   const [erreurNouveau, setErreurNouveau] = useState<string | null>(null);
@@ -216,243 +206,438 @@ export default function Chantiers() {
       setEnvoi(false);
     }
   };
-
   const ouverts = liste.filter((c) => c.statut === "ouvert" || c.statut === "suspendu").length;
 
   const recherche = q.trim().toLocaleLowerCase("fr");
   const visibles = tries.filter((c) => (!filtre || famille(c) === filtre) && (!recherche || `${c.nom} ${c.commune} ${c.code_postal} ${c.reference ?? ""}`.toLocaleLowerCase("fr").includes(recherche)));
 
-  const ligne = (c: Chantier): LigneFrise => {
-    const statut = STATUTS_CHANTIER[c.statut];
-    const t = tableau(c.id);
-    const pct = c.etape && c.etape.etapes ? c.etape.avancement_pct : null;
-    const p = c.prochain_passage;
-    const conf = p ? CONFIRMATIONS[p.confirmation] : null;
-    const lot = c.etape?.lot_libelle ?? null;
-    const enClair = resume(c, t, aujourdhui);
-    const passages = (t?.passages ?? []).filter((x) => x.statut !== "annule");
-    const aVenir = passages.filter((x) => x.statut === "prevu" && x.fin.slice(0, 10) >= aujourdhui).length;
-    const choisi = c.id === chantierOuvert?.id;
-    return {
-      cle: c.id,
-      niveau: 1,
-      icone: <IconeStatutProjet etat={ETAT[c.statut]} />,
-      teinteIcone: teinteDe(statut.teinte),
-      nom: c.nom,
-      sous: { texte: enClair.texte, teinte: enClair.teinte },
-      choisie: choisi,
-      href: `${RACINE}/daliro/chantiers/${encodeURIComponent(c.id)}`,
-      pilule: lot ?? (p ? `Passage ${quand(p.debut, aujourdhui)}` : undefined),
-      ronds: (
-        <>
-          <span className="ltl-rond" data-teinte={pct === null ? "gris" : pct === 100 ? "vert" : "ambre"} title={pct === null ? "Avancement : aucun lot posé" : `Avancement : ${pct} %${lot ? `, ${lot}` : ""}`} aria-label={pct === null ? "Avancement : aucun lot posé" : `Avancement : ${pct} %`} role="img">
-            <Avancement pct={pct} />
-          </span>
-          <span className="ltl-rond" data-liste="non" title={c.maitre_ouvrage_nom ? `Maître d'ouvrage : ${c.maitre_ouvrage_nom}` : "Maître d'ouvrage à désigner"} aria-label={c.maitre_ouvrage_nom ? `Maître d'ouvrage : ${c.maitre_ouvrage_nom}` : "Maître d'ouvrage à désigner"} role="img">
-            {c.maitre_ouvrage_nom ? <span className="ltl-avatar">{initiales(c.maitre_ouvrage_nom) || "?"}</span> : <UserRound aria-hidden="true" />}
-          </span>
-        </>
-      ),
-      barres:
-        c.date_debut || c.date_fin_prevue
-          ? [
-              {
-                cle: c.id,
-                debut: c.date_debut,
-                fin: c.date_fin_prevue,
-                libelle: lot ? `En cours : ${lot}` : statut.libelle,
-                meta: aVenir ? `${aVenir} passage${aVenir > 1 ? "s" : ""} à venir` : undefined,
-                titre: `${c.nom}, ${c.date_debut ? `du ${dateCourte(c.date_debut)}` : "sans date de début"} ${c.date_fin_prevue ? `au ${dateCourte(c.date_fin_prevue)}` : "sans fin prévue"} · cliquez pour l'aperçu`,
-                onClick: () => ouvrir({ apercu: c.id, passage: null }),
-                choisie: choisi && !passageOuvert,
-                /* sans tableau (base réelle pas encore lue), le losange du prochain passage, comme avant */
-                jalon: !t && p && conf ? { jour: p.debut, teinte: teinteDe(conf.teinte), titre: `Prochain passage ${quand(p.debut, aujourdhui)}` } : null,
-                /* sous les lots, la durée du chantier n'est plus qu'un trait */
-                fine: !!t,
-              },
-            ]
-          : [],
-    };
-  };
+  const tLots = lotsDe ? tableau(lotsDe) : null;
+  const filtreLots = params.get("lots");
+  const lots = useMemo(() => (tLots ? lignesLots(tLots).filter((x) => !filtreLots || x.lot.statut === filtreLots).sort((a, b) => a.lot.rang - b.lot.rang) : []), [tLots, filtreLots]);
+  const nbLignes = lotsDe ? lots.length : visibles.length;
 
-  /* sous chaque chantier, une ligne par lot qui a des passages : qui fait le lot, et ses passages en étiquettes */
-  const ICONE_REPONSE: Record<Confirmation, React.ReactNode> = {
-    confirmee: <Check aria-hidden="true" />,
-    demandee: <Send aria-hidden="true" />,
-    sans_reponse: <Clock aria-hidden="true" />,
-    declinee: <X aria-hidden="true" />,
-    non_demandee: <CircleDashed aria-hidden="true" />,
-  };
-  const pastille = (x: Passage): PastilleFrise => {
-    const fait = x.statut === "fait";
-    const conf = CONFIRMATION_CLAIRE[x.confirmation];
-    return {
-      cle: x.id,
-      debut: x.debut,
-      fin: x.fin,
-      texte: x.tache ?? qui(x),
-      sous: fait ? "fait" : conf.court,
-      teinte: fait ? "gris" : conf.teinte,
-      icone: fait ? <CheckCheck aria-hidden="true" /> : ICONE_REPONSE[x.confirmation],
-      titre: `${quand(x.debut, aujourdhui)} · ${qui(x)}${x.tache ? ` · ${x.tache}` : ""} · ${fait ? "fait" : conf.court} — cliquez pour le détail`,
-      onClick: () => ouvrir({ passage: x.id, apercu: null }),
-      choisi: x.id === passageOuvert?.id,
-    };
-  };
-  const lignesLots = (c: Chantier, t: Tableau | null): LigneFrise[] => {
-    if (!t) return [];
-    const passages = t.passages.filter((x) => x.statut !== "annule");
-    const parLot = new Map<string, Passage[]>();
-    for (const x of passages) parLot.set(x.lot_id ?? "", [...(parLot.get(x.lot_id ?? "") ?? []), x]);
-    const lots = [...t.lots].sort((a, b) => a.rang - b.rang || a.code.localeCompare(b.code));
-    const r: LigneFrise[] = [];
-    for (const lot of lots) {
-      const ps = parLot.get(lot.id);
-      if (!ps?.length) continue;
-      const qui = lot.tiers_nom ?? lot.equipe_nom ?? (lot.execution === "client" ? "Nos équipes" : EXECUTIONS[lot.execution]);
-      r.push({ cle: `${c.id}:${lot.id}`, niveau: 2, icone: null, nom: `${lot.code} · ${lot.libelle}`, sous: { texte: qui }, ronds: null, barres: [], pastilles: ps.map(pastille) });
+  /* ——— la frise : un an et demi autour d'aujourd'hui ——— */
+  const debutFrise = auj - 300;
+  const finFrise = auj + 420;
+  const largeur = (finFrise - debutFrise) * zoom.px;
+  const xJour = (j: number) => GAUCHE + (j - debutFrise) * zoom.px;
+  const mois = useMemo(() => {
+    const r: { j: number; libelle: string }[] = [];
+    const d = new Date(debutFrise * JOUR);
+    let a = d.getUTCFullYear();
+    let m = d.getUTCMonth() + 1;
+    for (;;) {
+      if (m > 11) {
+        m = 0;
+        a++;
+      }
+      const j = Math.floor(Date.UTC(a, m, 1) / JOUR);
+      if (j > finFrise) break;
+      r.push({ j, libelle: m === 0 ? `${MOIS[m]} ${a}` : MOIS[m] });
+      m++;
     }
-    const sans = parLot.get("");
-    if (sans?.length) r.push({ cle: `${c.id}:sans-lot`, niveau: 2, icone: null, nom: "Sans lot", sous: { texte: "passages à rattacher à un lot" }, ronds: null, barres: [], pastilles: sans.map(pastille) });
     return r;
+  }, [debutFrise, finFrise]);
+  const reperes = useMemo(() => {
+    const r: number[] = [];
+    /* les lundis, un sur deux (Linear, zoom Année : 5, 19 oct., 2, 16 nov.) ; le 1er janvier 1970 est un jeudi */
+    let j = debutFrise - ((debutFrise + 3) % 7);
+    if (zoom.pas === 14 && Math.floor((j + 3) / 7) % 2 !== 0) j += 7;
+    for (; j <= finFrise; j += zoom.pas) if (Math.abs(j - auj) * zoom.px > 24) r.push(j);
+    return r;
+  }, [debutFrise, finFrise, zoom.pas, zoom.px, auj]);
+
+  const zone = useRef<HTMLDivElement>(null);
+  const allerAujourdhui = () => {
+    const z = zone.current;
+    if (z) z.scrollLeft = xJour(auj) + zoom.px / 2 - (z.clientWidth / 2 + AUJ_DECALAGE);
+  };
+  useLayoutEffect(allerAujourdhui, [zoom.cle]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* le défilement de la frise : un chantier fini avant la partie visible montre « ← date »
+     au bord gauche de la frise (capture 390-sombre-timeline de Linear : flèche à 19 du bord
+     de la colonne gauche, date en texte quaternaire) ; un clic ramène sa barre en vue */
+  const [vu, setVu] = useState(0);
+  const suivreDefilement = () => {
+    const z = zone.current;
+    if (z && Math.abs(z.scrollLeft - vu) >= 1) setVu(z.scrollLeft);
+  };
+  const [glisse, setGlisse] = useState<Glisse | null>(null);
+  const lacher = (p: Passage, g: Glisse) => {
+    const jours = Math.round(g.dx / zoom.px);
+    setGlisse(null);
+    if (!g.bouge) {
+      ouvrir({ passage: p.id, apercu: null });
+      return;
+    }
+    if (jours) changer({ passage: p, chantierId: p.chantier_id, mode: g.etirer ? "etirer" : "deplacer", jours });
   };
 
-  const vide = !pret ? (
-    <p className="lin-vide">Lecture des chantiers…</p>
-  ) : liste.length === 0 ? (
-    <p className="lin-vide">
-      Aucun chantier.{" "}
-      <button type="button" className="lin-voir-tout" style={{ marginTop: 0 }} onClick={ouvrirNouveau}>
-        Créez votre premier chantier
-      </button>{" "}
-      : son nom, son adresse, son maître d&apos;ouvrage.
-    </p>
-  ) : (
-    <p className="lin-vide">{recherche ? "Aucun chantier ne correspond à la recherche." : "Rien dans cette famille."}</p>
-  );
+  const [menu, setMenu] = useState<null | "filtre" | "affichage" | "zoom">(null);
+  useEffect(() => {
+    if (!menu) return;
+    const dehors = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".dal-tl-pop")) setMenu(null);
+    };
+    const echap = (e: KeyboardEvent) => e.key === "Escape" && setMenu(null);
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [menu]);
 
-  return (
-    <div className="lin">
+  const jalons = (passages: Passage[]) =>
+    passages.map((p) => {
+              const g = glisse?.id === p.id ? glisse : null;
+              const x = xJour(versJour(p.debut)) + zoom.px / 2 + (g && !g.etirer ? g.dx : 0);
+              const etat = p.statut === "fait" ? "MilestoneStatusDone" : versJour(p.debut) <= auj && versJour(p.fin) >= auj ? "MilestoneStatusStarted" : "MilestoneStatusPlanned";
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="dal-tl-jalon"
+                  data-choisi={p.id === passageOuvert?.id ? "" : undefined}
+                  data-glisse={g?.bouge ? "" : undefined}
+                  style={{ left: x - 8 }}
+                  title={`${quand(p.debut, aujourdhui)} · ${qui(p)}${p.tache ? ` · ${p.tache}` : ""}${g ? ` → ${g.dx >= 0 ? "+" : ""}${Math.round(g.dx / zoom.px)} j` : " — glissez pour déplacer, Maj + glisser pour étirer"}`}
+                  aria-label={`Passage ${p.tache ?? ""} ${quand(p.debut, aujourdhui)}, ${qui(p)}`}
+                  disabled={p.statut === "fait"}
+                  onPointerDown={(e) => {
+                    if (e.button !== 0) return;
+                    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+                    setGlisse({ id: p.id, x0: e.clientX, dx: 0, etirer: e.shiftKey, bouge: false });
+                  }}
+                  onPointerMove={(e) => {
+                    if (!g) return;
+                    const dx = e.clientX - g.x0;
+                    setGlisse({ ...g, dx, bouge: g.bouge || Math.abs(dx) > 3 });
+                  }}
+                  onPointerUp={() => g && lacher(p, g)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      ouvrir({ passage: p.id, apercu: null });
+                    }
+                  }}
+                >
+                  <DalIcone nom={etat} />
+                </button>
+              );
+            });
+
+  /* une ligne de lot (frise de la fiche) : mêmes briques que la ligne d'un chantier */
+  const ligneLot = (x: LigneLot, i: number) => {
+    const l = x.lot;
+    const y = 32 + i * LIGNE;
+    const passages = (tLots?.passages ?? []).filter((p) => p.lot_id === l.id && p.statut !== "annule");
+    const d0 = passages.length ? Math.min(...passages.map((p) => versJour(p.debut))) : null;
+    const d1 = passages.length ? Math.max(...passages.map((p) => versJour(p.fin))) : null;
+    const xa = d0 !== null ? xJour(d0) : 0;
+    const xb = d1 !== null ? xJour(d1 + 1) : 0;
+    const nom = `${l.code} ${l.libelle}`;
+    return (
+      <div key={l.id} className="dal-tl-ligne" style={{ top: y }}>
+        <div className="dal-tl-cellule">
+          <div className="dal-tl-cellule-bloc">
+            <Link href={`${chemin}?onglet=argent&partie=lots`} className="dal-tl-nom" title={`${nom} — lots et déboursé`}>
+              <span className="dal-tl-icone" style={{ color: COULEUR_LOT[l.statut] }}>
+                <DalIcone nom="Project" />
+              </span>
+              <span className="dal-tl-nom-texte">{nom}</span>
+            </Link>
+            <span className="dal-tl-rond" role="img" aria-label={x.santeTexte} title={x.santeTexte}>
+              <IconeSante etat={x.sante} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={`Avancement ${x.pct ?? 0} %`} title={x.pct === null ? "Avancement non mesuré" : `Avancement ${x.pct} %`}>
+              <IconeStatut statut={STATUT_LOT[l.statut]} pct={x.pct ?? 0} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={`Priorité : ${NOM_PRIORITE[x.prio]}`} title={x.prioTexte}>
+              <IconePriorite n={x.prio} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={x.qui ?? "Exécutant à désigner"} title={x.qui ?? "Exécutant à désigner"}>
+              {x.qui ? <span className="dal-tl-avatar">{initialesDe(x.qui) || "?"}</span> : <DalIcone nom="UnassignedCircle" />}
+            </span>
+          </div>
+        </div>
+        {d0 !== null && d1 !== null && xb < vu + GAUCHE ? (
+          <button type="button" className="dal-tl-avant" style={{ left: vu + GAUCHE + 18 }} title={`${nom} : fini avant cette partie de la frise — y aller`} onClick={() => zone.current?.scrollTo({ left: Math.max(0, xa - GAUCHE - 40), behavior: "smooth" })}>
+            <span aria-hidden="true">←</span>
+            <span className="dal-tl-avant-date">{jourCourt(d1)}</span>
+          </button>
+        ) : null}
+        {d0 !== null && d1 !== null ? (
+          <>
+            <span className="dal-tl-libelle-voie" style={{ left: xa, width: Math.max(8, xb - xa), visibility: xb < vu + GAUCHE ? "hidden" : undefined }}>
+              <span className="dal-tl-libelle" style={{ left: GAUCHE + 13 }}>
+                {nom}
+              </span>
+            </span>
+            <button type="button" className="dal-tl-barre" style={{ left: xa, width: Math.max(8, xb - xa) }} title={`${nom} : passages du ${jourCourt(d0)} au ${jourCourt(d1)}`} aria-label={`${nom} : ouvrir le volet`} onClick={() => ouvrir({ apercu: lotsDe ?? null, passage: null })} />
+            {jalons(passages)}
+          </>
+        ) : null}
+      </div>
+    );
+  };
+
+  const ligne = (c: Chantier, i: number) => {
+    const fa = famille(c);
+    const t = tableau(c.id);
+    const r = resume(c, t, aujourdhui);
+    const pct = c.etape && c.etape.etapes ? c.etape.avancement_pct : 0;
+    const prio = PRIORITE[r.teinte];
+    const y = 32 + i * LIGNE;
+    const d0 = c.date_debut ? versJour(c.date_debut) : null;
+    const d1 = c.date_fin_prevue ? versJour(c.date_fin_prevue) : null;
+    const xa = d0 !== null ? xJour(d0) : d1 !== null ? xJour(debutFrise) : 0;
+    const xb = d1 !== null ? xJour(d1 + 1) : d0 !== null ? xJour(d0 + 1) : 0;
+    const passages = (t?.passages ?? []).filter((x) => x.statut !== "annule");
+    const choisi = c.id === chantierOuvert?.id && !passageOuvert;
+    return (
+      <div key={c.id} className="dal-tl-ligne" style={{ top: y }}>
+        <div className="dal-tl-cellule">
+          <div className="dal-tl-cellule-bloc">
+            <Link href={`${RACINE}/daliro/chantiers/${encodeURIComponent(c.id)}`} className="dal-tl-nom" title={`${c.nom} — ouvrir la fiche`}>
+              <span className="dal-tl-icone" style={{ color: COULEUR_STATUT[c.statut] }}>
+                <DalIcone nom="Project" />
+              </span>
+              <span className="dal-tl-nom-texte">{c.nom}</span>
+            </Link>
+            <span className="dal-tl-rond" role="img" aria-label={fa ? `Santé : ${FAMILLE_CLAIRE[fa]}` : "Santé : rien à signaler"} title={fa ? FAMILLE_CLAIRE[fa] : "Rien à signaler"}>
+              <IconeSante etat={fa ? SANTE[fa] : null} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={`${STATUTS_CHANTIER[c.statut].libelle}, avancement ${pct} %`} title={`${STATUTS_CHANTIER[c.statut].libelle} · ${pct} %${c.etape?.lot_libelle ? ` · ${c.etape.lot_libelle}` : ""}`}>
+              <IconeStatut statut={c.statut} pct={pct} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={`Priorité : ${NOM_PRIORITE[prio]}`} title={`${NOM_PRIORITE[prio]} — ${r.texte}`}>
+              <IconePriorite n={prio} />
+            </span>
+            <span className="dal-tl-rond" role="img" aria-label={c.maitre_ouvrage_nom ? `Maître d'ouvrage : ${c.maitre_ouvrage_nom}` : "Maître d'ouvrage à désigner"} title={c.maitre_ouvrage_nom ?? "Maître d'ouvrage à désigner"}>
+              {c.maitre_ouvrage_nom ? <span className="dal-tl-avatar">{initialesDe(c.maitre_ouvrage_nom) || "?"}</span> : <DalIcone nom="UnassignedCircle" />}
+            </span>
+          </div>
+        </div>
+        {(d0 !== null || d1 !== null) && xb < vu + GAUCHE ? (
+          <button
+            type="button"
+            className="dal-tl-avant"
+            style={{ left: vu + GAUCHE + 18 }}
+            title={`${c.nom} : fini avant cette partie de la frise — y aller`}
+            onClick={() => zone.current?.scrollTo({ left: Math.max(0, xa - GAUCHE - 40), behavior: "smooth" })}
+          >
+            <span aria-hidden="true">←</span>
+            <span className="dal-tl-avant-date">{jourCourt((d1 ?? d0) as number)}</span>
+          </button>
+        ) : null}
+        {d0 !== null || d1 !== null ? (
+          <>
+            {/* libellé posé sur le début de la barre ; si la barre commence avant la partie
+                visible, il colle à 13 du bord de la frise sans dépasser la fin de la barre
+                (captures de Linear : 577 pour un bord à 564 à 1440 ; à 390, « Maison Rolland »
+                finit avec sa barre, sous la colonne) */}
+            <span className="dal-tl-libelle-voie" style={{ left: xa, width: Math.max(8, xb - xa), visibility: xb < vu + GAUCHE ? "hidden" : undefined }}>
+              <span className="dal-tl-libelle" style={{ left: GAUCHE + 13 }}>
+                {c.nom}
+              </span>
+            </span>
+            <button
+              type="button"
+              className="dal-tl-barre"
+              data-ouverte={d0 === null ? "" : undefined}
+              data-choisie={choisi ? "" : undefined}
+              style={{ left: xa, width: Math.max(8, xb - xa) }}
+              title={`${c.nom}, ${c.date_debut ? `du ${dateCourte(c.date_debut)}` : "sans date de début"} ${c.date_fin_prevue ? `au ${dateCourte(c.date_fin_prevue)}` : "sans fin prévue"} — ouvrir le volet`}
+              aria-label={`${c.nom} : ouvrir le volet`}
+              onClick={() => ouvrir({ apercu: c.id, passage: null })}
+            />
+            {jalons(passages)}
+          </>
+        ) : null}
+      </div>
+    );
+  };
+
+  const cadreSeul = !!lotsDe;
+  const entete = cadreSeul ? null : (
+    <>
       <h1 className="v2-sr">Chantiers</h1>
-      <header className="lin-tete">
-        <span className="lin-tete-titre">Chantiers</span>
-        <div className="lin-tete-droite">
+      <header className="dal-tete">
+        <div className="dal-ligne1">
+          <h2 className="dal-tl-titre">Chantiers</h2>
+          <span className="dal-pousse" />
           {quota ? (
-            <span className="lin-position" title="Chantiers ouverts ou suspendus, sur le quota de la formule">
+            <span className="dal-tl-quota" title="Chantiers ouverts ou suspendus, sur le quota de la formule">
               {ouverts} / {quota} ouverts
             </span>
           ) : null}
-          <button type="button" className="v2-btn v2-btn--petit" onClick={ouvrirNouveau}>
-            <Plus width={14} height={14} aria-hidden="true" />
+          <button type="button" className="dal-tl-nouveau" onClick={ouvrirNouveau}>
+            <DalIcone nom="Plus" taille={14} />
             <span>Nouveau chantier</span>
           </button>
         </div>
+        <div className="dal-ligne2">
+          <Link href={lien({ famille: null })} scroll={false} className="dal-onglet" aria-current="page">
+            {filtre ? FAMILLE_CLAIRE[filtre] : "Tous les chantiers"}
+          </Link>
+          <Link href={`${RACINE}/daliro`} className="dal-rond" aria-label="Vue d'ensemble" title="Vue d'ensemble">
+            <DalIcone nom="CustomView" />
+          </Link>
+          <span className="dal-pousse" />
+          <div className="dal-tl-outils">
+            <div className="dal-tl-pop">
+              <button type="button" className="dal-rond dal-rond--plein" aria-label="Filtrer" title="Filtrer" aria-expanded={menu === "filtre"} onClick={() => setMenu(menu === "filtre" ? null : "filtre")}>
+                <DalIcone nom="Filtre" />
+                {filtre || recherche ? <span className="dal-tl-point" /> : null}
+              </button>
+              {menu === "filtre" ? (
+                <div className="dal-menu dal-tl-menu" role="menu" aria-label="Filtrer">
+                  <input className="dal-tl-champ" autoFocus placeholder="Filtrer : nom, commune, code postal…" aria-label="Rechercher un chantier" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && setMenu(null)} />
+                  <div className="dal-menu-sep" role="separator" />
+                  <Link href={lien({ famille: null })} scroll={false} role="menuitemradio" aria-checked={!filtre} className="dal-menu-option" onClick={() => setMenu(null)}>
+                    <DalIcone nom="Project" />
+                    <span className="dal-pousse">Tous les chantiers</span>
+                    <span className="dal-tl-compte">{liste.length}</span>
+                  </Link>
+                  {FAMILLES.map((fa) => (
+                    <Link key={fa.cle} href={lien({ famille: filtre === fa.cle ? null : fa.cle })} scroll={false} role="menuitemradio" aria-checked={filtre === fa.cle} className="dal-menu-option" onClick={() => setMenu(null)} title={fa.sous}>
+                      <IconeSante etat={SANTE[fa.cle]} />
+                      <span className="dal-pousse">{FAMILLE_CLAIRE[fa.cle]}</span>
+                      <span className="dal-tl-compte">{comptes[fa.cle]}</span>
+                    </Link>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <div className="dal-tl-pop">
+              <button type="button" className="dal-rond dal-rond--plein" aria-label="Options d'affichage" title="Options d'affichage" aria-expanded={menu === "affichage"} onClick={() => setMenu(menu === "affichage" ? null : "affichage")}>
+                <DalIcone nom="Affichage" />
+              </button>
+              {menu === "affichage" ? (
+                <div className="dal-menu dal-tl-menu" role="menu" aria-label="Options d'affichage">
+                  <p className="dal-tl-menu-titre">Échelle de la frise</p>
+                  {ZOOMS.map((z) => (
+                    <button key={z.cle} type="button" role="menuitemradio" aria-checked={zoom.cle === z.cle} className="dal-menu-option" onClick={() => (setMenu(null), ouvrir({ zoom: z.cle === "annee" ? null : z.cle }))}>
+                      <DalIcone nom="Calendar" />
+                      <span className="dal-pousse">{z.libelle}</span>
+                      {zoom.cle === z.cle ? <DalIcone nom="IssueStatusDone" /> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className="dal-rond dal-rond--plein"
+              aria-label={chantierOuvert ? "Fermer le volet" : "Ouvrir le volet"}
+              title={chantierOuvert ? "Fermer le volet" : "Ouvrir le volet"}
+              aria-pressed={!!chantierOuvert}
+              onClick={() => (chantierOuvert ? fermer() : visibles[0] && ouvrir({ apercu: visibles[0].id, passage: null }))}
+            >
+              <DalIcone nom="Volet" />
+            </button>
+          </div>
+        </div>
       </header>
 
-      <div className="lin-outils">
-        <nav className="lin-onglets" aria-label="Familles de chantiers">
-          <Link href={lien({ famille: null })} className="v2-btn v2-btn--petit" data-actif={!filtre ? "" : undefined} aria-current={!filtre ? "page" : undefined} scroll={false}>
-            Tous les chantiers <span className="ltl-compte">{liste.length}</span>
-          </Link>
-          {FAMILLES.map((fa) => (
-            <Link
-              key={fa.cle}
-              href={lien({ famille: filtre === fa.cle ? null : fa.cle })}
-              className="v2-btn v2-btn--petit"
-              data-actif={filtre === fa.cle ? "" : undefined}
-              aria-current={filtre === fa.cle ? "page" : undefined}
-              title={fa.sous}
-              scroll={false}
-            >
-              {FAMILLE_CLAIRE[fa.cle]} <span className="ltl-compte">{comptes[fa.cle]}</span>
-            </Link>
-          ))}
-        </nav>
-        <div className="lin-outils-droite">
-          <nav className="lin-onglets" aria-label="Affichage" style={{ marginRight: 6 }}>
-            <Link href={lien({ vue: null, zoom: null })} className="v2-btn v2-btn--petit" data-actif={!vueFrise ? "" : undefined} aria-current={!vueFrise ? "page" : undefined} scroll={false}>
-              Planning
-            </Link>
-            <Link href={lien({ vue: "frise", semaine: null, echelle: null, qui: null })} className="v2-btn v2-btn--petit" data-actif={vueFrise ? "" : undefined} aria-current={vueFrise ? "page" : undefined} scroll={false}>
-              Frise
-            </Link>
-          </nav>
-          <Menu
-            largeur={280}
-            bouton={(ouvert, basculer) => (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Rechercher un chantier" title="Rechercher un chantier" aria-expanded={ouvert} aria-pressed={!!recherche} onClick={basculer}>
-                <ListFilter width={14} height={14} aria-hidden="true" />
-              </button>
-            )}
-          >
-            {(fermer) => (
-              <input
-                className="lin-menu-champ"
-                autoFocus
-                placeholder="Nom, commune ou code postal…"
-                aria-label="Rechercher un chantier par nom ou commune"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                onKeyDown={(e) => (e.key === "Enter" || e.key === "Escape") && fermer()}
-              />
-            )}
-          </Menu>
-        </div>
-      </div>
-
       {erreur && source === "reelle" ? (
-        <p className="ltl-note" data-teinte="rouge" role="alert">
+        <p className="dal-tl-note" role="alert">
           La base réelle n&apos;a pas répondu. {erreur}
         </p>
       ) : null}
-      {recherche ? (
-        <p className="ltl-note" role="status">
-          {visibles.length} chantier{visibles.length > 1 ? "s" : ""} pour « {q.trim()} ».{" "}
-          <button type="button" className="lin-voir-tout" style={{ marginTop: 0 }} onClick={() => setQ("")}>
-            Effacer
-          </button>
-        </p>
-      ) : null}
 
-      {vueFrise && pret && visibles.length ? (
-        <p className="ltl-legende">Une ligne par lot, un rectangle par passage : qui vient, pour quoi, et ce qu&apos;il a répondu. Cliquez pour le détail à droite.</p>
-      ) : null}
-
-      <div className="ltl-cadre">
-        {vueFrise ? (
-          <Frise libelle="Frise des chantiers" lignes={pret ? visibles.flatMap((c) => [ligne(c), ...lignesLots(c, tableau(c.id))]) : []} zoom={zoom} onZoom={(z) => ouvrir({ zoom: z === "mois" ? null : z })} aujourdhui={aujourdhui} vide={vide} />
-        ) : pret && liste.length ? (
-          <Planning
-            lundi={lundi}
-            aujourdhui={aujourdhui}
-            densite={estDensite(params.get("echelle")) ? (params.get("echelle") as "semaines" | "mois") : "semaines"}
-            type={params.get("qui") === "equipes" ? "equipes" : params.get("qui") === "sous-traitants" ? "sous-traitants" : null}
-            chantiers={visibles}
-            tous={liste}
-            tableau={tableau}
-            passageChoisi={passageOuvert?.id ?? null}
-            onSemaine={(l) => ouvrir({ semaine: l ?? lundiDe(aujourdhui) })}
-            onDensite={(d) => ouvrir({ echelle: d === "semaines" ? null : d })}
-            onType={(t) => ouvrir({ qui: t })}
-            onPassage={(id) => ouvrir({ passage: id, apercu: null })}
-            onChanger={changer}
-          />
-        ) : (
-          <div className="ltl">{vide}</div>
-        )}
+    </>
+  );
+  const corps = (
+    <>
+      <div className="dal-tl-cadre">
+        <div className="dal-tl-principal">
+        <div className="dal-tl-zone" ref={zone} onScroll={suivreDefilement}>
+          {!pret ? (
+            <p className="dal-tl-vide">Lecture des chantiers…</p>
+          ) : lotsDe && !lots.length ? (
+            <p className="dal-tl-vide">Aucun lot sur ce chantier : le planning se pose lot par lot.</p>
+          ) : !lotsDe && visibles.length === 0 ? (
+            <p className="dal-tl-vide">
+              {liste.length === 0 ? (
+                <>
+                  Aucun chantier.{" "}
+                  <button type="button" className="dal-tl-lien" onClick={ouvrirNouveau}>
+                    Créez le premier
+                  </button>{" "}
+                  : nom, code postal et commune suffisent.
+                </>
+              ) : recherche ? (
+                "Aucun chantier ne correspond au filtre."
+              ) : (
+                "Rien dans cette famille."
+              )}
+            </p>
+          ) : (
+            <div className="dal-tl-toile" style={{ width: GAUCHE + largeur, height: 32 + nbLignes * LIGNE }}>
+              {mois.map((m) => (
+                <span key={m.j} className="dal-tl-mois-trait" style={{ left: xJour(m.j) - 1 }} />
+              ))}
+              <span className="dal-tl-auj-trait" style={{ left: xJour(auj) + zoom.px / 2 }} />
+              <div className="dal-tl-regle" style={{ width: GAUCHE + largeur }}>
+                {mois.map((m) => (
+                  <span key={m.j} className="dal-tl-mois" style={{ left: xJour(m.j) }}>
+                    {m.libelle}
+                  </span>
+                ))}
+                {reperes.map((j) => (
+                  <span key={j} className="dal-tl-jour" style={{ left: xJour(j) + zoom.px / 2 }}>
+                    {new Date(j * JOUR).getUTCDate()}
+                  </span>
+                ))}
+                <span className="dal-tl-auj" style={{ left: xJour(auj) + zoom.px / 2 }}>
+                  {new Date(auj * JOUR).getUTCDate()} {MOIS[new Date(auj * JOUR).getUTCMonth()].replace(".", "")}
+                </span>
+              </div>
+              {lotsDe ? lots.map(ligneLot) : visibles.map(ligne)}
+            </div>
+          )}
+        </div>
+        {pret && nbLignes ? (
+          <div className="dal-tl-commandes">
+            <button type="button" className="dal-tl-commande" onClick={allerAujourdhui}>
+              Aujourd&apos;hui
+            </button>
+            <div className="dal-tl-pop">
+              <button type="button" className="dal-tl-commande" aria-expanded={menu === "zoom"} onClick={() => setMenu(menu === "zoom" ? null : "zoom")}>
+                {zoom.libelle}
+                <DalIcone nom="Chevron" taille={12} style={{ transform: "rotate(90deg)" }} />
+              </button>
+              {menu === "zoom" ? (
+                <div className="dal-menu dal-tl-menu" role="menu" aria-label="Échelle" style={{ right: 0, left: "auto", minWidth: 140 }}>
+                  {ZOOMS.map((z) => (
+                    <button key={z.cle} type="button" role="menuitemradio" aria-checked={zoom.cle === z.cle} className="dal-menu-option" onClick={() => (setMenu(null), ouvrir({ zoom: z.cle === "annee" ? null : z.cle }))}>
+                      <span className="dal-pousse">{z.libelle}</span>
+                      {zoom.cle === z.cle ? <DalIcone nom="IssueStatusDone" /> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
+        </div>
         {chantierOuvert ? (
-          <ApercuFrise
-            key={passageOuvert?.id ?? chantierOuvert.id}
-            chantier={chantierOuvert}
-            tableau={tableau(chantierOuvert.id)}
-            passage={passageOuvert}
-            auj={aujourdhui}
-            lecture={enLecture(chantierOuvert.id)}
-            onPassage={(id) => ouvrir({ passage: id, apercu: null })}
-            onChantier={() => ouvrir({ apercu: chantierOuvert.id, passage: null })}
-            onFermer={fermer}
-            onHeures={heures}
-          />
+          <div className="lin dal-tl-volet">
+            <ApercuFrise
+              key={passageOuvert?.id ?? chantierOuvert.id}
+              chantier={chantierOuvert}
+              tableau={tableau(chantierOuvert.id)}
+              passage={passageOuvert}
+              auj={aujourdhui}
+              lecture={enLecture(chantierOuvert.id)}
+              onPassage={(id) => ouvrir({ passage: id, apercu: null })}
+              onChantier={() => ouvrir({ apercu: chantierOuvert.id, passage: null })}
+              onFermer={fermer}
+              onHeures={heures}
+            />
+          </div>
         ) : null}
       </div>
 
@@ -536,6 +721,14 @@ export default function Chantiers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
+  );
+  return cadreSeul ? (
+    corps
+  ) : (
+    <DalCarte className="dal-tl-page">
+      {entete}
+      {corps}
+    </DalCarte>
   );
 }

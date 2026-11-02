@@ -54,7 +54,11 @@ type DemandeSource = { entite_id: string | null; logiciel: string; genre: "branc
 
 const hier = () => new Date(Date.now() - 86400000).toISOString();
 
-export default function Branchements({ source, contexte, client_id, societes, onFait }: { source: Source; contexte: Contexte | null; client_id: string; societes: Societe[]; onFait: (m: string) => void }) {
+type Props = { source: Source; contexte: Contexte | null; client_id: string; societes: Societe[]; onFait: (m: string) => void };
+
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useBranchements({ source, contexte, client_id, societes, onFait }: Props) {
   const [locaux] = useState<Branchement[]>(() =>
     societes[0]
       ? [{ id: "exemple-1", entite_id: societes[0].entite_id, logiciel: "sage100", libelle: "Sage 100 du siège", statut: "actif", jeux: JEUX.map((j, i) => ({ code: j.cle, actif: true, dernier_recu_le: i < 3 ? hier() : null, lignes: [134, 633, 41, 0, 0][i] })) }]
@@ -124,6 +128,11 @@ export default function Branchements({ source, contexte, client_id, societes, on
     }
   };
 
+  return { locaux, reels, setReels, demandesLocales, setDemandesLocales, demandesReelles, setDemandesReelles, erreur, setErreur, charger, branchements, demandes, demandeDe, parSociete, peutBrancher, cible, setCible, demander, brancher, erreurDebrancher, setErreurDebrancher, debrancher };
+}
+
+export default function Branchements({ source, contexte, client_id, societes, onFait }: Props) {
+  const { reels, erreur, demandeDe, parSociete, peutBrancher, cible, setCible, brancher, erreurDebrancher, debrancher } = useBranchements({ source, contexte, client_id, societes, onFait });
   return (
     <section id="vrl-exports" className="esp-carte" aria-label="Exports automatiques" style={{ marginTop: 16 }}>
       <div className="esp-carte-tete">
@@ -178,7 +187,7 @@ export default function Branchements({ source, contexte, client_id, societes, on
   );
 }
 
-function DialogueBrancher({ s, onFermer, brancher }: { s: Societe; onFermer: () => void; brancher: (s: Societe, logiciel: string, jeux: string[]) => Promise<void> }) {
+export function DialogueBrancher({ s, onFermer, brancher }: { s: Societe; onFermer: () => void; brancher: (s: Societe, logiciel: string, jeux: string[]) => Promise<void> }) {
   const [logiciel, setLogiciel] = useState(LOGICIELS.find((l) => s.logiciel && l.libelle.toLowerCase().startsWith(s.logiciel.toLowerCase().slice(0, 3)))?.cle ?? "tableur");
   const [jeux, setJeux] = useState<string[]>(() => jeuxDe(LOGICIELS.find((l) => s.logiciel && l.libelle.toLowerCase().startsWith(s.logiciel.toLowerCase().slice(0, 3)))?.cle ?? "tableur").map((j) => j.cle));
   const [envoi, setEnvoi] = useState(false);

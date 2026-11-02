@@ -29,7 +29,9 @@ const BLOCS: { cle: keyof Matin; titre: string; ancre: string; vide: string }[] 
   { cle: "reciproques", titre: "Réciproques intragroupe", ancre: "vrl-reciproques", vide: "Les comptes réciproques concordent." },
 ];
 
-export default function CeMatin({ source, client_id, actif, codes, objets }: { source: Source; client_id: string; actif: boolean; codes: CodeRef[]; objets: Objet[] }) {
+/* 02/11/2026 — la lecture du point, en crochet : la carte ci-dessous (écran d'avant) et la
+   sous-page « Ce matin » de /espace2/varelo lisent la même chose. */
+export function useCeMatin(source: Source, client_id: string, actif: boolean, codes: CodeRef[], objets: Objet[]) {
   const [exemple] = useState<Matin>(() => matinExemple(codes, objets));
   const [reel, setReel] = useState<Matin | null>(null);
   const [erreur, setErreur] = useState(false);
@@ -50,7 +52,13 @@ export default function CeMatin({ source, client_id, actif, codes, objets }: { s
     return () => window.clearTimeout(t);
   }, [source, actif, charger]);
 
-  const m = source === "exemple" ? exemple : reel;
+  return { matin: source === "exemple" ? exemple : reel, erreur };
+}
+
+export const BLOCS_MATIN = BLOCS;
+
+export default function CeMatin({ source, client_id, actif, codes, objets }: { source: Source; client_id: string; actif: boolean; codes: CodeRef[]; objets: Objet[] }) {
+  const { matin: m, erreur } = useCeMatin(source, client_id, actif, codes, objets);
   if (!m) return null;
   const total = m.decisions.length + m.groupe.length + m.reserves.length + m.reportings.length + m.contrats.length + m.encours.length + m.reciproques.length;
 

@@ -15,7 +15,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useState } from "react";
-import { FileSignature, Mic } from "lucide-react";
+import { FileSignature, Image as ImageIcone, MessageSquare, Mic } from "lucide-react";
+import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point, Rangee, Rangees, SousLigne, SousListe, Texte, Vide, jourCourt, useVolet } from "@/components/espace2/lin/Volet";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { ilYa } from "../exemples/socle";
@@ -85,10 +86,25 @@ function Media({ piece, source, auteur, recu }: { piece: PieceMessage; source: S
   return <a href={url} target="_blank" rel="noreferrer">{piece.nom}</a>;
 }
 
-type Props = { tableau: Tableau; source: Source; relire: () => Promise<void> };
+/* 02/11/2026 — la fiche d'un chantier de l'espace 2 dessine le fil à sa façon (l'onglet Activity
+   d'une Initiative de Linear) : elle reçoit les messages et les gestes, la carte garde les portes,
+   l'exemple et les fenêtres */
+export type FilRendu = {
+  messages: MessageChantier[];
+  chargement: boolean;
+  envoi: boolean;
+  fait: string | null;
+  erreur: string | null;
+  ouvrirAvenant: (m: MessageChantier, objet?: string) => void;
+  ecarter: (m: MessageChantier) => void;
+  media: (piece: PieceMessage, auteur: string, recu: string) => React.ReactNode;
+  fenetres: React.ReactNode;
+};
+type Props = { tableau: Tableau; source: Source; relire: () => Promise<void>; rendu?: (f: FilRendu) => React.ReactNode };
 
-export default function FilCarte({ tableau, source, relire }: Props) {
+export default function FilCarte({ tableau, source, relire, rendu }: Props) {
   const c = tableau.chantier;
+  const volet = useVolet();
   const [reel, setReel] = useState<MessageChantier[] | null>(null);
   const [local, setLocal] = useState<MessageChantier[]>(() => exemple(tableau));
   const [chargement, setChargement] = useState(source === "reelle");
@@ -97,6 +113,7 @@ export default function FilCarte({ tableau, source, relire }: Props) {
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
+  const [aEcarter, setAEcarter] = useState<MessageChantier | null>(null);
 
   const lire = useCallback(async () => {
     try {
@@ -144,6 +161,181 @@ export default function FilCarte({ tableau, source, relire }: Props) {
     () => setLocal((l) => l.map((x) => (x.id === m.id ? { ...x, statut: "ecarte" } : x))),
     "Message écarté du fil.",
   );
+
+  const fenetres = (
+    <>
+      <Dialog open={!!avenant} onOpenChange={(o) => !o && setAvenant(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone><FileSignature width={18} height={18} aria-hidden="true" /></DialogIcone>
+            <DialogTitle>Ouvrir un avenant depuis ce message</DialogTitle>
+            <DialogDescription>Le message de {avenant?.de_nom ?? "l'expéditeur"} en est l&apos;origine (vocal, photo, texte). L&apos;avenant naît en brouillon : chiffrez-le sur vos prix, puis faites-le signer avant d&apos;exécuter.</DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              <label className="rv-libelle">Ce qui est demandé en plus <span className="esp-obligatoire">(obligatoire)</span>
+                <textarea className="rv-champ" rows={3} maxLength={500} value={objet} onChange={(e) => setObjet(e.target.value)} placeholder="Une prise supplémentaire dans le garage" />
+              </label>
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={envoi || !objet.trim()} onClick={() => avenant && void ouvrirAvenant(avenant)}>{envoi ? <Loader variant="spin" /> : null} Ouvrir l&apos;avenant</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {rendu ? (
+        <Dialog open={!!aEcarter} onOpenChange={(o) => !o && setAEcarter(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Écarter ce message du fil</DialogTitle>
+              <DialogDescription>Le message de {aEcarter?.de_nom ?? "l'expéditeur"} quitte le fil du chantier ; il reste au journal.</DialogDescription>
+            </DialogHeader>
+            <DialogBody>{erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</DialogBody>
+            <DialogFooter>
+              <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => { const m = aEcarter; setAEcarter(null); if (m) void ecarter(m); }}>{envoi ? <Loader variant="spin" /> : null} Écarter</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
+    </>
+  );
+
+  if (rendu) {
+    return (
+      <>
+        {rendu({
+          messages,
+          chargement,
+          envoi,
+          fait,
+          erreur: avenant ? null : erreur,
+          ouvrirAvenant: (m, o) => { setErreur(null); setObjet(o ?? m.texte ?? ""); setAvenant(m); },
+          ecarter: (m) => { setErreur(null); setAEcarter(m); },
+          media: (piece, auteur, recu) => <Media piece={piece} source={source} auteur={auteur} recu={recu} />,
+          fenetres,
+        })}
+      </>
+    );
+  }
+
+
+  /* 30/10/2026 — dans la fiche de l'espace 2 : un message par ligne (qui, ce qu'il dit, ce que Daliro
+     en a lu) ; les médias, la lecture et les gestes dans le volet (../../espace2/lin/Volet.tsx) */
+  if (volet) {
+    const jour = (iso: string) => iso.slice(0, 10);
+    const auj = new Date();
+    const ajd = `${auj.getFullYear()}-${`${auj.getMonth() + 1}`.padStart(2, "0")}-${`${auj.getDate()}`.padStart(2, "0")}`;
+    const semaine = new Date(auj.getTime() - 6 * 86400000).toISOString().slice(0, 10);
+    const tries = [...messages].sort((a, b) => b.recu_le.localeCompare(a.recu_le));
+    const groupes = [
+      { nom: "Aujourd'hui", liste: tries.filter((m) => jour(m.recu_le) === ajd) },
+      { nom: "Cette semaine", liste: tries.filter((m) => jour(m.recu_le) !== ajd && jour(m.recu_le) >= semaine) },
+      { nom: "Plus ancien", liste: tries.filter((m) => jour(m.recu_le) < semaine) },
+    ];
+    const canal = (m: MessageChantier) => (m.canal === "whatsapp" ? "WhatsApp" : m.canal === "sms" ? "SMS" : "Courriel");
+    const auteur = (m: MessageChantier) => m.de_nom ?? m.de_adresse ?? "Expéditeur inconnu";
+    const apercu = (m: MessageChantier) => m.texte ?? m.lecture?.resume ?? (m.pieces.some((p) => p.vocal) ? "Un vocal" : m.pieces.length ? "Une photo" : "");
+    const aConfirmer = (m: MessageChantier) => (m.lecture?.demandes ?? []).filter((d) => !d.verifiee).length;
+    return (
+      <Partie id="fil" titre="Fil du chantier" compte={messages.length ? `${messages.length} message${messages.length > 1 ? "s" : ""}` : null} avis={fait || (erreur && !avenant) ? <>{fait ? <Avis teinte="vert" role="status">{fait}</Avis> : null}{erreur && !avenant ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}</> : null}>
+        {chargement ? (
+          <Loader variant="spin" />
+        ) : messages.length ? (
+          <Liste>
+            {groupes.map((g) =>
+              g.liste.length ? (
+                <Groupe key={g.nom} nom={g.nom} compte={g.liste.length}>
+                  {g.liste.map((m) => (
+                    <Ligne
+                      key={m.id}
+                      cle={`message:${m.id}`}
+                      libelle={`Message de ${auteur(m)}, ${dateHeure(m.recu_le)}`}
+                      icone={m.pieces.some((p) => p.vocal) ? <Mic /> : m.pieces.length ? <ImageIcone /> : <MessageSquare />}
+                      id={canal(m)}
+                      titre={auteur(m)}
+                      second={apercu(m)}
+                      droite={
+                        <>
+                          {aConfirmer(m) ? <Pilule teinte="jaune" icone={<Point teinte="jaune" />}>{aConfirmer(m)} à confirmer</Pilule> : null}
+                          {m.avenant_id ? <Pilule teinte="bleu" icone={<FileSignature />}>Avenant ouvert</Pilule> : null}
+                        </>
+                      }
+                      date={jourCourt(m.recu_le)}
+                      dateTitre={dateHeure(m.recu_le)}
+                    />
+                  ))}
+                </Groupe>
+              ) : null,
+            )}
+          </Liste>
+        ) : (
+          <Vide>Rien encore : les photos, vocaux et messages que le chef d&apos;équipe envoie au numéro WhatsApp de l&apos;entreprise s&apos;affichent ici, rangés à leur chantier.</Vide>
+        )}
+        {messages.map((m) => {
+          const recu = dateHeure(m.recu_le);
+          const demandes = m.lecture?.demandes ?? [];
+          return (
+            <Detail key={m.id} cle={`message:${m.id}`} titre={auteur(m)} sous={`${recu} · ${canal(m)}`}>
+              <Rangees>
+                {m.rangement ? <Rangee libelle="Rangé">{RANGEMENTS[m.rangement].charAt(0).toUpperCase() + RANGEMENTS[m.rangement].slice(1)}</Rangee> : null}
+                {m.avenant_id ? <Rangee libelle="Avenant" teinte="bleu">Ouvert depuis ce message</Rangee> : null}
+              </Rangees>
+              {m.texte ? <Texte citation>« {m.texte} »</Texte> : null}
+              {m.pieces.length ? (
+                <div className="lvp-medias">
+                  {m.pieces.map((x) => <Media key={x.chemin} piece={x} source={source} auteur={auteur(m)} recu={recu} />)}
+                </div>
+              ) : null}
+              {m.lecture ? (
+                <div className="lvp-note">
+                  {(m.lecture.medias ?? []).filter((x) => x.transcription).map((x) => (
+                    <div key={x.n}>Transcription du vocal{x.duree_s ? ` (${x.duree_s} s)` : ""} : « {x.transcription} »</div>
+                  ))}
+                  {(m.lecture.medias ?? []).some((x) => x.statut === "non_transcrit") ? <div>Vocal non transcrit (service de transcription pas encore branché).</div> : null}
+                  {m.lecture.resume ? <div>Lu : {m.lecture.resume}</div> : null}
+                </div>
+              ) : m.pieces.length && source === "reelle" ? (
+                <div className="lvp-note"><div>Lecture des médias demandée au lecteur.</div></div>
+              ) : null}
+              {demandes.length ? (
+                <SousListe titre="Ce que Daliro a lu">
+                  {demandes.map((d, k) => (
+                    <SousLigne
+                      key={k}
+                      teinte={d.verifiee ? "vert" : "jaune"}
+                      titre={
+                        d.nature === "avancement"
+                          ? `Avancement${d.lot_code ? ` (lot ${d.lot_code})` : ""} : ${d.ouvrage ?? d.texte ?? "ouvrage non nommé"}${d.pourcentage != null ? `, ${d.pourcentage} %` : ""}`
+                          : `${d.nature === "travail_supplementaire" ? "Travail supplémentaire" : d.nature === "probleme" ? "Problème" : d.nature === "question" ? "Question" : "Information"} : ${d.texte ?? ""}${d.quantite != null ? `, ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`
+                      }
+                      second={
+                        d.nature === "travail_supplementaire" && !d.verifiee && !m.avenant_id ? (
+                          <button type="button" className="lvp-lien" disabled={envoi} onClick={() => { setErreur(null); setObjet(`${d.texte ?? ""}${d.quantite != null ? ` — ${d.quantite} ${d.unite ?? ""}`.trimEnd() : ""}`); setAvenant(m); }}>
+                            Ouvrir l&apos;avenant
+                          </button>
+                        ) : null
+                      }
+                      valeur={d.verifiee ? "vérifié" : "à confirmer"}
+                    />
+                  ))}
+                </SousListe>
+              ) : null}
+              <Gestes>
+                {!m.avenant_id ? (
+                  <Bouton fort icone={<FileSignature aria-hidden="true" />} disabled={envoi} onClick={() => { setErreur(null); setObjet(m.texte ?? ""); setAvenant(m); }}>
+                    Ouvrir un avenant
+                  </Bouton>
+                ) : null}
+                <Bouton disabled={envoi} onClick={() => void ecarter(m)}>Écarter</Bouton>
+              </Gestes>
+            </Detail>
+          );
+        })}
+        {fenetres}
+      </Partie>
+    );
+  }
 
   return (
     <section className="esp-carte" aria-label="Fil du chantier">
@@ -206,26 +398,7 @@ export default function FilCarte({ tableau, source, relire }: Props) {
         </ul>
       ) : <p className="esp-kpi-sous">Rien encore : les photos, vocaux et messages que le chef d&apos;équipe envoie au numéro WhatsApp de l&apos;entreprise s&apos;affichent ici, rangés à leur chantier.</p>}
 
-      <Dialog open={!!avenant} onOpenChange={(o) => !o && setAvenant(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FileSignature width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Ouvrir un avenant depuis ce message</DialogTitle>
-            <DialogDescription>Le message de {avenant?.de_nom ?? "l'expéditeur"} en est l&apos;origine (vocal, photo, texte). L&apos;avenant naît en brouillon : chiffrez-le sur vos prix, puis faites-le signer avant d&apos;exécuter.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Ce qui est demandé en plus <span className="esp-obligatoire">(obligatoire)</span>
-                <textarea className="rv-champ" rows={3} maxLength={500} value={objet} onChange={(e) => setObjet(e.target.value)} placeholder="Une prise supplémentaire dans le garage" />
-              </label>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi || !objet.trim()} onClick={() => avenant && void ouvrirAvenant(avenant)}>{envoi ? <Loader variant="spin" /> : null} Ouvrir l&apos;avenant</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetres}
     </section>
   );
 }

@@ -1,0 +1,402 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TIROMA — Réglages : Settings › Team de Linear au 1:1 (02/11/2026)
+   Relevé : docs/refonte-metiers/releves/linear-team-settings.md (refs-linear),
+   cotes de la carte à 244,8 (1440).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tir.tir-rg {
+  --tir-rg-carte: lch(9.232 0.85 272);
+  --tir-rg-ombre: lch(100 0 0 / 0.083) 0 0 0 0.5px, lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tir-rg-figure: lch(11.033 1.3 272);
+  --tir-rg-desc: lch(63.304 1.425 272);
+  --tir-rg-filet: lch(100 0 0 / 0.06);
+  --tir-rg-survol: lch(11.033 1.3 272);
+}
+html[data-v2-theme="light"] .v2 .tir.tir-rg {
+  --tir-rg-carte: lch(100 0 282);
+  --tir-rg-ombre: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tir-rg-figure: lch(94.5 0 282);
+  --tir-rg-desc: lch(40 1 282);
+  --tir-rg-filet: lch(0 0 0 / 0.088);
+  --tir-rg-survol: lch(96.5 0 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tir.tir-rg {
+    --tir-rg-carte: lch(100 0 282);
+    --tir-rg-ombre: lch(0 0 0 / 0.088) 0 0 0 0.5px, lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tir-rg-figure: lch(94.5 0 282);
+    --tir-rg-desc: lch(40 1 282);
+    --tir-rg-filet: lch(0 0 0 / 0.088);
+    --tir-rg-survol: lch(96.5 0 282);
+  }
+}
+
+.v2 .tir-rg .tir-rg-defile {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding-bottom: 96px;
+}
+/* barre haute collante 80 (dégradé du fond de carte), lien retour 28 à 9,11 */
+.v2 .tir-rg .tir-rg-haut {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 80px;
+  margin-bottom: -80px;
+  padding: 11px 0 0 9px;
+  background: linear-gradient(var(--tir-carte) 40px, transparent 80px);
+  pointer-events: none;
+}
+.v2 .tir-rg .tir-rg-retour {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t3);
+  pointer-events: auto;
+}
+.v2 .tir-rg .tir-rg-retour:hover {
+  background: var(--tir-survol-onglet);
+  color: var(--tir-t1);
+}
+.v2 .tir-rg .tir-rg-retour-chevron {
+  transform: rotate(180deg);
+}
+/* colonne 640 centrée, p 0 40 ; en-tête 640×60 p 0 16 gap 4, 64 sous le haut de la carte */
+.v2 .tir-rg .tir-rg-colonne {
+  width: 640px;
+  max-width: calc(100% - 80px);
+  margin: 0 auto;
+  padding-top: 64px;
+}
+.v2 .tir-rg .tir-rg-entete {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 60px;
+  padding: 0 16px;
+}
+.v2 .tir-rg .tir-rg-h1 {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--tir-t1);
+}
+.v2 .tir-rg .tir-rg-sous {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 24px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--tir-t3);
+}
+.v2 .tir-rg .tir-rg-apercu {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  height: 24px;
+  padding: 0 6px 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t2);
+}
+.v2 .tir-rg .tir-rg-apercu:hover {
+  background: var(--tir-survol-onglet);
+}
+.v2 .tir-rg .tir-rg-choix {
+  margin: 12px 16px 0;
+}
+.v2 .tir-rg .tir-rg-blocs {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-top: 32px;
+}
+.v2 .tir-rg .tir-rg-bloc {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.v2 .tir-rg .tir-rg-h3 {
+  margin-bottom: 16px;
+  padding: 0 16px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 23px;
+  color: var(--tir-t1);
+}
+.v2 .tir-rg .tir-rg-aide {
+  margin: -8px 0 16px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 22px;
+  color: var(--tir-t3);
+}
+.v2 .tir-rg .tir-rg-form .tir-rg-aide {
+  margin: 0;
+  padding: 0;
+}
+.v2 .tir-rg .tir-rg-lien {
+  padding: 1px 4px;
+  border-radius: 8px;
+  color: var(--tir-t1);
+}
+/* carte 640, r 10, ombre ; rangée 65 (p 16, gap 12), filet ::after inset 16 */
+.v2 .tir-rg .tir-rg-carte {
+  border-radius: 10px;
+  background: var(--tir-rg-carte);
+  box-shadow: var(--tir-rg-ombre);
+}
+.v2 .tir-rg .tir-rg-rangee {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 65px;
+  padding: 16px;
+  line-height: 15.5px;
+  text-align: left;
+}
+.v2 .tir-rg .tir-rg-rangee:first-child {
+  border-radius: 10px 10px 0 0;
+}
+.v2 .tir-rg .tir-rg-rangee:last-child {
+  border-radius: 0 0 10px 10px;
+}
+.v2 .tir-rg .tir-rg-rangee:only-child {
+  border-radius: 10px;
+}
+.v2 .tir-rg .tir-rg-rangee:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 0;
+  height: 0;
+  border-bottom: 0.5px solid var(--tir-rg-filet);
+}
+.v2 .tir-rg .tir-rg-rangee[data-lien]:hover {
+  background: var(--tir-rg-survol);
+}
+.v2 .tir-rg .tir-rg-rangee[data-verrou] .tir-rg-titre,
+.v2 .tir-rg .tir-rg-rangee[data-verrou] .tir-rg-desc,
+.v2 .tir-rg .tir-rg-rangee[data-verrou] .tir-rg-figure {
+  opacity: 0.6;
+}
+.v2 .tir-rg .tir-rg-figure {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: var(--tir-rg-figure);
+  color: var(--tir-rg-desc);
+}
+.v2 .tir-rg .tir-rg-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.v2 .tir-rg .tir-rg-titre {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 15.5px;
+  color: var(--tir-t1);
+}
+.v2 .tir-rg .tir-rg-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 14.5px;
+  color: var(--tir-rg-desc);
+}
+.v2 .tir-rg .tir-rg-droite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  max-width: 50%;
+}
+.v2 .tir-rg .tir-rg-valeur {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tir-rg-desc);
+}
+.v2 .tir-rg .tir-rg-chevron {
+  flex: none;
+  color: var(--tir-rg-desc);
+}
+/* « Available on Business » : pilule 32, 13/500, opacity .6 */
+.v2 .tir-rg .tir-rg-verrou {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t2);
+  opacity: 0.6;
+}
+/* boutons de la zone sensible : 32, 13/500, r 9999, p 0 12, opacity .6 au repos */
+.v2 .tir-rg .tir-rg-bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  height: 32px;
+  padding: 0 12px;
+  border: 0.5px solid var(--tir-puce-bord);
+  border-radius: 9999px;
+  background: var(--tir-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tir-t2);
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.v2 .tir-rg .tir-rg-bouton:hover:not(:disabled) {
+  opacity: 1;
+}
+.v2 .tir-rg .tir-rg-bouton--plein {
+  opacity: 1;
+  background: #5e6ad2;
+  border-color: #5e6ad2;
+  color: #fff;
+}
+.v2 .tir-rg .tir-rg-bouton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.v2 .tir-rg .tir-rg-confirme {
+  display: inline-flex;
+  gap: 6px;
+}
+.v2 .tir-rg .tir-rg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+.v2 .tir-rg .tir-rg-champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tir-t3);
+}
+.v2 .tir-rg .tir-rg-input {
+  height: 32px;
+  padding: 0 10px;
+  border: 0.5px solid var(--tir-puce-bord);
+  border-radius: 8px;
+  background: var(--tir-bouton);
+  color: var(--tir-t1);
+  font: inherit;
+  font-size: 13px;
+}
+.v2 .tir-rg .tir-rg-deux {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.v2 .tir-rg .tir-rg-cases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 13px;
+  color: var(--tir-t2);
+}
+.v2 .tir-rg .tir-rg-cases label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .tir-rg .tir-rg-trouves {
+  display: flex;
+  flex-direction: column;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 0.5px solid var(--tir-puce-bord);
+  border-radius: 8px;
+}
+.v2 .tir-rg .tir-rg-trouves button {
+  height: 32px;
+  padding: 0 10px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--tir-t1);
+}
+.v2 .tir-rg .tir-rg-trouves button:hover {
+  background: var(--tir-rg-survol);
+}
+.v2 .tir-rg .tir-rg-trouves button:disabled {
+  opacity: 0.5;
+}
+.v2 .tir-rg .tir-rg-form-pied {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.v2 .tir-rg .tir-rg-ok {
+  font-size: 12px;
+  color: rgb(76, 183, 130);
+}
+.v2 .tir-rg .tir-rg-erreur,
+.v2 .tir-rg .tir-rg-confirmer {
+  font-size: 12px;
+  color: var(--tir-rouge);
+}
+.v2 .tir-rg .tir-rg-sous-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: -36px;
+  padding: 0 16px;
+}
+
+/* ——— 390 : lien retour sous l'en-tête, colonne 346 à 22, rangées p 16 10.67, description sur deux lignes ——— */
+@media (max-width: 480px) {
+  .v2 .tir-rg .tir-rg-colonne {
+    max-width: calc(100% - 44px);
+  }
+  .v2 .tir-rg .tir-rg-rangee {
+    padding: 16px 10.67px;
+  }
+  .v2 .tir-rg .tir-rg-desc {
+    white-space: normal;
+  }
+  .v2 .tir-rg .tir-rg-sous {
+    flex-wrap: wrap;
+  }
+  .v2 .tir-rg .tir-rg-verrou {
+    height: 36px;
+  }
+}

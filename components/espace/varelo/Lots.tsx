@@ -21,10 +21,10 @@ import type { Actions, Donnees } from "./EcranVarelo";
 import { LIBELLE_TYPE_ACTION, type DemandeRef, type Proposition, type TypeActionRef } from "./types";
 
 const TEINTE_DEMANDE: Record<string, "ambre" | "vert" | "rouge" | "gris" | "bleu"> = { en_attente: "ambre", approuvee: "bleu", executee: "vert", rejetee: "rouge", annulee: "gris", expiree: "gris", echec_execution: "rouge" };
-const LIBELLE_STATUT: Record<string, string> = { en_attente: "En attente", approuvee: "Approuvée", executee: "Exécutée", rejetee: "Refusée", annulee: "Annulée", expiree: "Expirée", echec_execution: "Échec" };
-const LIBELLE_PROP: Record<string, string> = { a_valider: "à valider", ecartee: "écartée", executee: "appliquée", rejetee: "refusée", perimee: "périmée" };
+export const LIBELLE_STATUT: Record<string, string> = { en_attente: "En attente", approuvee: "Approuvée", executee: "Exécutée", rejetee: "Refusée", annulee: "Annulée", expiree: "Expirée", echec_execution: "Échec" };
+export const LIBELLE_PROP: Record<string, string> = { a_valider: "à valider", ecartee: "écartée", executee: "appliquée", rejetee: "refusée", perimee: "périmée" };
 
-function raisonTexte(p: Proposition): string {
+export function raisonTexte(p: Proposition): string {
   const r = (p.raisons ?? []) as Record<string, unknown>[];
   const parts: string[] = [];
   for (const x of r) {
@@ -42,7 +42,11 @@ function raisonTexte(p: Proposition): string {
   return parts.join(" · ") || (p.regle ? p.regle : "—");
 }
 
-export default function Lots({ donnees, actions }: { donnees: Donnees; actions: Actions }) {
+type Props = { donnees: Donnees; actions: Actions };
+
+/* 02/11/2026 — l'état et les gestes de la carte, en crochet : la carte ci-dessous (écran
+   d'avant) et la sous-page de /espace2/varelo partagent la même logique. */
+export function useLots({ donnees, actions }: Props) {
   const codesParId = useMemo(() => new Map(donnees.codes.map((c) => [c.code_id, c])), [donnees.codes]);
   const objetsParId = useMemo(() => new Map(donnees.objets.map((o) => [o.id, o])), [donnees.objets]);
   const lots = useMemo(() => {
@@ -104,6 +108,12 @@ export default function Lots({ donnees, actions }: { donnees: Donnees; actions: 
     return { gauche, droite };
   };
 
+  return { codesParId, objetsParId, lots, recentes, equipeDe, peutEcarter, aEcarter, setAEcarter, motif, setMotif, envoi, setEnvoi, erreur, setErreur, fait, setFait, confirmer, decrire };
+}
+
+export default function Lots({ donnees, actions }: Props) {
+  const h = useLots({ donnees, actions });
+  const { lots, recentes, equipeDe, peutEcarter, setAEcarter, setMotif, setErreur, fait, decrire } = h;
   return (
     <section className="esp-carte" aria-label="Lots à valider">
       <div className="esp-carte-tete">
@@ -178,27 +188,35 @@ export default function Lots({ donnees, actions }: { donnees: Donnees; actions: 
         </div>
       ) : null}
 
-      <Dialog open={!!aEcarter} onOpenChange={(o) => !o && !envoi && setAEcarter(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><XCircle width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Écarter cette paire</DialogTitle>
-            <DialogDescription>Le code repart seul sur son propre objet et ne sera pas reproposé ; le reste du lot continue. La décision est inscrite au journal à votre nom.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              {aEcarter ? <p className="esp-kpi-sous">{decrire(aEcarter).gauche.titre} → {decrire(aEcarter).droite.titre} · {raisonTexte(aEcarter)}</p> : null}
-              <label className="rv-libelle">Motif
-                <textarea className="rv-champ" value={motif} maxLength={500} placeholder="Deux homonymes, un fournisseur repris, la société elle-même…" onChange={(e) => setMotif(e.target.value)} />
-              </label>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={confirmer}>{envoi ? <Loader variant="spin" /> : null} Écarter</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <DialogueEcarter h={h}  />
     </section>
+  );
+}
+
+/* 02/11/2026 — la fenêtre, exportée pour la sous-page « Référentiel » de /espace2/varelo */
+export function DialogueEcarter({ h }: { h: ReturnType<typeof useLots> }) {
+  const { aEcarter, setAEcarter, envoi, motif, setMotif, erreur, confirmer, decrire } = h;
+  return (
+    <Dialog open={!!aEcarter} onOpenChange={(o) => !o && !envoi && setAEcarter(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogIcone><XCircle width={18} height={18} aria-hidden="true" /></DialogIcone>
+          <DialogTitle>Écarter cette paire</DialogTitle>
+          <DialogDescription>Le code repart seul sur son propre objet et ne sera pas reproposé ; le reste du lot continue. La décision est inscrite au journal à votre nom.</DialogDescription>
+        </DialogHeader>
+        <DialogBody>
+          <div className="esp-form">
+            {aEcarter ? <p className="esp-kpi-sous">{decrire(aEcarter).gauche.titre} → {decrire(aEcarter).droite.titre} · {raisonTexte(aEcarter)}</p> : null}
+            <label className="rv-libelle">Motif
+              <textarea className="rv-champ" value={motif} maxLength={500} placeholder="Deux homonymes, un fournisseur repris, la société elle-même…" onChange={(e) => setMotif(e.target.value)} />
+            </label>
+            {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={confirmer}>{envoi ? <Loader variant="spin" /> : null} Écarter</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

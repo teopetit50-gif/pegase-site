@@ -1,0 +1,376 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAVARO — le socle des copies 1:1 de Linear (01/11/2026, règles de Teo :
+   docs/refonte-metiers/REGLES.md). Préfixe tav-, propre à Tavaro : le
+   gabarit partagé components/espace2/lin n'est pas touché.
+
+   Jetons : les couleurs calculées de Linear, thème sombre et clair, telles
+   que relevées (docs/refonte-metiers/releves/linear-*.md, session
+   références du 01/11). Aucune n'est estimée ; là où un relevé ne donne
+   qu'un thème, la ligne le dit.
+
+   Cadre : la carte `main` de Linear (linear-home.md) — marges 8 8 8 0,
+   rayon 12, bordure 0.5, ombre double en clair, simple en sombre. Elle se
+   pose dans le <main> de la coquille d'espace2 (barre du haut 48, barres
+   latérales 304) : c'est l'équivalent de la barre latérale de Linear
+   (244), qui n'appartient pas à la page copiée. Sans barre « Agent » chez
+   nous, la marge du bas est 8 (36 chez Linear).
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tav {
+  /* sombre */
+  --tav-app: lch(2.595 0.4 272);
+  --tav-carte: lch(5.52 0.4 272);
+  --tav-carte-bord: lch(13.08 1.48 272);
+  --tav-carte-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --tav-t1: lch(100 0 272);
+  --tav-t2: lch(90.451 1.2 272);
+  --tav-t3: lch(61.803 1.2 272);
+  --tav-t4: lch(39.452 1.425 272);
+  --tav-actif: lch(16.706 0.979 272);
+  --tav-inactif: lch(10.149 0.593 272);
+  --tav-bouton: lch(10.149 0.689 272);
+  --tav-survol: lch(9.345 0.85 272);
+  --tav-survol-onglet: lch(13.861 1.043 272);
+  --tav-groupe: lch(9.232 0.85 272);
+  --tav-puce-bord: lch(16.32 1.48 272);
+  --tav-menu: lch(12.72 0.85 272);
+  --tav-menu-bord: lch(25.68 1.93 272);
+  --tav-menu-ombre: lch(0 0 0 / 0.125) 0 3px 8px 0, lch(0 0 0 / 0.125) 0 2px 5px 0, lch(0 0 0 / 0.125) 0 1px 1px 0;
+  --tav-menu-texte: lch(91.178 1.425 272);
+  --tav-menu-icone: lch(64.714 1.425 272);
+  --tav-menu-survol: lch(20.032 1.93 272);
+  --tav-equipe: lch(60.135 63.97 86.502);
+  --tav-equipe-fond: lch(60.135 63.97 86.502 / 0.175);
+  --tav-rouge: lch(58% 73 29);
+  --tav-violet: #6d78d5;
+
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--tav-app);
+  color: var(--tav-t1);
+  font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: normal;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-v2-theme="light"] .v2 .tav {
+  --tav-app: lch(94.44 0.5 282);
+  --tav-carte: lch(97.94 0.5 282);
+  --tav-carte-bord: lch(89.84 0 282);
+  --tav-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --tav-t1: lch(9.794 0 282);
+  --tav-t2: lch(19.588 1.25 282);
+  --tav-t3: lch(39.176 1.25 282);
+  --tav-t4: lch(64.64 1.25 282);
+  --tav-actif: lch(93.483 0.5 282);
+  --tav-inactif: lch(99.997 0.5 282);
+  --tav-bouton: lch(99.997 0.5 282);
+  --tav-survol: lch(94.44 0.5 282);
+  --tav-survol-onglet: lch(94.854 0.5 282);
+  --tav-groupe: lch(94.44 0.5 282);
+  --tav-puce-bord: lch(86.5 0 282);
+  --tav-menu: lch(100 0 282);
+  --tav-menu-bord: lch(86.5 0 282);
+  --tav-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+  --tav-menu-texte: lch(9.794 0 282);
+  --tav-menu-icone: lch(39.176 1.25 282);
+  --tav-menu-survol: lch(94.854 0.5 282);
+  --tav-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .tav {
+    --tav-app: lch(94.44 0.5 282);
+    --tav-carte: lch(97.94 0.5 282);
+    --tav-carte-bord: lch(89.84 0 282);
+    --tav-carte-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --tav-t1: lch(9.794 0 282);
+    --tav-t2: lch(19.588 1.25 282);
+    --tav-t3: lch(39.176 1.25 282);
+    --tav-t4: lch(64.64 1.25 282);
+    --tav-actif: lch(93.483 0.5 282);
+    --tav-inactif: lch(99.997 0.5 282);
+    --tav-bouton: lch(99.997 0.5 282);
+    --tav-survol: lch(94.44 0.5 282);
+    --tav-survol-onglet: lch(94.854 0.5 282);
+    --tav-groupe: lch(94.44 0.5 282);
+    --tav-puce-bord: lch(86.5 0 282);
+    --tav-menu: lch(100 0 282);
+    --tav-menu-bord: lch(86.5 0 282);
+    --tav-menu-ombre: lch(0 0 0 / 0.06) 0 3px 8px 0, lch(0 0 0 / 0.06) 0 2px 5px 0, lch(0 0 0 / 0.06) 0 1px 1px 0;
+    --tav-menu-texte: lch(9.794 0 282);
+    --tav-menu-icone: lch(39.176 1.25 282);
+    --tav-menu-survol: lch(94.854 0.5 282);
+    --tav-equipe-fond: lch(60.135 63.97 86.502 / 0.125);
+  }
+}
+
+.v2 .tav *,
+.v2 .tav *::before,
+.v2 .tav *::after {
+  box-sizing: border-box;
+}
+.v2 .tav :where(button) {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.v2 .tav :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .tav :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ——— la carte ——— */
+.v2 .tav .tav-carte {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 48px - 16px);
+  background: var(--tav-carte);
+  border: 0.5px solid var(--tav-carte-bord);
+  border-radius: 12px;
+  box-shadow: var(--tav-carte-ombre);
+  overflow: hidden;
+}
+.v2 .tav .tav-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* ——— l'en-tête : ligne du titre (44, filet bas) puis ligne des onglets (44) ——— */
+.v2 .tav .tav-tete {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .tav .tav-ligne1 {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  height: 44px;
+  padding: 7px 8px 0;
+  border-bottom: 0.5px solid var(--tav-carte-bord);
+}
+.v2 .tav .tav-ligne2 {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  height: 43.5px;
+  padding: 7px 8px 0;
+}
+.v2 .tav .tav-fil {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 4px 0 10px;
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tav-t1);
+  white-space: nowrap;
+}
+.v2 .tav .tav-fil svg {
+  flex: none;
+}
+.v2 .tav .tav-pousse {
+  flex: 1;
+}
+.v2 .tav .tav-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0 2px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .tav .tav-rond svg {
+  width: 14px;
+  height: 14px;
+  color: var(--tav-t3);
+}
+.v2 .tav .tav-rond:hover,
+.v2 .tav .tav-rond[aria-expanded="true"] {
+  background: var(--tav-survol-onglet);
+}
+.v2 .tav .tav-rond--plein {
+  background: var(--tav-bouton);
+}
+.v2 .tav .tav-onglet {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--tav-inactif);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tav-t3);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+.v2 .tav .tav-onglet:hover {
+  background: var(--tav-survol-onglet);
+  color: var(--tav-t2);
+}
+.v2 .tav .tav-onglet[aria-current="page"],
+.v2 .tav .tav-onglet[aria-selected="true"] {
+  background: var(--tav-actif);
+  color: var(--tav-t1);
+}
+.v2 .tav :focus-visible {
+  outline: 2px solid var(--tav-violet);
+  outline-offset: -1px;
+}
+
+/* ——— le menu « … » (Team actions, linear-home.md) ——— */
+.v2 .tav .tav-menu {
+  position: absolute;
+  z-index: 40;
+  min-width: 175px;
+  padding: 6px 0;
+  background: var(--tav-menu);
+  border: 0.5px solid var(--tav-menu-bord);
+  border-radius: 12px;
+  box-shadow: var(--tav-menu-ombre);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19.5px;
+  color: var(--tav-menu-texte);
+}
+.v2 .tav .tav-menu-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 32px;
+  padding: 0 18px 0 14px;
+  font-weight: 450;
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .tav .tav-menu-option::before {
+  content: "";
+  position: absolute;
+  inset: 0 6px;
+  border-radius: 8px;
+  z-index: -1;
+}
+.v2 .tav .tav-menu-option:hover::before,
+.v2 .tav .tav-menu-option:focus-visible::before {
+  background: var(--tav-menu-survol);
+}
+.v2 .tav .tav-menu-option {
+  isolation: isolate;
+}
+.v2 .tav .tav-menu-option svg {
+  flex: none;
+  color: var(--tav-menu-icone);
+}
+.v2 .tav .tav-menu-sep {
+  height: 0.5px;
+  margin: 6px 0;
+  background: var(--tav-menu-bord);
+}
+
+/* ——— 768 et moins : la carte s'efface (Linear la pose plein écran) ——— */
+@media (max-width: 768px) {
+  .v2 .tav {
+    padding: 0;
+    background: var(--tav-carte);
+  }
+  .v2 .tav .tav-carte {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  .v2 .tav .tav-defile {
+    overflow: visible;
+  }
+  .v2 .tav .tav-rond,
+  .v2 .tav .tav-onglet {
+    height: 32px;
+  }
+  .v2 .tav .tav-rond {
+    width: 32px;
+  }
+}
+
+/* ——— le pont : un gabarit `lin` (../lin, partagé, non touché) monté dans une page Tavaro
+   prend les couleurs exactes de Linear ci-dessus, dans les deux thèmes. Le double .lin
+   l'emporte sur les règles de thème de lin.css (html[data-v2-theme] .v2 .lin). ——— */
+.v2 .tav .lin.lin {
+  --lin-fond: var(--tav-carte);
+  --lin-trait: var(--tav-carte-bord);
+  --lin-survol: var(--tav-survol);
+  --lin-groupe: var(--tav-groupe);
+  --lin-pastille: var(--tav-inactif);
+  --lin-pastille-active: var(--tav-actif);
+  --lin-anneau: 0 0 0 0.5px transparent;
+  --lin-ombre-pastille: none;
+  --lin-bouton: var(--tav-bouton);
+  --lin-icone: var(--tav-t3);
+  --lin-titre: var(--tav-t1);
+  --lin-texte: var(--tav-t2);
+  --lin-texte-groupe: var(--tav-t2);
+  --lin-second: var(--tav-t3);
+  --lin-compte: var(--tav-t3);
+  --lin-cercle: var(--tav-t4);
+  --lin-en-cours: lch(80 90 85);
+  --lin-fait: lch(48 59.31 288.43);
+  --lin-avatar: var(--tav-t4);
+  --lin-carte: var(--tav-menu);
+  --lin-detail: var(--tav-menu);
+  --lin-detail-trait: var(--tav-menu-bord);
+  --lin-onglet-detail: var(--tav-inactif);
+  --lin-onglet-detail-actif: var(--tav-actif);
+  --lin-onglet-detail-texte: var(--tav-t3);
+  --lin-menu: var(--tav-menu);
+  --lin-menu-trait: var(--tav-menu-bord);
+  --lin-ombre-menu: var(--tav-menu-ombre);
+  --lin-champ: var(--tav-inactif);
+  --lin-menu-fond: var(--tav-menu);
+  --lin-menu-bord: var(--tav-menu-bord);
+  --lin-menu-sep: var(--tav-menu-bord);
+  --lin-menu-survol: var(--tav-menu-survol);
+  --lin-menu-texte: var(--tav-menu-texte);
+  --lin-menu-gris: var(--tav-menu-icone);
+  --lin-maj-trait: var(--tav-menu-bord);
+  min-height: 0;
+  background: transparent;
+}
+
+/* ——— un état vide centré (volet ou page sans objet) ——— */
+.v2 .tav .tav-vide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tav-t2);
+  text-align: center;
+}
