@@ -1,0 +1,297 @@
+/* ══════════════════════════════════════════════════════════════════════
+   VARELO, Groupe — Linear, liste des Initiatives, au 1:1 (02/11/2026).
+   Relevé : docs/refonte-metiers/releves/linear-initiatives-liste.md (le
+   complément du 01/11 prime : écart de colonnes 6). Préfixe var-i-.
+
+   Grille vérifiée sur les abscisses du relevé (case 264, titre 285,
+   statut 863, urgence 969, responsable 1031, cible 1087, projets 1193,
+   santé 1258, projets actifs 1316, bord 1432) : pas de padding sur la
+   ligne, colonnes 8 · 20 · titre · 100 · 56 · 50 · 100 · 59 · 52 · 98 ·
+   12, écart 6 ; le titre prend le reste (572 chez Linear, carte de 1187).
+   Ligne de 57, rayon 8, survol par ::before en retrait de 8.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .var .var-i-ligne2 {
+  gap: 6px;
+}
+.v2 .var .var-i-onglets {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .var .var-i-ronds {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  position: relative;
+}
+.v2 .var .var-i-ronds .var-rond {
+  background: var(--var-bouton);
+  color: var(--var-t2);
+}
+.v2 .var .var-i-tete,
+.v2 .var .var-i-ligne {
+  display: grid;
+  grid-template-columns: 8px 20px minmax(0, 1fr) 100px 56px 50px 100px 59px 52px 98px 12px;
+  column-gap: 6px;
+  align-items: center;
+}
+.v2 .var .var-i-tete {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 32px;
+  background: var(--var-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--var-t3);
+}
+.v2 .var .var-i-tete > span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .var .var-i-tri {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 24px;
+  margin-left: -6px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--var-t3);
+}
+.v2 .var .var-i-tri:hover {
+  background: var(--var-survol-onglet);
+}
+.v2 .var .var-i-tri svg {
+  width: 12px;
+  height: 12px;
+  color: var(--var-t2);
+}
+.v2 .var .var-i-lignes {
+  padding-bottom: 8px;
+}
+.v2 .var .var-i-ligne {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 57px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--var-t1);
+  transition: color 0.15s;
+}
+.v2 .var .var-i-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  z-index: -1;
+  border-radius: 8px;
+}
+.v2 .var .var-i-ligne:hover::before,
+.v2 .var .var-i-ligne[data-vise]::before {
+  background: var(--var-survol);
+}
+.v2 .var .var-i-ligne > span {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.v2 .var .var-i-titre {
+  gap: 6px;
+}
+.v2 .var .var-i-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 8px;
+}
+.v2 .var .var-i-textes {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+  min-width: 0;
+}
+.v2 .var .var-i-nom {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 15.5px;
+  color: var(--var-t2);
+}
+.v2 .var .var-i-resume {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 15.5px;
+  color: var(--var-t3);
+}
+.v2 .var .var-i-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  max-width: 100%;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+.v2 .var .var-i-pilule > svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+}
+.v2 .var .var-i-pilule > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .var .var-i-rond {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  color: var(--var-t3);
+}
+.v2 .var .var-i-rond--resp {
+  width: 30px;
+  margin-left: -3px;
+}
+.v2 .var .var-i-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--var-t4);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+}
+.v2 .var .var-i-cible {
+  margin-left: -3px;
+}
+.v2 .var .var-i-projets {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 24px;
+  padding: 2px 4px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  color: var(--var-t3);
+  white-space: nowrap;
+}
+.v2 .var .var-i-projets svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: #5e6ad2;
+}
+.v2 .var .var-i-projets strong {
+  font-weight: 500;
+  color: var(--var-t2);
+}
+.v2 .var .var-i-sante {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0 2px;
+  border-radius: 9999px;
+}
+.v2 .var .var-i-sante svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .var .var-i-actifs {
+  display: flex;
+  gap: 2px;
+  margin-left: -3px;
+}
+.v2 .var .var-i-pastille {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 2px 6px 2px 2px;
+  border: 0.5px solid transparent;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--var-t2);
+  white-space: nowrap;
+}
+.v2 .var .var-i-point {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+.v2 .var .var-i-point::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--var-point, var(--var-t3));
+}
+.v2 .var .var-i-vide {
+  padding: 12px 18px;
+  font-size: 13px;
+  color: var(--var-t3);
+}
+
+/* 1024 : la case disparaît, le titre passe à 380, le tableau défile */
+@media (max-width: 1024px) {
+  .v2 .var .var-i-defile {
+    overflow-x: auto;
+  }
+  .v2 .var .var-i-tete,
+  .v2 .var .var-i-ligne {
+    grid-template-columns: 8px 0 380px 100px 56px 50px 100px 59px 52px 98px 12px;
+    width: max-content;
+    min-width: 100%;
+  }
+}
+/* 390 : plus d'en-tête ; indent 8 · titre · santé 28 · fin 12 */
+@media (max-width: 480px) {
+  .v2 .var .var-i-tete {
+    display: none;
+  }
+  .v2 .var .var-i-ligne {
+    grid-template-columns: 8px minmax(0, 1fr) 28px 12px;
+    width: 100%;
+  }
+  .v2 .var .var-i-ligne > .var-i-case,
+  .v2 .var .var-i-ligne > .var-i-c-statut,
+  .v2 .var .var-i-ligne > .var-i-c-urgence,
+  .v2 .var .var-i-ligne > .var-i-c-resp,
+  .v2 .var .var-i-ligne > .var-i-c-cible,
+  .v2 .var .var-i-ligne > .var-i-c-projets,
+  .v2 .var .var-i-ligne > .var-i-c-actifs {
+    display: none;
+  }
+  .v2 .var .var-i-nouveau-texte {
+    display: none;
+  }
+}

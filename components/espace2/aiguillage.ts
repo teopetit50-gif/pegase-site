@@ -115,14 +115,15 @@ export const REGLES: Record<string, Regle> = {
   tiroma_plans: tiroma("tiroma_plans"),
   /* calculé par tiroma_avant_rendez_vous_pour (b3_04), repris par le point du matin (b3_06) */
   tiroma_travaux_labo: tiroma("tiroma_travaux_labo"),
-  grp_balances_depots: varelo("grp_balances_depots"),
+  grp_balances_depots: (id) => `${RACINE}/varelo/groupe?depot=${q(id)}`,
   /* 02/11/2026 — VARELO redécoupé : chaque objet mène à la sous-page qui le montre */
   grp_contrats: (id) => `${RACINE}/varelo/contrats?contrat=${q(id)}`,
   grp_encours_depots: varelo("grp_encours_depots"),
   grp_receptions: (id) => `${RACINE}/varelo/operations?reception=${q(id)}`,
   grp_ref_objets: varelo("grp_ref_objets"),
   grp_reportings_echeances: (id) => `${RACINE}/varelo/operations?echeance=${q(id)}`,
-  grp_societes: varelo("grp_societes"),
+  /* objet_id porte un entite_id (b1_08) */
+  grp_societes: (id) => `${RACINE}/varelo/groupe?societe=${q(id)}`,
 };
 
 export function moduleDeObjet(objet_type: string | null | undefined): string | null {

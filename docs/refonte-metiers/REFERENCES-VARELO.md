@@ -36,6 +36,7 @@ Inventaire (contrat de la refonte) : `docs/refonte-metiers/varelo.md`. Préfixe 
 | Ce matin | `/espace2/varelo` | Linear, accueil d'une équipe | `linear-home.md` | `ce-matin-*` | fait |
 | Contrats | `/espace2/varelo/contrats` (`?contrat=<id>`) | Plain, Accounts : liste et fiche | `plain-tenants.md`, `plain-tenant.md` | `contrats-liste-*`, `contrats-fiche-*`, `contrats-fiche-volet-*` | fait |
 | Opérations | `/espace2/varelo/operations` (`?reception=`, `?echeance=`) | Linear, Board | `linear-board.md` | `operations-*` | fait |
+| Groupe | `/espace2/varelo/groupe` (`?societe=`, `?depot=`) | Linear, liste des Initiatives | `linear-initiatives-liste.md` | `groupe-*` | fait |
 
 ### Ce matin → Linear, accueil d'une équipe (`linear-home.md`)
 
@@ -106,3 +107,25 @@ contenu (nombre de puces : la société d'un groupe est plus longue qu'un projet
   gestes (le menu contextuel de Linear, aussi au clic droit), car une réserve ou un reporting n'a pas de page.
 - Puces du métier : avarie, manquant, photos, préjudice, décision, canal (pastille 9×9 comme une étiquette).
 - La colonne « Faits » montre les 20 plus récents, puis « … et N de plus » (les reportings faits s'accumulent).
+
+### Groupe → Linear, liste des Initiatives (`linear-initiatives-liste.md`)
+
+Contenu : bloc 5 (« Le groupe sur une page » : totaux, une ligne par société, « Sans balance générale »), fenêtres 5.a
+(objectifs, G14) et 5.b (balance générale, G13) d'avant. Repères `grp_societes` (porte un `entite_id`) →
+`?societe=<entite_id>` et `grp_balances_depots` → `?depot=<id>` : la ligne de la société est surlignée.
+
+Grille vérifiée sur les abscisses du relevé (pas de padding sur la ligne, écart 6 ; le complément du 01/11 prime sur
+l'écart 12 du premier relevé). Preuves 1440 : sombre 4,8/255, clair 5,0/255 ; en-tête de colonnes de 32, lignes de 57,
+case de 28 de l'icône, nom et résumé, pilule d'état, ronds d'urgence et de responsable, date, compteur, santé et
+pastilles à point tombent sur la référence (colonnes décalées de 60 à gauche : la colonne du titre prend la largeur
+de carte en moins). 390 : plus d'en-tête, titre et santé seulement, comme Linear.
+
+Écarts restants, expliqués :
+- Colonnes du métier dans les briques de Linear : État (statut : Alerte = trésorerie sous le plancher, En retard,
+  À jour, Sans cible, À déposer), Urgence (priorité), Pôle (responsable : initiale du pôle), Balance (date cible),
+  Sur N-1 (compteur de projets : écart en %), Âge (santé : balance de moins de 35 jours), Trésorerie (pastille à point
+  des projets actifs). Les libellés d'état sont courts pour tenir dans les 100 px de Linear ; leur sens complet est
+  dans l'info-bulle.
+- Première ligne « Tout le groupe » : les totaux de l'écran d'avant, dans la même brique (Linear n'a pas de total).
+- Pas de troisième rond (« Open details ») : pas de volet de détail pour une société ; une ligne ouvre les objectifs.
+- Pas de case à cocher au survol : pas de geste groupé sur les sociétés.
