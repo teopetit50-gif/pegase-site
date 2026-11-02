@@ -134,6 +134,31 @@ html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
   font-weight: 450;
   color: var(--dal-mi-groupe-compte);
 }
+.v2 .dal .dal-rond.dal-mi-groupe-plus {
+  width: 24px;
+  height: 24px;
+}
+.v2 .dal .dal-rond.dal-mi-groupe-plus svg {
+  color: var(--dal-mi-groupe-nom);
+}
+.v2 .dal .dal-mi-nouvelle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.v2 .dal .dal-mi-nouvelle:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
 .v2 .dal .dal-mi-groupe-dates {
   font-weight: 450;
   color: var(--dal-mi-groupe-dates);
@@ -159,11 +184,61 @@ html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
   z-index: -1;
   border-radius: 8px;
 }
-.v2 .dal .dal-mi-ligne:hover::before {
+.v2 .dal .dal-mi-ligne:hover::before,
+.v2 .dal .dal-mi-ligne[data-choisie]::before {
   background: var(--dal-survol);
 }
-.v2 .dal .dal-mi-ligne[aria-current]::before {
+.v2 .dal .dal-mi-ligne[data-courant]::before {
   background: var(--dal-survol-onglet);
+}
+/* la ligne entière ouvre la tâche ; la case et la puce de semaine restent cliquables par-dessus */
+.v2 .dal .dal-mi-lien {
+  position: absolute;
+  inset: 0 8px;
+  z-index: 0;
+  border-radius: 8px;
+}
+.v2 .dal .dal-mi-ligne > :not(.dal-mi-lien):not(.dal-mi-case) {
+  position: relative;
+  pointer-events: none;
+}
+.v2 .dal .dal-mi-ligne .dal-mi-puce--lien {
+  pointer-events: auto;
+  z-index: 1;
+  color: var(--dal-t3);
+  transition: background-color 0.15s;
+}
+.v2 .dal .dal-mi-ligne .dal-mi-puce--lien:hover,
+.v2 .dal .dal-mi-ligne .dal-mi-puce--lien[aria-pressed="true"] {
+  background: var(--dal-survol-onglet);
+}
+/* la case « Select issue » : 14 × 14, bord 1 px #7c7c7c, r 3, invisible au repos (relevé) */
+.v2 .dal .dal-mi-case {
+  grid-column: checkbox;
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-left: 3px;
+  padding: 0;
+  border: 1px solid #7c7c7c;
+  border-radius: 3px;
+  color: transparent;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.v2 .dal .dal-mi-ligne:hover .dal-mi-case,
+.v2 .dal .dal-mi-case:focus-visible,
+.v2 .dal .dal-mi-liste:has([data-choisie]) .dal-mi-case {
+  opacity: 1;
+}
+.v2 .dal .dal-mi-case[aria-checked="true"] {
+  border-color: var(--dal-violet);
+  background: var(--dal-violet);
+  color: #fff;
 }
 .v2 .dal .dal-mi-prio {
   grid-column: priority;
@@ -429,6 +504,60 @@ html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
   color: var(--dal-mi-cours);
 }
 
+/* ——— la barre des actions groupées (cases cochées) ——— */
+.v2 .dal .dal-mi-barre {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: calc(100% - 32px);
+  height: 40px;
+  padding: 0 6px 0 14px;
+  transform: translateX(-50%);
+  border: 0.5px solid var(--dal-menu-bord);
+  border-radius: 12px;
+  background: var(--dal-menu);
+  box-shadow: var(--dal-menu-ombre);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-menu-texte);
+  white-space: nowrap;
+}
+.v2 .dal .dal-mi-barre-compte {
+  margin-right: 4px;
+}
+.v2 .dal .dal-mi-barre-sep {
+  width: 0.5px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--dal-menu-bord);
+}
+.v2 .dal .dal-mi-barre-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--dal-menu-texte);
+}
+.v2 .dal .dal-mi-barre-bouton svg {
+  color: var(--dal-menu-icone);
+}
+.v2 .dal .dal-mi-barre-bouton:hover,
+.v2 .dal .dal-mi-barre-bouton[aria-expanded="true"] {
+  background: var(--dal-menu-survol);
+}
+:is(.v2, .v2-jetons) .dal-mi-liste-confirmer {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  list-style: disc;
+  font-size: 13px;
+}
+
 /* ——— 1024 : les puces restent, le volet se pose par-dessus ——— */
 @media (max-width: 1180px) {
   .v2 .dal .dal-mi-volet {
@@ -450,6 +579,9 @@ html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
   }
   .v2 .dal .dal-mi-id,
   .v2 .dal .dal-mi-puces,
+  .v2 .dal .dal-mi-nouvelle span,
+  .v2 .dal .dal-mi-case,
+  .v2 .dal .dal-mi-barre-compte,
   .v2 .dal .dal-mi-date,
   .v2 .dal .dal-mi-groupe-dates {
     display: none;

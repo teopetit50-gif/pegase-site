@@ -45,6 +45,7 @@ import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { messagesExemple } from "./exemplesARanger";
 import { IconeLinear } from "./IconesLinear";
+import { EtoilePleine } from "./IconesProjet";
 import { copier, useFavoris, useReportes, useSuivis } from "./navigateur";
 import { ILLUSTRATION_TRIAGE } from "./illustrationTriage";
 import "./dal-triage.css";
@@ -590,12 +591,12 @@ export default function ARanger() {
         <button
           type="button"
           className="dal-rond dal-tr-etoile"
-          aria-pressed={favoris.estEpingle("page", "daliro/a-ranger")}
-          aria-label={favoris.estEpingle("page", "daliro/a-ranger") ? "Retirer la page des épinglés" : "Épingler la page"}
-          title={favoris.estEpingle("page", "daliro/a-ranger") ? "Retirer des épinglés de la vue d'ensemble" : "Épingler dans la vue d'ensemble"}
-          onClick={() => favoris.basculer({ type: "page", id: "daliro/a-ranger", titre: "À ranger", href: CHEMIN })}
+          aria-pressed={favoris.estEpingle("vue", "daliro-a-ranger")}
+          aria-label={favoris.estEpingle("vue", "daliro-a-ranger") ? "Retirer la page des épinglés" : "Épingler la page"}
+          title={favoris.estEpingle("vue", "daliro-a-ranger") ? "Retirer des épinglés de la vue d'ensemble" : "Épingler dans la vue d'ensemble"}
+          onClick={() => favoris.basculer({ type: "vue", id: "daliro-a-ranger", titre: "À ranger", href: CHEMIN })}
         >
-          <DalIcone nom={favoris.estEpingle("page", "daliro/a-ranger") ? "Favorite" : "Etoile"} />
+          {favoris.estEpingle("vue", "daliro-a-ranger") ? <EtoilePleine /> : <DalIcone nom="Etoile" />}
         </button>
         <span className="dal-pousse" />
         <MenuTr
@@ -713,7 +714,7 @@ export default function ARanger() {
     const recu = dateHeure(m.recu_le);
     const demandes = m.lecture?.demandes ?? [];
     const transcriptions = (m.lecture?.medias ?? []).filter((x) => x.transcription);
-    const epingle = favoris.estEpingle("message", m.id);
+    const epingle = favoris.estEpingle("btp_messages", m.id);
     const suivi = suivis.estSuivi("expediteur", cleExpediteur(m));
     const report = reportes.reportes.find((x) => x.type === "message" && x.id === m.id && estReporte("message", m.id));
     const optionsPieces: OptionTr[] = m.pieces.length
@@ -747,9 +748,9 @@ export default function ARanger() {
             aria-pressed={epingle}
             aria-label={epingle ? "Retirer des épinglés" : "Épingler le message"}
             title={epingle ? "Retirer des épinglés de la vue d'ensemble" : "Épingler dans la vue d'ensemble"}
-            onClick={() => favoris.basculer({ type: "message", id: m.id, titre: `${CANAUX[m.canal]} de ${auteur} : ${titreDe(m)}`, href: `${CHEMIN}?id=${encodeURIComponent(m.id)}` })}
+            onClick={() => favoris.basculer({ type: "btp_messages", id: m.id, titre: `${CANAUX[m.canal]} de ${auteur} : ${titreDe(m)}`, href: `${CHEMIN}?id=${encodeURIComponent(m.id)}` })}
           >
-            <DalIcone nom={epingle ? "Favorite" : "Etoile"} />
+            {epingle ? <EtoilePleine /> : <DalIcone nom="Etoile" />}
           </button>
           <MenuTr
             libelle="Actions du message"
@@ -758,7 +759,7 @@ export default function ARanger() {
             declencheur={<DalIcone nom="Points" />}
             options={[
               { cle: "avenant", libelle: "Ouvrir un avenant…", icone: "Signature", action: () => ouvrirAvenantFenetre(m) },
-              { cle: "suivre", libelle: suivi ? "Ne plus suivre l'expéditeur" : "Suivre l'expéditeur", icone: "Subscribe", action: () => suivis.basculer({ type: "expediteur", id: cleExpediteur(m), titre: auteur, href: CHEMIN }) },
+              { cle: "suivre", libelle: suivi ? "Ne plus suivre l'expéditeur" : "Suivre l'expéditeur", icone: suivi ? "Notified" : "Subscribe", action: () => suivis.basculer({ type: "expediteur", id: cleExpediteur(m), titre: auteur, href: CHEMIN }) },
               { cle: "lien", libelle: "Copier le lien", icone: "Link", action: copierLien },
             ]}
           />

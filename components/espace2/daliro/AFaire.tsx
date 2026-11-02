@@ -42,15 +42,21 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { dateCourte, dateHeure, montant } from "@/components/espace/format";
+import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { CONFIRMATIONS, libelleEnvoi } from "@/components/espace/daliro/etats";
+import { ouvrirSituation, terminerPassage } from "@/components/espace/daliro/portes";
+import { ouvrirLocale } from "@/components/espace/daliro/situations";
 import { ouverte as fonctionOuverte } from "@/components/espace/daliro/fonctions";
 import type { Chantier, Passage, Tableau } from "@/components/espace/daliro/types";
+import { Note } from "../ui";
+import { useToast } from "../Toasts";
 import { useAujourdhui } from "../horloge";
 import { RACINE } from "../modules";
 import { useDaliro } from "./donnees";
 import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { completerExemple } from "./exemplesAFaire";
+import { copier, exporterCsv, useReportes } from "./navigateur";
 import "./dal-mes.css";
 
 const CHEMIN = `${RACINE}/daliro/a-faire`;
@@ -308,6 +314,16 @@ const decaler = (iso: string, n: number) => isoLocal(Date.parse(`${iso}T12:00:00
 /* la référence du chantier dans la colonne de 55 de l'identifiant OME-n : l'année sur deux chiffres */
 const refCourte = (ref: string) => ref.replace(/-20(\d\d)\b/, "-$1");
 
+/* la semaine d'une date (lundi), la puce « cycle » de Linear : S45 */
+const lundiDe = (iso: string) => decaler(iso, -((new Date(`${iso}T12:00:00`).getDay() + 6) % 7));
+function numeroSemaine(iso: string): number {
+  const d = new Date(`${iso}T12:00:00`);
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const premier = new Date(d.getFullYear(), 0, 4, 12);
+  return 1 + Math.round(((d.getTime() - premier.getTime()) / 86_400_000 - 3 + ((premier.getDay() + 6) % 7)) / 7);
+}
+const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+
 /* la priorité de Linear (sprite Priority0…4) donnée par la nature de la tâche */
 function prioriteDe(x: Tache): { icone: NomDalIcone; libelle: string; urgente?: boolean } {
   if (x.enRetard) return { icone: "Priority1", libelle: "Urgente", urgente: true };
@@ -390,11 +406,21 @@ const VUES: { cle: Vue; libelle: string }[] = [
   { cle: "tous", libelle: "Tous" },
 ];
 
-type Groupe = { cle: string; libelle: string; dates?: string; icone?: NomDalIcone; taches: Tache[] };
+type Groupe = { cle: string; libelle: string; dates?: string; icone?: NomDalIcone; taches: Tache[]; /* pour « + » : la fin de période proposée, le chantier */ fin: string; chantierId?: string };
 
 export default function AFaire() {
   const d = useDaliro();
-  const { source, liste, onLocal } = d;
+  const { source, liste, onLocal, relireChantier } = d;
+  const toast = useToast();
+  const reportes = useReportes();
+  /* la sélection (cases à cocher) et la barre d'actions groupées */
+  const [choisies, setChoisies] = useState<Set<string>>(() => new Set());
+  const [confirmerFaits, setConfirmerFaits] = useState(false);
+  const [envoi, setEnvoi] = useState(false);
+  const [erreurFenetre, setErreurFenetre] = useState<string | null>(null);
+  /* « New issue » et « + » de groupe : ouvrir une situation (la tâche « Soumettre » en naît) */
+  const [nouvelle, setNouvelle] = useState<{ chantier: string; fin: string } | null>(null);
+  const [menuReport, setMenuReport] = useState(false);
   const reelle = source === "reelle";
   const routeur = useRouter();
   const params = useSearchParams();
@@ -409,6 +435,8 @@ export default function AFaire() {
   const cleParam = params.get("tache");
   const passageParam = params.get("passage");
   const voletDemande = params.get("details") !== "0";
+  const semaineFiltre = params.get("semaine");
+  const voirReportees = params.get("reportees") === "1";
 
   /* base réelle : les tableaux de tous les chantiers, demandés une fois par liste
      (et de nouveau quand le temps réel les a tous vidés) */
@@ -430,9 +458,13 @@ export default function AFaire() {
 
   /* recalculées à chaque rendu : quelques chantiers, quelques dizaines de passages */
   const toutes = jour ? tableaux.flatMap((t) => tachesDe(t, jour)) : [];
+  const { estReporte } = reportes;
+  const nbReportees = toutes.filter((x) => estReporte("tache", x.cle)).length;
   const visibles = toutes
     .filter((x) => (vue === "tous" ? true : vue === "attente" ? !x.aFaire : x.aFaire))
     .filter((x) => !filtreChantier || x.chantier.id === filtreChantier)
+    .filter((x) => !semaineFiltre || lundiDe(x.quand) === semaineFiltre)
+    .filter((x) => voirReportees || !estReporte("tache", x.cle))
     .sort((a, b) => RANG_PRIORITE[prioriteDe(a).icone] - RANG_PRIORITE[prioriteDe(b).icone] || a.quand.localeCompare(b.quand) || a.titre.localeCompare(b.titre, "fr"));
 
   /* les groupes : en retard, puis les semaines (les cycles de Linear), ou un groupe par chantier */
@@ -441,16 +473,16 @@ export default function AFaire() {
     if (groupement === "chantier") {
       const parChantier = new Map<string, Tache[]>();
       for (const x of visibles) parChantier.set(x.chantier.id, [...(parChantier.get(x.chantier.id) ?? []), x]);
-      return [...parChantier.values()].sort((a, b) => a[0].chantier.nom.localeCompare(b[0].chantier.nom, "fr")).map((ts) => ({ cle: ts[0].chantier.id, libelle: ts[0].chantier.nom, icone: "Crane" as NomDalIcone, taches: ts }));
+      return [...parChantier.values()].sort((a, b) => a[0].chantier.nom.localeCompare(b[0].chantier.nom, "fr")).map((ts) => ({ cle: ts[0].chantier.id, libelle: ts[0].chantier.nom, icone: "Crane" as NomDalIcone, taches: ts, fin: jour, chantierId: ts[0].chantier.id }));
     }
     const lundi = decaler(jour, -((new Date(`${jour}T12:00:00`).getDay() + 6) % 7));
     const dimanche = decaler(lundi, 6);
     const dimancheSuivant = decaler(lundi, 13);
     const g: Groupe[] = [
-      { cle: "retard", libelle: "En retard", taches: visibles.filter((x) => x.enRetard) },
-      { cle: "semaine", libelle: "Cette semaine", dates: `${jourMois(lundi)} → ${jourMois(dimanche)}`, icone: "Cycle", taches: visibles.filter((x) => !x.enRetard && x.quand <= dimanche) },
-      { cle: "suivante", libelle: "Semaine prochaine", dates: `${jourMois(decaler(lundi, 7))} → ${jourMois(dimancheSuivant)}`, icone: "Cycle", taches: visibles.filter((x) => !x.enRetard && x.quand > dimanche && x.quand <= dimancheSuivant) },
-      { cle: "plus_tard", libelle: "Plus tard", icone: "Cycle", taches: visibles.filter((x) => !x.enRetard && x.quand > dimancheSuivant) },
+      { cle: "retard", libelle: "En retard", taches: visibles.filter((x) => x.enRetard), fin: jour },
+      { cle: "semaine", libelle: "Cette semaine", dates: `${jourMois(lundi)} → ${jourMois(dimanche)}`, icone: "Cycle", taches: visibles.filter((x) => !x.enRetard && x.quand <= dimanche), fin: dimanche },
+      { cle: "suivante", libelle: "Semaine prochaine", dates: `${jourMois(decaler(lundi, 7))} → ${jourMois(dimancheSuivant)}`, icone: "Cycle", taches: visibles.filter((x) => !x.enRetard && x.quand > dimanche && x.quand <= dimancheSuivant), fin: dimancheSuivant },
+      { cle: "plus_tard", libelle: "Plus tard", icone: "Cycle", taches: visibles.filter((x) => !x.enRetard && x.quand > dimancheSuivant), fin: decaler(dimancheSuivant, 14) },
     ];
     return g.filter((x) => x.taches.length);
   })();
@@ -494,6 +526,89 @@ export default function AFaire() {
   const lienVue = (v: Vue) => adresse((p) => (v === "a_faire" ? p.delete("vue") : p.set("vue", v)));
   const lienGroupement = (g: Groupement) => adresse((p) => (g === "semaine" ? p.delete("tri") : p.set("tri", g)));
   const lienChantier = (c: string | null) => adresse((p) => (c ? p.set("chantier", c) : p.delete("chantier")));
+  const lienSemaine = (l: string | null) => adresse((p) => (l ? p.set("semaine", l) : p.delete("semaine")));
+  const lienReportees = adresse((p) => (voirReportees ? p.delete("reportees") : p.set("reportees", "1")));
+
+  /* ——— la sélection : cases à cocher, puis la barre d'actions groupées ——— */
+  const selection = ordre.filter((x) => choisies.has(x.cle));
+  const basculerChoix = (cle: string) =>
+    setChoisies((c) => {
+      const n = new Set(c);
+      if (n.has(cle)) n.delete(cle);
+      else n.add(cle);
+      return n;
+    });
+  const faitsPossibles = selection.filter((x) => x.genre === "fait" && x.passageId);
+  /* Noter faits (G24) : chaque passage à sa fin prévue, au plus tard aujourd'hui — porte btp_terminer_passage */
+  const noterFaits = async () => {
+    if (!jour || envoi) return;
+    setEnvoi(true);
+    setErreurFenetre(null);
+    let n = 0;
+    try {
+      for (const x of faitsPossibles) {
+        const t = d.tableau(x.chantier.id);
+        const p = t?.passages.find((q) => q.id === x.passageId);
+        if (!t || !p) continue;
+        const fin = p.fin.slice(0, 10) < jour ? p.fin.slice(0, 10) : jour;
+        if (reelle) {
+          await terminerPassage(p.id, fin);
+          await relireChantier(t.chantier.id);
+        } else {
+          onLocal({ ...t, passages: t.passages.map((q) => (q.id === p.id ? { ...q, fin, statut: "fait" } : q)) });
+        }
+        n += 1;
+      }
+      toast(`${n} passage${n > 1 ? "s" : ""} noté${n > 1 ? "s" : ""} fait${n > 1 ? "s" : ""}.`, "vert");
+      setConfirmerFaits(false);
+      setChoisies(new Set());
+    } catch (e) {
+      setErreurFenetre(`${n ? `${n} noté${n > 1 ? "s" : ""} fait${n > 1 ? "s" : ""}, puis : ` : ""}${e instanceof Error ? e.message : "La base a refusé l'action."}`);
+    } finally {
+      setEnvoi(false);
+    }
+  };
+  const reporterSelection = (jusqu: string) => {
+    for (const x of selection) reportes.reporter("tache", x.cle, jusqu);
+    toast(`${selection.length} tâche${selection.length > 1 ? "s" : ""} reportée${selection.length > 1 ? "s" : ""} au ${jourMois(jusqu)} : elles reviennent ce jour-là.`, "vert");
+    setChoisies(new Set());
+  };
+  const lignesCsv = (ts: Tache[]) => ts.map((x) => [x.ref, x.chantier.nom, NATURE[x.genre].libelle, x.titre, x.quand, x.enRetard ? "oui" : "non", x.qui ?? "", x.geste]);
+  const exporter = (ts: Tache[]) => exporterCsv("daliro-a-faire", ["Référence", "Chantier", "Nature", "Tâche", "Date", "En retard", "Qui", "Geste"], lignesCsv(ts));
+  const copierSelection = () =>
+    void copier(selection.map((x) => `- ${x.titre} (${x.chantier.nom}, ${jourMois(x.quand)}) : ${x.geste}`).join("\n")).then((ok) => toast(ok ? "Tâches copiées." : "Le presse-papier a refusé la copie.", ok ? "vert" : "rouge"));
+
+  /* ——— « New issue » : ouvrir une situation (porte btp_ouvrir_situation) — sa tâche « Soumettre » naît ——— */
+  const chantiersSituation = tableaux
+    .filter((t) => (t.chantier.statut === "ouvert" || t.chantier.statut === "suspendu" || t.chantier.statut === "receptionne") && t.marches.some((m) => m.statut === "verifie") && !(t.situations ?? []).some((x) => x.statut === "brouillon" || x.statut === "soumise" || x.statut === "refusee"))
+    .map((t) => t.chantier)
+    .sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
+  const ouvrirNouvelle = (fin: string, chantierId?: string) => {
+    setErreurFenetre(null);
+    setNouvelle({ chantier: chantierId && chantiersSituation.some((c) => c.id === chantierId) ? chantierId : (chantiersSituation[0]?.id ?? ""), fin });
+  };
+  const creerSituation = async () => {
+    if (!nouvelle || envoi) return;
+    const t = d.tableau(nouvelle.chantier);
+    if (!t) return;
+    setEnvoi(true);
+    setErreurFenetre(null);
+    try {
+      if (reelle) {
+        await ouvrirSituation(t.chantier.id, nouvelle.fin, null);
+        await relireChantier(t.chantier.id);
+      } else {
+        const s = ouvrirLocale(t, nouvelle.fin, null, nid);
+        onLocal({ ...t, situations: [s, ...(t.situations ?? [])] });
+      }
+      toast(`Situation ouverte sur « ${t.chantier.nom} » : saisissez l'avancement, puis soumettez-la.`, "vert");
+      setNouvelle(null);
+    } catch (e) {
+      setErreurFenetre(e instanceof Error ? e.message : "La base a refusé l'action.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
   /* le bouton « Open details » de Linear (⌘ I) : rien d'ouvert, il ouvre la première tâche */
   const lienVolet = !ouverte && !repereEnAttente ? (ordre.length ? lienTache(ordre[0].cle) : null) : adresse((p) => (volet ? p.set("details", "0") : p.delete("details")));
   const basculerVolet = () => {
@@ -513,7 +628,10 @@ export default function AFaire() {
         return;
       }
       if (e.metaKey || e.ctrlKey) return;
-      if (e.key === "Escape" && (cleParam || passageParam)) {
+      if (e.key === "Escape" && choisies.size) {
+        e.preventDefault();
+        setChoisies(new Set());
+      } else if (e.key === "Escape" && (cleParam || passageParam)) {
         e.preventDefault();
         routeur.replace(lienTache(null), { scroll: false });
       } else if ((e.key === "ArrowDown" || e.key === "ArrowUp") && ordre.length) {
@@ -525,7 +643,7 @@ export default function AFaire() {
     };
     window.addEventListener("keydown", touche);
     return () => window.removeEventListener("keydown", touche);
-  }, [cleParam, passageParam, ouverte, ordre, routeur, lienTache, lienVolet]);
+  }, [cleParam, passageParam, ouverte, ordre, routeur, lienTache, lienVolet, choisies.size]);
   useEffect(() => {
     listeRef.current?.querySelector("[aria-current]")?.scrollIntoView({ block: "nearest" });
   }, [ouverte?.cle]);
@@ -539,6 +657,17 @@ export default function AFaire() {
       <header className="dal-tete">
         <div className="dal-ligne1 dal-mi-ligne1">
           <h2 className="dal-mi-titre">À faire</h2>
+          <span className="dal-pousse" />
+          <button
+            type="button"
+            className="dal-mi-nouvelle"
+            title="Nouvelle tâche : ouvrir une situation de fin de mois sur un chantier"
+            disabled={!jour}
+            onClick={() => jour && ouvrirNouvelle(decaler(lundiDe(jour), 6))}
+          >
+            <DalIcone nom="Plus" taille={14} />
+            <span>Nouvelle tâche</span>
+          </button>
         </div>
         <div className="dal-ligne2 dal-mi-ligne2">
           <nav className="dal-mi-onglets" aria-label="Vues">
@@ -564,6 +693,7 @@ export default function AFaire() {
               options={[
                 { cle: "semaine", libelle: "Grouper par semaine", icone: "Cycle", coche: groupement === "semaine", href: lienGroupement("semaine") },
                 { cle: "chantier", libelle: "Grouper par chantier", icone: "Crane", coche: groupement === "chantier", href: lienGroupement("chantier") },
+                { cle: "reportees", libelle: `Afficher les reportées (${nbReportees})`, icone: "Clock", coche: voirReportees, href: lienReportees },
               ]}
             />
             <button type="button" className="dal-rond dal-rond--plein" aria-label={volet ? "Fermer les détails" : "Ouvrir les détails"} title={volet ? "Fermer les détails (⌘ I)" : "Ouvrir les détails (⌘ I)"} aria-expanded={volet} onClick={basculerVolet}>
@@ -611,6 +741,10 @@ export default function AFaire() {
                     <span className="dal-mi-groupe-nom">{g.libelle}</span>
                     <span className="dal-mi-groupe-compte">{g.taches.length}</span>
                     {g.dates ? <span className="dal-mi-groupe-dates">{g.dates}</span> : null}
+                    <span className="dal-pousse" />
+                    <button type="button" className="dal-rond dal-mi-groupe-plus" aria-label={`Nouvelle tâche : ${g.libelle}`} title={`Nouvelle tâche dans « ${g.libelle} » : ouvrir une situation`} onClick={() => ouvrirNouvelle(g.fin, g.chantierId)}>
+                      <DalIcone nom="Plus" taille={14} />
+                    </button>
                   </div>
                   {replie
                     ? null
@@ -619,7 +753,13 @@ export default function AFaire() {
                         const et = etatDe(x);
                         const nat = NATURE[x.genre];
                         return (
-                          <Link key={x.cle} href={lienTache(x.cle)} scroll={false} className="dal-mi-ligne" aria-current={ouverte?.cle === x.cle ? "true" : undefined}>
+                          <div key={x.cle} className="dal-mi-ligne" data-courant={ouverte?.cle === x.cle ? "" : undefined} data-choisie={choisies.has(x.cle) ? "" : undefined}>
+                            <Link href={lienTache(x.cle)} scroll={false} className="dal-mi-lien" aria-current={ouverte?.cle === x.cle ? "true" : undefined} aria-label={x.titre} />
+                            <button type="button" role="checkbox" className="dal-mi-case" aria-checked={choisies.has(x.cle)} aria-label={`Choisir : ${x.titre}`} onClick={() => basculerChoix(x.cle)}>
+                              <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                                <path d="M13.53 3.97a.75.75 0 0 1 0 1.06l-7 7a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06L6 10.44l6.47-6.47a.75.75 0 0 1 1.06 0" />
+                              </svg>
+                            </button>
                             <span className="dal-mi-prio" title={pr.libelle} data-urgente={pr.urgente ? "" : undefined}>
                               <DalIcone nom={pr.icone} />
                             </span>
@@ -642,6 +782,16 @@ export default function AFaire() {
                                   <DalIcone nom="Crane" taille={14} />
                                   {x.chantier.nom}
                                 </span>
+                                <Link
+                                  href={lienSemaine(semaineFiltre === lundiDe(x.quand) ? null : lundiDe(x.quand))}
+                                  scroll={false}
+                                  className="dal-mi-puce dal-mi-puce--lien"
+                                  title={semaineFiltre === lundiDe(x.quand) ? "Retirer le filtre de semaine" : `Ne montrer que la semaine du ${jourMois(lundiDe(x.quand))}`}
+                                  aria-pressed={semaineFiltre === lundiDe(x.quand)}
+                                >
+                                  <DalIcone nom="Cycle" taille={14} />
+                                  {`S${numeroSemaine(x.quand)}`}
+                                </Link>
                                 {x.enRetard ? (
                                   <span className="dal-mi-puce" title="Fin prévue dépassée">
                                     <DalIcone nom="CrossedOutCalendar" taille={14} className="dal-mi-retard" />
@@ -652,7 +802,7 @@ export default function AFaire() {
                               <Avatar nom={x.qui} />
                             </span>
                             <span className="dal-mi-date">{jourMois(x.quand)}</span>
-                          </Link>
+                          </div>
                         );
                       })}
                 </section>
@@ -681,8 +831,164 @@ export default function AFaire() {
           {reelle && d.erreur ? <p className="dal-mi-avis">Un chantier n&apos;a pas pu être lu : {d.erreur}</p> : null}
         </div>
 
+        {selection.length ? (
+          <div className="dal-mi-barre" role="toolbar" aria-label="Actions sur la sélection">
+            <span className="dal-mi-barre-compte">
+              {selection.length} choisie{selection.length > 1 ? "s" : ""}
+            </span>
+            <button type="button" className="dal-mi-barre-bouton" onClick={() => setChoisies(new Set(ordre.map((x) => x.cle)))}>
+              Tout choisir
+            </button>
+            <span className="dal-mi-barre-sep" />
+            {faitsPossibles.length ? (
+              <button
+                type="button"
+                className="dal-mi-barre-bouton"
+                onClick={() => {
+                  setErreurFenetre(null);
+                  setConfirmerFaits(true);
+                }}
+              >
+                <DalIcone nom="IssueStatusDone" taille={14} />
+                Noter fait{faitsPossibles.length > 1 ? "s" : ""} ({faitsPossibles.length})
+              </button>
+            ) : null}
+            <div className="dal-mi-menu-boite">
+              <button type="button" className="dal-mi-barre-bouton" aria-haspopup="menu" aria-expanded={menuReport} onClick={() => setMenuReport((o) => !o)}>
+                <DalIcone nom="Clock" taille={14} />
+                Reporter…
+              </button>
+              {menuReport ? (
+                <div className="dal-menu" role="menu" style={{ bottom: 36, left: 0, minWidth: 220 }}>
+                  {[
+                    { libelle: "Demain", n: 1 },
+                    { libelle: "Dans 3 jours", n: 3 },
+                    { libelle: "Dans une semaine", n: 7 },
+                    { libelle: "Dans deux semaines", n: 14 },
+                  ].map((o) => (
+                    <button
+                      key={o.n}
+                      type="button"
+                      role="menuitem"
+                      className="dal-menu-option"
+                      onClick={() => {
+                        setMenuReport(false);
+                        if (jour) reporterSelection(decaler(jour, o.n));
+                      }}
+                    >
+                      <DalIcone nom="Clock" />
+                      <span className="dal-mi-menu-libelle">{o.libelle}</span>
+                      <span className="dal-mi-menu-coche">{jour ? jourMois(decaler(jour, o.n)) : ""}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <button type="button" className="dal-mi-barre-bouton" onClick={() => exporter(selection)}>
+              <DalIcone nom="Spreadsheet" taille={14} />
+              Exporter en CSV
+            </button>
+            <button type="button" className="dal-mi-barre-bouton" onClick={copierSelection}>
+              <DalIcone nom="Page" taille={14} />
+              Copier
+            </button>
+            <button type="button" className="dal-rond dal-mi-barre-fermer" aria-label="Tout désélectionner (Échap)" title="Tout désélectionner (Échap)" onClick={() => setChoisies(new Set())}>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                <path d="M4.03 3.97a.75.75 0 0 0-1.06 1.06L6.94 8l-3.97 3.97a.75.75 0 1 0 1.06 1.06L8 9.06l3.97 3.97a.75.75 0 1 0 1.06-1.06L9.06 8l3.97-3.97a.75.75 0 0 0-1.06-1.06L8 6.94z" />
+              </svg>
+            </button>
+          </div>
+        ) : null}
+
         {volet ? (ouverte ? voletDe(ouverte) : voletAttente()) : null}
       </div>
+      {/* Noter faits (G24) : la confirmation, passage par passage */}
+      <ModalOverlay isOpen={confirmerFaits} onOpenChange={(o) => !o && !envoi && setConfirmerFaits(false)} isDismissable={!envoi} className="v2-jetons v2-voile">
+        <Modal className="v2-modale">
+          <Dialog className="v2-modale-dialogue">
+            <div className="v2-modale-corps">
+              <Heading slot="title">
+                Noter {faitsPossibles.length} passage{faitsPossibles.length > 1 ? "s" : ""} fait{faitsPossibles.length > 1 ? "s" : ""} ?
+              </Heading>
+              <p>Chaque passage est noté fait à sa fin prévue, ou aujourd&apos;hui s&apos;il n&apos;est pas fini de date. Pour une autre date de fin, notez-le depuis le planning du chantier.</p>
+              <ul className="dal-mi-liste-confirmer">
+                {faitsPossibles.map((x) => (
+                  <li key={x.cle}>
+                    {x.titre.replace(/^Noter fait /, "")} — {x.chantier.nom}
+                  </li>
+                ))}
+              </ul>
+              {erreurFenetre ? (
+                <Note teinte="rouge" role="alert">
+                  <strong>Refusé par la base.</strong> {erreurFenetre}
+                </Note>
+              ) : null}
+            </div>
+            <div className="v2-modale-pied">
+              <Button className="v2-btn v2-btn--petit" slot="close" isDisabled={envoi}>
+                Annuler
+              </Button>
+              <button type="button" className="v2-btn v2-btn--petit v2-btn--primaire" disabled={envoi} onClick={() => void noterFaits()}>
+                {envoi ? "Enregistrement…" : "Noter faits"}
+              </button>
+            </div>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
+
+      {/* « New issue » et « + » : ouvrir une situation (G41) — sa tâche « Soumettre la situation » naît dans la liste */}
+      <ModalOverlay isOpen={!!nouvelle} onOpenChange={(o) => !o && !envoi && setNouvelle(null)} isDismissable={!envoi} className="v2-jetons v2-voile">
+        <Modal className="v2-modale">
+          <Dialog className="v2-modale-dialogue">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void creerSituation();
+              }}
+            >
+              <div className="v2-modale-corps">
+                <Heading slot="title">Nouvelle tâche : ouvrir une situation</Heading>
+                <p>La situation se calcule sur le marché vérifié du chantier. Saisissez ensuite l&apos;avancement cumulé ligne à ligne ; la tâche « Soumettre » attend ici.</p>
+                <div className="v2-grille-champs" style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
+                  <label className="v2-libelle">
+                    Chantier
+                    <span className="v2-champ">
+                      <select value={nouvelle?.chantier ?? ""} onChange={(e) => setNouvelle((n) => (n ? { ...n, chantier: e.target.value } : n))} required>
+                        <option value="">Choisir le chantier</option>
+                        {chantiersSituation.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.nom}
+                          </option>
+                        ))}
+                      </select>
+                    </span>
+                    {!chantiersSituation.length ? <span className="v2-aide">Aucun chantier ne peut ouvrir de situation : il faut un marché vérifié et aucune situation en cours.</span> : null}
+                  </label>
+                  <label className="v2-libelle">
+                    Fin de la période
+                    <span className="v2-champ">
+                      <input type="date" value={nouvelle?.fin ?? ""} onChange={(e) => setNouvelle((n) => (n ? { ...n, fin: e.target.value } : n))} required />
+                    </span>
+                  </label>
+                </div>
+                {erreurFenetre ? (
+                  <Note teinte="rouge" role="alert">
+                    <strong>Refusé par la base.</strong> {erreurFenetre}
+                  </Note>
+                ) : null}
+              </div>
+              <div className="v2-modale-pied">
+                <Button className="v2-btn v2-btn--petit" slot="close" isDisabled={envoi}>
+                  Annuler
+                </Button>
+                <button type="submit" className="v2-btn v2-btn--petit v2-btn--primaire" disabled={envoi || !nouvelle?.chantier || !nouvelle?.fin}>
+                  {envoi ? "Enregistrement…" : "Ouvrir la situation"}
+                </button>
+              </div>
+            </form>
+          </Dialog>
+        </Modal>
+      </ModalOverlay>
     </DalCarte>
   );
 
