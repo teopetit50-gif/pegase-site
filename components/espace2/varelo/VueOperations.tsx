@@ -416,7 +416,7 @@ export default function VueOperations() {
           <div style={{ position: "relative" }} data-var-menu="">
             <button type="button" className="var-b-nouveau" aria-haspopup="menu" aria-expanded={menu === "nouveau"} onClick={() => setMenu(menu === "nouveau" ? null : "nouveau")} disabled={!rs.peutSaisir && !rp.peutSaisir}>
               <VarIcone nom="Plus" />
-              Nouveau
+              <span className="var-b-nouveau-texte">Nouveau</span>
             </button>
             {nouveau("nouveau", { top: 32, right: 0 })}
           </div>
