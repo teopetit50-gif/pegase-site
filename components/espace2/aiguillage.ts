@@ -56,7 +56,6 @@ const PREFIXES: [string, string][] = [
 ];
 
 const tavaro = objet("tavaro");
-const tamila = objet("tamila");
 const tiroma = objet("tiroma");
 const varelo = objet("varelo");
 
@@ -109,7 +108,8 @@ export const REGLES: Record<string, Regle> = {
   loc_passages_peage: tavaro("loc_passages_peage"),
   loc_rappels_vehicules: tavaro("loc_rappels_vehicules"),
   loc_remises: tavaro("loc_remises"),
-  tamila_dossier: tamila("tamila_dossier"),
+  /* TAMILA, refait le 30/10/2026 : la page du dossier (les demandes à valider ; le point du matin ne nomme aucun dossier) */
+  tamila_dossier: (id) => `${RACINE}/tamila/dossiers/${q(id)}`,
   tiroma_evenements_agenda: tiroma("tiroma_evenements_agenda"),
   tiroma_fauteuils: tiroma("tiroma_fauteuils"),
   tiroma_plans: tiroma("tiroma_plans"),

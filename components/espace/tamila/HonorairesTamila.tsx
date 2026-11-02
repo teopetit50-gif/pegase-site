@@ -54,7 +54,31 @@ type Props = {
   clientNom: string | null;
   /* les événements du dossier dont le temps se propose (b4_12) */
   evenements: { audiences: Audience[]; delais: Delai[]; avis: AvisRpva[] };
+  /* 02/11/2026 : l'espace 2 dessine la carte lui-même ; le composant ne rend que ses fenêtres */
+  rendu?: (api: ApiHonoraires) => React.ReactNode;
 };
+
+/* 02/11/2026, refonte des pages métiers : ce que le dessin de l'espace 2 reçoit (`rendu`) */
+export type ApiHonoraires = {
+  h: Honoraires | null;
+  chargee: boolean;
+  resume: ReturnType<typeof resumer> | null;
+  forfait: ReturnType<typeof consommationForfait> | null;
+  propositions: Proposition[];
+  descriptions: Record<string, string>;
+  envoi: boolean;
+  erreur: string | null;
+  fait: string | null;
+  peutEcrire: boolean;
+  peutGerer: boolean;
+  peutEncaisser: boolean;
+  ouvrir: (x: FormHonoraires, init?: Record<string, string>) => void;
+  saisirProposition: (p: Proposition) => void;
+  ignorer: (p: Proposition) => Promise<void>;
+  annulerTemps: (t: Temps) => Promise<void>;
+  imprimer: (f: Facture) => void;
+};
+export type FormHonoraires = NonNullable<Form>;
 
 type Form =
   | { type: "temps"; proposition?: Proposition }
@@ -108,7 +132,7 @@ export function resumer(h: Honoraires, d: Dossier, maintenant = Date.now()) {
   };
 }
 
-export default function HonorairesTamila({ dossier: d, source, moi, personnes, pieces, cle, peutEcrire, peutGerer, peutEncaisser, clientId, gerant, entete, clair, clientNom, evenements }: Props) {
+export default function HonorairesTamila({ dossier: d, source, moi, personnes, pieces, cle, peutEcrire, peutGerer, peutEncaisser, clientId, gerant, entete, clair, clientNom, evenements, rendu }: Props) {
   /* undefined : lecture en cours ; null : la base n'a pas les honoraires (b4_06 non posée) */
   const [h, setH] = useState<Honoraires | null | undefined>(() => (source === "exemple" ? honorairesExemple(d.id) : undefined));
   const [descriptions, setDescriptions] = useState<Record<string, string>>(() => (source === "exemple" ? DESCRIPTIONS_TEMPS_EXEMPLE : {}));
@@ -380,6 +404,154 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
     recue: "Provision reçue", facturer: "Émettre une facture", payee: "Facture payée", annuler_facture: "Annuler une facture",
   };
 
+
+  const fenetre0 = (
+  <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
+    <DialogContent>
+      {form ? (
+        <>
+          <DialogHeader>
+            <DialogIcone>{form.type === "temps" ? <Clock width={18} height={18} aria-hidden="true" /> : form.type === "forfait" ? <Gauge width={18} height={18} aria-hidden="true" /> : form.type === "convention" || form.type === "signer" ? <FileSignature width={18} height={18} aria-hidden="true" /> : form.type === "facturer" || form.type === "annuler_facture" ? <ReceiptText width={18} height={18} aria-hidden="true" /> : <Banknote width={18} height={18} aria-hidden="true" />}</DialogIcone>
+            <DialogTitle>{titre[form.type]}</DialogTitle>
+            <DialogDescription>
+              {form.type === "temps" ? (form.proposition ? `Proposé d'après le dossier (${form.proposition.libelle}) : corrigez la durée, la nature et la description avant d'enregistrer. La description est chiffrée dans votre navigateur.` : "Votre temps, au jour où vous l'avez passé. La description est chiffrée dans votre navigateur avec la clé du dossier.") : null}
+              {form.type === "forfait" ? "Le temps que le forfait est censé couvrir. Tout le temps saisi au dossier, par chacun, se compte contre lui." : null}
+              {form.type === "convention" ? "Écrite et signée sauf urgence (loi du 31/12/1971, art. 10). Une nouvelle convention remplace la précédente, qui reste au dossier." : null}
+              {form.type === "signer" ? "La date de signature, et l'exemplaire signé s'il est déposé parmi les pièces du dossier." : null}
+              {form.type === "provision" ? "Une provision sur honoraires, imputée sur la prochaine facture une fois reçue." : null}
+              {form.type === "recue" ? `Provision de ${euros(form.provision.montant_ttc_cents)} TTC demandée le ${dateCourte(form.provision.demandee_le)}. Les modes de règlement sont ceux du RIN (art. 11.6).` : null}
+              {form.type === "facturer" ? "Le temps facturable jusqu'à la date choisie, le forfait s'il n'est pas encore facturé, les déboursés hors TVA ; les provisions reçues s'imputent. Le numéro suit sans trou." : null}
+              {form.type === "payee" ? `Facture ${form.facture.numero}, reste dû ${euros(form.facture.reste_du_cents)}.` : null}
+              {form.type === "annuler_facture" ? `Facture ${form.facture.numero} : son numéro reste dans la suite ; le temps et les provisions qu'elle portait redeviennent à facturer.` : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {form.type === "temps" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Jour<input className="rv-champ" type="date" max={aujourdhui()} value={champ("jour", aujourdhui())} onChange={(e) => poser("jour", e.target.value)} /></label>
+                    <label className="rv-libelle">Nature<select className="rv-champ" value={champ("nature", "redaction")} onChange={(e) => poser("nature", e.target.value)}>{(Object.keys(NATURES_TEMPS) as NatureTemps[]).map((n) => <option key={n} value={n}>{NATURES_TEMPS[n]}</option>)}</select></label>
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Heures<input className="rv-champ" type="number" min={0} max={24} inputMode="numeric" value={champ("heures", "0")} onChange={(e) => poser("heures", e.target.value)} /></label>
+                    <label className="rv-libelle">Minutes<input className="rv-champ" type="number" min={0} max={59} step={5} inputMode="numeric" value={champ("minutes", "30")} onChange={(e) => poser("minutes", e.target.value)} /></label>
+                  </div>
+                  <label className="rv-libelle">Ce qui a été fait<textarea className="rv-champ" rows={2} value={champ("description")} onChange={(e) => poser("description", e.target.value)} /></label>
+                  <label className="rv-libelle">Facturable<select className="rv-champ" value={champ("facturable", "oui")} onChange={(e) => poser("facturable", e.target.value)}><option value="oui">Oui</option><option value="non">Non (temps interne)</option></select></label>
+                </>
+              ) : null}
+              {form.type === "forfait" ? (
+                <label className="rv-libelle">Temps prévu (heures)<input className="rv-champ" inputMode="decimal" value={champ("heures_prevues")} onChange={(e) => poser("heures_prevues", e.target.value)} /></label>
+              ) : null}
+              {form.type === "convention" ? (
+                <>
+                  <label className="rv-libelle">Mode<select className="rv-champ" value={champ("mode", "temps_passe")} onChange={(e) => poser("mode", e.target.value)}>{(Object.keys(MODES_HONORAIRES) as ModeHonoraires[]).map((m) => <option key={m} value={m}>{MODES_HONORAIRES[m]}</option>)}</select></label>
+                  <div className="esp-form-ligne">
+                    {champ("mode", "temps_passe") !== "forfait" ? <label className="rv-libelle">Taux horaire (€ HT)<input className="rv-champ" inputMode="decimal" value={champ("taux", "250")} onChange={(e) => poser("taux", e.target.value)} /></label> : null}
+                    {champ("mode", "temps_passe") !== "temps_passe" ? <label className="rv-libelle">Forfait (€ HT)<input className="rv-champ" inputMode="decimal" value={champ("forfait")} onChange={(e) => poser("forfait", e.target.value)} /></label> : null}
+                  </div>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Honoraire de résultat (%)<input className="rv-champ" inputMode="decimal" placeholder="facultatif" value={champ("complement")} onChange={(e) => poser("complement", e.target.value)} /></label>
+                    <label className="rv-libelle">TVA<select className="rv-champ" value={champ("tva", "20")} onChange={(e) => poser("tva", e.target.value)}><option value="20">20 %</option><option value="10">10 %</option><option value="0">0 % (exonéré ou hors champ)</option></select></label>
+                  </div>
+                  <label className="rv-libelle">Urgence<select className="rv-champ" value={champ("urgence", "non")} onChange={(e) => poser("urgence", e.target.value)}><option value="non">Non : convention écrite à faire signer</option><option value="oui">Oui : intervention urgente, sans écrit pour l&apos;instant</option></select></label>
+                  {conv ? <Avis teinte="gris">La convention en cours ({MODES_HONORAIRES[conv.mode].toLowerCase()}, {conv.statut === "signee" ? "signée" : "proposée"}) sera résiliée.</Avis> : null}
+                </>
+              ) : null}
+              {form.type === "signer" ? (
+                <>
+                  <label className="rv-libelle">Signée le<input className="rv-champ" type="date" max={aujourdhui()} value={champ("signee_le", aujourdhui())} onChange={(e) => poser("signee_le", e.target.value)} /></label>
+                  <label className="rv-libelle">Exemplaire signé<select className="rv-champ" value={champ("piece")} onChange={(e) => poser("piece", e.target.value)}><option value="">— pas encore déposé —</option>{pieces.map((pc) => <option key={pc.id} value={pc.id}>{pc.nom_fichier}</option>)}</select></label>
+                </>
+              ) : null}
+              {form.type === "provision" ? (
+                <label className="rv-libelle">Montant (€ TTC) <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" inputMode="decimal" value={champ("montant")} onChange={(e) => poser("montant", e.target.value)} /></label>
+              ) : null}
+              {form.type === "recue" || form.type === "payee" ? (
+                <div className="esp-form-ligne">
+                  <label className="rv-libelle">{form.type === "recue" ? "Reçue le" : "Payée le"}<input className="rv-champ" type="date" max={aujourdhui()} value={champ("le", aujourdhui())} onChange={(e) => poser("le", e.target.value)} /></label>
+                  <label className="rv-libelle">Mode de règlement<select className="rv-champ" value={champ("mode", "virement")} onChange={(e) => poser("mode", e.target.value)}>{(Object.keys(MODES_REGLEMENT) as ModeReglement[]).map((m) => <option key={m} value={m}>{MODES_REGLEMENT[m]}</option>)}</select></label>
+                </div>
+              ) : null}
+              {form.type === "facturer" ? (
+                <>
+                  <div className="esp-form-ligne">
+                    <label className="rv-libelle">Temps passé jusqu&apos;au<input className="rv-champ" type="date" max={aujourdhui()} value={champ("jusqu", aujourdhui())} onChange={(e) => poser("jusqu", e.target.value)} /></label>
+                    <label className="rv-libelle">Déboursés (€, hors TVA)<input className="rv-champ" inputMode="decimal" value={champ("debours", "0")} onChange={(e) => poser("debours", e.target.value)} /></label>
+                  </div>
+                  <label className="rv-libelle">Nature<select className="rv-champ" value={champ("definitif", "non")} onChange={(e) => poser("definitif", e.target.value)}><option value="non">Facture</option><option value="oui">Compte détaillé définitif (RIN art. 11.7)</option></select></label>
+                  {apercu ? (
+                    <dl className="esp-def esp-def--trois tam-honoraires-apercu">
+                      <Def etiquette="Honoraires HT">{euros(apercu.ht)}<span className="esp-kpi-sous"> · {duree(apercu.minutes)}{apercu.forfait ? ` + forfait ${euros(apercu.forfait)}` : ""}</span></Def>
+                      <Def etiquette={`TVA ${conv?.taux_tva.toLocaleString("fr-FR")} %`}>{euros(apercu.tva)}</Def>
+                      <Def etiquette="TTC" fort>{euros(apercu.ttc)}<span className="esp-kpi-sous"> · provisions {euros(apercu.prov)} · reste {euros(apercu.reste)}</span></Def>
+                    </dl>
+                  ) : null}
+                </>
+              ) : null}
+              {form.type === "annuler_facture" ? (
+                <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", "erreur_montant")} onChange={(e) => poser("motif", e.target.value)}>{Object.entries(MOTIFS_ANNULATION_FACTURE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
+              ) : null}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--fil" onClick={() => setForm(null)}>Fermer</button>
+            <button
+              type="button"
+              className={`r-btn ${form.type === "annuler_facture" ? "r-btn--rouge" : "r-btn--noir"}`}
+              disabled={envoi}
+              onClick={() => {
+                if (form.type === "temps") void soumettreTemps();
+                else if (form.type === "forfait") void soumettreForfait();
+                else if (form.type === "convention") void soumettreConvention();
+                else if (form.type === "signer") void soumettreSignature(form.convention);
+                else if (form.type === "provision") void soumettreProvision();
+                else if (form.type === "recue") void soumettreRecue(form.provision);
+                else if (form.type === "facturer") void soumettreFacture();
+                else if (form.type === "payee") void soumettrePayee(form.facture);
+                else void soumettreAnnulation(form.facture);
+              }}
+            >
+              {envoi ? <Loader variant="spin" /> : null}{" "}
+              {form.type === "temps" ? "Saisir" : form.type === "forfait" ? "Enregistrer" : form.type === "convention" ? "Poser la convention" : form.type === "signer" ? "Enregistrer" : form.type === "provision" ? "Demander" : form.type === "recue" ? "Noter reçue" : form.type === "facturer" ? (champ("definitif", "non") === "oui" ? "Émettre le compte définitif" : "Émettre la facture") : form.type === "payee" ? "Noter payée" : "Annuler la facture"}
+            </button>
+          </DialogFooter>
+        </>
+      ) : null}
+    </DialogContent>
+  </Dialog>
+  );
+
+  const fenetreFacture = imprimee && h ? (
+    <FactureImprimable
+      ouvert
+      onFermer={() => setImprimee(null)}
+      source={source}
+      clientId={clientId}
+      facture={imprimee}
+      convention={h.conventions.find((c) => c.statut !== "resiliee") ?? h.conventions[0] ?? null}
+      temps={h.temps.filter((t) => t.facture_id === imprimee.id)}
+      descriptions={descriptions}
+      entete={entete}
+      clientNom={clientNom}
+      dossier={clair ? { reference: clair.reference, intitule: clair.intitule } : null}
+      gerant={gerant}
+    />
+  ) : null;
+
+  if (rendu) {
+    const api: ApiHonoraires = { h: h ?? null, chargee: h !== undefined, resume: r, forfait, propositions, descriptions, envoi, erreur: form ? null : erreur, fait, peutEcrire, peutGerer, peutEncaisser, ouvrir: (x, init) => ouvrir(x, init), saisirProposition, ignorer, annulerTemps, imprimer: setImprimee };
+    return (
+      <>
+        {rendu(api)}
+        {fenetreFacture}
+        {fenetre0}
+      </>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Honoraires">
       <div className="esp-carte-tete">
@@ -521,139 +693,9 @@ export default function HonorairesTamila({ dossier: d, source, moi, personnes, p
         )}
       </div>
 
-      {imprimee && h ? (
-        <FactureImprimable
-          ouvert
-          onFermer={() => setImprimee(null)}
-          source={source}
-          clientId={clientId}
-          facture={imprimee}
-          convention={h.conventions.find((c) => c.statut !== "resiliee") ?? h.conventions[0] ?? null}
-          temps={h.temps.filter((t) => t.facture_id === imprimee.id)}
-          descriptions={descriptions}
-          entete={entete}
-          clientNom={clientNom}
-          dossier={clair ? { reference: clair.reference, intitule: clair.intitule } : null}
-          gerant={gerant}
-        />
-      ) : null}
+      {fenetreFacture}
 
-      <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          {form ? (
-            <>
-              <DialogHeader>
-                <DialogIcone>{form.type === "temps" ? <Clock width={18} height={18} aria-hidden="true" /> : form.type === "forfait" ? <Gauge width={18} height={18} aria-hidden="true" /> : form.type === "convention" || form.type === "signer" ? <FileSignature width={18} height={18} aria-hidden="true" /> : form.type === "facturer" || form.type === "annuler_facture" ? <ReceiptText width={18} height={18} aria-hidden="true" /> : <Banknote width={18} height={18} aria-hidden="true" />}</DialogIcone>
-                <DialogTitle>{titre[form.type]}</DialogTitle>
-                <DialogDescription>
-                  {form.type === "temps" ? (form.proposition ? `Proposé d'après le dossier (${form.proposition.libelle}) : corrigez la durée, la nature et la description avant d'enregistrer. La description est chiffrée dans votre navigateur.` : "Votre temps, au jour où vous l'avez passé. La description est chiffrée dans votre navigateur avec la clé du dossier.") : null}
-                  {form.type === "forfait" ? "Le temps que le forfait est censé couvrir. Tout le temps saisi au dossier, par chacun, se compte contre lui." : null}
-                  {form.type === "convention" ? "Écrite et signée sauf urgence (loi du 31/12/1971, art. 10). Une nouvelle convention remplace la précédente, qui reste au dossier." : null}
-                  {form.type === "signer" ? "La date de signature, et l'exemplaire signé s'il est déposé parmi les pièces du dossier." : null}
-                  {form.type === "provision" ? "Une provision sur honoraires, imputée sur la prochaine facture une fois reçue." : null}
-                  {form.type === "recue" ? `Provision de ${euros(form.provision.montant_ttc_cents)} TTC demandée le ${dateCourte(form.provision.demandee_le)}. Les modes de règlement sont ceux du RIN (art. 11.6).` : null}
-                  {form.type === "facturer" ? "Le temps facturable jusqu'à la date choisie, le forfait s'il n'est pas encore facturé, les déboursés hors TVA ; les provisions reçues s'imputent. Le numéro suit sans trou." : null}
-                  {form.type === "payee" ? `Facture ${form.facture.numero}, reste dû ${euros(form.facture.reste_du_cents)}.` : null}
-                  {form.type === "annuler_facture" ? `Facture ${form.facture.numero} : son numéro reste dans la suite ; le temps et les provisions qu'elle portait redeviennent à facturer.` : null}
-                </DialogDescription>
-              </DialogHeader>
-              <DialogBody>
-                <div className="esp-form">
-                  {form.type === "temps" ? (
-                    <>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Jour<input className="rv-champ" type="date" max={aujourdhui()} value={champ("jour", aujourdhui())} onChange={(e) => poser("jour", e.target.value)} /></label>
-                        <label className="rv-libelle">Nature<select className="rv-champ" value={champ("nature", "redaction")} onChange={(e) => poser("nature", e.target.value)}>{(Object.keys(NATURES_TEMPS) as NatureTemps[]).map((n) => <option key={n} value={n}>{NATURES_TEMPS[n]}</option>)}</select></label>
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Heures<input className="rv-champ" type="number" min={0} max={24} inputMode="numeric" value={champ("heures", "0")} onChange={(e) => poser("heures", e.target.value)} /></label>
-                        <label className="rv-libelle">Minutes<input className="rv-champ" type="number" min={0} max={59} step={5} inputMode="numeric" value={champ("minutes", "30")} onChange={(e) => poser("minutes", e.target.value)} /></label>
-                      </div>
-                      <label className="rv-libelle">Ce qui a été fait<textarea className="rv-champ" rows={2} value={champ("description")} onChange={(e) => poser("description", e.target.value)} /></label>
-                      <label className="rv-libelle">Facturable<select className="rv-champ" value={champ("facturable", "oui")} onChange={(e) => poser("facturable", e.target.value)}><option value="oui">Oui</option><option value="non">Non (temps interne)</option></select></label>
-                    </>
-                  ) : null}
-                  {form.type === "forfait" ? (
-                    <label className="rv-libelle">Temps prévu (heures)<input className="rv-champ" inputMode="decimal" value={champ("heures_prevues")} onChange={(e) => poser("heures_prevues", e.target.value)} /></label>
-                  ) : null}
-                  {form.type === "convention" ? (
-                    <>
-                      <label className="rv-libelle">Mode<select className="rv-champ" value={champ("mode", "temps_passe")} onChange={(e) => poser("mode", e.target.value)}>{(Object.keys(MODES_HONORAIRES) as ModeHonoraires[]).map((m) => <option key={m} value={m}>{MODES_HONORAIRES[m]}</option>)}</select></label>
-                      <div className="esp-form-ligne">
-                        {champ("mode", "temps_passe") !== "forfait" ? <label className="rv-libelle">Taux horaire (€ HT)<input className="rv-champ" inputMode="decimal" value={champ("taux", "250")} onChange={(e) => poser("taux", e.target.value)} /></label> : null}
-                        {champ("mode", "temps_passe") !== "temps_passe" ? <label className="rv-libelle">Forfait (€ HT)<input className="rv-champ" inputMode="decimal" value={champ("forfait")} onChange={(e) => poser("forfait", e.target.value)} /></label> : null}
-                      </div>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Honoraire de résultat (%)<input className="rv-champ" inputMode="decimal" placeholder="facultatif" value={champ("complement")} onChange={(e) => poser("complement", e.target.value)} /></label>
-                        <label className="rv-libelle">TVA<select className="rv-champ" value={champ("tva", "20")} onChange={(e) => poser("tva", e.target.value)}><option value="20">20 %</option><option value="10">10 %</option><option value="0">0 % (exonéré ou hors champ)</option></select></label>
-                      </div>
-                      <label className="rv-libelle">Urgence<select className="rv-champ" value={champ("urgence", "non")} onChange={(e) => poser("urgence", e.target.value)}><option value="non">Non : convention écrite à faire signer</option><option value="oui">Oui : intervention urgente, sans écrit pour l&apos;instant</option></select></label>
-                      {conv ? <Avis teinte="gris">La convention en cours ({MODES_HONORAIRES[conv.mode].toLowerCase()}, {conv.statut === "signee" ? "signée" : "proposée"}) sera résiliée.</Avis> : null}
-                    </>
-                  ) : null}
-                  {form.type === "signer" ? (
-                    <>
-                      <label className="rv-libelle">Signée le<input className="rv-champ" type="date" max={aujourdhui()} value={champ("signee_le", aujourdhui())} onChange={(e) => poser("signee_le", e.target.value)} /></label>
-                      <label className="rv-libelle">Exemplaire signé<select className="rv-champ" value={champ("piece")} onChange={(e) => poser("piece", e.target.value)}><option value="">— pas encore déposé —</option>{pieces.map((pc) => <option key={pc.id} value={pc.id}>{pc.nom_fichier}</option>)}</select></label>
-                    </>
-                  ) : null}
-                  {form.type === "provision" ? (
-                    <label className="rv-libelle">Montant (€ TTC) <span className="esp-obligatoire">(obligatoire)</span><input className="rv-champ" inputMode="decimal" value={champ("montant")} onChange={(e) => poser("montant", e.target.value)} /></label>
-                  ) : null}
-                  {form.type === "recue" || form.type === "payee" ? (
-                    <div className="esp-form-ligne">
-                      <label className="rv-libelle">{form.type === "recue" ? "Reçue le" : "Payée le"}<input className="rv-champ" type="date" max={aujourdhui()} value={champ("le", aujourdhui())} onChange={(e) => poser("le", e.target.value)} /></label>
-                      <label className="rv-libelle">Mode de règlement<select className="rv-champ" value={champ("mode", "virement")} onChange={(e) => poser("mode", e.target.value)}>{(Object.keys(MODES_REGLEMENT) as ModeReglement[]).map((m) => <option key={m} value={m}>{MODES_REGLEMENT[m]}</option>)}</select></label>
-                    </div>
-                  ) : null}
-                  {form.type === "facturer" ? (
-                    <>
-                      <div className="esp-form-ligne">
-                        <label className="rv-libelle">Temps passé jusqu&apos;au<input className="rv-champ" type="date" max={aujourdhui()} value={champ("jusqu", aujourdhui())} onChange={(e) => poser("jusqu", e.target.value)} /></label>
-                        <label className="rv-libelle">Déboursés (€, hors TVA)<input className="rv-champ" inputMode="decimal" value={champ("debours", "0")} onChange={(e) => poser("debours", e.target.value)} /></label>
-                      </div>
-                      <label className="rv-libelle">Nature<select className="rv-champ" value={champ("definitif", "non")} onChange={(e) => poser("definitif", e.target.value)}><option value="non">Facture</option><option value="oui">Compte détaillé définitif (RIN art. 11.7)</option></select></label>
-                      {apercu ? (
-                        <dl className="esp-def esp-def--trois tam-honoraires-apercu">
-                          <Def etiquette="Honoraires HT">{euros(apercu.ht)}<span className="esp-kpi-sous"> · {duree(apercu.minutes)}{apercu.forfait ? ` + forfait ${euros(apercu.forfait)}` : ""}</span></Def>
-                          <Def etiquette={`TVA ${conv?.taux_tva.toLocaleString("fr-FR")} %`}>{euros(apercu.tva)}</Def>
-                          <Def etiquette="TTC" fort>{euros(apercu.ttc)}<span className="esp-kpi-sous"> · provisions {euros(apercu.prov)} · reste {euros(apercu.reste)}</span></Def>
-                        </dl>
-                      ) : null}
-                    </>
-                  ) : null}
-                  {form.type === "annuler_facture" ? (
-                    <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", "erreur_montant")} onChange={(e) => poser("motif", e.target.value)}>{Object.entries(MOTIFS_ANNULATION_FACTURE).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
-                  ) : null}
-                  {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-                </div>
-              </DialogBody>
-              <DialogFooter>
-                <button type="button" className="r-btn r-btn--fil" onClick={() => setForm(null)}>Fermer</button>
-                <button
-                  type="button"
-                  className={`r-btn ${form.type === "annuler_facture" ? "r-btn--rouge" : "r-btn--noir"}`}
-                  disabled={envoi}
-                  onClick={() => {
-                    if (form.type === "temps") void soumettreTemps();
-                    else if (form.type === "forfait") void soumettreForfait();
-                    else if (form.type === "convention") void soumettreConvention();
-                    else if (form.type === "signer") void soumettreSignature(form.convention);
-                    else if (form.type === "provision") void soumettreProvision();
-                    else if (form.type === "recue") void soumettreRecue(form.provision);
-                    else if (form.type === "facturer") void soumettreFacture();
-                    else if (form.type === "payee") void soumettrePayee(form.facture);
-                    else void soumettreAnnulation(form.facture);
-                  }}
-                >
-                  {envoi ? <Loader variant="spin" /> : null}{" "}
-                  {form.type === "temps" ? "Saisir" : form.type === "forfait" ? "Enregistrer" : form.type === "convention" ? "Poser la convention" : form.type === "signer" ? "Enregistrer" : form.type === "provision" ? "Demander" : form.type === "recue" ? "Noter reçue" : form.type === "facturer" ? (champ("definitif", "non") === "oui" ? "Émettre le compte définitif" : "Émettre la facture") : form.type === "payee" ? "Noter payée" : "Annuler la facture"}
-                </button>
-              </DialogFooter>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {fenetre0}
     </section>
   );
 }

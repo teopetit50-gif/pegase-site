@@ -1,0 +1,413 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — la liste de « My issues » de Linear (02/11/2026)
+   Relevé : releves/linear-my-issues.md (29/10 et complément du 01/11),
+   captures 1440-reel-sombre.png / 1440-reel-clair.png, 390-*.png.
+
+   Carte          en-tête 87,5 : ligne 1 de 44 (filet bas 0,5), ligne 2 de
+                  43,5 (onglets 28, gap 8, à 8 du bord ; 3 boutons ronds 28
+                  à droite, gap 6).
+   Liste          groupes espacés de 8 ; en-tête de groupe 36 (marges 0 8,
+                  r 8, gap 8) puis lignes de 44, 2 de marge basse.
+   Ligne          grille en subgrid (carte de référence à 244,8) : [indent] 8 [case] 18 [priorité] 16
+                  [identifiant] max-content (55 chez Linear pour « OME-21 »)
+                  [statut] 16 [titre] 1fr [date] 60 [fin] 18, gap 0 8.
+   Puce           24 de haut, r 48, p 0 8, bord 0,5, fond de carte ; pastille
+                  9 dans 14 ; texte 12/450 tertiaire ; gap 4 entre puces.
+   390            [indent] 2 [case] 0 [priorité] 16 [statut] 16 [titre] 1fr
+                  [fin] 15 ; identifiant, puces et date disparaissent ;
+                  boutons et onglets à 32.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tam .tam-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--tam-t3);
+  white-space: nowrap;
+  transition: border 0.15s, background-color 0.15s, color 0.15s;
+}
+.v2 .tam .tam-nouveau svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tam-nouveau:hover {
+  background: var(--tam-survol-onglet);
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-droite {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.v2 .tam .tam-liste {
+  display: grid;
+  grid-template-columns: [indent] 8px [case] 18px [priorite] 16px [identifiant] max-content [statut] 16px [titre] minmax(0, 1fr) [date] 60px [fin] 18px;
+  column-gap: 8px;
+  row-gap: 0;
+  align-content: start;
+  padding-bottom: 8px;
+}
+.v2 .tam .tam-groupe {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  padding-bottom: 2px;
+}
+.v2 .tam .tam-groupe + .tam-groupe {
+  margin-top: 8px;
+}
+.v2 .tam .tam-groupe-tete {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  margin: 0 8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  background: var(--tam-groupe);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-groupe-libelle);
+}
+.v2 .tam .tam-replier {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: -2px;
+  padding: 2px;
+  border-radius: 9999px;
+  color: var(--tam-replier);
+}
+.v2 .tam .tam-replier svg {
+  transition: transform 0.15s;
+}
+.v2 .tam .tam-replier[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.v2 .tam .tam-groupe-icone {
+  flex: none;
+  color: var(--tam-groupe-compte);
+}
+.v2 .tam .tam-groupe-libelle {
+  padding: 0 2px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.v2 .tam .tam-groupe-compte {
+  font-weight: 450;
+  color: var(--tam-groupe-compte);
+}
+.v2 .tam .tam-groupe-dates {
+  font-weight: 450;
+  color: var(--tam-groupe-dates);
+  white-space: nowrap;
+}
+.v2 .tam .tam-groupe-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  padding: 0 2px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  color: var(--tam-groupe-libelle);
+}
+.v2 .tam .tam-groupe-plus svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tam-groupe-plus:hover {
+  background: var(--tam-survol-onglet);
+}
+
+.v2 .tam .tam-ligne {
+  position: relative;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  height: 44px;
+  isolation: isolate;
+  color: var(--tam-t1);
+}
+.v2 .tam .tam-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  border-radius: 8px;
+  z-index: -1;
+}
+@media (any-hover: hover) and (any-pointer: fine) {
+  .v2 .tam .tam-ligne:hover::before {
+    background: var(--tam-survol);
+  }
+  .v2 .tam .tam-ligne:hover .tam-case {
+    opacity: 1;
+  }
+}
+.v2 .tam .tam-ligne[aria-current="true"]::before {
+  background: var(--tam-choisi);
+}
+.v2 .tam .tam-case {
+  grid-column: case;
+  justify-self: center;
+  width: 14px;
+  height: 14px;
+  padding: 2px;
+  border: 1px solid var(--tam-case);
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.v2 .tam .tam-priorite {
+  grid-column: priorite;
+  display: flex;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-priorite[data-p="Priority1"] {
+  color: var(--tam-urgent);
+}
+.v2 .tam .tam-identifiant {
+  grid-column: identifiant;
+  min-width: 46px;
+  font-size: 13px;
+  font-weight: 450;
+  letter-spacing: -0.26px;
+  color: var(--tam-t3);
+  white-space: nowrap;
+}
+.v2 .tam .tam-statut {
+  grid-column: statut;
+  display: flex;
+  color: var(--tam-todo);
+}
+.v2 .tam .tam-statut[data-s="IssueStatusStarted"] {
+  color: var(--tam-en-cours);
+}
+.v2 .tam .tam-statut[data-s="IssueStatusDone"] {
+  color: var(--tam-fait);
+}
+.v2 .tam .tam-statut[data-s="IssueStatusTriage"] {
+  color: var(--tam-triage);
+}
+.v2 .tam .tam-statut[data-s="StatusCanceled"] {
+  color: var(--tam-t4);
+}
+.v2 .tam .tam-titre {
+  grid-column: titre;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  height: 36px;
+}
+.v2 .tam .tam-titre-texte {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-right: auto;
+  padding-right: 8px;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-t1);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tam .tam-puce {
+  display: inline-flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
+  overflow: hidden;
+  border: 0.5px solid var(--tam-puce-bord);
+  border-radius: 48px;
+  background: var(--tam-carte);
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tam-puce-texte);
+  white-space: nowrap;
+}
+.v2 .tam .tam-puce svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--tam-t3);
+}
+.v2 .tam .tam-puce-point {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+.v2 .tam .tam-puce-point::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--point, var(--tam-t3));
+}
+.v2 .tam .tam-puce--retard svg {
+  color: var(--tam-rouge);
+}
+.v2 .tam .tam-titre .tam-avatar,
+.v2 .tam .tam-titre .tam-sans-avatar {
+  margin-left: 8px;
+}
+.v2 .tam .tam-date {
+  grid-column: date;
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--tam-t3);
+  white-space: nowrap;
+}
+.v2 .tam .tam-vide-liste {
+  grid-column: 1 / -1;
+  padding: 24px 18px;
+  font-size: 13px;
+  color: var(--tam-t3);
+}
+
+/* ——— le bandeau d'un état du cabinet (réel : phrase, coffre, installation, hors vue) ——— */
+.v2 .tam .tam-bandeau {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  margin: 8px 8px 0;
+  padding: 6px 8px 6px 12px;
+  border-radius: 8px;
+  background: var(--tam-groupe);
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tam-t2);
+}
+.v2 .tam .tam-bandeau .tam-nouveau {
+  margin-left: auto;
+  background: var(--tam-bouton);
+}
+
+/* ——— le volet de détails (« Open details », linear-initiative.md : cartes 388, r 10, p 12) ——— */
+.v2 .tam .tam-corps {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.v2 .tam .tam-corps > .tam-defile {
+  flex: 1;
+}
+.v2 .tam .tam-volet {
+  flex: none;
+  width: 400px;
+  padding: 0 8px 8px 4px;
+  overflow: auto;
+}
+.v2 .tam .tam-volet-carte {
+  padding: 12px;
+  border: 0.5px solid var(--tam-menu-bord);
+  border-radius: 10px;
+  background: var(--tam-menu);
+  box-shadow: var(--tam-menu-ombre);
+}
+.v2 .tam .tam-volet-carte + .tam-volet-carte {
+  margin-top: 8px;
+}
+.v2 .tam .tam-volet-titre {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+  margin-left: -8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tam-groupe-compte);
+}
+.v2 .tam .tam-volet-ligne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 42px;
+  margin-top: 6px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--tam-groupe);
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--tam-t2);
+  text-align: left;
+}
+.v2 .tam .tam-volet-ligne[aria-pressed="true"] {
+  background: var(--tam-survol-onglet);
+  color: var(--tam-t1);
+}
+.v2 .tam .tam-volet-ligne small {
+  font-size: 12px;
+  color: var(--tam-t3);
+}
+
+/* ——— « 2 de plus ▾ » (390) ——— */
+.v2 .tam .tam-onglets-plus {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .v2 .tam .tam-volet {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .tam .tam-nouveau-libelle {
+    display: none;
+  }
+  .v2 .tam .tam-nouveau {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+  /* [indent] 2 [case] 0 [priorité] 16 [statut] 16 [titre] 1fr [fin] 15, gap 8 : les colonnes absentes
+     ne gardent pas leur gap, d'où les gaps portés dans les largeurs et un gap de grille nul */
+  .v2 .tam .tam-liste {
+    grid-template-columns: [indent] 18px [case] 0 [priorite] 24px [identifiant] 0 [statut] 24px [titre] minmax(0, 1fr) [date] 0 [fin] 23px;
+    column-gap: 0;
+  }
+  .v2 .tam .tam-identifiant,
+  .v2 .tam .tam-date,
+  .v2 .tam .tam-puce,
+  .v2 .tam .tam-case,
+  .v2 .tam .tam-groupe-dates {
+    display: none;
+  }
+  .v2 .tam .tam-groupe-plus {
+    width: 28px;
+    height: 28px;
+  }
+  .v2 .tam .tam-onglet-loin {
+    display: none;
+  }
+  .v2 .tam .tam-onglets-plus {
+    display: inline-flex;
+    gap: 6px;
+  }
+}

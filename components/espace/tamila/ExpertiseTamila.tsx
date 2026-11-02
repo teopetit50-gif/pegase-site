@@ -21,7 +21,7 @@ import { expertisesExemple } from "./exemples";
 import * as portes from "./portes";
 import type { Dossier, Expertise } from "./types";
 
-type Props = { dossier: Dossier; source: Source; peutEcrire: boolean };
+type Props = { dossier: Dossier; source: Source; peutEcrire: boolean; rendu?: (api: ApiExpertise) => React.ReactNode };
 
 const CHAMPS: { cle: keyof portes.ChampsExpertise; libelle: string }[] = [
   { cle: "ordonnee_le", libelle: "Ordonnée le" }, { cle: "consignation_avant", libelle: "Consignation avant le" },
@@ -36,7 +36,23 @@ const ETAPES: { cle: portes.EtapeExpertise; libelle: string; fait: keyof Experti
 ];
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 
-export default function ExpertiseTamila({ dossier: d, source, peutEcrire }: Props) {
+/* 02/11/2026, refonte des pages métiers : l'espace 2 dessine l'expertise lui-même (`rendu`) ; le composant ne
+   rend alors que sa fenêtre, et lui donne ses gestes */
+export type EtapeExpertiseAffichee = (typeof ETAPES)[number];
+export type ApiExpertise = {
+  liste: Expertise[];
+  chargee: boolean;
+  envoi: boolean;
+  erreur: string | null;
+  fait: string | null;
+  peutEcrire: boolean;
+  ouvrir: (x: Expertise | null) => void;
+  noter: (x: Expertise, e: EtapeExpertiseAffichee) => Promise<void>;
+  etat: (x: Expertise, e: EtapeExpertiseAffichee) => { texte: string; teinte: "vert" | "rouge" | "ambre" } | null;
+  etapes: EtapeExpertiseAffichee[];
+};
+
+export default function ExpertiseTamila({ dossier: d, source, peutEcrire, rendu }: Props) {
   /* undefined : lecture ; null : la base n'a pas b4_16 */
   const [liste, setListe] = useState<Expertise[] | null | undefined>(() => (source === "exemple" ? expertisesExemple(d.id) : undefined));
   const [form, setForm] = useState<{ expertise: Expertise | null } | null>(null);
@@ -109,6 +125,43 @@ export default function ExpertiseTamila({ dossier: d, source, peutEcrire }: Prop
     return { texte: `${e.libelle.replace(/ reçu$| versée$| adressés$/, "")} : ${retard ? "attendu depuis le" : "le"} ${dateCourte(prevu)}`, teinte: retard ? ("rouge" as const) : ("ambre" as const) };
   };
 
+
+  const fenetre0 = (
+  <Dialog open={!!form} onOpenChange={(o) => !o && !envoi && setForm(null)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogIcone><Microscope width={18} height={18} aria-hidden="true" /></DialogIcone>
+        <DialogTitle>{form?.expertise ? "Les dates de l'expertise" : "Une expertise ordonnée"}</DialogTitle>
+        <DialogDescription>Les dates seulement : l&apos;expert est une partie du dossier, son nom reste chiffré. Le pré-rapport vient avant la fin des dires, les dires avant le rapport.</DialogDescription>
+      </DialogHeader>
+      <DialogBody>
+        <div className="esp-form">
+          <div className="tam-entete-grille">
+            {CHAMPS.map((c) => (
+              <label key={c.cle} className="rv-libelle">{c.libelle}<input className="rv-champ" type="date" value={f[c.cle] ?? ""} onChange={(e) => setF((p) => ({ ...p, [c.cle]: e.target.value }))} /></label>
+            ))}
+          </div>
+          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+        </div>
+      </DialogBody>
+      <DialogFooter>
+        <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setForm(null)}>Fermer</button>
+        <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => void enregistrer()}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+  );
+
+  if (rendu) {
+    const api: ApiExpertise = { liste: liste ?? [], chargee: liste !== undefined, envoi, erreur: form ? null : erreur, fait, peutEcrire, ouvrir, noter, etat, etapes: ETAPES };
+    return (
+      <>
+        {rendu(api)}
+        {fenetre0}
+      </>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Expertise">
       <div className="esp-carte-tete">
@@ -139,29 +192,7 @@ export default function ExpertiseTamila({ dossier: d, source, peutEcrire }: Prop
         ))}
       </div>
 
-      <Dialog open={!!form} onOpenChange={(o) => !o && !envoi && setForm(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><Microscope width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>{form?.expertise ? "Les dates de l'expertise" : "Une expertise ordonnée"}</DialogTitle>
-            <DialogDescription>Les dates seulement : l&apos;expert est une partie du dossier, son nom reste chiffré. Le pré-rapport vient avant la fin des dires, les dires avant le rapport.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <div className="tam-entete-grille">
-                {CHAMPS.map((c) => (
-                  <label key={c.cle} className="rv-libelle">{c.libelle}<input className="rv-champ" type="date" value={f[c.cle] ?? ""} onChange={(e) => setF((p) => ({ ...p, [c.cle]: e.target.value }))} /></label>
-                ))}
-              </div>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setForm(null)}>Fermer</button>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => void enregistrer()}>{envoi ? <Loader variant="spin" /> : null} Enregistrer</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetre0}
     </section>
   );
 }

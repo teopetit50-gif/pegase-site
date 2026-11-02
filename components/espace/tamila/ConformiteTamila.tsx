@@ -47,9 +47,28 @@ type Props = {
   peutGerer: boolean;
   gerant: boolean;
   referenceDe: (dossier: string) => string | null;
+  /* 02/11/2026 : l'espace 2 dessine la carte lui-même ; le composant ne rend que sa fenêtre */
+  rendu?: (api: ApiConformite) => React.ReactNode;
 };
 
-type Resultat = { partie: Partie; nom: string; controle: ControleConflits; decision: string | null };
+export type Resultat = { partie: Partie; nom: string; controle: ControleConflits; decision: string | null };
+/* 02/11/2026, refonte des pages métiers : ce que le dessin de l'espace 2 reçoit (`rendu`) */
+export type ApiConformite = {
+  conf: Conformite | null;
+  chargee: boolean;
+  resultats: Resultat[];
+  envoi: boolean;
+  erreur: string | null;
+  fait: string | null;
+  nomsLisibles: boolean;
+  jamaisIndexees: number;
+  peutGerer: boolean;
+  gerant: boolean;
+  controler: () => Promise<void>;
+  creerIndex: () => Promise<void>;
+  vigilance: () => void;
+  decider: (r: Resultat) => void;
+};
 type Form = { type: "vigilance" } | { type: "decider"; resultat: Resultat } | null;
 
 export const ACTIVITES: Record<ActiviteAssujettie, string> = {
@@ -108,7 +127,7 @@ function controleExemple(dossier: string, partie: Partie, nom: string): Controle
   return { controle: crypto.randomUUID(), correspondances: trouves.length, conflits: trouves.filter((t) => t.nature === "conflit").length, hors_vue: 0, trouves };
 }
 
-export default function ConformiteTamila({ dossier: d, source, clientId, parties, partiesClair, pieces, peutEcrire, peutGerer, gerant, referenceDe }: Props) {
+export default function ConformiteTamila({ dossier: d, source, clientId, parties, partiesClair, pieces, peutEcrire, peutGerer, gerant, referenceDe, rendu }: Props) {
   /* undefined : lecture ; null : la base n'a pas b4_07 */
   const [conf, setConf] = useState<Conformite | null | undefined>(() => (source === "exemple" ? conformiteExemple(d.id) : undefined));
   const [resultats, setResultats] = useState<Resultat[] | null>(null);
@@ -260,6 +279,73 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
     setForm(x);
   };
 
+
+  const fenetre0 = (
+  <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
+    <DialogContent>
+      {form ? (
+        <>
+          <DialogHeader>
+            <DialogIcone>{form.type === "vigilance" ? <ShieldCheck width={18} height={18} aria-hidden="true" /> : <ScanSearch width={18} height={18} aria-hidden="true" />}</DialogIcone>
+            <DialogTitle>{form.type === "vigilance" ? "La vigilance LCB-FT du dossier" : `Décider : ${form.resultat.nom}`}</DialogTitle>
+            <DialogDescription>
+              {form.type === "vigilance" ? "L'avocat est assujetti pour certaines activités seulement (CMF art. L.561-3) : il identifie alors le client et le bénéficiaire effectif et apprécie le risque." : form.resultat.controle.conflits ? "Des intérêts opposés : le conflit se lève avec l'accord écrit des clients concernés, ou le dossier se refuse (RIN art. 4)." : "La partie est déjà connue du cabinet, du même côté ou sans opposition d'intérêts."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <div className="esp-form">
+              {form.type === "vigilance" ? (
+                <>
+                  <label className="rv-libelle">Le dossier est-il assujetti ?<select className="rv-champ" value={champ("assujetti", v?.assujetti ? "oui" : "non")} onChange={(e) => poser("assujetti", e.target.value)}><option value="non">Non (conseil ou contentieux hors activités assujetties)</option><option value="oui">Oui</option></select></label>
+                  {champ("assujetti", v?.assujetti ? "oui" : "non") === "oui" ? (
+                    <>
+                      <label className="rv-libelle">Activité<select className="rv-champ" value={champ("activite", v?.activite ?? "transaction_immobiliere")} onChange={(e) => poser("activite", e.target.value)}>{(Object.keys(ACTIVITES) as ActiviteAssujettie[]).map((a) => <option key={a} value={a}>{ACTIVITES[a]}</option>)}</select></label>
+                      <div className="esp-form-ligne">
+                        <label className="rv-libelle">Client identifié le<input className="rv-champ" type="date" value={champ("identification", v?.identification_le ?? "")} onChange={(e) => poser("identification", e.target.value)} /></label>
+                        <label className="rv-libelle">Bénéficiaire effectif vérifié le<input className="rv-champ" type="date" value={champ("beneficiaire", v?.beneficiaire_effectif_le ?? "")} onChange={(e) => poser("beneficiaire", e.target.value)} /></label>
+                      </div>
+                      <div className="esp-form-ligne">
+                        <label className="rv-libelle">Pièce d&apos;identité<select className="rv-champ" value={champ("piece", v?.identification_piece ?? "")} onChange={(e) => poser("piece", e.target.value)}><option value="">— non déposée —</option>{pieces.map((pc) => <option key={pc.id} value={pc.id}>{pc.nom_fichier}</option>)}</select></label>
+                        <label className="rv-libelle">Niveau de risque<select className="rv-champ" value={champ("risque", v?.risque ?? "")} onChange={(e) => poser("risque", e.target.value)}><option value="">— à apprécier —</option>{(Object.keys(RISQUES) as (keyof typeof RISQUES)[]).map((k) => <option key={k} value={k}>{RISQUES[k]}</option>)}</select></label>
+                      </div>
+                    </>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <label className="rv-libelle">Décision<select className="rv-champ" value={champ("decision", form.resultat.controle.conflits ? "conflit_leve" : "pas_de_conflit")} onChange={(e) => poser("decision", e.target.value)}>
+                    {form.resultat.controle.conflits ? null : <option value="pas_de_conflit">Pas de conflit</option>}
+                    <option value="conflit_leve">Conflit levé</option>
+                    <option value="refus">Refuser le dossier</option>
+                  </select></label>
+                  <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", champ("decision", form.resultat.controle.conflits ? "conflit_leve" : "pas_de_conflit") === "refus" ? "refus_du_dossier" : form.resultat.controle.conflits ? "accord_ecrit_des_clients" : "homonyme")} onChange={(e) => poser("motif", e.target.value)}>{Object.entries(MOTIFS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
+                </>
+              )}
+              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            </div>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--fil" onClick={() => setForm(null)}>Fermer</button>
+            <button type="button" className={`r-btn ${form.type === "decider" && champ("decision") === "refus" ? "r-btn--rouge" : "r-btn--noir"}`} disabled={envoi} onClick={() => (form.type === "vigilance" ? void poserVigilance() : void decider(form.resultat))}>
+              {envoi ? <Loader variant="spin" /> : null} Enregistrer
+            </button>
+          </DialogFooter>
+        </>
+      ) : null}
+    </DialogContent>
+  </Dialog>
+  );
+
+  if (rendu) {
+    const api: ApiConformite = { conf: conf ?? null, chargee: conf !== undefined, resultats: resultats ?? [], envoi, erreur: form ? null : erreur, fait, nomsLisibles, jamaisIndexees, peutGerer, gerant, controler, creerIndex, vigilance: () => ouvrir({ type: "vigilance" }), decider: (r) => ouvrir({ type: "decider", resultat: r }) };
+    return (
+      <>
+        {rendu(api)}
+        {fenetre0}
+      </>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Conflits d'intérêts et vigilance">
       <div className="esp-carte-tete">
@@ -326,59 +412,7 @@ export default function ConformiteTamila({ dossier: d, source, clientId, parties
         )}
       </div>
 
-      <Dialog open={!!form} onOpenChange={(o) => !o && setForm(null)}>
-        <DialogContent>
-          {form ? (
-            <>
-              <DialogHeader>
-                <DialogIcone>{form.type === "vigilance" ? <ShieldCheck width={18} height={18} aria-hidden="true" /> : <ScanSearch width={18} height={18} aria-hidden="true" />}</DialogIcone>
-                <DialogTitle>{form.type === "vigilance" ? "La vigilance LCB-FT du dossier" : `Décider : ${form.resultat.nom}`}</DialogTitle>
-                <DialogDescription>
-                  {form.type === "vigilance" ? "L'avocat est assujetti pour certaines activités seulement (CMF art. L.561-3) : il identifie alors le client et le bénéficiaire effectif et apprécie le risque." : form.resultat.controle.conflits ? "Des intérêts opposés : le conflit se lève avec l'accord écrit des clients concernés, ou le dossier se refuse (RIN art. 4)." : "La partie est déjà connue du cabinet, du même côté ou sans opposition d'intérêts."}
-                </DialogDescription>
-              </DialogHeader>
-              <DialogBody>
-                <div className="esp-form">
-                  {form.type === "vigilance" ? (
-                    <>
-                      <label className="rv-libelle">Le dossier est-il assujetti ?<select className="rv-champ" value={champ("assujetti", v?.assujetti ? "oui" : "non")} onChange={(e) => poser("assujetti", e.target.value)}><option value="non">Non (conseil ou contentieux hors activités assujetties)</option><option value="oui">Oui</option></select></label>
-                      {champ("assujetti", v?.assujetti ? "oui" : "non") === "oui" ? (
-                        <>
-                          <label className="rv-libelle">Activité<select className="rv-champ" value={champ("activite", v?.activite ?? "transaction_immobiliere")} onChange={(e) => poser("activite", e.target.value)}>{(Object.keys(ACTIVITES) as ActiviteAssujettie[]).map((a) => <option key={a} value={a}>{ACTIVITES[a]}</option>)}</select></label>
-                          <div className="esp-form-ligne">
-                            <label className="rv-libelle">Client identifié le<input className="rv-champ" type="date" value={champ("identification", v?.identification_le ?? "")} onChange={(e) => poser("identification", e.target.value)} /></label>
-                            <label className="rv-libelle">Bénéficiaire effectif vérifié le<input className="rv-champ" type="date" value={champ("beneficiaire", v?.beneficiaire_effectif_le ?? "")} onChange={(e) => poser("beneficiaire", e.target.value)} /></label>
-                          </div>
-                          <div className="esp-form-ligne">
-                            <label className="rv-libelle">Pièce d&apos;identité<select className="rv-champ" value={champ("piece", v?.identification_piece ?? "")} onChange={(e) => poser("piece", e.target.value)}><option value="">— non déposée —</option>{pieces.map((pc) => <option key={pc.id} value={pc.id}>{pc.nom_fichier}</option>)}</select></label>
-                            <label className="rv-libelle">Niveau de risque<select className="rv-champ" value={champ("risque", v?.risque ?? "")} onChange={(e) => poser("risque", e.target.value)}><option value="">— à apprécier —</option>{(Object.keys(RISQUES) as (keyof typeof RISQUES)[]).map((k) => <option key={k} value={k}>{RISQUES[k]}</option>)}</select></label>
-                          </div>
-                        </>
-                      ) : null}
-                    </>
-                  ) : (
-                    <>
-                      <label className="rv-libelle">Décision<select className="rv-champ" value={champ("decision", form.resultat.controle.conflits ? "conflit_leve" : "pas_de_conflit")} onChange={(e) => poser("decision", e.target.value)}>
-                        {form.resultat.controle.conflits ? null : <option value="pas_de_conflit">Pas de conflit</option>}
-                        <option value="conflit_leve">Conflit levé</option>
-                        <option value="refus">Refuser le dossier</option>
-                      </select></label>
-                      <label className="rv-libelle">Motif<select className="rv-champ" value={champ("motif", champ("decision", form.resultat.controle.conflits ? "conflit_leve" : "pas_de_conflit") === "refus" ? "refus_du_dossier" : form.resultat.controle.conflits ? "accord_ecrit_des_clients" : "homonyme")} onChange={(e) => poser("motif", e.target.value)}>{Object.entries(MOTIFS).map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></label>
-                    </>
-                  )}
-                  {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-                </div>
-              </DialogBody>
-              <DialogFooter>
-                <button type="button" className="r-btn r-btn--fil" onClick={() => setForm(null)}>Fermer</button>
-                <button type="button" className={`r-btn ${form.type === "decider" && champ("decision") === "refus" ? "r-btn--rouge" : "r-btn--noir"}`} disabled={envoi} onClick={() => (form.type === "vigilance" ? void poserVigilance() : void decider(form.resultat))}>
-                  {envoi ? <Loader variant="spin" /> : null} Enregistrer
-                </button>
-              </DialogFooter>
-            </>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+      {fenetre0}
     </section>
   );
 }

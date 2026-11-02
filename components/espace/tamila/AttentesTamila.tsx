@@ -21,13 +21,27 @@ import { ATTENTES_OBJETS_EXEMPLE, attentesExemple } from "./exemples";
 import * as portes from "./portes";
 import type { Attente, Dossier } from "./types";
 
-type Props = { dossier: Dossier; source: Source; cle: CryptoKey | null; peutEcrire: boolean };
+type Props = { dossier: Dossier; source: Source; cle: CryptoKey | null; peutEcrire: boolean; rendu?: (api: ApiAttentes) => React.ReactNode };
 
 const DE: Record<Attente["de"], string> = { client: "Client", confrere: "Confrère", tiers: "Tiers" };
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const dansJours = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString().slice(0, 10);
 
-export default function AttentesTamila({ dossier: d, source, cle, peutEcrire }: Props) {
+/* 02/11/2026, refonte des pages métiers : l'espace 2 dessine la liste lui-même (`rendu`) ; le composant ne rend
+   alors que sa fenêtre, et lui donne ses gestes */
+export type ApiAttentes = {
+  liste: Attente[];
+  chargee: boolean;
+  objets: Record<string, string>;
+  envoi: boolean;
+  erreur: string | null;
+  fait: string | null;
+  peutEcrire: boolean;
+  demander: () => void;
+  noter: (a: Attente, ev: "recue" | "relancee" | "abandon") => Promise<void>;
+};
+
+export default function AttentesTamila({ dossier: d, source, cle, peutEcrire, rendu }: Props) {
   /* undefined : lecture ; null : la base n'a pas b4_18 */
   const [liste, setListe] = useState<Attente[] | null | undefined>(() => (source === "exemple" ? attentesExemple(d.id) : undefined));
   const [objets, setObjets] = useState<Record<string, string>>(() => (source === "exemple" ? ATTENTES_OBJETS_EXEMPLE : {}));
@@ -113,6 +127,43 @@ export default function AttentesTamila({ dossier: d, source, cle, peutEcrire }: 
     );
 
   const attendues = (liste ?? []).filter((a) => a.statut === "attendue");
+
+  const fenetre0 = (
+  <Dialog open={form} onOpenChange={(o) => !o && !envoi && setForm(false)}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogIcone><FileClock width={18} height={18} aria-hidden="true" /></DialogIcone>
+        <DialogTitle>Une pièce attendue</DialogTitle>
+        <DialogDescription>Ce que vous attendez, de qui, et quand relancer. L&apos;objet est chiffré dans votre navigateur avec la clé du dossier.</DialogDescription>
+      </DialogHeader>
+      <DialogBody>
+        <div className="esp-form">
+          <label className="rv-libelle">Ce qui est attendu<input className="rv-champ" value={f.objet ?? ""} onChange={(e) => setF((p) => ({ ...p, objet: e.target.value }))} /></label>
+          <div className="esp-form-ligne">
+            <label className="rv-libelle">De qui<select className="rv-champ" value={f.de ?? "client"} onChange={(e) => setF((p) => ({ ...p, de: e.target.value }))}>{(Object.keys(DE) as Attente["de"][]).map((k) => <option key={k} value={k}>{DE[k]}</option>)}</select></label>
+            <label className="rv-libelle">Relancer le<input className="rv-champ" type="date" min={aujourdhui()} value={f.relance ?? ""} onChange={(e) => setF((p) => ({ ...p, relance: e.target.value }))} /></label>
+          </div>
+          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+        </div>
+      </DialogBody>
+      <DialogFooter>
+        <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setForm(false)}>Fermer</button>
+        <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => void poser()}>{envoi ? <Loader variant="spin" /> : null} Noter</button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+  );
+
+  if (rendu) {
+    const api: ApiAttentes = { liste: liste ?? [], chargee: liste !== undefined, objets, envoi, erreur: form ? null : erreur, fait, peutEcrire, demander: () => { setErreur(null); setF({ de: "client", relance: dansJours(7) }); setForm(true); }, noter };
+    return (
+      <>
+        {rendu(api)}
+        {fenetre0}
+      </>
+    );
+  }
+
   return (
     <section className="esp-carte" aria-label="Pièces attendues">
       <div className="esp-carte-tete">
@@ -148,29 +199,7 @@ export default function AttentesTamila({ dossier: d, source, cle, peutEcrire }: 
         })}
       </div>
 
-      <Dialog open={form} onOpenChange={(o) => !o && !envoi && setForm(false)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogIcone><FileClock width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>Une pièce attendue</DialogTitle>
-            <DialogDescription>Ce que vous attendez, de qui, et quand relancer. L&apos;objet est chiffré dans votre navigateur avec la clé du dossier.</DialogDescription>
-          </DialogHeader>
-          <DialogBody>
-            <div className="esp-form">
-              <label className="rv-libelle">Ce qui est attendu<input className="rv-champ" value={f.objet ?? ""} onChange={(e) => setF((p) => ({ ...p, objet: e.target.value }))} /></label>
-              <div className="esp-form-ligne">
-                <label className="rv-libelle">De qui<select className="rv-champ" value={f.de ?? "client"} onChange={(e) => setF((p) => ({ ...p, de: e.target.value }))}>{(Object.keys(DE) as Attente["de"][]).map((k) => <option key={k} value={k}>{DE[k]}</option>)}</select></label>
-                <label className="rv-libelle">Relancer le<input className="rv-champ" type="date" min={aujourdhui()} value={f.relance ?? ""} onChange={(e) => setF((p) => ({ ...p, relance: e.target.value }))} /></label>
-              </div>
-              {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
-            </div>
-          </DialogBody>
-          <DialogFooter>
-            <button type="button" className="r-btn r-btn--fil" disabled={envoi} onClick={() => setForm(false)}>Fermer</button>
-            <button type="button" className="r-btn r-btn--noir" disabled={envoi} onClick={() => void poser()}>{envoi ? <Loader variant="spin" /> : null} Noter</button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {fenetre0}
     </section>
   );
 }

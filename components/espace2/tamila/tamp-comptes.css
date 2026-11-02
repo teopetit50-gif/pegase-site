@@ -1,0 +1,347 @@
+/* ══════════════════════════════════════════════════════════════════════
+   TAMILA — la liste « Accounts » (ex-Tenants) de Plain (02/11/2026)
+   Relevé : releves/plain-tenants.md (+ plain-commun.md), captures
+   1440-reel-*.png, 1440-clair-menu-colonne.png, 1440-clair-menu-display.png,
+   390-*.png.
+
+   Carte          colonne, p 24 24 0.
+   Tête           58 (p 0 24 24, gap 24) : icône 18 + h1 Whyte 20/400/28
+                  (gap 8) ; à droite (gap 8) favori 32, Filters 34, Display
+                  34 (+ kbd V), bouton secondaire 34.
+   Section        défile dans les deux sens ; barre d'outils p 12 20 (40 de
+                  haut) : recherche 320×40 ; « Sorted by » (icône 18 +
+                  12/400/16 t2 + valeur 12/550 t1 + × 24, gap 6).
+   Tableau        12 sous la barre ; th 32 (fond de carte, collant, 12/550/16
+                  t2, p 8 16 — 1re 8 16 8 32, dernière 8 32 8 16 — filet
+                  inset 0 −1 0 bord-1, icône 14 icone-1, gap 8) ; td p 16
+                  (1re 16 16 16 32), haut, filet bas 1 bord-1 ; survol
+                  remplir-1 sans transition. 1re colonne collante.
+   Pied           p 16 : « Load more » secondaire 26 (p 5 8, 12/550/16).
+   390            tête sur deux lignes ; recherche 143 ; Name 126.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .tamp .tamp-col {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 24px 0 0;
+}
+.v2 .tamp .tamp-tete {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 24px;
+  height: 58px;
+  padding: 0 24px 24px;
+}
+.v2 .tamp .tamp-tete-titre {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 6px;
+}
+.v2 .tamp .tamp-tete-titre svg {
+  flex: none;
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-tete-titre h1 {
+  font-size: 20px;
+  line-height: 28px;
+}
+.v2 .tamp .tamp-tete-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .tamp .tamp-tete-actions .tamp-kbd {
+  margin-left: 4px;
+}
+.v2 .tamp .tamp-section {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.v2 .tamp .tamp-outils {
+  position: sticky;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 20px 0;
+}
+.v2 .tamp .tamp-tri {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-2);
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-tri > svg {
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-tri b {
+  font-weight: 550;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-tri button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--p-icone-2);
+}
+.v2 .tamp .tamp-tri button:hover {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-table {
+  min-width: 100%;
+  margin-top: 12px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .tamp .tamp-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 32px;
+  padding: 0;
+  background: var(--p-carte);
+  box-shadow: inset 0 -1px 0 var(--p-bord-1);
+  text-align: left;
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-th {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-th svg {
+  flex: none;
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-th[data-droite] {
+  justify-content: flex-end;
+}
+.v2 .tamp .tamp-table th:first-child .tamp-th,
+.v2 .tamp .tamp-table td:first-child {
+  padding-left: 32px;
+}
+.v2 .tamp .tamp-table th:last-child .tamp-th,
+.v2 .tamp .tamp-table td:last-child {
+  padding-right: 32px;
+}
+.v2 .tamp .tamp-table th:first-child,
+.v2 .tamp .tamp-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.v2 .tamp .tamp-table th:first-child {
+  z-index: 3;
+}
+.v2 .tamp .tamp-table td {
+  position: relative;
+  padding: 16px;
+  border-bottom: 1px solid var(--p-bord-1);
+  background: var(--p-carte);
+  color: var(--p-texte-1);
+  vertical-align: top;
+  white-space: nowrap;
+  transition: all 0s;
+}
+.v2 .tamp .tamp-table tr:hover td,
+.v2 .tamp .tamp-table tr:focus-within td {
+  background: var(--p-remplir-1);
+}
+.v2 .tamp .tamp-cellule-lien {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.v2 .tamp .tamp-nom {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  width: 251px;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+}
+.v2 .tamp .tamp-nom > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .tamp .tamp-vignette {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border-radius: 4px;
+  background: var(--p-remplir-2);
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-nombre {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  font-weight: 550;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-nombre svg {
+  color: var(--p-bleu-icone-1);
+}
+.v2 .tamp .tamp-gris {
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-droite {
+  text-align: right;
+}
+.v2 .tamp .tamp-source {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-source svg {
+  color: var(--p-icone-2);
+}
+.v2 .tamp .tamp-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+.v2 .tamp .tamp-pied {
+  position: sticky;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-2);
+}
+.v2 .tamp .tamp-pied .tamp-secondaire {
+  height: 26px;
+  padding: 5px 8px;
+}
+.v2 .tamp .tamp-popover {
+  position: absolute;
+  z-index: 40;
+  width: 280px;
+  padding: 16px 8px;
+  border-radius: 6px;
+  background: var(--p-fond-1);
+  box-shadow: var(--p-menu-ombre);
+}
+.v2 .tamp .tamp-popover h4 {
+  margin: 0 0 4px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 16px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-popover h4 + * {
+  margin-top: 4px;
+}
+.v2 .tamp .tamp-popover-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 0 0 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--p-texte-1);
+}
+.v2 .tamp .tamp-popover-ligne > svg {
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-popover-ligne > span {
+  flex: 1;
+}
+.v2 .tamp .tamp-oeil {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border-radius: 6px;
+  color: var(--p-icone-1);
+}
+.v2 .tamp .tamp-oeil[aria-pressed="false"] {
+  background: var(--p-remplir-1);
+  color: var(--p-icone-2);
+}
+.v2 .tamp .tamp-popover-pied {
+  margin-top: 12px;
+  padding: 0 8px;
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--p-texte-2);
+}
+
+@media (max-width: 768px) {
+  .v2 .tamp .tamp-col {
+    padding-top: 16px;
+  }
+  .v2 .tamp .tamp-tete {
+    padding: 0 16px 24px;
+  }
+  .v2 .tamp .tamp-tete-actions .tamp-kbd {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .v2 .tamp .tamp-tete {
+    flex-wrap: wrap;
+    height: auto;
+    row-gap: 12px;
+  }
+  .v2 .tamp .tamp-tete-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .v2 .tamp .tamp-recherche {
+    width: 143px;
+  }
+  .v2 .tamp .tamp-nom {
+    width: 94px;
+  }
+}
+
+/* une pastille dans une cellule : ligne de 59,5 (16 + 27,5 + 16), la pastille 4 plus bas que le nom (relevé) */
+.v2 .tamp .tamp-table td > .tamp-pastille,
+.v2 .tamp .tamp-table td > .tamp-pile {
+  margin: 2px 0 1.5px;
+}
