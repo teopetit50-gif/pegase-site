@@ -111,3 +111,20 @@
 .v2 .dal .dal-fc-outils .dal-rond {
   position: relative;
 }
+
+/* les onglets (vues comprises) défilent de côté quand ils ne tiennent pas (390, 768) ;
+   les boutons de droite restent en vue, comme chez Linear dont les onglets passent dessous */
+.v2 .dal .dal-fc-onglets {
+  display: flex;
+  flex: 0 1 auto;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .dal .dal-fc-onglets::-webkit-scrollbar {
+  display: none;
+}
+.v2 .dal .dal-fc-onglets > * {
+  flex: none;
+}
