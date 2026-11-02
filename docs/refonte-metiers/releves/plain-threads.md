@@ -117,7 +117,7 @@ messages pleine largeur sans avatar à gauche (avatar dans l'en-tête de la cart
 
 `1440-reel-clair.png`, `1440-reel-sombre.png` (liste) · `1440-reel-clair-fil-ouvert.png`, `1440-reel-sombre-fil-ouvert.png` (1440×900,
 tuiles à l'échelle 1 recollées). Le fil a été ouvert par son URL directe : dans ce cas Plain n'affiche **pas** la colonne liste de 400 px
-(rail 56 + carte du fil 1384 de large, fil élargi, détails 384) ; la colonne liste n'apparaît que quand on ouvre le fil depuis la liste
+(rail 56 puis directement la carte du fil, volet de détails à droite ; largeurs non remesurées dans ce cas) ; la colonne liste n'apparaît que quand on ouvre le fil depuis la liste
 (capture `1440-clair-fil-ouvert.png`).
 
 ## Captures (`captures/plain-threads/`)
