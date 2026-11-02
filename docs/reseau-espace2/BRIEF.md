@@ -141,8 +141,9 @@ côte juraient. **On harmonise** :
     données d'exemple ». La fiche garde en plus « Retour à l'annuaire ».
     Avant, il y avait quatre textes, trois tailles d'icône et trois
     boutons différents.
-  - L'en-tête d'Opportunités reprend celui de Membres : surtitre « Réseau
-    Omega », titre 22/29, même chapeau.
+  - L'en-tête d'Opportunités reprenait celui de Membres (surtitre,
+    titre 22/29). C'est caduc depuis la reprise du 02/11 au soir : la page
+    prend la barre du titre des moteurs.
 - **Vérifié sans rien changer.**
   - « Vous » est `useOrganisation()` sur les quatre pages. CAMA n'est
     écrit en dur nulle part, sauf dans des commentaires.
@@ -164,9 +165,18 @@ côte juraient. **On harmonise** :
 
 ### Ce qui jure encore
 
-- Le Fil et les Messages n'ont pas d'en-tête visible : le fil de Circle
-  et Slack n'en ont pas, et c'est leur composition. Membres et
-  Opportunités en ont un, désormais le même.
+*Mis à jour le 02/11 au soir, après la réintégration d'Opportunités
+(commit 59835427). Fil, Membres et Messages sont en cours de reprise sur
+la DA des moteurs (demande de Teo) ; cette liste se refera une fois les
+quatre réintégrées.*
+
+- Opportunités a maintenant la DA des moteurs (kit `lin/`, barre du titre
+  de 44 px, colonnes de Linear). Les trois autres pages gardent encore
+  l'habillage d'avant : la rubrique ne sera homogène qu'après leur
+  reprise.
+- Le Fil et les Messages n'ont pas d'en-tête visible. Membres a un
+  en-tête de page (surtitre, titre 22/29), Opportunités la barre du titre
+  des moteurs.
 - L'état vide du Fil tient dans la colonne du fil (moins large, décalé à
   gauche). Celui des Messages est centré dans une page étroite. Même
   contenu, mais pas la même largeur.
