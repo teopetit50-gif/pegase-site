@@ -38,6 +38,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ArrowRight, Building2, CheckCheck, Copy, ExternalLink, ListFilter, MapPin, MessageSquare, PanelRight, PhoneCall, RefreshCw, Send, ShieldCheck, SlidersHorizontal, UserMinus, UserRound } from "lucide-react";
+import ExclusionsOffload from "./Exclusions";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { montant } from "@/components/espace/format";
@@ -1767,8 +1768,36 @@ export default function ComptesRisque() {
                       />
                     </dd>
                   </div>
+                  {/* « Vous fixez le délai de silence et le montant qui mérite un message », « Un message par
+                      trimestre au plus », « le plafond par compte, la durée de quarantaine » : offload_reglages */}
+                  <div>
+                    <dt>Montant minimum</dt>
+                    <dd>
+                      <span>{reglages.montant_min.toLocaleString("fr-FR")} € d&apos;achats cumulés</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Quarantaine</dt>
+                    <dd>
+                      <span>un message par compte tous les {reglages.quarantaine_jours} jours</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Second message</dt>
+                    <dd>
+                      <span>{reglages.delai_relance_jours} jours sans réponse</span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Plafond</dt>
+                    <dd>
+                      <span>{reglages.plafond_reprises_jour} reprises par jour</span>
+                    </dd>
+                  </div>
                 </dl>
               </CarteDroite>
+
+              <ExclusionsOffload source={source === "exemple" ? "exemple" : "reelle"} />
 
               <CarteDroite titre="Étapes de la reprise">
                 <ul className="lin-jalons">
