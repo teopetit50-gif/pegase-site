@@ -62,7 +62,8 @@ import { Loader } from "@/components/ui/loader";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { Avis } from "@/components/espace/ui";
-import { masquerIban, montant } from "@/components/espace/format";
+import { masquerIban, montant, nombreFr, pourcent } from "@/components/espace/format";
+import { pastilleProvenance } from "@/components/espace/filed/factureElectronique";
 import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "@/components/espace/exemples/filed";
 import { ENTITES, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE } from "@/components/espace/exemples/socle";
 import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "@/components/espace/types";
@@ -1130,6 +1131,35 @@ export default function TableauFiled() {
                         </li>
                       ))
                     : null}
+                </ul>
+                {/* D'où viennent ces valeurs : le site promet « la facture électronique fait foi »
+                    (le fichier structuré) ; l'aide était écrite mais ne s'affichait nulle part. */}
+                {dossier ? (
+                  <p className="lin-maj-texte lin-maj-gris">
+                    {pastilleProvenance(dossier).libelle} — {pastilleProvenance(dossier).aide}
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+
+            {/* « Chaque ligne de la facture est lue » : le tableau existait dans l'ancien écran seul */}
+            {fac && dossier?.lignes.length ? (
+              <>
+                <h3 className="lin-projet-h2">Lignes de la facture</h3>
+                <ul className="lin-projet-liste filed-lignes-actions">
+                  {dossier.lignes.map((x) => (
+                    <li key={x.id}>
+                      <span>
+                        {x.rang}. {x.designation ?? "sans désignation"}
+                        {x.quantite !== null ? ` · ${nombreFr(x.quantite)}${x.unite ? ` ${x.unite}` : ""}` : ""}
+                        {x.prix_unitaire !== null ? ` × ${montant(x.prix_unitaire, fac.devise)}` : ""}
+                      </span>
+                      <span className="lin-meta">
+                        {montant(x.montant_ht, fac.devise)}
+                        {x.taux_tva !== null ? ` · TVA ${pourcent(x.taux_tva)}` : ""}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </>
             ) : null}
