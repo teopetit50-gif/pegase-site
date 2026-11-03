@@ -18,24 +18,22 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 ## Totaux par produit
 
 **Après les corrections du 3 novembre (état à 20 h 15 UTC, trois passages, mis en ligne et vérifiés sur omegaai.fr).**
-61 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
-Puis, le soir, **17 promesses « aucune page » ont reçu leur écran** (section « Promesses sans page : le 3 novembre au soir ») :
-78 promesses passées à « Montrée » en tout ; il reste 15 « aucune page », dont 9 attendent une porte ou une migration (Teo).
+63 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
 | Socle et pages transverses | 13 | 3 | 1 | 1 | 1 | 5 | 3 | **27** |
-| FILED — factures fournisseurs | 45 | 3 | 7 | 1 | 3 | 3 | 3 | **65** |
-| CASHD — relances d’impayés | 56 | 3 | 2 | 1 | 0 | 2 | 2 | **66** |
-| REPUT — demandes clients | 34 | 0 | 0 | 0 | 3 | 3 | 3 | **43** |
-| OFFLOAD — nouvelles affaires | 42 | 1 | 0 | 4 | 0 | 0 | 1 | **48** |
-| DALIRO — BTP | 25 | 1 | 2 | 0 | 2 | 2 | 3 | **35** |
-| LORANI — architectes | 58 | 1 | 2 | 2 | 1 | 7 | 2 | **73** |
+| FILED — factures fournisseurs | 35 | 3 | 7 | 1 | 13 | 3 | 3 | **65** |
+| CASHD — relances d’impayés | 53 | 3 | 2 | 1 | 3 | 2 | 2 | **66** |
+| REPUT — demandes clients | 32 | 0 | 0 | 0 | 5 | 3 | 3 | **43** |
+| OFFLOAD — nouvelles affaires | 40 | 1 | 0 | 4 | 2 | 0 | 1 | **48** |
+| DALIRO — BTP | 26 | 1 | 1 | 0 | 2 | 2 | 3 | **35** |
+| LORANI — architectes | 59 | 1 | 1 | 2 | 1 | 7 | 2 | **73** |
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
 | TAVARO — location automobile | 32 | 1 | 2 | 0 | 1 | 3 | 3 | **42** |
 | TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
 | VARELO — groupes | 20 | 2 | 0 | 1 | 1 | 2 | 1 | **27** |
-| **Tous** | **390** | **17** | **17** | **10** | **15** | **45** | **26** | **520** |
+| **Tous** | **375** | **17** | **15** | **10** | **32** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -116,6 +114,8 @@ sur omegaai.fr.
 | 27 | DALIRO : ouvert directement, le Point du mois ne montrait qu'un chantier. | « Point mensuel — nous rapprochons les travaux repérés des travaux facturés » | Quatre chantiers, « 10 à relancer (10 437,00 €) », quelle que soit la page ouverte en premier. | `810ce17` |
 | 28 | REPUT : aucune demande dans une autre langue. | « La langue du client est identifiée » ; « réponses en plusieurs langues » | James Whitfield, en anglais : « langue : en », réponse rédigée en anglais depuis la fiche Horaires. | `239092f` |
 | 29 | DALIRO : aucun chantier d'exemple réceptionné. | « Les reprises demandées à la réception sont photographiées, et celles hors devis chiffrées à part » | Maison Garnier — extension, réceptionnée depuis six jours : deux réserves (dont une hors devis), retenue de garantie, décompte à préparer. | `8ccb689` |
+| 30 | DALIRO : « Résumer la visite » répondait « le fil n'est pas transmis ». | Maquette « Résumer la visite » | Le résumé du fil d'exemple, message par message, daté, avec canal, auteur, photo ou vocal. | `d3727e7` |
+| 31 | LORANI : aucune pièce de BET dans l'exemple. | « Fonds de plan BET croisés » | Contrôle du dossier Dubois : « BET 02 · PC3 », la trémie du R+1 à 1,2 m sur le fond du BET contre 1,8 m sur la coupe. | `eda2860` |
 
 **Étape « sans back-end » (45 promesses).** Le coordinateur a demandé de poser la pastille « En préparation » sur
 ces phrases. Je ne l'ai pas fait : `components/ui/en-preparation.tsx` porte ta décision du 06/10 à 19 h 20 (« sur
@@ -131,7 +131,7 @@ proposées » plus bas.
 **Restent ouverts après ce passage** (raisons) : FILED n° 37 (il faudrait fabriquer un exercice clos et une pièce
 reçue après), FILED n° 52 (la liste des exports n'a, en exemple, que le sceau mensuel), FILED n° 54 (l'écran ne
 montre qu'une boîte par fournisseur : limite de l'écran, pas de l'exemple), CASHD n° 46 (devise), TIROMA n° 38 (un
-second cabinet d'exemple complet serait nécessaire), DALIRO n° 15, 23 et OFFLOAD n° 13 (le fichier de la page
+second cabinet d'exemple complet serait nécessaire), DALIRO n° 15 et OFFLOAD n° 13 (le fichier de la page
 vient d'être retouché par une autre session : je n'y ai pas touché).
 
 Reclassées sans changement de code, après vérification à l’écran : CASHD n° 52 et 53 (« hors périmètre », « attente de
@@ -538,7 +538,7 @@ Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 0 · Aucune page 2 · Sans back-end 2 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 25, n° 26, n° 27, n° 30, n° 32.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 23, n° 25, n° 26, n° 27, n° 30, n° 32.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -582,7 +582,7 @@ Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 
 
 Totaux : Montrée 54 · Ailleurs 2 · Exemple à compléter 5 · Code invisible 2 · Aucune page 1 · Sans back-end 7 · À reformuler 2.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 29, n° 40, n° 60.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 29, n° 40, n° 56, n° 60.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
