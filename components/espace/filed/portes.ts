@@ -104,10 +104,27 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
     origine_deposee_par: await deposantOrigine(a),
+    reponses: await chargerReponses(a.document.id).catch(() => []),
     decoupage: await chargerDecoupage(a, (piece?.data ?? null) as { piece_mere_id?: string | null } | null).catch(() => null),
     ...(await chargerFactureElectronique(a.document.id, fid ?? null).catch(() => ({}))),
   };
 }
+
+/* les réponses préparées au fournisseur (public.filed_reponses, a4_38 : en production, migration absente du
+   dépôt) ; aucune porte publique pour les préparer : lecture seule */
+async function chargerReponses(document: string): Promise<NonNullable<DossierFiled["reponses"]>> {
+  const { data, error } = await createClient()
+    .from("filed_reponses")
+    .select("id, sorte, destinataire_adresse, destinataire_nom, sujet, corps, statut, demande_id, motif, prepare_le, decide_le")
+    .eq("document_id", document)
+    .order("prepare_le", { ascending: false });
+  if (error) return [];
+  return (data ?? []) as NonNullable<DossierFiled["reponses"]>;
+}
+
+/* la vue cabinet (public.filed_vue_ensemble, a4_52 : en production, migration absente du dépôt) */
+export type DossierCabinet = { client_id: string; organisation: string; role: string; epingle: boolean; rang: number | null; pieces_mois: number; quota: number | null; etat_quota: string | null; bloquees: number; attente: number; a_completer: number; litiges: number; a_payer_30j: number; en_retard: number; dernier_recu_le: string | null; erreur: string | null };
+export const vueEnsemble = () => rpc<DossierCabinet[]>("filed_vue_ensemble", {});
 
 /* une pièce fille (a4_21, pieces.piece_mere_id) : le fichier d'origine et les
    documents nés du même fichier — lecture seule des tables pieces et filed_documents */

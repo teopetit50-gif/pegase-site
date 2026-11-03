@@ -793,6 +793,30 @@ D22.controles = [
   ctrl(D22.facture!.id, "tva.hors_ue", "info", "ok", "Service d'un prestataire hors Union : la TVA est autoliquidée au taux normal (285,31 €) à l'écriture."),
 ];
 
+/* ——— La catégorie d'achat (filed_factures.categorie, categorie_source, categorie_le : a4_47, en production) et
+   une réponse préparée au fournisseur (filed_reponses : a4_38, en production), pour les promesses FILED n° 28 et 60 ——— */
+const CATEGORIES: [DossierFiled, string, "lecteur" | "humain"][] = [
+  [D14, "Fournitures de bureau", "lecteur"], [D08, "Énergie", "lecteur"], [D18, "Transport", "lecteur"], [D19, "Honoraires", "humain"],
+  [D20, "Réceptions et repas", "lecteur"], [D21, "Sous-traitance", "lecteur"], [D22, "Logiciels et licences", "lecteur"],
+  [D11, "Matériel informatique", "lecteur"], [D09, "Serrurerie et métallerie", "lecteur"], [D16, "Impression", "lecteur"], [D17, "Fournitures de bureau", "humain"],
+];
+for (const [d, c, src] of CATEGORIES) Object.assign(d.facture!, { categorie: c, categorie_source: src, categorie_le: d.document.recu_le });
+D09.reponses = [
+  {
+    id: u("rp", 9),
+    sorte: "confirmation_iban",
+    destinataire_adresse: "facturation@metallerie-roux.fr",
+    destinataire_nom: "Métallerie Roux SARL",
+    sujet: "Facture MR-2026-0412 : confirmation de vos coordonnées bancaires",
+    corps: "Bonjour,\n\nVotre facture MR-2026-0412 porte un IBAN différent de celui que nous avons enregistré pour vous. Avant tout paiement, pouvez-vous nous confirmer ce changement par un courrier signé sur papier à en-tête, ou par téléphone au numéro que nous avons déjà ?\n\nBien cordialement,\nAtelier Bertin",
+    statut: "a_valider",
+    demande_id: null,
+    motif: null,
+    prepare_le: ilYa(8, 9),
+    decide_le: null,
+  },
+];
+
 export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08, D20, D21, D22];
 
 /* Les fournisseurs d'exemple pour « rattacher » : les six connus. */

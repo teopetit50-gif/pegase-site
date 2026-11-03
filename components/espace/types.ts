@@ -204,6 +204,10 @@ export type Facture = {
   controle_le: string | null;
   commande_id: string | null;
   avoir_de: string | null;
+  /* a4_47 (en production, migration absente du dépôt) : la catégorie d'achat, d'où elle vient, quand */
+  categorie?: string | null;
+  categorie_source?: string | null;
+  categorie_le?: string | null;
 };
 
 export type LigneFacture = {
@@ -367,6 +371,20 @@ export type ValeurPiece = {
 };
 
 /* le dossier complet d'un document, tel que l'écran FILED le montre */
+export type ReponseFournisseur = {
+  id: string;
+  sorte: string;
+  destinataire_adresse: string | null;
+  destinataire_nom: string | null;
+  sujet: string | null;
+  corps: string | null;
+  statut: string;
+  demande_id: string | null;
+  motif: string | null;
+  prepare_le: string | null;
+  decide_le: string | null;
+};
+
 export type DossierFiled = {
   document: DocumentFiled;
   facture: Facture | null;
@@ -394,6 +412,8 @@ export type DossierFiled = {
   ecritures?: Ecriture[];
   /* une pièce fille (a4_21) : le fichier d'origine découpé pièce par pièce, et
      les autres documents nés du même fichier */
+  /* a4_38 (en production, migration absente du dépôt) : les réponses préparées au fournisseur, en lecture */
+  reponses?: ReponseFournisseur[];
   decoupage?: { mere: string; nb_pages: number | null; pages?: string | null; soeurs: { document_id: string; reference: string; pages?: string | null }[] } | null;
 };
 

@@ -82,6 +82,7 @@ import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe
 import { RACINE } from "../modules";
 import "./tableau-filed.css";
 import PilotageFiled from "./Pilotage";
+import CabinetFiled from "./Cabinet";
 
 /* l'écran du dossier (pièce en regard, lecteur PDF) ne se charge qu'à l'ouverture de l'onglet « Dossier » */
 /* le dossier de toujours ne rend plus son écran ici : l'Aperçu lui emprunte ses fenêtres de correction (28/10/2026) */
@@ -903,6 +904,8 @@ export default function TableauFiled() {
       { notion: "montant_ttc", libelle: "Total TTC", valeur: fac ? montant(fac.montant_ttc, fac.devise) : null, champ: "montant_ttc" },
       { notion: "iban", libelle: "IBAN", valeur: null, champ: "iban" },
       { notion: "siren", libelle: "SIREN", valeur: null },
+      /* « La catégorie d'achat … produite à la lecture » (filed_factures.categorie, a4_47) */
+      { notion: "categorie", libelle: "Catégorie d'achat", valeur: fac?.categorie ? `${fac.categorie}${fac.categorie_source === "humain" ? " · choisie" : ""}` : null },
     ];
     const optionsFournisseurGestes: Option[] = [
       ...(fou?.statut === "a_confirmer"
@@ -1257,6 +1260,35 @@ export default function TableauFiled() {
                 de change et la contre-valeur en euros », « les mentions d'escompte, de pénalité et d'indemnité » :
                 filed_factures_tva, filed_factures.regime_tva et .mentions (a4_22, a4_27), lus avec la facture */}
             {fac ? <TvaEtMentions fac={fac} tva={dossier?.tva ?? []} /> : null}
+
+            {/* « Il lit chaque document, le range et prépare la réponse » : filed_reponses (a4_38), en lecture ;
+                elle part après validation, dans « À valider » */}
+            {dossier?.reponses?.length ? (
+              <>
+                <h3 className="lin-projet-h2">Réponse au fournisseur</h3>
+                {dossier.reponses.map((r) => (
+                  <div key={r.id}>
+                    <ul className="lin-projet-liste filed-lignes-actions">
+                      <li>
+                        <IconeEnveloppe />
+                        <span>{r.sujet ?? "Réponse préparée"}</span>
+                        <span className="lin-meta">{r.statut === "a_valider" ? "à valider" : r.statut === "envoyee" ? "envoyée" : r.statut === "refusee" ? "refusée" : r.statut}</span>
+                      </li>
+                      <li>
+                        <span>À {r.destinataire_nom ?? r.destinataire_adresse ?? "destinataire à désigner"}</span>
+                        <span className="lin-meta">{r.prepare_le ? `préparée le ${dateCourte(r.prepare_le)}` : ""}</span>
+                      </li>
+                    </ul>
+                    {r.corps ? <p className="lin-maj-texte lin-maj-gris" style={{ whiteSpace: "pre-line" }}>{r.corps}</p> : null}
+                    {r.statut === "a_valider" ? (
+                      <p className="lin-maj-texte lin-maj-gris">
+                        Rien ne part sans validation : <Link href={`${RACINE}/validations`}>ouvrir « À valider »</Link>.
+                      </p>
+                    ) : null}
+                  </div>
+                ))}
+              </>
+            ) : null}
 
             {/* « Un fichier qui contient plusieurs factures est découpé pièce par pièce » (a4_21) */}
             {dossier?.decoupage ? (
@@ -2058,6 +2090,7 @@ export default function TableauFiled() {
               <CarteAPayer lignes={portee} titre="Échéances" fournisseurs />
 
               {aujourdhui ? <PilotageFiled source={source === "exemple" ? "exemple" : "reelle"} dossiers={local} aujourdhui={new Date(aujourdhui)} /> : null}
+              {aujourdhui ? <CabinetFiled source={source === "exemple" ? "exemple" : "reelle"} aujourdhui={new Date(aujourdhui)} /> : null}
 
               <CarteDroite
                 titre="Activité"
