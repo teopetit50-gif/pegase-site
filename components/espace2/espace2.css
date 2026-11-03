@@ -2971,7 +2971,9 @@ html.v2-calme *::after {
 
 /* la barre de saisie */
 .v2-ia-saisie { display: grid; gap: 6px; padding: 10px 10px 8px 12px; border-radius: 6px; background: var(--v2-bg-100); box-shadow: 0 0 0 1px var(--v2-a-400); transition: box-shadow 0.15s; }
-.v2-ia-saisie:focus-within { box-shadow: var(--v2-anneau); }
+/* 29/10/2026 — retour de Teo : pas de halo autour de la barre au focus, le trait s'assombrit seulement
+   (resté sur la branche fix/assistant-barre-sans-cadre, mis en ligne le 03/11). */
+.v2-ia-saisie:focus-within { box-shadow: 0 0 0 1px var(--v2-a-600); }
 .v2-ia-saisie textarea { width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--v2-gray-1000); font: inherit; font-size: 14px; line-height: 20px; max-height: 200px; }
 .v2-ia-saisie textarea::placeholder { color: var(--v2-gray-900); }
 /* 30/10/2026 — retour de Teo : `.v2-jetons :focus-visible` posait son anneau
