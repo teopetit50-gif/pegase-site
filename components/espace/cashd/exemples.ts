@@ -127,9 +127,18 @@ export const FICHES_EXEMPLE: Fiche[] = [
   {
     compte: giraud,
     balance: null,
-    pieces: [piece(41, giraud.id, { numero: "F-2026-088", date_emission: decale(-55), echeance: decale(-25), montant_ttc: 1850 })],
-    reglements: [],
-    suivi: [suivi(id(41), { palier_atteint: "rappel", palier_atteint_le: decale(-18), derniere_relance_statut: "a_valider", palier_suivant: "relance", palier_suivant_le: decale(-4), etat_sequence: "en_cours" })],
+    /* Le client a payé hier : sa facture est soldée, sa séquence s'arrête — c'est la promesse la plus
+       répétée du site (« un client qui a payé n'est jamais relancé »). Elle doit se voir en exemple. */
+    pieces: [
+      piece(41, giraud.id, { numero: "F-2026-088", date_emission: decale(-55), echeance: decale(-25), montant_ttc: 1850, statut: "soldee", regle: 1850, reste_du: 0 }),
+      /* une facture récente, pas encore échue : le compte reste consultable alors qu'il ne doit plus rien */
+      piece(42, giraud.id, { numero: "F-2026-151", date_emission: decale(-6), echeance: decale(24), montant_ttc: 620, reste_du: 620 }),
+    ],
+    reglements: [{ id: id(92), compte_id: giraud.id, compte: giraud.nom, recu_le: decale(-1), montant: 1850, mode: "virement", reference: "F-2026-088", libelle: "VIR SEPA PEINT GIRAUD", statut: "actif", impute: 1850, a_imputer: 0 }],
+    suivi: [
+      suivi(id(41), { palier_atteint: "rappel", palier_atteint_le: decale(-18), derniere_relance_statut: "coupee", palier_suivant: null, palier_suivant_le: null, etat_sequence: "sequence_terminee" }),
+      suivi(id(42), { palier_suivant: "rappel", palier_suivant_le: decale(31) }),
+    ],
   },
   {
     compte: martin,
@@ -140,8 +149,10 @@ export const FICHES_EXEMPLE: Fiche[] = [
   },
 ];
 
+/* Un virement qu'aucune référence ne rattache : il reste « à imputer » (le règlement de Giraud, lui,
+   est imputé sur sa facture). */
 export const SANS_COMPTE_EXEMPLE: ReglementEtat[] = [
-  { id: id(91), compte_id: null, compte: null, recu_le: decale(-1), montant: 1850, mode: "virement", reference: null, libelle: "VIR SEPA PEINT GIRAUD", statut: "actif", impute: 0, a_imputer: 1850 },
+  { id: id(91), compte_id: null, compte: null, recu_le: decale(-1), montant: 480, mode: "virement", reference: null, libelle: "VIR SEPA SARL BROTT", statut: "actif", impute: 0, a_imputer: 480 },
 ];
 
 export const DERNIER_IMPORT_EXEMPLE = `${decale(0)}T05:41:00Z`;
@@ -189,12 +200,12 @@ export const RELANCES_EXEMPLE: Relance[] = [
     pieces: [{ facture_id: id(51), numero: "F-2026-120", palier: "rappel", reste_du: 960, retard_jours: 7, penalites: 0, indemnite: 40 }],
   },
   {
-    // Validée ce matin, à envoyer soi-même (envoi du module coupé) : le geste « Noter l'envoi à la main » (c2_11).
+    // Préparée pour ce matin, puis COUPÉE par le règlement reçu la veille : la séquence s'arrête d'elle-même.
     id: id(106), compte_id: giraud.id, compte: giraud.nom, jour: decale(0), nature: "facture", palier: "relance", langue: "fr",
     destinataire_adresse: giraud.contact_facturation_email, destinataire_nom: "M. Giraud",
     sujet: "Atelier Bertin — relance : 1 850,00 € restent dus",
     corps: `Bonjour M. Giraud,\n\nMalgré notre précédent rappel, la somme suivante reste impayée sur votre compte C-GIRAUD, secteur Bâtiment :\n  • Facture F-2026-088 du ${decale(-55).split("-").reverse().join("/")}, 1 850,00 € TTC, échue le ${decale(-25).split("-").reverse().join("/")} (25 jours de retard) : 1 850,00 € restant dus\n\nTotal restant dû : 1 850,00 €. Nous vous remercions de procéder au règlement au plus tard le ${decale(8).split("-").reverse().join("/")}.\nNous vous rappelons que tout retard de paiement rend exigibles une indemnité forfaitaire pour frais de recouvrement de 40,00 € par facture et des pénalités de retard (Code de commerce, art. L441-10).\nSi vous contestez tout ou partie de ces montants, merci de nous l'écrire pour que nous l'examinions.${signature}`,
-    montant: 1850, penalites: 0, indemnites: 40, statut: "a_valider", etat: "validee", motif: null, demande_id: id(206), envoi_id: null, envoye_le: null,
-    pieces: [{ facture_id: id(41), numero: "F-2026-088", palier: "relance", reste_du: 1850, retard_jours: 25, penalites: 0, indemnite: 40 }],
+    montant: 1850, penalites: 0, indemnites: 40, statut: "coupee", etat: "coupee", motif: `règlement reçu le ${decale(-1).split("-").reverse().join("/")} : 1 850,00 € par virement`, demande_id: id(206), envoi_id: null, envoye_le: null,
+    pieces: [{ facture_id: id(41), numero: "F-2026-088", palier: "relance", reste_du: 0, retard_jours: 25, penalites: 0, indemnite: 40 }],
   },
 ];
