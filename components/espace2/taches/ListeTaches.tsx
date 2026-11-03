@@ -316,7 +316,20 @@ function MenuListe({
     }
   };
   return (
-    <div className="lin-ancre" ref={ref} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
+    <div
+      className="lin-ancre"
+      ref={ref}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => {
+        /* 03/11/2026 — dans « Options d'affichage », rien ne prend le focus :
+           Échap partait du bouton, hors du panneau, et ne fermait rien */
+        if (ouvert && e.key === "Escape") {
+          e.preventDefault();
+          fermer();
+        }
+        e.stopPropagation();
+      }}
+    >
       {bouton(ouvert, () => (ouvert ? fermer() : setOuvert(true)))}
       {ouvert ? (
         <div className={enfants ? "lt-menu lt-affichage" : "lt-menu"} data-cote={cote} style={largeur ? { width: largeur } : undefined} role="dialog" aria-label={titre} onKeyDown={touche}>
@@ -1249,7 +1262,8 @@ function FenetreTache({
                 Créer d&apos;autres
               </span>
               <div className="lt-fenetre-pied-droite">
-                <button type="submit" className="lt-fenetre-creer">
+                {/* 03/11/2026 — grisé tant que le titre est vide, comme « Create issue » de Linear */}
+                <button type="submit" className="lt-fenetre-creer" disabled={!titre.trim()}>
                   {fiche ? "Enregistrer" : "Créer la tâche"}
                 </button>
               </div>

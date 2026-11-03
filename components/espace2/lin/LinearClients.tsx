@@ -661,7 +661,8 @@ function Creation({ collection, entreprises, prerempli, fermer, creer }: { colle
           <button type="button" className="lcl-btn-fantome" onClick={fermer}>
             Annuler
           </button>
-          <button type="submit" form="lcl-creation" className="lcl-btn-plein">
+          {/* 03/11/2026 — grisé tant que le nom est vide, comme « Create issue » de Linear */}
+          <button type="submit" form="lcl-creation" className="lcl-btn-plein" disabled={!nom.trim()}>
             {estEntreprise ? "Créer l'entreprise" : "Créer le contact"}
           </button>
         </div>

@@ -744,6 +744,8 @@ html[data-v2-theme="light"] .v2 .lin input[type="date"].pr-input {
     width: 100%;
     margin-left: 0;
     justify-content: flex-end;
+    /* 03/11/2026 — « Réglages propres » sortait à gauche à 390 (REPUT, Sites) */
+    flex-wrap: wrap;
   }
   .v2 .lin .pr-compteurs {
     flex-direction: column;

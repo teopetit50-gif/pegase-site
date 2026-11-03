@@ -965,7 +965,11 @@ html[data-v2-theme="light"] .v2 .lin.lt {
   color: #fff;
   transition: filter 0.1s;
 }
-:is(.v2, .v2-jetons) .lt-fenetre-creer:hover {
+:is(.v2, .v2-jetons) .lt-fenetre-creer:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+:is(.v2, .v2-jetons) .lt-fenetre-creer:hover:not(:disabled) {
   filter: brightness(1.1);
 }
 :is(.v2, .v2-jetons) .lt-fenetre-creer:focus-visible,

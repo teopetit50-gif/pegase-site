@@ -999,6 +999,22 @@ html[data-v2-theme="light"] .lrg-voile {
   .v2 .lrg-ligne {
     flex-wrap: wrap;
   }
+  .v2 .lrg-mnote {
+    margin: 0 16px;
+  }
+  .v2 .lrg .lin-menu:has(> .lrg-menu-corps) {
+    min-width: 142px;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* 03/11/2026 — de 768 à 900 px, le rail et le volet des réglages ne laissent
+   que 460 à 600 px au tableau des membres : ses colonnes fixes (60 + 25 % +
+   140 + 150 + 28 + 32) écrasaient la colonne du nom à zéro — avatars sur les
+   adresses, « Nom » sur « E-mail », descriptions des rôles en colonne d'une
+   lettre, page qui défilait de côté. Le tableau prend la mise en page étroite
+   dès 900 px. */
+@media (max-width: 900px) {
   .v2 .lrg-mtete {
     margin: 0 16px 16px;
     padding-top: 24px;
@@ -1018,6 +1034,10 @@ html[data-v2-theme="light"] .lrg-voile {
   }
   .v2 .lrg-entete > :not(.lrg-entete-nom) {
     display: none;
+  }
+  /* « Nom ↓ » sortait de 6 px à gauche de l'écran à 390 */
+  .v2 .lrg-entete-btn {
+    margin-left: 0;
   }
   .v2 .lrg-groupe {
     padding: 0 16px 0 16px;
@@ -1045,12 +1065,5 @@ html[data-v2-theme="light"] .lrg-voile {
   .v2 .lrg-vide,
   .v2 .lrg-squelette {
     grid-column: 2 / 4;
-  }
-  .v2 .lrg-mnote {
-    margin: 0 16px;
-  }
-  .v2 .lrg .lin-menu:has(> .lrg-menu-corps) {
-    min-width: 142px;
-    max-width: calc(100vw - 32px);
   }
 }

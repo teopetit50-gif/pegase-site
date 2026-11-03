@@ -233,7 +233,14 @@ export default function EcranReglages() {
                 <strong>Votre archive est prête.</strong> {exportFait.nb_fichiers} fichier{exportFait.nb_fichiers > 1 ? "s" : ""}, {octets(exportFait.octets)}.{" "}
                 {exportFait.fichiers_manquants ? `${exportFait.fichiers_manquants} fichier${exportFait.fichiers_manquants > 1 ? "s" : ""} introuvable${exportFait.fichiers_manquants > 1 ? "s" : ""} dans le stockage : ${exportFait.fichiers_manquants > 1 ? "ils sont listés" : "il est listé"} dans l'archive. ` : ""}
                 <br />
-                <a href={exportFait.lien} target="_blank" rel="noopener noreferrer" download>Télécharger l&apos;archive (zip)</a> — lien valable jusqu&apos;au {dateHeure(exportFait.expire_le)}.
+                {/* 03/11/2026 — en données d'exemple, le lien « #exemple » téléchargeait la page elle-même (reglages.html) */}
+                {exportFait.lien.startsWith("#") ? (
+                  <span>Archive d&apos;exemple : rien à télécharger. Avec vos données, le lien de l&apos;archive (zip) apparaît ici.</span>
+                ) : (
+                  <>
+                    <a href={exportFait.lien} target="_blank" rel="noopener noreferrer" download>Télécharger l&apos;archive (zip)</a> — lien valable jusqu&apos;au {dateHeure(exportFait.expire_le)}.
+                  </>
+                )}
               </Avis>
             ) : null}
             {exportFait ? (

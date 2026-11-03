@@ -892,9 +892,18 @@ html[data-v2-theme="light"] .v2 .lin .pf-vide-carte {
   .v2 .lin .pf-btn {
     padding: 8px 8px;
   }
-  .v2 .lin .pf-btn .pf-btn-libelle,
   .v2 .lin .pf-kbd {
     display: none;
+  }
+  /* 03/11/2026 — le libellé était retiré (display: none) et le bouton-icône
+     restait sans nom pour un lecteur d'écran : il n'est plus que caché à l'œil */
+  .v2 .lin .pf-btn .pf-btn-libelle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .v2 .lin .pf-btn > svg {
     margin-right: 0;

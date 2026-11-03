@@ -95,6 +95,12 @@
 .v2 .lcl-tete > .lcl-num {
   justify-self: end;
 }
+/* 03/11/2026 — les cases vides de l'en-tête (pistes de 8 px aux bords)
+   gardaient le rembourrage 0 6 px des libellés : 12 px dans une piste de 8,
+   la dernière dépassait de 4 px et toute la page défilait de côté. */
+.v2 .lcl-tete > span:empty {
+  padding: 0;
+}
 .v2 .lcl-ligne {
   cursor: default;
   position: relative;
@@ -288,6 +294,14 @@
   margin-top: -192px;
   padding-top: 160px;
   background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--lin-fond) 55%, transparent) 40%, var(--lin-fond) 80%);
+  /* 03/11/2026 — le fondu passait par-dessus les trois ou quatre dernières
+     lignes visibles : un clic sur « Nadia Durand » ou « SCI Lefèvre » ne
+     faisait rien (seul le clavier les ouvrait). Le fondu laisse passer les
+     clics ; seul le bouton les prend. */
+  pointer-events: none;
+}
+.v2 .lcl-suite-btn {
+  pointer-events: auto;
 }
 .v2 .lcl-suite[data-ouvert] {
   margin-top: -12px;

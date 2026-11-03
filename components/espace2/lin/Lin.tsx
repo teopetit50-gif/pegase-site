@@ -139,9 +139,13 @@ export function MenuOptions({
     setQ("");
     setActif(0);
   };
+  /* 03/11/2026 — après Échap ou un choix au clavier, le focus retombait sur
+     <body> : il revient au bouton qui a ouvert le menu */
+  const rendreFocus = () => ref.current?.querySelector<HTMLButtonElement>(":scope > button")?.focus();
   const choisir = (o: Option | undefined) => {
     if (!o) return;
     fermer();
+    rendreFocus();
     if (o.action) o.action();
     else if (o.href) routeur.push(o.href, { scroll: false });
   };
@@ -172,6 +176,7 @@ export function MenuOptions({
       e.preventDefault();
       e.stopPropagation();
       fermer();
+      rendreFocus();
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       setActif((i) => Math.min(visibles.length - 1, i + 1));

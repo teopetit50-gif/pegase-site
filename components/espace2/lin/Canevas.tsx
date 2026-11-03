@@ -548,6 +548,14 @@ export const EditeurPlain = forwardRef<PoigneeEditeur, Props>(function EditeurPl
   };
 
   const clavier = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    /* 03/11/2026 — la bulle « Raccourcis clavier » annonce « Échap : Fermer » ;
+       le focus est alors sur son bouton, pas sur le canevas : Échap la ferme
+       d'où qu'il parte */
+    if (e.key === "Escape" && raccourcis && e.target !== e.currentTarget) {
+      setRaccourcis(false);
+      e.preventDefault();
+      return;
+    }
     if (e.target !== e.currentTarget) return;
     if (e.key === "+" || e.key === "=") zoomer(1.2);
     else if (e.key === "-") zoomer(1 / 1.2);
