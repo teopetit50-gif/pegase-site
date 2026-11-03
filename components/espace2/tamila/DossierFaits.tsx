@@ -563,7 +563,7 @@ function Faits({ complet, cle }: { complet: DossierComplet; cle: CryptoKey | nul
                   <svg viewBox="0 0 8 8" fill="currentColor" aria-hidden="true">
                     <path d="M0.5 2h7L4 6.5z" />
                   </svg>
-                  {type === "pieces_citees" ? "Pièces citées" : type === "contradictions" ? "Contradictions" : "Faits"}
+                  {type === "pieces_citees" ? "Pièces citées" : type === "contradictions" ? "Contradictions" : type === "bordereau" ? "Bordereau" : type === "prelecture" ? "Pré-lecture" : "Faits"}
                 </button>
                 <span className="tk-jauge" title="Faits dont toutes les citations sont retrouvées dans la pièce">
                   <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
