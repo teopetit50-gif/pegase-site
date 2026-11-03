@@ -81,6 +81,7 @@ import { RACINE } from "@/components/espace2/modules";
 import Habille from "@/components/espace2/Habille";
 import { dateCourte } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
+import { aujourdHui } from "@/components/espace/exemples/socle";
 import ChantierVue, { type FormChantier } from "@/components/espace/daliro/ChantierVue";
 import { annulerIndisponibilite, chargerDisponibilites, noterIndisponibilite, repondreConfirmation } from "@/components/espace/daliro/portes";
 import type { Disponibilite, Passage, Tableau, Tiers } from "@/components/espace/daliro/types";
@@ -286,7 +287,11 @@ export default function Equipes() {
   /* les absences : la porte b6_31 en base réelle, la mémoire en exemple */
   const [reel, setReel] = useState<Disponibilite[] | null>(null);
   const [erreurDispo, setErreurDispo] = useState<string | null>(null);
-  const [locales, setLocales] = useState<Record<string, Absence[]>>({});
+  /* « …et leurs disponibilités » : en exemple, Plâtrerie Morel a un compagnon en arrêt pendant son passage
+     « Bandes et enduits » du Cabinet médical Saint-Clair — le conflit se lit sans rien noter */
+  const [locales, setLocales] = useState<Record<string, Absence[]>>(() => ({
+    "00000000-0000-4000-8000-00000000d701": [{ id: "00000000-0000-4000-8000-0000000ea901", du: aujourdHui(2), au: aujourdHui(3), motif: "Un plâtrier en arrêt maladie" }],
+  }));
   const clientId = client?.client_id ?? null;
   const lire = useCallback(async () => {
     if (!clientId) return;
