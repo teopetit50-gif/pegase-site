@@ -363,6 +363,21 @@
   line-height: 16px;
   color: var(--p-texte-2);
 }
+/* 03/11/2026 — retour de Teo : un intitulé long (« Syndicat des copropriétaires Les Tilleuls… »)
+   sortait du volet à droite. La pastille tient dans sa colonne et le nom se tronque, comme Plain. */
+.v2 .tamp .tamp-tdl dd {
+  min-width: 0;
+}
+.v2 .tamp .tamp-tdl dd > .tamp-pastille {
+  max-width: 100%;
+  min-width: 0;
+}
+.v2 .tamp .tamp-tdl .tamp-pastille-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 @media (max-width: 1024px) {
   .v2 .tamp .tamp-tvolet {

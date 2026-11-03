@@ -514,11 +514,11 @@ export default function Conformite() {
             <dl className="tamp-tdl">
               <dt>Dossier</dt>
               <dd>
-                <Link className="tamp-pastille" href={`${RACINE}/tamila/dossiers/${ouverteT.dossier}`}>
+                <Link className="tamp-pastille" href={`${RACINE}/tamila/dossiers/${ouverteT.dossier}`} title={intituleDe(ouverteT.dossier)}>
                   <span className="tamp-vignette">
                     <PlainIcone nom="Batiment" taille={12} />
                   </span>
-                  {intituleDe(ouverteT.dossier)}
+                  <span className="tamp-pastille-texte">{intituleDe(ouverteT.dossier)}</span>
                 </Link>
               </dd>
               <dt>Origine</dt>
