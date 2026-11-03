@@ -17,6 +17,26 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 
 ## Totaux par produit
 
+**Après les corrections du 3 novembre (état à 18 h 40 UTC, mis en ligne et vérifié sur omegaai.fr).**
+51 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
+
+| Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
+|---|---|---|---|---|---|---|---|---|
+| Socle et pages transverses | 13 | 3 | 1 | 1 | 1 | 5 | 3 | **27** |
+| FILED — factures fournisseurs | 35 | 3 | 7 | 1 | 13 | 3 | 3 | **65** |
+| CASHD — relances d’impayés | 52 | 3 | 3 | 1 | 3 | 2 | 2 | **66** |
+| REPUT — demandes clients | 31 | 0 | 1 | 0 | 5 | 3 | 3 | **43** |
+| OFFLOAD — nouvelles affaires | 38 | 1 | 2 | 4 | 2 | 0 | 1 | **48** |
+| DALIRO — BTP | 23 | 1 | 4 | 0 | 2 | 2 | 3 | **35** |
+| LORANI — architectes | 57 | 1 | 3 | 2 | 1 | 7 | 2 | **73** |
+| TAMILA — avocats | 25 | 0 | 1 | 0 | 0 | 14 | 2 | **42** |
+| TAVARO — location automobile | 31 | 1 | 3 | 0 | 1 | 3 | 3 | **42** |
+| TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
+| VARELO — groupes | 19 | 2 | 1 | 1 | 1 | 2 | 1 | **27** |
+| **Tous** | **363** | **17** | **27** | **10** | **32** | **45** | **26** | **520** |
+
+Au relevé (3 novembre au matin, avant toute correction) :
+
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
 | Socle et pages transverses | 12 | 3 | 2 | 1 | 1 | 5 | 3 | **27** |
@@ -45,7 +65,7 @@ Ce que veut dire chaque statut :
 
 ## Ce qui a été corrigé et mis en ligne le 3 novembre
 
-Dix corrections, en neuf commits poussés sur `main` et vérifiés sur la page servie par omegaai.fr. Chacune règle des promesses
+Dix corrections au premier passage, en neuf commits poussés sur `main` et vérifiés sur la page servie par omegaai.fr. Chacune règle des promesses
 que l’écran ne tenait pas : des données d’exemple muettes, un bloc écrit que plus aucune page ne montait,
 un lien qui menait ailleurs.
 
@@ -66,6 +86,31 @@ Chaque lot a passé `npx tsc --noEmit`, `npx eslint` sur les fichiers touchés, 
 aux cinq largeurs (390 / 768 / 1024 / 1440 / 1700) en thème sombre et clair, avant d’être poussé et revérifié
 sur omegaai.fr.
 
+### Second passage (3 novembre, 17 h 20 – 18 h 40 UTC)
+
+| # | Ce qui ne se voyait pas | Promesse du site | Ce qui se voit maintenant | Commit |
+|---|---|---|---|---|
+| 11 | CASHD : aucun litige, aucun recouvrement, aucun compte export, aucun règlement partiel, aucun échéancier, aucun recommandé électronique ; les relances parties n’avaient pas de texte. | « Une contestation écrite bascule la facture en litige », « le dossier de recouvrement est remis complet », « les comptes export reçoivent leur relance dans leur langue », « les règlements partiels sont imputés », « un échéancier négocié remplace l’échéance d’origine », « le recommandé électronique est préparé quand la créance l’exige » | Litiges et pauses : SCI Lefèvre en litige (2 160 €), Restaurant Le Comptoir en recouvrement ; Alpine Retreats Ltd (rappel rédigé en anglais, 1 000 € lettrés, échéancier) ; la mise en demeure des Brotteaux part en LRE ; contacts commerciaux, lien de paiement, textes des relances parties. | `23887ca` |
+| 12 | DALIRO : aucune absence dans Équipes. | « …et leurs disponibilités » | Plâtrerie Morel « Absent du … au … : passage à revoir ». | `6766c8c` |
+| 13 | VARELO : « Décisions à valider » menait à une file sans aucune décision Varelo. | « Rien ne part sans l’accord de la direction concernée, décision par décision » | Deux décisions dans « À valider » (dénonciation Loc’Manut, protestation CMA CGM), chacune avec son calcul et son « Ouvrir dans VARELO ». | `90f38bf` |
+| 14 | DALIRO : aucun lien vers les rôles ; LORANI : aucun lien vers l’invitation. | « Rôles et droits — vous décidez qui valide un avenant » ; « Inviter l’équipe » | Réglages › Organisation : « Rôles et droits » ; menu « Ajouter au projet » : « Inviter quelqu’un dans l’espace… ». | `e9f4e8c`, `5b80a2e` |
+| 15 | REPUT : ni client reconnu, ni appel manqué, ni demande de parler à une personne. | « Le client est reconnu, son fil est repris », « un appel manqué devient une demande », « parler à une personne » | Karim B. « Client connu · 1 autre demande » ; M. Girard, appel manqué transcrit, « Parler à une personne », sans réponse automatique. | `fa38b3e` |
+| 16 | OFFLOAD : la règle « jamais un compte en litige » était « pas encore applicable », alors que la base l’applique (c4_11). | « Ne relance jamais un compte en litige. » → « Compris — ces fiches sont écartées. » | Garde-fous : la règle est « Appliquée », avec la réponse du site. | `1445857` |
+| 17 | Les six éditions passées du point du matin étaient identiques mot pour mot. | « Les sept dernières éditions restent consultables » | Chaque édition dit sa journée (solde, factures, demandes, avis). | `891f8d5` |
+| 18 | TAMILA : aucune lecture « Bordereau », pré-lecture « en cours » pour toujours. | « Bordereau contrôlé (art. 768) », « l’ensemble de la pré-lecture » | Dossier de faits : bordereau (3 pièces + la pièce n° 12 citée sans être communiquée) et pré-lecture (prétention, moyen, fait, pièces visées), chaque constat renvoyé à sa page. | `53e1323` |
+| 19 | VARELO : « Photos 0 » sur les deux réceptions avec avarie. | « Une livraison reçue avec avarie : le transport, les colis et les photos du constat » | Opérations : « Photos du constat (2) » et (1), photos Unsplash avec crédits. | `03f74c2` |
+| 20 | OFFLOAD : aucun second message parti, aucun compte suivi en direct. | « Un compte sans réponse reçoit un second message », « un compte suivi en direct par un commercial est exclu du cycle » | « Relancé, en attente · 1 compte » ; Boulangerie Lemaire « Suivi en direct par Sofia ». | `532b2a1` |
+
+Reclassées sans changement de code, après vérification à l’écran : CASHD n° 52 et 53 (« hors périmètre », « attente de
+contact ») sont déjà dans la pastille Statut de la fiche d’un compte (« Ne plus contacter », « Contact à désigner ») —
+`captures-promesses/cashd/52-statut-hors-perimetre.jpg`.
+
+Restent volontairement ouvertes : TAVARO n° 41 (factures « à envoyer vous-même » et « émises hier » : une facture
+d’exemple de plus casserait la chaîne proposition → facture de l’exemple), CASHD n° 45 (le lien de paiement est réglé
+dans l’exemple, mais les textes de relance d’exemple ne le reprennent pas), CASHD n° 46 (une facture en devise
+fausserait les totaux, que le calcul d’exemple tient en euros), TAMILA n° 12 (renvois cliquables : il faudrait fabriquer
+des PDF d’exemple), DALIRO n° 15, 23, 30, 32 (changements de code plus lourds, détaillés dans le relevé).
+
 ## Les relevés, produit par produit
 
 Les tableaux ci-dessous décrivent l’état **au moment du relevé** (3 novembre au matin).
@@ -75,6 +120,8 @@ la section « Ce qui a été corrigé » dit ce qui a changé depuis.
 ### Socle et pages transverses
 
 Totaux : Montrée 12 · Ailleurs 3 · Exemple à compléter 2 · Code invisible 1 · Aucune page 1 · Sans back-end 5 · À reformuler 3.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 3.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -109,6 +156,8 @@ Totaux : Montrée 12 · Ailleurs 3 · Exemple à compléter 2 · Code invisible 
 ### FILED — factures fournisseurs
 
 Totaux : Montrée 33 · Ailleurs 3 · Exemple à compléter 7 · Code invisible 3 · Aucune page 13 · Sans back-end 3 · À reformuler 3.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 6, n° 27.**
 
 | Statut | Nombre |
 |---|---|
@@ -191,6 +240,8 @@ Totaux : Montrée 33 · Ailleurs 3 · Exemple à compléter 7 · Code invisible 
 ### CASHD — relances d’impayés
 
 Totaux : Montrée 41 · Ailleurs 3 · Exemple à compléter 12 · Code invisible 3 · Aucune page 3 · Sans back-end 2 · À reformuler 2.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 7, n° 20, n° 30, n° 33, n° 35, n° 37, n° 38, n° 40, n° 47, n° 52, n° 53.**
 
 | Statut | Nombre |
 |---|---|
@@ -275,6 +326,8 @@ Totaux : Montrée 41 · Ailleurs 3 · Exemple à compléter 12 · Code invisible
 
 Totaux : Montrée 22 · Ailleurs 0 · Exemple à compléter 5 · Code invisible 5 · Aucune page 5 · Sans back-end 3 · À reformuler 3.
 
+**Réglées depuis le relevé (désormais « Montrée ») : n° 4, n° 5, n° 19, n° 20, n° 21, n° 24, n° 26, n° 34, n° 35.**
+
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
 | 1 | « Une demande reçue à 21 h obtient sa réponse à 21 h » ; « Il lit le message dès qu'il arrive et répond dans la minute. » ; « Répondu à 6 h 31 » ; « < 1 min » ; /offres « Réponse à toute heure » | /offres/demandes-clients (A:85, A:138, A:369) ; / (`app/page.tsx:705-708`) ; /offres (`app/offres/page.tsx:397`) | `/espace2/reput` carte Propriétés « Délai médian 47 min sur 7 jours » ; bandeau « Rien ne part sans votre accord, sauf sur les sujets autorisés d'avance » | PROMESSE À REFORMULER | Décision de Teo du 22/10 : la nuit seul l'accusé part, la réponse attend l'ouverture (`omega/CHIFFRAGE/reput.md` n° 1, 3, 22, 100). L'exemple affiche lui-même 47 min (X:133). `captures-promesses/reput/01-tableau.jpg` |
@@ -324,6 +377,8 @@ Totaux : Montrée 22 · Ailleurs 0 · Exemple à compléter 5 · Code invisible 
 ### OFFLOAD — nouvelles affaires
 
 Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 4 · Aucune page 2 · Sans back-end 0 · À reformuler 1.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 5, n° 17, n° 19.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -380,6 +435,8 @@ Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 0 · Aucune page 2 · Sans back-end 2 · À reformuler 3.
 
+**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 25, n° 26, n° 27.**
+
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
 | 1 | « Daliro repère ces travaux dans les photos et les vocaux de vos équipes » ; « Un imprévu signalé par vocal devient un avenant » / « Daliro identifie l'ouvrage concerné » ; « Daliro les repère dans les photos et les vocaux, puis les chiffre sur vos prix » ; « Lecture des photos et vocaux » ; Métiers : « Un linteau à reprendre apparaît sur une photo du mardi… », « …le vocal du chef d'équipe devient une ligne d'avenant » ; FAQ « Un ouvrage qui n'y figure pas remonte avec la photo, le lot concerné… » | /secteurs/btp (T:38, F, C, M, T:158, T:207) | `…d001?onglet=fil` (onglet « Activité ») : carte WhatsApp « Vocal (14 s) » → « Lu par Daliro : … » → « Travail supplémentaire : Deux portes de placard, chambre du fond, 2 u · à confirmer · Ouvrir l'avenant » ; avenants « Origine Photo/Vocal » dans `/espace2/daliro/avenants` | MONTRÉE | `captures-promesses/daliro/01-fil-lu-par-daliro.jpg` |
@@ -421,6 +478,8 @@ Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 
 ### LORANI — architectes
 
 Totaux : Montrée 54 · Ailleurs 2 · Exemple à compléter 5 · Code invisible 2 · Aucune page 1 · Sans back-end 7 · À reformuler 2.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 40, n° 60.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -502,6 +561,8 @@ Totaux : Montrée 54 · Ailleurs 2 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 20 · Ailleurs 0 · Exemple à compléter 6 · Code invisible 0 · Aucune page 0 · Sans back-end 14 · À reformuler 2.
 
+**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 11, n° 24, n° 26, n° 27.**
+
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
 | 1 | « Tamila suit désormais vos délais d'appel » ; formule Cabinet : « Délais d'appel lus dans l'avis RPVA » | /secteurs/avocats (textes.ts:37, :183-184) | `/espace2/tamila`, onglet Échéances : groupe « Délais à confirmer 3 », lignes « Remettre ses conclusions et les notifier (art. 908) … J-1 4 nov. » ; `/espace2/tamila/arrivees` : avis e-barreau, volet « Avis de fixation à bref délai · 2026-0412 (même n° RG) » | MONTRÉE | captures-promesses/tamila/01-echeances.jpg, 09-arrivees.jpg |
@@ -551,6 +612,8 @@ Totaux : Montrée 20 · Ailleurs 0 · Exemple à compléter 6 · Code invisible 
 
 Totaux : Montrée 28 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 1 · Aucune page 1 · Sans back-end 3 · À reformuler 3.
 
+**Réglées depuis le relevé (désormais « Montrée ») : n° 6, n° 7, n° 30.**
+
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
 | 1 | « Au retour du véhicule, Tavaro compare les photos de restitution à l'état des lieux de départ » ; « Tavaro compare ces photos à l'état des lieux de départ » ; « Tavaro rapproche les photos de restitution de l'état des lieux de départ » ; « Les retours sont comparés aux photos de départ » ; bento « Tavaro compare les photos de départ et de retour » ; maquette « Photos de départ et de retour comparées » | /secteurs/location-automobile (textes.ts HERO.chapo, SOLUTIONS « facturation », A_PROPOS.liste[0], MOTEURS 01 ; apercus/BentoMethode.tsx, ApercuFacturation.tsx) ; /secteurs (lib/secteurs.ts:110) | `/espace2/tavaro/contrats/…co001`, fenêtre « Chiffrer le retour » : « État de départ signé par Marie Durand : carburant 8/8, 1 dommage déjà noté (flanc droit) » | PROMESSE À REFORMULER | captures-promesses/tavaro/04-comparaison-depart.jpg — la comparaison porte sur les dommages notés zone par zone (`FormulaireRetour.tsx:58,195`), aucune comparaison d'images ; CHIFFRAGE l.5 le demandait déjà |
@@ -599,6 +662,8 @@ Totaux : Montrée 28 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 ### TIROMA — cabinet dentaire
 
 Totaux : Montrée 37 · Ailleurs 3 · Exemple à compléter 2 · Code invisible 0 · Aucune page 3 · Sans back-end 4 · À reformuler 3.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 4, n° 45.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -668,6 +733,8 @@ Totaux : Montrée 37 · Ailleurs 3 · Exemple à compléter 2 · Code invisible 
 ### VARELO — groupes
 
 Totaux : Montrée 13 · Ailleurs 2 · Exemple à compléter 7 · Code invisible 1 · Aucune page 1 · Sans back-end 2 · À reformuler 1.
+
+**Réglées depuis le relevé (désormais « Montrée ») : n° 3, n° 8, n° 11, n° 15, n° 18, n° 22.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
