@@ -11,7 +11,7 @@ import "./formation.css";
    pages.ts ; le sommaire se déduit des sections. */
 
 /* un texte riche : [libellé](/lien) devient un lien, le reste est du texte */
-function riche(texte: Riche): ReactNode[] {
+export function riche(texte: Riche): ReactNode[] {
   const morceaux: ReactNode[] = [];
   const motif = /\[([^\]]+)\]\(([^)]+)\)/g;
   let fin = 0;
@@ -28,7 +28,7 @@ function riche(texte: Riche): ReactNode[] {
   return morceaux;
 }
 
-function blocs(liste: Bloc[]) {
+export function blocs(liste: Bloc[]) {
   return liste.map((b, i) => {
     if ("sous" in b)
       return (
