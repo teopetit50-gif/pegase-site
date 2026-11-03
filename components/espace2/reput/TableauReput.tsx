@@ -55,6 +55,11 @@ import {
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { dateHeure } from "@/components/espace/format";
+import Astreinte from "@/components/espace/reput/Astreinte";
+import PiecesJointes from "@/components/espace/reput/PiecesJointes";
+import Rapprochement from "@/components/espace/reput/Rapprochement";
+import RendezVous from "@/components/espace/reput/RendezVous";
+import SujetSecondaire from "@/components/espace/reput/SujetSecondaire";
 import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, libelleStatut, telecharger } from "@/components/espace/reput/export";
 import { chargerMonde, corriger, decider, monClient } from "@/components/espace/reput/portes";
@@ -1055,6 +1060,16 @@ export default function TableauReput() {
                   </footer>
                 </details>
 
+                {/* Ce que le site promet et que l'ancien écran seul montrait (il ne s'ouvre plus depuis le
+                    02/11/2026) : l'astreinte appelée la nuit, le second sujet d'un même message, le
+                    rapprochement d'un doublon, les pièces jointes et la prise de rendez-vous. */}
+                <h2 className="lin-projet-h2">Urgence et classement</h2>
+                <div className="lin-reput-blocs">
+                  <Astreinte key={`astreinte:${d.id}`} demande={d} traite={decideur} source={source} />
+                  <SujetSecondaire demande={d} monde={m} traite={decideur} source={source} relire={charger} modifierLocal={(f) => setLocal((x) => f(x))} />
+                  <Rapprochement demande={d} monde={m} traite={decideur} source={source} relire={charger} modifierLocal={(f) => setLocal((x) => f(x))} />
+                </div>
+
                 <h2 className="lin-projet-h2">Le message reçu</h2>
                 <p className="lin-meta">
                   {CANAUX[d.canal]}
@@ -1064,6 +1079,19 @@ export default function TableauReput() {
                 </p>
                 {rec?.sujet ? <p className="lin-maj-texte lin-reput-message">{rec.sujet}</p> : null}
                 <p className="lin-maj-texte lin-reput-corps lin-reput-message">{rec?.corps || "(message sans texte)"}</p>
+                {pieces ? (
+                  <div className="lin-reput-blocs">
+                    <PiecesJointes key={d.id} demande={d.id} pieces={rec?.pieces ?? null} source={source} />
+                  </div>
+                ) : null}
+                {d.sujet === "rendez_vous" ? (
+                  <>
+                    <h2 className="lin-projet-h2">Rendez-vous</h2>
+                    <div className="lin-reput-blocs">
+                      <RendezVous key={`rdv:${d.id}`} demande={d} client={reel?.client ?? null} traite={decideur} source={source} />
+                    </div>
+                  </>
+                ) : null}
 
                 <h2 className="lin-projet-h2">Parcours</h2>
                 <ul className="lin-projet-liste">

@@ -8,6 +8,59 @@
    que ces détails.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* Les blocs repris de l'ancien écran (astreinte, second sujet, doublon, pièces jointes,
+   rendez-vous) : ils portent leur propre habillage « esp-* » et « r-btn ». Ce cadre les range
+   dans la page comme les autres sections, sans toucher aux composants partagés. */
+.v2 .lin .lin-reput-blocs {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 12px;
+  border: 0.5px solid var(--lin-trait);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--lin-texte);
+}
+.v2 .lin .lin-reput-blocs:empty {
+  display: none;
+}
+.v2 .lin .lin-reput-blocs .esp-section-titre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-second);
+}
+.v2 .lin .lin-reput-blocs .esp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2 .lin .lin-reput-blocs .r-btn {
+  padding: 4px 10px;
+  border: 0.5px solid var(--lin-trait);
+  border-radius: 6px;
+  background: var(--lin-champ);
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.v2 .lin .lin-reput-blocs .r-btn:hover {
+  background: var(--lin-survol, var(--lin-champ));
+}
+.v2 .lin .lin-reput-blocs .esp-kpi-sous {
+  color: var(--lin-second);
+}
+.v2 .lin .lin-reput-blocs select,
+.v2 .lin .lin-reput-blocs input {
+  font: inherit;
+  color: inherit;
+  background: var(--lin-champ);
+  border: 0.5px solid var(--lin-trait);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
 .v2 .lin .lin-reput-corps {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
