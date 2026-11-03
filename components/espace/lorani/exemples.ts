@@ -510,6 +510,9 @@ export const MARCHES_EXEMPLE: Marche[] = [
   { id: M(2), projet_id: P_MERCIERE, lot_id: id("1", 9), titulaire: "Échafaudages Rhône", montant_ht: 24000, avenants_ht: 0, retenue_pct: 5, delai_verification_jours: 15, actif: true, delai_execution_jours: 210, demarrage_le: j(-102) },
 ];
 const mois = (n: number) => `${j(n).slice(0, 7)}-01`;
+/* « Retenue, avance et pénalités recalculées » (b5_33) : le lot 01 prévoit une avance de 5 % et une pénalité de
+   150 € HT par jour de retard ; le volet d'une situation les recalcule (03/11/2026, docs/verification) */
+Object.assign(MARCHES_EXEMPLE[0], { avance_pct: 5, penalite_jour_ht: 150 });
 export const SITUATIONS_EXEMPLE: Situation[] = [
   { id: id("5", 1), projet_id: P_MERCIERE, marche_id: M(1), numero: 1, mois: mois(-95), cumul_ht: 42000, recue_le: j(-66), a_viser_avant: j(-51), statut: "visee", cumul_admis_ht: 42000, observation: null, visee_le: j(-60) },
   { id: id("5", 2), projet_id: P_MERCIERE, marche_id: M(1), numero: 2, mois: mois(-65), cumul_ht: 98000, recue_le: j(-36), a_viser_avant: j(-21), statut: "rectifiee", cumul_admis_ht: 95500, observation: "Joints non réalisés sur la travée 3", visee_le: j(-30) },
