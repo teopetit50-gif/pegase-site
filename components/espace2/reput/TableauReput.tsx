@@ -1320,6 +1320,13 @@ export default function TableauReput() {
     const heureDe = (iso: string) => Number(new Intl.DateTimeFormat("fr-FR", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Paris" }).format(new Date(iso)));
     const parHeure = Array.from({ length: 12 }, (_, i) => ({ h: i * 2, n: portee.filter((d) => Math.floor(heureDe(d.recu_le) / 2) === i).length })).filter((x) => x.n > 0);
     const maxHeure = Math.max(1, ...parHeure.map((x) => x.n));
+    /* par service : le service est l'équipe du sujet (c3_16), comme la vue reput_indicateurs_services ; sans équipe, l'accueil */
+    const serviceDe = (d: Demande) => {
+      const eq = m.sujets.find((x) => x.code === d.sujet)?.equipe_id ?? null;
+      return (eq && m.equipes?.find((e) => e.id === eq)?.nom) || "Accueil (sans service)";
+    };
+    const parService = [...new Set(portee.map(serviceDe))].map((sv) => ({ sv, n: portee.filter((d) => serviceDe(d) === sv).length })).sort((a, b) => b.n - a.n);
+    const maxService = Math.max(1, ...parService.map((x) => x.n));
     const seuleDe = (d: Demande) => d.statut === "envoyee" && !reponseDe(m, d)?.redigee_par && m.accords.sujets.some((a) => a.sujet === d.sujet && a.statut === "active");
     const jours7 = Array.from({ length: JOURS }, (_, i) => {
       const debut = minuit(maint) - (JOURS - 1 - i) * JOUR;
@@ -1570,6 +1577,19 @@ export default function TableauReput() {
                     <span className="lin-tranche-nom">{CANAUX[c]}</span>
                     <span className="lin-tranche-barre" aria-hidden="true">
                       <span style={{ width: `${(n / maxCanal) * 100}%` }} />
+                    </span>
+                    <span className="lin-meta">{n}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <h3 className="lin-projet-h2">Demandes par service</h3>
+              <ul className="lin-projet-liste">
+                {parService.map(({ sv, n }) => (
+                  <li key={sv}>
+                    <span className="lin-tranche-nom">{sv}</span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span style={{ width: `${(n / maxService) * 100}%` }} />
                     </span>
                     <span className="lin-meta">{n}</span>
                   </li>
