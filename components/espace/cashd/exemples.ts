@@ -38,6 +38,8 @@ export const REGLAGES_EXEMPLE: Reglages = {
   seuil_relance: 0,
   seuil_direction: 2000,
   heure_relances: "07:00:00",
+  /* « un lien de paiement accompagne la relance » : l'adresse de l'exemple, reprise sous chaque facture */
+  lien_paiement: "https://paiement.exemple.fr/atelier-bertin?facture={numero}&montant={montant}",
 };
 
 function compte(n: number, c: Partial<Compte> & Pick<Compte, "reference" | "nom">): Compte {
@@ -83,11 +85,16 @@ function suivi(factureId: string, s: Partial<Suivi>): Suivi {
   return { facture_id: factureId, palier_atteint: null, palier_atteint_le: null, derniere_relance_statut: null, palier_suivant: null, palier_suivant_le: null, etat_sequence: "pas_encore_relancee", ...s };
 }
 
-const sci = compte(1, { reference: "C-LEFEVRE", nom: "SCI Lefèvre Patrimoine", secteur: "Immobilier", siren: "552100554", contact_facturation_nom: "Mme Lefèvre", contact_facturation_email: "compta@lefevre-patrimoine.fr", plafond_encours: 20000 });
-const hotel = compte(2, { reference: "C-BROTTEAUX", nom: "Hôtel des Brotteaux", groupe: "Groupe Brotteaux", secteur: "Hôtellerie", contact_facturation_email: "factures@hotel-brotteaux.fr" });
+const sci = compte(1, { reference: "C-LEFEVRE", nom: "SCI Lefèvre Patrimoine", secteur: "Immobilier", siren: "552100554", contact_facturation_nom: "Mme Lefèvre", contact_facturation_email: "compta@lefevre-patrimoine.fr", contact_commercial_email: "commercial.lefevre@atelier-bertin.fr", plafond_encours: 20000 });
+const hotel = compte(2, { reference: "C-BROTTEAUX", nom: "Hôtel des Brotteaux", groupe: "Groupe Brotteaux", secteur: "Hôtellerie", contact_facturation_email: "factures@hotel-brotteaux.fr", contact_commercial_email: "yanis.dupre@atelier-bertin.fr" });
 const mairie = compte(3, { reference: "C-CALUIRE", nom: "Mairie de Caluire", secteur: "Collectivité", contact_facturation_email: "mandatement@caluire.fr" });
 const giraud = compte(4, { reference: "C-GIRAUD", nom: "Peintures Giraud SARL", secteur: "Bâtiment", contact_facturation_nom: "M. Giraud", contact_facturation_email: "compta@peintures-giraud.fr" });
 const martin = compte(5, { reference: "C-MARTIN", nom: "Boulangerie Martin", secteur: "Commerce", contact_facturation_email: "boulangerie.martin@orange.fr", statut: "pause", statut_motif: "Le gérant a appelé : paiement promis vendredi", statut_le: `${decale(-2)}T09:12:00Z` });
+
+/* « Les comptes export reçoivent leur relance dans leur langue », « les règlements partiels sont imputés »,
+   « un échéancier négocié remplace l'échéance d'origine » ; et « le dossier de recouvrement est remis complet » */
+const alpine = compte(6, { reference: "C-ALPINE", nom: "Alpine Retreats Ltd", secteur: "Hôtellerie", langue: "en", contact_facturation_nom: "Ms. Fischer", contact_facturation_email: "accounts@alpine-retreats.example.com" });
+const comptoir = compte(7, { reference: "C-COMPTOIR", nom: "Restaurant Le Comptoir", secteur: "Restauration", contact_facturation_email: "gerance@le-comptoir.example.com", statut: "recouvrement", statut_motif: "Trois relances et une mise en demeure sans réponse : dossier remis à l'huissier", statut_le: `${decale(-9)}T10:30:00Z` });
 
 export const FICHES_EXEMPLE: Fiche[] = [
   {
@@ -97,6 +104,7 @@ export const FICHES_EXEMPLE: Fiche[] = [
       piece(11, sci.id, { numero: "F-2026-101", date_emission: decale(-75), echeance: decale(-45), montant_ttc: 12000 }),
       piece(12, sci.id, { numero: "F-2026-140", date_emission: decale(-10), echeance: decale(20), montant_ttc: 6000 }),
       piece(13, sci.id, { nature: "devis", numero: "D-2026-033", date_emission: decale(-5), montant_ttc: 8400, statut: "en_attente" }),
+      piece(14, sci.id, { numero: "F-2026-118", date_emission: decale(-48), echeance: decale(-18), montant_ttc: 2160, statut: "litige", statut_motif: `Contestation écrite du ${decale(-6).split("-").reverse().join("/")} : deux heures de main-d'œuvre contestées (pose du garde-corps)` }),
     ],
     reglements: [],
     suivi: [
@@ -147,6 +155,28 @@ export const FICHES_EXEMPLE: Fiche[] = [
     reglements: [],
     suivi: [suivi(id(51), { palier_atteint: "rappel", palier_atteint_le: decale(-5), derniere_relance_statut: "a_valider", palier_suivant: "relance", palier_suivant_le: decale(9), etat_sequence: "pause" })],
   },
+  {
+    compte: alpine,
+    balance: null,
+    pieces: [
+      /* payée en partie : 1 000 € imputés, le reste continue d'être suivi */
+      piece(61, alpine.id, { numero: "F-2026-109", date_emission: decale(-50), echeance: decale(-20), montant_ttc: 2800, regle: 1000 }),
+      /* échéancier accepté : l'échéance d'origine est remplacée, la relance attend la nouvelle date */
+      piece(62, alpine.id, { numero: "F-2026-131", date_emission: decale(-40), echeance: decale(20), echeance_origine: decale(-10), montant_ttc: 3600 }),
+    ],
+    reglements: [{ id: id(93), compte_id: alpine.id, compte: alpine.nom, recu_le: decale(-3), montant: 1000, mode: "virement", reference: "F-2026-109", libelle: "SWIFT ALPINE RETREATS PART PAYMENT", statut: "actif", impute: 1000, a_imputer: 0 }],
+    suivi: [
+      suivi(id(61), { palier_suivant: "rappel", palier_suivant_le: decale(0), etat_sequence: "en_cours" }),
+      suivi(id(62), { palier_suivant: "rappel", palier_suivant_le: decale(27) }),
+    ],
+  },
+  {
+    compte: comptoir,
+    balance: null,
+    pieces: [piece(71, comptoir.id, { numero: "F-2026-021", date_emission: decale(-170), echeance: decale(-140), montant_ttc: 4200 })],
+    reglements: [],
+    suivi: [suivi(id(71), { palier_atteint: "mise_en_demeure", palier_atteint_le: decale(-60), etat_sequence: "recouvrement" })],
+  },
 ];
 
 /* Un virement qu'aucune référence ne rattache : il reste « à imputer » (le règlement de Giraud, lui,
@@ -173,6 +203,8 @@ export const RELANCES_EXEMPLE: Relance[] = [
     destinataire_adresse: hotel.contact_facturation_email, destinataire_nom: hotel.nom,
     sujet: "Atelier Bertin — mise en demeure de payer 3 000,00 €",
     corps: `Bonjour Madame, Monsieur,\n\nMalgré nos précédentes relances, les sommes suivantes restent impayées (compte C-BROTTEAUX, secteur Hôtellerie) :\n  • Facture F-2026-050 du ${decale(-130).split("-").reverse().join("/")}, 3 600,00 € TTC, échue le ${decale(-100).split("-").reverse().join("/")} (100 jours de retard) : 3 000,00 € restant dus\n\nPar la présente, nous vous mettons en demeure de régler la somme de 3 000,00 € dans un délai de 8 jours à compter de la réception de ce courrier, soit au plus tard le ${decale(8).split("-").reverse().join("/")}.\nEn application des articles L441-10 et D441-5 du Code de commerce, sont également dues des pénalités de retard (99,86 € à ce jour) et une indemnité forfaitaire pour frais de recouvrement de 40,00 € par facture (40,00 € au total).\nÀ défaut de règlement dans ce délai, nous engagerons une procédure de recouvrement, sans autre avis.${signature}`,
+    /* « le courrier recommandé électronique est préparé quand la créance l'exige » : la mise en demeure part en LRE */
+    canal: "lre",
     montant: 3000, penalites: 99.86, indemnites: 40, statut: "a_valider", etat: "a_valider", motif: null, demande_id: id(202), envoi_id: id(302), envoye_le: null,
     pieces: [{ facture_id: id(21), numero: "F-2026-050", palier: "mise_en_demeure", reste_du: 3000, retard_jours: 100, penalites: 99.86, indemnite: 40 }],
   },
@@ -188,7 +220,8 @@ export const RELANCES_EXEMPLE: Relance[] = [
     id: id(104), compte_id: giraud.id, compte: giraud.nom, jour: decale(-18), nature: "facture", palier: "rappel", langue: "fr",
     destinataire_adresse: giraud.contact_facturation_email, destinataire_nom: "M. Giraud",
     sujet: "Atelier Bertin — rappel : facture F-2026-088 échue",
-    corps: null, montant: 1850, penalites: 0, indemnites: 40, statut: "a_valider", etat: "envoyee", motif: null, demande_id: id(204), envoi_id: id(304),
+    /* « chaque relance partie est datée et consignée, avec son objet et son texte » */
+    corps: `Bonjour M. Giraud,\n\nSauf erreur de notre part, la somme suivante reste due sur votre compte C-GIRAUD, secteur Bâtiment :\n  • Facture F-2026-088 du ${decale(-55).split("-").reverse().join("/")}, 1 850,00 € TTC, échue le ${decale(-25).split("-").reverse().join("/")} (7 jours de retard) : 1 850,00 € restant dus\n\nIl s'agit sans doute d'un simple oubli. Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur cette facture, il vous suffit de répondre à ce courriel.${signature}`, montant: 1850, penalites: 0, indemnites: 40, statut: "a_valider", etat: "envoyee", motif: null, demande_id: id(204), envoi_id: id(304),
     envoye_le: `${decale(-18)}T07:42:00Z`,
     pieces: [{ facture_id: id(41), numero: "F-2026-088", palier: "rappel", reste_du: 1850, retard_jours: 7, penalites: 0, indemnite: 40 }],
   },
@@ -196,7 +229,7 @@ export const RELANCES_EXEMPLE: Relance[] = [
     id: id(105), compte_id: martin.id, compte: martin.nom, jour: decale(-5), nature: "facture", palier: "rappel", langue: "fr",
     destinataire_adresse: martin.contact_facturation_email, destinataire_nom: martin.nom,
     sujet: "Atelier Bertin — rappel : facture F-2026-120 échue",
-    corps: null, montant: 960, penalites: 0, indemnites: 40, statut: "coupee", etat: "coupee", motif: "compte pause : Le gérant a appelé : paiement promis vendredi", demande_id: id(205), envoi_id: null, envoye_le: null,
+    corps: `Bonjour,\n\nSauf erreur de notre part, la somme suivante reste due sur votre compte C-MARTIN, secteur Commerce :\n  • Facture F-2026-120 du ${decale(-42).split("-").reverse().join("/")}, 960,00 € TTC, échue le ${decale(-12).split("-").reverse().join("/")} (7 jours de retard) : 960,00 € restant dus\n\nIl s'agit sans doute d'un simple oubli. Si le règlement est déjà parti, merci de ne pas tenir compte de ce message. Pour toute question sur cette facture, il vous suffit de répondre à ce courriel.${signature}`, montant: 960, penalites: 0, indemnites: 40, statut: "coupee", etat: "coupee", motif: "compte pause : Le gérant a appelé : paiement promis vendredi", demande_id: id(205), envoi_id: null, envoye_le: null,
     pieces: [{ facture_id: id(51), numero: "F-2026-120", palier: "rappel", reste_du: 960, retard_jours: 7, penalites: 0, indemnite: 40 }],
   },
   {
@@ -207,5 +240,14 @@ export const RELANCES_EXEMPLE: Relance[] = [
     corps: `Bonjour M. Giraud,\n\nMalgré notre précédent rappel, la somme suivante reste impayée sur votre compte C-GIRAUD, secteur Bâtiment :\n  • Facture F-2026-088 du ${decale(-55).split("-").reverse().join("/")}, 1 850,00 € TTC, échue le ${decale(-25).split("-").reverse().join("/")} (25 jours de retard) : 1 850,00 € restant dus\n\nTotal restant dû : 1 850,00 €. Nous vous remercions de procéder au règlement au plus tard le ${decale(8).split("-").reverse().join("/")}.\nNous vous rappelons que tout retard de paiement rend exigibles une indemnité forfaitaire pour frais de recouvrement de 40,00 € par facture et des pénalités de retard (Code de commerce, art. L441-10).\nSi vous contestez tout ou partie de ces montants, merci de nous l'écrire pour que nous l'examinions.${signature}`,
     montant: 1850, penalites: 0, indemnites: 40, statut: "coupee", etat: "coupee", motif: `règlement reçu le ${decale(-1).split("-").reverse().join("/")} : 1 850,00 € par virement`, demande_id: id(206), envoi_id: null, envoye_le: null,
     pieces: [{ facture_id: id(41), numero: "F-2026-088", palier: "relance", reste_du: 0, retard_jours: 25, penalites: 0, indemnite: 40 }],
+  },
+  {
+    /* « les comptes export reçoivent leur relance dans leur langue de facturation » */
+    id: id(107), compte_id: alpine.id, compte: alpine.nom, jour: decale(0), nature: "facture", palier: "rappel", langue: "en",
+    destinataire_adresse: alpine.contact_facturation_email, destinataire_nom: "Ms. Fischer",
+    sujet: "Atelier Bertin — reminder: invoice F-2026-109 overdue",
+    corps: `Dear Ms. Fischer,\n\nUnless we are mistaken, the following amount remains due on your account C-ALPINE:\n  • Invoice F-2026-109 dated ${decale(-50).split("-").reverse().join("/")}, EUR 2,800.00 incl. VAT, due on ${decale(-20).split("-").reverse().join("/")} (20 days overdue): EUR 1,800.00 outstanding after your part payment of EUR 1,000.00\n\nThis is most likely an oversight. If the payment has already been made, please disregard this message. For any question about this invoice, simply reply to this e-mail.\n\nKind regards,\nAtelier Bertin — accounts department\n`,
+    montant: 1800, penalites: 0, indemnites: 40, statut: "a_valider", etat: "a_valider", motif: null, demande_id: id(207), envoi_id: null, envoye_le: null,
+    pieces: [{ facture_id: id(61), numero: "F-2026-109", palier: "rappel", reste_du: 1800, retard_jours: 20, penalites: 0, indemnite: 40 }],
   },
 ];
