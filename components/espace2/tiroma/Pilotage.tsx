@@ -242,6 +242,24 @@ function Section({ titre, colonnes = 3, children }: { titre: string; colonnes?: 
   );
 }
 
+/* 03/11/2026 — quatre sections (objectifs, semaine, devis à relancer, vus
+   sans suite) avaient un titre en bouton qui ne faisait rien : elles se
+   replient comme les autres, sans la grille de Section. */
+function SectionPliable({ titre, children }: { titre: string; children: React.ReactNode }) {
+  const [ouverte, setOuverte] = useState(true);
+  return (
+    <section className="in-section">
+      <div className="in-section-titre">
+        <button type="button" aria-expanded={ouverte} onClick={() => setOuverte((o) => !o)}>
+          <h2>{titre}</h2>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ transform: ouverte ? undefined : "rotate(-90deg)" }}><path d="M12 15.4 6.7 10.1a1 1 0 0 1 1.4-1.4l3.9 3.9 3.9-3.9a1 1 0 0 1 1.4 1.4z" /></svg>
+        </button>
+      </div>
+      {ouverte ? children : null}
+    </section>
+  );
+}
+
 /* « Noter l'appel » au menu de Plain (items 36), « À rappeler » au choix d'un délai, « Ne plus contacter » confirmé */
 function MenuAppel({ cible }: { cible: CibleAppel }) {
   const t = useTiroma();
@@ -342,6 +360,23 @@ export default function Pilotage() {
   const [chercheSuite, setChercheSuite] = useState("");
   const [sidekick, setSidekick] = useState(true);
   const [avisSk, setAvisSk] = useState<string | null>(null);
+  /* 03/11/2026 — les menus de la barre (Filtre, Grouper, Période, Pas) ne se
+     fermaient ni par Échap ni par un clic dehors. */
+  useEffect(() => {
+    if (!menu) return;
+    const dehors = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".pl-ancre")) setMenu(null);
+    };
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenu(null);
+    };
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [menu]);
   /* B : « Ask Sidekick Agent » */
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
@@ -506,8 +541,7 @@ export default function Pilotage() {
           ) : null}
 
           {obj && obj.fauteuils.length ? (
-            <section className="in-section">
-              <div className="in-section-titre"><button type="button"><h2>Objectifs par fauteuil</h2></button></div>
+            <SectionPliable titre="Objectifs par fauteuil">
               <p className="in-texte">{obj.fauteuils.filter((f) => f.objectif && f.comptees && f.atteintes * 2 >= f.comptees).length} fauteuil(s) sur {obj.fauteuils.length} à l&apos;objectif au moins une semaine sur deux. Vous seul voyez ce tableau.</p>
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: `160px 170px repeat(${semainesObj.length}, minmax(0, 1fr)) 80px` }}>
                 <div className="in-tab-ligne in-tab-tete" role="row">
@@ -518,12 +552,11 @@ export default function Pilotage() {
                 </div>
                 {obj.fauteuils.map((f) => <LigneObjectif key={f.fauteuil_id} f={f} semaines={semainesObj} />)}
               </div>
-            </section>
+            </SectionPliable>
           ) : null}
 
           {syn ? (
-            <section className="in-section">
-              <div className="in-section-titre"><button type="button"><h2>Semaine du {jourCourt(syn.semaine.du)} au {jourCourt(syn.semaine.au)}</h2></button></div>
+            <SectionPliable titre={`Semaine du ${jourCourt(syn.semaine.du)} au ${jourCourt(syn.semaine.au)}`}>
               <p className="in-texte">Le lundi matin, la même synthèse arrive au point du matin du titulaire et de la direction.</p>
               <OutilsTableau invite="Chercher un centre" recherche={chercheSyn} setRecherche={setChercheSyn} telecharger={() => exporterCSV("tiroma-synthese-semaine", ["Centre", "Rendez-vous", "Manqués", "Taux de manqués", "Réinscription", "Créneaux libérés", "Devis signés", "Devis présentés", "Montant signé", "Plans sans rendez-vous", "Montant sans rendez-vous", "Appels", "Rendez-vous repris"], syn.cabinets.filter((c) => c.nom.toLowerCase().includes(chercheSyn.toLowerCase())).map((c) => [c.nom, c.rdv.passes, c.rdv.manques, pct(c.rdv.taux_manques), pct(c.reinscription?.taux), c.creneaux.liberes, c.devis.signes, c.devis.presentes, c.devis.montant_signe, c.plans_sans_rdv.nombre, c.plans_sans_rdv.montant, c.appels.appels, c.appels.rdv_pris]))} />
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: "200px repeat(7, minmax(0, 1fr))" }}>
@@ -546,12 +579,11 @@ export default function Pilotage() {
                   <span role="cell">TOTAL</span><span role="cell">{syn.total.passes}</span><span role="cell">{syn.total.manques} ({pct(syn.total.taux_manques)})</span><span role="cell">{pct(syn.total.reinscription_taux)}</span><span role="cell">{syn.total.creneaux_liberes}</span><span role="cell">{syn.total.devis_signes}/{syn.total.devis_presentes} · {euros(syn.total.montant_signe)}</span><span role="cell">{syn.total.plans_sans_rdv} · {euros(syn.total.montant_plans_sans_rdv)}</span><span role="cell">{syn.total.appels}</span>
                 </div>
               </div>
-            </section>
+            </SectionPliable>
           ) : null}
 
           {p && p.en_attente.a_relancer_liste.length ? (
-            <section className="in-section">
-              <div className="in-section-titre"><button type="button"><h2>Devis à relancer</h2></button></div>
+            <SectionPliable titre="Devis à relancer">
               <OutilsTableau invite="Chercher un patient ou un devis" recherche={chercheDevis} setRecherche={setChercheDevis} telecharger={() => exporterCSV("tiroma-devis-a-relancer", ["Patient", "Devis", "Présenté le", "Expire le", "Panier", "Montant", "Reste à charge"], p.en_attente.a_relancer_liste.filter((dv) => `${dv.patient_nom} ${dv.devis_numero ?? ""}`.toLowerCase().includes(chercheDevis.toLowerCase())).map((dv) => [dv.patient_nom, dv.devis_numero, dv.presente_le, dv.valide_jusqu_au, PANIERS[dv.panier ?? "non_precise"], dv.montant, dv.reste_a_charge]))} />
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: "200px 150px 150px 150px minmax(0, 1fr) 130px" }}>
                 <div className="in-tab-ligne in-tab-tete" role="row"><span role="columnheader">Patient</span><span role="columnheader">Devis</span><span role="columnheader">Présenté le</span><span role="columnheader">Expire le</span><span role="columnheader">Panier · montant</span><span role="columnheader" /></div>
@@ -566,12 +598,11 @@ export default function Pilotage() {
                   </div>
                 ))}
               </div>
-            </section>
+            </SectionPliable>
           ) : null}
 
           {rei && rei.sans_suite.length ? (
-            <section className="in-section">
-              <div className="in-section-titre"><button type="button"><h2>Vus sans prochain rendez-vous</h2></button></div>
+            <SectionPliable titre="Vus sans prochain rendez-vous">
               <OutilsTableau invite="Chercher un patient ou un praticien" recherche={chercheSuite} setRecherche={setChercheSuite} telecharger={() => exporterCSV("tiroma-vus-sans-suite", ["Patient", "Vu le", "Praticien"], rei.sans_suite.filter((x) => `${x.patient_nom} ${x.praticien ?? ""}`.toLowerCase().includes(chercheSuite.toLowerCase())).map((x) => [d?.profil === "direction" ? "Patient du cabinet" : x.patient_nom, x.derniere_visite, x.praticien]))} />
               <div className="in-tableau" role="table" style={{ ["--in-cols" as string]: "240px 180px minmax(0, 1fr) 130px" }}>
                 <div className="in-tab-ligne in-tab-tete" role="row"><span role="columnheader">Patient</span><span role="columnheader">Vu le</span><span role="columnheader">Praticien</span><span role="columnheader" /></div>
@@ -584,7 +615,7 @@ export default function Pilotage() {
                   </div>
                 ))}
               </div>
-            </section>
+            </SectionPliable>
           ) : null}
 
           {d?.appels ? (

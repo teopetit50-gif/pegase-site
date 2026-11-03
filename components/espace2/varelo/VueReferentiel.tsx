@@ -178,6 +178,7 @@ export default function VueReferentiel() {
           <button
             type="button"
             className="var-a-bouton"
+            aria-label="Copier pour l'assistant"
             title="Copier pour l'assistant : le résumé de ce que vous regardez"
             onClick={() => {
               const texte = objet
@@ -187,7 +188,7 @@ export default function VueReferentiel() {
             }}
           >
             <VarIcone nom="Chat" />
-            Copier pour l&apos;assistant
+            <span className="var-a-bouton-texte">Copier pour l&apos;assistant</span>
           </button>
         </header>
 

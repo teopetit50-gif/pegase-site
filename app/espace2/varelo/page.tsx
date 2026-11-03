@@ -16,7 +16,7 @@ import { RACINE } from "@/components/espace2/modules";
    montre l'objet (contrat, réception, échéance, dépôt, société, objet du groupe). */
 
 export const metadata: Metadata = {
-  title: "Référentiel du groupe",
+  title: "Ce matin — Varelo",
   description: "Le point du matin du groupe : décisions à valider, trésoreries, réserves, reportings, contrats à dénoncer, encours et réciproques.",
 };
 

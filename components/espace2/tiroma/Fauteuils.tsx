@@ -268,11 +268,24 @@ function Absence({ fermer }: { fermer: () => void }) {
   const [motif, setMotif] = useState<MotifAbsenceMembre>("conge");
   const [avis, setAvis] = useState<{ ok: boolean; t: string } | null>(null);
   const [occupe, setOccupe] = useState(false);
+  /* 03/11/2026 — un second clic sur « Noter » doublait l'absence : la même
+     saisie ne se note qu'une fois (le bouton revient dès qu'un champ change),
+     et Échap referme le panneau comme les autres volets. */
+  const saisie = `${membre}|${du}|${au}|${motif}`;
+  const [notee, setNotee] = useState<string | null>(null);
+  useEffect(() => {
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") fermer();
+    };
+    document.addEventListener("keydown", echap);
+    return () => document.removeEventListener("keydown", echap);
+  }, [fermer]);
   const noter = async () => {
     setOccupe(true);
     setAvis(null);
     try {
       await t.noterAbsence({ membre_id: membre, debut: new Date(`${du}T00:00:00`).toISOString(), fin: new Date(`${enJours(au, 1)}T00:00:00`).toISOString(), motif });
+      setNotee(saisie);
       setAvis({ ok: true, t: "C'est noté. Les soins à basculer s'affichent dans la liste." });
     } catch (e) {
       setAvis({ ok: false, t: e instanceof Error ? e.message : "La base n'a pas répondu." });
@@ -302,7 +315,7 @@ function Absence({ fermer }: { fermer: () => void }) {
       </div>
       <div className="cal-panneau-pied">
         <button type="button" className="cal-bouton" onClick={fermer}>Fermer</button>
-        <button type="button" className="cal-bouton cal-bouton--plein" disabled={occupe || !membre || !du || !au || au < du} onClick={() => void noter()}>Noter</button>
+        <button type="button" className="cal-bouton cal-bouton--plein" disabled={occupe || !membre || !du || !au || au < du || notee === saisie} onClick={() => void noter()}>Noter</button>
       </div>
     </aside>
   );
@@ -391,8 +404,15 @@ export default function Fauteuils() {
   useEffect(() => {
     if (!menu) return;
     const fermer = () => setMenu(null);
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenu(null);
+    };
     window.addEventListener("click", fermer);
-    return () => window.removeEventListener("click", fermer);
+    window.addEventListener("keydown", echap);
+    return () => {
+      window.removeEventListener("click", fermer);
+      window.removeEventListener("keydown", echap);
+    };
   }, [menu]);
 
   const groupesBruts = d ? lignes(d, onglet, (id) => { const a = d.equipe?.find((x) => x.absence_id === id); return a ? t.cloreAbsence(a) : Promise.resolve(); }) : [];
@@ -434,7 +454,7 @@ export default function Fauteuils() {
             </nav>
             <span className="cal-ancre">
               <button type="button" className="cal-bouton cal-filtre" aria-expanded={menu === "filtre"} onClick={(e) => { e.stopPropagation(); setMenu((m) => (m === "filtre" ? null : "filtre")); }}>
-                <Icone d={L.filtre} />Filter{filtreVal ? <span className="cal-filtre-val">: {filtreVal}</span> : null}
+                <Icone d={L.filtre} />Filtrer{filtreVal ? <span className="cal-filtre-val">: {filtreVal}</span> : null}
               </button>
               {menu === "filtre" ? (
                 <div className="cal-menu cal-menu--gauche" role="menu" onClick={(e) => e.stopPropagation()}>

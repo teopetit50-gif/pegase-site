@@ -612,6 +612,20 @@ html[data-v2-theme="light"] .v2 .tir-cal {
   box-shadow: 0 10px 15px -3px #0000001a, 0 4px 6px -4px #0000001a;
   white-space: nowrap;
 }
+/* 03/11/2026 — à 390, la barre « 1 choisie » débordait des deux côtés et
+   restait au bas de la carte, loin sous l'écran : sous 640 px, elle se pose
+   en bas de l'écran, à 16 px des bords, et défile si elle est trop longue. */
+@media (max-width: 640px) {
+  .v2 .tir-cal .cal-lot {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    transform: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
 .v2 .tir-cal .cal-lot-compte,
 .v2 .tir-cal .cal-avis {
   padding: 0 6px;

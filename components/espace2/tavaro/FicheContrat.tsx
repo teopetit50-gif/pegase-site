@@ -50,6 +50,12 @@ import { copier as copierTexte, dansJours, exporterCsv, useFavoris, useReportes,
 import { TavIcone, type NomTavIcone } from "./TavIcone";
 import { BASE } from "./VueEnsemble";
 import "./tav-ticket.css";
+/* 03/11/2026 — les fenêtres reprises de /espace (formulaires, états des lieux, avis)
+   s'habillent avec ces trois feuilles ; sans elles, ouvertes sur une page chargée
+   directement, elles sortaient en blanc dans le thème sombre, champs bruts. */
+import "@/components/espace/espace.css";
+import "@/components/espace/tavaro/tavaro.css";
+import "../habillage.css";
 
 type Form =
   | { type: "completer" }

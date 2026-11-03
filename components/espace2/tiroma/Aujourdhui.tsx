@@ -27,7 +27,7 @@
    (et Activité, comme le quatrième onglet de Linear).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FAMILLES, ISSUES_APPEL, MOTIFS_APPEL, MUTUELLES, NATURES_VERIF, REPONSES_RAPPEL, TYPES_CRENEAU, libelleLogiciel, STATUTS_CABINET, CAPACITES } from "@/components/espace/tiroma/libelles";
@@ -477,6 +477,22 @@ export default function Aujourdhui() {
   const [puces, setPuces] = useState(true);
   const [details, setDetails] = useState(false);
   const [plusOuvert, setPlusOuvert] = useState(false);
+  /* 03/11/2026 — « 2 de plus » ne se fermait ni par Échap ni par un clic dehors */
+  useEffect(() => {
+    if (!plusOuvert) return;
+    const dehors = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".tir-mi-plus-vues")) setPlusOuvert(false);
+    };
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setPlusOuvert(false);
+    };
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [plusOuvert]);
   const [reportesVisibles, setReportesVisibles] = useState(false);
   const [choisies, setChoisies] = useState<Set<string>>(new Set());
   const [menuLot, setMenuLot] = useState<null | "reporter">(null);

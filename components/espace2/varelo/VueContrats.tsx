@@ -46,6 +46,12 @@ import { MenuPlain, useOuvert, useTouche, type OptionPlain } from "./PlainCadre"
 import { Confirmer, type Demande } from "./Confirmer";
 import { useFavoris } from "./local";
 import "./var-plain.css";
+/* 03/11/2026 — les fenêtres reprises de /espace (formulaires, états des lieux, avis)
+   s'habillent avec ces trois feuilles ; sans elles, ouvertes sur une page chargée
+   directement, elles sortaient en blanc dans le thème sombre, champs bruts. */
+import "@/components/espace/espace.css";
+import "@/components/espace/varelo/varelo.css";
+import "../habillage.css";
 
 const ICI = `${RACINE}/varelo/contrats`;
 const PAR_PAGE = 25;

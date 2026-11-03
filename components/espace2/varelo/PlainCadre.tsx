@@ -31,8 +31,28 @@ export function useOuvert<T extends HTMLElement>() {
 export type OptionPlain = { libelle: string; icone?: NomPlainIcone; coche?: boolean; desactive?: boolean; action: () => void } | "sep";
 
 export function MenuPlain({ options, style, onFermer, libelle }: { options: OptionPlain[]; style: React.CSSProperties; onFermer: () => void; libelle: string }) {
+  /* 03/11/2026 — certains appelants (menus de colonne des Contrats) ne
+     branchaient pas useOuvert : le menu restait ouvert après Échap ou un clic
+     dehors. Le menu se referme donc lui-même ; « dehors » exclut le bloc qui
+     le porte avec son bouton, pour que ce bouton reste une bascule. */
+  const menu = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const dehors = (e: MouseEvent) => {
+      const bloc = menu.current?.parentElement ?? menu.current;
+      if (!bloc?.contains(e.target as Node)) onFermer();
+    };
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onFermer();
+    };
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [onFermer]);
   return (
-    <div className="var-p-menu" role="menu" aria-label={libelle} style={style}>
+    <div ref={menu} className="var-p-menu" role="menu" aria-label={libelle} style={style}>
       {options.map((o, i) =>
         o === "sep" ? (
           <div key={i} className="var-p-menu-sep" role="separator" />

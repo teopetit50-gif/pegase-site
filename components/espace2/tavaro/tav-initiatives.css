@@ -169,6 +169,14 @@
   color: var(--tav-t1);
   white-space: nowrap;
   overflow: hidden;
+  /* 03/11/2026 — « à valider par la direction » était coupé net : le statut
+     tient dans sa colonne et finit par « … » */
+  max-width: 100%;
+  min-width: 0;
+}
+.v2 .tav .tav-n-statut > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .v2 .tav .tav-n-statut svg {
   flex: none;

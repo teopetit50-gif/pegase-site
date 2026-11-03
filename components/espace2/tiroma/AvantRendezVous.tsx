@@ -316,7 +316,7 @@ export default function AvantRendezVous() {
         libelle: "Copier la relance du laboratoire",
         icone: "Email",
         action: async () =>
-          dire((await copier(`Bonjour${w?.laboratoire ? ` (${w.laboratoire})` : ""},\nPouvez-vous nous confirmer le retour de ${w?.type_travail ?? "ce travail"} pour ${v.patient_nom ?? "notre patient"} ? La pose est prévue le ${complet(v.quand)}.\nMerci,\n${d?.cabinet.entite_nom ?? "Le cabinet"}`)) ? "Relance copiée : à envoyer depuis votre messagerie." : "Le presse-papier a refusé la copie."),
+          dire((await copier(`${w?.laboratoire ? `À l'attention de ${w.laboratoire}\n\n` : ""}Bonjour,\nPouvez-vous nous confirmer le retour de ${w?.type_travail ?? "ce travail"} pour ${v.patient_nom ?? "notre patient"} ? La pose est prévue le ${complet(v.quand)}.\nMerci,\n${d?.cabinet.entite_nom ?? "Le cabinet"}`)) ? "Relance copiée : à envoyer depuis votre messagerie." : "Le presse-papier a refusé la copie."),
       };
     }
     if (v.nature === "implant") {

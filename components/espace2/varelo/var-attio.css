@@ -81,6 +81,25 @@ html[data-v2-theme="light"] .v2 .var.var--attio {
   gap: 6px;
   min-width: 0;
   white-space: nowrap;
+  /* 03/11/2026 — à 390, le fil (« Fournisseurs / F-00001 Scieries du Jura »)
+     passait sous « Partager » et les icônes : il se tronque avec « … »,
+     comme le fil d'Attio. */
+  overflow: hidden;
+}
+.v2 .var.var--attio .var-a-fil > :last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .var.var--attio .var-a-tete > :not(.var-a-fil):not(.var-a-pousse) {
+  flex: none;
+}
+/* … et à 390, « Copier pour l'assistant » ne garde que son icône pour que
+   la barre tienne dans l'écran */
+@media (max-width: 640px) {
+  .v2 .var.var--attio .var-a-tete .var-a-bouton-texte {
+    display: none;
+  }
 }
 .v2 .var.var--attio .var-a-fil a {
   color: var(--a-second);
@@ -684,12 +703,20 @@ html:not([data-v2-theme="light"]) .v2 .var.var--attio .var-a-case {
 }
 
 /* Attio n'a pas de mise en page mobile : la grille et la fiche défilent à l'horizontale */
-@media (max-width: 768px) {
+/* 03/11/2026 — la barre de vue ne défile plus de côté : son défilement
+   coupait les menus qu'elle ouvre (« Import / Export », « Réglages de la
+   vue » s'ouvraient invisibles à 390), et entre 768 et 1180 elle n'avait
+   aucune parade (« Lancer un passage » coupé net par la carte à 1024). Ses
+   boutons passent à la ligne quand la place manque. */
+@media (max-width: 1180px) {
   .v2 .var.var--attio .var-a-vue,
   .v2 .var.var--attio .var-a-tri {
-    overflow-x: auto;
-    scrollbar-width: none;
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 48px;
   }
+}
+@media (max-width: 768px) {
   .v2 .var.var--attio .var-a-fiche {
     overflow-x: auto;
   }

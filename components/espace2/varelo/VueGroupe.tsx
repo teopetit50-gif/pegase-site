@@ -27,7 +27,7 @@
        grp_balances_depots) désignent la ligne de la société.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { dateCourte, montant } from "@/components/espace/format";
 import { DialogueBalanceGenerale, DialogueObjectif, useGroupePage } from "@/components/espace/varelo/GroupePage";
@@ -65,6 +65,23 @@ export default function VueGroupe() {
   const [pole, setPole] = useState<string | null>(null);
   const [masquees, setMasquees] = useState<Colonne[]>([]);
   const [menu, setMenu] = useState<"filtre" | "affichage" | null>(null);
+  /* 03/11/2026 — « Filtrer par pôle » et « Affichage » ne se fermaient ni par
+     Échap ni par un clic dehors. */
+  useEffect(() => {
+    if (!menu) return;
+    const dehors = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".var-i-ronds")) setMenu(null);
+    };
+    const echap = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenu(null);
+    };
+    document.addEventListener("mousedown", dehors);
+    document.addEventListener("keydown", echap);
+    return () => {
+      document.removeEventListener("mousedown", dehors);
+      document.removeEventListener("keydown", echap);
+    };
+  }, [menu]);
   /* cases à cocher : sélection multiple, puis actions groupées */
   const [selection, setSelection] = useState<string[]>([]);
   /* le troisième rond (« Open details ») : le volet des totaux des lignes affichées ou choisies */

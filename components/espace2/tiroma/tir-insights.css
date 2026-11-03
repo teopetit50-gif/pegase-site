@@ -330,7 +330,11 @@ html[data-v2-theme="light"] .v2 .tir-in {
   flex-direction: column;
   border: 1px solid var(--pl-bord-1);
   border-radius: 8px;
-  overflow: hidden;
+  /* 03/11/2026 — à 1024, « Devis à relancer » (200 + 3 × 150 + 130 px de
+     colonnes) ne tenait pas dans 670 px : « Expire le » et « Noter l'appel »
+     étaient coupés, inatteignables. Le tableau défile de côté, comme sous 768. */
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .v2 .tir-in .in-tab-ligne {
   display: grid;
@@ -523,6 +527,8 @@ html[data-v2-theme="light"] .v2 .tir-in {
   color: var(--in-axe);
   white-space: nowrap;
   overflow: hidden;
+  /* « Cette semaine » était coupé net sous sa colonne */
+  text-overflow: ellipsis;
 }
 .v2 .tir-in .in-chaleur-case {
   height: 18.8px;

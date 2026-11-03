@@ -12,7 +12,7 @@
    <FenetreOperations />.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClipboardCheck } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
@@ -29,6 +29,12 @@ import {
   refacturerPeages, transfertFait,
 } from "@/components/espace/tavaro/portes";
 import type { Dossier, Role, Vehicule } from "@/components/espace/tavaro/types";
+/* 03/11/2026 — les fenêtres reprises de /espace (formulaires, états des lieux, avis)
+   s'habillent avec ces trois feuilles ; sans elles, ouvertes sur une page chargée
+   directement, elles sortaient en blanc dans le thème sombre, champs bruts. */
+import "@/components/espace/espace.css";
+import "@/components/espace/tavaro/tavaro.css";
+import "../habillage.css";
 
 /* Un formulaire générique : chaque geste décrit ses champs, la boîte de dialogue les rend. */
 export type Champ = {
@@ -478,6 +484,13 @@ export type EtatOperations = ReturnType<typeof useOperationsEtat>;
 /* F16 : la fenêtre générique des opérations (OperationsVue.tsx:765-814), telle quelle */
 export function FenetreOperations({ o }: { o: EtatOperations }) {
   const { form, setForm, envoi, erreur, setErreur, soumettre, optionsVehicules } = o;
+  /* 03/11/2026 — l'erreur s'affiche au bas du formulaire, souvent sous le bord
+     de la zone qui défile : on l'amène dans la vue, sinon le clic sur
+     « Enregistrer » semblait ne rien faire. */
+  const boiteErreur = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (erreur) boiteErreur.current?.scrollIntoView({ block: "nearest" });
+  }, [erreur]);
   return (
   <Dialog open={!!form} onOpenChange={(o) => { if (!o) { setForm(null); setErreur(null); } }}>
     <DialogContent>
@@ -519,7 +532,7 @@ export function FenetreOperations({ o }: { o: EtatOperations }) {
                 </label>
               );
             })}
-            {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : null}
+            {erreur ? <div ref={boiteErreur}><Avis teinte="rouge" role="alert">{erreur}</Avis></div> : null}
           </div>
         ) : null}
       </DialogBody>

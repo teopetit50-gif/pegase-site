@@ -433,6 +433,16 @@ function Composeur({ fil, jour, fermer, issueDepart = "rdv_pris" }: { fil: Fil; 
   const [occupe, setOccupe] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [fait, setFait] = useState<string | null>(null);
+  /* 03/11/2026 — le composeur s'insère au bas du fil, souvent sous l'écran :
+     sans défilement, « Noter l'appel » semblait ne rien faire. Comme « Reply »
+     chez Plain, il vient dans la vue et prend le focus. */
+  const boite = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const b = boite.current;
+    if (!b) return;
+    b.scrollIntoView({ block: "nearest" });
+    b.querySelector<HTMLElement>('[aria-checked="true"], button[role="radio"]')?.focus({ preventScroll: true });
+  }, []);
   const noter = async () => {
     if (!cible) return;
     if (issue === "ne_plus_contacter" && !confirme) {
@@ -453,6 +463,7 @@ function Composeur({ fil, jour, fermer, issueDepart = "rdv_pris" }: { fil: Fil; 
   };
   return (
     <div
+      ref={boite}
       className="pl-composeur"
       role="dialog"
       aria-label="Noter l'appel"
@@ -515,6 +526,9 @@ function Inscription({ fermer }: { fermer: () => void }) {
   const d = t.dossier;
   const [texte, setTexte] = useState("");
   const [trouves, setTrouves] = useState<PatientCourt[]>([]);
+  /* le texte pour lequel `trouves` a été cherché : « Aucun patient trouvé »
+     ne s'affiche qu'une fois la recherche revenue (03/11/2026) */
+  const [cherche, setCherche] = useState("");
   const [patient, setPatient] = useState<PatientCourt | null>(null);
   const [famille, setFamille] = useState<Famille | "">("");
   const [duree, setDuree] = useState("30");
@@ -527,7 +541,11 @@ function Inscription({ fermer }: { fermer: () => void }) {
   useEffect(() => {
     if (patient || texte.trim().length < 2) return;
     const h = window.setTimeout(() => {
-      void t.chercher(texte).then(setTrouves).catch(() => setTrouves([]));
+      void t
+        .chercher(texte)
+        .then(setTrouves)
+        .catch(() => setTrouves([]))
+        .finally(() => setCherche(texte));
     }, 250);
     return () => window.clearTimeout(h);
   }, [texte, patient, t]);
@@ -563,6 +581,8 @@ function Inscription({ fermer }: { fermer: () => void }) {
             </button>
           ))}
         </div>
+      ) : !patient && texte.trim().length >= 2 && cherche === texte ? (
+        <p className="pl-composeur-aide" role="status">Aucun patient trouvé.</p>
       ) : null}
       <label className="pl-composeur-champ">
         <span>Soin attendu</span>
