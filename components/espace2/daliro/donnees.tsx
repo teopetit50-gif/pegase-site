@@ -22,6 +22,8 @@ import { useSource, type Source } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { TABLEAUX_EXEMPLE } from "@/components/espace/daliro/exemples";
 import { TABLEAUX_PLUS } from "./exemplesPlus";
+import { AVENANTS_PLUS, SITUATIONS_PLUS } from "./exemplesAvenants";
+import { completerExemple } from "./exemplesAFaire";
 import { listeDepuis } from "@/components/espace/daliro/liste";
 import { chargerListe, chargerTableau, monClient } from "@/components/espace/daliro/portes";
 import type { Chantier, Tableau, Tiers } from "@/components/espace/daliro/types";
@@ -72,9 +74,24 @@ export function useDaliro(): Contexte {
   return c;
 }
 
+/* L'exemple complet dès le premier écran (03/11/2026, docs/verification/PROMESSES-ECRANS.md) : les avenants,
+   situations et passages de plus étaient posés par les pages Avenants et À faire au moment où on les ouvrait,
+   si bien que le Point du mois, la vue d'ensemble et les fiches n'en montraient rien tant qu'on n'y était pas
+   passé. Les deux pages gardent leur pose (elle ne fait rien quand tout est déjà là). */
+function exempleComplet(): Record<string, Tableau> {
+  const base: Record<string, Tableau> = { ...TABLEAUX_EXEMPLE, ...TABLEAUX_PLUS };
+  for (const [id, t] of Object.entries(base)) {
+    const avs = AVENANTS_PLUS.filter((a) => a.chantier_id === id && !t.avenants.some((x) => x.id === a.id));
+    const sits = SITUATIONS_PLUS.filter((x) => x.chantier_id === id && !(t.situations ?? []).some((y) => y.id === x.id));
+    if (avs.length || sits.length) base[id] = { ...t, avenants: [...t.avenants, ...avs], situations: [...(t.situations ?? []), ...sits] };
+  }
+  for (const t of completerExemple(Object.values(base))) base[t.chantier.id] = t;
+  return base;
+}
+
 export default function DonneesDaliro({ children }: { children: React.ReactNode }) {
   const { source } = useSource();
-  const [local, setLocal] = useState<Record<string, Tableau>>(() => ({ ...TABLEAUX_EXEMPLE, ...TABLEAUX_PLUS }));
+  const [local, setLocal] = useState<Record<string, Tableau>>(exempleComplet);
   const [reel, setReel] = useState<Reel | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [enCours, setEnCours] = useState<Set<string>>(new Set());
