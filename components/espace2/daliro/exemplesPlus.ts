@@ -28,6 +28,7 @@ const MO_CLAIR = id(5);
 const MO_MAMIE = id(6);
 const MO_DURET = id(7);
 const MO_VENISSIEUX = id(8);
+const MO_GARNIER = id(12);
 const ROCHAT = "00000000-0000-4000-8000-00000000d023";
 const EQUIPE_A = "00000000-0000-4000-8000-00000000d031";
 const EQUIPE_B = id(10);
@@ -51,6 +52,7 @@ const TIERS_PLUS: Tiers[] = [
   mo(MO_MAMIE, "Boulangerie Ma Mie SARL", "Lyon 7e"),
   mo(MO_DURET, "M. et Mme Duret", "Écully"),
   mo(MO_VENISSIEUX, "Ville de Vénissieux", "Vénissieux"),
+  mo(MO_GARNIER, "Mme Garnier", "Tassin-la-Demi-Lune"),
 ];
 const TIERS = [...TABLEAUX_EXEMPLE[TILLEULS].tiers, ...TIERS_PLUS];
 const EQUIPES = [
@@ -180,5 +182,36 @@ const LISTE: Tableau[] = [
     ],
   }),
 ];
+
+/* « Les reprises demandées à la réception sont photographiées, et celles qui ne figuraient pas au devis sont
+   chiffrées à part » (03/11/2026, docs/verification) : un chantier fini, réceptionné il y a six jours avec deux
+   réserves, dont une hors devis — la carte Réception de la fiche montre la retenue, le décompte à préparer et
+   les gestes « Lever la réserve » et « Hors devis : ouvrir un avenant ». */
+const GARNIER = chantier({
+  n: 60, nom: "Maison Garnier — extension", ref: "GAR-2026", adresse: "9 chemin des Vignes", cp: "69160", commune: "Tassin-la-Demi-Lune", mo: MO_GARNIER, moType: "particulier",
+  statut: "receptionne", du: -70, au: -8,
+  lots: [
+    { n: 61, code: "01", libelle: "Gros œuvre de l'extension", corps: "maçonnerie", par: EQUIPE_A, equipe: true, statut: "termine" },
+    { n: 62, code: "02", libelle: "Menuiseries extérieures", corps: "menuiserie", par: EQUIPE_B, equipe: true, statut: "termine" },
+  ],
+  passages: [
+    { n: 63, lot: 61, tache: "Élévation des murs et dalle", du: -70, au: -40, conf: "confirmee", fait: true },
+    { n: 64, lot: 62, tache: "Pose de la baie coulissante", du: -14, au: -10, conf: "confirmee", fait: true },
+  ],
+});
+const RECEPTION_GARNIER = id(65);
+GARNIER.chantier = { ...GARNIER.chantier, date_reception: aujourdHui(-6) };
+GARNIER.reception = {
+  id: RECEPTION_GARNIER, chantier_id: GARNIER.chantier.id, date_reception: aujourdHui(-6), avec_reserves: true,
+  retenue_montant: 2140, retenue_caution: false, retenue_due_le: aujourdHui(359), retenue_statut: "bloquee", retenue_etat: "bloquee",
+  opposition_le: null, opposition_motif: null, liberee_le: null, liberee_avant_terme: false,
+  decompte_statut: "a_preparer", decompte_marche_ht: null, decompte_facture_ht: null, decompte_reste_ht: null, decompte_retenue: null,
+  decompte_envoye_le: null, decompte_repondu_le: null, decompte_motif: null, decompte_echeance: aujourdHui(39),
+  reserves: [
+    { id: id(66), reception_id: RECEPTION_GARNIER, lot_id: id(62), ordre: 1, description: "Joint de la baie coulissante à reprendre côté jardin", statut: "ouverte", levee_le: null },
+    { id: id(67), reception_id: RECEPTION_GARNIER, lot_id: null, ordre: 2, description: "Habillage de la descente d'eaux pluviales, non prévu au devis", statut: "ouverte", levee_le: null },
+  ],
+};
+LISTE.push(GARNIER);
 
 export const TABLEAUX_PLUS: Record<string, Tableau> = Object.fromEntries(LISTE.map((t) => [t.chantier.id, t]));
