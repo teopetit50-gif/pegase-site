@@ -85,6 +85,9 @@ export type Fiche = {
   statut: "brouillon" | "validee" | "remplacee" | "retiree";
   cree_le: string;
   valide_le: string | null;
+  /* c3_01 : l'auteur de la version et la personne qui l'a validée */
+  cree_par?: string | null;
+  valide_par?: string | null;
 };
 
 export type Sujet = {

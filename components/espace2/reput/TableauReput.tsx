@@ -1314,6 +1314,18 @@ export default function TableauReput() {
     const parSujet = sujetsPortee.map((x) => ({ x, n: portee.filter((d) => (d.sujet ?? "") === x).length })).sort((a, b) => b.n - a.n);
     const maxCanal = Math.max(1, ...parCanal.map((x) => x.n));
     const maxSujet = Math.max(1, ...parSujet.map((x) => x.n));
+    /* « Le volume de demandes se lit par canal, par service et par heure de la journée » (la vue
+       reput_volumes_heure fait le même compte en base) et « la part des demandes traitées sans
+       intervention humaine est suivie dans le temps » : jour par jour sur sept jours */
+    const heureDe = (iso: string) => Number(new Intl.DateTimeFormat("fr-FR", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Paris" }).format(new Date(iso)));
+    const parHeure = Array.from({ length: 12 }, (_, i) => ({ h: i * 2, n: portee.filter((d) => Math.floor(heureDe(d.recu_le) / 2) === i).length })).filter((x) => x.n > 0);
+    const maxHeure = Math.max(1, ...parHeure.map((x) => x.n));
+    const seuleDe = (d: Demande) => d.statut === "envoyee" && !reponseDe(m, d)?.redigee_par && m.accords.sujets.some((a) => a.sujet === d.sujet && a.statut === "active");
+    const jours7 = Array.from({ length: JOURS }, (_, i) => {
+      const debut = minuit(maint) - (JOURS - 1 - i) * JOUR;
+      const du = portee.filter((d) => Date.parse(d.recu_le) >= debut && Date.parse(d.recu_le) < debut + JOUR);
+      return { debut, recues: du.length, seules: du.filter(seuleDe).length };
+    });
     const reponsesDe = new Map(portee.map((d) => [d.id, reponseDe(m, d)]));
     const parEtape = ETAPES.map((e) => ({ e, n: portee.filter((d) => parcours(d, reponsesDe.get(d.id))[e.cle].atteinte).length }));
     const aFaire = [...aTraiter, ...aValider].sort(parUrgence);
@@ -1560,6 +1572,34 @@ export default function TableauReput() {
                       <span style={{ width: `${(n / maxCanal) * 100}%` }} />
                     </span>
                     <span className="lin-meta">{n}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <h3 className="lin-projet-h2">Demandes par heure de la journée</h3>
+              <ul className="lin-projet-liste">
+                {parHeure.map(({ h, n }) => (
+                  <li key={h}>
+                    <span className="lin-tranche-nom">
+                      {h} h – {h + 2} h
+                    </span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span style={{ width: `${(n / maxHeure) * 100}%` }} />
+                    </span>
+                    <span className="lin-meta">{n}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <h3 className="lin-projet-h2">Parties sans intervention, jour par jour</h3>
+              <ul className="lin-projet-liste">
+                {jours7.map((j) => (
+                  <li key={j.debut}>
+                    <span className="lin-tranche-nom">{new Intl.DateTimeFormat("fr-FR", { weekday: "short", day: "numeric" }).format(new Date(j.debut))}</span>
+                    <span className="lin-tranche-barre" aria-hidden="true">
+                      <span style={{ width: `${j.recues ? (j.seules / j.recues) * 100 : 0}%` }} />
+                    </span>
+                    <span className="lin-meta">{j.recues ? `${j.seules} sur ${j.recues}` : "—"}</span>
                   </li>
                 ))}
               </ul>

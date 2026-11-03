@@ -55,6 +55,7 @@ import {
   Star,
 } from "lucide-react";
 import { useSource } from "@/components/espace/source";
+import { useNoms } from "./noms";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, telecharger } from "@/components/espace/reput/export";
@@ -868,6 +869,7 @@ function PageFiche({
   valider: () => void;
   retirer: (motif: string) => void;
 }) {
+  const nom = useNoms();
   const [toutes, setToutes] = useState(false);
   const [correction, setCorrection] = useState("");
   const e = etatDe(f, jour);
@@ -1009,7 +1011,7 @@ function PageFiche({
       icone: <PenLine {...ic} />,
       texte: (
         <>
-          <b>{f.version > 1 ? `Version ${f.version}` : "Fiche"}</b> écrite{f.version > 1 ? ", les précédentes restent au journal" : ""} · {dateCourte(f.cree_le)}
+          <b>{f.version > 1 ? `Version ${f.version}` : "Fiche"}</b> écrite{nom(f.cree_par) ? ` par ${nom(f.cree_par)}` : ""}{f.version > 1 ? ", les précédentes restent au journal" : ""} · {dateCourte(f.cree_le)}
         </>
       ),
     },
@@ -1023,6 +1025,7 @@ function PageFiche({
             texte: (
               <>
                 <b>Validée</b>
+                {nom(f.valide_par) ? ` par ${nom(f.valide_par)}` : ""}
                 {vigueurALaValidation ? ", en vigueur" : ""} · {dateCourte(f.valide_le)}
               </>
             ),

@@ -9,7 +9,7 @@
    Rien d'ici n'est jamais écrit en base.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { dans, EXEMPLE_CLIENT_ID, ilYa } from "../exemples/socle";
+import { CLAIRE, dans, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, ilYa } from "../exemples/socle";
 import type { AccordSujet, Demande, Fiche, Monde, Reception, Reponse, Sujet } from "./types";
 
 const F = {
@@ -25,7 +25,7 @@ const MENTION = "Réponse préparée par notre assistant à partir de nos inform
 
 function fiche(id: string, sujet: string, genre: Fiche["genre"], titre: string, contenu: string, source: string, extra: Partial<Fiche> = {}): Fiche {
   return { id, entite_id: null, origine_id: id, version: 1, sujet, genre, titre, contenu, langue: "fr", source, valide_du: ilYa(90).slice(0, 10),
-           valide_au: null, statut: "validee", cree_le: ilYa(90), valide_le: ilYa(90), ...extra };
+           valide_au: null, statut: "validee", cree_le: ilYa(90), valide_le: ilYa(90), cree_par: CLAIRE, valide_par: EXEMPLE_MOI, ...extra };
 }
 
 export const SUJETS_EXEMPLE: Sujet[] = [
