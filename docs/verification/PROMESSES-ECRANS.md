@@ -18,14 +18,14 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 ## Totaux par produit
 
 **Après les corrections du 3 novembre (état à 20 h 15 UTC, trois passages, mis en ligne et vérifiés sur omegaai.fr).**
-63 promesses sont passées à « Montrée » depuis le relevé par les trois passages, puis **22 promesses « aucune page »**
-ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au soir ») : 85 en tout. Il reste 10
-« aucune page », dont 9 attendent une porte ou une migration (Teo).
+63 promesses sont passées à « Montrée » depuis le relevé par les trois passages, puis **26 promesses « aucune page »**
+ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au soir ») : 89 en tout. Il reste 6
+« aucune page », dont 5 attendent une porte (Teo).
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
 | Socle et pages transverses | 14 | 3 | 1 | 1 | 0 | 5 | 3 | **27** |
-| FILED — factures fournisseurs | 45 | 3 | 7 | 1 | 3 | 3 | 3 | **65** |
+| FILED — factures fournisseurs | 48 | 3 | 7 | 1 | 0 | 3 | 3 | **65** |
 | CASHD — relances d’impayés | 56 | 3 | 2 | 1 | 0 | 2 | 2 | **66** |
 | REPUT — demandes clients | 35 | 0 | 0 | 0 | 2 | 3 | 3 | **43** |
 | OFFLOAD — nouvelles affaires | 42 | 1 | 0 | 4 | 0 | 0 | 1 | **48** |
@@ -34,8 +34,8 @@ ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
 | TAVARO — location automobile | 33 | 1 | 2 | 0 | 0 | 3 | 3 | **42** |
 | TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
-| VARELO — groupes | 20 | 2 | 0 | 1 | 1 | 2 | 1 | **27** |
-| **Tous** | **397** | **17** | **15** | **10** | **10** | **45** | **26** | **520** |
+| VARELO — groupes | 21 | 2 | 0 | 1 | 0 | 2 | 1 | **27** |
+| **Tous** | **401** | **17** | **15** | **10** | **6** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -160,7 +160,7 @@ briques (Linear pour le document FILED, Rapports pour Comptabilité et Trésorer
 CarteDroite pour OFFLOAD) ; aucune page nouvelle. Recette 390 / 768 / 1024 / 1440 / 1700, sombre et clair, sans
 débordement ; vérifié sur omegaai.fr.
 
-### Construites (a) — 22 lignes
+### Construites (a) — 26 lignes
 
 | Produit · n° | Promesse | Écran construit | Adresse (données d'exemple) | Back-end lu | Commit |
 |---|---|---|---|---|---|
@@ -186,6 +186,10 @@ débordement ; vérifié sur omegaai.fr.
 | DALIRO · 4 | Photos datées jointes à l'avenant | Photos du message sous la citation d'origine, dans le détail d'un avenant | `/espace2/daliro/avenants?avenant=…d082` (TIL-A2) | `btp_messages.pieces` + URL signées (base réelle) ; exemple : `public/exemples/daliro` | `12280c3` |
 | TAVARO · 4 | Photos de départ et de retour comparées | Bloc « Photos de départ et de retour » de la fiche d'un contrat : vue par vue, départ à gauche, retour à droite | `/espace2/tavaro/contrats/…co005` (C-2026-0340) | `loc_etats_des_lieux.photos` + URL signées ; exemple : `public/exemples/tavaro` | `39da3e5` |
 | LORANI · 43 | « Rechercher un point » | Champ de recherche au-dessus des constats du contrôle (texte, objet, correction, article) | `/espace2/lorani/projets/…b005?partie=controle` (« recul ») | `lorani_constats`, déjà chargés | `f2254c2` |
+| FILED · 28 | Catégorie d'achat produite à la lecture | Ligne « Catégorie d'achat » des valeurs lues (« · choisie » quand une personne l'a posée) | `/espace2/filed?objet=document:…dd09` et les autres factures | `filed_factures.categorie`, `categorie_source` (a4_47) | `bc5787d` |
+| FILED · 55 | Un espace par dossier, vue d'ensemble de tous les dossiers | Carte « Vos dossiers » du tableau de bord (épinglés d'abord ; pièces du mois, bloquées, en attente, litiges, à payer à 30 j), affichée dès deux dossiers | `/espace2/filed` | `filed_vue_ensemble()` (a4_52) | `bc5787d` |
+| FILED · 60 | « …et prépare la réponse » | Section « Réponse au fournisseur » de la page d'un document : sujet, destinataire, statut, texte, renvoi vers « À valider » (lecture seule) | `/espace2/filed?objet=document:…dd09` (Métallerie Roux, IBAN changé) | `filed_reponses` (a4_38) | `bc5787d` |
+| VARELO · 23 | Le journal garde qui a validé quoi ; chaque lecture tracée | Les actions `varelo.*` du journal parmi les décisions d'Activité (Validé, Lu, Refusé), filtrables par module | `/espace2/activite?modules=varelo` | `journal_opposable`, écrit par `private.grp_journal` (chaîne vérifiée en production) | `5c33817` |
 
 Données d'exemple ajoutées pour les rendre visibles : trois factures FILED (R2026-000020 Brasserie des Canuts,
 10 % et 20 % ; R2026-000021 Giraud Plâtrerie, autoliquidation ; toutes deux filles du même scan ; R2026-000022
@@ -193,19 +197,22 @@ Northlight Type Ltd, en livres), des mentions sur R2026-000014 et R2026-000019 ;
 exercices repris ; le délai de règlement des sept comptes CASHD ; quatre changements de réglage ; l'auteur des fiches
 REPUT ; trois exclusions OFFLOAD. FILED compte donc 15 documents d'exemple au lieu de 12.
 
-### Non construites, porte ou migration manquante (b) — 9 lignes, à Teo
+### Non construites, porte manquante (b) — 5 lignes, à Teo
+
+**Écart à signaler** (vérifié en production, en lecture, par le coordinateur le 03/11 à 19 h 25) : `filed_categories`,
+les colonnes `filed_factures.categorie*`, `filed_vue_ensemble()`, `filed_epingler_dossier()`, `filed_reponses` (lots
+a4_38, a4_47, a4_52) et la vue `reput_indicateurs_services` (c3_12) **existent en production sans leur migration dans
+le dépôt**. Rien n'est corrigé ce soir ; il faudra rapatrier ces migrations dans `omega/migrations` et
+`omega/modules/reput/migrations`. Le « résumé de la pièce » (FILED n° 28) n'a, lui, aucune colonne : seule la
+catégorie est montrée.
 
 | Produit · n° | Promesse | Ce qui manque |
 |---|---|---|
-| FILED · 28 | Catégorie d'achat et résumé produits à la lecture | Le lot a4_47 (`filed_categories_lecteur`) n'est pas dans `omega/migrations` ; aucune colonne de catégorie sur `filed_factures` dans le dépôt. Faire rapatrier a4_47, puis l'écran est une ligne de « Valeurs lues ». |
-| FILED · 55 | Cabinet : un espace par dossier, vue d'ensemble | `filed_vue_ensemble` (a4_52) absente du dépôt ; la bascule d'un dossier à l'autre est au socle (CHIFFRAGE n° 33). |
-| FILED · 60 | « …et prépare la réponse » au fournisseur | Lot a4_38 (réponses aux fournisseurs) absent du dépôt ; aucune table lisible connue. |
 | REPUT · 3 | Étiquette « Hors horaires » sur chaque demande | Le verrou HORS_HEURES vit au socle (envoi différé) ; aucune colonne ni porte ne dit d'une demande qu'elle est arrivée hors horaires. |
 | REPUT · 41 | Consolidé et lecture par site, export daté | La vue `reput_indicateurs_services` existe en prod (avec `entite_id`), mais Espace 2 n'a aucun choix de site pour REPUT ni règle « un responsable de site ne voit que le sien » côté écran ; le périmètre par site relève du socle (`perimetre_couvre`). À décider : un filtre par site sur l'aperçu suffit-il ? |
 | DALIRO · 28 | « …et qui voit les prix » | `private.btp_voit_prix` ne dit que pour la personne connectée ; aucune porte ne liste ni ne règle `voit_prix` par personne. |
 | TIROMA · 14 | Schéma dentaire et actes par dent d'un plan | `tiroma_plan_actes.dents` existe ; aucune porte ne renvoie les actes d'un plan. |
 | TIROMA · 47 | Agenda des rendez-vous par fauteuil, page Patients | `tiroma_rendez_vous` existe ; aucune porte d'agenda, et une page nouvelle demanderait un relevé de référence. |
-| VARELO · 23 | Journal Varelo : qui a validé quoi, chaque lecture tracée | Les lectures sont inscrites par `private.grp_journal` ; il manque une porte qui rende ces lignes au groupe (le journal se lit aujourd'hui par l'export CSV de Réglages seulement). |
 
 ### Reste pour Teo, sans porte à écrire
 
