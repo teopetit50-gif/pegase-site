@@ -89,7 +89,7 @@ l'adresse calculée dans `videos.ts` change.
 |---|---|---|
 | 1 | Cahier des charges ; catalogue et scripts de **Bien démarrer + CASHD** ; CASHD détaillé geste par geste ; outil de dépôt ; sous-titres dans le lecteur | en ligne le 03/11 |
 | 2 | Scripts et pages détaillées de **FILED, REPUT, OFFLOAD** | en ligne le 03/11 |
-| 3 | Scripts et pages des **six métiers** | à venir |
+| 3 | Scripts et pages des **six métiers** | en ligne le 03/11 |
 | 4 | Le reste du socle et le **Réseau Omega** | à venir |
 | 5 | La **vitrine publique**, dès que 6 vidéos sont tournées | attend le tournage |
 | 6 | La **refonte du visuel** : 2 ou 3 directions proposées à Teo, qui choisit | après le lot 2 |

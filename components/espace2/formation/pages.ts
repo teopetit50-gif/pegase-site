@@ -780,41 +780,84 @@ export const PAGES: Record<string, PageFormation> = {
   /* ——— les modules métier : le panneau ne montre que celui de l'entreprise ——— */
   daliro: metier("daliro", {
     titre: "DALIRO",
-    intro:
-      "DALIRO suit vos chantiers : le marché vérifié ligne à ligne, les travaux supplémentaires chiffrés sur vos prix et signés avant exécution, les passages confirmés à J-2.",
+    intro: "DALIRO suit vos chantiers : le marché vérifié ligne à ligne, les travaux supplémentaires chiffrés sur vos prix et signés avant exécution, les passages confirmés à J-2.",
     sections: [
       {
         id: "ecrans",
         titre: "Les écrans",
         niveau: 2,
-        video: v("daliro-chantiers"),
         blocs: [
           {
             liste: [
-              `[Tableau de bord](${E}/daliro) et [chantiers](${E}/daliro/chantiers) : chaque chantier, avec son terrain, son argent, son fil et sa réception.`,
-              `[À ranger](${E}/daliro/a-ranger) : les messages à rattacher à un chantier.`,
-              `[À faire](${E}/daliro/a-faire) et [avenants](${E}/daliro/avenants).`,
-              `[Annuaire](${E}/daliro/annuaire) et [équipes](${E}/daliro/equipes), sur les 30 prochains jours.`,
-              `[Réglages](${E}/daliro/reglages) : la bibliothèque de prix.`,
+              `[Vue d'ensemble](${E}/daliro) : vos chantiers et ce qui demande votre attention.`,
+              `[Chantiers](${E}/daliro/chantiers) : chaque chantier sur une frise : dates, santé, avancement, prochain passage ; la fiche d'un chantier porte ses lots, son planning, son argent, le fil du terrain et la réception.`,
+              `[À ranger](${E}/daliro/a-ranger) : les photos, vocaux et messages du terrain sans chantier.`,
+              `[À faire](${E}/daliro/a-faire) : les passages à confirmer ou à noter faits, les avenants à signer, les situations à soumettre.`,
+              `[Avenants et situations](${E}/daliro/avenants) : les avenants à chiffrer, à signer et signés, les situations de travaux.`,
+              `[Approvisionnement](${E}/daliro/approvisionnement) : ce qu'il faut commander, les livraisons attendues, le matériel à rendre.`,
+              `[Annuaire](${E}/daliro/annuaire) : les entreprises de vos chantiers, en lecture.`,
+              `[Équipes](${E}/daliro/equipes) : les passages des équipes et sous-traitants, leurs confirmations à J-2, leurs absences.`,
+              `[Réglages](${E}/daliro/reglages) : la bibliothèque de prix et l'organisation.`,
             ],
           },
         ],
       },
+      { id: "gestes", titre: "Ce que vous faites", niveau: 2, blocs: [] },
       {
-        id: "gestes",
-        titre: "Ce que vous faites",
-        niveau: 2,
-        video: v("daliro-avenants"),
-        blocs: [
-          {
-            liste: [
-              "Depuis un message : ouvrir un avenant, ou l'écarter.",
-              "Dans À faire : noter une réponse, noter fait, signer, soumettre, valider.",
-              "Noter une absence dans une équipe.",
-              "Poser un prix dans la bibliothèque, puis le valider.",
-            ],
-          },
-        ],
+        id: "chantier",
+        titre: "Créer et ouvrir un chantier",
+        niveau: 3,
+        video: v("daliro-chantier"),
+        blocs: [{ p: `« Nouveau chantier » crée un chantier en préparation : le département, le territoire et le régime de TVA se déduisent du code postal. Une fois ses lots et son marché posés, « Ouvrir le chantier » le lance ; il faut pour cela un maître d'ouvrage désigné, qui signera les avenants.` }],
+      },
+      {
+        id: "ranger",
+        titre: "Ranger un message du terrain",
+        niveau: 3,
+        video: v("daliro-ranger"),
+        blocs: [{ p: `Dans [À ranger](${E}/daliro/a-ranger), la pastille « Chantier » range un message dans son chantier. « Écarter le message » le sort de la file sans le ranger ; il reste au journal.` }],
+      },
+      {
+        id: "avenant",
+        titre: "Ouvrir et chiffrer un avenant",
+        niveau: 3,
+        video: v("daliro-avenant"),
+        blocs: [{ p: `« Ajouter un avenant » fait d'un message l'origine d'un avenant en brouillon, sur un chantier en cours. Chaque ligne se chiffre sur un prix validé de la bibliothèque. « Soumettre à la signature » envoie une demande de validation dans [À valider](${E}/validations) : celui qui a chiffré ne décide pas.` }],
+      },
+      {
+        id: "signer",
+        titre: "Signer un avenant",
+        niveau: 3,
+        video: v("daliro-signer"),
+        blocs: [{ p: `Un avenant approuvé se signe depuis la fiche du chantier, onglet Argent : ses travaux entrent alors dans l'engagé du lot. « Faire signer sur place » prépare un lien à usage unique que le client signe du doigt.` }],
+      },
+      {
+        id: "passages",
+        titre: "Confirmer les passages à J-2",
+        niveau: 3,
+        video: v("daliro-passages"),
+        blocs: [{ p: `Dans [Équipes](${E}/daliro/equipes), « Noter la réponse » inscrit au fil la confirmation d'un sous-traitant. Un passage décliné propose des remplaçants et prévient le conducteur. « Relancer le sous-traitant » ne part jamais sans vous.` }],
+      },
+      {
+        id: "planning",
+        titre: "Noter un passage fait, recaler la suite",
+        niveau: 3,
+        video: v("daliro-planning"),
+        blocs: [{ p: `« Noter fait » clôt un passage ; « Recaler » décale la suite en jours ouvrés, chaque passage gardant sa durée. Dans [À faire](${E}/daliro/a-faire), plusieurs passages se notent faits d'un coup.` }],
+      },
+      {
+        id: "absence",
+        titre: "Noter une absence",
+        niveau: 3,
+        video: v("daliro-absence"),
+        blocs: [{ p: `« Noter une absence » retire ces jours des propositions pour ce sous-traitant.` }],
+      },
+      {
+        id: "prix",
+        titre: "La bibliothèque de prix",
+        niveau: 3,
+        video: v("daliro-prix"),
+        blocs: [{ p: `Dans les [réglages](${E}/daliro/reglages), « Poser un prix » enrichit la bibliothèque ; un prix proposé pendant un chiffrage s'y valide. Un nouveau prix validé pour la même désignation retire l'ancien.` }],
       },
       {
         id: "garde-fous",
@@ -823,8 +866,11 @@ export const PAGES: Record<string, PageFormation> = {
         blocs: [
           {
             liste: [
-              "L'accord permanent de passage à J-2 est réservé au gérant et aux administrateurs.",
-              "Un nouveau prix validé pour la même désignation retire l'ancien.",
+              "Un avenant se soumet avec au moins une ligne chiffrée, et celui qui l'a chiffré ne le signe pas.",
+              "Un avenant ne se signe qu'après son approbation dans « À valider ».",
+              "Un chantier ne s'ouvre qu'avec un maître d'ouvrage désigné.",
+              "Une relance de sous-traitant ne part jamais sans vous.",
+              "Seule une personne autorisée valide les prix de la bibliothèque.",
             ],
           },
         ],
@@ -834,109 +880,266 @@ export const PAGES: Record<string, PageFormation> = {
 
   lorani: metier("lorani", {
     titre: "LORANI",
-    intro: "LORANI tient le calendrier de vos permis : chaque demande, ses pièces et ses délais d'instruction.",
+    intro: "LORANI suit chacun de vos permis jusqu'à la purge des recours : délai d'instruction, pièces réclamées, décision tacite, affichage, recours des tiers.",
     sections: [
       {
         id: "ecrans",
-        titre: "L'écran",
+        titre: "Les écrans",
         niveau: 2,
-        video: v("lorani-calendrier"),
-        blocs: [{ liste: [`[Calendrier des permis](${E}/lorani) : à confirmer, pièces à fournir, en instruction, accordés, clos.`] }],
-      },
-      {
-        id: "gestes",
-        titre: "Ce que vous faites",
-        niveau: 2,
-        video: v("lorani-suivre-permis"),
         blocs: [
           {
             liste: [
-              "Créer un nouveau permis.",
-              "Déposer un courrier de la mairie.",
-              "Demander les pièces manquantes.",
-              "Saisir un recours.",
-              "Exporter le dossier daté.",
+              `[Vue d'ensemble](${E}/lorani) : le calendrier des permis : à confirmer, pièces à fournir, en instruction, accordé, clos.`,
+              `[Courrier à ranger](${E}/lorani/courrier) : les dates lues sur les courriers de la mairie, à confirmer ou à écarter.`,
+              `[Questions et réponses](${E}/lorani/questions) : les questions posées aux entreprises et aux bureaux d'études, suivies jusqu'à la réponse.`,
+              `[À viser](${E}/lorani/a-viser) : les situations et documents à viser, les réserves à lever, les décennales qui expirent.`,
+              `[Réglages](${E}/lorani/reglages) : par projet : l'équipe, les lots, le régime de chaque permis, qui décide.`,
             ],
           },
         ],
+      },
+      { id: "gestes", titre: "Ce que vous faites", niveau: 2, blocs: [] },
+      {
+        id: "projet",
+        titre: "Créer un projet et son permis",
+        niveau: 3,
+        video: v("lorani-projet"),
+        blocs: [{ p: `« Nouveau projet » ouvre un projet ; le lieu du terrain fixe les règles. « Nouveau permis » y ajoute un permis, dont le type fixe le délai de droit commun : un mois pour une déclaration préalable, deux pour une maison, trois pour les autres.` }],
+      },
+      {
+        id: "courrier",
+        titre: "Déposer un courrier de la mairie",
+        niveau: 3,
+        video: v("lorani-courrier"),
+        blocs: [{ p: `« Déposer un courrier de la mairie » fait lire un récépissé, une lettre de délai, une demande de pièces, un arrêté ou un constat d'affichage. LORANI propose la date lue, à confirmer.` }],
+      },
+      {
+        id: "confirmer",
+        titre: "Confirmer une date lue",
+        niveau: 3,
+        video: v("lorani-confirmer"),
+        blocs: [{ p: `Dans [Courrier à ranger](${E}/lorani/courrier), « Confirmer » valide la date lue (corrigée au besoin) et recalcule le calendrier ; « Écarter » l'abandonne, motif au journal.` }],
+      },
+      {
+        id: "tacite",
+        titre: "Confirmer une décision tacite",
+        niveau: 3,
+        video: v("lorani-tacite"),
+        blocs: [{ p: `Une décision implicite se confirme, elle ne se saisit pas : le système la date. Il reste à afficher le permis et à saisir le premier jour d'affichage.` }],
+      },
+      {
+        id: "evenement",
+        titre: "Saisir ce qui arrive sur un permis",
+        niveau: 3,
+        video: v("lorani-evenement"),
+        blocs: [{ p: `Sur la page d'un permis, « Copier ou saisir ce qui est arrivé » note un dépôt, une demande de pièces, un arrêté, l'affichage ou un recours. Le premier jour d'affichage ouvre les deux mois de recours des tiers.` }],
+      },
+      {
+        id: "questions",
+        titre: "Suivre une question",
+        niveau: 3,
+        video: v("lorani-questions"),
+        blocs: [{ p: `Dans [Questions et réponses](${E}/lorani/questions), une question est suivie jusqu'à la réponse ; sans réponse au bout de huit jours, elle remonte au point du matin. Rien n'est envoyé au destinataire ; une relance s'ouvre dans votre messagerie.` }],
+      },
+      {
+        id: "viser",
+        titre: "Viser une situation, lever une réserve",
+        niveau: 3,
+        video: v("lorani-viser"),
+        blocs: [{ p: `Dans [À viser](${E}/lorani/a-viser), « Viser » ou « Rectifier » une situation, rendre un avis (VSO, VAO, refusé) sur un document, ou « Lever » une réserve.` }],
+      },
+      {
+        id: "export",
+        titre: "Exporter le dossier daté",
+        niveau: 3,
+        video: v("lorani-export"),
+        blocs: [{ p: `« Exporter le dossier daté » (options du projet) produit le registre en PDF et Excel, dans une archive.` }],
       },
       {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
-        blocs: [{ p: "Quinze jours après la décision, un rappel porte sur l'affichage du permis." }],
+        blocs: [
+          {
+            liste: [
+              "Rien de ce que LORANI lit n'est appliqué sans votre confirmation.",
+              "Une décision tacite se confirme ; elle est datée par le système, jamais saisie à la main.",
+              "Un permis n'est purgé que lorsque l'issue de chaque recours est saisie.",
+              "Aucune question n'est envoyée à une entreprise à votre place.",
+            ],
+          },
+        ],
       },
     ],
   }),
 
   tavaro: metier("tavaro", {
     titre: "TAVARO",
-    intro: "TAVARO chiffre les retours de location et prépare les factures. L'agence valide ou refuse chaque facture, et aucune ne part sans cette validation.",
+    intro: "TAVARO chiffre les retours de location sur votre barème et prépare les factures. L'agence valide ou refuse chaque facture, et aucune ne part sans cette validation.",
     sections: [
       {
         id: "ecrans",
-        titre: "L'écran",
+        titre: "Les écrans",
         niveau: 2,
-        video: v("tavaro-tableau"),
         blocs: [
           {
             liste: [
-              `[Tableau de bord](${E}/tavaro) : les retours à chiffrer, à valider, bloqués, et ce qui reste à encaisser ; le dossier de chaque contrat, et le barème.`,
+              `[Vue d'ensemble](${E}/tavaro) : les contrats de location, les retours chiffrés et les factures.`,
+              `[Retours à facturer](${E}/tavaro/retours) : les retours à chiffrer, les propositions devant l'agence, les factures bloquées ; un contrat s'ouvre à droite.`,
+              `[Parc et atelier](${E}/tavaro/parc) : les véhicules à remettre en location, immobilisés ou en entretien.`,
+              `[Amendes](${E}/tavaro/amendes) : les avis de contravention à désigner sous 45 jours.`,
+              `[Pilotage](${E}/tavaro/pilotage) : part facturée et délais, par agence.`,
+              `[Réglages](${E}/tavaro/reglages) : le barème, les règles et les responsables.`,
             ],
           },
         ],
       },
+      { id: "gestes", titre: "Ce que vous faites", niveau: 2, blocs: [] },
       {
-        id: "gestes",
-        titre: "Ce que vous faites",
-        niveau: 2,
+        id: "retours",
+        titre: "Voir ce qui attend",
+        niveau: 3,
+        video: v("tavaro-retours"),
+        blocs: [{ p: `Dans [Retours à facturer](${E}/tavaro/retours), filtrez par famille (à chiffrer, à valider, bloqués) et par agence ; un contrat s'ouvre à droite.` }],
+      },
+      {
+        id: "etat-lieux",
+        titre: "L'état des lieux signé",
+        niveau: 3,
+        video: v("tavaro-etat-lieux"),
+        blocs: [{ p: `« Faire l'état de départ » puis « Signer l'état des lieux » : une empreinte du contenu signé est gardée, l'état ne change plus. Sans signature du client, l'état se clôt avec un motif ; les dommages iront alors à la direction, hors barème.` }],
+      },
+      {
+        id: "retour",
+        titre: "Chiffrer un retour",
+        niveau: 3,
         video: v("tavaro-retour"),
-        blocs: [
-          {
-            liste: ["Chiffrer un retour.", "Signer l'état des lieux.", "Demander un avoir.", "Publier un barème.", "Envoyer le dossier à la banque."],
-          },
-        ],
+        blocs: [{ p: `« Chiffrer le retour » compare les dommages relevés à l'état de départ et chiffre chaque poste sur le barème. La facture est proposée à l'agence ; sans preuve, aucune facture ne part.` }],
+      },
+      {
+        id: "valider",
+        titre: "Valider la facture",
+        niveau: 3,
+        video: v("tavaro-valider"),
+        blocs: [{ p: `La facture proposée se décide dans [À valider](${E}/validations). Celui qui a chiffré ne décide pas ; une facture refusée se rechiffre si un montant reste dû.` }],
+      },
+      {
+        id: "facture",
+        titre: "Suivre une facture",
+        niveau: 3,
+        video: v("tavaro-facture"),
+        blocs: [{ p: `Sur une facture : « Réglée » date le règlement ; « Relancer » prépare une relance qui attend un accord ; « Demander un avoir » corrige une facture émise (la direction décide sous 48 heures) ; « Litige » suspend le recouvrement.` }],
+      },
+      {
+        id: "prolonger",
+        titre: "Prolonger un contrat",
+        niveau: 3,
+        video: v("tavaro-prolonger"),
+        blocs: [{ p: `« Prolonger » enregistre une prolongation, une restitution décalée sans frais ou un retard offert ; seul le chef d'agence ou la direction amende un contrat.` }],
+      },
+      {
+        id: "amendes",
+        titre: "Désigner le conducteur d'une amende",
+        niveau: 3,
+        video: v("tavaro-amendes"),
+        blocs: [{ p: `Dans [Amendes](${E}/tavaro/amendes), un avis s'enregistre puis sa désignation, faite sur antai.gouv.fr, se consigne : TAVARO garde la preuve et arrête les alertes.` }],
+      },
+      {
+        id: "bareme",
+        titre: "Publier un barème",
+        niveau: 3,
+        video: v("tavaro-bareme"),
+        blocs: [{ p: `Dans les [réglages](${E}/tavaro/reglages), « Publier un barème » le met en vigueur pour les départs à partir de sa date d'effet ; seule la direction publie. Les retours déjà chiffrés gardent le leur.` }],
       },
       {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
-        blocs: [{ p: "Aucune facture ne part sans la validation de l'agence." }],
+        blocs: [
+          {
+            liste: [
+              "Aucune facture ne part sans la validation de l'agence, et celui qui chiffre ne décide pas.",
+              "Sans preuve, un dommage reste « preuve manquante » et n'est pas facturé.",
+              "Une facture émise ne se modifie pas : un avoir la corrige, décidé par la direction.",
+              "Un état des lieux signé ne change plus.",
+            ],
+          },
+        ],
       },
     ],
   }),
 
   tiroma: metier("tiroma", {
     titre: "TIROMA",
-    intro: "TIROMA aide à remplir vos fauteuils : les créneaux à sauver, la liste d'attente, et les vérifications avant les rendez-vous.",
+    intro: "TIROMA aide à remplir vos fauteuils : les créneaux à sauver, la liste d'attente, les plans sans rendez-vous et les vérifications avant les rendez-vous. Il lit l'agenda du logiciel du cabinet sans y écrire.",
     sections: [
       {
         id: "ecrans",
-        titre: "L'écran",
+        titre: "Les écrans",
         niveau: 2,
-        video: v("tiroma-tableau"),
         blocs: [
           {
             liste: [
-              `[Tableau de bord](${E}/tiroma) : créneaux à sauver, plans de soins sans rendez-vous, vérifications avant les rendez-vous, demi-journées vides.`,
+              `[Aujourd'hui](${E}/tiroma) : le cabinet en une page : créneaux à sauver, plans sans rendez-vous, vérifications, charge des fauteuils.`,
+              `[Créneaux et appels](${E}/tiroma/creneaux) : chaque créneau libéré avec les patients qui peuvent le reprendre, les appels à reprendre, la liste d'attente.`,
+              `[Fauteuils](${E}/tiroma/fauteuils) : la charge du jour, les demi-journées vides, l'équipe absente.`,
+              `[Plans et devis](${E}/tiroma/plans) : les plans signés sans rendez-vous, la mutuelle, les devis à relancer.`,
+              `[Avant les rendez-vous](${E}/tiroma/avant) : labo, implants, orthodontie, devis à échéance, mutuelle.`,
+              `[Pilotage](${E}/tiroma/pilotage) : devis acceptés, rendez-vous manqués, occupation.`,
+              `[Réglages](${E}/tiroma/reglages) : cabinet, fauteuils, horaires, règles, export.`,
             ],
           },
         ],
       },
+      { id: "gestes", titre: "Ce que vous faites", niveau: 2, blocs: [] },
       {
-        id: "gestes",
-        titre: "Ce que vous faites",
-        niveau: 2,
+        id: "point",
+        titre: "Le point du jour",
+        niveau: 3,
+        video: v("tiroma-point"),
+        blocs: [{ p: `[Aujourd'hui](${E}/tiroma) montre chaque matin les créneaux à sauver, les plans sans rendez-vous et les vérifications ; chaque ligne mène à son écran.` }],
+      },
+      {
+        id: "creneau",
+        titre: "Sauver un créneau libéré",
+        niveau: 3,
+        video: v("tiroma-creneau"),
+        blocs: [{ p: `Dans [Créneaux et appels](${E}/tiroma/creneaux), chaque créneau libéré propose les patients qui peuvent le reprendre. « Noter l'appel » enregistre l'issue ; le rendez-vous se pose dans le logiciel du cabinet, qui fait foi.` }],
+      },
+      {
+        id: "attente",
+        titre: "La liste d'attente",
+        niveau: 3,
         video: v("tiroma-attente"),
-        blocs: [
-          {
-            liste: [
-              "Inscrire un patient sur la liste d'attente.",
-              "Noter un appel, ou une mutuelle.",
-              "Noter une absence, ou ajouter une fermeture.",
-            ],
-          },
-        ],
+        blocs: [{ p: `« Liste d'attente » inscrit un patient, proposé au premier créneau qui lui convient ; un patient gêné passe en premier. Un patient qui a demandé à ne pas être contacté ne s'inscrit pas.` }],
+      },
+      {
+        id: "mutuelle",
+        titre: "Noter la mutuelle d'un plan",
+        niveau: 3,
+        video: v("tiroma-mutuelle"),
+        blocs: [{ p: `Dans [Plans et devis](${E}/tiroma/plans), « Noter la mutuelle » suit la demande et la réponse ; un accord reçu sans rendez-vous remonte chaque matin.` }],
+      },
+      {
+        id: "absence",
+        titre: "Noter une absence de l'équipe",
+        niveau: 3,
+        video: v("tiroma-absence"),
+        blocs: [{ p: `Dans [Fauteuils](${E}/tiroma/fauteuils), « Noter une absence » affiche les soins à basculer ; aucune raison médicale n'est demandée.` }],
+      },
+      {
+        id: "avant",
+        titre: "Préparer les rendez-vous",
+        niveau: 3,
+        video: v("tiroma-avant"),
+        blocs: [{ p: `[Avant les rendez-vous](${E}/tiroma/avant) liste le laboratoire, les implants, l'orthodontie et la mutuelle à vérifier ; les relances se copient et s'envoient par vous.` }],
+      },
+      {
+        id: "fermeture",
+        titre: "Fermetures et congés",
+        niveau: 3,
+        video: v("tiroma-fermeture"),
+        blocs: [{ p: `Dans les [réglages](${E}/tiroma/reglages), « Fermetures et congés » réduit la plage ouverte ; réservé au titulaire.` }],
       },
       {
         id: "garde-fous",
@@ -945,10 +1148,10 @@ export const PAGES: Record<string, PageFormation> = {
         blocs: [
           {
             liste: [
-              "Les messages aux patients partent par le courriel du cabinet, jamais par SMS.",
-              "En mode essai, ils ne partent qu'à l'adresse d'essai, jamais au patient.",
-              "Un patient qui ne veut plus être contacté se note dans le logiciel du cabinet : c'est lui qui fait foi.",
-              "La charge se lit par fauteuil, jamais par personne.",
+              "TIROMA lit le logiciel du cabinet sans y écrire : les rendez-vous se posent dans ce logiciel, qui fait foi.",
+              "Un patient qui a demandé à ne pas être contacté ne l'est pas, et ne s'inscrit pas en liste d'attente.",
+              "Les messages aux patients ne partent que par un prestataire agréé pour les données de santé ; d'ici là, ils sont préparés puis retenus.",
+              "L'export des données est réservé au titulaire : il contient des données de santé.",
             ],
           },
         ],
@@ -958,29 +1161,74 @@ export const PAGES: Record<string, PageFormation> = {
 
   tamila: metier("tamila", {
     titre: "TAMILA",
-    intro: "TAMILA tient les dossiers du cabinet : les parties, les délais calculés, les audiences, les avis RPVA et le journal des accès.",
+    intro: "TAMILA tient les dossiers du cabinet : les délais calculés et confirmés par un avocat, les audiences, les avis RPVA, les conflits d'intérêts et les honoraires. Les dossiers sont chiffrés dans votre navigateur.",
     sections: [
       {
         id: "ecrans",
-        titre: "L'écran",
+        titre: "Les écrans",
         niveau: 2,
-        video: v("tamila-dossiers"),
         blocs: [
           {
-            liste: [`[Dossiers du cabinet](${E}/tamila) : délais à confirmer, échéances sous quinze jours, audiences, dossiers ouverts et clos.`],
+            liste: [
+              `[Vue d'ensemble](${E}/tamila) : tous les dossiers : délais à confirmer, échéances sous 15 jours, décisions en attente.`,
+              `[Arrivées](${E}/tamila/arrivees) : les avis RPVA reçus par courriel, à rattacher ou à écarter.`,
+              `[Honoraires du cabinet](${E}/tamila/honoraires) : convention, temps non facturé, à facturer, provisions, reste dû.`,
+              `[Pilotage](${E}/tamila/pilotage) : marge, charge, dossiers sans diligence.`,
+              `[Conformité du cabinet](${E}/tamila/conformite) : conflits, vigilance LCB-FT, journal des accès.`,
+              `[Réglages](${E}/tamila/reglages) : installation, coffre à clés, en-tête des factures, durées de conservation.`,
+            ],
           },
         ],
       },
+      { id: "gestes", titre: "Ce que vous faites", niveau: 2, blocs: [] },
       {
-        id: "gestes",
-        titre: "Ce que vous faites",
-        niveau: 2,
+        id: "ouvrir",
+        titre: "Ouvrir un dossier",
+        niveau: 3,
         video: v("tamila-ouvrir"),
-        blocs: [
-          {
-            liste: ["Ouvrir un nouveau dossier.", "Calculer une date.", "Contrôler les conflits.", "Saisir un avis.", "Clôturer un dossier."],
-          },
-        ],
+        blocs: [{ p: `« Nouveau dossier » ouvre un dossier dont la référence, l'intitulé et le numéro RG sont chiffrés dans votre navigateur. Un dossier ouvert par un assistant attend l'accord de son avocat responsable avant toute lecture.` }],
+      },
+      {
+        id: "delais",
+        titre: "Poser et confirmer un délai",
+        niveau: 3,
+        video: v("tamila-delais"),
+        blocs: [{ p: `« Déclarer l'appel » fait courir les délais ; « Délai de procédure » calcule l'échéance avec la règle, le départ, la cour et le domicile du client. Chaque délai est confirmé par un avocat qui voit le dossier.` }],
+      },
+      {
+        id: "audience",
+        titre: "Audiences et avis RPVA",
+        niveau: 3,
+        video: v("tamila-audience"),
+        blocs: [{ p: `« Audience » pose une audience au dossier ; « Avis RPVA » saisi à la main s'applique comme un avis lu : délais posés, audience ajoutée.` }],
+      },
+      {
+        id: "arrivees",
+        titre: "Rattacher un avis reçu",
+        niveau: 3,
+        video: v("tamila-arrivees"),
+        blocs: [{ p: `Dans [Arrivées](${E}/tamila/arrivees), « Chiffrer et rattacher » range un avis dans son dossier et efface la copie reçue par courriel. Un avis non rattaché voit sa copie effacée à sept jours.` }],
+      },
+      {
+        id: "conflits",
+        titre: "Contrôler les conflits d'intérêts",
+        niveau: 3,
+        video: v("tamila-conflits"),
+        blocs: [{ p: `« Contrôler les conflits » compare chaque partie à tout le cabinet sans qu'aucun nom ne quitte votre navigateur ; une partie connue se décide (pas de conflit, conflit levé, dossier refusé). La vigilance LCB-FT s'enregistre dans le même onglet.` }],
+      },
+      {
+        id: "honoraires",
+        titre: "Honoraires : convention, temps, facture",
+        niveau: 3,
+        video: v("tamila-honoraires"),
+        blocs: [{ p: `Dans l'onglet Honoraires : « Poser la convention », « Saisir du temps », puis « Facturer » ; le numéro des factures suit sans trou. [Honoraires du cabinet](${E}/tamila/honoraires) en fait la synthèse.` }],
+      },
+      {
+        id: "cloture",
+        titre: "Clôturer un dossier",
+        niveau: 3,
+        video: v("tamila-cloture"),
+        blocs: [{ p: `« Clôturer le dossier » demande la clôture, qu'un associé décide. Le dossier est effacé N jours après l'approbation (sept par défaut, réglable) : téléchargez l'export avant.` }],
       },
       {
         id: "garde-fous",
@@ -989,8 +1237,10 @@ export const PAGES: Record<string, PageFormation> = {
         blocs: [
           {
             liste: [
-              "TAMILA lit vos pièces sans jamais y écrire, et aucun entraînement n'est fait sur elles.",
-              "Les pièces sont effacées à la clôture du dossier.",
+              "Chaque délai calculé est confirmé par un avocat qui voit le dossier.",
+              "Les dossiers sont chiffrés dans votre navigateur, et chaque lecture est tracée au journal des accès.",
+              "La clôture est décidée par un associé ; l'effacement suit à l'échéance réglée.",
+              "Une muraille posée sur un dossier ne se lève que sur décision du gérant.",
             ],
           },
         ],
@@ -1000,42 +1250,90 @@ export const PAGES: Record<string, PageFormation> = {
 
   varelo: metier("varelo", {
     titre: "VARELO",
-    intro: "VARELO met votre groupe sur une page : sociétés, lots, caisses, reportings et contrats. Il lit vos logiciels de gestion, vos caisses et vos tableurs sans jamais rien y écrire.",
+    intro: "VARELO met votre groupe sur une page : sociétés, référentiel commun, finance, contrats et opérations. Il lit vos logiciels et vos exports sans jamais rien y écrire.",
     sections: [
       {
         id: "ecrans",
-        titre: "L'écran",
+        titre: "Les écrans",
         niveau: 2,
-        video: v("varelo-groupe"),
         blocs: [
           {
             liste: [
-              `[Tableau de bord](${E}/varelo) : ce matin, le groupe sur une page, les ventes des caisses, les reportings dus, les réserves à émettre, les encours, les contrats à dénoncer et les comptes réciproques.`,
+              `[Ce matin](${E}/varelo) : les décisions à valider, les trésoreries, les réserves, les reportings, les contrats.`,
+              `[Référentiel](${E}/varelo/referentiel) : un seul nom par client, fournisseur, article ou site pour tout le groupe.`,
+              `[Finance](${E}/varelo/finance) : encours, plafonds, réciproques intragroupe, ventes des caisses.`,
+              `[Contrats](${E}/varelo/contrats) : les contrats rangés par date limite de dénonciation.`,
+              `[Opérations](${E}/varelo/operations) : les réserves à émettre aux transporteurs et les reportings dus.`,
+              `[Groupe](${E}/varelo/groupe) : ventes, résultat, trésorerie et écarts de chaque société.`,
+              `[Sources et structure](${E}/varelo/sources) : sociétés, logiciels branchés, dépôt d'un export, règles du groupe.`,
             ],
           },
         ],
       },
+      { id: "gestes", titre: "Ce que vous faites", niveau: 2, blocs: [] },
       {
-        id: "gestes",
-        titre: "Ce que vous faites",
-        niveau: 2,
-        video: v("varelo-rapprocher"),
-        blocs: [
-          {
-            liste: [
-              `Rapprocher les fiches : proposer un nom, fusionner, scinder, détacher, ou écarter une paire. Le rapprochement se décide dans [À valider](${E}/validations).`,
-              "Inscrire une société.",
-              "Noter la dénonciation d'un contrat.",
-              "Justifier un écart.",
-            ],
-          },
-        ],
+        id: "societe",
+        titre: "Inscrire une société et déposer son export",
+        niveau: 3,
+        video: v("varelo-societe"),
+        blocs: [{ p: `Dans [Sources et structure](${E}/varelo/sources), « Inscrire une société » l'ajoute au groupe ; « Déposer l'export d'une société » lui donne ses données, sans rien écrire dans le logiciel d'origine.` }],
+      },
+      {
+        id: "referentiel",
+        titre: "Rapprocher le référentiel",
+        niveau: 3,
+        video: v("varelo-referentiel"),
+        blocs: [{ p: `« Lancer un passage » propose des lots de rapprochement ; une paire fausse s'écarte. Une correction (nom, fusion, scission, rattachement) attend la décision du référent données, qui n'est pas celui qui la propose.` }],
+      },
+      {
+        id: "contrats",
+        titre: "Suivre un contrat et sa dénonciation",
+        niveau: 3,
+        video: v("varelo-contrats"),
+        blocs: [{ p: `Dans [Contrats](${E}/varelo/contrats), un contrat ajouté calcule sa date limite de dénonciation et prévient 30 jours avant. La dénonciation se fait valider par la direction juridique, part de chez vous, puis se note.` }],
+      },
+      {
+        id: "reserves",
+        titre: "Émettre une réserve transporteur",
+        niveau: 3,
+        video: v("varelo-reserves"),
+        blocs: [{ p: `Dans [Opérations](${E}/varelo/operations), une livraison enregistrée prépare la lettre de protestation, que vous envoyez en recommandé ; « Sous réserve de déballage » ne vaut pas réserve.` }],
+      },
+      {
+        id: "reportings",
+        titre: "Suivre un reporting",
+        niveau: 3,
+        video: v("varelo-reportings"),
+        blocs: [{ p: `« Ajouter un reporting » crée ses échéances ; « Envoyé… » note l'envoi au journal.` }],
+      },
+      {
+        id: "finance",
+        titre: "Encours et réciproques",
+        niveau: 3,
+        video: v("varelo-finance"),
+        blocs: [{ p: `Dans [Finance](${E}/varelo/finance), un plafond d'encours proposé est posé à la validation de la direction financière ; un écart intragroupe justifié sort dans le tableau remis à la consolidation.` }],
+      },
+      {
+        id: "groupe",
+        titre: "Le groupe sur une page",
+        niveau: 3,
+        video: v("varelo-groupe"),
+        blocs: [{ p: `[Groupe](${E}/varelo/groupe) lit chaque société d'après sa balance générale ; « Objectifs » fixe un plancher de trésorerie qui lève une alerte.` }],
       },
       {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
-        blocs: [{ p: "VARELO n'écrit jamais dans vos logiciels." }],
+        blocs: [
+          {
+            liste: [
+              "VARELO lit vos logiciels en lecture seule : rien n'est jamais écrit dans un logiciel branché.",
+              "Une correction du référentiel attend la décision du référent données ; celui qui la propose ne la décide pas.",
+              "Un geste irréversible ou qui envoie quelque chose demande une confirmation.",
+              "Les lettres et dénonciations partent de chez vous ; VARELO les prépare et note leur envoi.",
+            ],
+          },
+        ],
       },
     ],
   }),

@@ -3,7 +3,7 @@
 > Fichier produit par `node outils/formation-scripts.mjs` à partir de
 > `components/espace2/formation/videos.ts`. Ne pas le modifier à la main.
 
-56 vidéos au catalogue, 44 scripts écrits, 0 tournées.
+89 vidéos au catalogue, 89 scripts écrits, 0 tournées.
 
 ## Pour tourner
 
@@ -555,61 +555,521 @@ Identifiant : `offload-garde-fous` · à tourner · départ : https://omegaai.fr
 
 ## DALIRO
 
-### Vos chantiers
+### Créer et ouvrir un chantier
 
-Identifiant : `daliro-chantiers` · script à écrire
+Identifiant : `daliro-chantier` · à tourner · départ : https://omegaai.fr/espace2/daliro
 
-### Avenants et prix
+*Objectif : Créer un chantier, puis l'ouvrir une fois son maître d'ouvrage désigné.*
 
-Identifiant : `daliro-avenants` · script à écrire
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Cliquer sur « Nouveau chantier », remplir, puis « Créer le chantier ». | Un chantier naît en préparation. Le département, le territoire et le régime de TVA se déduisent du code postal. |
+| 2 | Montrer le message : posez ses lots, son marché, puis ouvrez-le. | Posez ses lots et son marché. |
+| 3 | Dans la fiche, menu « Actions sur le chantier », « Ouvrir le chantier… », « Confirmer ». | Puis ouvrez-le. Il faut un maître d'ouvrage désigné dans l'annuaire : c'est lui qui signe les avenants. |
+
+### Ranger un message du terrain
+
+Identifiant : `daliro-ranger` · à tourner · départ : https://omegaai.fr/espace2/daliro/a-ranger
+
+*Objectif : Rattacher à son chantier une photo, un vocal ou un message reçu du terrain.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir À ranger, puis un message. | Les photos, vocaux et messages envoyés depuis le terrain sans chantier arrivent ici. |
+| 2 | Pastille « Chantier », choisir le chantier. | Choisissez son chantier : le message y est rangé. |
+| 3 | Sur un autre message, « Écarter le message… », motif facultatif, « Écarter le message ». | Un message sans intérêt s'écarte. Il quitte la file sans être rangé, et reste au journal. |
+
+### Ouvrir et chiffrer un avenant
+
+Identifiant : `daliro-avenant` · à tourner · départ : https://omegaai.fr/espace2/daliro/a-ranger
+
+*Objectif : Transformer une demande du terrain en avenant chiffré sur vos prix.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Sur un message, « Ajouter un avenant », choisir le chantier, remplir « Ce qui est demandé en plus », puis « Ranger à … et ouvrir ». | Un client demande des travaux en plus ? Le message devient l'origine d'un avenant en brouillon. |
+| 2 | « Voir l'avenant », puis « Chiffrer une ligne », « Chiffrer ». | Chiffrez chaque ligne sur un prix validé de votre bibliothèque. Un prix saisi librement est proposé à la bibliothèque, à valider. |
+| 3 | « Soumettre à la signature », « Soumettre ». | Soumettez l'avenant : une demande de validation part dans « À valider ». Celui qui a chiffré ne décide pas. |
+
+### Signer un avenant
+
+Identifiant : `daliro-signer` · à tourner · départ : https://omegaai.fr/espace2/daliro/a-faire
+
+*Objectif : Faire signer un avenant validé, au bureau ou sur place.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans À faire, geste « Signer », qui ouvre la fiche, onglet Argent. | Une fois l'avenant approuvé, il se signe. |
+| 2 | « Signer », puis « Signer ». | Signé, ses travaux entrent dans l'engagé du lot. |
+| 3 | Montrer « Faire signer sur place », « Préparer le lien ». | Sur le chantier, préparez un lien à usage unique : le client signe du doigt sur le téléphone du chef d'équipe. |
+
+### Confirmer les passages à J-2
+
+Identifiant : `daliro-passages` · à tourner · départ : https://omegaai.fr/espace2/daliro/equipes
+
+*Objectif : Noter la réponse d'un sous-traitant et gérer un passage décliné.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Équipes, onglet « Non confirmés ». | Deux jours avant chaque passage, la venue du sous-traitant se confirme. |
+| 2 | Menu du passage, « Noter la réponse », « Confirmé », « Noter : confirmé ». | Une réponse reçue par téléphone se note ici, comme celle reçue par WhatsApp. |
+| 3 | Sur un autre, « Noter le passage décliné ». | Un passage décliné propose des remplaçants et prévient le conducteur de travaux. |
+
+### Noter un passage fait, recaler la suite
+
+Identifiant : `daliro-planning` · à tourner · départ : https://omegaai.fr/espace2/daliro/a-faire
+
+*Objectif : Tenir le planning à jour.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans la fiche, onglet Terrain, Planning, « Noter fait ». | Un passage terminé se note fait. |
+| 2 | « Recaler », saisir la nouvelle fin, « Voir ce qui bouge », « Recaler ». | Un retard ? Donnez la nouvelle fin : la suite glisse en jours ouvrés, chaque passage garde sa durée. |
+| 3 | Dans À faire, cocher plusieurs passages, « Noter faits ». | Plusieurs passages se notent faits d'un coup depuis À faire. |
+
+### Noter une absence
+
+Identifiant : `daliro-absence` · à tourner · départ : https://omegaai.fr/espace2/daliro/equipes
+
+*Objectif : Empêcher qu'un sous-traitant absent soit proposé.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Équipes, « Noter une absence », choisir la période, « Noter l'absence ». | Les jours notés ne sont plus proposés pour ce sous-traitant, ni pour un passage, ni comme remplaçant. |
+
+### La bibliothèque de prix
+
+Identifiant : `daliro-prix` · à tourner · départ : https://omegaai.fr/espace2/daliro/reglages
+
+*Objectif : Poser et valider vos prix.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Réglages, Bibliothèque de prix, « Poser un prix », « Poser et valider ». | Vos avenants se chiffrent sur cette bibliothèque. Posez vos prix ici. |
+| 2 | Sur un prix proposé, « Valider ce prix… », « Valider le prix ». | Un prix saisi pendant un chiffrage arrive ici, proposé. Validez-le. Un nouveau prix validé pour la même désignation retire l'ancien. |
 
 ## LORANI
 
-### Le calendrier des permis
+### Créer un projet et son permis
 
-Identifiant : `lorani-calendrier` · script à écrire
+Identifiant : `lorani-projet` · à tourner · départ : https://omegaai.fr/espace2/lorani
 
-### Suivre un permis
+*Objectif : Ouvrir un projet, puis saisir son permis.*
 
-Identifiant : `lorani-suivre-permis` · script à écrire
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | « Nouveau projet », remplir le lieu, « Ouvrir le projet ». | Le lieu du terrain fixe les règles : le code postal dit quel droit de l'urbanisme s'applique. |
+| 2 | Dans le projet, « Nouveau permis », choisir le type, « Saisir le permis ». | Le type fixe le délai de droit commun : un mois pour une déclaration préalable, deux pour une maison, trois pour les autres permis. |
+
+### Déposer un courrier de la mairie
+
+Identifiant : `lorani-courrier` · à tourner · départ : https://omegaai.fr/espace2/lorani
+
+*Objectif : Faire lire un courrier de la mairie pour mettre le calendrier à jour.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le projet, « Déposer un courrier de la mairie… », choisir le fichier, laisser « Laisser Lorani reconnaître », « Déposer ». | Récépissé, lettre de délai, demande de pièces, arrêté : déposez le courrier, LORANI le lit. |
+| 2 | Montrer la date proposée. | Il vous propose la date qu'il y a lue. Rien n'est appliqué tant que vous ne l'avez pas confirmée. |
+
+### Confirmer une date lue
+
+Identifiant : `lorani-confirmer` · à tourner · départ : https://omegaai.fr/espace2/lorani/courrier
+
+*Objectif : Valider ou écarter ce que LORANI a lu sur un courrier.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Courrier à ranger, onglet « À confirmer », « Confirmer », corriger si besoin, « Confirmer ». | Vérifiez la date contre le courrier et corrigez-la s'il dit autre chose : c'est la valeur confirmée qui compte, et le calendrier est recalculé. |
+| 2 | Sur une autre, « Écarter ». | Une lecture fausse s'écarte : le permis n'en garde rien, et le motif est inscrit au journal. |
+
+### Confirmer une décision tacite
+
+Identifiant : `lorani-tacite` · à tourner · départ : https://omegaai.fr/espace2/lorani/courrier
+
+*Objectif : Prendre acte d'un permis obtenu sans réponse de la mairie.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Sur une décision implicite, « Confirmer ». | Quand la mairie n'a pas répondu dans le délai, la décision est tacite. Le système la date lui-même : elle ne se saisit pas à la main. |
+| 2 | Montrer le message après confirmation. | Affichez ensuite le permis sur le terrain, puis saisissez le premier jour d'affichage. |
+
+### Saisir ce qui arrive sur un permis
+
+Identifiant : `lorani-evenement` · à tourner · départ : https://omegaai.fr/espace2/lorani
+
+*Objectif : Noter un dépôt, un arrêté, l'affichage ou un recours.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Page du permis, « Copier ou saisir ce qui est arrivé », « Permis affiché sur le terrain… », « Saisir ». | Chaque événement du permis se saisit ici. Le premier jour d'affichage ouvre le délai de recours des tiers, deux mois. |
+| 2 | Montrer « Recours reçu… ». | Un recours reçu se saisit aussi : tant que son issue n'est pas saisie, le permis n'est pas purgé. |
+
+### Suivre une question
+
+Identifiant : `lorani-questions` · à tourner · départ : https://omegaai.fr/espace2/lorani/questions
+
+*Objectif : Poser une question à une entreprise et la suivre jusqu'à la réponse.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | « Nouvelle question », « Poser ». | Notez la question posée à une entreprise ou un bureau d'études. Rien ne lui est envoyé : la question est suivie ici. |
+| 2 | « Réponse reçue », « Noter la réponse ». | Sans réponse au bout de huit jours, elle remonte au point du matin. |
+| 3 | « Solder ». | Une fois traitée, soldez-la : elle sort des points en suspens. |
+
+### Viser une situation, lever une réserve
+
+Identifiant : `lorani-viser` · à tourner · départ : https://omegaai.fr/espace2/lorani/a-viser
+
+*Objectif : Viser les situations et lever les réserves.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | À viser, cliquer une situation, « Viser » (ou « Rectifier »). | Visée, la situation vaut pour le cumul admis ; rectifiée, elle retient le montant que vous indiquez. |
+| 2 | Sur un document, avis VSO, VAO ou Refusé, « Rendre l'avis ». | L'avis rendu clôt l'échéance au registre des délais. |
+| 3 | Sur une réserve, « Lever ». | Une réserve levée est datée d'aujourd'hui. |
+
+### Exporter le dossier daté
+
+Identifiant : `lorani-export` · à tourner · départ : https://omegaai.fr/espace2/lorani
+
+*Objectif : Garder la trace datée d'un projet.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le projet, « Options du projet », « Exporter le dossier daté ». | Le dossier daté sort en registre PDF et Excel, dans une archive. |
 
 ## TAVARO
 
-### Le tableau de bord
+### Voir ce qui attend
 
-Identifiant : `tavaro-tableau` · script à écrire
+Identifiant : `tavaro-retours` · à tourner · départ : https://omegaai.fr/espace2/tavaro/retours
+
+*Objectif : Trouver les retours à chiffrer et les factures en attente.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Retours à facturer, menu « Filtrer par famille », « Retours à chiffrer ». | Les retours se rangent par famille : à chiffrer, à valider, bloqués. |
+| 2 | « Filtrer par agence », puis cliquer un contrat. | Filtrez par agence, et ouvrez un contrat : son dossier s'affiche à droite. |
+
+### L'état des lieux signé
+
+Identifiant : `tavaro-etat-lieux` · à tourner · départ : https://omegaai.fr/espace2/tavaro/retours
+
+*Objectif : Faire signer l'état des lieux de départ.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans la fiche du contrat, « Faire l'état de départ », « Enregistrer et faire signer ». | Sans état de départ signé, un dommage facturé au retour se conteste facilement. |
+| 2 | Saisir le nom du signataire, « Signer l'état des lieux ». | Le locataire relit et signe. Une empreinte du contenu est gardée : l'état ne changera plus. |
+| 3 | Montrer « Le client ne signe pas ». | S'il refuse de signer, clôturez sans signature avec un motif : les photos font foi, et les dommages iront à la direction, hors barème. |
 
 ### Chiffrer un retour
 
-Identifiant : `tavaro-retour` · script à écrire
+Identifiant : `tavaro-retour` · à tourner · départ : https://omegaai.fr/espace2/tavaro/retours
+
+*Objectif : Chiffrer les dommages d'un retour sur le barème.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Fiche du contrat, « Chiffrer le retour », « Ajouter un dommage » avec sa preuve. | Relevez les dommages au retour. TAVARO les compare à l'état des lieux de départ. |
+| 2 | « Ajouter un poste (nettoyage, clé, frais…) », puis « Chiffrer le retour ». | Chaque poste est chiffré selon le barème. La facture n'est proposée qu'à l'agence. |
+| 3 | Montrer un dommage sans preuve. | Sans preuve, la proposition reste « preuve manquante » et aucune facture ne part. |
+
+### Valider la facture
+
+Identifiant : `tavaro-valider` · à tourner · départ : https://omegaai.fr/espace2/tavaro/retours
+
+*Objectif : Approuver ou refuser une facture proposée.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Fiche du contrat, « Ouvrir la file « À valider » », « Consulter la demande ». | La facture proposée attend l'agence dans « À valider ». |
+| 2 | « Approuver » (ou « Refuser »). | Celui qui a chiffré le retour ne décide pas : une autre personne approuve. Refusée, la facture se rechiffre si quelque chose reste dû. |
+
+### Suivre une facture
+
+Identifiant : `tavaro-facture` · à tourner · départ : https://omegaai.fr/espace2/tavaro/retours
+
+*Objectif : Noter un règlement, relancer, demander un avoir ou passer en litige.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Bloc Factures, déplier une facture, « Réglée », « Confirmer le règlement ». | Le règlement est daté et la facture ne bouge plus. |
+| 2 | « Relancer », « Envoyer la relance ». | Une relance attend un accord dans « À valider » avant de partir. Sans geste de votre part, TAVARO en prépare une sept jours après l'échéance. |
+| 3 | « Demander un avoir », saisir ce que la facture avait de faux. | Une facture émise ne se modifie pas : l'avoir la corrige, la direction décide sous 48 heures. |
+| 4 | « Litige », saisir la contestation. | La contestation écrite du client suspend le recouvrement. |
+
+### Prolonger un contrat
+
+Identifiant : `tavaro-prolonger` · à tourner · départ : https://omegaai.fr/espace2/tavaro/retours
+
+*Objectif : Prolonger, décaler la restitution ou offrir un retard.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Fiche du contrat, « Prolonger », choisir la nature, « Enregistrer ». | Une prolongation déplace le retour prévu. Une restitution décalée le déplace sans frais. Un retard offert annule le poste retard. Le chef d'agence ou la direction amende un contrat. |
+
+### Désigner le conducteur d'une amende
+
+Identifiant : `tavaro-amendes` · à tourner · départ : https://omegaai.fr/espace2/tavaro/amendes
+
+*Objectif : Enregistrer un avis de contravention et consigner la désignation.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Amendes, « Enregistrer un avis », « Enregistrer ». | Un avis de contravention se désigne sous 45 jours. |
+| 2 | Ouvrir l'avis, « Désigner le conducteur », « Une personne », « Consigner la désignation ». | Faites la désignation sur antai.gouv.fr, puis consignez ici ce qui a été envoyé : TAVARO garde la preuve et arrête les alertes. La direction ou un valideur la fait. |
+
+### Publier un barème
+
+Identifiant : `tavaro-bareme` · à tourner · départ : https://omegaai.fr/espace2/tavaro/reglages
+
+*Objectif : Mettre en vigueur un nouveau barème.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Réglages, onglet « Barème », « Publier un barème », remplir, « Publier ». | Sans barème en vigueur à la date du départ, aucun retour ne se chiffre. Seule la direction publie le barème ; il s'applique aux départs à partir de sa date d'effet. |
 
 ## TIROMA
 
-### Le tableau de bord
+### Le point du jour
 
-Identifiant : `tiroma-tableau` · script à écrire
+Identifiant : `tiroma-point` · à tourner · départ : https://omegaai.fr/espace2/tiroma
+
+*Objectif : Lire le cabinet en une page chaque matin.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Aujourd'hui. | Chaque matin, TIROMA lit l'agenda, les plans et les devis du logiciel du cabinet, sans y écrire. |
+| 2 | Pointer les groupes : créneaux à sauver, plans sans rendez-vous, avant les rendez-vous. | Il vous montre les créneaux à sauver, les plans signés sans rendez-vous et ce qu'il faut vérifier avant les rendez-vous. |
+| 3 | Cliquer une ligne. | Chaque ligne mène à l'écran où se fait le geste. |
+
+### Sauver un créneau libéré
+
+Identifiant : `tiroma-creneau` · à tourner · départ : https://omegaai.fr/espace2/tiroma/creneaux
+
+*Objectif : Proposer un créneau libéré et noter l'appel.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Créneaux et appels, « Créneaux à sauver », ouvrir un créneau. | Un rendez-vous annulé libère un créneau. TIROMA propose les patients qui peuvent le reprendre. |
+| 2 | « Noter l'appel », « Rendez-vous pris », « Noter ». | Appelez le patient, puis notez l'issue de l'appel. |
+| 3 | Pointer le rappel : le rendez-vous se pose dans le logiciel du cabinet. | Le rendez-vous se pose dans le logiciel du cabinet : c'est lui qui fait foi. TIROMA le confirmera au prochain relevé. |
 
 ### La liste d'attente
 
-Identifiant : `tiroma-attente` · script à écrire
+Identifiant : `tiroma-attente` · à tourner · départ : https://omegaai.fr/espace2/tiroma/creneaux
+
+*Objectif : Inscrire un patient en liste d'attente et l'en retirer.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | « Liste d'attente », remplir le patient, le soin, la durée, cocher « Patient gêné (douleur) » s'il le faut, « Inscrire ». | TIROMA proposera le patient au premier créneau libéré qui lui convient, après les plans acceptés. Un patient gêné est appelé en premier. |
+| 2 | Sur un patient, « Retirer de la liste », choisir le motif, « Retirer ». | Un patient se retire avec un motif, qui reste dans le journal du cabinet. |
+
+### Noter la mutuelle d'un plan
+
+Identifiant : `tiroma-mutuelle` · à tourner · départ : https://omegaai.fr/espace2/tiroma/plans
+
+*Objectif : Suivre l'accord de la mutuelle sur un plan de traitement.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Plans et devis, cliquer une carte, « Noter la mutuelle ». | Le logiciel du cabinet n'exporte pas la mutuelle : notez ici la demande et la réponse. |
+| 2 | Choisir « Accord reçu », la date, « Noter la mutuelle ». | Un accord reçu sans rendez-vous remonte chaque matin. Le rendez-vous se prend dans le logiciel du cabinet. |
+
+### Noter une absence de l'équipe
+
+Identifiant : `tiroma-absence` · à tourner · départ : https://omegaai.fr/espace2/tiroma/fauteuils
+
+*Objectif : Prévoir l'absence d'une assistante.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Fauteuils, « Noter une absence », qui, du, au, « Noter ». | Une assistante absente ? Notez-le : les soins à basculer s'affichent dans la liste. Aucune raison médicale n'est demandée. |
+
+### Préparer les rendez-vous
+
+Identifiant : `tiroma-avant` · à tourner · départ : https://omegaai.fr/espace2/tiroma/avant
+
+*Objectif : Vérifier ce qui doit être prêt avant un rendez-vous.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Avant les rendez-vous, onglets Laboratoire, Implants, Devis et mutuelle. | Avant chaque rendez-vous, TIROMA liste ce qui doit être prêt : le travail du laboratoire, les implants, l'accord de la mutuelle. |
+| 2 | « Copier la relance du laboratoire ». | Copiez la relance du laboratoire ou la commande d'implants, et envoyez-la vous-même. |
+
+### Fermetures et congés
+
+Identifiant : `tiroma-fermeture` · à tourner · départ : https://omegaai.fr/espace2/tiroma/reglages
+
+*Objectif : Déclarer un congé ou une fermeture.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Réglages, « Fermetures et congés », remplir, « Ajouter ». | Un congé, une fermeture de fauteuil ou du cabinet, une formation : la plage ouverte se réduit d'autant. Le titulaire seul le fait. |
 
 ## TAMILA
 
-### Les dossiers du cabinet
-
-Identifiant : `tamila-dossiers` · script à écrire
-
 ### Ouvrir un dossier
 
-Identifiant : `tamila-ouvrir` · script à écrire
+Identifiant : `tamila-ouvrir` · à tourner · départ : https://omegaai.fr/espace2/tamila
+
+*Objectif : Créer un dossier chiffré.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | « Nouveau dossier », remplir la référence et l'intitulé, « Ouvrir le dossier ». | Une clé est tirée dans votre navigateur : la référence, l'intitulé et le numéro RG sont chiffrés avant de partir. |
+| 2 | Montrer la page du dossier et ses onglets. | Le dossier s'ouvre sur ses onglets : vue d'ensemble, procédure, pièces, honoraires, conformité. Chaque lecture est tracée au journal des accès. |
+
+### Poser et confirmer un délai
+
+Identifiant : `tamila-delais` · à tourner · départ : https://omegaai.fr/espace2/tamila
+
+*Objectif : Déclarer l'appel, faire calculer un délai, le faire confirmer par un avocat.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le dossier, « + », « Déclarer l'appel… », « Enregistrer ». | Déclarez l'appel : ses délais commencent à courir. |
+| 2 | « + », « Délai de procédure… », « Calculer la date », « Enregistrer ». | TAMILA calcule l'échéance avec la règle, le départ, la cour et le domicile du client. |
+| 3 | « Confirmer le délai », « Approuver ». | Un avocat qui voit le dossier confirme chaque délai. |
+
+### Audiences et avis RPVA
+
+Identifiant : `tamila-audience` · à tourner · départ : https://omegaai.fr/espace2/tamila
+
+*Objectif : Poser une audience ou saisir un avis RPVA.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | « + », « Audience… », « Ajouter une audience ». | Une audience se pose au dossier ; l'avocat qui plaide est un avocat du cabinet. |
+| 2 | « + », « Avis RPVA… », « Saisir un avis RPVA ». | Saisi à la main, un avis est appliqué comme s'il avait été lu : délais posés, audience ajoutée. |
+
+### Rattacher un avis reçu
+
+Identifiant : `tamila-arrivees` · à tourner · départ : https://omegaai.fr/espace2/tamila/arrivees
+
+*Objectif : Ranger dans son dossier un avis RPVA arrivé par courriel.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Arrivées, cliquer un avis, « Choisir le dossier », bouton « Chiffrer et rattacher ». | L'avis est chiffré dans le dossier, et la copie reçue par courriel est effacée. |
+| 2 | Sur un autre, « Écarter l'avis », « Écarter ». | Un avis sans objet s'écarte : rien n'est déposé au dossier. Seul un avocat peut écarter. |
+
+### Contrôler les conflits d'intérêts
+
+Identifiant : `tamila-conflits` · à tourner · départ : https://omegaai.fr/espace2/tamila
+
+*Objectif : Comparer les parties d'un dossier à tout le cabinet et décider.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Onglet Conformité du dossier, « Contrôler les conflits ». | Chaque partie est comparée à tous les dossiers du cabinet, sans qu'aucun nom ne quitte votre navigateur. |
+| 2 | Sur une partie déjà connue, « Décider », choisir, « Enregistrer ». | Si une partie est déjà connue, décidez : pas de conflit, conflit levé avec l'accord écrit des clients, ou dossier refusé. |
+| 3 | Montrer « Vigilance LCB-FT ». | Pour les activités concernées, la vigilance LCB-FT s'enregistre au même endroit. |
+
+### Honoraires : convention, temps, facture
+
+Identifiant : `tamila-honoraires` · à tourner · départ : https://omegaai.fr/espace2/tamila
+
+*Objectif : Poser la convention, saisir le temps, facturer.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Onglet Honoraires, « Poser la convention ». | La convention d'honoraires est écrite et signée, sauf urgence. Faites-la signer, puis enregistrez la signature. |
+| 2 | « Saisir du temps », « Saisir ». | Saisissez le temps passé. |
+| 3 | « Facturer », « Émettre la facture ». | Émettez la facture : son numéro suit sans trou. |
+
+### Clôturer un dossier
+
+Identifiant : `tamila-cloture` · à tourner · départ : https://omegaai.fr/espace2/tamila
+
+*Objectif : Exporter puis demander la clôture d'un dossier.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Menu « … », « Exporter le dossier… », « Demander l'export ». | Avant de clôturer, exportez le dossier. L'export est une lecture tracée. |
+| 2 | « Clôturer le dossier… », « Demander la clôture ». | Un associé décide. Une fois clos, le dossier est effacé quelques jours plus tard, sept par défaut : pièces, parties, clé. Vous gardez l'export. |
 
 ## VARELO
 
+### Inscrire une société et déposer son export
+
+Identifiant : `varelo-societe` · à tourner · départ : https://omegaai.fr/espace2/varelo/sources
+
+*Objectif : Ajouter une société au groupe et lui donner ses données.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Sources et structure, « Inscrire une société », « Inscrire la société ». | La société devient une entité du groupe. Son territoire fixe son fuseau et ses délais. |
+| 2 | « Déposer l'export d'une société », « Déposer ». | Déposez son premier export. Rien n'est écrit dans le logiciel d'origine. |
+
+### Rapprocher le référentiel
+
+Identifiant : `varelo-referentiel` · à tourner · départ : https://omegaai.fr/espace2/varelo/referentiel
+
+*Objectif : Lancer un passage de rapprochement et corriger le référentiel.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Référentiel, « Lancer un passage », « Lancer maintenant ». | VARELO rapproche les clients, fournisseurs et articles de toutes les sociétés, et propose des lots à valider. |
+| 2 | Sur une paire douteuse d'un lot, « Écarter », « Écarter ». | Une paire fausse s'écarte : le code repart seul et ne sera pas reproposé. |
+| 3 | Ouvrir un objet, « Fusionner dans… », « Proposer ». | Une correction est proposée ; elle attend la décision du référent données. Celui qui la propose ne la décide pas. |
+
+### Suivre un contrat et sa dénonciation
+
+Identifiant : `varelo-contrats` · à tourner · départ : https://omegaai.fr/espace2/varelo/contrats
+
+*Objectif : Ajouter un contrat et ne pas manquer sa date de dénonciation.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Contrats, « Ajouter un contrat », « Enregistrer le contrat ». | La date limite de dénonciation se calcule, et une alerte prévient 30 jours avant. |
+| 2 | Sur la fiche, « Faire valider », « Envoyer à la direction juridique ». | Pour dénoncer, faites valider par la direction juridique. |
+| 3 | « Dénoncé… », « Noter la dénonciation ». | La dénonciation part de chez vous ; ici, on note qu'elle est partie et quand. |
+
+### Émettre une réserve transporteur
+
+Identifiant : `varelo-reserves` · à tourner · départ : https://omegaai.fr/espace2/varelo/operations
+
+*Objectif : Enregistrer une livraison abîmée et émettre la réserve.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Opérations, « Nouveau », « Enregistrer une livraison », « Enregistrer la livraison ». | Une livraison abîmée ou incomplète s'enregistre. « Sous réserve de déballage » sur le bon ne vaut pas réserve. |
+| 2 | Sur la carte, « Lettre de protestation », « Copier le texte ». | VARELO prépare la lettre de protestation, à envoyer en recommandé avant la date indiquée. C'est vous qui l'envoyez. |
+
+### Suivre un reporting
+
+Identifiant : `varelo-reportings` · à tourner · départ : https://omegaai.fr/espace2/varelo/operations
+
+*Objectif : Ne pas manquer un reporting dû.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | « Nouveau », « Ajouter un reporting », « Enregistrer le reporting ». | Ajoutez les reportings que vous devez remettre : banque, franchiseur, actionnaire. |
+| 2 | Sur la carte, « Envoyé… », « Noter ». | Notez leur envoi : il est inscrit au journal. |
+
+### Encours et réciproques
+
+Identifiant : `varelo-finance` · à tourner · départ : https://omegaai.fr/espace2/varelo/finance
+
+*Objectif : Proposer un plafond d'encours et justifier un écart intragroupe.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Finance, section Encours, « Proposer ». | Proposez un plafond d'encours pour un client : la proposition part à la direction financière avec son calcul. |
+| 2 | Section Réciproques intragroupe, « Justifier », « Justifier l'écart ». | Un écart entre deux sociétés du groupe se justifie. La justification sort dans le tableau remis à la consolidation. |
+
 ### Le groupe sur une page
 
-Identifiant : `varelo-groupe` · script à écrire
+Identifiant : `varelo-groupe` · à tourner · départ : https://omegaai.fr/espace2/varelo/groupe
 
-### Rapprocher les fiches
+*Objectif : Lire chaque société et fixer ses objectifs.*
 
-Identifiant : `varelo-rapprocher` · script à écrire
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Groupe, « Déposer une balance générale », « Déposer ». | Chaque société se lit d'après sa balance générale : ventes, résultat, trésorerie. |
+| 2 | Sur une société, « Objectifs… », « Enregistrer ». | Fixez ses objectifs : sous le plancher de trésorerie, une alerte est levée, et se ferme d'elle-même quand la trésorerie remonte. |
 
