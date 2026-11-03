@@ -18,7 +18,7 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 ## Totaux par produit
 
 **Après les corrections du 3 novembre (état à 20 h 15 UTC, trois passages, mis en ligne et vérifiés sur omegaai.fr).**
-60 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
+61 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
@@ -27,13 +27,13 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 | CASHD — relances d’impayés | 53 | 3 | 2 | 1 | 3 | 2 | 2 | **66** |
 | REPUT — demandes clients | 32 | 0 | 0 | 0 | 5 | 3 | 3 | **43** |
 | OFFLOAD — nouvelles affaires | 40 | 1 | 0 | 4 | 2 | 0 | 1 | **48** |
-| DALIRO — BTP | 24 | 1 | 3 | 0 | 2 | 2 | 3 | **35** |
+| DALIRO — BTP | 25 | 1 | 2 | 0 | 2 | 2 | 3 | **35** |
 | LORANI — architectes | 58 | 1 | 2 | 2 | 1 | 7 | 2 | **73** |
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
 | TAVARO — location automobile | 32 | 1 | 2 | 0 | 1 | 3 | 3 | **42** |
 | TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
 | VARELO — groupes | 20 | 2 | 0 | 1 | 1 | 2 | 1 | **27** |
-| **Tous** | **372** | **17** | **18** | **10** | **32** | **45** | **26** | **520** |
+| **Tous** | **373** | **17** | **17** | **10** | **32** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -113,6 +113,7 @@ sur omegaai.fr.
 | 26 | LORANI : ni avance ni pénalité au marché d'exemple. | « Retenue, avance et pénalités recalculées » | Volet d'une situation : « avance à rembourser 9 300,00 € sur 9 300,00 € ». La révision BT n'est pas posée : aucune colonne de révision dans les migrations du dépôt. | `c40782b` |
 | 27 | DALIRO : ouvert directement, le Point du mois ne montrait qu'un chantier. | « Point mensuel — nous rapprochons les travaux repérés des travaux facturés » | Quatre chantiers, « 10 à relancer (10 437,00 €) », quelle que soit la page ouverte en premier. | `810ce17` |
 | 28 | REPUT : aucune demande dans une autre langue. | « La langue du client est identifiée » ; « réponses en plusieurs langues » | James Whitfield, en anglais : « langue : en », réponse rédigée en anglais depuis la fiche Horaires. | `239092f` |
+| 29 | DALIRO : aucun chantier d'exemple réceptionné. | « Les reprises demandées à la réception sont photographiées, et celles hors devis chiffrées à part » | Maison Garnier — extension, réceptionnée depuis six jours : deux réserves (dont une hors devis), retenue de garantie, décompte à préparer. | `8ccb689` |
 
 **Étape « sans back-end » (45 promesses).** Le coordinateur a demandé de poser la pastille « En préparation » sur
 ces phrases. Je ne l'ai pas fait : `components/ui/en-preparation.tsx` porte ta décision du 06/10 à 19 h 20 (« sur
@@ -128,7 +129,7 @@ proposées » plus bas.
 **Restent ouverts après ce passage** (raisons) : FILED n° 37 (il faudrait fabriquer un exercice clos et une pièce
 reçue après), FILED n° 52 (la liste des exports n'a, en exemple, que le sceau mensuel), FILED n° 54 (l'écran ne
 montre qu'une boîte par fournisseur : limite de l'écran, pas de l'exemple), CASHD n° 46 (devise), TIROMA n° 38 (un
-second cabinet d'exemple complet serait nécessaire), DALIRO n° 15, 23, 32 et OFFLOAD n° 13 (le fichier de la page
+second cabinet d'exemple complet serait nécessaire), DALIRO n° 15, 23 et OFFLOAD n° 13 (le fichier de la page
 vient d'être retouché par une autre session : je n'y ai pas touché).
 
 Reclassées sans changement de code, après vérification à l’écran : CASHD n° 52 et 53 (« hors périmètre », « attente de
@@ -465,7 +466,7 @@ Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 0 · Aucune page 2 · Sans back-end 2 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 25, n° 26, n° 27, n° 30.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 25, n° 26, n° 27, n° 30, n° 32.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
