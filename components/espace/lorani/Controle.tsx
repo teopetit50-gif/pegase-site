@@ -96,7 +96,20 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   const c = controles.find((x) => x.id === choisi) ?? controles[0] ?? null;
   const precedent = c?.precedent_id ? dossier.controles.find((x) => x.id === c.precedent_id) ?? null : null;
   const pieces = useMemo(() => (c ? dossier.controlePieces.filter((x) => x.controle_id === c.id) : []), [dossier.controlePieces, c]);
-  const constats = useMemo(() => (c ? dossier.constats.filter((x) => x.controle_id === c.id) : []), [dossier.constats, c]);
+  /* « Rechercher un point » (03/11/2026) : le texte du constat, son objet, sa correction, son article */
+  const [cherche, setCherche] = useState("");
+  const q = cherche.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const constats = useMemo(
+    () =>
+      c
+        ? dossier.constats.filter(
+            (x) =>
+              x.controle_id === c.id &&
+              (!q || [x.titre, x.objet, x.correction, x.article, x.grandeur].filter(Boolean).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(q)),
+          )
+        : [],
+    [dossier.constats, c, q],
+  );
   const ouverts = constats.filter((x) => x.statut === "ouvert").sort((a, b) => GRAVITES[a.gravite].rang - GRAVITES[b.gravite].rang || a.titre.localeCompare(b.titre));
   const decides = constats.filter((x) => x.statut !== "ouvert");
   const corrigesIci = c ? dossier.constats.filter((x) => x.corrige_au_controle === c.id) : [];
@@ -609,6 +622,16 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
               {" "}Décide des constats : {c.decideur ? nommer(c.decideur) : "toute l’équipe du projet"}.
               {c.suspendu_le ? ` Suspendu le ${jour(c.suspendu_le)} : ${c.suspendu_motif}.` : ""}
             </p>
+            <input
+              type="search"
+              className="lin-menu-champ"
+              style={{ width: "100%", margin: "4px 0 10px", padding: "6px 10px", border: "1px solid var(--lin-bordure, rgba(128,128,128,.3))", borderRadius: 6, background: "transparent", color: "inherit", fontSize: 13 }}
+              placeholder="Rechercher un point"
+              aria-label="Rechercher un point dans les constats"
+              value={cherche}
+              onChange={(e) => setCherche(e.target.value)}
+            />
+            {q && !constats.length ? <p className="lvp-resume">Aucun point ne contient « {cherche.trim()} ».</p> : null}
             <Liste>
               <Groupe nom="Le contrôle" compte={1}>
                 <Ligne
