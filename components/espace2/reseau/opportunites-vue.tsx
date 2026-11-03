@@ -358,7 +358,7 @@ function Tableau({ vous }: { vous: string }) {
         ) : null}
         {vue === "tableau" && recherche.trim() ? (
           <button type="button" className="v2-btn v2-btn--petit op-filtre" title="Retirer la recherche" onClick={() => setRecherche("")}>
-            « {recherche.trim()} » <X width={12} height={12} aria-hidden="true" />
+            <span className="op-filtre-texte">« {recherche.trim()} »</span> <X width={12} height={12} aria-hidden="true" />
           </button>
         ) : null}
         {vue === "tableau" && aTraiter ? (

@@ -68,7 +68,10 @@ function Annuaire() {
   const [details, setDetails] = useState(true);
 
   const appliquer = (f: Filtres) => {
-    const avant = adresseDe({ ...filtres, q: frappe });
+    /* 03/11/2026 — comparer à l'adresse en cours : avec la frappe, « avant » et
+       « après » étaient égaux et la recherche n'entrait jamais dans l'adresse
+       (perdue au retour d'une fiche) */
+    const avant = adresseDe(filtres);
     const apres = adresseDe(f);
     if (avant === apres) return;
     setHistorique((h) => [...h, avant]);

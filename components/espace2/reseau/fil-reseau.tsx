@@ -671,9 +671,12 @@ function CartePublication({ p, gestes, entiere }: { p: Publication; gestes: Gest
 function phraseAidants(noms: string[]) {
   const vous = noms.includes("vous");
   const autres = noms.filter((x) => x !== "vous");
-  const liste = vous ? [...autres, "vous"] : autres;
+  /* 03/11/2026 — « Solelek Antilles et vous peuvent aider » : avec « vous »,
+     le verbe est « pouvez » ; dans une liste tronquée, « vous » passe en tête
+     pour rester nommé */
+  const liste = vous ? (autres.length >= 2 ? ["vous", ...autres] : [...autres, "vous"]) : autres;
   const texte = liste.length <= 2 ? liste.join(" et ") : `${liste.slice(0, 2).join(", ")} et ${liste.length - 2} autre${liste.length - 2 > 1 ? "s" : ""}`;
-  const verbe = liste.length > 1 ? "peuvent" : vous ? "pouvez" : "peut";
+  const verbe = vous ? "pouvez" : liste.length > 1 ? "peuvent" : "peut";
   return `${texte.charAt(0).toUpperCase()}${texte.slice(1)} ${verbe} aider`;
 }
 

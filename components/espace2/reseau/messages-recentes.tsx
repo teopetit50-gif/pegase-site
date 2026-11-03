@@ -119,7 +119,7 @@ export default function Recentes({ etat, aller, retour, nomVous, minuit }: { eta
             </a>
           ))
         ) : (
-          <p className="lin-vide">{filtre === "non-lues" ? "Tout est lu." : filtre === "ecrites" ? "Vous n'avez encore écrit dans aucune de ces conversations." : "Aucune conversation ne correspond."}</p>
+          <p className="lin-vide">{q.trim() ? "Aucune conversation ne correspond." : filtre === "non-lues" ? "Tout est lu." : filtre === "ecrites" ? "Vous n'avez encore écrit dans aucune de ces conversations." : "Aucune conversation ne correspond."}</p>
         )}
       </div>
     </section>

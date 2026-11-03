@@ -25,6 +25,16 @@
 /* ——— la barre d'outils ——— */
 .v2 .lin.op .op-filtre {
   gap: 6px;
+  /* 03/11/2026 — une recherche longue faisait une pastille de milliers de
+     pixels, son « × » hors d'atteinte */
+  max-width: 220px;
+  min-width: 0;
+}
+.v2 .lin.op .op-filtre-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .v2 .lin.op .op-vous {
   white-space: nowrap;

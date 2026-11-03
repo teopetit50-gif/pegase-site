@@ -862,3 +862,9 @@
     overflow-x: auto;
   }
 }
+
+/* 03/11/2026 — un titre de sujet sans espace (80 caractères) était coupé net
+   au bord droit à 390 : il passe à la ligne où il faut */
+.v2 .ms .lin-ticket-titre {
+  overflow-wrap: anywhere;
+}
