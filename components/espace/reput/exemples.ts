@@ -70,6 +70,11 @@ export function mondeExemple(): Monde {
   /* c3_22 : une urgence non prise, l'astreinte appelée (rang 2 après un rang 1 sans réponse) */
   const d7 = demande(7, "whatsapp", "Sophie Garnier", "+33 6 00 00 00 07", ilYa(0, 1), { sujet: "urgence", statut: "a_traiter", urgence: true, couverte: false,
                                                                                          motif: "Urgence : jamais de réponse automatique, l'astreinte est appelée." });
+  /* « le client est reconnu, son fil est repris » : Karim B. revient sur WhatsApp, depuis le même numéro */
+  const d8 = demande(8, "whatsapp", "Karim B.", "+33 6 12 34 56 78", ilYa(0, 2), { sujet: "devis", statut: "a_preparer", couverte: null, preparee_le: null });
+  /* « un appel manqué devient une demande » et « le client qui veut parler à une personne est transmis » */
+  const d9 = demande(9, "appel", "Paul Girard", null, ilYa(0, 3), { sujet: "humain", statut: "a_traiter", couverte: false,
+                                                                   motif: "Le client demande à parler à quelqu'un : transmis sans réponse automatique." });
   const receptions: Record<number, Reception> = {
     9001: { id: 9001, canal: "email", de_nom: "Marie Durand", de_adresse: "marie.durand@exemple.fr", sujet: "Ouverts samedi ?", recu_le: d1.recu_le, pieces: [],
             corps: "Bonjour,\nJe voudrais passer voir les échantillons de plans de travail. Êtes-vous ouverts samedi matin ?\nMerci,\nMarie" },
@@ -84,6 +89,10 @@ export function mondeExemple(): Monde {
             corps: "Rappelez-moi pour un rendez-vous, au 06 00 00 00 00." },
     9007: { id: 9007, canal: "whatsapp", de_nom: "Sophie Garnier", de_adresse: "+33 6 00 00 00 07", sujet: null, recu_le: d7.recu_le, pieces: [],
             corps: "Le volet roulant est tombé, la fenêtre ne ferme plus et il pleut dans la chambre." },
+    9008: { id: 9008, canal: "whatsapp", de_nom: "Karim B.", de_adresse: "+33 6 12 34 56 78", sujet: null, recu_le: d8.recu_le, pieces: [],
+            corps: "Re-bonjour, je reviens vers vous pour la porte d'entrée : finalement je voudrais aussi changer la serrure. Vous pouvez me faire un devis pour les deux ?" },
+    9009: { id: 9009, canal: "appel", de_nom: "Paul Girard", de_adresse: "04 78 00 00 09", sujet: "Appel manqué", recu_le: d9.recu_le, pieces: [],
+            corps: "Transcription du message laissé : « Bonjour, c'est M. Girard, je préférerais parler à quelqu'un pour mes volets, rappelez-moi au 04 78 00 00 09. Merci. »" },
     9006: { id: 9006, canal: "whatsapp", de_nom: "Martin Luc", de_adresse: "+33 6 00 00 00 06", sujet: null, recu_le: d6.recu_le, pieces: [],
             corps: "Pour la cuisine, j'ai pris les mesures : 4,20 m exactement." },
   };
@@ -131,7 +140,7 @@ export function mondeExemple(): Monde {
         regle_le: ilYa(40).slice(0, 10), statut: "avis_recu", motif: null, prochain_le: null, envois: ["y", "z"], cree_le: ilYa(40) },
     ],
     indicateurs: { recues: 41, repondues: 33, parties_seules: 14, hors_base: 6, delai_median_minutes: 47 },
-    demandes: [d1, d2, d3, d4, d5, d6, d7],
+    demandes: [d1, d2, d3, d4, d5, d6, d7, d8, d9],
     receptions,
     reponses,
     fiches,
