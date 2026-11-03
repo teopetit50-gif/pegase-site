@@ -51,7 +51,8 @@
   --tir-priorite: var(--tir-t3);
 
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : pleine page, comme Tamila (47b22a8) — plus de bande autour, ni arrondi, ni ombre. */
+  padding: 0;
   background: var(--tir-app);
   color: var(--tir-t1);
   font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
@@ -147,11 +148,11 @@ html[data-v2-theme="light"] .v2 .tir {
 .v2 .tir .tir-carte {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   background: var(--tir-carte);
-  border: 0.5px solid var(--tir-carte-bord);
-  border-radius: 12px;
-  box-shadow: var(--tir-carte-ombre);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 .v2 .tir .tir-defile {

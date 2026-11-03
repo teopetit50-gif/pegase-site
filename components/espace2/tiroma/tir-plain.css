@@ -51,7 +51,8 @@
   --pl-pastille-bord: #323035;
 
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : pleine page, comme Tamila (47b22a8) — plus de bande autour, ni arrondi, ni ombre. */
+  padding: 0;
   background: var(--pl-fond-2);
   color: var(--pl-texte-1);
   font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
@@ -167,10 +168,10 @@ html[data-v2-theme="light"] .v2 .tir-pl {
   position: relative;
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   background: var(--pl-fond-1);
-  border-radius: 12px;
-  box-shadow: var(--pl-carte-ombre);
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 

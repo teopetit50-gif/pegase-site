@@ -49,7 +49,8 @@
   --c-menu-survol: rgb(17 17 17 / 0.04);
 
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : pleine page, comme Tamila (47b22a8) — plus de bande autour, ni arrondi, ni ombre. */
+  padding: 0;
   background: var(--c-page);
   color: var(--c-fort);
   font-family: var(--font-dal-cal), "Cal Sans", Arial, sans-serif;
@@ -146,13 +147,13 @@ html[data-v2-theme="light"] .v2 .dcal {
 
 /* ——— la carte <main> ——— */
 .v2 .dcal-main {
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   overflow: auto;
   scrollbar-width: thin;
   background: var(--c-main);
-  border: 1px solid var(--c-main-bd);
-  border-radius: 16px;
-  box-shadow: var(--c-main-ombre);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   padding: 24px 40px 40px;
 }
 

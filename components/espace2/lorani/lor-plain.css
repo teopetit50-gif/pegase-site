@@ -58,7 +58,8 @@
 
   display: block;
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : pleine page, comme Tamila (47b22a8) — plus de bande autour, ni arrondi, ni ombre. */
+  padding: 0;
   background: var(--pl-f2);
   color: var(--pl-t1);
   font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
@@ -161,12 +162,12 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 /* ——— la carte (main de Plain) ——— */
 .v2 .lor-pl-carte {
   position: relative;
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   overflow-y: auto;
   overflow-x: hidden;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--pl-f1);
-  box-shadow: var(--pl-carte-ombre);
+  box-shadow: none;
   container-type: inline-size;
   container-name: lorpl;
 }
@@ -457,11 +458,11 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 }
 .v2 .lor-pl-colonne {
   flex-direction: column;
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   overflow-y: auto;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--pl-f1);
-  box-shadow: var(--pl-carte-ombre);
+  box-shadow: none;
 }
 .v2 .lor-pl-colonne-tete { display: flex; align-items: center; gap: 8px; height: 56px; padding: 6px 10px 6px 16px; border-bottom: 1px solid var(--pl-b1); flex-shrink: 0; }
 .v2 .lor-pl-colonne-tete b { font-weight: 550; }
@@ -498,9 +499,9 @@ html[data-v2-theme="light"] .v2 .lor-pl {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 384px;
   grid-template-rows: 56px minmax(0, 1fr);
-  height: calc(100dvh - 48px - 16px);
-  border-radius: 12px;
-  border: 1px solid var(--pl-b1);
+  height: calc(100dvh - 48px);
+  border-radius: 0;
+  border: 0;
   background: var(--pl-f1);
   overflow: hidden;
 }

@@ -28,7 +28,8 @@
   --cal-rouge: #ff6467;
 
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : pleine page, comme Tamila (47b22a8) — plus de bande autour, ni arrondi, ni ombre. */
+  padding: 0;
   background: var(--cal-page);
   color: var(--cal-fort);
   font-family: var(--font-tir-cal), "Cal Sans", Arial, sans-serif;
@@ -104,11 +105,11 @@ html[data-v2-theme="light"] .v2 .tir-cal {
 /* ——— carte <main> : bd 1px, r 16, ombre ; contenu à 41 du bord ——— */
 .v2 .tir-cal .cal-carte {
   position: relative;
-  height: calc(100dvh - 48px - 16px);
-  border: 1px solid var(--cal-carte-bord);
-  border-radius: 16px;
+  height: calc(100dvh - 48px);
+  border: 0;
+  border-radius: 0;
   background: var(--cal-carte);
-  box-shadow: 0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d;
+  box-shadow: none;
   overflow: hidden;
 }
 .v2 .tir-cal .cal-defile {

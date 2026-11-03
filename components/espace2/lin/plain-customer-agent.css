@@ -181,11 +181,11 @@ html[data-v2-theme="light"] .v2 .lin.pca {
 .v2 .lin .pca-carte-page {
   flex: 1 1 auto;
   min-width: 0;
-  min-height: calc(100dvh - 48px - 16px);
-  margin: 8px 8px 8px 8px;
-  border-radius: 12px;
+  min-height: calc(100dvh - 48px);
+  margin: 0;
+  border-radius: 0;
   background: var(--pca-carte);
-  box-shadow: var(--pca-ombre-cadre);
+  box-shadow: none;
 }
 .v2 .lin .pca-colonne {
   width: 100%;
