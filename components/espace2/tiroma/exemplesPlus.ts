@@ -56,8 +56,34 @@ const plans: PlanSansRdv[] = GABARITS.map(([plan_id, patient_id, patient_nom, pr
   prochaine: { rang: 1, libelle, famille, duree_min: duree, seance: 1 }, proches_a_planifier: i === 2 ? 1 : 0, ne_pas_contacter: false,
 }));
 
+const tousPlans = [...DOSSIER_EXEMPLE.plans, ...plans].sort((x, y) => y.jours_depuis - x.jours_depuis);
+
+/* Pilotage et synthèse comptent les mêmes plans que la page Plans et devis (11 avec ceux ci-dessus), pas les 4 du
+   dossier de base : « signé sans rendez-vous » doit dire le même nombre partout. */
+const sansRdv = {
+  nombre: tousPlans.length,
+  montant: tousPlans.reduce((s, p) => s + (p.montant ?? 0), 0),
+  reste_a_charge: tousPlans.reduce((s, p) => s + (p.reste_a_charge ?? 0), 0),
+};
+const syn = DOSSIER_EXEMPLE.synthese;
+
 export const DOSSIER_EXEMPLE_TIROMA: Dossier = {
   ...DOSSIER_EXEMPLE,
   creneaux: [...DOSSIER_EXEMPLE.creneaux.slice(0, 2), creneau, ...DOSSIER_EXEMPLE.creneaux.slice(2)],
-  plans: [...DOSSIER_EXEMPLE.plans, ...plans].sort((x, y) => y.jours_depuis - x.jours_depuis),
+  plans: tousPlans,
+  pilotage: DOSSIER_EXEMPLE.pilotage ? { ...DOSSIER_EXEMPLE.pilotage, plans_sans_rdv: sansRdv } : DOSSIER_EXEMPLE.pilotage,
+  synthese: syn
+    ? (() => {
+        const cabinets = syn.cabinets.map((c, i) => (i === 0 ? { ...c, plans_sans_rdv: { nombre: sansRdv.nombre, montant: sansRdv.montant } } : c));
+        return {
+          ...syn,
+          cabinets,
+          total: {
+            ...syn.total,
+            plans_sans_rdv: cabinets.reduce((s, c) => s + c.plans_sans_rdv.nombre, 0),
+            montant_plans_sans_rdv: cabinets.reduce((s, c) => s + c.plans_sans_rdv.montant, 0),
+          },
+        };
+      })()
+    : syn,
 };

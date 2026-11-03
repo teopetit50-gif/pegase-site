@@ -202,6 +202,43 @@ function lignesDuJour(d: Dossier) {
     }
   }
 
+  /* Équipe absente (b3_18) : un membre absent et les soins de son fauteuil à basculer — la capture du site
+     « Ce matin » le montre ; la vue complète reste Fauteuils › Équipe absente */
+  const MOTIF_ABSENCE: Record<string, string> = { conge: "Congé", maladie: "Arrêt", formation: "Formation", autre: "Absence" };
+  const equipe: Ligne[] = (d.equipe ?? []).map((ab, i) => {
+    const sansSolution = ab.soins.filter((x) => !x.vers.length).length;
+    return {
+      cle: `eq-${ab.absence_id}`,
+      ident: `EQ-${i + 1}`,
+      priorite: sansSolution ? 2 : 3,
+      statut: "todo",
+      titre: `${ab.membre} : absence du ${jourCourt(ab.debut)} au ${jourCourt(ab.fin)}${ab.fauteuil_nom ? ` (${ab.fauteuil_nom})` : ""} : ${ab.soins.length} soin${ab.soins.length > 1 ? "s" : ""} à basculer${sansSolution ? `, ${sansSolution} sans autre fauteuil` : ""}`,
+      puces: [
+        { type: "etiquette", couleur: sansSolution ? ROUGE : BEIGE, texte: MOTIF_ABSENCE[ab.motif] ?? ab.motif },
+        ...(ab.fauteuil_nom ? [{ type: "projet" as const, icone: "Box" as NomTirIcone, couleur: "lch(80 90 85)", texte: ab.fauteuil_nom }] : []),
+      ],
+      personne: ab.membre,
+      date: jourCourt(ab.debut),
+      dateTitre: complet(ab.debut),
+      href: `${BASE}/fauteuils?vue=equipe`,
+    };
+  });
+
+  /* Contrôles dus (b3_23) : les patients sans contrôle depuis plus de N mois ; la liste entière est dans
+     Créneaux et appels › Contrôles dus */
+  const controles: Ligne[] = (d.controlesDus?.patients ?? []).slice(0, 3).map((c, i) => ({
+    cle: `ct-${c.patient_id}`,
+    ident: `CT-${i + 1}`,
+    priorite: 3,
+    statut: "todo",
+    titre: `${c.patient_nom} — ${c.mois_depuis != null ? `dernier contrôle il y a ${c.mois_depuis} mois` : "aucun contrôle connu"}`,
+    puces: [{ type: "etiquette", couleur: BLEU_VERT, texte: "Contrôle" }],
+    personne: null,
+    date: c.derniere_venue ? jourCourt(c.derniere_venue) : "",
+    dateTitre: c.derniere_venue ? `Dernière venue le ${complet(c.derniere_venue)}` : "",
+    href: `${BASE}/creneaux?vue=controles`,
+  }));
+
   /* B24 — réponses des patients aux rappels (quinze jours) ; une confirmation passe dans « Faits » */
   const reponses: Ligne[] = [];
   (d.rappels?.reponses ?? []).forEach((r, i) => {
@@ -237,6 +274,8 @@ function lignesDuJour(d: Dossier) {
     { cle: "plans", libelle: "Plans sans rendez-vous", compteur: plans.length, lignes: plans, plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
     { cle: "avant", libelle: "Avant les rendez-vous", compteur: avant.length, dates: critiques ? `${critiques} critique${critiques > 1 ? "s" : ""}` : `à J-${d.regles?.labo_verif_jours ?? 2}`, lignes: avant.sort(parPriorite), plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
     { cle: "vides", libelle: "Demi-journées vides", compteur: titulaire ? (d.charge?.demi_journees_vides ?? vides.length) : "—", dates: titulaire ? "aujourd'hui, par fauteuil" : "réservé au titulaire", lignes: vides, plus: `${BASE}/fauteuils?vue=equipe&absence=1`, plusTitre: "Noter une absence de l'équipe" },
+    ...(equipe.length ? [{ cle: "equipe", libelle: "Équipe absente", compteur: equipe.length, lignes: equipe.sort(parPriorite), plus: `${BASE}/fauteuils?vue=equipe&absence=1`, plusTitre: "Noter une absence de l'équipe" }] : []),
+    ...(controles.length ? [{ cle: "controles", libelle: "Contrôles dus", compteur: d.controlesDus?.total ?? controles.length, dates: `plus de ${d.controlesDus?.seuil_mois ?? 12} mois`, lignes: controles, plus: `${BASE}/creneaux?vue=controles`, plusTitre: "Voir tous les contrôles dus" }] : []),
     ...(reponses.length ? [{ cle: "reponses", libelle: "Réponses des patients", compteur: reponses.length, lignes: reponses.sort(parPriorite), plus: `${BASE}/reglages?section=rappels`, plusTitre: "Ajouter un moyen de contact" }] : []),
     ...(faits.length ? [{ cle: "faits", libelle: "Faits", icone: "IssueStatusDone" as NomTirIcone, couleurIcone: "var(--tir-t3)", compteur: faits.length, lignes: faits, plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" }] : []),
   ];
