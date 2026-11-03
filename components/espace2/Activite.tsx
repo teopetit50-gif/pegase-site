@@ -45,7 +45,7 @@ import { dateCourte, dateHeure, libelleModule, montant, relatif } from "@/compon
 import { etatDocument } from "@/components/espace/filed/etats";
 import { nomPersonne } from "@/components/espace/exemples/socle";
 import { useSource } from "@/components/espace/source";
-import { chargerEnvois, envoisExemple, type Envoi } from "./envois";
+import { chargerEnvois, chargerJournalVarelo, envoisExemple, journalVareloExemple, type Envoi, type LigneVarelo } from "./envois";
 import { Note, Squelette } from "./ui";
 import { useDonnees, type Donnees } from "./donnees";
 import { STATUTS_DEMANDE } from "./evenements";
@@ -150,6 +150,25 @@ function cartes(donnees: Donnees): Carte[] {
   return l;
 }
 
+/* Varelo : qui a validé quoi, chaque lecture tracée (journal_opposable, actions varelo.*) — parmi les décisions */
+function cartesVarelo(l: LigneVarelo[]): Carte[] {
+  const T: Record<LigneVarelo["etat"], TeinteLin> = { Validé: "vert", Lu: "gris", Refusé: "rouge", Noté: "bleu" };
+  return l.map((x) => ({
+    id: x.id,
+    colonne: "decisions" as const,
+    quand: x.quand,
+    titre: x.quoi,
+    complet: `${x.quoi} — ${x.par}`,
+    somme: null,
+    devise: "EUR",
+    etat: { libelle: x.etat, teinte: T[x.etat] },
+    par: x.par,
+    module: "varelo",
+    lien: `${RACINE}/varelo/referentiel?vue=decisions`,
+    texte: `${x.quoi} ${x.par} ${x.etat}`,
+  }));
+}
+
 /* « Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui l'a validé » */
 function cartesEnvois(envois: Envoi[]): Carte[] {
   return envois.map((e) => ({
@@ -244,8 +263,20 @@ export default function Activite() {
       actif = false;
     };
   }, [source]);
+  const [vareloReel, setVareloReel] = useState<LigneVarelo[]>([]);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let actif = true;
+    chargerJournalVarelo()
+      .then((x) => actif && setVareloReel(x))
+      .catch(() => undefined);
+    return () => {
+      actif = false;
+    };
+  }, [source]);
   const envois = useMemo(() => (source === "exemple" ? envoisExemple() : envoisReels), [source, envoisReels]);
-  const toutes = useMemo(() => (donnees ? [...cartes(donnees), ...cartesEnvois(envois)] : null), [donnees, envois]);
+  const varelo = useMemo(() => (source === "exemple" ? journalVareloExemple() : vareloReel), [source, vareloReel]);
+  const toutes = useMemo(() => (donnees ? [...cartes(donnees), ...cartesEnvois(envois), ...cartesVarelo(varelo)] : null), [donnees, envois, varelo]);
   const duree = PERIODES.find((p) => p.cle === periode)?.duree ?? Infinity;
   const dansPeriode = useMemo(() => (toutes && maintenant !== null ? toutes.filter((c) => duree === Infinity || maintenant - new Date(c.quand).getTime() <= duree) : null), [toutes, maintenant, duree]);
   const lesModules = useMemo(() => Array.from(new Set((dansPeriode ?? []).map((c) => c.module))), [dansPeriode]);

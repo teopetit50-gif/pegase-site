@@ -49,3 +49,37 @@ export function envoisExemple(): Envoi[] {
     { id: "env-6", quand: ilYa(2, 9), quoi: "Mise en demeure envoyée · Restaurant Le Comptoir", module: "cashd", a_qui: "gerance@le-comptoir.example.com", regle: "mise en demeure, J+30", valide_par: "Vous", montant: 3120, lien: "/espace2/cashd/suivi?vue=relances" },
   ];
 }
+
+/* VARELO — « …et le journal garde qui a validé quoi », « chaque lecture est inscrite au journal » (03/11/2026).
+   private.grp_journal écrit les actions varelo.* dans public.journal_opposable (chaîne vérifiée en production) ;
+   la page Activité les montre parmi les décisions, filtrables par module (?modules=varelo). */
+export type LigneVarelo = { id: string; quand: string; quoi: string; par: string; etat: "Validé" | "Lu" | "Refusé" | "Noté" };
+
+const etatVarelo = (action: string): LigneVarelo["etat"] => (/lecture|lu$/.test(action) ? "Lu" : /refus|rejet/.test(action) ? "Refusé" : /valid|decision|appliqu/.test(action) ? "Validé" : "Noté");
+
+export async function chargerJournalVarelo(): Promise<LigneVarelo[]> {
+  const { data, error } = await createClient()
+    .from("journal_opposable")
+    .select("id, survenu_le, action, objet_type, acteur_libelle, donnees")
+    .like("action", "varelo.%")
+    .order("survenu_le", { ascending: false })
+    .limit(100);
+  if (error) throw new Error(error.message);
+  return ((data ?? []) as { id: number; survenu_le: string; action: string; objet_type: string; acteur_libelle: string | null; donnees: Record<string, unknown> | null }[]).map((x) => ({
+    id: `var-${x.id}`,
+    quand: x.survenu_le,
+    quoi: `${x.action.replace(/^varelo\./, "").replace(/[._]/g, " ")}${typeof x.donnees?.libelle === "string" ? ` · ${x.donnees.libelle}` : ""}`,
+    par: x.acteur_libelle ?? "Varelo",
+    etat: etatVarelo(x.action),
+  }));
+}
+
+export function journalVareloExemple(): LigneVarelo[] {
+  return [
+    { id: "var-1", quand: ilYa(0, 8), quoi: "Référentiel lu par l'assistant · fiche fournisseur Hôtel des Alpes (question de la direction financière)", par: "Assistant Omega", etat: "Lu" },
+    { id: "var-2", quand: ilYa(1, 15), quoi: "Lot de rapprochement des fournisseurs validé · 12 doublons fusionnés", par: "Claire Morel", etat: "Validé" },
+    { id: "var-3", quand: ilYa(1, 11), quoi: "Plafond d'encours d'Hôtel des Alpes porté à 60 000 €", par: "Vous", etat: "Validé" },
+    { id: "var-4", quand: ilYa(2, 10), quoi: "Rapprochement refusé · « Durand SA » n'est pas « Papeterie Durand »", par: "Sofia Carvalho", etat: "Refusé" },
+    { id: "var-5", quand: ilYa(3, 9), quoi: "Référentiel lu · export des réciproques pour la consolidation", par: "Claire Morel", etat: "Lu" },
+  ];
+}
