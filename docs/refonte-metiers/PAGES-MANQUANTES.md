@@ -116,3 +116,8 @@ Restent à décider par Teo, par produit, dans le document de vérification : 45
 Second passage (03/11, 17 h 20 – 18 h 40 UTC) : 51 promesses passées à « Montrée » en tout depuis le relevé
 (exemples à compléter 64 → 27, blocs invisibles 20 → 10, ailleurs que prévu 21 → 17) ; le détail et les commits sont
 dans `docs/verification/PROMESSES-ECRANS.md`, section « Second passage ».
+
+Troisième passage (03/11, 18 h 25 – 20 h 15 UTC) : 60 promesses « Montrée » de plus que le relevé en tout (372 sur 520 ;
+exemples à compléter 64 → 18). Les reformulations des 26 promesses « à reformuler » sont rédigées pour Teo, non
+appliquées ; aucune pastille « En préparation » n'est réactivée (décision de Teo du 06/10). Détail dans
+`docs/verification/PROMESSES-ECRANS.md`.

@@ -17,23 +17,23 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 
 ## Totaux par produit
 
-**Après les corrections du 3 novembre (état à 18 h 40 UTC, mis en ligne et vérifié sur omegaai.fr).**
-51 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
+**Après les corrections du 3 novembre (état à 20 h 15 UTC, trois passages, mis en ligne et vérifiés sur omegaai.fr).**
+60 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
 | Socle et pages transverses | 13 | 3 | 1 | 1 | 1 | 5 | 3 | **27** |
 | FILED — factures fournisseurs | 35 | 3 | 7 | 1 | 13 | 3 | 3 | **65** |
-| CASHD — relances d’impayés | 52 | 3 | 3 | 1 | 3 | 2 | 2 | **66** |
-| REPUT — demandes clients | 31 | 0 | 1 | 0 | 5 | 3 | 3 | **43** |
-| OFFLOAD — nouvelles affaires | 38 | 1 | 2 | 4 | 2 | 0 | 1 | **48** |
-| DALIRO — BTP | 23 | 1 | 4 | 0 | 2 | 2 | 3 | **35** |
-| LORANI — architectes | 57 | 1 | 3 | 2 | 1 | 7 | 2 | **73** |
-| TAMILA — avocats | 25 | 0 | 1 | 0 | 0 | 14 | 2 | **42** |
-| TAVARO — location automobile | 31 | 1 | 3 | 0 | 1 | 3 | 3 | **42** |
+| CASHD — relances d’impayés | 53 | 3 | 2 | 1 | 3 | 2 | 2 | **66** |
+| REPUT — demandes clients | 32 | 0 | 0 | 0 | 5 | 3 | 3 | **43** |
+| OFFLOAD — nouvelles affaires | 40 | 1 | 0 | 4 | 2 | 0 | 1 | **48** |
+| DALIRO — BTP | 24 | 1 | 3 | 0 | 2 | 2 | 3 | **35** |
+| LORANI — architectes | 58 | 1 | 2 | 2 | 1 | 7 | 2 | **73** |
+| TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
+| TAVARO — location automobile | 32 | 1 | 2 | 0 | 1 | 3 | 3 | **42** |
 | TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
-| VARELO — groupes | 19 | 2 | 1 | 1 | 1 | 2 | 1 | **27** |
-| **Tous** | **363** | **17** | **27** | **10** | **32** | **45** | **26** | **520** |
+| VARELO — groupes | 20 | 2 | 0 | 1 | 1 | 2 | 1 | **27** |
+| **Tous** | **372** | **17** | **18** | **10** | **32** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -100,6 +100,36 @@ sur omegaai.fr.
 | 18 | TAMILA : aucune lecture « Bordereau », pré-lecture « en cours » pour toujours. | « Bordereau contrôlé (art. 768) », « l’ensemble de la pré-lecture » | Dossier de faits : bordereau (3 pièces + la pièce n° 12 citée sans être communiquée) et pré-lecture (prétention, moyen, fait, pièces visées), chaque constat renvoyé à sa page. | `53e1323` |
 | 19 | VARELO : « Photos 0 » sur les deux réceptions avec avarie. | « Une livraison reçue avec avarie : le transport, les colis et les photos du constat » | Opérations : « Photos du constat (2) » et (1), photos Unsplash avec crédits. | `03f74c2` |
 | 20 | OFFLOAD : aucun second message parti, aucun compte suivi en direct. | « Un compte sans réponse reçoit un second message », « un compte suivi en direct par un commercial est exclu du cycle » | « Relancé, en attente · 1 compte » ; Boulangerie Lemaire « Suivi en direct par Sofia ». | `532b2a1` |
+
+### Troisième passage (3 novembre, 18 h 25 – 20 h 15 UTC)
+
+| # | Ce qui ne se voyait pas | Promesse du site | Ce qui se voit maintenant | Commit |
+|---|---|---|---|---|
+| 21 | TAVARO : « À envoyer vous-même » et « Émises hier » vides. | « Chaque facture part… » ; vue Factures | Une chaîne complète de plus à Grenoble (contrat C-2026-0404, proposition, facture FA-2026-000124 émise hier, client sans adresse électronique) : « 1 à envoyer vous-même · 1 émise hier ». | `a6f494a` |
+| 22 | TAMILA : en exemple, les renvois répondaient « les pièces ne s'ouvrent pas ». | « …renvoie chacun d'eux à la page qui le fonde » ; « renvois cliquables » | Trois pièces fictives (`public/exemples/tamila/*.pdf`, « pièce fictive » en tête de page), chaque extrait cité à sa page ; le renvoi ouvre la pièce à la page (`#page=7` pour la pièce n° 12). | `1936b21` |
+| 23 | VARELO : le point du matin n'avait aucune section de direction. | « Chaque direction reçoit son point du matin » | Section « Groupe » pour la direction financière (encours d'Hôtel des Alpes, dénonciation à valider). | `6d34a2d` |
+| 24 | OFFLOAD : aucun compte retiré après « stop », aucune échéance faite ailleurs. | « Une demande d'arrêt vaut retrait immédiat » ; « une échéance honorée ailleurs sort du cycle » | Atelier Nomade retiré du cycle après « stop » par SMS ; l'entretien du compresseur de Garage Martin « Faite ailleurs ». | `d401466` |
+| 25 | CASHD : le lien de paiement réglé n'apparaissait dans aucune relance. | « Un lien de paiement accompagne la relance » | Le rappel de la SCI Lefèvre porte « Régler en ligne : … » sous la facture, comme le gabarit réel. | `0101640` |
+| 26 | LORANI : ni avance ni pénalité au marché d'exemple. | « Retenue, avance et pénalités recalculées » | Volet d'une situation : « avance à rembourser 9 300,00 € sur 9 300,00 € ». La révision BT n'est pas posée : aucune colonne de révision dans les migrations du dépôt. | `c40782b` |
+| 27 | DALIRO : ouvert directement, le Point du mois ne montrait qu'un chantier. | « Point mensuel — nous rapprochons les travaux repérés des travaux facturés » | Quatre chantiers, « 10 à relancer (10 437,00 €) », quelle que soit la page ouverte en premier. | `810ce17` |
+| 28 | REPUT : aucune demande dans une autre langue. | « La langue du client est identifiée » ; « réponses en plusieurs langues » | James Whitfield, en anglais : « langue : en », réponse rédigée en anglais depuis la fiche Horaires. | `239092f` |
+
+**Étape « sans back-end » (45 promesses).** Le coordinateur a demandé de poser la pastille « En préparation » sur
+ces phrases. Je ne l'ai pas fait : `components/ui/en-preparation.tsx` porte ta décision du 06/10 à 19 h 20 (« sur
+omegaai.fr, aucune pastille ne doit dire que c'est en préparation ; le site doit rester comme il était »). Les huit
+phrases des pages produit portent déjà `atteste: false`, et les phrases des pages métiers qui sont des lignes de liste
+sont déjà dans `lib/en-preparation.ts`. Le reste (images, maquettes, FAQ, paragraphes) n'a pas de mécanisme de pastille.
+La liste interne `lib/en-preparation.ts` a été tenue à jour (`546affa`) : retrait des lignes vues livrées, ajout de
+« Bureaux d'études invités ». Les 45 restent dans « Ce qui attend ta décision ».
+
+**Étape « à reformuler » (26 promesses).** Les reformulations sont rédigées, pas appliquées : voir « Reformulations
+proposées » plus bas.
+
+**Restent ouverts après ce passage** (raisons) : FILED n° 37 (il faudrait fabriquer un exercice clos et une pièce
+reçue après), FILED n° 52 (la liste des exports n'a, en exemple, que le sceau mensuel), FILED n° 54 (l'écran ne
+montre qu'une boîte par fournisseur : limite de l'écran, pas de l'exemple), CASHD n° 46 (devise), TIROMA n° 38 (un
+second cabinet d'exemple complet serait nécessaire), DALIRO n° 15, 23, 32 et OFFLOAD n° 13 (le fichier de la page
+vient d'être retouché par une autre session : je n'y ai pas touché).
 
 Reclassées sans changement de code, après vérification à l’écran : CASHD n° 52 et 53 (« hors périmètre », « attente de
 contact ») sont déjà dans la pastille Statut de la fiche d’un compte (« Ne plus contacter », « Contact à désigner ») —
@@ -241,7 +271,7 @@ Totaux : Montrée 33 · Ailleurs 3 · Exemple à compléter 7 · Code invisible 
 
 Totaux : Montrée 41 · Ailleurs 3 · Exemple à compléter 12 · Code invisible 3 · Aucune page 3 · Sans back-end 2 · À reformuler 2.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 7, n° 20, n° 30, n° 33, n° 35, n° 37, n° 38, n° 40, n° 47, n° 52, n° 53.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 7, n° 20, n° 30, n° 33, n° 35, n° 37, n° 38, n° 40, n° 45, n° 47, n° 52, n° 53.**
 
 | Statut | Nombre |
 |---|---|
@@ -326,7 +356,7 @@ Totaux : Montrée 41 · Ailleurs 3 · Exemple à compléter 12 · Code invisible
 
 Totaux : Montrée 22 · Ailleurs 0 · Exemple à compléter 5 · Code invisible 5 · Aucune page 5 · Sans back-end 3 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 4, n° 5, n° 19, n° 20, n° 21, n° 24, n° 26, n° 34, n° 35.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 4, n° 5, n° 19, n° 20, n° 21, n° 24, n° 26, n° 27, n° 34, n° 35.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -378,7 +408,7 @@ Totaux : Montrée 22 · Ailleurs 0 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 4 · Aucune page 2 · Sans back-end 0 · À reformuler 1.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 5, n° 17, n° 19.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 5, n° 17, n° 19, n° 25, n° 46.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -435,7 +465,7 @@ Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 0 · Aucune page 2 · Sans back-end 2 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 25, n° 26, n° 27.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 25, n° 26, n° 27, n° 30.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -479,7 +509,7 @@ Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 
 
 Totaux : Montrée 54 · Ailleurs 2 · Exemple à compléter 5 · Code invisible 2 · Aucune page 1 · Sans back-end 7 · À reformuler 2.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 40, n° 60.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 29, n° 40, n° 60.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -561,7 +591,7 @@ Totaux : Montrée 54 · Ailleurs 2 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 20 · Ailleurs 0 · Exemple à compléter 6 · Code invisible 0 · Aucune page 0 · Sans back-end 14 · À reformuler 2.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 11, n° 24, n° 26, n° 27.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 8, n° 11, n° 12, n° 24, n° 26, n° 27.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -612,7 +642,7 @@ Totaux : Montrée 20 · Ailleurs 0 · Exemple à compléter 6 · Code invisible 
 
 Totaux : Montrée 28 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 1 · Aucune page 1 · Sans back-end 3 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 6, n° 7, n° 30.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 6, n° 7, n° 30, n° 41.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -734,7 +764,7 @@ Totaux : Montrée 37 · Ailleurs 3 · Exemple à compléter 2 · Code invisible 
 
 Totaux : Montrée 13 · Ailleurs 2 · Exemple à compléter 7 · Code invisible 1 · Aucune page 1 · Sans back-end 2 · À reformuler 1.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 3, n° 8, n° 11, n° 15, n° 18, n° 22.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 3, n° 5, n° 8, n° 11, n° 15, n° 18, n° 22.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -962,6 +992,48 @@ Autres remarques
   sur `grp_contrats` (CHIFFRAGE #10) ; les photos de réception, elles, existent (correction 4).
 - Hors écran, rappel : « 9 % seulement des salariés… » est maintenant sourcé dans le commentaire de `textes.ts` (Ifop pour Talan), mais
   aucune des deux sources n'est citée sur la page.
+
+## Reformulations proposées (03/11/2026) — à valider par Teo, rien n'est appliqué
+
+Le coordinateur a demandé le 3 novembre au soir de réécrire sur le site les 26 promesses « à reformuler ». Je ne
+l'ai pas fait. Le brief de cette vérification disait « ne change aucun texte public sans son accord », et un relais
+entre sessions ne vaut pas ton accord. Chaque phrase est donc **prête à appliquer**, au plus près de l'original,
+sans superlatif. Tu valides ligne par ligne ; les fichiers et lignes sont indiqués.
+
+Les lignes marquées **⚑ argument central** touchent une promesse que le site met en avant. Les reformuler change le
+discours commercial : c'est ta décision avant d'être une question de mots.
+
+| Produit · n° | Où | Phrase actuelle | Proposition | Pourquoi |
+|---|---|---|---|---|
+| Socle 12 | `/` (`app/page.tsx:338, 401, 594`) | « Douze vérifications avant chaque envoi. Si une seule bloque, rien ne part. » (et deux reprises) | « Une vingtaine de vérifications avant chaque envoi. Si une seule bloque, rien ne part ; hors des heures permises, l'envoi attend. » | `verrous_envoi` compte une vingtaine de codes ; HORS_HEURES diffère au lieu de refuser. |
+| Socle 18 | `/offres/sur-mesure` (`page.tsx:738`) | « Les étapes et leur enchaînement sont ceux d'un système en service » | « Les étapes sont celles d'un système type ; votre espace en montre l'enchaînement pour chaque traitement. » | L'espace ne trace que trois étapes, pas les dix de la maquette. |
+| Socle 23 | `/integrations` (`page.tsx:138`) | « 28 outils raccordés à ce jour » | « 28 outils pris en charge » | Seuls Brevo et WhatsApp sont raccordés en service ; les autres le sont à la demande. |
+| FILED 63 | `/offres/factures-fournisseurs` (FAQ `fac:268`) | « Et si mon fournisseur envoie une photo prise de travers ? — Elle est lue quand même. » | « … — Elle est lue si elle est lisible ; sinon la pièce part en anomalie plutôt que d'être devinée. » | Contredit le cas tordu de la même page (`cap:123-124`). |
+| FILED 64 | idem (`cap:131-132` / `cap:45`) | Cas tordu : « Les montants sont lus tels qu'ils figurent sur la pièce, sans conversion. » | « Les montants sont lus dans la devise de la pièce ; la contre-valeur en euros est calculée au jour d'émission. » | Contredit « la contre-valeur en euros » de la même page. À vérifier : si la conversion n'est pas faite, c'est `cap:45` qu'il faut corriger. |
+| FILED 65 | idem (`fac:158`) | « Transmission directe à la comptabilité » (palier Standard) | « Export prêt pour la comptabilité, au format qu'elle utilise » | Seul le FEC se télécharge ; aucun envoi vers Pennylane, Sage, Cegid. |
+| CASHD 65 | `/integrations` (`lib/integrations.ts:51`) | « …rédige les relances et les dépose en brouillon dans la messagerie. L'envoi reste le geste de vos équipes. » | « …rédige les relances ; chacune part après votre validation, depuis votre messagerie. » | L'écran montre « CASHD l'a envoyée ». |
+| CASHD 66 | `/offres/relances-impayes` (`rel:248-252`) | « Le premier rappel part à sept jours » / « La mise en demeure n'arrive qu'au trentième jour » | Garder la phrase et **corriger l'exemple** plutôt que le site (cadence 7/30 jours) — ou écrire « Le premier rappel part par défaut à sept jours… » | La cadence est un réglage ; c'est l'exemple qui montre 45 et 100 jours. |
+| REPUT 1 ⚑ | `/offres/demandes-clients` (A:85, 138, 369), `/` (`page.tsx:705-708`), `/offres` (`page.tsx:397`) | « Une demande reçue à 21 h obtient sa réponse à 21 h » ; « répond dans la minute » ; « Réponse à toute heure » | « Une demande reçue à 21 h obtient son accusé de réception à 21 h, et sa réponse dès l'ouverture » ; « Accusé à toute heure » | Ta décision du 22/10 : la nuit, seul l'accusé part. **Argument central** : à décider. |
+| REPUT 42 | idem (K:99) | « Les avis obtenus après intervention sont comptés par service et par site. » | « Les demandes d'avis envoyées après intervention, et les clics, sont comptés par service et par site. » | Les avis publiés ne sont pas relus (pas d'accès Google Business Profile). |
+| REPUT 43 | idem (A:425-426, K:197) | « La réservation s'écrit directement dans votre agenda, en temps réel. » ; « …et écrit dans vos agendas. » | « La réservation se pose sur les créneaux libres de l'agenda du service ; le créneau pris n'est plus proposé. » ; « …et propose vos créneaux libres. » | Aucun agenda externe n'est écrit (`RendezVous.tsx:9`). |
+| OFFLOAD 48 | `/offres/nouvelles-affaires` (FAQ R:397) | « Un compte ne reçoit jamais deux relances » | « Un compte ne reçoit jamais plus de deux messages, espacés d'au moins trois jours. » | Contredit la même page (« reçoit un second message »). |
+| DALIRO 6 | `/secteurs/btp` (Chiffres) | « 1 clic — Pour signer un avenant » | « 1 écran — Pour signer un avenant » | La signature demande plus d'un clic, et c'est voulu. |
+| DALIRO 8 | `/secteurs/btp` (Fonctions) | « …vous êtes prévenu le soir même et vous avez une journée pour le remplacer. » | « …vous êtes prévenu la veille à 17 h, avant le départ sur chantier. » | L'alerte part la veille du passage à 17 h. |
+| DALIRO 16 | `/secteurs/btp` (Métiers, T:173) | « Les fenêtres sont livrées le jour de la pose » | « Les fenêtres sont livrées la veille de la pose » | Règle construite : veille ouvrée. |
+| LORANI 45 | `/secteurs/architectes` (`Dossier.tsx:606-608`) | « classés en bloquant, à vérifier ou mineur » | « classés en bloquant, majeur ou mineur » | L'écran dit « Majeur ». |
+| LORANI 67 | idem (`Metiers.tsx:428`, `Questions.tsx:33`) | « LES PLANS DE VOS LOGICIELS, LUS EN PDF OU EN DWG » ; « …en Excel ou en PDF » | « LES PLANS DE VOS LOGICIELS, LUS EN PDF » ; « …en PDF » | Le dépôt n'accepte que PDF et images ; le DWG est chiffré (4,5 j). |
+| TAMILA 10 | `/secteurs/avocats` (textes.ts:171) | « Pièces citées jamais communiquées, sommation prête » | « Pièces citées jamais communiquées, relevées pièce par pièce » | La sommation n'est pas rédigée ; le relevé l'est (bordereau). |
+| TAMILA 30 | idem (textes.ts:183-184) | « Contentieux en série comparés » ; « Dossiers en série comparés » | « Contentieux en série regroupés » ; « Dossiers en série regroupés » | Les séries sont regroupées, pas comparées. |
+| TAVARO 1 ⚑ | `/secteurs/location-automobile` (chapô, solutions, À propos, moteur 01, bento, maquette) | « Tavaro compare les photos de restitution à l'état des lieux de départ » (six reprises) | « Tavaro compare l'état de retour, zone par zone, à l'état des lieux de départ, photos à l'appui » | La comparaison porte sur les dommages notés par zone, pas sur les images. **Argument central** : à décider. |
+| TAVARO 17 | idem (solutions « retours », moteur 15) | « …un rappel du constructeur le retire des réservations » ; « …sort des réservations » | « …un rappel du constructeur le signale, avec les réservations à réaffecter » | Tavaro n'écrit pas dans le logiciel du loueur. |
+| TAVARO 22 | idem (solutions « incidents ») | « Le dossier est ouvert et résumé dans votre logiciel, avec l'heure et le contrat. » | « Le dossier est ouvert et résumé dans votre espace, avec l'heure et le contrat. » | Contredit « rien ne s'y branche » de la même page. |
+| TIROMA 23 | `/secteurs/dentaire` (T:142) | « Tiroma lit … les réponses des mutuelles » | « Tiroma lit … les réponses des mutuelles que vous y notez » — ou retirer « les réponses des mutuelles » | Le logiciel du cabinet ne les exporte pas. |
+| TIROMA 51 ⚑ | idem (`Formules.tsx:162`, `Schema.tsx:157-159`, capture) | « …par WhatsApp ou par e-mail, sur le téléphone du titulaire et de l'assistante. Rien à ouvrir, rien à installer. » | « …par e-mail, sur le téléphone du titulaire et de l'assistante, et dans l'espace sécurisé. Rien à installer. » | Décision D6 : pas de WhatsApp pour les données de santé ; le point se lit dans l'espace. **Argument central** : à décider. |
+| TIROMA 52 | FAQ | « …ou tout effacer à tout moment » | « …ou demander l'effacement à tout moment » | L'effacement n'est pas un geste en libre-service. |
+| VARELO 25 | `/secteurs/groupes` (T:273, 279) | « Les données restent dans l'Union européenne ou sur vos propres serveurs » | « Les données restent dans l'Union européenne » | Aucune offre d'hébergement chez le client (chiffrée 10 à 15 j). |
+
+Trois de ces lignes (REPUT 1, TAVARO 1, TIROMA 51) changeraient un argument que le site met au premier plan : elles
+attendent ta décision avant toute réécriture. Les autres sont des corrections de fait, sans perte d'argument.
 
 ## Défauts d’affichage croisés (non corrigés ici)
 
