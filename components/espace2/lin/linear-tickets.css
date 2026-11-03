@@ -868,7 +868,7 @@ html[data-v2-theme="light"] .v2 .lin.lt {
   line-height: 22.5px;
   color: var(--lin-texte);
   outline: none;
-  resize: vertical;
+  resize: none; /* 03/11/2026 — composeur sans bord : pas de poignée, comme Linear et Plain */
 }
 :is(.v2, .v2-jetons) .lt-fenetre-description::placeholder {
   color: var(--lin-second);

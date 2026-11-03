@@ -14,6 +14,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Copy, Download, FileSpreadsheet, Trash2, Users } from "lucide-react";
 import { Loader } from "@/components/ui/loader";
 import { EXEMPLE_CLIENT_ID, ilYa } from "../exemples/socle";
@@ -65,6 +66,9 @@ function exportExemple(): ExportComplet {
 }
 
 export default function EcranReglages() {
+  /* 03/11/2026 — dans Espace 2, « Gérer l'équipe » menait à l'ancien /espace/equipe */
+  const chemin = usePathname() ?? "";
+  const lienEquipe = chemin.startsWith("/espace2") ? "/espace2/equipe" : "/espace/equipe";
   const { source } = useSource();
   const [compte, setCompte] = useState<{ client_id: string; role: string | null } | null>(null);
   const [lu, setLu] = useState(false);
@@ -187,7 +191,7 @@ export default function EcranReglages() {
           <div className="esp-carte-corps" style={{ display: "grid", gap: 12 }}>
             <p className="esp-kpi-sous" style={{ margin: 0 }}>Qui a accès à votre organisation, avec quel rôle, et sur quelles sociétés.</p>
             <div className="esp-actions">
-              <Link href="/espace/equipe" className="r-btn r-btn--fil"><Users width={15} height={15} aria-hidden="true" /> Gérer l&apos;équipe</Link>
+              <Link href={lienEquipe} className="r-btn r-btn--fil"><Users width={15} height={15} aria-hidden="true" /> Gérer l&apos;équipe</Link>
             </div>
           </div>
         </section>

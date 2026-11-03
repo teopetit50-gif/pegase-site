@@ -212,7 +212,7 @@ function Tableau({ vous }: { vous: string }) {
   /* ——— les gestes ——— */
   const accepter = (c: Carte & { famille: "relation" }) => {
     poser(c.id, "engagee");
-    toast(`Intro demandée à ${membre(c.r.membre).nom}. Elle compte dans « Ce que le réseau vous a apporté ».`, "vert");
+    toast(`Intro notée pour ${membre(c.r.membre).nom} : elle partira à l'ouverture du réseau. Elle compte dans « Ce que le réseau vous a apporté ».`, "vert");
   };
   const plusTard = (c: Carte & { famille: "relation" }) => {
     poser(c.id, "de_cote");
@@ -644,13 +644,14 @@ function Tableau({ vous }: { vous: string }) {
       );
       fil = [
         { cle: "vu", qui: "Omega", quoi: `a rapproché ${c.r.provenance.libelle.toLowerCase()} de ce que propose ${m.nom}`, quand: `il y a ${c.r.age}` },
-        ...(e === "engagee" ? [{ cle: "ok", qui: "Vous", quoi: `avez accepté : ${m.nom} reçoit l'intro avec la raison de la suggestion` }] : []),
+        ...(e === "engagee" ? [{ cle: "ok", qui: "Vous", quoi: `avez accepté : ${m.nom} recevra l'intro, avec la raison de la suggestion, à l'ouverture du réseau` }] : []),
         ...(e === "de_cote" ? [{ cle: "plus-tard", qui: "Vous", quoi: "avez mis la suggestion de côté" }] : []),
       ];
       note =
         e === "examiner" ? (
           <Note teinte="bleu">
-            <strong>Rien ne part sans votre accord.</strong> « Accepter » envoie une intro à {m.nom} : votre nom et la raison ci-dessus, pas vos factures.
+            {/* 03/11/2026 — le réseau n'envoie encore rien (gestes notés sur cet écran) : le texte le dit */}
+            <strong>Rien ne part sans votre accord.</strong> « Accepter » note votre accord pour une intro à {m.nom} : votre nom et la raison ci-dessus, pas vos factures. Le réseau n&apos;envoie encore rien : l&apos;intro partira quand il ouvrira.
           </Note>
         ) : null;
     } else if (c.famille === "groupement") {

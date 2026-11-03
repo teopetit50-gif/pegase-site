@@ -1058,7 +1058,7 @@
 .v2 .tir-pl .pl-zone {
   height: auto;
   padding: 8px 10px;
-  resize: vertical;
+  resize: none; /* 03/11/2026 — composeur sans bord : pas de poignée, comme Linear et Plain */
   line-height: 20px;
 }
 .v2 .tir-pl .pl-composeur--note {

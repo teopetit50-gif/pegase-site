@@ -512,7 +512,7 @@
   padding: 4px 0;
   border: 0;
   background: transparent;
-  resize: vertical;
+  resize: none; /* 03/11/2026 — composeur sans bord : pas de poignée, comme Linear et Plain */
   font: inherit;
   font-size: 13px;
   line-height: 20px;

@@ -269,7 +269,7 @@
 .v2 .sb-donnees-pied { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 36px; padding: 0 24px; border-top: 1px solid var(--v2-a-400); background: var(--v2-bg-200); font-size: 12px; line-height: 16px; color: var(--v2-gray-900); }
 .v2 .sb-volet-detail form { display: flex; flex-direction: column; gap: 16px; }
 .v2 .sb-volet-detail label { display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 19.5px; color: var(--v2-gray-1000); }
-.v2 .sb-volet-detail .v2-champ textarea { flex: 1; min-height: 96px; padding: 8px 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; resize: vertical; }
+.v2 .sb-volet-detail .v2-champ textarea { flex: 1; min-height: 96px; padding: 8px 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; resize: none; } /* 03/11/2026 — sans bord : pas de poignée */
 .v2 .sb-volet-detail-pied { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid var(--v2-a-400); margin-top: auto; }
 
 /* ══ Le gabarit « journal » : Logs, journaux unifiés (relevé le 22/10) ═══

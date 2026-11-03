@@ -489,7 +489,7 @@
   font-weight: 450;
   line-height: 24px;
   color: var(--lin-texte);
-  resize: vertical;
+  resize: none; /* 03/11/2026 — composeur sans bord : pas de poignée, comme Linear et Plain */
   outline: none;
 }
 .v2 .lcl-desc::placeholder {

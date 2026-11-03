@@ -765,7 +765,7 @@
   font-size: 14px;
   line-height: 20px;
   color: var(--v2-gray-1000);
-  resize: vertical;
+  resize: none; /* 03/11/2026 — composeur sans bord : pas de poignée, comme Linear et Plain */
   outline: none;
 }
 .rm-zone:hover {
