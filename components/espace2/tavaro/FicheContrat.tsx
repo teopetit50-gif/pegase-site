@@ -29,6 +29,7 @@
    maintenant une confirmation (DECOUPAGES.md, règle 5).
    ══════════════════════════════════════════════════════════════════════ */
 
+import PhotosEtats from "./PhotosEtats";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { BadgeEuro, CalendarClock, Pencil, RotateCcw, Scale, Send, ShieldCheck } from "lucide-react";
@@ -472,6 +473,13 @@ export default function FicheContrat({ dossier, volet = false, retour }: { dossi
               ) : null}
               {!dep ? <Rangee icone="Alert" titre={<span className="tav-t-gris">Sans état de départ signé, un dommage facturé au retour se conteste facilement.</span>} /> : null}
             </Bloc>
+
+            {/* « Photos de départ et de retour comparées » : vue par vue, le départ à gauche, le retour à droite */}
+            {dep?.photos.length || ret?.photos.length ? (
+              <Bloc titre="Photos de départ et de retour" compte={`${(dep?.photos.length ?? 0) + (ret?.photos.length ?? 0)}`}>
+                <PhotosEtats dep={dep ?? null} ret={ret ?? null} source={source === "exemple" ? "exemple" : "reelle"} />
+              </Bloc>
+            ) : null}
 
             <Bloc titre="Chiffrage du retour" compte={p ? `v${p.version} · ${montant(p.total_ttc)}` : undefined} ajout={{ libelle: p ? "Rechiffrer le retour" : "Chiffrer le retour", action: () => ouvrir({ type: "retour" }), actif: peutChiffrer }}>
               {!p ? (
