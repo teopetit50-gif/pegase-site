@@ -18,22 +18,24 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 ## Totaux par produit
 
 **Après les corrections du 3 novembre (état à 20 h 15 UTC, trois passages, mis en ligne et vérifiés sur omegaai.fr).**
-63 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
+63 promesses sont passées à « Montrée » depuis le relevé par les trois passages, puis **22 promesses « aucune page »**
+ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au soir ») : 85 en tout. Il reste 10
+« aucune page », dont 9 attendent une porte ou une migration (Teo).
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
-| Socle et pages transverses | 13 | 3 | 1 | 1 | 1 | 5 | 3 | **27** |
-| FILED — factures fournisseurs | 35 | 3 | 7 | 1 | 13 | 3 | 3 | **65** |
-| CASHD — relances d’impayés | 53 | 3 | 2 | 1 | 3 | 2 | 2 | **66** |
-| REPUT — demandes clients | 32 | 0 | 0 | 0 | 5 | 3 | 3 | **43** |
-| OFFLOAD — nouvelles affaires | 40 | 1 | 0 | 4 | 2 | 0 | 1 | **48** |
-| DALIRO — BTP | 26 | 1 | 1 | 0 | 2 | 2 | 3 | **35** |
-| LORANI — architectes | 59 | 1 | 1 | 2 | 1 | 7 | 2 | **73** |
+| Socle et pages transverses | 14 | 3 | 1 | 1 | 0 | 5 | 3 | **27** |
+| FILED — factures fournisseurs | 45 | 3 | 7 | 1 | 3 | 3 | 3 | **65** |
+| CASHD — relances d’impayés | 56 | 3 | 2 | 1 | 0 | 2 | 2 | **66** |
+| REPUT — demandes clients | 35 | 0 | 0 | 0 | 2 | 3 | 3 | **43** |
+| OFFLOAD — nouvelles affaires | 42 | 1 | 0 | 4 | 0 | 0 | 1 | **48** |
+| DALIRO — BTP | 27 | 1 | 1 | 0 | 1 | 2 | 3 | **35** |
+| LORANI — architectes | 60 | 1 | 1 | 2 | 0 | 7 | 2 | **73** |
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
-| TAVARO — location automobile | 32 | 1 | 2 | 0 | 1 | 3 | 3 | **42** |
+| TAVARO — location automobile | 33 | 1 | 2 | 0 | 0 | 3 | 3 | **42** |
 | TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
 | VARELO — groupes | 20 | 2 | 0 | 1 | 1 | 2 | 1 | **27** |
-| **Tous** | **375** | **17** | **15** | **10** | **32** | **45** | **26** | **520** |
+| **Tous** | **397** | **17** | **15** | **10** | **10** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -148,7 +150,7 @@ des PDF d’exemple), DALIRO n° 15, 23, 30, 32 (changements de code plus lourds
 
 ## Promesses sans page : le 3 novembre au soir
 
-Session « promesses sans page », 18 h 25 – 20 h 15 UTC. Les 32 lignes « AUCUNE PAGE » ont été reprises une à une :
+Session « promesses sans page », 18 h 25 – 20 h 15 UTC (second lot après 19 h 20, à la demande du coordinateur). Les 32 lignes « AUCUNE PAGE » ont été reprises une à une :
 **(a)** la lecture ou le geste existe déjà côté client (table ou vue lisible par `authenticated`, porte `grant execute …
 to authenticated`) : l'écran est construit ; **(b)** il faudrait une porte, une colonne ou une migration nouvelle : rien
 n'est construit, le manque est noté. Aucune migration, aucune écriture en base, aucune porte SQL nouvelle ; les
@@ -158,7 +160,7 @@ briques (Linear pour le document FILED, Rapports pour Comptabilité et Trésorer
 CarteDroite pour OFFLOAD) ; aucune page nouvelle. Recette 390 / 768 / 1024 / 1440 / 1700, sombre et clair, sans
 débordement ; vérifié sur omegaai.fr.
 
-### Construites (a) — 17 lignes
+### Construites (a) — 22 lignes
 
 | Produit · n° | Promesse | Écran construit | Adresse (données d'exemple) | Back-end lu | Commit |
 |---|---|---|---|---|---|
@@ -179,18 +181,17 @@ débordement ; vérifié sur omegaai.fr.
 | REPUT · 38 | La part traitée sans intervention, suivie dans le temps | « Parties sans intervention, jour par jour » (sept jours) sur l'aperçu | `/espace2/reput` | demandes et réponses déjà chargées (même calcul que `reput_indicateurs`) | `135d2cb` |
 | OFFLOAD · 4 | Délai de silence, montant minimum, un message par trimestre, plafond | Carte Propriétés : Montant minimum, Quarantaine, Second message, Plafond | `/espace2/offload` | `offload_reglages` (déjà chargés) | `c1e7be6` |
 | OFFLOAD · 36 | Listes d'exclusion par compte, secteur et commercial | Carte « Listes d'exclusion » (type, valeur, motif, date) | `/espace2/offload` | `offload_exclusions` (c4_05) | `c1e7be6` |
+| Socle · 8 | Chaque envoi tracé : quoi, à qui, sur quelle règle, validé par qui | Quatrième colonne « Envois » de la page Activité (filtre, histogramme, fiche : destinataire, règle, validation) | `/espace2/activite` | `journal_opposable` (lecture des gérants et administrateurs, comme l'export CSV) | `8913daf` |
+| REPUT · 36 | Volume par canal, **par service** et par heure | « Demandes par service » (l'équipe du sujet) et « Demandes par heure de la journée » sur l'aperçu | `/espace2/reput` | sujets et équipes déjà chargés ; même compte que `reput_indicateurs_services`, présente en prod (vérifié par le coordinateur) | `135d2cb`, `a710239` |
+| DALIRO · 4 | Photos datées jointes à l'avenant | Photos du message sous la citation d'origine, dans le détail d'un avenant | `/espace2/daliro/avenants?avenant=…d082` (TIL-A2) | `btp_messages.pieces` + URL signées (base réelle) ; exemple : `public/exemples/daliro` | `12280c3` |
+| TAVARO · 4 | Photos de départ et de retour comparées | Bloc « Photos de départ et de retour » de la fiche d'un contrat : vue par vue, départ à gauche, retour à droite | `/espace2/tavaro/contrats/…co005` (C-2026-0340) | `loc_etats_des_lieux.photos` + URL signées ; exemple : `public/exemples/tavaro` | `39da3e5` |
+| LORANI · 43 | « Rechercher un point » | Champ de recherche au-dessus des constats du contrôle (texte, objet, correction, article) | `/espace2/lorani/projets/…b005?partie=controle` (« recul ») | `lorani_constats`, déjà chargés | `f2254c2` |
 
 Données d'exemple ajoutées pour les rendre visibles : trois factures FILED (R2026-000020 Brasserie des Canuts,
 10 % et 20 % ; R2026-000021 Giraud Plâtrerie, autoliquidation ; toutes deux filles du même scan ; R2026-000022
 Northlight Type Ltd, en livres), des mentions sur R2026-000014 et R2026-000019 ; quatre charges récurrentes et deux
 exercices repris ; le délai de règlement des sept comptes CASHD ; quatre changements de réglage ; l'auteur des fiches
 REPUT ; trois exclusions OFFLOAD. FILED compte donc 15 documents d'exemple au lieu de 12.
-
-### Partiellement construite
-
-- **REPUT · 36** « par canal, par service et par heure » : « Demandes par heure de la journée » est construit (`135d2cb`,
-  `/espace2/reput`) ; **par service, il manque** la vue `reput_indicateurs_services` (c3_12), absente des migrations du
-  dépôt (`omega/modules/reput/migrations` s'arrête à c3_08). La ligne reste comptée « aucune page ».
 
 ### Non construites, porte ou migration manquante (b) — 9 lignes, à Teo
 
@@ -200,21 +201,19 @@ REPUT ; trois exclusions OFFLOAD. FILED compte donc 15 documents d'exemple au li
 | FILED · 55 | Cabinet : un espace par dossier, vue d'ensemble | `filed_vue_ensemble` (a4_52) absente du dépôt ; la bascule d'un dossier à l'autre est au socle (CHIFFRAGE n° 33). |
 | FILED · 60 | « …et prépare la réponse » au fournisseur | Lot a4_38 (réponses aux fournisseurs) absent du dépôt ; aucune table lisible connue. |
 | REPUT · 3 | Étiquette « Hors horaires » sur chaque demande | Le verrou HORS_HEURES vit au socle (envoi différé) ; aucune colonne ni porte ne dit d'une demande qu'elle est arrivée hors horaires. |
-| REPUT · 41 | Consolidé et lecture par site | Même vue `reput_indicateurs_services` (c3_12) absente ; `reput_indicateurs` n'a pas d'entité. |
+| REPUT · 41 | Consolidé et lecture par site, export daté | La vue `reput_indicateurs_services` existe en prod (avec `entite_id`), mais Espace 2 n'a aucun choix de site pour REPUT ni règle « un responsable de site ne voit que le sien » côté écran ; le périmètre par site relève du socle (`perimetre_couvre`). À décider : un filtre par site sur l'aperçu suffit-il ? |
 | DALIRO · 28 | « …et qui voit les prix » | `private.btp_voit_prix` ne dit que pour la personne connectée ; aucune porte ne liste ni ne règle `voit_prix` par personne. |
 | TIROMA · 14 | Schéma dentaire et actes par dent d'un plan | `tiroma_plan_actes.dents` existe ; aucune porte ne renvoie les actes d'un plan. |
 | TIROMA · 47 | Agenda des rendez-vous par fauteuil, page Patients | `tiroma_rendez_vous` existe ; aucune porte d'agenda, et une page nouvelle demanderait un relevé de référence. |
 | VARELO · 23 | Journal Varelo : qui a validé quoi, chaque lecture tracée | Les lectures sont inscrites par `private.grp_journal` ; il manque une porte qui rende ces lignes au groupe (le journal se lit aujourd'hui par l'export CSV de Réglages seulement). |
 
-### (a) non construites ce soir — 5 lignes, rien ne manque côté base
+### Reste pour Teo, sans porte à écrire
 
-| Produit · n° | Promesse | Pourquoi pas ce soir, et où le poser |
-|---|---|---|
-| Socle · 8 | Journal des envois : quoi, à qui, sur quelle règle, validé par qui | `journal_opposable` est lisible (l'export CSV le lit) ; il faut un filtre « Envois » dans `/espace2/activite` et un exemple plus fourni que les 6 lignes actuelles. |
-| DALIRO · 4 | Photos datées jointes à l'avenant | `btp_messages.pieces` lisible ; il faut des images d'exemple et l'URL signée du bucket dans le détail d'avenant. |
-| LORANI · 43 | « Rechercher un point » | `lorani_constats` déjà chargé ; champ de recherche à poser dans la partie Contrôle de la page projet (ou indexer les constats dans la palette ⌘K). |
-| TAVARO · 4 | Photos de départ et de retour comparées | `loc_etats_des_lieux.photos` lisible ; il faut des images d'exemple et les URL signées dans la fiche du contrat. |
-| TIROMA · 3 | Bandeau « Trois décisions pour ce matin » | Données présentes, mais Aujourd'hui copie Linear My issues, qui n'a pas de bandeau : l'ajouter serait inventer un dessin. À décider : retirer le bandeau de la capture, ou le poser dans le point du matin. |
+- **TIROMA · 3** — bandeau « Trois décisions pour ce matin » : les données sont là, mais Aujourd'hui copie Linear My
+  issues, qui n'a pas de bandeau. En poser un serait inventer un dessin. Retirer le bandeau de la capture du site, ou
+  le poser dans le point du matin ?
+
+Photos d'exemple : recadrages des photos déjà publiées sur l'accueil (`public/exemples/CREDITS-PHOTOS.txt`).
 
 ## Les relevés, produit par produit
 
