@@ -19,21 +19,23 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 
 **Après les corrections du 3 novembre (état à 20 h 15 UTC, trois passages, mis en ligne et vérifiés sur omegaai.fr).**
 61 promesses sont passées à « Montrée » depuis le relevé ; les autres lignes sont inchangées.
+Puis, le soir, **17 promesses « aucune page » ont reçu leur écran** (section « Promesses sans page : le 3 novembre au soir ») :
+78 promesses passées à « Montrée » en tout ; il reste 15 « aucune page », dont 9 attendent une porte ou une migration (Teo).
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
 | Socle et pages transverses | 13 | 3 | 1 | 1 | 1 | 5 | 3 | **27** |
-| FILED — factures fournisseurs | 35 | 3 | 7 | 1 | 13 | 3 | 3 | **65** |
-| CASHD — relances d’impayés | 53 | 3 | 2 | 1 | 3 | 2 | 2 | **66** |
-| REPUT — demandes clients | 32 | 0 | 0 | 0 | 5 | 3 | 3 | **43** |
-| OFFLOAD — nouvelles affaires | 40 | 1 | 0 | 4 | 2 | 0 | 1 | **48** |
+| FILED — factures fournisseurs | 45 | 3 | 7 | 1 | 3 | 3 | 3 | **65** |
+| CASHD — relances d’impayés | 56 | 3 | 2 | 1 | 0 | 2 | 2 | **66** |
+| REPUT — demandes clients | 34 | 0 | 0 | 0 | 3 | 3 | 3 | **43** |
+| OFFLOAD — nouvelles affaires | 42 | 1 | 0 | 4 | 0 | 0 | 1 | **48** |
 | DALIRO — BTP | 25 | 1 | 2 | 0 | 2 | 2 | 3 | **35** |
 | LORANI — architectes | 58 | 1 | 2 | 2 | 1 | 7 | 2 | **73** |
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
 | TAVARO — location automobile | 32 | 1 | 2 | 0 | 1 | 3 | 3 | **42** |
 | TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
 | VARELO — groupes | 20 | 2 | 0 | 1 | 1 | 2 | 1 | **27** |
-| **Tous** | **373** | **17** | **17** | **10** | **32** | **45** | **26** | **520** |
+| **Tous** | **390** | **17** | **17** | **10** | **15** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -141,6 +143,76 @@ d’exemple de plus casserait la chaîne proposition → facture de l’exemple)
 dans l’exemple, mais les textes de relance d’exemple ne le reprennent pas), CASHD n° 46 (une facture en devise
 fausserait les totaux, que le calcul d’exemple tient en euros), TAMILA n° 12 (renvois cliquables : il faudrait fabriquer
 des PDF d’exemple), DALIRO n° 15, 23, 30, 32 (changements de code plus lourds, détaillés dans le relevé).
+
+## Promesses sans page : le 3 novembre au soir
+
+Session « promesses sans page », 18 h 25 – 20 h 15 UTC. Les 32 lignes « AUCUNE PAGE » ont été reprises une à une :
+**(a)** la lecture ou le geste existe déjà côté client (table ou vue lisible par `authenticated`, porte `grant execute …
+to authenticated`) : l'écran est construit ; **(b)** il faudrait une porte, une colonne ou une migration nouvelle : rien
+n'est construit, le manque est noté. Aucune migration, aucune écriture en base, aucune porte SQL nouvelle ; les
+lectures ajoutées côté client (`components/espace/filed/portes.ts`, `components/espace2/cashd/delais.ts`…) appellent
+des tables, vues et portes existantes. Chaque écran est une section ou un geste d'une page existante, dans ses propres
+briques (Linear pour le document FILED, Rapports pour Comptabilité et Trésorerie, Canevas de Plain pour le circuit,
+CarteDroite pour OFFLOAD) ; aucune page nouvelle. Recette 390 / 768 / 1024 / 1440 / 1700, sombre et clair, sans
+débordement ; vérifié sur omegaai.fr.
+
+### Construites (a) — 17 lignes
+
+| Produit · n° | Promesse | Écran construit | Adresse (données d'exemple) | Back-end lu | Commit |
+|---|---|---|---|---|---|
+| FILED · 7 | Fichier de plusieurs factures découpé pièce par pièce | Section « Fichier d'origine » de la page d'un document : fichier mère, pages, autre pièce du même fichier (lien) | `/espace2/filed?objet=document:…dd14` (R2026-000020) et `…dd15` (R2026-000021), nés de `scan_courrier_20261002.pdf` | `pieces.piece_mere_id` (a4_21), `filed_documents` | `5f93466` |
+| FILED · 15 | « L'engagé du mois par fournisseur, société et centre de coût » | Carte « Engagé · <mois> » du tableau de bord : engagé HT, factures, onglets Fournisseurs / Sociétés / Centres de coût, bascule « Mois dernier » | `/espace2/filed` | `filed_engage_mois` (a4_06) | `5f93466` |
+| FILED · 29 | TVA multi-taux, autoliquidation, exonération, TVA sur les débits | Section « TVA et mentions » : régime, une ligne par taux, total, option sur les débits | `…dd14` (10 % + 20 %), `…dd15` (autoliquidation BTP), `…dd13` (débits) | `filed_factures_tva`, `filed_factures.regime_tva`, `.mentions` (a4_22, a4_27) | `5f93466` |
+| FILED · 30 | Devise, taux de change, contre-valeur en euros | Même section : « Contre-valeur en euros » et taux du jour d'émission | `…dd16` (Northlight Type Ltd, 1 200 £ → 1 426,53 €) | `filed_factures.mentions.contre_valeur` (a4_27) | `5f93466` |
+| FILED · 32 | Mentions d'escompte, de pénalité de retard, d'indemnité forfaitaire | Même section : pénalités, indemnité de recouvrement, escompte (présentes ou absentes) | `…dd0e` (Papeterie Durand), `…dd13` (pénalités absentes) | `filed_factures.mentions` (a4_27) | `5f93466` |
+| FILED · 41 | Relance de l'approbateur, puis remontée d'un niveau | Section « Relance et remontée » du panneau « Configurer l'approbation » (clic sur un bloc Approbation) | `/espace2/filed/circuit` | `filed_circuits.delai_relance_jours`, `delai_remontee_jours` (a4_07) ; en exemple, les délais par défaut 3 et 7 j | `d53a5f4` |
+| FILED · 42 | Saisie et approbation par deux personnes distinctes | Déjà à l'écran : encart « Deux personnes distinctes » du même panneau ; le relevé ne l'avait pas ouvert | `/espace2/filed/circuit` | — | (aucun) |
+| FILED · 47 | Charges récurrentes, écritures d'abonnement sans ressaisie | Section « Charges récurrentes » de Comptabilité | `/espace2/filed/comptabilite` | `filed_charges_recurrentes` (a4_01) | `d53a5f4` |
+| FILED · 50 | Délai moyen de traitement, de la réception au classement | Carte « Engagé » du tableau de bord : « Délai moyen », médiane, maximum | `/espace2/filed` | `filed_delai_traitement` (a4_06) | `5f93466` |
+| FILED · 59 | Reprise de plusieurs exercices à l'installation | Section « Reprise des exercices passés » de Comptabilité | `/espace2/filed/comptabilite` | `filed_reprises` (a4_24) | `d53a5f4` |
+| CASHD · 24 | Encours « avec le délai moyen de règlement », compte par compte | Section « Délai de règlement » de Trésorerie : moyenne pondérée, tableau par compte (12 mois, 3 derniers mois, retard moyen) | `/espace2/cashd/suivi?vue=tresorerie` | vue `cashd_delais_reglement` (c2_03) | `31cf813` |
+| CASHD · 25 | Le ton se cale sur l'historique de paiement | « Historique de paiement » sur la fiche d'un débiteur (« Paie en 44,2 j en moyenne… ») | `/espace2/cashd?compte=…c2001` | même vue | `31cf813` |
+| CASHD · 57 | Chaque changement de réglage reste daté | « Historique des réglages » sous « Enregistrer ces réglages » : date, réglage, auteur, valeurs | `/espace2/cashd/suivi?vue=relances&textes=1` | vue `cashd_historique_reglages` (c2_03) | `31cf813` |
+| REPUT · 28 | Chaque règle de la base porte sa date et son auteur | Activité d'une fiche : « Fiche écrite par Claire Morel », « Validée par … » | `/espace2/reput/base?fiche=…c302` | `reput_connaissances.cree_par`, `valide_par` (c3_01) ; noms par la rpc `annuaire` | `135d2cb` |
+| REPUT · 38 | La part traitée sans intervention, suivie dans le temps | « Parties sans intervention, jour par jour » (sept jours) sur l'aperçu | `/espace2/reput` | demandes et réponses déjà chargées (même calcul que `reput_indicateurs`) | `135d2cb` |
+| OFFLOAD · 4 | Délai de silence, montant minimum, un message par trimestre, plafond | Carte Propriétés : Montant minimum, Quarantaine, Second message, Plafond | `/espace2/offload` | `offload_reglages` (déjà chargés) | `c1e7be6` |
+| OFFLOAD · 36 | Listes d'exclusion par compte, secteur et commercial | Carte « Listes d'exclusion » (type, valeur, motif, date) | `/espace2/offload` | `offload_exclusions` (c4_05) | `c1e7be6` |
+
+Données d'exemple ajoutées pour les rendre visibles : trois factures FILED (R2026-000020 Brasserie des Canuts,
+10 % et 20 % ; R2026-000021 Giraud Plâtrerie, autoliquidation ; toutes deux filles du même scan ; R2026-000022
+Northlight Type Ltd, en livres), des mentions sur R2026-000014 et R2026-000019 ; quatre charges récurrentes et deux
+exercices repris ; le délai de règlement des sept comptes CASHD ; quatre changements de réglage ; l'auteur des fiches
+REPUT ; trois exclusions OFFLOAD. FILED compte donc 15 documents d'exemple au lieu de 12.
+
+### Partiellement construite
+
+- **REPUT · 36** « par canal, par service et par heure » : « Demandes par heure de la journée » est construit (`135d2cb`,
+  `/espace2/reput`) ; **par service, il manque** la vue `reput_indicateurs_services` (c3_12), absente des migrations du
+  dépôt (`omega/modules/reput/migrations` s'arrête à c3_08). La ligne reste comptée « aucune page ».
+
+### Non construites, porte ou migration manquante (b) — 9 lignes, à Teo
+
+| Produit · n° | Promesse | Ce qui manque |
+|---|---|---|
+| FILED · 28 | Catégorie d'achat et résumé produits à la lecture | Le lot a4_47 (`filed_categories_lecteur`) n'est pas dans `omega/migrations` ; aucune colonne de catégorie sur `filed_factures` dans le dépôt. Faire rapatrier a4_47, puis l'écran est une ligne de « Valeurs lues ». |
+| FILED · 55 | Cabinet : un espace par dossier, vue d'ensemble | `filed_vue_ensemble` (a4_52) absente du dépôt ; la bascule d'un dossier à l'autre est au socle (CHIFFRAGE n° 33). |
+| FILED · 60 | « …et prépare la réponse » au fournisseur | Lot a4_38 (réponses aux fournisseurs) absent du dépôt ; aucune table lisible connue. |
+| REPUT · 3 | Étiquette « Hors horaires » sur chaque demande | Le verrou HORS_HEURES vit au socle (envoi différé) ; aucune colonne ni porte ne dit d'une demande qu'elle est arrivée hors horaires. |
+| REPUT · 41 | Consolidé et lecture par site | Même vue `reput_indicateurs_services` (c3_12) absente ; `reput_indicateurs` n'a pas d'entité. |
+| DALIRO · 28 | « …et qui voit les prix » | `private.btp_voit_prix` ne dit que pour la personne connectée ; aucune porte ne liste ni ne règle `voit_prix` par personne. |
+| TIROMA · 14 | Schéma dentaire et actes par dent d'un plan | `tiroma_plan_actes.dents` existe ; aucune porte ne renvoie les actes d'un plan. |
+| TIROMA · 47 | Agenda des rendez-vous par fauteuil, page Patients | `tiroma_rendez_vous` existe ; aucune porte d'agenda, et une page nouvelle demanderait un relevé de référence. |
+| VARELO · 23 | Journal Varelo : qui a validé quoi, chaque lecture tracée | Les lectures sont inscrites par `private.grp_journal` ; il manque une porte qui rende ces lignes au groupe (le journal se lit aujourd'hui par l'export CSV de Réglages seulement). |
+
+### (a) non construites ce soir — 5 lignes, rien ne manque côté base
+
+| Produit · n° | Promesse | Pourquoi pas ce soir, et où le poser |
+|---|---|---|
+| Socle · 8 | Journal des envois : quoi, à qui, sur quelle règle, validé par qui | `journal_opposable` est lisible (l'export CSV le lit) ; il faut un filtre « Envois » dans `/espace2/activite` et un exemple plus fourni que les 6 lignes actuelles. |
+| DALIRO · 4 | Photos datées jointes à l'avenant | `btp_messages.pieces` lisible ; il faut des images d'exemple et l'URL signée du bucket dans le détail d'avenant. |
+| LORANI · 43 | « Rechercher un point » | `lorani_constats` déjà chargé ; champ de recherche à poser dans la partie Contrôle de la page projet (ou indexer les constats dans la palette ⌘K). |
+| TAVARO · 4 | Photos de départ et de retour comparées | `loc_etats_des_lieux.photos` lisible ; il faut des images d'exemple et les URL signées dans la fiche du contrat. |
+| TIROMA · 3 | Bandeau « Trois décisions pour ce matin » | Données présentes, mais Aujourd'hui copie Linear My issues, qui n'a pas de bandeau : l'ajouter serait inventer un dessin. À décider : retirer le bandeau de la capture, ou le poser dans le point du matin. |
 
 ## Les relevés, produit par produit
 
