@@ -56,14 +56,26 @@ export function pointExemple(decalage = 0): { point: PointDuJour; lignes: LigneP
   });
 
   if (decalage !== 0) {
+    /* « Les sept dernières éditions restent consultables » : chaque édition passée dit sa journée, au lieu de
+       répéter mot pour mot la même (03/11/2026, docs/verification/PROMESSES-ECRANS.md) */
+    const k = Math.abs(decalage);
+    const solde = [48210, 46935, 51480, 49760, 44120, 47305][(k - 1) % 6];
+    const factures = [0, 2, 1, 0, 3, 1][(k - 1) % 6];
+    const validations = [3, 5, 2, 4, 6, 1][(k - 1) % 6];
+    const avis = [2, 0, 1, 3, 1, 2][(k - 1) % 6];
+    const euros = (n: number) => `${n.toLocaleString("fr-FR")} €`;
     return {
       point,
       lignes: [
-        l(1, 1, { titre: "Trésorerie", module: "cashd", texte: "Solde consolidé 48 210 €. Aucune échéance au-delà du solde cette semaine.", gravite: "info", sante: true }),
-        l(2, 0, { titre: "Factures reçues", module: "filed", texte: "Rien à signaler.", sante: true }),
-        l(3, 1, { titre: "Validations", module: "socle", texte: "3 demandes en attente, aucune en retard.", gravite: "info", lien: "/espace/validations" }),
+        l(1, 1, { titre: "Trésorerie", module: "cashd", texte: `Solde consolidé ${euros(solde)}. Aucune échéance au-delà du solde cette semaine.`, gravite: "info", sante: true }),
+        factures
+          ? l(2, 1, { titre: "Factures reçues", module: "filed", texte: `${factures} facture${factures > 1 ? "s" : ""} lue${factures > 1 ? "s" : ""} et classée${factures > 1 ? "s" : ""}, aucune anomalie.`, gravite: "info", lien: "/espace/filed" })
+          : l(2, 0, { titre: "Factures reçues", module: "filed", texte: "Rien à signaler.", sante: true }),
+        l(3, 1, { titre: "Validations", module: "socle", texte: `${validations} demande${validations > 1 ? "s" : ""} en attente, aucune en retard.`, gravite: "info", lien: "/espace/validations" }),
         l(4, 0, { titre: "Équipe", module: "rh", texte: "Rien à signaler.", sante: true }),
-        l(5, 1, { titre: "Clients", module: "reput", texte: "2 nouveaux avis (4 et 5 étoiles), réponses envoyées.", gravite: "info" }),
+        avis
+          ? l(5, 1, { titre: "Clients", module: "reput", texte: `${avis} ${avis > 1 ? "nouveaux" : "nouvel"} avis, réponse${avis > 1 ? "s" : ""} envoyée${avis > 1 ? "s" : ""}.`, gravite: "info" })
+          : l(5, 0, { titre: "Clients", module: "reput", texte: "Rien à signaler.", sante: true }),
       ],
     };
   }
