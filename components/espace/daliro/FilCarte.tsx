@@ -37,7 +37,8 @@ const RANGEMENTS: Record<NonNullable<MessageChantier["rangement"]>, string> = {
 /* L'exemple : une photo dessinée (rien n'est lu dans un vrai bucket) et un vocal sans fichier. */
 const PHOTO_EXEMPLE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200"><rect width="320" height="200" fill="#e9e6df"/><rect x="40" y="50" width="110" height="120" fill="#c9c3b6"/><rect x="58" y="68" width="74" height="84" fill="#9fb4c7"/><rect x="180" y="40" width="100" height="130" fill="#d8d2c4"/><text x="160" y="190" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#555">Photo d\'exemple</text></svg>')}`;
 
-function exemple(tableau: Tableau): MessageChantier[] {
+/* exporté : l'assistant du chantier résume ce même fil en exemple (QuestionsCarte, « Résumer la visite ») */
+export function exemple(tableau: Tableau): MessageChantier[] {
   const base = { chantier_id: tableau.chantier.id, de_adresse: null, intervenant_id: null, tiers_id: null, avenant_id: null, statut: "range" as const };
   return [
     { ...base, id: "00000000-0000-4000-8000-00000000f001", reception_id: 1, canal: "whatsapp", de_nom: "Karim Haddad", rangement: "passage", recu_le: ilYa(0, 10),

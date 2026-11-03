@@ -21,6 +21,7 @@ import { dateCourte, dateHeure, montant } from "../format";
 import { Avis, Pastille } from "../ui";
 import { formuleQuiOuvre, ouverte } from "./fonctions";
 import { poserQuestion, questionsDuChantier } from "./portes";
+import { exemple as filExemple } from "./FilCarte";
 import type { QuestionChantier, Tableau } from "./types";
 
 export const QUESTIONS_DEMO = ["Qu'est-ce qui n'est pas au devis ?", "Préparer la réunion de chantier", "Résumer la visite"];
@@ -57,8 +58,18 @@ export function reponseExemple(t: Tableau, question: string, aujourdhui: string)
              reponse: points.length ? ["Points à aborder, dans cet ordre :", ...points].join("\n") : "Rien d'ouvert : ni contrôle à traiter, ni avenant à signer, ni passage à confirmer." };
   }
   if (/visite|résum|resum|fil/.test(q)) {
-    return { ...base, couverte: false, sources: [], raison: "En exemple, le fil n'est pas joint à l'assistant.",
-             reponse: "En exemple, le fil du chantier n'est pas transmis à l'assistant. Avec vos données, il résume les derniers messages, photos et vocaux, datés." };
+    /* « Résumer la visite » : en exemple, l'assistant résume le fil d'exemple du chantier, message par message,
+       daté et signé (03/11/2026, docs/verification/PROMESSES-ECRANS.md) */
+    const fil = filExemple(t).slice().sort((a, b) => b.recu_le.localeCompare(a.recu_le));
+    const canal = (c: string) => (c === "whatsapp" ? "WhatsApp" : c === "sms" ? "SMS" : c === "email" ? "courriel" : c);
+    const lignes = fil.map((m) => {
+      const vocal = m.pieces?.some((x) => x.vocal);
+      const photo = m.pieces?.some((x) => (x.mime ?? "").startsWith("image/"));
+      const dit = m.lecture?.resume ?? m.texte ?? "message sans texte";
+      return `- ${dateCourte(m.recu_le)}, ${canal(m.canal)}, ${m.de_nom ?? "intervenant"}${vocal ? " (vocal)" : photo ? " (photo jointe)" : ""} : ${dit}`;
+    });
+    return { ...base, couverte: true, raison: null, sources: ["fil du chantier"],
+             reponse: lignes.length ? ["Ce que le fil du chantier dit depuis la dernière visite :", ...lignes].join("\n") : "Rien de neuf dans le fil du chantier depuis la dernière visite." };
   }
   return { ...base, couverte: false, sources: [], raison: "En exemple, seules les trois questions proposées ont une réponse.",
            reponse: "En exemple, l'assistant répond aux trois questions proposées. Avec vos données, il répond à toute question sur ce chantier." };
