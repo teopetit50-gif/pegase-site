@@ -530,6 +530,7 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
 /* ——— la page ——— */
 export default function PageDossier({ id }: { id: string }) {
   const t = useTamila();
+  const router = useRouter();
   const params = useSearchParams();
   const o = params.get("onglet");
   const onglet: Onglet = ONGLETS.some((x) => x.cle === o) ? (o as Onglet) : "apercu";
@@ -1027,7 +1028,12 @@ export default function PageDossier({ id }: { id: string }) {
                           ...(a.comptes?.attention ? ([["À vérifier", String(a.comptes.attention)]] as [string, string][]) : []),
                           ...(a.motif ? ([["Motif", a.motif]] as [string, string][]) : []),
                         ],
-                        gestes: a.statut === "finie" || a.statut === "partielle" ? [{ libelle: "Lire", principal: true, faire: () => void an.lire(a) }] : [],
+                        gestes: a.statut === "finie" || a.statut === "partielle"
+                          ? [
+                              { libelle: "Lire", principal: true, faire: () => void an.lire(a) },
+                              { libelle: "Ouvrir le dossier de faits", faire: () => router.push(`${RACINE}/tamila/dossiers/${d.id}/faits?lecture=${encodeURIComponent(a.id)}`) },
+                            ]
+                          : [],
                       },
                     }));
                     const peutLire = !an.envoi && an.peutDemander && an.vivant && (t.source === "exemple" || an.auCoffre);

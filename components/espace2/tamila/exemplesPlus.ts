@@ -105,6 +105,8 @@ export const DOSSIERS_PLUS: DossierComplet[] = PLUS.map((p) => {
 
 /* Les honoraires des dossiers de plus : une convention (temps passé ou forfait), du temps saisi, parfois une
    facture ; de quoi remplir le tableau « Honoraires du cabinet » comme la liste Accounts de Plain. */
+const EN_SOMMEIL = ["2026-0350", "2026-0395"];
+
 export function honorairesPlus(dossier: string): Honoraires | null {
   const i = DOSSIERS_PLUS.findIndex((c) => c.dossier.id === dossier);
   if (i < 0) return null;
@@ -115,9 +117,11 @@ export function honorairesPlus(dossier: string): Honoraires | null {
     id: `${dossier}-hc`, client_id: c.dossier.client_id, dossier_id: dossier, mode: forfait ? ("forfait" as const) : ("temps_passe" as const),
     taux_horaire_cents: forfait ? null : 22000 + (i % 3) * 3000, forfait_cents: forfait ? 250000 + i * 10000 : null, complement_resultat_pct: null, taux_tva: 20,
     urgence: false, statut: signee ? ("signee" as const) : ("proposee" as const), signee_le: signee ? jour(ilYa(10 + i)) : null, piece_id: null, cree_par: MOI, cree_le: ilYa(12 + i), resiliee_le: null,
-    minutes_prevues: forfait ? 900 : undefined,
+    /* deux forfaits dépassés (Transports Vidal 132 %, Durand 105 %), comme l'exemple du site (« 132 % », « 104 % ») */
+    minutes_prevues: forfait ? (i === 1 ? 375 : i === 4 ? 300 : 900) : undefined,
   };
-  const temps = Array.from({ length: 2 + (i % 3) }, (_, k) => ({
+  /* deux dossiers en sommeil, sans temps saisi : ils remontent dans « Sans diligence » du Pilotage */
+  const temps = EN_SOMMEIL.includes(c.clair?.reference ?? "") ? [] : Array.from({ length: 2 + (i % 3) }, (_, k) => ({
     id: `${dossier}-h${k + 1}`, client_id: c.dossier.client_id, dossier_id: dossier, user_id: k % 2 ? ROUSSEAU : c.dossier.responsable_id ?? MOI, jour: jour(ilYa(2 + k * 4 + i)),
     minutes: 45 + ((i + k) % 4) * 60, nature: (["redaction", "recherche", "rendez_vous", "audience"] as const)[(i + k) % 4], description_chiffree: null, facturable: true,
     statut: "saisi" as const, facture_id: null, cree_le: ilYa(2 + k * 4 + i),
