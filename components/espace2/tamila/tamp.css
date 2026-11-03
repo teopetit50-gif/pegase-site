@@ -55,7 +55,9 @@
   --p-kbd-bord: #49474e;
 
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : « la bande noire, ça doit être plein ». La carte de Plain prend toute la
+     place : plus de marge de 8 px autour (avant : padding 8px 8px 8px 0), plus d'arrondi ni d'ombre. */
+  padding: 0;
   background: var(--p-fond-2);
   color: var(--p-texte-1);
   font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
@@ -132,10 +134,10 @@ html[data-v2-theme="light"] .v2 .tamp {
 .v2 .tamp .tamp-carte {
   position: relative;
   display: flex;
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   background: var(--p-carte);
-  border-radius: 12px;
-  box-shadow: var(--p-carte-ombre);
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 

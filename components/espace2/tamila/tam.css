@@ -65,7 +65,8 @@
   --tam-bleu-fond: lch(67.5 38.933 217.444 / 0.175);
 
   min-height: calc(100dvh - 48px);
-  padding: 8px 8px 8px 0;
+  /* 03/11/2026 — Teo : plus de bande sombre autour de la carte, comme les pages Plain (tamp.css). */
+  padding: 0;
   background: var(--tam-app);
   color: var(--tam-t1);
   font-family: var(--font-v2-inter), "Inter Variable", "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
@@ -175,11 +176,11 @@ html[data-v2-theme="light"] .v2 .tam {
 .v2 .tam .tam-carte {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 48px - 16px);
+  height: calc(100dvh - 48px);
   background: var(--tam-carte);
-  border: 0.5px solid var(--tam-carte-bord);
-  border-radius: 12px;
-  box-shadow: var(--tam-carte-ombre);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 .v2 .tam .tam-defile {
