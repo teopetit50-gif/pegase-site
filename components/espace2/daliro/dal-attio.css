@@ -971,6 +971,21 @@ html:not([data-v2-theme="light"]) .v2 .dat-voir {
   box-shadow: var(--a-menu-ombre);
   white-space: nowrap;
 }
+/* 03/11/2026 — à 390, la barre de sélection sortait des deux côtés de
+   l'écran (début du compte rogné, derniers boutons inaccessibles) : sous
+   640 px, elle tient entre 16 px des bords et défile si elle est trop longue. */
+@media (max-width: 640px) {
+  .v2 .dat-selection {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: none;
+    margin: 0;
+    transform: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
 .v2 .dat-selection-nb {
   padding: 0 8px;
   color: var(--a-second);

@@ -518,6 +518,17 @@ html[data-v2-theme="light"] .v2 .dal.dal-bd-page {
   }
 }
 
+/* 03/11/2026 — sous 768, la barre du haut fait 82 px (le ruban « Données
+   d'exemple » prend sa ligne) : le volet posé à 48 px passait dessous et le
+   titre « Avenant n° 1 » était à moitié caché. Le volet couvre l'écran, barre
+   comprise, comme une feuille ; il garde son bouton de fermeture. */
+@media (max-width: 767px) {
+  .v2 .dal .dal-bd-volet {
+    top: 0;
+    z-index: 45;
+  }
+}
+
 /* ——— 768 et moins : carte plein écran, colonnes depuis x 17 ——— */
 @media (max-width: 768px) {
   .v2 .dal .dal-bd-corps {

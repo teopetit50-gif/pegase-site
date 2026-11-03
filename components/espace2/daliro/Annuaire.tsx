@@ -456,6 +456,18 @@ export default function Annuaire() {
   const [nouvelle, setNouvelle] = useState<{ nom: string; type: string; ville: string; telephone: string; email: string } | null>(null);
   const creer = () => {
     if (!nouvelle?.nom.trim()) return;
+    /* 03/11/2026 — le bouton n'est pas dans un formulaire : le contrôle du
+       navigateur (type="email") ne jouait jamais, « abc » passait */
+    const courriel = nouvelle.email.trim();
+    if (courriel && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(courriel)) {
+      toast(`« ${courriel} » n'est pas une adresse de courriel.`, "rouge");
+      return;
+    }
+    const tel = nouvelle.telephone.trim();
+    if (tel && !/^[+\d][\d\s.()-]{5,}$/.test(tel)) {
+      toast(`« ${tel} » n'est pas un numéro de téléphone.`, "rouge");
+      return;
+    }
     const fiche: EntrepriseLocale = { id: nid(), cree: new Date().toISOString(), nom: nouvelle.nom.trim(), type: nouvelle.type.trim(), ville: nouvelle.ville.trim(), telephone: nouvelle.telephone.trim(), email: nouvelle.email.trim() };
     ecrireStockage(CLE_ENTREPRISES, JSON.stringify([fiche, ...locales]));
     setNouvelle(null);

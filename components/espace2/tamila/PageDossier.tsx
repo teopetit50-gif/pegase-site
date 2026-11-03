@@ -51,7 +51,7 @@ import { Avatar, TamCarte, TamMenu, type OptionMenu } from "./TamCadre";
 import { TamIcone, type NomTamIcone } from "./TamIcone";
 import { TamFenetre } from "./TamFenetre";
 import { dateCourte, dateLongue, prioriteDe } from "./echeances";
-import { copier, exporterCsv, useMemoire } from "./navigateur";
+import { copier, copierEtDire, exporterCsv, useMemoire } from "./navigateur";
 import { useTamila } from "./donnees";
 import "./tam-liste.css";
 import "./tam-initiative.css";
@@ -308,7 +308,7 @@ function Mise({ complet, api, onglet, haut, sections, menuPlus, fait, erreur }: 
           <TamMenu libelle="Actions du dossier" options={actions} />
           <div className="tam-pousse" />
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <button type="button" className="tam-rond tam-rond--petit" aria-label="Copier l'adresse de la page" title="Copier l'adresse de la page" onClick={() => void navigator.clipboard?.writeText(window.location.href)}>
+            <button type="button" className="tam-rond tam-rond--petit" aria-label="Copier l'adresse de la page" title="Copier l'adresse de la page" onClick={() => copierEtDire(window.location.href, "Adresse de la page copiée.")}>
               <TamIcone nom="LienUrl" />
             </button>
             <button type="button" className="tam-rond" aria-pressed={suivi} aria-label={suivi ? "Ne plus suivre le dossier" : "Suivre le dossier"} title={suivi ? "Ne plus suivre (ses avis ne remontent plus en tête des Arrivées)" : "Suivre : ses avis reçus passent en tête des Arrivées, marqués « suivi »"} onClick={() => suivis.basculer(`dossier:${d.id}`)} style={suivi ? { color: "var(--tam-violet)" } : undefined}>
@@ -779,7 +779,7 @@ export default function PageDossier({ id }: { id: string }) {
                     title="Copier pour l'assistant : un résumé en clair du dossier"
                     aria-label="Copier pour l'assistant"
                     onClick={() =>
-                      void copier(
+                      copierEtDire(
                         [
                           `Dossier ${complet.clair?.reference ?? ""} — ${complet.clair?.intitule ?? ""}`,
                           [complet.clair?.numero_rg ? `RG ${complet.clair.numero_rg}` : null, libelleMatiere(d.matiere), d.juridiction].filter(Boolean).join(" · "),
@@ -792,7 +792,7 @@ export default function PageDossier({ id }: { id: string }) {
                   >
                     <TamIcone nom="Comment" />
                   </button>
-                  <button type="button" className="tam-rond" title="Copier l'adresse de cette page" aria-label="Copier l'adresse de cette page" onClick={() => void copier(window.location.href)}>
+                  <button type="button" className="tam-rond" title="Copier l'adresse de cette page" aria-label="Copier l'adresse de cette page" onClick={() => copierEtDire(window.location.href, "Adresse de la page copiée.")}>
                     <TamIcone nom="LienUrl" />
                   </button>
                   {prochain && prochain.statut === "a_confirmer" ? (() => {

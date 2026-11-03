@@ -193,6 +193,20 @@ export default function Conformite() {
     document.addEventListener("keydown", touche);
     return () => document.removeEventListener("keydown", touche);
   }, []);
+  /* 03/11/2026 — Échap referme la tâche ouverte, comme le volet de Plain */
+  useEffect(() => {
+    if (!ouverte || nouveau) return;
+    const touche = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      if ((e.target as HTMLElement).closest("input, textarea, select") || document.querySelector('[role="menu"], [role="dialog"][aria-modal="true"]')) return;
+      e.preventDefault();
+      const q = new URLSearchParams(params.toString());
+      q.delete("tache");
+      router.replace(`${ICI}${q.size ? `?${q}` : ""}`, { scroll: false });
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, [ouverte, nouveau, params, router]);
 
   const associe = estAssocie(t.moi);
   const gerant = estGerant(t.moi);

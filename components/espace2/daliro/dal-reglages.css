@@ -304,6 +304,15 @@ html[data-v2-theme="light"] .v2 .dal.dal-rg-page {
   font-weight: 500;
   color: var(--dal-menu-texte);
 }
+/* 03/11/2026 — à 390, « Tout sélectionner » : la barre en max-content
+   coupait « Exporter en CSV » ; elle tient dans la largeur et défile */
+@media (max-width: 640px) {
+  .v2 .dal .dal-rg-barre {
+    max-width: calc(100% - 16px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+}
 .v2 .dal .dal-rg-barre-compte {
   display: inline-flex;
   align-items: center;

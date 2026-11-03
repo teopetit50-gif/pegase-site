@@ -121,6 +121,19 @@ html[data-v2-theme="light"] .v2 .lor-at {
 .v2 .lor-at-identite h2 { font-size: 18px; font-weight: 600; line-height: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2 .lor-at-avatar-grand { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--lor-at-actif); box-shadow: inset 0 0 0 1px var(--lor-at-filet); font-size: 10px; font-weight: 600; color: var(--lor-at-second); }
 .v2 .lor-at-actions { display: flex; gap: 8px; padding: 4px 12px 0; overflow: hidden; }
+/* 03/11/2026 — trois boutons avec leur texte ne tiennent pas dans la fiche
+   (« Ouvrir le projet » coupé net, à 1440 comme à 390) : comme Attio quand
+   la place manque, les boutons après le premier ne gardent que leur icône
+   (le nom reste lu par title et par le lecteur d'écran). */
+.v2 .lor-at-actions .lor-at-bouton + .lor-at-bouton .lor-at-bouton-texte {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .v2 .lor-at-section { padding: 29px 16px 18px; }
 .v2 .lor-at-section--filet { border-top: 1px solid var(--lor-at-filet); }
 .v2 .lor-at-petit-titre { display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 500; line-height: 16px; color: var(--lor-at-second); }

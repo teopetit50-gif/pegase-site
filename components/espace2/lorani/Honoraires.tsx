@@ -210,17 +210,17 @@ function Fiche({ v, l, projet, peutEcrire, nommer, demander }: { v: VueHonoraire
         <div className="lor-at-actions">
           <button type="button" className="lor-at-bouton" disabled={gris || !v.peutSaisirTemps} onClick={v.ouvrirTemps}>
             {Ic.horloge}
-            Saisir du temps
+            <span className="lor-at-bouton-texte">Saisir du temps</span>
           </button>
           {prochain ? (
-            <button type="button" className="lor-at-bouton" disabled={gris} onClick={() => demander(l)}>
+            <button type="button" className="lor-at-bouton" disabled={gris} onClick={() => demander(l)} title={prochain === "facturee" ? "Marquer facturé" : "Marquer achevé"}>
               {Ic.etat}
-              {prochain === "facturee" ? "Marquer facturé" : "Marquer achevé"}
+              <span className="lor-at-bouton-texte">{prochain === "facturee" ? "Marquer facturé" : "Marquer achevé"}</span>
             </button>
           ) : null}
-          <Link href={lienProjet(projet.id)} className="lor-at-bouton">
+          <Link href={lienProjet(projet.id)} className="lor-at-bouton" title="Ouvrir le projet">
             {Ic.dossier}
-            Ouvrir le projet
+            <span className="lor-at-bouton-texte">Ouvrir le projet</span>
           </Link>
         </div>
         <div className="lor-at-section">

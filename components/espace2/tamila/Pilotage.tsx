@@ -29,7 +29,7 @@ import { PlainCarte, useOuvert } from "./TamCadre";
 import { PlainIcone, TamIcone, type NomTamIcone } from "./TamIcone";
 import { useTamila } from "./donnees";
 import { dateCourte } from "./echeances";
-import { copier } from "./navigateur";
+import { copierEtDire } from "./navigateur";
 import "./tamp-pilotage.css";
 
 const JOUR = 86_400_000;
@@ -238,7 +238,7 @@ function Carte({ titre, aide, valeur, suffixe, signal, children }: { titre: stri
           title="Copier pour l'assistant : la valeur de la carte et ce qu'elle mesure"
           onClick={(e) => {
             const carte = (e.currentTarget.closest(".tamp-rcarte") as HTMLElement | null)?.innerText ?? "";
-            void copier(`${titre} : ${valeur} ${suffixe}\n${aide}\n${carte.split("\n").slice(2).join("\n")}`);
+            copierEtDire(`${titre} : ${valeur} ${suffixe}\n${aide}\n${carte.split("\n").slice(2).join("\n")}`, "Carte copiée pour l'assistant.");
           }}
         >
           <TamIcone nom="Comment" taille={14} />

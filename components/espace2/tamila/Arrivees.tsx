@@ -32,7 +32,7 @@ import { Champ, TamFenetre } from "./TamFenetre";
 import { dateCourte, dateLongue, ilYaCourt } from "./echeances";
 import { useTamila } from "./donnees";
 import { AVIS_ENTRANTS_PLUS } from "./exemplesPlus";
-import { copier, estReporte, exporterCsv, useMemoire } from "./navigateur";
+import { copierEtDire, estReporte, exporterCsv, useMemoire } from "./navigateur";
 import NouveauDossier from "./NouveauDossier";
 import "./tam-liste.css";
 import "./tam-triage.css";
@@ -109,6 +109,22 @@ export default function Arrivees() {
     setChoix(null);
     router.replace(id ? `${ICI}?avis=${id}` : ICI, { scroll: false });
   };
+  /* 03/11/2026 — Échap referme l'avis ouvert, comme le Triage de Linear
+     (et Daliro À ranger) ; pas quand un menu, un champ ou une fenêtre a la main */
+  const fenetre = !!reporter || !!ecart || nouveau;
+  useEffect(() => {
+    if (!choisi || fenetre) return;
+    const touche = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented) return;
+      const c = e.target as HTMLElement | null;
+      if (c && (c.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(c.tagName))) return;
+      if (document.querySelector('[role="menu"]')) return;
+      e.preventDefault();
+      router.replace(ICI, { scroll: false });
+    };
+    window.addEventListener("keydown", touche);
+    return () => window.removeEventListener("keydown", touche);
+  }, [choisi, fenetre, router]);
   const retirer = (id: string) => {
     setAvis((x) => (x ? x.filter((y) => y.id !== id) : x));
     const reste = liste.filter((y) => y.id !== id);
@@ -248,7 +264,7 @@ export default function Arrivees() {
                       </span>
                     ) : null}
                     {estReporte(reportes.valeur, x.id) ? <span className="tam-tri-quand">reporté au {dateCourte(reportes.valeur[x.id])}</span> : null}
-                    <span className="tam-tri-quand">{ilYaCourt(x.recu_le)}</span>
+                    <span className="tam-tri-quand" suppressHydrationWarning>{ilYaCourt(x.recu_le)}</span>
                   </span>
                 </Link>
               );
@@ -272,7 +288,7 @@ export default function Arrivees() {
                 libelle="Actions de l'avis"
                 options={[
                   ...(proposes[a.id] ? [{ libelle: `Ouvrir le dossier ${refDe(proposes[a.id])}`, icone: "Project" as NomTamIcone, href: `${RACINE}/tamila/dossiers/${proposes[a.id]}` }] : []),
-                  ...(rgDe(a) ? [{ libelle: "Copier le n° RG", icone: "LienUrl" as NomTamIcone, action: () => void navigator.clipboard?.writeText(rgDe(a)!) }] : []),
+                  ...(rgDe(a) ? [{ libelle: "Copier le n° RG", icone: "LienUrl" as NomTamIcone, action: () => copierEtDire(rgDe(a)!, "N° RG copié.") }] : []),
                   { libelle: "Revenir à la file", icone: "Inbox", action: () => ouvrir(null) },
                 ]}
               />
@@ -315,7 +331,7 @@ export default function Arrivees() {
                   <TamIcone nom="Project" />
                 </Link>
               ) : null}
-              <button type="button" className="tam-rond tam-rond--plein" aria-label="Copier l'adresse de l'avis" title="Copier l'adresse de l'avis" onClick={() => void copier(window.location.href)}>
+              <button type="button" className="tam-rond tam-rond--plein" aria-label="Copier l'adresse de l'avis" title="Copier l'adresse de l'avis" onClick={() => copierEtDire(window.location.href, "Adresse de l'avis copiée.")}>
                 <TamIcone nom="LienUrl" />
               </button>
               {/* « Copy as prompt | Choose coding tool » de Linear : copier pour l'assistant, et le menu des autres copies */}
@@ -326,7 +342,7 @@ export default function Arrivees() {
                   style={{ borderRadius: "9999px 0 0 9999px", borderRight: 0 }}
                   title="Copier pour l'assistant : un résumé en clair de l'avis"
                   onClick={() =>
-                    void copier(
+                    copierEtDire(
                       [`Avis RPVA reçu ${ilYaCourt(a.recu_le)} de ${a.reception?.de_nom ?? "e-barreau"}`, a.reception?.sujet ?? "", rgDe(a) ? `N° RG : ${rgDe(a)}` : "", proposes[a.id] ? `Dossier proposé : ${refDe(proposes[a.id])}` : "", a.type_suppose ? `Type supposé : ${TYPES_AVIS[a.type_suppose as keyof typeof TYPES_AVIS] ?? a.type_suppose}` : "", "", a.reception?.corps ?? ""]
                         .filter((x, i) => x || i === 5)
                         .join("\n"),
@@ -341,9 +357,9 @@ export default function Arrivees() {
                   alignement="droite"
                   classe="tam-bouton"
                   options={[
-                    { libelle: "Copier le texte du courriel", icone: "Email", action: () => void copier(a.reception?.corps ?? "") },
-                    { libelle: "Copier le n° RG", icone: "LienUrl", action: () => void copier(rgDe(a) ?? ""), desactive: !rgDe(a) },
-                    { libelle: "Copier le sujet", icone: "Page", action: () => void copier(a.reception?.sujet ?? "") },
+                    { libelle: "Copier le texte du courriel", icone: "Email", action: () => copierEtDire(a.reception?.corps ?? "", "Texte du courriel copié.") },
+                    { libelle: "Copier le n° RG", icone: "LienUrl", action: () => copierEtDire(rgDe(a) ?? "", "N° RG copié."), desactive: !rgDe(a) },
+                    { libelle: "Copier le sujet", icone: "Page", action: () => copierEtDire(a.reception?.sujet ?? "", "Sujet copié.") },
                   ]}
                 />
               </span>
@@ -420,7 +436,7 @@ export default function Arrivees() {
                 </div>
                 <p className="tam-evenement">
                   <Avatar nom={a.reception?.de_nom ?? "e-barreau"} taille={14} />
-                  <b>{a.reception?.de_nom ?? "e-barreau"}</b> a envoyé l&apos;avis{a.reception?.de_adresse ? ` (${a.reception.de_adresse})` : ""} <b>·</b> {ilYaCourt(a.recu_le)}
+                  <b>{a.reception?.de_nom ?? "e-barreau"}</b> a envoyé l&apos;avis{a.reception?.de_adresse ? ` (${a.reception.de_adresse})` : ""} <b>·</b> {/* 03/11/2026 — l'heure relative change entre le rendu du serveur et celui du navigateur (erreur React #418 relevée à chaque ouverture) */}<span suppressHydrationWarning>{ilYaCourt(a.recu_le)}</span>
                 </p>
                 <p className="tam-evenement">
                   <TamIcone nom="Lock" taille={14} />

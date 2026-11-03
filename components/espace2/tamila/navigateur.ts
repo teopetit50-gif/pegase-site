@@ -15,6 +15,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useSyncExternalStore } from "react";
+import { annoncer } from "../Toasts";
 
 const ecouteurs = new Set<() => void>();
 const avertir = () => ecouteurs.forEach((f) => f());
@@ -73,6 +74,12 @@ export function useMemoire(nom: "favoris" | "suivis" | "reportes") {
 
 /* reporté jusqu'à une date (AAAA-MM-JJ) : caché tant qu'elle n'est pas passée */
 export const estReporte = (reportes: Record<string, string>, id: string) => !!reportes[id] && reportes[id] > new Date().toISOString().slice(0, 10);
+
+/* 03/11/2026 — plusieurs « Copier » remplissaient le presse-papier sans rien
+   afficher : on croyait le bouton mort. Celle-ci le dit. */
+export function copierEtDire(texte: string, quoi = "Copié dans le presse-papier.") {
+  void copier(texte).then((ok) => annoncer(ok ? quoi : "Le presse-papier a refusé la copie.", ok ? "vert" : "rouge"));
+}
 
 export async function copier(texte: string): Promise<boolean> {
   try {
