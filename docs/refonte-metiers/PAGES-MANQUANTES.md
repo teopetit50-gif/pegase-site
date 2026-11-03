@@ -85,3 +85,30 @@ sous-page de la fiche d’un dossier (dernière ligne du tableau).
 | Sections ci-dessus | sessions Refonte <MÉTIER> | leurs branches | après les boutons |
 
 Sections (02/11, 21 h 40) : DALIRO fait — météo de la semaine (vue d'ensemble), tâches de commande et de livraison (À faire), lien « Journal des validations » (Réglages). « Affecter ce remplaçant » reste un manque : aucune porte n'écrit l'intervenant d'un passage (migration à décider par Teo).
+
+## Vérification à l'écran (03/11/2026) — `docs/verification/PROMESSES-ECRANS.md`
+
+Teo a demandé le 03/11 une vérification d'un autre ordre : non plus « la fonction existe-t-elle dans le
+code ? », mais « la promesse se voit-elle à l'écran, avec ses informations, dans les données d'exemple ? ».
+520 promesses d'affichage ont été relevées sur les pages publiques et ouvertes une par une sur
+https://omegaai.fr, Varelo compris cette fois. Le relevé, les captures et les totaux sont dans
+`docs/verification/PROMESSES-ECRANS.md` ; il remplace ce document pour tout ce qui touche à l'affichage.
+
+Ce qu'il change pour les manques listés ici :
+
+- **Le point du matin d'exemple n'avait aucune ligne métier** alors que les six modules en déposent en base.
+  Corrigé le 03/11 (`61c6091`) : cinq sections (Daliro, Tavaro, Tiroma, Tamila, Lorani), chaque ligne ouvrant
+  son objet. La file « À valider » et le journal d'activité filtré par module ont aussi gagné leurs demandes
+  métier — ils étaient vides, ce que cet audit-ci n'avait pas vu.
+- **Les six pages construites le 02/11 montrent bien ce qu'elles promettaient** (Approvisionnement, Questions
+  et réponses, À viser, Pilotage de Tavaro, Avant les rendez-vous, Dossier de faits) ; le Dossier de faits
+  n'était atteignable que par le menu « … » : un geste « Ouvrir le dossier de faits » a été posé sur chaque
+  lecture (`6e91e93`).
+- **Varelo, hors champ ici, a son premier relevé** : 27 promesses, dont 7 exemples à compléter. Trois sont
+  corrigées (`9df1b00`).
+- **Des blocs écrits mais que plus aucun écran ne montait** ont été rebranchés : REPUT (astreinte, second
+  sujet, doublon, pièces jointes, rendez-vous — `c0312d5`), FILED (lignes de la facture, provenance
+  Factur-X — `e2fb025`).
+
+Restent à décider par Teo, par produit, dans le document de vérification : 45 promesses sans back-end et
+26 promesses à reformuler (aucun texte public n'a été modifié).
