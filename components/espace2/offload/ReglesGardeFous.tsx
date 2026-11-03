@@ -58,9 +58,11 @@ const EXEMPLE: Etat = {
       id: "r3",
       texte: "Ne relance jamais un compte en litige.",
       famille: "litige",
-      statut: "en_attente",
+      /* la base l'applique (offload_impaye, c4_11) : un compte en litige, en recouvrement ou avec une facture
+         échue chez CASHD est écarté — l'exemple disait l'inverse (03/11/2026, docs/verification) */
+      statut: "appliquee",
       cree_le: "",
-      reponse: "Compris, mais je ne sais pas encore quels comptes sont en litige : la règle s'appliquera quand OFFLOAD lira vos impayés (CASHD). D'ici là, excluez ces comptes un par un.",
+      reponse: "Compris — ces fiches sont écartées : un compte en litige, en recouvrement ou avec une facture échue dans vos impayés (CASHD) ne reçoit aucune relance commerciale.",
     },
   ],
 };
