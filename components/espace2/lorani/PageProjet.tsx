@@ -379,6 +379,8 @@ export default function PageProjet({ id }: { id: string }) {
     { cle: "permis", libelle: "Nouveau permis…", form: { type: "permis", projet: projet.id }, off: gris },
     { cle: "courrier", libelle: "Déposer un courrier de la mairie…", form: { type: "courrier", projet: projet.id }, off: gris },
     { cle: "membre", libelle: "Ajouter un membre à l'équipe…", form: { type: "membre", projet: projet.id }, off: gris },
+    /* « Inviter l'équipe » : une personne sans compte s'invite depuis la page Équipe de l'espace (03/11/2026) */
+    { cle: "inviter", libelle: "Inviter quelqu'un dans l'espace…", href: `${RACINE}/equipe` },
     { cle: "lot", libelle: "Ajouter un lot…", form: { type: "lot", projet: projet.id }, off: gris },
     { cle: "intervenant", libelle: "Ajouter un intervenant…", form: { type: "intervenant", projet: projet.id }, off: gris },
   ];
