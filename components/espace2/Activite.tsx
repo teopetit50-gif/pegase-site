@@ -45,6 +45,7 @@ import { dateCourte, dateHeure, libelleModule, montant, relatif } from "@/compon
 import { etatDocument } from "@/components/espace/filed/etats";
 import { nomPersonne } from "@/components/espace/exemples/socle";
 import { useSource } from "@/components/espace/source";
+import { chargerEnvois, envoisExemple, type Envoi } from "./envois";
 import { Note, Squelette } from "./ui";
 import { useDonnees, type Donnees } from "./donnees";
 import { STATUTS_DEMANDE } from "./evenements";
@@ -56,7 +57,7 @@ import { IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeSante, ty
 const CHEMIN = `${RACINE}/activite`;
 const JOUR = 86_400_000;
 
-type Cle = "recus" | "a_valider" | "decisions";
+type Cle = "recus" | "a_valider" | "decisions" | "envois";
 type TeinteLin = "vert" | "jaune" | "rouge" | "bleu" | "gris";
 type Carte = {
   id: string;
@@ -80,10 +81,11 @@ const TYPES: { cle: Cle; libelle: string; teinte: TeinteLin }[] = [
   { cle: "recus", libelle: "Documents reçus", teinte: "gris" },
   { cle: "a_valider", libelle: "À valider", teinte: "jaune" },
   { cle: "decisions", libelle: "Décisions", teinte: "bleu" },
+  { cle: "envois", libelle: "Envois", teinte: "vert" },
 ];
 const TOUS_TYPES: Cle[] = TYPES.map((t) => t.cle);
-const TYPE: Record<Cle, string> = { recus: "Document reçu", a_valider: "À valider", decisions: "Décision" };
-const GRAPH: Record<Cle, string> = { recus: "var(--lin-graph-gris)", a_valider: "var(--lin-graph-jaune)", decisions: "var(--lin-graph-bleu)" };
+const TYPE: Record<Cle, string> = { recus: "Document reçu", a_valider: "À valider", decisions: "Décision", envois: "Envoi" };
+const GRAPH: Record<Cle, string> = { recus: "var(--lin-graph-gris)", a_valider: "var(--lin-graph-jaune)", decisions: "var(--lin-graph-bleu)", envois: "var(--lin-vert, #4cb782)" };
 /* les liens « Voir tout » des colonnes d'avant : dans le menu d'actions de la tête */
 const LIENS_TOUT: { libelle: string; href: string; icone: React.ReactNode }[] = [
   { libelle: "Voir tous les documents reçus", href: `${RACINE}/filed/boite`, icone: <IconeDocument /> },
@@ -99,7 +101,7 @@ const PERIODES: { cle: Periode; libelle: string; court: string; duree: number }[
   { cle: "tout", libelle: "Depuis le début", court: "Depuis le début", duree: Infinity },
 ];
 const estPeriode = (v: string | null): v is Periode => v === "jour" || v === "7j" || v === "30j" || v === "tout";
-const estCle = (v: string): v is Cle => v === "recus" || v === "a_valider" || v === "decisions";
+const estCle = (v: string): v is Cle => v === "recus" || v === "a_valider" || v === "decisions" || v === "envois";
 
 /* « Payer la facture R2026-000014 — Papeterie Durand, 486,20 € » : la carte garde l'action, le reste va dans l'info-bulle */
 const court = (resume: string) => resume.split(" — ")[0].trim() || resume;
@@ -146,6 +148,24 @@ function cartes(donnees: Donnees): Carte[] {
     }
   }
   return l;
+}
+
+/* « Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui l'a validé » */
+function cartesEnvois(envois: Envoi[]): Carte[] {
+  return envois.map((e) => ({
+    id: e.id,
+    colonne: "envois" as const,
+    quand: e.quand,
+    titre: e.quoi,
+    complet: `${e.quoi} — à ${e.a_qui}${e.regle ? ` · règle : ${e.regle}` : ""}${e.valide_par ? ` · validé : ${e.valide_par}` : ""}`,
+    somme: e.montant,
+    devise: "EUR",
+    etat: { libelle: "Parti", teinte: "vert" as const },
+    par: e.valide_par,
+    module: e.module,
+    lien: e.lien ?? `${RACINE}/reglages`,
+    texte: `${e.quoi} ${e.a_qui} ${e.regle ?? ""} ${e.valide_par ?? ""}`,
+  }));
 }
 
 /* les icônes relevées sur Linear (viewBox 16) : le « → » des changements, la bulle de « 0 comments » */
@@ -213,7 +233,19 @@ export default function Activite() {
     [],
   );
 
-  const toutes = useMemo(() => (donnees ? cartes(donnees) : null), [donnees]);
+  const [envoisReels, setEnvoisReels] = useState<Envoi[]>([]);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let actif = true;
+    chargerEnvois()
+      .then((x) => actif && setEnvoisReels(x))
+      .catch(() => undefined);
+    return () => {
+      actif = false;
+    };
+  }, [source]);
+  const envois = useMemo(() => (source === "exemple" ? envoisExemple() : envoisReels), [source, envoisReels]);
+  const toutes = useMemo(() => (donnees ? [...cartes(donnees), ...cartesEnvois(envois)] : null), [donnees, envois]);
   const duree = PERIODES.find((p) => p.cle === periode)?.duree ?? Infinity;
   const dansPeriode = useMemo(() => (toutes && maintenant !== null ? toutes.filter((c) => duree === Infinity || maintenant - new Date(c.quand).getTime() <= duree) : null), [toutes, maintenant, duree]);
   const lesModules = useMemo(() => Array.from(new Set((dansPeriode ?? []).map((c) => c.module))), [dansPeriode]);
@@ -230,14 +262,14 @@ export default function Activite() {
     if (!visibles.length || maintenant === null) return { b: [] as Record<Cle, number>[], debut: 0 };
     const debut = duree === Infinity ? Math.min(...visibles.map((c) => new Date(c.quand).getTime())) : maintenant - duree;
     const pas = Math.max(1, (maintenant - debut) / 40);
-    const b = Array.from({ length: 40 }, () => ({ recus: 0, a_valider: 0, decisions: 0 }));
+    const b = Array.from({ length: 40 }, () => ({ recus: 0, a_valider: 0, decisions: 0, envois: 0 }));
     for (const c of visibles) {
       const k = Math.min(39, Math.max(0, Math.floor((new Date(c.quand).getTime() - debut) / pas)));
       b[k][c.colonne] += 1;
     }
     return { b, debut };
   }, [visibles, maintenant, duree]);
-  const max = Math.max(1, ...barres.b.map((x) => x.recus + x.a_valider + x.decisions));
+  const max = Math.max(1, ...barres.b.map((x) => x.recus + x.a_valider + x.decisions + x.envois));
   const dateAxe = (t: number) => new Date(t).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
   const quandCourt = (iso: string) => {
     const d = new Date(iso);
@@ -277,7 +309,7 @@ export default function Activite() {
   const stop = { onClick: (e: React.MouseEvent) => e.stopPropagation(), onKeyDown: (e: React.KeyboardEvent) => e.stopPropagation() };
   const menuCarte = (c: Carte): Option[] => [
     { cle: "detail", libelle: c.id === choisie ? "Fermer le détail" : "Voir le détail", icone: <PanelRight width={16} height={16} aria-hidden="true" />, action: () => basculerChoix(c.id) },
-    { cle: "ouvrir", libelle: c.colonne === "recus" ? "Ouvrir dans FILED" : "Ouvrir dans À valider", icone: <ExternalLink width={16} height={16} aria-hidden="true" />, href: c.lien },
+    { cle: "ouvrir", libelle: c.colonne === "recus" ? "Ouvrir dans FILED" : c.colonne === "envois" ? "Ouvrir la page concernée" : "Ouvrir dans À valider", icone: <ExternalLink width={16} height={16} aria-hidden="true" />, href: c.lien },
   ];
 
   /* une demande à valider : la carte de mise à jour de Linear */
@@ -751,7 +783,7 @@ export default function Activite() {
                 <div className="lpu-histo" role="img" aria-label={`${visibles.length} événements sur la période`}>
                   {barres.b.length
                     ? barres.b.map((n, i) =>
-                        n.recus + n.a_valider + n.decisions ? (
+                        n.recus + n.a_valider + n.decisions + n.envois ? (
                           <span key={i}>{TOUS_TYPES.map((cle) => (n[cle] ? <i key={cle} style={{ height: `${Math.max(4, (n[cle] / max) * 196)}px`, background: GRAPH[cle] }} /> : null))}</span>
                         ) : (
                           <span key={i} data-vide="" />
