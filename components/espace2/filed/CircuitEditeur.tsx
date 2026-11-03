@@ -31,7 +31,9 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useSource } from "@/components/espace/source";
 import { CalendarDays, CheckCheck, ExternalLink, FileText, Layers, MessageSquare, Paperclip, Play, Shuffle, Sparkles, UserRound, Users, Zap } from "lucide-react";
 import { useMaintenant } from "../horloge";
 import { dateCourte, dateHeure, montant, relatif } from "@/components/espace/format";
@@ -447,6 +449,39 @@ export default function CircuitEditeur() {
   );
 }
 
+/* ——— « L'approbateur qui n'a pas répondu est relancé, puis la pièce remonte d'un niveau » (03/11/2026) :
+   les délais du circuit (public.filed_circuits, a4_07, lecture ouverte aux comptes du client) et la
+   relance faite par private.filed_relancer_validations ; en exemple, les délais par défaut du circuit. ——— */
+function RelanceRemontee({ regleId }: { regleId: string }) {
+  const { source } = useSource();
+  const [reel, setReel] = useState<{ relance: number; remontee: number } | null>(null);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let actif = true;
+    createClient()
+      .from("filed_circuits")
+      .select("delai_relance_jours, delai_remontee_jours")
+      .eq("regle_id", regleId)
+      .eq("actif", true)
+      .limit(1)
+      .then(({ data }) => {
+        const c = (data ?? [])[0] as { delai_relance_jours: number; delai_remontee_jours: number } | undefined;
+        if (actif) setReel(c ? { relance: c.delai_relance_jours, remontee: c.delai_remontee_jours } : null);
+      });
+    return () => {
+      actif = false;
+    };
+  }, [source, regleId]);
+  const d = source === "exemple" ? { relance: 3, remontee: 7 } : reel;
+  if (!d) return null;
+  return (
+    <Section titre="Relance et remontée" texte="Si personne ne répond.">
+      <Champ icone={<CalendarDays aria-hidden="true" />}>{`Relance de l'approbateur après ${d.relance} jours sans réponse`}</Champ>
+      <Champ icone={<Layers aria-hidden="true" />}>{`Remontée d'un niveau, à la direction, après ${d.remontee} jours`}</Champ>
+    </Section>
+  );
+}
+
 /* ——— « Configurer » : le détail d'un bloc, dans le dessin du panneau de Plain ——— */
 function PanneauConfigurer({ bloc, calc, fermer }: { bloc: string; calc: { regles: Regle[]; delegations: Delegation[] }; fermer: () => void }) {
   const [type, id] = bloc.includes(":") ? [bloc.split(":")[0], bloc.slice(bloc.indexOf(":") + 1)] : [bloc, ""];
@@ -529,6 +564,7 @@ function PanneauConfigurer({ bloc, calc, fermer }: { bloc: string; calc: { regle
             <Champ icone={<CheckCheck aria-hidden="true" />}>{approbations(regle)}</Champ>
             <Encart titre="Deux personnes distinctes">Celle qui a saisi ne peut pas approuver ; au-delà d&apos;une approbation, chacune est donnée par une personne différente.</Encart>
           </Section>
+          <RelanceRemontee regleId={regle.id} />
           <Section titre="Rôles autorisés" texte="Les rôles qui peuvent approuver cette demande.">
             <div className="pe-puces">
               {regle.roles_autorises.map((y) => (

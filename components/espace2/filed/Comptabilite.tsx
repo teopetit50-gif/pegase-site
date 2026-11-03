@@ -30,6 +30,7 @@ import { montant, nombreFr } from "@/components/espace/format";
 import { COMPTES_SYSTEME, SOUS_TITRE_FEC, exporterFec, quand, reglerCompte, telecharger, type ExportFec, type RoleCompte } from "@/components/espace/filed/factureElectronique";
 import { EXERCICES_EXEMPLE, fecExemple, type Compte, type Contexte } from "@/components/espace/filed/EcranComptabilite";
 import { chargerVueFournisseurs, monClient, type FactureDuFournisseur } from "@/components/espace/filed/portes";
+import ChargesReprise from "./ChargesReprise";
 import { AvisRapport, CarteRapport, CourbeRapport, Rapport, SectionRapport, TableauRapport, pluriel, serieDatee, useParametresRapport } from "../lin/Rapports";
 
 const annee = new Date().getFullYear();
@@ -386,6 +387,8 @@ export default function Comptabilite() {
             )}
           </CarteRapport>
         </SectionRapport>
+
+        <ChargesReprise source={source === "exemple" ? "exemple" : "reelle"} />
       </Rapport>
 
       <Dialog open={!!edition} onOpenChange={(o) => !o && !envoi && setEdition(null)}>
