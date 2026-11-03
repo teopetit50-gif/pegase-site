@@ -26,6 +26,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowRight, Building2, CheckCheck, Copy, Download, ExternalLink, HandCoins, ListFilter, MessageSquare, PanelRight, Plus, SlidersHorizontal } from "lucide-react";
+import { DELAIS_EXEMPLE, chargerDelais, phraseHistorique, type DelaiReglement } from "./delais";
 import { useSource } from "@/components/espace/source";
 import { montant } from "@/components/espace/format";
 import { tableauDe, jourParis } from "@/components/espace/cashd/calcul";
@@ -339,6 +340,21 @@ export default function Debiteurs() {
   const [ongletDetails, setOngletDetails] = useState<"anciennete" | "relances" | "groupes">("anciennete");
   const [filtre, setFiltre] = useState("");
   const [ongletFiche, setOngletFiche] = useState<"apercu" | "relances">("apercu");
+  /* l'historique de paiement de chaque compte (vue cashd_delais_reglement, c2_03) */
+  const [delaisReels, setDelaisReels] = useState<DelaiReglement[] | null>(null);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let actif = true;
+    portes
+      .monClient()
+      .then((c) => (c ? chargerDelais(c.client_id) : []))
+      .then((x) => actif && setDelaisReels(x))
+      .catch(() => actif && setDelaisReels([]));
+    return () => {
+      actif = false;
+    };
+  }, [source]);
+  const delais = source === "exemple" ? DELAIS_EXEMPLE : (delaisReels ?? []);
 
   useEffect(() => {
     if (source !== "reelle") return;
@@ -734,6 +750,10 @@ export default function Debiteurs() {
                     </li>
                   ))}
                 </ul>
+
+                {/* « le ton se cale sur l'historique de paiement » : il se lit ici, compte par compte */}
+                <h2 className="lin-projet-h2">Historique de paiement</h2>
+                <p className="lin-maj-texte">{phraseHistorique(delais.find((x) => x.compte_id === b.compte_id)) ?? "Aucune facture payée sur les douze derniers mois : pas encore d'historique."}</p>
 
                 <h2 className="lin-projet-h2">Paliers de relance</h2>
                 <ul className="lin-projet-liste">

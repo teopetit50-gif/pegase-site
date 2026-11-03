@@ -15,6 +15,7 @@
    seulement) ; chaque changement reste daté au journal.
    ══════════════════════════════════════════════════════════════════════ */
 
+import HistoriqueReglages from "./HistoriqueReglages";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Chargement, Pastille } from "../ui";
@@ -460,6 +461,7 @@ export default function Textes({ source, client, reglages, emetteur, apresReglag
         <button type="button" className="r-btn" disabled={!reglageValide || envoi} onClick={() => void reglerTon()}>Enregistrer ces réglages</button>
       </div>
     </div>
+    <HistoriqueReglages source={source === "exemple" ? "exemple" : "reelle"} client={client} />
     </>
   );
   const valide = (

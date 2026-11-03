@@ -17,6 +17,7 @@
    base réelle (portes.ts, sous RLS, relue en temps réel).
    ══════════════════════════════════════════════════════════════════════ */
 
+import { DELAIS_EXEMPLE, chargerDelais, delaiGlobal, type DelaiReglement } from "./delais";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FileUp } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
@@ -55,6 +56,7 @@ export default function Tresorerie() {
   const [fait, setFait] = useState<string | null>(null);
   const [previsionReelle, setPrevisionReelle] = useState<portes.Prevision | null>(null);
   const [pilotageReel, setPilotageReel] = useState<{ reponses: portes.Reponse[]; arretes: portes.Arrete[] } | null>(null);
+  const [delaisReels, setDelaisReels] = useState<DelaiReglement[] | null>(null);
 
   const charger = useCallback(async () => {
     await Promise.resolve();
@@ -70,6 +72,7 @@ export default function Tresorerie() {
       setReel({ client, tableau });
       setPrevisionReelle(await portes.prevision(client.client_id).catch(() => null));
       setPilotageReel(await portes.chargerPilotage(client.client_id).catch(() => null));
+      setDelaisReels(await chargerDelais(client.client_id).catch(() => null));
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
       setReel({ client: null, tableau: null });
@@ -98,6 +101,7 @@ export default function Tresorerie() {
   }, [source, fiches, sansCompte, reel]);
   const t = tableau?.totaux;
   const client = reel?.client?.client_id ?? null;
+  const delais = source === "exemple" ? DELAIS_EXEMPLE : (delaisReels ?? []);
 
   /* le pilotage : taux de réponse par palier et arrêtés de la balance (exemple : les relances parties de l'exemple) */
   const pilotage = useMemo(() => {
@@ -449,6 +453,33 @@ export default function Tresorerie() {
               </TableauRapport>
             ) : (
               <p className="rap-sous">Le premier arrêté se prend au jour du mois réglé.</p>
+            )}
+          </CarteRapport>
+        </SectionRapport>
+
+        {/* « Votre encours est classé par ancienneté, avec le délai moyen de règlement » (vue cashd_delais_reglement) */}
+        <SectionRapport titre="Délai de règlement" meta="De l'émission au paiement, sur les factures payées des douze derniers mois">
+          <CarteRapport
+            taille="large"
+            titre="Délai moyen de règlement"
+            info="Moyenne des comptes, pondérée par le nombre de factures payées ; le retard moyen se compte après l'échéance."
+            chiffre={delaiGlobal(delais) !== null ? `${String(delaiGlobal(delais)).replace(".", ",")} j` : "—"}
+            legende={delais.length ? `sur ${pluriel(delais.reduce((n, x) => n + x.factures_payees, 0), "facture payée", "factures payées")}` : "aucune facture payée en douze mois"}
+            etat={delais.length ? "vert" : "gris"}
+          >
+            {delais.length ? (
+              <TableauRapport libelle="Délai de règlement par compte" colonnes={[{ libelle: "Compte" }, { libelle: "Délai moyen", num: true }, { libelle: "3 derniers mois", num: true }, { libelle: "Retard moyen", num: true }]}>
+                {delais.map((x) => (
+                  <tr key={x.compte_id}>
+                    <td>{x.nom}</td>
+                    <td className="rap-num">{x.delai_moyen_jours !== null ? `${String(x.delai_moyen_jours).replace(".", ",")} j` : "—"}</td>
+                    <td className="rap-num">{x.delai_recent_jours !== null ? `${String(x.delai_recent_jours).replace(".", ",")} j` : "—"}</td>
+                    <td className="rap-num">{x.retard_moyen_jours !== null ? `${String(x.retard_moyen_jours).replace(".", ",")} j` : "—"}</td>
+                  </tr>
+                ))}
+              </TableauRapport>
+            ) : (
+              <p className="rap-sous">Le délai se mesure dès la première facture payée.</p>
             )}
           </CarteRapport>
         </SectionRapport>
