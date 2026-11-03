@@ -17,6 +17,12 @@
    colonne `atteste` (lib/produits/capacites/*.ts) fait le même travail.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* 03/11/2026 — vérification à l'écran (docs/verification/PROMESSES-ECRANS.md) : retirées les lignes que
+   le relevé a vues livrées et montrées dans Espace 2 (Tamila : chronologie, contradictions, bordereau,
+   dossier de faits, export, pré-lecture ; Lorani : sept lignes ; Tavaro : dix lignes ; Offload, Reput :
+   une chacun) ; ajoutée « Bureaux d'études invités » (Lorani, aucune invitation). Rappel : la pastille
+   ne s'affiche plus sur le site (décision de Teo du 06/10, components/ui/en-preparation.tsx) ; cette
+   liste ne sert qu'au suivi. */
 const LIGNES = {
   /* TIROMA — ouvrier B3. Tout est livré. Retirés le 06/10 au soir :
      synthèse de la semaine (b3_15), réinscription (b3_16), absences
@@ -35,14 +41,8 @@ const LIGNES = {
   tamila: [
     // cartes « fonctionnalités »
     "Pièces adverses du jour",
-    "Chronologie sourcée",
-    "Bordereau contrôlé",
-    "Contradictions relevées",
     // section « point du matin »
     // formule Pré-lecture
-    "Dossier de faits daté et sourcé",
-    "Contradictions entre pièces",
-    "Bordereau contrôlé (art. 768)",
     "Dispositif contre motifs (art. 954)",
     "Prétentions nouvelles et concentration en appel",
     "Pièces citées jamais communiquées, sommation prête",
@@ -53,7 +53,6 @@ const LIGNES = {
     "Premier jet de l'exposé des faits",
     "Dossier de plaidoirie et renvois cliquables",
     "Pièces scannées et manuscrites",
-    "Export Word et PDF",
     "Chronologie des soins",
     "Interruptions de soins repérées",
     "Nomenclature Dintilhac pré-remplie",
@@ -62,7 +61,6 @@ const LIGNES = {
     "Questions posées au dossier médical",
     "Pièces médicales scannées",
     // formule Cabinet
-    "L'ensemble de la pré-lecture",
   ],
 
   /* LORANI — ouvrier B5. Construits et retirés d'ici le 06/10 au soir :
@@ -74,20 +72,14 @@ const LIGNES = {
      (b5_21). Restent : PLU (servitudes et risques non lus) et le métré, dont
      la phrase promet une mesure sur le dessin que le lecteur ne fait pas. */
   lorani: [
-    "Plans croisés, rapport PDF annoté",
     "PLU, servitudes et risques lus depuis l'adresse",
     "Questions posées au dossier",
-    "Analyse des offres sur DPGF",
     "Métré des plans contre la DPGF",
-    "Une question en un clic",
     "Checklists de l'agence",
-    "Export Excel par lot",
-    "Honoraires par phase contre temps passé",
-    "Dossier de défense décennale",
-    "Historique des indices sans limite",
     "Contrôles définis avec vous",
     "Import depuis vos plateformes de projet",
     "Règles de votre charte intégrées",
+    "Bureaux d'études invités",
   ],
 
   /* DALIRO — ouvrier B6 (lecture des photos et vocaux avec A1 et A2).
@@ -113,35 +105,21 @@ const LIGNES = {
      Retirés le 06/10 : remise en location et entretien (b2_10). */
   tavaro: [
     "Assistance",
-    "Sortie de flotte",
-    "Questions",
-    "Réservations à risque",
-    "Montée en gamme",
-    "Contrats à risque",
-    "Véhicules inactifs",
-    "Transferts",
-    "Péages",
     "Rappels",
     "Garage et carrosserie",
     "Contestations bancaires",
-    "Sinistres et recours",
     "Relevés constructeur",
-    "Plan de flotte",
   ],
 
   /* OFFLOAD — ouvrier C4. Lignes « non construites » de NOTES-C4 (f9bf72d)
      qui apparaissent hors du catalogue. Le catalogue, lui, porte déjà
      `atteste: false`. Retiré le 06/10 au soir : « Entretien annuel redevenu
      dû » (c4_07, 5f2cc7e, échéances et renouvellements). */
-  offload: [
-    "Pièce arrivée, jamais reprise",
-  ],
+  offload: [] as string[],
 
   /* REPUT — ouvrier C3 (palier 5 : rendez-vous, avis, astreinte). Lignes
      non tenues (NOTES-C3) qui apparaissent hors du catalogue. */
-  reput: [
-    "Prise de rendez-vous",
-  ],
+  reput: [] as string[],
 };
 
 /* Une liste PAR MODULE : la même phrase peut être livrée chez l'un et pas
