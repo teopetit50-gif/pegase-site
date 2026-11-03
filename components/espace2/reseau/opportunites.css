@@ -500,3 +500,44 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ——— la carte ouverte au milieu : rien de coupé (Teo, 03/11 : « c'est coupé en bas ») ———
+   La CarteCentrale des moteurs garde une hauteur fixe et fait défiler sa colonne de droite
+   derrière un fondu : sur une carte d'Opportunités, « Activité » restait à moitié cachée sous
+   la note et le bouton, et sur mobile le détail défilait dans un cadre de 330 px. Ici, la carte
+   prend sa hauteur réelle et c'est le voile qui défile, comme une page ; la note et le bouton
+   suivent le contenu. Sous 900 px, la feuille de gauche (qui redit les lots et le montant de la
+   colonne de droite) est masquée. Le voile porte la classe op-voile-carte (prop « classe ») :
+   les cartes des moteurs ne changent pas. */
+.op-voile-carte {
+  overflow-y: auto;
+  place-items: start center;
+}
+.op-voile-carte .v2-modale.v2-val-carte {
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  margin: auto 0;
+}
+.op-voile-carte .v2-det-carte-corps,
+.op-voile-carte .v2-det-decision-corps {
+  flex: none;
+}
+.op-voile-carte .v2-det-decision-corps,
+.op-voile-carte .v2-det-document-pages {
+  overflow: visible;
+}
+.op-voile-carte .v2-det-fondu {
+  display: none;
+}
+@media (max-width: 900px) {
+  .op-voile-carte .v2-modale.v2-val-carte {
+    height: auto;
+  }
+  .op-voile-carte .v2-det-carte-corps {
+    grid-template-rows: auto;
+  }
+  .op-voile-carte .v2-det-document {
+    display: none;
+  }
+}

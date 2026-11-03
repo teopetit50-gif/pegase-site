@@ -37,6 +37,7 @@ export function CarteCentrale({
   children,
   notes,
   actions,
+  classe,
 }: {
   ouverte: boolean;
   fermer: () => void;
@@ -58,6 +59,8 @@ export function CarteCentrale({
   children?: React.ReactNode;
   notes?: React.ReactNode;
   actions?: React.ReactNode;
+  /* une classe de plus sur le voile, pour qu'une page règle sa carte sans toucher aux autres (02/11 : Opportunités) */
+  classe?: string;
 }) {
   /* ← → passent d'une carte à l'autre, comme dans « À valider » (hors champs) */
   useEffect(() => {
@@ -78,7 +81,7 @@ export function CarteCentrale({
   }, [ouverte, nav]);
 
   return (
-    <ModalOverlay isOpen={ouverte} onOpenChange={(o) => !o && fermer()} isDismissable className="v2-jetons v2-voile v2-voile--carte">
+    <ModalOverlay isOpen={ouverte} onOpenChange={(o) => !o && fermer()} isDismissable className={`v2-jetons v2-voile v2-voile--carte${classe ? ` ${classe}` : ""}`}>
       <Modal className="v2-modale v2-val-carte">
         <Dialog className="v2-modale-dialogue" aria-label={libelle}>
           <div className="v2-det">

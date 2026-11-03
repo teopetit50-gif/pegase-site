@@ -796,6 +796,7 @@ function Tableau({ vous }: { vous: string }) {
         echeance={echeance}
         notes={note}
         actions={actionsCarte(c, true)}
+        classe="op-voile-carte"
       >
         {fiche}
         <div className="v2-det-bloc">
