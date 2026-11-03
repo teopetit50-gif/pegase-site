@@ -12,9 +12,9 @@ formulaires, relever les « petites conneries » et corriger ce qui est simple. 
 | Pages parcourues | 90 pages au chargement × 5 largeurs (390 / 768 / 1024 / 1440 / 1700) × 2 thèmes, soit 900 vues sondées automatiquement ; puis environ 300 adresses ouvertes en interaction (pages, sous-pages, fiches `[id]`, `?id=`, `?verif=`, `?avis=`, `?element=`, `?vue=`…), à 390 sombre et 1440 clair, et à 768 / 1024 quand c'était fragile |
 | Boutons cliqués | ≈ 7 900 (dont ≈ 700 premiers éléments de menus ouverts), plus ≈ 300 clics ciblés à la main |
 | Formulaires validés | ≈ 85 (valeurs plausibles, vides, très longues, 2 000 caractères sans espace, adresses fausses, double envoi), plus ≈ 30 saisies invalides |
-| Défauts trouvés | **75** lignes de défaut (une ligne regroupe parfois le même défaut sur plusieurs pages : les menus hors écran, par exemple, en couvrent une trentaine) |
-| Corrigés et en ligne | **57** (6 commits, voir plus bas), dont 2 corrigés en partie avec un reste à décider |
-| À décider par Teo | **13** (dont 11 sans correction) |
+| Défauts trouvés | **79** lignes de défaut (une ligne regroupe parfois le même défaut sur plusieurs pages : les menus hors écran, par exemple, en couvrent une trentaine) |
+| Corrigés et en ligne | **60** (7 commits, voir plus bas), dont 2 corrigés en partie avec un reste à décider |
+| À décider par Teo | **14** (dont 12 sans correction) |
 | Laissés en l'état ou écartés après vérification (conformes à la référence, sans conséquence, non reproduits) | **7** |
 
 Erreurs de console : aucune exception, aucun écran blanc, aucun chargement sans fin, aucun lien en 404
@@ -38,6 +38,7 @@ Le verrou mérite d'être régénéré un jour.
 | A | `0f7fac1` | Daliro, Lorani, Tamila |
 | B | `886765a` | Tavaro, Tiroma, Varelo |
 | R | `6caa109` | Réseau |
+| F | `5ca2e9e` | Retours relayés par la coordination : « Gérer l'équipe », texte d'Opportunités, poignées des composeurs sans bord |
 
 Captures : `docs/verification/captures/` (avant / après).
 
@@ -66,6 +67,9 @@ Captures : `docs/verification/captures/` (avant / après).
 | `/espace2/ecosysteme` | toutes | Barre du haut « Espace client », aucune entrée du volet allumée | cosmétique | — | titre corrigé C ; **à décider** : une entrée dans le rail pour cette page interne ? |
 | palette ⌘K | 390 | Invite coupée net (« …un modul ») | cosmétique | — | corrigé C |
 | volet Réglages | toutes | « Accessibilité » et « Données » (ancres `#`) ne s'allument jamais | cosmétique | — | laissé : demande de revoir le volet des réglages (ancres) |
+| `/espace2/reglages` | toutes | « Gérer l'équipe » menait à l'ancien `/espace/equipe` (relevé par la session Formation) | gênant | — | corrigé F |
+| `/espace2/point` « Prochaine édition » | toutes | « Personnaliser » mène aux Réglages, qui ne contiennent ni l'heure ni le canal du point (relevé par la session Formation) | gênant | — | **à décider** : aucun écran ne règle l'heure et le canal du point ; en créer un, ou retirer le lien |
+| composeurs sans bord (Tiroma fils, Membres, Plain fil, Contacts, Nouvelle tâche, volet des parties, volet Supabase) | toutes | Poignée de redimensionnement dans un champ sans bord (demande de Teo relayée) | cosmétique | — | corrigé F |
 | `/espace2/formation/<inconnue>` | — | Affiche la 404 mais répond 200 (`notFound()` après le début du flux) | sans conséquence | — | noté (page en `noindex`) |
 
 ## Les quatre systèmes
@@ -136,13 +140,14 @@ Captures : `docs/verification/captures/` (avant / après).
 | `/reseau/membres/inconnu` | toutes | 404 du site vitrine, hors d'Espace 2 | gênant | — | **à décider** : un `not-found.tsx` sous `app/espace2` |
 | `/reseau/messages` | 390 | Titre de sujet sans espace coupé net | cosmétique | — | corrigé R |
 | `/reseau/opportunites` | 390 | Pastille de recherche longue de milliers de pixels | cosmétique | — | corrigé R ; bouton « Effacer les filtres » dans l'état vide non fait |
+| `/reseau/opportunites` | toutes | « Accepter envoie une intro… » alors que rien ne part (gestes notés sur l'écran) | gênant | — | corrigé F (le texte dit que l'intro partira à l'ouverture du réseau) |
 | `/reseau/messages` Récentes | toutes | État vide faux quand c'est la recherche qui ne trouve rien | cosmétique | — | corrigé R |
 
 ---
 
 ## Compte rendu pour Teo
 
-**Corrigé et en ligne** (6 commits du 03/11, vérifiés sur omegaai.fr) :
+**Corrigé et en ligne** (7 commits du 03/11, vérifiés sur omegaai.fr) :
 - le thème sombre ne saute plus en refermant le tiroir sur téléphone ;
 - plus aucun menu « … », filtre ou petite fenêtre ne sort de l'écran à 390 : la coquille les recale
   (une quinzaine de cas, dont le filtre d'agence de Tavaro Incidents qu'on ne pouvait pas choisir et le
@@ -165,6 +170,7 @@ Captures : `docs/verification/captures/` (avant / après).
 4. **Fiches sans entrée allumée** dans le volet (Tavaro contrat, Tamila dossier et faits) : une entrée
    peut-elle couvrir plusieurs adresses ?
 5. **Écosystème** : une entrée dans le rail ?
+5 bis. **Point du matin** : « Personnaliser » mène aux Réglages, qui ne règlent ni l'heure ni le canal du point. Un écran pour ça, ou on retire le lien ?
 6. **Réseau** : fiche de membre inconnue qui tombe sur la 404 du site vitrine (une page « introuvable »
    propre à Espace 2 ?) ; publication faite sous un filtre qui disparaît (lever le filtre ?).
 7. **Données d'exemple** : le compte « Froid Services Vannes » d'OFFLOAD manque ; seuls 5 patients
