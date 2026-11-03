@@ -34,8 +34,8 @@ restent exclus comme références de dessin.
 2. **Comment marche Omega** : « À valider », les règles de décision, le mode essai, ce qui arrête un envoi, les rôles, les données.
 3. **Votre première semaine** : le premier accès, le point du matin, la routine de validation, l'activité, le rodage.
 4. **FILED**, **CASHD**, **REPUT**, **OFFLOAD** : une page par système, avec une vidéo par geste.
-5. *(à écrire, lot 4)* **Le reste du socle** : Tâches, Notes, Appels, Contacts, Automatisations, Carte, Écosystème, Utilisation, Réglages.
-6. *(à écrire, lot 4)* **Le Réseau Omega** : membres, messages, opportunités.
+5. **Votre espace au quotidien** (`/espace2/formation/espace`) : vue d'ensemble, délégation, équipe, activité et automatisations, tâches, contacts, notes et appels, utilisation et carte, réglages.
+6. **Le Réseau Omega** (`/espace2/formation/reseau`) : présenté comme « ouvre bientôt », avec un aperçu sur les données d'exemple ; ses gestes ne sont pas enseignés tant qu'ils restent locaux.
 
 ### Module métier (selon le client)
 Daliro (BTP), Lorani (architectes), Tamila (avocats), Tavaro (location),
@@ -90,7 +90,7 @@ l'adresse calculée dans `videos.ts` change.
 | 1 | Cahier des charges ; catalogue et scripts de **Bien démarrer + CASHD** ; CASHD détaillé geste par geste ; outil de dépôt ; sous-titres dans le lecteur | en ligne le 03/11 |
 | 2 | Scripts et pages détaillées de **FILED, REPUT, OFFLOAD** | en ligne le 03/11 |
 | 3 | Scripts et pages des **six métiers** | en ligne le 03/11 |
-| 4 | Le reste du socle et le **Réseau Omega** | à venir |
+| 4 | Le reste du socle et le **Réseau Omega** | en ligne le 03/11 |
 | 5 | La **vitrine publique**, dès que 6 vidéos sont tournées | attend le tournage |
 | 6 | La **refonte du visuel** : 2 ou 3 directions proposées à Teo, qui choisit | après le lot 2 |
 

@@ -3,7 +3,7 @@
 > Fichier produit par `node outils/formation-scripts.mjs` à partir de
 > `components/espace2/formation/videos.ts`. Ne pas le modifier à la main.
 
-89 vidéos au catalogue, 89 scripts écrits, 0 tournées.
+98 vidéos au catalogue, 98 scripts écrits, 0 tournées.
 
 ## Pour tourner
 
@@ -552,6 +552,118 @@ Identifiant : `offload-garde-fous` · à tourner · départ : https://omegaai.fr
 | 1 | Ouvrir Garde-fous. | Sans règle de votre part, les messages restent sans prix ni délai, toujours au vouvoiement. |
 | 2 | Écrire une règle, par exemple « ne jamais parler de remise », et lire la réponse. | Écrivez une règle en une phrase. OFFLOAD vous répond ce qu'il en fera, ou qu'il ne l'a pas comprise. Tout message qui enfreint une règle est retenu. |
 | 3 | Montrer « Suspendre OFFLOAD », sans cliquer. | En cas de doute, suspendez OFFLOAD : plus aucune reprise ne part. |
+
+## Votre espace au quotidien
+
+### La vue d'ensemble
+
+Identifiant : `espace-accueil` · à tourner · départ : https://omegaai.fr/espace2
+
+*Objectif : Lire la page d'accueil de l'espace.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir la vue d'ensemble. | La vue d'ensemble montre la courbe des factures reçues, ce qu'il faut payer en priorité, vos tâches du jour et l'activité récente. |
+| 2 | Menu de la courbe, « 30 derniers jours ». | Changez la période de la courbe : 7, 30 ou 90 jours. |
+| 3 | « Voir tout » sous « À payer en priorité ». | « Voir tout » mène à l'écran complet. |
+
+### Déléguer pendant une absence
+
+Identifiant : `espace-delegation` · à tourner · départ : https://omegaai.fr/espace2/validations
+
+*Objectif : Faire décider quelqu'un à votre place pendant une absence, puis révoquer.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir une demande dans À valider, « Déléguer ». | Vous partez en congés ? Déléguez votre décision. |
+| 2 | Choisir « À qui », la portée, la date « Jusqu'au », le motif, puis « Poser la délégation ». | La personne désignée décidera en votre nom, sur ce module ou sur tous, jusqu'à la date choisie. |
+| 3 | Carte « Délégations », « Gérer », « Révoquer ». | Vous pouvez révoquer à tout moment. Les décisions déjà prises restent valables. |
+
+### Gérer l'équipe
+
+Identifiant : `espace-equipe` · à tourner · départ : https://omegaai.fr/espace2/equipe
+
+*Objectif : Ajouter une personne, changer son rôle, limiter ses sociétés, la retirer.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Équipe, « Inviter », saisir l'adresse de son compte, choisir le rôle, « Ajouter ». | La personne doit déjà avoir un compte Omega : l'invitation par courriel arrive bientôt. Sinon, écrivez-nous. |
+| 2 | Menu « ··· » d'une personne, « Rôle ». | Changez son rôle : il fixe ce qu'elle voit et ce qu'elle décide. |
+| 3 | « Sociétés visibles… », cocher, « Enregistrer ». | Limitez-la à certaines sociétés : elle ne voit et ne décide que pour celles-ci. |
+| 4 | « Retirer de l'organisation… », « Retirer ». | Une personne retirée perd l'accès. Ce qu'elle a fait reste au journal, à son nom. |
+
+### Activité et automatisations
+
+Identifiant : `espace-activite` · à tourner · départ : https://omegaai.fr/espace2/activite
+
+*Objectif : Retrouver ce qui s'est passé, et chaque passage d'un système.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Activité, choisir « 7 jours », filtrer « Décisions ». | L'activité retrace les documents reçus, les demandes à valider et les décisions. |
+| 2 | « Voir le détail », puis « Ouvrir dans À valider ». | Chaque ligne mène à son objet. |
+| 3 | Ouvrir Automatisations, onglet « Échouées ». | Automatisations montre chaque passage de vos systèmes, par état : en cours, réussi, échoué. |
+
+### Les tâches
+
+Identifiant : `espace-taches` · à tourner · départ : https://omegaai.fr/espace2/taches
+
+*Objectif : Noter ce qu'il reste à faire, avec une échéance.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Tâches, « Nouvelle tâche », titre, priorité, échéance, « Créer la tâche ». | Notez ce qu'il reste à faire, avec une priorité et une échéance. |
+| 2 | Cocher une tâche faite. | Cochez-la quand elle est faite. |
+| 3 | Pointer la mention de l'appareil. | Pour l'instant, vos tâches sont gardées sur cet appareil : vos collègues ne les voient pas encore. |
+
+### Contacts, notes et appels
+
+Identifiant : `espace-carnet` · à tourner · départ : https://omegaai.fr/espace2/appels
+
+*Objectif : Tenir vos contacts, vos notes et le suivi de vos appels.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Appels, « Nouvel appel », avec qui, ce qui a été dit, Enregistrer. | Notez un appel et ce qui s'est dit. |
+| 2 | « Suivi », choisir une date. | Prévoyez un suivi : passé la date, l'appel s'affiche en retard. |
+| 3 | Ouvrir Contacts, « Nouveau contact ». | Contacts, entreprises et notes fonctionnent de la même façon. Pour l'instant, tout est enregistré sur cet appareil. |
+
+### Utilisation et carte
+
+Identifiant : `espace-utilisation` · à tourner · départ : https://omegaai.fr/espace2/utilisation
+
+*Objectif : Mesurer ce que l'espace a traité, et voir le circuit de vos systèmes.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Utilisation, menu « Période ». | Utilisation montre ce que l'espace a traité sur la période : documents, demandes, montants facturés et payés. |
+| 2 | Ouvrir Carte. | La carte montre vos systèmes en circuit : ce qui arrive, ce qu'ils en font, ce qui vous attend, où le travail aboutit. |
+
+### Réglages et vos données
+
+Identifiant : `espace-reglages` · à tourner · départ : https://omegaai.fr/espace2/reglages
+
+*Objectif : Exporter vos données et passer de l'exemple à vos données.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Réglages, « Afficher la base réelle ». | Sans compte, l'espace montre une entreprise d'exemple. Ce réglage passe de l'exemple à vos données. |
+| 2 | Montrer « Exporter toutes mes données ». | Vous exportez vos données à tout moment, dans une archive chiffrée. Le mot de passe n'est montré qu'une fois : notez-le. |
+| 3 | Montrer « Exporter mon journal (CSV) ». | Le gérant et les administrateurs exportent aussi le journal. |
+
+## Le Réseau Omega
+
+### Aperçu du Réseau Omega
+
+Identifiant : `reseau-apercu` · à tourner · départ : https://omegaai.fr/espace2/reseau
+
+*Objectif : Découvrir ce que sera le Réseau, sur les données d'exemple.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Réseau, montrer « Le réseau ouvre bientôt », puis « Voir les données d'exemple ». | Le Réseau Omega met les clients d'Omega en relation. Il ouvre bientôt ; en attendant, les données d'exemple montrent à quoi il ressemblera. |
+| 2 | Parcourir le Fil, puis Membres, Messages et Opportunités. | Le fil réunit les demandes et les alertes des membres ; l'annuaire, les membres vérifiés ; les messages, les échanges privés et les salons ; les opportunités, les mises en relation et les achats groupés. |
+| 3 | Rester sur l'écran. | Ce que vous voyez ici est un aperçu : rien n'est encore envoyé ni partagé. Rien ne le sera sans votre accord. |
 
 ## DALIRO
 

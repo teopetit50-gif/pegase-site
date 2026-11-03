@@ -574,6 +574,14 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
         ],
       },
       { titre: "Les modules", liens: modules.map((m) => ({ libelle: m.nom, href: `${RACINE}/formation/${m.cle}` })) },
+      /* 03/11/2026 — lot 4 de la formation : le reste de l'espace, et le Réseau */
+      {
+        titre: "Aller plus loin",
+        liens: [
+          { libelle: "Votre espace au quotidien", href: `${RACINE}/formation/espace` },
+          { libelle: "Le Réseau Omega", href: `${RACINE}/formation/reseau` },
+        ],
+      },
     ],
   };
   /* 02/11/2026 — le Réseau Omega : les clients d'Omega entre eux (Fil, Membres, Messages, Opportunités), un groupe du rail sous les fiches */

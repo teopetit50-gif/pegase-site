@@ -1333,6 +1333,106 @@ export const VIDEOS: Record<string, FicheVideo> = {
       { ecran: "Sur une société, « Objectifs… », « Enregistrer ».", dire: "Fixez ses objectifs : sous le plancher de trésorerie, une alerte est levée, et se ferme d'elle-même quand la trésorerie remonte." },
     ],
   },
+  /* ═══════════════ Lot 4 · votre espace et le Réseau ═══════════════ */
+  "espace-accueil": {
+    titre: "La vue d'ensemble",
+    page: "espace",
+    depart: "/espace2",
+    objectif: "Lire la page d'accueil de l'espace.",
+    etapes: [
+      { ecran: "Ouvrir la vue d'ensemble.", dire: "La vue d'ensemble montre la courbe des factures reçues, ce qu'il faut payer en priorité, vos tâches du jour et l'activité récente." },
+      { ecran: "Menu de la courbe, « 30 derniers jours ».", dire: "Changez la période de la courbe : 7, 30 ou 90 jours." },
+      { ecran: "« Voir tout » sous « À payer en priorité ».", dire: "« Voir tout » mène à l'écran complet." },
+    ],
+  },
+  "espace-delegation": {
+    titre: "Déléguer pendant une absence",
+    page: "espace",
+    depart: "/espace2/validations",
+    objectif: "Faire décider quelqu'un à votre place pendant une absence, puis révoquer.",
+    etapes: [
+      { ecran: "Ouvrir une demande dans À valider, « Déléguer ».", dire: "Vous partez en congés ? Déléguez votre décision." },
+      { ecran: "Choisir « À qui », la portée, la date « Jusqu'au », le motif, puis « Poser la délégation ».", dire: "La personne désignée décidera en votre nom, sur ce module ou sur tous, jusqu'à la date choisie." },
+      { ecran: "Carte « Délégations », « Gérer », « Révoquer ».", dire: "Vous pouvez révoquer à tout moment. Les décisions déjà prises restent valables." },
+    ],
+  },
+  "espace-equipe": {
+    titre: "Gérer l'équipe",
+    page: "espace",
+    depart: "/espace2/equipe",
+    objectif: "Ajouter une personne, changer son rôle, limiter ses sociétés, la retirer.",
+    etapes: [
+      { ecran: "Équipe, « Inviter », saisir l'adresse de son compte, choisir le rôle, « Ajouter ».", dire: "La personne doit déjà avoir un compte Omega : l'invitation par courriel arrive bientôt. Sinon, écrivez-nous." },
+      { ecran: "Menu « ··· » d'une personne, « Rôle ».", dire: "Changez son rôle : il fixe ce qu'elle voit et ce qu'elle décide." },
+      { ecran: "« Sociétés visibles… », cocher, « Enregistrer ».", dire: "Limitez-la à certaines sociétés : elle ne voit et ne décide que pour celles-ci." },
+      { ecran: "« Retirer de l'organisation… », « Retirer ».", dire: "Une personne retirée perd l'accès. Ce qu'elle a fait reste au journal, à son nom." },
+    ],
+  },
+  "espace-activite": {
+    titre: "Activité et automatisations",
+    page: "espace",
+    depart: "/espace2/activite",
+    objectif: "Retrouver ce qui s'est passé, et chaque passage d'un système.",
+    etapes: [
+      { ecran: "Activité, choisir « 7 jours », filtrer « Décisions ».", dire: "L'activité retrace les documents reçus, les demandes à valider et les décisions." },
+      { ecran: "« Voir le détail », puis « Ouvrir dans À valider ».", dire: "Chaque ligne mène à son objet." },
+      { ecran: "Ouvrir Automatisations, onglet « Échouées ».", dire: "Automatisations montre chaque passage de vos systèmes, par état : en cours, réussi, échoué." },
+    ],
+  },
+  "espace-taches": {
+    titre: "Les tâches",
+    page: "espace",
+    depart: "/espace2/taches",
+    objectif: "Noter ce qu'il reste à faire, avec une échéance.",
+    etapes: [
+      { ecran: "Tâches, « Nouvelle tâche », titre, priorité, échéance, « Créer la tâche ».", dire: "Notez ce qu'il reste à faire, avec une priorité et une échéance." },
+      { ecran: "Cocher une tâche faite.", dire: "Cochez-la quand elle est faite." },
+      { ecran: "Pointer la mention de l'appareil.", dire: "Pour l'instant, vos tâches sont gardées sur cet appareil : vos collègues ne les voient pas encore." },
+    ],
+  },
+  "espace-carnet": {
+    titre: "Contacts, notes et appels",
+    page: "espace",
+    depart: "/espace2/appels",
+    objectif: "Tenir vos contacts, vos notes et le suivi de vos appels.",
+    etapes: [
+      { ecran: "Appels, « Nouvel appel », avec qui, ce qui a été dit, Enregistrer.", dire: "Notez un appel et ce qui s'est dit." },
+      { ecran: "« Suivi », choisir une date.", dire: "Prévoyez un suivi : passé la date, l'appel s'affiche en retard." },
+      { ecran: "Ouvrir Contacts, « Nouveau contact ».", dire: "Contacts, entreprises et notes fonctionnent de la même façon. Pour l'instant, tout est enregistré sur cet appareil." },
+    ],
+  },
+  "espace-utilisation": {
+    titre: "Utilisation et carte",
+    page: "espace",
+    depart: "/espace2/utilisation",
+    objectif: "Mesurer ce que l'espace a traité, et voir le circuit de vos systèmes.",
+    etapes: [
+      { ecran: "Utilisation, menu « Période ».", dire: "Utilisation montre ce que l'espace a traité sur la période : documents, demandes, montants facturés et payés." },
+      { ecran: "Ouvrir Carte.", dire: "La carte montre vos systèmes en circuit : ce qui arrive, ce qu'ils en font, ce qui vous attend, où le travail aboutit." },
+    ],
+  },
+  "espace-reglages": {
+    titre: "Réglages et vos données",
+    page: "espace",
+    depart: "/espace2/reglages",
+    objectif: "Exporter vos données et passer de l'exemple à vos données.",
+    etapes: [
+      { ecran: "Réglages, « Afficher la base réelle ».", dire: "Sans compte, l'espace montre une entreprise d'exemple. Ce réglage passe de l'exemple à vos données." },
+      { ecran: "Montrer « Exporter toutes mes données ».", dire: "Vous exportez vos données à tout moment, dans une archive chiffrée. Le mot de passe n'est montré qu'une fois : notez-le." },
+      { ecran: "Montrer « Exporter mon journal (CSV) ».", dire: "Le gérant et les administrateurs exportent aussi le journal." },
+    ],
+  },
+  "reseau-apercu": {
+    titre: "Aperçu du Réseau Omega",
+    page: "reseau",
+    depart: "/espace2/reseau",
+    objectif: "Découvrir ce que sera le Réseau, sur les données d'exemple.",
+    etapes: [
+      { ecran: "Ouvrir Réseau, montrer « Le réseau ouvre bientôt », puis « Voir les données d'exemple ».", dire: "Le Réseau Omega met les clients d'Omega en relation. Il ouvre bientôt ; en attendant, les données d'exemple montrent à quoi il ressemblera." },
+      { ecran: "Parcourir le Fil, puis Membres, Messages et Opportunités.", dire: "Le fil réunit les demandes et les alertes des membres ; l'annuaire, les membres vérifiés ; les messages, les échanges privés et les salons ; les opportunités, les mises en relation et les achats groupés." },
+      { ecran: "Rester sur l'écran.", dire: "Ce que vous voyez ici est un aperçu : rien n'est encore envoyé ni partagé. Rien ne le sera sans votre accord." },
+    ],
+  },
 };
 
 /* la vidéo à montrer : celle de Teo si elle est tournée, sinon la vidéo provisoire sous le titre du geste */

@@ -774,6 +774,118 @@ export const PAGES: Record<string, PageFormation> = {
         ],
       },
     ],
+    suivant: { titre: "Votre espace au quotidien", href: `${F}/espace` },
+  },
+
+  /* ——— votre espace au quotidien, et le Réseau (lot 4, 03/11/2026) ——— */
+  espace: {
+    titre: "Votre espace au quotidien",
+    intro: "Au-delà de vos systèmes, l'espace porte votre équipe, vos délégations, votre activité, vos tâches et votre carnet. Voici les gestes de tous les jours.",
+    sections: [
+      {
+        id: "accueil",
+        titre: "La vue d'ensemble",
+        niveau: 2,
+        video: v("espace-accueil"),
+        blocs: [{ p: `La [vue d'ensemble](${E}) montre les factures reçues, ce qu'il faut payer en priorité, les tâches du jour et l'activité récente ; « Voir tout » ouvre l'écran complet.` }],
+      },
+      {
+        id: "delegation",
+        titre: "Déléguer pendant une absence",
+        niveau: 2,
+        video: v("espace-delegation"),
+        blocs: [{ p: `Dans [À valider](${E}/validations), « Déléguer » fait décider une personne en votre nom, sur un module ou sur tous, jusqu'à une date. On ne se désigne pas soi-même. « Révoquer » y met fin ; les décisions déjà prises restent valables.` }],
+      },
+      {
+        id: "equipe",
+        titre: "Gérer l'équipe",
+        niveau: 2,
+        video: v("espace-equipe"),
+        blocs: [{ p: `Dans [Équipe](${E}/equipe), seuls le gérant et les administrateurs agissent. « Inviter » ajoute une personne qui a déjà un compte Omega ; le menu d'une personne change son rôle, ses sociétés visibles, ou la retire. Personne ne change son propre rôle.` }],
+      },
+      {
+        id: "activite",
+        titre: "Activité et automatisations",
+        niveau: 2,
+        video: v("espace-activite"),
+        blocs: [{ p: `[L'activité](${E}/activite) se filtre par période, par type et par mot ; [Automatisations](${E}/automatisations) montre chaque passage d'un système, par état. Les deux se consultent : rien ne s'y décide.` }],
+      },
+      {
+        id: "taches",
+        titre: "Les tâches",
+        niveau: 2,
+        video: v("espace-taches"),
+        blocs: [{ p: `Dans [Tâches](${E}/taches), « Nouvelle tâche » (ou la touche C) crée une tâche avec statut, priorité, échéance. Pour l'instant, les tâches sont gardées sur cet appareil : vos collègues ne les voient pas encore.` }],
+      },
+      {
+        id: "carnet",
+        titre: "Contacts, notes et appels",
+        niveau: 2,
+        video: v("espace-carnet"),
+        blocs: [{ p: `[Appels](${E}/appels), [Contacts](${E}/contacts), [Entreprises](${E}/entreprises) et [Notes](${E}/notes) gardent votre carnet : un appel se note, se suit à une date, se clôt. Pour l'instant, ces fiches sont enregistrées sur cet appareil, pas encore partagées avec l'équipe.` }],
+      },
+      {
+        id: "utilisation",
+        titre: "Utilisation et carte",
+        niveau: 2,
+        video: v("espace-utilisation"),
+        blocs: [{ p: `[Utilisation](${E}/utilisation) mesure ce que l'espace a traité sur une période ; la [carte](${E}/carte) montre le circuit, des sources aux résultats. Rien ne s'y décide.` }],
+      },
+      {
+        id: "reglages",
+        titre: "Réglages et vos données",
+        niveau: 2,
+        video: v("espace-reglages"),
+        blocs: [{ p: `Dans les [réglages](${E}/reglages), « Afficher la base réelle » passe de l'entreprise d'exemple à vos données. « Exporter toutes mes données » produit une archive chiffrée, avec un lien valable 24 heures et un mot de passe montré une seule fois.` }],
+      },
+    ],
+    suivant: { titre: "Le Réseau Omega", href: `${F}/reseau` },
+  },
+
+  reseau: {
+    titre: "Le Réseau Omega",
+    intro: "Le Réseau Omega met les entreprises clientes d'Omega en relation : demandes et alertes du terrain, annuaire vérifié, messages, mises en relation et achats groupés. Il ouvre bientôt.",
+    video: v("reseau-apercu"),
+    sections: [
+      {
+        id: "ecrans",
+        titre: "Ses quatre écrans",
+        niveau: 2,
+        blocs: [
+          {
+            liste: [
+              `[Fil](${E}/reseau) : les demandes et les alertes terrain des membres, par île et par secteur.`,
+              `[Membres](${E}/reseau/membres) : l'annuaire des membres, avec des badges vérifiés par la donnée.`,
+              `[Messages](${E}/reseau/messages) : les messages privés et les sujets des salons, par île et par secteur.`,
+              `[Opportunités](${E}/reseau/opportunites) : les mises en relation, les groupements de marchés publics et les achats groupés.`,
+            ],
+          },
+        ],
+      },
+      {
+        id: "aujourdhui",
+        titre: "Aujourd'hui",
+        niveau: 2,
+        blocs: [
+          { p: "Le réseau ouvre bientôt : aucune entreprise n'y est encore inscrite. Avec vos données, ses écrans l'indiquent ; « Voir les données d'exemple » montre à quoi il ressemblera." },
+          { p: "Dans les données d'exemple, les gestes (publier, répondre, écrire, accepter une mise en relation) restent dans la page : rien n'est envoyé ni enregistré." },
+        ],
+      },
+      {
+        id: "garde-fous",
+        titre: "Les garde-fous",
+        niveau: 2,
+        blocs: [
+          {
+            liste: [
+              "Rien n'est partagé avec le réseau tant que vous n'avez pas donné votre accord.",
+              "Vous choisissez, champ par champ, ce que votre fiche montre aux autres membres.",
+              "Une mise en relation ne part pas sans votre accord.",
+            ],
+          },
+        ],
+      },
+    ],
     suivant: { titre: "Revenir au guide de démarrage", href: F },
   },
 

@@ -29,6 +29,8 @@ const PAGES = {
   cashd: "CASHD",
   reput: "REPUT",
   offload: "OFFLOAD",
+  espace: "Votre espace au quotidien",
+  reseau: "Le Réseau Omega",
   daliro: "DALIRO",
   lorani: "LORANI",
   tavaro: "TAVARO",
