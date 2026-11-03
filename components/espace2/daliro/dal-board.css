@@ -358,8 +358,9 @@ html[data-v2-theme="light"] .v2 .dal.dal-bd-page {
   cursor: pointer;
   transition: color 0.15s;
 }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
 .v2 .dal .dal-bd-carte[aria-current="true"] {
-  box-shadow: var(--dal-bd-carte-ombre), 0 0 0 1px var(--dal-violet);
+  box-shadow: var(--dal-bd-carte-ombre), 0 0 0 1px color-mix(in srgb, currentColor 35%, transparent);
 }
 .v2 .dal .dal-bd-carte[data-glisse] {
   opacity: 0.5;

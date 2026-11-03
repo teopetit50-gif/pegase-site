@@ -151,11 +151,13 @@
 .v2 .tamp .tamp-tligne:hover {
   background: var(--p-remplir-1);
 }
-.v2 .tamp .tamp-tache[aria-current="true"] {
-  border-top-color: var(--p-bleu-fond-2);
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
+.v2 .tamp .tamp-tache[aria-current="true"]:has(:focus-visible) {
+  box-shadow: none;
 }
-.v2 .tamp .tamp-tache[aria-current="true"] .tamp-tligne {
-  background: var(--p-bleu-fond-2);
+.v2 .tamp .tamp-tache[aria-current="true"] .tamp-tligne,
+.v2 .tamp .tamp-tache[aria-current="true"] .tamp-tligne:hover {
+  background: color-mix(in srgb, currentColor 9%, transparent);
 }
 .v2 .tamp .tamp-tcase {
   display: flex;

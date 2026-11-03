@@ -337,8 +337,9 @@ html[data-v2-theme="light"] .v2 .var .var-b-puce {
   flex-direction: column;
   margin: 16px -14px 0;
 }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
 .v2 .var .var-b-carte[data-choisi] {
-  box-shadow: 0 0 0 1px var(--var-violet);
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 35%, transparent);
 }
 @media (max-width: 768px) {
   .v2 .var .var-b-cadre {

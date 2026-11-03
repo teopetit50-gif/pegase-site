@@ -390,8 +390,9 @@ html[data-v2-theme="light"] .v2 .tam.tk {
   box-shadow: var(--tk-carte-ombre);
   scroll-margin-top: 52px;
 }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
 .v2 .tam .tk-carte[data-actif] {
-  border-color: var(--tam-violet);
+  border-color: color-mix(in srgb, currentColor 35%, transparent);
 }
 .v2 .tam .tk-carte-haut {
   padding: 15.5px 16px 14.5px;

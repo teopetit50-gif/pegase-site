@@ -224,8 +224,14 @@ html[data-v2-theme="light"] .v2 .tav.tav--plain {
 .v2 .tav.tav--plain .tav-p-ligne:hover {
   background: var(--tav-p-f1);
 }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
+.v2 .tav.tav--plain .tav-p-ligne[aria-current="true"]:focus-visible,
+.v2 .tav.tav--plain .tav-p-ligne[aria-current="true"] :focus-visible {
+  outline: none;
+  box-shadow: none;
+}
 .v2 .tav.tav--plain .tav-p-ligne[aria-current="true"] {
-  background: var(--tav-p-ouverte);
+  background: color-mix(in srgb, currentColor 9%, transparent);
 }
 .v2 .tav.tav--plain .tav-p-case-boite {
   display: inline-flex;

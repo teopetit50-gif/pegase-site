@@ -478,7 +478,8 @@ html[data-v2-theme="light"] .v2 .lor-pl {
   color: var(--pl-t1);
 }
 .v2 .lor-pl-fiche:hover { background: var(--pl-survol); }
-.v2 .lor-pl-fiche[aria-current="true"] { background: var(--pl-bleu-r1); box-shadow: inset 3px 0 0 var(--pl-bleu-plein); }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
+.v2 .lor-pl-fiche[aria-current="true"] { background: color-mix(in srgb, currentColor 9%, transparent); box-shadow: none; }
 .v2 .lor-pl-fiche-l { display: flex; align-items: center; gap: 4px; min-width: 0; white-space: nowrap; }
 .v2 .lor-pl-fiche-l > * { min-width: 0; }
 .v2 .lor-pl-fiche-l--petit { font-size: 12px; line-height: 16px; }

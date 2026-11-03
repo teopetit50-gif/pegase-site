@@ -139,8 +139,9 @@ html[data-v2-theme="light"] .v2 .tir.tir-bd {
   box-shadow: var(--tir-bd-ombre);
   transition: color 0.15s;
 }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
 .v2 .tir-bd .tir-bd-carte[aria-current="true"] {
-  box-shadow: 0 0 0 1px #5e6ad2, var(--tir-bd-ombre);
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 35%, transparent), var(--tir-bd-ombre);
 }
 .v2 .tir-bd .tir-bd-c1 {
   display: flex;

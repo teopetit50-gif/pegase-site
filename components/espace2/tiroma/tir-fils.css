@@ -341,9 +341,10 @@
 .v2 .tir-pf .pl-carte-fil:hover {
   background: var(--pl-survol);
 }
+/* 03/11/2026 — Teo : la ligne ou la carte choisie se montre en gris, jamais en bleu */
 .v2 .tir-pf .pl-carte-fil[aria-current="true"] {
-  background: var(--pl-bleu-rempli-1);
-  box-shadow: inset 3px 0 0 var(--pl-bleu-plein);
+  background: color-mix(in srgb, currentColor 9%, transparent);
+  box-shadow: none;
 }
 .v2 .tir-pf .pl-cf-l1,
 .v2 .tir-pf .pl-cf-l5 {
@@ -994,7 +995,7 @@
   color: #fff;
 }
 .v2 .tir-pfl .pl-ligne[data-choisi] {
-  background: var(--pl-bleu-rempli-1);
+  background: color-mix(in srgb, currentColor 9%, transparent);
 }
 .v2 .tir-pfl .pl-carte {
   position: relative;
