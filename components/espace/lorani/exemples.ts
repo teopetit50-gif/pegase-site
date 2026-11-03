@@ -536,11 +536,13 @@ export const PIECES_CONTROLE_EXEMPLE: PieceProjet[] = [
   { id: PD(5), objet_id: P_DUBOIS, nom_fichier: "CCTP-lot-02-gros-oeuvre.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_cctp", cree_le: ilYa(22) },
   { id: PD(6), objet_id: P_DUBOIS, nom_fichier: "DPGF-lot-02-gros-oeuvre.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_dpgf", cree_le: ilYa(22) },
   { id: PD(7), objet_id: P_DUBOIS, nom_fichier: "PC5-facades-indB.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_planche", cree_le: ilYa(3) },
+  /* « Fonds de plan BET croisés » (03/11/2026) : le fond de plan du bureau d'études structure, croisé à l'indice B */
+  { id: PD(8), objet_id: P_DUBOIS, nom_fichier: "BET-structure-fond-de-plan-indB.pdf", mime: "application/pdf", statut: "lue", type_piece: "lorani_plan_bet", cree_le: ilYa(3) },
 ];
 const CA = id("8", 1);
 const CB = id("8", 2);
 export const CONTROLES_EXEMPLE: Controle[] = [
-  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 3, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
+  { id: CB, projet_id: P_DUBOIS, intitule: "Dossier de permis", indice: "B", precedent_id: CA, statut: "controle", lance_le: ilYa(2), constats_nb: 4, cree_le: ilYa(2), decideur: EXEMPLE_MOI,
     changements: [
       { reference: "PC3", grandeur: "largeur_m", objet: "tremie_r1", libelle: "la largeur de « tremie r1 »", unite: "m", avant: 1.2, apres: 1.8, page_avant: 1, page_apres: 1, texte_avant: "trémie 120", texte_apres: "trémie 180", releve: false },
       { reference: "PC2", grandeur: "recul_limite_m", objet: "projet", libelle: "le recul sur limite séparative", unite: "m", avant: 3.4, apres: 3.2, page_avant: 1, page_apres: 1, texte_avant: "3,40 m", texte_apres: "3,20 m", releve: true },
@@ -551,6 +553,7 @@ const roles: [string, ControlePiece["role"], string][] = [[PD(1), "planche", "PC
 export const CONTROLE_PIECES_EXEMPLE: ControlePiece[] = [
   ...[...roles, [PD(3), "planche", "PC5"] as [string, ControlePiece["role"], string]].map(([piece_id, role, reference], i) => ({ id: id("a", i + 1), controle_id: CA, piece_id, role, reference })),
   ...[...roles, [PD(7), "planche", "PC5"] as [string, ControlePiece["role"], string]].map(([piece_id, role, reference], i) => ({ id: id("a", i + 11), controle_id: CB, piece_id, role, reference })),
+  { id: id("a", 18), controle_id: CB, piece_id: PD(8), role: "bet", reference: "BET 02" },
 ];
 const constat = (k: Partial<Constat> & Pick<Constat, "id" | "controle_id" | "nature" | "gravite" | "titre">): Constat => ({
   grandeur: null, objet: null, correction: null, article: null, valeurs: [], statut: "ouvert", motif: null, precedent_id: null, corrige_au_controle: null, decide_par: null, decide_le: null, ...k,
@@ -607,6 +610,16 @@ export const CONSTATS_EXEMPLE: Constat[] = [
   constat({ id: id("9", 8), controle_id: CB, ...POSTE_27, precedent_id: id("9", 5), decide_le: ilYa(15) }),
   constat({ id: id("9", 10), controle_id: CA, ...METRE_22 }),
   constat({ id: id("9", 11), controle_id: CB, ...METRE_22, precedent_id: id("9", 10) }),
+  /* le fond de plan du BET croisé avec la coupe : la trémie du R+1 n'a pas suivi l'indice B */
+  constat({
+    id: id("9", 12), controle_id: CB, nature: "incoherence", gravite: "majeur", grandeur: "largeur_m", objet: "tremie_r1",
+    titre: "La largeur de la trémie du R+1 diffère entre le fond de plan du BET (1,2 m sur BET 02, p. 1) et la coupe (1,8 m sur PC3, p. 1).",
+    correction: "Faire reprendre le fond de plan du BET à l'indice B (trémie de 1,8 m), ou revenir à 1,2 m sur la coupe.",
+    valeurs: [
+      { piece: PD(8), reference: "BET 02", page: 1, valeur: 1.2, texte: "Trémie 120 x 250" },
+      { piece: PD(2), reference: "PC3", page: 1, valeur: 1.8, texte: "trémie 180" },
+    ],
+  }),
 ];
 
 /* ——— le PLU trouvé depuis l'adresse (b5_17) : réponses du Géoportail de l'urbanisme, telles qu'au 06/10/2026 ——— */
