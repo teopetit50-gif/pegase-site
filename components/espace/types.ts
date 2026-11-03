@@ -392,6 +392,9 @@ export type DossierFiled = {
   cycle?: LigneCycle[];
   litiges?: Litige[];
   ecritures?: Ecriture[];
+  /* une pièce fille (a4_21) : le fichier d'origine découpé pièce par pièce, et
+     les autres documents nés du même fichier */
+  decoupage?: { mere: string; nb_pages: number | null; pages?: string | null; soeurs: { document_id: string; reference: string; pages?: string | null }[] } | null;
 };
 
 /* ——— le point du matin ——— */

@@ -722,7 +722,78 @@ export const LIGNES_COMMANDE_EXEMPLE: LigneCommande[] = [
   { id: u("cl", 6), commande_id: u("bc", 80), rang: 1, designation: "Agencement comptoir d'accueil — chêne massif, fourniture et pose", quantite: 1, unite: "forfait", prix_unitaire: 4850, montant_ht: 4850 },
 ];
 
-export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08];
+/* ——— Promesses sans page (03/11) : la TVA ventilée, l'autoliquidation, la devise,
+   les mentions de paiement et le fichier découpé pièce par pièce (a4_21, a4_22, a4_27).
+   Les mentions sont celles que private.filed_controles_mentions recopie dans
+   filed_factures.mentions ; la ventilation est filed_factures_tva. ——— */
+D14.facture!.mentions = {
+  penalites: "Pénalités de retard : trois fois le taux d'intérêt légal",
+  penalites_taux: 9.21,
+  indemnite_recouvrement: true,
+  indemnite_montant: 40,
+  escompte: "Pas d'escompte pour paiement anticipé",
+};
+D19.facture!.mentions = { tva_debits: true, escompte: "Escompte de 1 % pour paiement sous 8 jours", indemnite_recouvrement: true, indemnite_montant: 40 };
+D19.controles.push(ctrl(D19.facture!.id, "tva.debits", "info", "ok", "La facture porte l'option pour le paiement de la TVA d'après les débits."));
+D19.controles.push(ctrl(D19.facture!.id, "mentions.penalites", "attention", "anomalie", "Les conditions des pénalités de retard ne figurent pas sur la facture : mention obligatoire entre professionnels (C. com., art. L441-9 et L441-10)."));
+D19.facture!.nb_attention = 1;
+
+/* un fichier scanné de trois pages, déposé par Sofia : deux factures, deux pièces filles */
+const SCAN = "scan_courrier_20261002.pdf";
+const BRASSERIE = { nom: "Brasserie des Canuts", siren: "829 114 506", tva: "FR 61 829114506", adresse: "12 place Croix-Paquet, 69001 Lyon", iban: "FR76 1009 6180 0300 0412 7755 102", code: "CANUTS" };
+const D20 = validee(20, { fournisseur: BRASSERIE, numero: "BC-1042", emission: fr(ilYa(32)), echeance: fr(dans(12)), ht: 0, designation: "", iban: true, expediteur: "" });
+Object.assign(D20.facture!, { statut: "a_valider", montant_ht: 640, montant_tva: 76.8, montant_ttc: 716.8, net_a_payer: 716.8, mentions: { indemnite_recouvrement: true, indemnite_montant: 40, penalites: "Taux BCE majoré de 10 points" } });
+D20.document = { ...D20.document, nom_fichier: SCAN, source: "depot", expediteur: null, depose_par: SOFIA } as never;
+D20.lignes = [
+  { id: u("11", 201), rang: 1, designation: "Déjeuner d'équipe — 16 couverts", quantite: 16, unite: "couvert", prix_unitaire: 32, montant_ht: 512, taux_tva: 10, remise: null, commande_ligne: null },
+  { id: u("11", 202), rang: 2, designation: "Vins et apéritifs", quantite: 1, unite: "forfait", prix_unitaire: 128, montant_ht: 128, taux_tva: 20, remise: null, commande_ligne: null },
+];
+D20.tva = [
+  { id: u("22", 201), categorie: "S", taux: 10, base: 512, montant: 51.2 },
+  { id: u("22", 202), categorie: "S", taux: 20, base: 128, montant: 25.6 },
+];
+D20.controles = [ctrl(D20.facture!.id, "tva.coherence", "bloquant", "ok", "Deux taux : 512,00 € × 10 % + 128,00 € × 20 % = 76,80 €."), ctrl(D20.facture!.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC.")];
+D20.historique = [
+  hist("reception", `Reçue dans le fichier ${SCAN} (pages 1 et 2), déposé par Sofia Carvalho.`, ilYa(12, 9), "Sofia Carvalho"),
+  hist("decoupage", `${SCAN} contenait 2 factures : découpé en 2 pièces, le fichier d'origine reste attaché à chacune.`, ilYa(12, 9)),
+];
+
+const GIRAUD_ST = { nom: "Giraud Plâtrerie (sous-traitant)", siren: "903 551 278", tva: "FR 27 903551278", adresse: "7 rue Garon, 69100 Villeurbanne", iban: "FR76 1382 5002 0008 0012 3344 590", code: "GIRAUDP" };
+const D21 = validee(21, { fournisseur: GIRAUD_ST, numero: "GP-2026-077", emission: fr(ilYa(14)), echeance: fr(dans(31)), ht: 3260, designation: "Cloisons et doublages — lot 06, situation n° 2", iban: true, expediteur: "" });
+Object.assign(D21.facture!, { statut: "a_valider", regime_tva: "autoliquidation", montant_tva: 0, montant_ttc: 3260, net_a_payer: 3260, mentions: { autoliquidation: true, penalites: "Pénalités au taux de 12 % l'an", penalites_taux: 12, indemnite_recouvrement: true, indemnite_montant: 40 } });
+D21.document = { ...D21.document, nom_fichier: SCAN, source: "depot", expediteur: null, depose_par: SOFIA } as never;
+D21.lignes = D21.lignes.map((x) => ({ ...x, taux_tva: 0 }));
+D21.tva = [{ id: u("22", 211), categorie: "AE", taux: 0, base: 3260, montant: 0 }];
+D21.controles = [
+  ctrl(D21.facture!.id, "tva.autoliquidation", "info", "ok", "« Autoliquidation » portée sur la facture : la TVA (652,00 € au taux normal) est due par vous et déductible à la même écriture."),
+  ctrl(D21.facture!.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT = TTC : aucune TVA facturée."),
+];
+D21.historique = [
+  hist("reception", `Reçue dans le fichier ${SCAN} (page 3), déposé par Sofia Carvalho.`, ilYa(12, 9), "Sofia Carvalho"),
+  hist("decoupage", `${SCAN} contenait 2 factures : découpé en 2 pièces, le fichier d'origine reste attaché à chacune.`, ilYa(12, 9)),
+];
+D20.decoupage = { mere: SCAN, nb_pages: 3, pages: "pages 1 et 2", soeurs: [{ document_id: D21.document.id, reference: D21.document.reference, pages: "page 3" }] };
+D21.decoupage = { mere: SCAN, nb_pages: 3, pages: "page 3", soeurs: [{ document_id: D20.document.id, reference: D20.document.reference, pages: "pages 1 et 2" }] };
+
+/* une facture en livres sterling, d'un prestataire hors Union : la contre-valeur en euros au jour d'émission */
+const NORTHLIGHT = { nom: "Northlight Type Ltd", siren: "", tva: "GB 293 7710 41", adresse: "21 Ancoats Street, Manchester M4 6AE, Royaume-Uni", iban: "GB33 BUKB 2020 1555 5555 55", code: "NORTHL" };
+const D22 = validee(22, { fournisseur: NORTHLIGHT, numero: "NL-INV-3381", emission: fr(ilYa(9)), echeance: fr(dans(21)), ht: 1200, designation: "Licence de polices de caractères — 25 postes, 1 an", iban: true, expediteur: "billing@northlight-type.example.com" });
+Object.assign(D22.facture!, {
+  statut: "a_valider",
+  devise: "GBP",
+  regime_tva: "hors_ue",
+  montant_tva: 0,
+  montant_ttc: 1200,
+  net_a_payer: 1200,
+  mentions: { contre_valeur: { taux_change: 0.8412, montant_ttc_eur: 1426.53, montant_tva_eur: 0 }, penalites: "Late payment interest: 8% above Bank of England base rate", indemnite_recouvrement: false },
+});
+D22.tva = [{ id: u("22", 221), categorie: "O", taux: 0, base: 1200, montant: 0 }];
+D22.controles = [
+  ctrl(D22.facture!.id, "devise.contre_valeur", "info", "ok", "Facture en GBP : 1 200,00 £ au taux BCE du jour d'émission (0,8412 £ pour 1 €), soit 1 426,53 €."),
+  ctrl(D22.facture!.id, "tva.hors_ue", "info", "ok", "Service d'un prestataire hors Union : la TVA est autoliquidée au taux normal (285,31 €) à l'écriture."),
+];
+
+export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08, D20, D21, D22];
 
 /* Les fournisseurs d'exemple pour « rattacher » : les six connus. */
 export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08, D16, D17].map((d) => d.fournisseur!);

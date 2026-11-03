@@ -104,7 +104,28 @@ export async function chargerDossier(a: Apercu): Promise<DossierFiled> {
     valeurs: (valeurs?.data ?? []) as DossierFiled["valeurs"],
     appariements: (appar?.data ?? []) as DossierFiled["appariements"],
     origine_deposee_par: await deposantOrigine(a),
+    decoupage: await chargerDecoupage(a, (piece?.data ?? null) as { piece_mere_id?: string | null } | null).catch(() => null),
     ...(await chargerFactureElectronique(a.document.id, fid ?? null).catch(() => ({}))),
+  };
+}
+
+/* une pièce fille (a4_21, pieces.piece_mere_id) : le fichier d'origine et les
+   documents nés du même fichier — lecture seule des tables pieces et filed_documents */
+async function chargerDecoupage(a: Apercu, piece: { piece_mere_id?: string | null } | null): Promise<DossierFiled["decoupage"]> {
+  const mereId = piece?.piece_mere_id;
+  if (!mereId) return null;
+  const supabase = createClient();
+  const [mere, filles] = await Promise.all([
+    supabase.from("pieces").select("nom_fichier, nb_pages").eq("id", mereId).maybeSingle(),
+    supabase.from("pieces").select("id").eq("piece_mere_id", mereId),
+  ]);
+  if (!mere.data) return null;
+  const ids = (filles.data ?? []).map((x: { id: string }) => x.id);
+  const docs = ids.length ? await supabase.from("filed_documents").select("id, reference, piece_id").in("piece_id", ids) : null;
+  return {
+    mere: (mere.data as { nom_fichier: string }).nom_fichier,
+    nb_pages: (mere.data as { nb_pages: number | null }).nb_pages,
+    soeurs: ((docs?.data ?? []) as { id: string; reference: string }[]).filter((x) => x.id !== a.document.id).map((x) => ({ document_id: x.id, reference: x.reference })),
   };
 }
 
@@ -285,3 +306,10 @@ export async function etatPaiement(p_facture: string): Promise<EtatPaiement | nu
 export const noterPaiement = (o: { facture: string; date: string | null; montant: number | null; moyen: MoyenPaiement | null; reference: string | null }) =>
   rpc<string>("filed_noter_paiement", { p_facture: o.facture, p_date: o.date, p_montant: o.montant, p_moyen: o.moyen, p_reference: o.reference });
 export const apparierLigne = (p_facture: string, p_facture_ligne: string, p_commande_ligne: string, p_motif: string) => rpc("filed_apparier_ligne", { p_facture, p_facture_ligne, p_commande_ligne, p_motif });
+
+/* Le pilotage (a4_06) : l'engagé du mois par société, fournisseur et centre de coût, et le délai de traitement
+   de la réception au classement. Deux portes en lecture, ouvertes aux lecteurs du client. */
+export type LigneEngage = { entite_id: string | null; entite: string | null; fournisseur_id: string | null; fournisseur: string; centre_id: string | null; centre: string; nb_factures: number; montant_ht: number; montant_ttc: number };
+export type DelaiTraitement = { nb_factures: number; delai_moyen_jours: number | null; delai_median_jours: number | null; delai_max_jours: number | null };
+export const engageMois = (p_client: string, p_mois: string) => rpc<LigneEngage[]>("filed_engage_mois", { p_client, p_mois });
+export const delaiTraitement = async (p_client: string) => ((await rpc<DelaiTraitement[]>("filed_delai_traitement", { p_client })) ?? [])[0] ?? null;

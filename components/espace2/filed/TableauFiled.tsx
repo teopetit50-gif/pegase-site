@@ -81,6 +81,7 @@ import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions,
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeImport, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
 import "./tableau-filed.css";
+import PilotageFiled from "./Pilotage";
 
 /* l'écran du dossier (pièce en regard, lecteur PDF) ne se charge qu'à l'ouverture de l'onglet « Dossier » */
 /* le dossier de toujours ne rend plus son écran ici : l'Aperçu lui emprunte ses fenêtres de correction (28/10/2026) */
@@ -407,6 +408,94 @@ function CarteAPayer({ lignes, titre, fournisseurs }: { lignes: Ligne[]; titre: 
         </ul>
       ) : null}
     </CarteDroite>
+  );
+}
+
+const REGIMES: Record<string, { court: string; long: string }> = {
+  normal: { court: "TVA facturée", long: "" },
+  autoliquidation: { court: "Autoliquidation", long: "Sous-traitance du BTP (CGI, art. 283-2 nonies) : aucune TVA facturée ; elle est due par vous au taux normal et déduite à la même écriture." },
+  intracom: { court: "Intracommunautaire", long: "Acquisition intracommunautaire : la TVA est autoliquidée au taux normal, due et déduite à la même écriture." },
+  hors_ue: { court: "Hors Union", long: "Service d'un prestataire hors Union : la TVA est autoliquidée au taux normal, due et déduite à la même écriture." },
+  franchise: { court: "Franchise en base", long: "Franchise en base de TVA (CGI, art. 293 B) : aucune TVA facturée." },
+  exoneration: { court: "Exonérée", long: "Opération exonérée de TVA : aucune TVA facturée." },
+};
+const CATEGORIES_TVA: Record<string, string> = { S: "Taux", AE: "Autoliquidation", E: "Exonérée", Z: "Taux zéro", K: "Intracommunautaire", G: "Export", O: "Hors champ" };
+
+function TvaEtMentions({ fac, tva }: { fac: NonNullable<DossierFiled["facture"]>; tva: DossierFiled["tva"] }) {
+  const m = (fac.mentions ?? {}) as Record<string, unknown>;
+  const texte = (k: string) => (typeof m[k] === "string" && m[k] ? (m[k] as string) : null);
+  const nombreDe = (k: string) => (typeof m[k] === "number" ? (m[k] as number) : null);
+  const cv = (m.contre_valeur ?? null) as { taux_change?: number; montant_ttc_eur?: number; montant_tva_eur?: number } | null;
+  const regime = REGIMES[fac.regime_tva ?? "normal"] ?? { court: fac.regime_tva ?? "—", long: "" };
+  const enDevise = !!fac.devise && fac.devise !== "EUR";
+  const tauxPen = nombreDe("penalites_taux");
+  const penalites = texte("penalites") || tauxPen !== null;
+  const indemnite = m.indemnite_recouvrement === true || nombreDe("indemnite_montant") !== null;
+  const lues = Object.keys(m).length > 0;
+  const absente = (f: string) => (lues ? f : "non lue");
+  const precisions = [
+    regime.long,
+    enDevise
+      ? `Facture en ${fac.devise}${cv?.taux_change ? ` au taux de ${nombreFr(cv.taux_change)} ${fac.devise} pour 1 € du jour d'émission` : ", au taux BCE du jour d'émission"}${cv?.montant_ttc_eur !== undefined ? ` : contre-valeur de ${montant(cv.montant_ttc_eur, "EUR")} TTC` : ""}.`
+      : "",
+    texte("penalites") ? `Sur la facture : « ${texte("penalites")} ».` : "",
+  ].filter(Boolean);
+  return (
+    <>
+      <h3 className="lin-projet-h2">TVA et mentions</h3>
+      <ul className="lin-projet-liste filed-lignes-actions">
+        <li>
+          <span>Régime de TVA</span>
+          <span className="lin-meta">{regime.court}</span>
+        </li>
+        {tva.map((x) => (
+          <li key={x.id}>
+            <span>
+              {CATEGORIES_TVA[x.categorie ?? "S"] ?? x.categorie} {x.categorie === "S" || !x.categorie ? pourcent(x.taux) : ""}
+              {x.base !== null ? ` · base ${montant(x.base, fac.devise)}` : ""}
+            </span>
+            <span className="lin-meta">{montant(x.montant, fac.devise)}</span>
+          </li>
+        ))}
+        {tva.length > 1 ? (
+          <li>
+            <span>TVA sur {tva.length} taux</span>
+            <span className="lin-meta">{montant(fac.montant_tva, fac.devise)}</span>
+          </li>
+        ) : null}
+        {m.tva_debits === true ? (
+          <li>
+            <span>TVA sur les débits</span>
+            <span className="lin-meta">option portée</span>
+          </li>
+        ) : null}
+        {enDevise ? (
+          <li>
+            <span>Contre-valeur en euros</span>
+            <span className="lin-meta">{cv?.montant_ttc_eur !== undefined ? montant(cv.montant_ttc_eur, "EUR") : "au taux BCE"}</span>
+          </li>
+        ) : null}
+        <li>
+          <span>Pénalités de retard</span>
+          <span className={penalites ? "lin-meta" : "lin-meta lin-props-vide"}>{tauxPen !== null ? pourcent(tauxPen) : penalites ? "mentionnées" : absente("absentes")}</span>
+        </li>
+        <li>
+          <span>Indemnité de recouvrement</span>
+          <span className={indemnite ? "lin-meta" : "lin-meta lin-props-vide"}>
+            {indemnite ? (nombreDe("indemnite_montant") !== null ? montant(nombreDe("indemnite_montant"), "EUR") : "mentionnée") : absente("absente")}
+          </span>
+        </li>
+        <li>
+          <span>{texte("escompte") ?? "Escompte"}</span>
+          <span className={texte("escompte") ? "lin-meta" : "lin-meta lin-props-vide"}>{texte("escompte") ? "mentionné" : absente("non mentionné")}</span>
+        </li>
+      </ul>
+      {precisions.map((t) => (
+        <p key={t} className="lin-maj-texte lin-maj-gris">
+          {t}
+        </p>
+      ))}
+    </>
   );
 }
 
@@ -1161,6 +1250,36 @@ export default function TableauFiled() {
                     </li>
                   ))}
                 </ul>
+              </>
+            ) : null}
+
+            {/* « La TVA multi-taux, l'autoliquidation, l'exonération et la TVA sur les débits », « la devise, le taux
+                de change et la contre-valeur en euros », « les mentions d'escompte, de pénalité et d'indemnité » :
+                filed_factures_tva, filed_factures.regime_tva et .mentions (a4_22, a4_27), lus avec la facture */}
+            {fac ? <TvaEtMentions fac={fac} tva={dossier?.tva ?? []} /> : null}
+
+            {/* « Un fichier qui contient plusieurs factures est découpé pièce par pièce » (a4_21) */}
+            {dossier?.decoupage ? (
+              <>
+                <h3 className="lin-projet-h2">Fichier d&apos;origine</h3>
+                <ul className="lin-projet-liste filed-lignes-actions">
+                  <li>
+                    <IconeDocument />
+                    <span>
+                      Découpée du fichier {dossier.decoupage.mere}
+                      {dossier.decoupage.nb_pages ? ` (${pluriel(dossier.decoupage.nb_pages, "page")})` : ""}
+                    </span>
+                    <span className="lin-meta">{dossier.decoupage.pages ?? "pièce fille"}</span>
+                  </li>
+                  {dossier.decoupage.soeurs.map((x) => (
+                    <li key={x.document_id}>
+                      <IconeDocument />
+                      <Link href={ficheDe(x.document_id)}>Autre pièce du même fichier : {x.reference}</Link>
+                      <span className="lin-meta">{x.pages ?? ""}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="lin-maj-texte lin-maj-gris">Chaque pièce vit sa vie : sa lecture, ses contrôles, sa validation et ses écritures. Le fichier d&apos;origine reste attaché à chacune.</p>
               </>
             ) : null}
 
@@ -1937,6 +2056,8 @@ export default function TableauFiled() {
               </CarteDroite>
 
               <CarteAPayer lignes={portee} titre="Échéances" fournisseurs />
+
+              {aujourdhui ? <PilotageFiled source={source === "exemple" ? "exemple" : "reelle"} dossiers={local} aujourdhui={new Date(aujourdhui)} /> : null}
 
               <CarteDroite
                 titre="Activité"
