@@ -1,0 +1,6 @@
+Photos des données d'exemple d'Espace 2 (03/11/2026, session « promesses sans page »).
+
+public/exemples/daliro/til-a2-*.jpg — recadrages de public/accueil-secteurs/btp.jpg (photo déjà publiée sur la page
+d'accueil du site), pour les photos jointes à l'avenant TIL-A2 de l'exemple Daliro.
+public/exemples/tavaro/*.jpg — recadrages de public/accueil-secteurs/location-automobile.jpg (même origine), pour les
+photos de départ et de retour d'un état des lieux de l'exemple Tavaro.

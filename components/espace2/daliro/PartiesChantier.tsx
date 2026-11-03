@@ -17,6 +17,8 @@
    Réception) font de même chez elles.
    ══════════════════════════════════════════════════════════════════════ */
 
+import PhotosAvenant from "./PhotosAvenant";
+import { useSource } from "@/components/espace/source";
 import { AlertTriangle, BookOpen, CalendarDays, CheckCircle2, ClipboardCheck, FileSignature, FileText, FileUp, GitBranch, Layers, Link2, PenLine, Plus, Receipt, RotateCcw, Unlink, Users } from "lucide-react";
 import ChiffrageLu from "@/components/espace/daliro/ChiffrageLu";
 import type { FormChantier, SectionChantier } from "@/components/espace/daliro/ChantierVue";
@@ -269,6 +271,7 @@ function Planning({ tableau, ouvrir, envoi, aujourdhui, faireProposerDependances
 /* ——— Avenants : par statut ; le message du terrain, le chiffrage et les lignes dans le détail ——— */
 function Avenants({ tableau, ouvrir, envoi, faireRetirerLigne }: Props) {
   const { avenants, voit_prix, lots } = tableau;
+  const { source } = useSource();
   const lotNom = (id: string | null) => (id ? lots.find((l) => l.id === id)?.code ?? "?" : "—");
   const valide = (a: Avenant) => a.demande_statut === "approuvee" || a.demande_statut === "executee";
   const validation = (a: Avenant) => (valide(a) ? { t: "vert" as const, l: "Validé : à signer" } : a.demande_statut === "rejetee" ? { t: "rouge" as const, l: "Refusé à la validation" } : { t: "bleu" as const, l: "Dans « À valider »" });
@@ -356,6 +359,7 @@ function Avenants({ tableau, ouvrir, envoi, faireRetirerLigne }: Props) {
               {a.motif ? <Rangee libelle="Motif">{a.motif}</Rangee> : null}
             </Rangees>
             {o.texte ? <Texte citation>« {String(o.texte)} »</Texte> : null}
+            <PhotosAvenant origine={o} source={source === "exemple" ? "exemple" : "reelle"} />
             <div className="lvp-note">
               <ChiffrageLu chiffrage={o.chiffrage} chiffree={a.lignes.some((l) => l.origine_prix === "bibliotheque")} voitPrix={!!voit_prix} />
             </div>

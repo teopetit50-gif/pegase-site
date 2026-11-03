@@ -138,7 +138,14 @@ const AVENANTS_TIL: Avenant[] = [
       { id: id("312"), avenant_id: AV1, lot_id: LOT2, prix_id: null, ordre: 2, designation: "Dépose du garde-corps provisoire", unite: "ml", quantite: 12, sens: 1, nature: "ouvrage", origine_prix: "saisie", prix_unitaire_ht: 15, montant_ht: 180 },
     ] },
   { id: AV2, chantier_id: TILLEULS, marche_id: M1, numero: 2, objet: "Remplacement de deux fenêtres par des portes-fenêtres (logements 7 et 8)",
-    origine: { canal: "photo", auteur: "Conducteur de travaux", date: aujourdHui(-1), texte: "Photo du mardi : les allèges des logements 7 et 8 sont déjà démolies. Il faut reprendre les appuis avant la pose des fenêtres, le maître d'ouvrage attend le chiffrage." },
+    origine: { canal: "photo", auteur: "Conducteur de travaux", date: aujourdHui(-1), texte: "Photo du mardi : les allèges des logements 7 et 8 sont déjà démolies. Il faut reprendre les appuis avant la pose des fenêtres, le maître d'ouvrage attend le chiffrage.",
+               /* les photos du message, jointes à l'avenant (photos libres, public/exemples/daliro) */
+               photos: [
+                 { url: "/exemples/daliro/til-a2-fouille.jpg", nom: "allege-logement-7.jpg" },
+                 { url: "/exemples/daliro/til-a2-maconnerie.jpg", nom: "allege-logement-8.jpg" },
+                 { url: "/exemples/daliro/til-a2-coffrage.jpg", nom: "appui-a-reprendre.jpg" },
+                 { url: "/exemples/daliro/til-a2-ferraillage.jpg", nom: "vue-d-ensemble.jpg" },
+               ] },
     statut: "brouillon", demande_id: null, demande_statut: null, piece_id: null, soumis_le: null, signe_le: null, signe_par: null, signe_libelle: null, motif: null, cree_le: ilYa(1, 9), nb_lignes: 1, montant_ht: -2360,
     lignes: [
       { id: id("321"), avenant_id: AV2, lot_id: LOT1, prix_id: PRIX_FEN, ordre: 1, designation: "Fenêtre bois-alu un vantail, vitrage 4/16/4 faible émissivité (moins-value)", unite: "u", quantite: 2, sens: -1, nature: "ouvrage", origine_prix: "bibliotheque", prix_unitaire_ht: 1180, montant_ht: -2360 },
