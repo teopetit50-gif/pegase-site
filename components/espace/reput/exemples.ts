@@ -75,6 +75,9 @@ export function mondeExemple(): Monde {
   /* « un appel manqué devient une demande » et « le client qui veut parler à une personne est transmis » */
   const d9 = demande(9, "appel", "Paul Girard", null, ilYa(0, 3), { sujet: "humain", statut: "a_traiter", couverte: false,
                                                                    motif: "Le client demande à parler à quelqu'un : transmis sans réponse automatique." });
+  /* « La langue du client est identifiée dès le premier message » ; « les réponses se font en plusieurs langues,
+     avec le même périmètre de contenu » : un client anglophone, une réponse en anglais tirée de la même fiche */
+  const d10 = demande(10, "email", "James Whitfield", "j.whitfield@exemple.co.uk", ilYa(0, 4), { id: "00000000-0000-4000-8000-0000000c3d10", objet: "Opening hours on Saturday?", sujet: "horaires", langue: "en" });
   const receptions: Record<number, Reception> = {
     9001: { id: 9001, canal: "email", de_nom: "Marie Durand", de_adresse: "marie.durand@exemple.fr", sujet: "Ouverts samedi ?", recu_le: d1.recu_le, pieces: [],
             corps: "Bonjour,\nJe voudrais passer voir les échantillons de plans de travail. Êtes-vous ouverts samedi matin ?\nMerci,\nMarie" },
@@ -93,6 +96,8 @@ export function mondeExemple(): Monde {
             corps: "Re-bonjour, je reviens vers vous pour la porte d'entrée : finalement je voudrais aussi changer la serrure. Vous pouvez me faire un devis pour les deux ?" },
     9009: { id: 9009, canal: "appel", de_nom: "Paul Girard", de_adresse: "04 78 00 00 09", sujet: "Appel manqué", recu_le: d9.recu_le, pieces: [],
             corps: "Transcription du message laissé : « Bonjour, c'est M. Girard, je préférerais parler à quelqu'un pour mes volets, rappelez-moi au 04 78 00 00 09. Merci. »" },
+    9010: { id: 9010, canal: "email", de_nom: "James Whitfield", de_adresse: "j.whitfield@exemple.co.uk", sujet: "Opening hours on Saturday?", recu_le: d10.recu_le, pieces: [],
+            corps: "Hello,\nWe are staying in Lyon for a few weeks and would like to see your worktop samples. Are you open on Saturday morning?\nThanks,\nJames" },
     9006: { id: 9006, canal: "whatsapp", de_nom: "Martin Luc", de_adresse: "+33 6 00 00 00 06", sujet: null, recu_le: d6.recu_le, pieces: [],
             corps: "Pour la cuisine, j'ai pris les mesures : 4,20 m exactement." },
   };
@@ -103,6 +108,11 @@ export function mondeExemple(): Monde {
             { sources: [F.diagnostic], statut: "envoyee", objet: null }),
     reponse(3, d3, "Merci pour votre demande de devis. Nous la transmettons à notre agenceur, qui revient vers vous pour préciser les dimensions et les finitions.",
             { couverte: false, type_action: "reput.transferer", raison: "La base ne donne pas de prix au mètre linéaire pour les façades en chêne." }),
+    {
+      ...reponse(10, d10, "", { sources: [F.horaires], objet: "Re: Opening hours on Saturday?" }),
+      id: "00000000-0000-4000-8000-0000000c3e10", langue: "en",
+      corps: "Hello,\n\nYes, the workshop is open on Saturdays from 9 am to 12 noon; the worktop samples are on display in the showroom.\n\nKind regards,\nThe Atelier Bertin team\n\nReply prepared by our assistant from our information, reviewed by the workshop.",
+    },
     reponse(4, d4, "Nous avons bien reçu votre message et nous en sommes désolés. Le responsable de la pose vous appelle aujourd'hui pour fixer la fin du chantier.",
             { type_action: "reput.transferer", sources: [], couverte: true }),
   ];
@@ -140,7 +150,7 @@ export function mondeExemple(): Monde {
         regle_le: ilYa(40).slice(0, 10), statut: "avis_recu", motif: null, prochain_le: null, envois: ["y", "z"], cree_le: ilYa(40) },
     ],
     indicateurs: { recues: 41, repondues: 33, parties_seules: 14, hors_base: 6, delai_median_minutes: 47 },
-    demandes: [d1, d2, d3, d4, d5, d6, d7, d8, d9],
+    demandes: [d1, d2, d3, d4, d5, d6, d7, d8, d9, d10],
     receptions,
     reponses,
     fiches,
