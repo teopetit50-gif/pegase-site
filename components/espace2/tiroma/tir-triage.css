@@ -452,7 +452,10 @@ html[data-v2-theme="light"] .v2 .tir-av {
   font-size: 15px;
   line-height: 21px;
   color: var(--tir-t1);
-  resize: vertical;
+  /* 03/11/2026 — Teo : plus de poignée dans le coin, la note grandit avec sa boîte */
+  resize: none;
+  field-sizing: content;
+  max-height: 200px;
   outline: none;
 }
 .v2 .tir-av .tir-av-composeur textarea::placeholder {

@@ -266,6 +266,16 @@ html[data-v2-theme="dark"] :is(.v2, .v2-jetons, .dlg-panneau) {
   outline: none;
   box-shadow: var(--v2-anneau);
 }
+/* 03/11/2026 — retour de Teo : « quand on tape dans la barre, il y a toujours le petit carré ».
+   L'anneau ci-dessus encadrait chaque zone de texte, posée sans bord dans sa boîte (notes,
+   composeurs, réponses). Une zone de texte ne le porte plus : le curseur montre où l'on tape, et
+   la boîte qui l'entoure garde son propre focus (:focus-within), comme .v2-ia-saisie.
+   Chaque métier repose son anneau (`.v2 .tir :focus-visible`, `.v2 .lor :focus-visible`…) :
+   le `:not(#_)` donne à cette règle le poids d'un identifiant pour passer devant toutes. */
+:is(.v2, .v2-jetons) textarea:focus-visible:not(#_) {
+  outline: none;
+  box-shadow: none;
+}
 /* 11/10/2026 — retour de Teo : à l'ouverture d'un menu, react-aria donne le
    focus à la liste elle-même ; l'anneau ci-dessus l'encadrait d'un cadre
    carré gris autour du popover arrondi. La liste n'en porte plus : au
