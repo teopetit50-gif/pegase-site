@@ -38,6 +38,7 @@ import { libellePalier } from "@/components/espace/cashd/etats";
 import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeImport, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
+import { copierEtDire } from "../Toasts";
 
 type Donnees = {
   tableau: Tableau;
@@ -569,7 +570,7 @@ export default function Debiteurs() {
             </span>
           </nav>
           <div className="lin-tete-droite">
-            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier la référence" title="Copier la référence" onClick={() => navigator.clipboard?.writeText(b.reference)}>
+            <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier la référence" title="Copier la référence" onClick={() => copierEtDire(b.reference)}>
               <Copy width={14} height={14} aria-hidden="true" />
             </button>
             <Link href={suivi} className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Ouvrir dans Débiteurs et relances" title="Ouvrir dans Débiteurs et relances">
@@ -677,7 +678,7 @@ export default function Debiteurs() {
                           cle: "copier",
                           libelle: "Copier l'adresse",
                           icone: <Copy width={16} height={16} />,
-                          action: () => navigator.clipboard?.writeText(contact),
+                          action: () => copierEtDire(contact),
                         },
                       ]}
                     />
@@ -868,7 +869,7 @@ export default function Debiteurs() {
                           cle: "copier",
                           libelle: "Copier la référence",
                           icone: <Copy width={16} height={16} />,
-                          action: () => navigator.clipboard?.writeText(b.reference),
+                          action: () => copierEtDire(b.reference),
                         },
                       ]}
                     />

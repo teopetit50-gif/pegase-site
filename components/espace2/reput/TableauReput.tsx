@@ -69,6 +69,7 @@ import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe
 import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
 import "./reput.css";
+import { copierEtDire } from "../Toasts";
 
 type Sante = "a_traiter" | "a_valider" | "preparation" | "repondue" | "classee";
 type Teinte = "vert" | "jaune" | "rouge" | "gris" | "bleu";
@@ -762,11 +763,11 @@ export default function TableauReput() {
         href: lienFiltres({ canal: d.canal }, "demandes"),
       },
       ...(courriel ? [{ cle: "ecrire", libelle: "Écrire un e-mail", icone: <IconeEnveloppe />, action: () => void window.open(`mailto:${courriel}`) }] : []),
-      ...(adresse ? [{ cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => void navigator.clipboard?.writeText(adresse) }] : []),
+      ...(adresse ? [{ cle: "copier", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => copierEtDire(adresse) }] : []),
     ];
     const optionsClient: Option[] = memeClient.map((x) => ({ cle: x.id, libelle: titreDe(m, x), meta: dateCourte(x.recu_le), icone: <IconeStatut sante={santeDe(x)} />, coche: x.id === d.id, href: ficheDe(x.id) }));
     const optionsBase: Option[] = [
-      ...(rep ? [{ cle: "copier", libelle: "Copier la réponse", icone: <Copy width={16} height={16} />, action: () => void navigator.clipboard?.writeText(rep.corps) }] : []),
+      ...(rep ? [{ cle: "copier", libelle: "Copier la réponse", icone: <Copy width={16} height={16} />, action: () => copierEtDire(rep.corps) }] : []),
       ...(rep
         ? [
             {
@@ -805,7 +806,7 @@ export default function TableauReput() {
           </nav>
           <div className="lin-tete-droite">
             {adresse ? (
-              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier l'adresse du client" title="Copier l'adresse du client" onClick={() => navigator.clipboard?.writeText(adresse)}>
+              <button type="button" className="v2-btn v2-btn--petit v2-btn--icone" aria-label="Copier l'adresse du client" title="Copier l'adresse du client" onClick={() => copierEtDire(adresse)}>
                 <Copy width={14} height={14} aria-hidden="true" />
               </button>
             ) : null}
@@ -931,7 +932,7 @@ export default function TableauReput() {
                         className="lin-maj-lien"
                         onClick={(e) => {
                           e.preventDefault();
-                          void navigator.clipboard?.writeText(rep.corps);
+                          copierEtDire(rep.corps);
                         }}
                       >
                         <Copy width={14} height={14} aria-hidden="true" /> Copier

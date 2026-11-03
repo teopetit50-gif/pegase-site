@@ -67,6 +67,7 @@ import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
 import "./reput.css";
 import "./boite-base.css";
+import { copierEtDire } from "../Toasts";
 
 type Teinte = "vert" | "jaune" | "rouge" | "gris" | "bleu";
 type Etat = "brouillon" | "a_revoir" | "a_venir" | "en_vigueur";
@@ -878,7 +879,7 @@ function PageFiche({
   const versions = m.fiches.filter((x) => x.origine_id === f.origine_id).sort((a, b) => b.version - a.version);
   const autres = versions.filter((x) => x.id !== f.id);
   const lienFiltre = (dim: Dimension, v: string) => lien(bascule(filtres, dim, v), f.id);
-  const copier = (t: string) => void navigator.clipboard?.writeText(t);
+  const copier = (t: string) => copierEtDire(t);
   const voir = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   /* l'activité n'est pas rendue pendant l'édition : la refermer d'abord */
   const voirActivite = () => {

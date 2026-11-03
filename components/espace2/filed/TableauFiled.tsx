@@ -74,7 +74,7 @@ import { lireCible, trouverCible } from "@/components/espace/filed/lien";
 /* les habits de l'ancien espace, que portent encore les fenêtres du dossier et la pièce (chargés avant par HabilleSb) */
 import "@/components/espace/espace.css";
 import "../habillage.css";
-import { useToast } from "../Toasts";
+import { useToast, copierEtDire } from "../Toasts";
 import { useAujourdhui, useMonte } from "../horloge";
 import { A_PAYER, GROUPES, aPayer, du, etatsExemple, groupeDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
 import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
@@ -164,7 +164,7 @@ const arrondi = (v: number) => Math.round(v * 100) / 100;
 /* une phrase finie par un point, sans en doubler un (« 26 nov. ») */
 const phrase = (t: string) => (t.endsWith(".") ? t : `${t}.`);
 const nomDe = (a: Apercu) => a.fournisseur?.nom ?? a.document.expediteur ?? a.document.nom_fichier;
-const copier = (texte: string) => navigator.clipboard?.writeText(texte);
+const copier = (texte: string) => copierEtDire(texte);
 
 /* ——— les filtres du tableau de bord (règle de Teo, 28/10 : « quand on clique sur
    Comptabilité ça renvoie vers une autre sous-page alors que c'est juste censé

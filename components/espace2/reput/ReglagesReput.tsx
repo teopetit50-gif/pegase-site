@@ -182,8 +182,10 @@ export function ReglagesReput() {
         await charger();
       } else modifierLocal(localF);
       toast(message, "vert");
+      return true;
     } catch (e) {
       toast(e instanceof Error ? e.message : "La base n'a pas répondu.", "rouge");
+      return false;
     } finally {
       setEnvoi(null);
     }
@@ -191,6 +193,11 @@ export function ReglagesReput() {
 
   const enregistrer = () => {
     if (!r) return;
+    /* 03/11/2026 — « pas un lien » s'enregistrait comme page d'avis */
+    if (r.lien_avis?.trim() && !/^https:\/\/\S+\.\S+/.test(r.lien_avis.trim())) {
+      toast("Le lien de votre page d'avis doit commencer par https:// (la page Google, Trustpilot…).", "rouge");
+      return;
+    }
     const champs: Partial<Reglages> = {
       signature: r.signature,
       formule_appel: r.formule_appel,
@@ -213,6 +220,9 @@ export function ReglagesReput() {
     );
   };
 
+  /* 03/11/2026 — « abc » passait pour une adresse, et le formulaire restait
+     rempli après l'envoi (un second clic faisait un doublon) */
+  const adresseValide = nouvel.canal === "email" ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nouvel.adresse.trim()) : nouvel.adresse.replace(/\D/g, "").length >= 6;
   const programmer = () =>
     void agir(
       "avis",
@@ -240,7 +250,9 @@ export function ReglagesReput() {
         ],
       }),
       "Demande d'avis programmée : elle part trois jours après le règlement, relancée deux fois au plus.",
-    );
+    ).then((ok) => {
+      if (ok) setNouvel((n) => ({ ...n, adresse: "", nom: "", reference: "", regle_le: "" }));
+    });
 
   /* ——— le bouton « Enregistrer » des sous-pages de réglages (le même geste qu'avant, pour tous les champs) ——— */
   const enregistrement = r ? (
@@ -501,7 +513,7 @@ export function ReglagesReput() {
                   <input className="pr-input" type="date" value={nouvel.regle_le} onChange={(e) => setNouvel({ ...nouvel, regle_le: e.target.value })} />
                 </ChampReglage>
                 <div className="pr-actions">
-                  <BoutonReglage plein disabled={envoi !== null || nouvel.adresse.trim().length < 3} onClick={programmer}>
+                  <BoutonReglage plein disabled={envoi !== null || !adresseValide} onClick={programmer}>
                     {envoi === "avis" ? <Loader variant="spin" /> : null} Programmer la demande d&apos;avis
                   </BoutonReglage>
                 </div>

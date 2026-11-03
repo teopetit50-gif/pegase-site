@@ -65,6 +65,7 @@ import { IconeBoiteX, IconeCalendrier, IconeEnveloppe, IconeNonLus, IconeSante, 
 import { RACINE } from "../modules";
 import "./offload.css";
 import "./BoiteEcheances.css";
+import { copierEtDire } from "../Toasts";
 
 type Statut = EcheanceLigne["statut"];
 type Teinte = "vert" | "jaune" | "rouge" | "gris" | "bleu";
@@ -662,13 +663,13 @@ export default function BoiteEcheances() {
     ...(c?.email
       ? [
           { cle: "ecrire", libelle: "Écrire un e-mail", meta: c.email, icone: <IconeEnveloppe />, action: () => window.open(`mailto:${c.email}`) },
-          { cle: "copier-mail", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => navigator.clipboard?.writeText(c.email ?? "") },
+          { cle: "copier-mail", libelle: "Copier l'adresse", icone: <Copy width={16} height={16} />, action: () => copierEtDire(c.email ?? "") },
         ]
       : []),
     ...(c?.telephone
       ? [
           { cle: "appeler", libelle: "Appeler", meta: c.telephone, icone: <PhoneCall width={16} height={16} />, action: () => window.open(`tel:${(c.telephone ?? "").replace(/\s/g, "")}`) },
-          { cle: "copier-tel", libelle: "Copier le numéro", icone: <Copy width={16} height={16} />, action: () => navigator.clipboard?.writeText(c.telephone ?? "") },
+          { cle: "copier-tel", libelle: "Copier le numéro", icone: <Copy width={16} height={16} />, action: () => copierEtDire(c.telephone ?? "") },
         ]
       : []),
   ];
@@ -679,11 +680,11 @@ export default function BoiteEcheances() {
   const optionsCommercial: Option[] = optionsDe("commercial").map((o) => ({ ...o, coche: o.cle === `commercial-${commercial ?? SANS_COMMERCIAL}` }));
   const optionsCompte: Option[] = [
     optionFiltre("compte", e.compte_id, { libelle: actifs.compte === e.compte_id ? "Toutes les échéances" : "Les échéances de ce compte" }),
-    ...(c?.ref ? [{ cle: "copier-ref", libelle: "Copier la référence du compte", meta: c.ref, icone: <Copy width={16} height={16} />, action: () => navigator.clipboard?.writeText(c.ref) }] : []),
+    ...(c?.ref ? [{ cle: "copier-ref", libelle: "Copier la référence du compte", meta: c.ref, icone: <Copy width={16} height={16} />, action: () => copierEtDire(c.ref) }] : []),
     ...optionsContact,
   ];
   const optionsRef: Option[] = [
-    { cle: "copier", libelle: e.contrat ? "Copier le numéro du contrat" : "Copier la référence de l'équipement", icone: <Copy width={16} height={16} />, action: () => navigator.clipboard?.writeText(refDe(e)) },
+    { cle: "copier", libelle: e.contrat ? "Copier le numéro du contrat" : "Copier la référence de l'équipement", icone: <Copy width={16} height={16} />, action: () => copierEtDire(refDe(e)) },
   ];
   const copierRef = () => {
     /* la coche ne vient que si le presse-papiers a accepté (il refuse une page sans le focus) */
