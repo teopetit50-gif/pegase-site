@@ -1068,6 +1068,62 @@ Autres remarques
 - Hors écran, rappel : « 9 % seulement des salariés… » est maintenant sourcé dans le commentaire de `textes.ts` (Ifop pour Talan), mais
   aucune des deux sources n'est citée sur la page.
 
+## Sans back-end : les deux voies, ligne par ligne (03/11/2026) — à trancher par Teo
+
+Pour chacune des 45 promesses « sans back-end », deux voies : **construire** (ce qu'il faut côté base, porte ou
+connecteur ; toute nouvelle page demande un nouveau relevé de référence) ou **reformuler** (texte proposé, au plus près
+de l'original). Rien n'est appliqué, aucune pastille n'est posée (ta décision du 06/10). Les numéros renvoient aux
+relevés ci-dessus ; les chiffrages cités sont ceux de `omega/CHIFFRAGE/`.
+
+| Produit · n° | Promesse | Construire | Reformuler |
+|---|---|---|---|
+| Socle 11 | « Journal d'accès » ; « des accès tracés » | Table socle des consultations (sur le modèle de `tamila_journal_acces`), écriture dans les portes de lecture, écran « Journal » dans Réglages | « Journal des actions » ; « chaque action tracée » |
+| Socle 19 | Montant indexé sur les pièces traitées ; paliers 150 / 400 / 1 000 | Compteur mensuel des pièces facturables et de la part reprise par un opérateur (porte de lecture), affiché dans `/espace2/utilisation` | « Le montant suit le volume que le système traite pour vous ; les paliers sont revus avec vous chaque trimestre. » |
+| Socle 21 | Relevé hebdomadaire de ce que le site reçoit, recherches sans résultat, pages d'origine | Collecte des visites et recherches du site client (table + script côté site), relevé hebdomadaire dans l'espace | « Les demandes reçues par le site, et la page d'où elles viennent, se lisent dans votre espace. » (seule la part demandes existe via REPUT) |
+| Socle 24 | Telegram : point du matin et alertes | Connecteur Telegram (bot, envoi du point et des alertes critiques) | Retirer Telegram de `/integrations`, ou le classer « sur demande » |
+| Socle 25 | « Vos automatisations s'exportent en fichiers lisibles » | Ajouter règles et automatisations à l'« Export complet » (fichier JSON ou YAML par règle) | « Vos données s'exportent dans un format de base standard ; vos règles vous sont remises sur demande. » |
+| FILED 46 | Imputation analytique apprise sur les écritures passées | Colonnes d'axe analytique sur les lignes, import des écritures passées, proposition par fournisseur | Retirer la phrase, ou « L'imputation analytique se règle fournisseur par fournisseur. » |
+| FILED 57 | Manuscrits et tickets de caisse lus et rattachés | Rien en base ; il faut une preuve de lecture (jeu de tests manuscrits, `filed.md:48`) | « Les tickets de caisse sont lus et rattachés ; une pièce manuscrite illisible part en anomalie. » |
+| FILED 58 | Dépôt par lot depuis un dossier partagé ou un transfert | Dépôt multiple à l'écran, puis relève d'un dossier partagé ou d'un SFTP (A2) | « Les pièces arrivent par courriel ou se déposent dans l'espace. » |
+| CASHD 28 | Commande au-delà du plafond bloquée | Lecture des commandes (connecteur ERP) et porte de blocage avec décision d'un responsable | « Un compte au-delà de son plafond vous est signalé avant la prochaine commande. » |
+| CASHD 29 | Jours ouvrés, fériés locaux, fenêtres horaires | Réglage d'horaires et calendrier des fériés dans les migrations CASHD, lu par l'envoi | « Les envois partent les jours ouvrés, aux heures de bureau. » (à vérifier contre HORS_HEURES du socle) |
+| REPUT 17 | Messagerie instantanée du site aux mêmes règles | Canal « messagerie du site » dans le type `Canal`, widget A2 branché sur la file (`reput.md` n° 39) | Retirer la phrase, ou « Le formulaire du site est tenu aux mêmes règles que le reste. » |
+| REPUT 18 | Messages des réseaux sociaux dans la même file | Connecteur Meta (Messenger, Instagram) vers la file (`reput.md` n° 40) | Retirer, ou « …sur demande, les messages des réseaux sociaux. » |
+| REPUT 22 | Contrat et interventions passées lus en même temps | Connecteur au logiciel métier du client (`reput.md` n° 46) | « Son historique d'échanges est lu en même temps. » |
+| DALIRO 34 | Maquette « Rendez-vous : réunion de chantier, réception, visite » | Objet « rendez-vous » (table, portes, bloc à l'accueil) | Retirer le bloc de la maquette, ou le remplacer par les passages d'intervenants qui existent |
+| DALIRO 35 | « Fournisseur a accepté le décalage » | Envoi au fournisseur et réception de sa réponse (canal, statut sur la livraison) | « Livraison décalée, fournisseur à prévenir » |
+| LORANI 31 | Fiches techniques confrontées au CCTP (feu, Avis Technique, PV) | Lecture du fond des fiches et du CCTP, champs classement / AT / PV sur `lorani_visas` | « Chaque fiche technique est rattachée à son article du CCTP et suivie jusqu'au visa. » |
+| LORANI 33 | Notes de calcul et PV ; compteurs par nature | Colonne `nature` sur `lorani_visas`, compteur par nature | Retirer les compteurs de la maquette ; « Notes de calcul et PV d'essais suivis au visa » |
+| LORANI 48 | Règles internes, checklists, charte de l'agence | Table des contrôles propres à l'agence, branchée sur le contrôle du dossier | « Les tolérances du contrôle se règlent avec vous. » |
+| LORANI 54 | « Questions posées au dossier » | Recherche plein texte et réponse citée (chiffrage #53) | Retirer de la formule Agence |
+| LORANI 59 | Compte rendu « à partir de vos notes et photos de visite » | Champ photos sur `CompteRendu` et dans le PDF (chiffrage #61) | « …à partir de vos notes de visite » |
+| LORANI 65 | « Bureaux d'études invités » | Porte d'invitation et compte BET limité au projet | « Bureaux d'études inscrits au projet » |
+| LORANI 66 | « Import depuis vos plateformes de projet » | Connecteur par plateforme (6 / 3 j, accès partenaire) | Retirer, ou « sur demande » |
+| TAMILA 5 | « …et vous laisse trancher » | Geste « retenir cette pièce » et colonne de décision sur `analyses` | « …et vous les montre côte à côte » |
+| TAMILA 6 | « Trous de la chronologie » | Type de lecture « périodes sans pièce » (CHIFFRAGE l. 53) | « Faits contredits » seuls |
+| TAMILA 13 | « Dossier de plaidoirie » | Assemblage et export des pièces citées (CHIFFRAGE l. 57) | Retirer |
+| TAMILA 15 | Pièces adverses du jour rapprochées du dossier de faits | Réception des pièces (au-delà des avis RPVA de b4_10) et lecture comparée au dossier de faits | « Chaque pièce adverse déposée est lue et versée au dossier de faits. » (⚑ promesse du titre de la page : à décider) |
+| TAMILA 16 | Maquette : conclusions annotées en marge | Type de lecture « conclusions face au dossier de faits » (CHIFFRAGE l. 7) | Remplacer la maquette par le dossier de faits tel qu'il existe |
+| TAMILA 17 | « Dispositif contre motifs (art. 954) » | Type de lecture dédié | Retirer |
+| TAMILA 18 | « Prétentions nouvelles et concentration en appel » | Type de lecture dédié | Retirer |
+| TAMILA 19 | « Dires à l'expert préparés sur le pré-rapport » | Lecture du pré-rapport et brouillon de dires (au-delà des dates de b4_16) | « Échéance des dires à l'expert suivie » |
+| TAMILA 20 | « Index des personnes et faits classés par moyen » | Type de lecture « index » et rattachement des faits aux moyens (CHIFFRAGE l. 54) | « Les parties de chaque pièce relevées » |
+| TAMILA 21 | « Questions posées au dossier (médical) » | Écran questions-réponses citées (CHIFFRAGE l. 55, 60) | Retirer |
+| TAMILA 22 | « Premier jet de l'exposé des faits » | Type de lecture « exposé des faits » | Retirer |
+| TAMILA 23 | Formule « Dommage corporel » | Lectures dédiées (soins, Dintilhac, écarts d'expertise) **et** hébergeur HDS | Retirer la formule tant que l'hébergement HDS n'est pas en place |
+| TAMILA 25 | Point du matin : pièces attendues, forfaits dépassés, dossiers sans diligence | Trois blocs de plus dans b4_14 (les données existent : pièces attendues, forfaits, dernière diligence) | Retirer les trois mentions du courriel d'exemple |
+| TAMILA 35 | « Dossiers partagés », « Logiciel métier » | Connecteurs Drive / SharePoint et logiciel métier (CHIFFRAGE l. 24-25) | « Vos outils restent en place : Tamila lit ce que vous y déposez. » |
+| TAVARO 11 | Tâche créée sur la messagerie de l'équipe | Envoi des tâches vers WhatsApp, Slack ou Teams | « Le retour crée la tâche dans Parc et atelier, avec l'heure limite. » |
+| TAVARO 19 | L'assistant répond à l'appel et transfère | Fournisseur de voix (non choisi), transcription, transfert | « L'appel est noté, le dossier ouvert, et la personne d'astreinte prévenue avec tout le contexte. » |
+| TAVARO 37 | Relevés constructeur (carburant, km, batterie) | Agrégateur télématique branché | « Carburant et kilométrage notés au retour » ; retirer « 0 boîtier » |
+| TIROMA 6 | « Production prévue 7 820 € » | Porte de calcul de la production prévue à partir des rendez-vous | Retirer la tuile de la capture |
+| TIROMA 48 | « Questionnaire médical de plus d'un an » | Table et porte des questionnaires | Retirer de la démo |
+| TIROMA 49 | « 18 rappels de contrôle prêts » | Gabarit de rappel de contrôle dans b3_14 (envoi retenu sans prestataire HDS) | « 41 contrôles dus » seul |
+| TIROMA 50 | « Point du soir » | Section du soir dans les migrations Tiroma | Retirer du schéma |
+| VARELO 7 | Facture rapprochée du bon de livraison | Rapprochement facture ↔ BL (CHIFFRAGE #4, ≈ 3 j avec A4) | Refaire l'image du héros sans ce volet |
+| VARELO 24 | Image des réglages d'hébergement | Écran de réglages d'hébergement en lecture | Remplacer l'image par le journal, qui existe |
+
+
 ## Reformulations proposées (03/11/2026) — à valider par Teo, rien n'est appliqué
 
 Le coordinateur a demandé le 3 novembre au soir de réécrire sur le site les 26 promesses « à reformuler ». Je ne
