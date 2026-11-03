@@ -265,7 +265,13 @@ function Faits({ complet, cle }: { complet: DossierComplet; cle: CryptoKey | nul
   /* le renvoi cliquable : la pièce déchiffrée dans le navigateur, ouverte à la page citée (AnalysesTamila.tsx) */
   const ouvrirPiece = async (pid: string, page = 1) => {
     const p = complet.pieces.find((x) => x.id === pid);
-    if (t.source === "exemple") return dire(`En exemple, les pièces ne s'ouvrent pas : en réel, ${p?.nom_fichier ?? "la pièce"} s'ouvre déchiffrée à la page ${page}.`);
+    /* en exemple, les trois pièces FICTIVES du dossier (public/exemples/tamila) s'ouvrent à la page citée :
+       « renvoie chacun d'eux à la page qui le fonde » se vérifie sans compte (03/11/2026) */
+    if (t.source === "exemple") {
+      if (!p?.nom_fichier) return dire("Cette pièce n'a pas d'exemple à ouvrir.");
+      window.open(`/exemples/tamila/${encodeURIComponent(p.nom_fichier)}#page=${page}`, "_blank", "noopener");
+      return;
+    }
     if (!p || !cle) return dire("La clé du dossier n'est pas ouverte dans ce navigateur.", true);
     try {
       const octets = await dechiffrerOctets(cle, await portes.telecharger(p.chemin));
