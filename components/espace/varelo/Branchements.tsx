@@ -61,7 +61,7 @@ type Props = { source: Source; contexte: Contexte | null; client_id: string; soc
 export function useBranchements({ source, contexte, client_id, societes, onFait }: Props) {
   const [locaux] = useState<Branchement[]>(() =>
     societes[0]
-      ? [{ id: "exemple-1", entite_id: societes[0].entite_id, logiciel: "sage100", libelle: "Sage 100 du siège", statut: "actif", jeux: JEUX.map((j, i) => ({ code: j.cle, actif: true, dernier_recu_le: i < 3 ? hier() : null, lignes: [134, 633, 41, 0, 0][i] })) }]
+      ? [{ id: "exemple-1", entite_id: societes[0].entite_id, logiciel: "sage100", libelle: "Sage 100 du siège", statut: "actif", jeux: JEUX.map((j, i) => ({ code: j.cle, actif: true, dernier_recu_le: i < 6 ? hier() : null, lignes: [134, 633, 41, 58, 212, 512][i] })) }]
       : [],
   );
   const [reels, setReels] = useState<Branchement[] | null>(null);

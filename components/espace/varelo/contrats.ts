@@ -167,10 +167,10 @@ export function contratsExemple(objets: Objet[]): ContratBrut[] {
   const o = (id: string) => objets.find((x) => x.id === U(id)) ?? null;
   return [
     /* le transporteur sous contrat dans deux sociétés : une négociation de groupe */
-    B("0t01", SIEGE, o("0f06"), "Transports Deschamps", { intitule: "Livraisons régionales", reference: "TD-2023-04", date_echeance: dans(48), preavis_valeur: 1, montant_annuel: 36000 }),
+    B("0t01", SIEGE, o("0f06"), "Transports Deschamps", { intitule: "Livraisons régionales", reference: "TD-2023-04", date_echeance: dans(48), preavis_valeur: 1, montant_annuel: 36000, notes: "À renégocier pour tout le groupe en même temps que les navettes d'Annecy (même transporteur, deux contrats)." }),
     B("0t02", ANNECY, o("0f06"), "Transports Deschamps", { intitule: "Navettes Annecy – Lyon", date_echeance: dans(130), montant_annuel: 14400 }),
     B("0t03", AGENCE, null, "Bureau Contrôle Alpes", { intitule: "Vérifications électriques annuelles", categorie: "maintenance", date_debut: dans(-375), date_echeance: dans(-10), preavis_valeur: 2, montant_annuel: 2900 }),
-    B("0t04", SIEGE, null, "Loc'Manut", { intitule: "Location de deux chariots élévateurs", categorie: "location", date_echeance: dans(12), preavis_valeur: 10, preavis_unite: "jours", montant_annuel: 7800 }),
+    B("0t04", SIEGE, null, "Loc'Manut", { intitule: "Location de deux chariots élévateurs", categorie: "location", date_echeance: dans(12), preavis_valeur: 10, preavis_unite: "jours", notes: "Signé par l'ancien responsable logistique : vérifier avec l'atelier que les deux chariots servent encore avant de dénoncer.", montant_annuel: 7800 }),
     B("0t05", SIEGE, o("0f07"), "Papeterie du Rhône", { intitule: "Fournitures de bureau", categorie: "fourniture", date_echeance: dans(250), montant_annuel: 4200 }),
     B("0t06", AGENCE, null, "Éditeur de la paie", { intitule: "Licence du logiciel de paie", categorie: "licence", date_echeance: dans(70), reconduction: "aucune", montant_annuel: 3100 }),
     B("0t07", ANNECY, null, "Assurances du Lac", { intitule: "Flotte automobile", categorie: "assurance", date_echeance: dans(95), preavis_valeur: 2, montant_annuel: 9600, statut: "denonce", denonce_le: dans(-3), motif: "Mise en concurrence au niveau du groupe" }),

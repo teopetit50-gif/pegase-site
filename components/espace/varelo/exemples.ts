@@ -115,6 +115,9 @@ const BRUTS: CodeBrut[] = [
   /* clients */
   { id: U("0k11"), nature: "client", entite: SIEGE, code: "C0211", nom: "HOTEL DES ALPES", objet: U("0c01"), etat: "confirme", methode: "nouveau", rattache: ilYa(28) },
   { id: U("0k12"), nature: "client", entite: ANNECY, code: "HDA", nom: "Hôtel des Alpes — Annecy", objet: U("0c01"), etat: "confirme", methode: "nom_cp", score: 1, rattache: ilYa(20) },
+  /* le même client sous un troisième nom, dans une troisième société : le site promet « un client
+     à trois noms dans trois sociétés, réuni sous une fiche » */
+  { id: U("0k18"), nature: "client", entite: AGENCE, code: "HALP", nom: "H. ALPES SAS", objet: U("0c01"), etat: "confirme", methode: "siren", score: 1, rattache: ilYa(15) },
   { id: U("0k13"), nature: "client", entite: SIEGE, code: "C0304", nom: "MAIRIE DE VIENNE", objet: U("0c02"), etat: "nouveau", methode: "nouveau", rattache: ilYa(28) },
   { id: U("0k14"), nature: "client", entite: AGENCE, code: "GHS", nom: "Groupe Hôtelier Savoie", objet: U("0c03"), etat: "nouveau", methode: "nouveau", rattache: ilYa(12) },
   /* articles */

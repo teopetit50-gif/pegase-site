@@ -147,9 +147,10 @@ export const ARRETES_EXEMPLE: ArreteExemple[] = [
 ];
 
 export const LIGNES_BRUTES_EXEMPLE: BrutEncours[] = [
-  /* Hôtel des Alpes : 48 000 au siège, 31 000 à Annecy → 79 000 pour le groupe, plafond 70 000 */
+  /* Hôtel des Alpes : 48 000 au siège, 31 000 à Annecy, 6 000 à l'agence → 85 000 pour le groupe, plafond 70 000 */
   { id: U("0l01"), nature: "client", entite: SIEGE, code: "C0211", non_echu: 30000, e30: 10000, eplus: 8000 },
   { id: U("0l02"), nature: "client", entite: ANNECY, code: "HDA", non_echu: 25000, e60: 6000 },
+  { id: U("0l10"), nature: "client", entite: AGENCE, code: "HALP", non_echu: 6000 },
   { id: U("0l03"), nature: "client", entite: SIEGE, code: "C0304", non_echu: 12500 },
   { id: U("0l04"), nature: "client", entite: AGENCE, code: "GHS", non_echu: 7300, e30: 2500 },
   /* un code que le référentiel ne connaît pas encore */
