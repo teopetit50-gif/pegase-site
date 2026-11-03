@@ -103,3 +103,6 @@ html[data-v2-theme="light"] .v2 .lor-ib { --lor-ib-point: lch(53 52.26 286.91); 
   .v2 .lor-ib-texte { width: 28px; padding: 0; }
   .v2 .lor-ib-texte svg { margin-right: 0; }
 }
+/* 02/11 : courriels du guichet — le corps du courriel garde ses retours à la ligne */
+.v2 .lor-ib-corps { white-space: pre-line; }
+.v2 .lor-ib-lignes .lor-groupe-epingles { list-style: none; margin-top: 8px; }

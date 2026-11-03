@@ -95,3 +95,6 @@ html[data-v2-theme="light"] .v2 .lor-rg {
   .v2 .lor-rg-sections { gap: 24px; margin-top: 24px; }
   .v2 .lor-rg-droite { max-width: 38%; }
 }
+/* la « Danger zone » : pas de case, un bouton de 32 à droite (13/500, r 9999, p 0 12, opacité .6 au repos) */
+.v2 .lor-rg-danger { display: inline-flex; align-items: center; flex-shrink: 0; height: 32px; padding: 0 12px; border-radius: 9999px; border: 0.5px solid transparent; font-size: 13px; font-weight: 500; color: var(--lor-t2); opacity: 0.6; }
+.v2 .lor-rg-danger:hover { opacity: 1; background: var(--lor-rg-survol); }

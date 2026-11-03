@@ -13,7 +13,11 @@
      vue              le projet (« Recently Contacted People ⌄ ») ;
                       View settings : colonnes affichées
      New Person       « Saisir du temps » (F23, G42)
-     Import / Export  « Ajouter ⌄ » : un élément de mission (F22, G43)
+     Import / Export  « Ajouter / Exporter ⌄ » : un élément de mission (F22,
+                      G43) ; la liste affichée en CSV
+     cases            sélection : épingler, exporter, marquer achevé
+                      (confirmation) ; « + Add column » : colonnes ;
+                      « Add calculation » : somme, moyenne ou décompte
      Sorted by        l'ordre des phases ; Filter : l'état des éléments
      grille           Élément · Temps (pastille de niveau : à venir, en
                       cours, à surveiller à 80 %, dépassé, facturé) ·
@@ -46,7 +50,10 @@ import type { Honoraire, Projet } from "@/components/espace/lorani/types";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { LIBELLES_CALCUL, calculer, exporterCsv, useMarques, type Calcul } from "./lor-local";
+import { BarreSelection, BoutonEtoile, useSelection } from "./lor-selection";
 import "@/components/espace/espace.css";
+import "./lor.css";
 import "./lor-attio.css";
 
 const CHEMIN = `${RACINE}/lorani/honoraires`;
@@ -198,6 +205,7 @@ function Fiche({ v, l, projet, peutEcrire, nommer, demander }: { v: VueHonoraire
             {court(l).slice(0, 3)}
           </span>
           <h2>{v.libelle(l)}</h2>
+          <BoutonEtoile cle={`honoraire:${l.id}`} nom={v.libelle(l)} />
         </div>
         <div className="lor-at-actions">
           <button type="button" className="lor-at-bouton" disabled={gris || !v.peutSaisirTemps} onClick={v.ouvrirTemps}>
@@ -395,6 +403,12 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
   const [ouvertAjout, setOuvertAjout, ajoutRef] = useMenu();
   const [ouvertFiltre, setOuvertFiltre, filtreRef] = useMenu();
   const [voirTaux, setVoirTaux] = useState(true);
+  /* 02/11 : cases (sélection), étoile (épinglés en tête), « Add calculation » par colonne — ./lor-local.ts */
+  const selection = useSelection();
+  const favoris = useMarques("favoris");
+  const [calculs, setCalculs] = useState<Record<string, Calcul>>({ temps: "somme", montant: "somme", taux: "moyenne" });
+  const SUITE: Calcul[] = ["somme", "moyenne", "decompte", "aucun"];
+  const changerCalcul = (c: string) => setCalculs((x) => ({ ...x, [c]: SUITE[(SUITE.indexOf(x[c] ?? "aucun") + 1) % SUITE.length] }));
   const [filtre, setFiltre] = useState<Honoraire["statut"] | null>(null);
   const [aChanger, setAChanger] = useState<AChanger>(null);
   const [echec, setEchec] = useState(false);
@@ -410,7 +424,29 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
     return s ? `${chemin}?${s}` : chemin;
   };
   const choisie = v.lignes.find((l) => l.id === params.get("element")) ?? null;
-  const lignes = v.lignes.filter((l) => !filtre || l.statut === filtre);
+  const lignes = v.lignes.filter((l) => !filtre || l.statut === filtre).sort((a, b) => Number(favoris.a(`honoraire:${b.id}`)) - Number(favoris.a(`honoraire:${a.id}`)));
+  const exporter = (choisies: LigneHonoraire[]) =>
+    exporterCsv(
+      `honoraires-${projet.nom}`,
+      ["Élément", "Intitulé", "Honoraires HT", "Heures prévues", "Heures passées", "Consommation %", "État", "Achevé le", "Facturé le", "Taux réalisé €/h"],
+      choisies.map((l) => [court(l), v.libelle(l), l.montant_ht, l.heures_prevues, l.passees, l.conso ?? "", LIBELLES_ETAT[l.statut], l.achevee_le ?? "", l.facturee_le ?? "", l.taux === null ? "" : Math.round(l.taux)]),
+    );
+  /* la valeur d'un calcul de pied, sur les lignes affichées */
+  const pied = (c: string, valeurs: (number | null)[], format: (n: number) => string) => {
+    const k = calculs[c] ?? "aucun";
+    const r = calculer(k, valeurs);
+    return (
+      <button type="button" className="lor-at-calcul" onClick={() => changerCalcul(c)} title={`${LIBELLES_CALCUL[k]} sur les lignes affichées · cliquer pour changer (somme, moyenne, décompte)`}>
+        {k === "aucun" ? (
+          <span className="lor-at-discret">+ Calcul</span>
+        ) : (
+          <>
+            <span className="lor-at-discret">{LIBELLES_CALCUL[k].toLowerCase()}</span> {r === null ? "—" : k === "decompte" ? r : format(r)}
+          </>
+        )}
+      </button>
+    );
+  };
 
   const demander = (ligne: LigneHonoraire) => {
     const statut = suivant(ligne);
@@ -493,9 +529,9 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
             </div>
             <div className="lor-at-groupe">
               <div className="lor-at-ancre" ref={ajoutRef}>
-                <button type="button" className="lor-at-bouton" aria-expanded={ouvertAjout} disabled={gris} onClick={() => setOuvertAjout((o) => !o)}>
+                <button type="button" className="lor-at-bouton" aria-expanded={ouvertAjout} onClick={() => setOuvertAjout((o) => !o)}>
                   {Ic.plus}
-                  Ajouter
+                  Ajouter / Exporter
                   {Ic.chevron}
                 </button>
                 {ouvertAjout ? (
@@ -504,12 +540,24 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
                       type="button"
                       role="menuitem"
                       className="lor-at-option"
+                      disabled={gris}
                       onClick={() => {
                         setOuvertAjout(false);
                         v.ouvrirElement();
                       }}
                     >
-                      <span className="lor-at-option-texte">Un élément de mission…</span>
+                      <span className="lor-at-option-texte">Ajouter un élément de mission…</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="lor-at-option"
+                      onClick={() => {
+                        setOuvertAjout(false);
+                        exporter(lignes);
+                      }}
+                    >
+                      <span className="lor-at-option-texte">Exporter la liste affichée (CSV)</span>
                     </button>
                   </div>
                 ) : null}
@@ -562,7 +610,14 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
           <div className="lor-at-grille" role="table" aria-label={`Honoraires de ${projet.nom}`} data-taux={voirTaux ? "" : undefined}>
             <div className="lor-at-rang lor-at-rang--tete" role="row">
               <span className="lor-at-cell lor-at-c1" role="columnheader">
-                <span className="lor-at-case" aria-hidden="true" />
+                <button
+                  type="button"
+                  className="lor-at-case"
+                  role="checkbox"
+                  aria-checked={!!lignes.length && selection.cles.length === lignes.length}
+                  aria-label="Tout sélectionner"
+                  onClick={() => (selection.cles.length === lignes.length ? selection.vider() : selection.tout(lignes.map((l) => l.id)))}
+                />
                 Élément
                 <button type="button" className="lor-at-plus-col" aria-label="Ajouter un élément de mission" title="Ajouter un élément de mission" disabled={gris} onClick={v.ouvrirElement}>
                   {Ic.plus}
@@ -585,14 +640,19 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
                   {Ic.jauge}
                   Taux réalisé
                 </span>
-              ) : null}
+              ) : (
+                <button type="button" className="lor-at-cell lor-at-ajout-col" role="columnheader" onClick={() => setVoirTaux(true)} title="Ajouter la colonne « Taux réalisé »">
+                  {Ic.plus}
+                  Ajouter une colonne
+                </button>
+              )}
             </div>
             {lignes.map((l) => {
               const n = niveau(l);
               return (
                 <div key={l.id} className="lor-at-rang" role="row">
                   <span className="lor-at-cell lor-at-c1" role="cell">
-                    <span className="lor-at-case" aria-hidden="true" />
+                    <button type="button" className="lor-at-case" role="checkbox" aria-checked={selection.a(l.id)} aria-label={`Sélectionner ${v.libelle(l)}`} onClick={() => selection.basculer(l.id)} />
                     <Link href={lien({ element: l.id })} scroll={false} className="lor-at-pilule">
                       <span className="lor-at-mini" aria-hidden="true">
                         {court(l)[0]}
@@ -600,6 +660,7 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
                       <span className="lor-at-pilule-texte">
                         {court(l)} · {v.libelle(l)}
                       </span>
+                      {favoris.a(`honoraire:${l.id}`) ? <span className="lor-marque">épinglé</span> : null}
                     </Link>
                   </span>
                   <span className="lor-at-cell" role="cell" title={l.conso !== null ? `${l.conso} % des heures prévues` : undefined}>
@@ -635,23 +696,51 @@ function Vue({ v, projet, projets, totalDe, peutEcrire, nommer }: { v: VueHonora
                 {lignes.length} <span className="lor-at-discret">éléments</span>
               </span>
               <span className="lor-at-cell lor-at-pied" role="cell">
-                {heures(v.passees)} <span className="lor-at-discret">sur {heures(v.prevues)}</span>
+                {pied("temps", lignes.map((l) => l.passees), heures)}
               </span>
               <span className="lor-at-cell lor-at-pied" role="cell">
-                {euros(v.total)} <span className="lor-at-discret">HT</span>
+                {pied("montant", lignes.map((l) => l.montant_ht), euros)}
               </span>
               <span className="lor-at-cell lor-at-pied" role="cell">
-                {euros(v.facture)} <span className="lor-at-discret">facturés</span>
+                {euros(lignes.filter((l) => l.statut === "facturee").reduce((t, l) => t + l.montant_ht, 0))} <span className="lor-at-discret">facturés</span>
               </span>
               {voirTaux ? (
                 <span className="lor-at-cell lor-at-pied" role="cell">
-                  {v.passees > 0 ? euros(v.total / v.passees) : "—"} <span className="lor-at-discret">/ h</span>
+                  {pied("taux", lignes.map((l) => l.taux), (n) => `${euros(n)} / h`)}
                 </span>
               ) : null}
             </div>
           </div>
         </>
       )}
+
+      {/* la barre prend les jetons de ./lor.css (menus de Linear) : un conteneur sans boîte (display: contents) */}
+      <div className="lor lor-contenu">
+        <BarreSelection
+          nombre={selection.cles.length}
+          vider={selection.vider}
+          actions={[
+            { cle: "epingler", libelle: "Épingler", faire: () => favoris.poser(selection.cles.map((id) => `honoraire:${id}`), true) },
+            { cle: "csv", libelle: "Exporter en CSV", faire: () => exporter(v.lignes.filter((l) => selection.a(l.id))) },
+            ...(peutEcrire
+              ? [
+                  {
+                    cle: "achever",
+                    libelle: "Marquer achevé",
+                    confirmer: { titre: "Marquer achevés les éléments sélectionnés ?", texte: "Chaque élément en cours ou à venir passe à « achevé » ce jour : le chef de projet est prévenu qu'un appel d'honoraires est à émettre. Les éléments déjà achevés ou facturés ne changent pas.", bouton: "Marquer achevé" },
+                    faire: async () => {
+                      const cibles = v.lignes.filter((l) => selection.a(l.id) && (l.statut === "a_venir" || l.statut === "en_cours"));
+                      let ok = 0;
+                      for (const l of cibles) if (await v.changerStatut(l, "achevee")) ok++;
+                      toast(`${ok} élément${ok > 1 ? "s" : ""} achevé${ok > 1 ? "s" : ""} sur ${cibles.length}.`, ok === cibles.length ? "vert" : "rouge");
+                      selection.vider();
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
+      </div>
 
       {/* Achevé / Facturé (G44, G45) : une fenêtre de confirmation avant d'écrire */}
       <Dialog open={!!aChanger} onOpenChange={(o) => !o && !v.envoi && setAChanger(null)}>

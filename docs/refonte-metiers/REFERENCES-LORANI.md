@@ -157,3 +157,49 @@ Correspondances : onglets Assigned · Created · Subscribed · Activity → Tout
 - Aucun nouveau relevé (pas d'accès aux comptes de Teo) : les deux pages reposent sur les relevés existants ; le popover Display de Plain n'est pas relevé en détail, il est rendu avec la brique « Popover » de `plain-commun.md`.
 - Pas de relance envoyée par Lorani : aucune porte n'envoie un courriel à un intervenant ; « Relancer par courriel » ouvre la messagerie de l'utilisateur (mailto), qui l'envoie lui-même.
 - Le délai « 7 ou 15 jours » des situations n'est pas recalculé ici : il est posé par la base (`delai_verification_jours` du marché, b5_13).
+
+## Boutons de la référence et leur utilité (02/11/2026, décision de Teo : « trouve une utilité aux boutons »)
+
+Chaque bouton de Linear ou d'Attio est dessiné et fait une chose réelle ; aucun bouton mort. Ordre de préférence : un geste qui existe déjà (portes inchangées, aucune migration), sinon le navigateur (`components/espace2/lorani/lor-local.ts` : `espace2:favoris:lorani`, `espace2:suivis:lorani`, `espace2:reportes:lorani` ; export CSV ; presse-papier). Un geste qui écrit en base ou retire quelque chose passe par une confirmation. Les cases cochées ouvrent la barre d'actions groupées commune (`lor-selection.tsx`).
+
+| Page | Bouton de la référence | Ce qu'il fait | Par quoi |
+|---|---|---|---|
+| Vue d'ensemble | cases à cocher (clic ou « x ») | sélection ; barre : Épingler, Désépingler, Suivre, Reporter (demain, trois jours, lundi), Exporter en CSV | navigateur |
+| Vue d'ensemble | (étoile des pages) | section « Épinglés » en tête de la liste | navigateur (`favoris`) |
+| Vue d'ensemble | Display options | tri, permis clos, reportés affichés ou masqués, « Exporter la liste affichée (CSV) » | navigateur |
+| Vue d'ensemble | Add view (calques) · Filter · Open sidebar · New project | filtre par famille · menu des familles · volet de répartition · F1 | existants |
+| Permis | étoile « Add to favorites » | Épingler le permis en tête de la vue d'ensemble | navigateur |
+| Permis | Mark as duplicate | Dupliquer : ouvre la fenêtre d'un nouveau permis sur le même projet (F2, `?nouveau=permis`) | porte existante (ouvrirPermis) |
+| Permis | Snooze | Reporter : le permis quitte la vue d'ensemble jusqu'à la date choisie (demain, trois jours, lundi, un mois, date) | navigateur (`reportes`) |
+| Permis | Unsubscribe / Subscribe (Activité) | Suivre : ses courriers passent en tête du Courrier, marqués « suivi » | navigateur (`suivis`) |
+| Permis | Copy as prompt · Choose coding tool | Copier pour l'assistant (le permis en clair : état, dates, calendrier, à confirmer) · menu : copier, saisies F10/F11 | presse-papier · portes existantes |
+| Permis | Accept / Decline · Copy URL · Copy ID · Copy branch · « … » · réaction · trombone · Leave a comment | Confirmer / Écarter (F7-F10) · lien · numéro · référence du projet · options · ouvrir le Courrier · déposer un courrier · déposer un courrier | existants |
+| Projet | étoile | Épingler le projet en tête de la vue d'ensemble | navigateur |
+| Projet | cloche « Notifications » | Suivre le projet : ses courriers en tête du Courrier | navigateur |
+| Projet | Add new view (calques) | Nouvelle vue : les permis d'une santé dans la vue d'ensemble (`?famille=`) | adresse |
+| Projet | cases du tableau Projects | sélection ; barre : Épingler, Suivre, Reporter, Exporter en CSV | navigateur |
+| Projet | réaction (Latest update) | Copier le dernier point | presse-papier |
+| Projet | Copy page URL · « + » · « … » · « + » d'un groupe · Display options · ⌘ I | lien · F2-F6 · options · F2 · grouper par santé · volet de détails | existants |
+| Courrier | Snooze (courrier ouvert) | Reporter le courrier : il quitte la liste jusqu'à sa date ; « n reportés : les afficher » | navigateur |
+| Courrier | cloche (courrier ouvert) | Suivre le permis ou le projet du courrier | navigateur |
+| Courrier | Open archive · Filter · Display · « … » | courriers traités · À confirmer / À ranger / Tous · traités · déposer sur un projet | existants |
+| Réglages | Danger zone (Leave / Retire / Delete) | Exporter le dossier daté · Oublier les épingles, suivis et reports du projet (confirmation, la base n'est pas touchée) · Ouvrir l'écran d'avant | dossierDate · navigateur · adresse |
+| Honoraires | cases d'Attio | sélection (et « tout sélectionner ») ; barre : Épingler, Exporter en CSV, Marquer achevé (confirmation, changerHonoraire) | navigateur · porte existante |
+| Honoraires | Import / Export | « Ajouter / Exporter » : un élément (F22) ; la liste affichée en CSV | porte existante · navigateur |
+| Honoraires | + Add column | réaffiche la colonne « Taux réalisé » (masquable dans Affichage) | navigateur |
+| Honoraires | + Add calculation | somme, moyenne ou décompte de la colonne sur les lignes affichées (clic pour changer) | calcul dans le navigateur |
+| Honoraires | étoile de la fiche | Épingler l'élément en tête de la grille | navigateur |
+
+Restent sans équivalent, dits ici : le crayon de la fiche d'Attio (aucune porte ne modifie l'intitulé ni le montant d'un élément : un crayon qui ne ferait que copier tromperait) ; les rangées verrouillées « Available on Business » de Settings › Team (offre commerciale de Linear, sans objet). Épingles, suivis et reports sont propres au navigateur (ni partagés entre appareils ni entre membres) : c'est écrit dans le titre de chaque bouton.
+
+## Second chantier : promesses du site comblées dans les pages existantes (PAGES-MANQUANTES.md, 02/11)
+
+- **Courrier à ranger, « Courriels du guichet »** (b5_11 ; E10 sans dossier reconnu, E11 sans pièce jointe) : groupe sous la liste, lu par la porte existante de la boîte de réception (`components/espace/filed/receptions.ts` : `chargerBoite("toutes")`, filtré sur `module = lorani`) ; ouvert à droite (expéditeur, date, corps, pièces) ; gestes : Déposer sur un projet (F3 sur le projet choisi, le courriel passe « lu » par `marquerReception`), Écarter (confirmation, `marquerReception(…, "ecartee")`). Deux courriels fictifs dans l'exemple.
+- **Courrier à ranger, situations lues à ranger** (b5_14, E18) : une pièce `lorani_situation_travaux` « à vérifier » est libellée « Situation de travaux à ranger » et mène au chantier du projet (« Situation reçue », F25).
+- **Projet, onglet Activité, vue « Registre daté »** (`?vue=registre`) : les lignes de `lignesDossier` (dossier-date.ts) par mois, avec rubrique, lot, état, décideur et pièce ; « Exporter le dossier daté » (registre PDF et Excel). Promesses « Registre daté des visas », « Dossier de défense décennale ».
+- **Projet, Chantier, « Bordereau des visas »** : PDF VSO · VAO · refus · à viser, par lot et par date, fabriqué dans le navigateur (`bordereau-visas.ts`, outil Mise / ecrirePdf des rapports).
+- **Projet, Chantier, révision BT** (b5_34) : la formule de chaque marché est affichée quand elle est saisie (index, mois zéro, partie fixe) ; sinon « aucune formule de révision saisie ».
+
+Manques, faute de porte (portes inchangées, aucune migration) :
+- **Révision BT complète** : la lecture des situations (`chargerDossier`) ne prend pas leur colonne `revision` (In, I0, coefficient, montant révisé), rien ne lit `lorani_ref_index`, et aucune porte n'écrit la formule d'un marché (`poserMarche` ne la prend pas). Il faut ajouter `revision` à la lecture des situations et une porte « formule de révision du marché ».
+- **Situations lues non rangées sans statut « à vérifier »** : la lecture des situations ne charge pas `piece_id` ; une situation lue mais restée au statut « lue » ne se distingue pas d'une situation rangée. Il faut `piece_id` dans la lecture.

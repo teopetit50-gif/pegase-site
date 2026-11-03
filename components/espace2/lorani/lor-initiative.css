@@ -283,3 +283,16 @@ html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, va
 /* l'habit de l'écran repris (Habille) ne pose ni marge ni fond dans une vue du dossier : la section commence sous les onglets */
 .v2 .lor-in-vue .v2-page:has(> #ecran.resa) { max-width: none; padding: 0; }
 .v2 .lor-in-vue #ecran.resa { padding: 0; margin: 0; max-width: none; width: auto; background: transparent; border: 0; box-shadow: none; }
+/* 02/11 : une ligne cochée garde sa case ; sa case est cliquable */
+.v2 .lor-in-ligne[data-coche] .lor-in-c-case { opacity: 1; }
+.v2 .lor-in-ligne[data-coche]::before { background: var(--lor-survol); }
+.v2 .lor-in-maj-actions .lor-rond svg { width: 16px; height: 16px; }
+/* 02/11 : registre daté (onglet Activité), visas et révision des prix (vue Chantier) */
+.v2 .lor-in-vues-activite { display: flex; gap: 4px; margin-bottom: 16px; }
+.v2 .lor-in-registre-tete { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; font-size: 12px; }
+.v2 .lor-in-registre-tete .lor-texte-btn { flex-shrink: 0; }
+.v2 .lor-in-rubrique { flex-shrink: 0; height: 18px; padding: 0 6px; border-radius: 9999px; background: var(--lor-onglet-actif); font-size: 11px; font-weight: 500; line-height: 18px; color: var(--lor-t2); white-space: nowrap; }
+.v2 .lor-in-registre { padding-left: 0; }
+.v2 .lor-in-chantier-tete { margin-bottom: 32px; }
+.v2 .lor-in-revisions { margin-top: 8px; }
+.v2 .lor-in-revisions .lor-in-ev { padding-left: 0; }

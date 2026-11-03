@@ -27,7 +27,7 @@
    portes, mêmes droits, là où elles sont.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { dateCourte, montant } from "@/components/espace/format";
@@ -35,6 +35,10 @@ import { PHASES, ROLES_PROJET, libelleActivite, titrePermis } from "@/components
 import type { Permis, Projet } from "@/components/espace/lorani/types";
 import { RACINE } from "../modules";
 import { useLorani } from "./donnees";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { dossierDate } from "@/components/espace/lorani/dossier-date";
+import { oublier } from "./lor-local";
+import { useToast } from "../Toasts";
 import { IconeLin, IconeSprite } from "./lor-icones";
 import type { NomIcone } from "./lor-sprite";
 import "./lor.css";
@@ -181,6 +185,8 @@ export default function Reglages() {
 
 function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre: React.ReactNode; note: React.ReactNode; nommer: (id: string | null | undefined) => string }) {
   const { dossier } = useLorani();
+  const toast = useToast();
+  const [oubli, setOubli] = useState(false);
   const pid = projet.id;
 
   const membres = dossier.membres.filter((m) => m.projet_id === pid);
@@ -322,9 +328,86 @@ function ReglagesProjet({ projet, barre, note, nommer }: { projet: Projet; barre
                 />
               ))}
             </Section>
+
+            {/* la « Danger zone » de Linear : ce qu'on fait rarement, d'un geste ; rien n'y efface la base */}
+            <section className="lor-rg-section" aria-label="Zone sensible">
+              <h3 className="lor-rg-h3">Zone sensible</h3>
+              <ul className="lor-rg-carte">
+                <li>
+                  <div className="lor-rg-rangee">
+                    <span className="lor-rg-textes">
+                      <span className="lor-rg-nom">Exporter le dossier daté</span>
+                      <span className="lor-rg-desc">Registre PDF et Excel (une feuille par lot), dans une archive : la preuve datée de ce qui a été reçu, visé et décidé.</span>
+                    </span>
+                    <button
+                      type="button"
+                      className="lor-rg-danger"
+                      onClick={() => {
+                        try {
+                          const r = dossierDate(projet, dossier, nommer);
+                          const url = URL.createObjectURL(new Blob([r.octets as BlobPart], { type: "application/zip" }));
+                          const a = document.createElement("a");
+                          a.href = url;
+                          a.download = r.nom;
+                          a.click();
+                          window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+                        } catch (e) {
+                          toast(e instanceof Error ? e.message : "Le dossier daté n'a pas pu être fabriqué.", "rouge");
+                        }
+                      }}
+                    >
+                      Exporter…
+                    </button>
+                  </div>
+                </li>
+                <li>
+                  <div className="lor-rg-rangee">
+                    <span className="lor-rg-textes">
+                      <span className="lor-rg-nom">Oublier les épingles, suivis et reports</span>
+                      <span className="lor-rg-desc">Ce que ce navigateur garde pour ce projet et ses permis (étoile, cloche, Reporter). La base n&apos;est pas touchée.</span>
+                    </span>
+                    <button type="button" className="lor-rg-danger" onClick={() => setOubli(true)}>
+                      Oublier…
+                    </button>
+                  </div>
+                </li>
+                <li>
+                  <div className="lor-rg-rangee">
+                    <span className="lor-rg-textes">
+                      <span className="lor-rg-nom">Ouvrir l&apos;écran d&apos;avant</span>
+                      <span className="lor-rg-desc">Le dossier du projet tel qu&apos;il était avant la refonte, le temps de la recette.</span>
+                    </span>
+                    <Link href={`${BASE}?ancien=1&projet=${encodeURIComponent(pid)}`} className="lor-rg-danger">
+                      Ouvrir…
+                    </Link>
+                  </div>
+                </li>
+              </ul>
+            </section>
           </div>
         </div>
       </div>
+      <Dialog open={oubli} onOpenChange={setOubli}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Oublier les épingles, suivis et reports de « {projet.nom} » ?</DialogTitle>
+            <DialogDescription>Le projet et ses {pluriel(permis.length, "permis", "permis")} quittent la section « Épinglés », ne sont plus suivis dans le Courrier et reviennent dans leurs listes. Rien n&apos;est effacé en base.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              className="r-btn r-btn--noir"
+              onClick={() => {
+                oublier([`projet:${pid}`, ...permis.map((x) => `permis:${x.id}`)]);
+                setOubli(false);
+                toast("Épingles, suivis et reports de ce projet oubliés dans ce navigateur.");
+              }}
+            >
+              Oublier
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

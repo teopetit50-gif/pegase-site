@@ -277,7 +277,14 @@ export default function Arrivees() {
                 ]}
               />
               <div className="tam-tri-actions">
-                <button type="button" className="tam-rond" aria-label="Rattacher à son dossier" title="Rattacher à son dossier" onClick={() => void rattacher(a, dossierChoisi, typeChoisi)} disabled={envoi}>
+                <button
+                  type="button"
+                  className="tam-rond"
+                  aria-label={envoi ? "Chiffrement…" : "Chiffrer et rattacher"}
+                  title={dossierChoisi ? `Chiffrer et rattacher à ${refDe(dossierChoisi)} : chaque pièce jointe (${a.nb_pieces}) est chiffrée dans votre navigateur avec la clé du dossier, puis déposée ; la copie reçue en clair est ensuite effacée.` : "Choisissez d'abord le dossier (pilule « Dossier »)"}
+                  onClick={() => void rattacher(a, dossierChoisi, typeChoisi)}
+                  disabled={envoi || !dossierChoisi}
+                >
                   <TamIcone nom="Resolved" />
                 </button>
                 {t.avocat ? (
@@ -349,14 +356,46 @@ export default function Arrivees() {
                     <TamIcone nom="IssueStatusTriage" style={{ color: "var(--tam-triage)" }} />
                     <span>À rattacher</span>
                   </span>
-                  <span className="tam-pilule" data-valeur={a.type_suppose ? "" : undefined}>
-                    <TamIcone nom="Label" />
-                    <span>{a.type_suppose ? (TYPES_AVIS[a.type_suppose as keyof typeof TYPES_AVIS] ?? a.type_suppose) : "Type à lire"}</span>
-                  </span>
-                  <span className="tam-pilule" data-valeur={proposes[a.id] ? "" : undefined}>
-                    <TamIcone nom="Project" />
-                    <span>{proposes[a.id] ? `${refDe(proposes[a.id])} (même n° RG)` : rgDe(a) ? `RG ${rgDe(a)} : aucun dossier lisible` : "Dossier"}</span>
-                  </span>
+                  {/* 03/11/2026 — Teo : plus de formulaire sous l'avis. Comme les pilules Labels et Project
+                      de Linear (Triage), « Type » et « Dossier » s'ouvrent en menu et posent le choix ;
+                      le rattachement part du bouton rond ✓ de la barre (Accept de Linear). */}
+                  <TamMenu
+                    libelle="Type d'avis"
+                    classe="tam-pilule"
+                    enfants={
+                      <span style={{ display: "contents" }} data-valeur={typeChoisi ? "" : undefined}>
+                        <TamIcone nom="Label" />
+                        <span>{typeChoisi ? (TYPES_AVIS[typeChoisi as keyof typeof TYPES_AVIS] ?? typeChoisi) : "Type à lire"}</span>
+                      </span>
+                    }
+                    options={[
+                      { libelle: "À lire par le lecteur", icone: "Label", action: () => setChoix({ dossier: dossierChoisi, type: "" }) },
+                      "sep",
+                      ...(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((k) => ({ libelle: TYPES_AVIS[k], icone: "Label" as NomTamIcone, action: () => setChoix({ dossier: dossierChoisi, type: k }) })),
+                    ]}
+                  />
+                  <TamMenu
+                    libelle="Dossier de l'avis"
+                    classe="tam-pilule"
+                    alignement="droite"
+                    enfants={
+                      <span style={{ display: "contents" }}>
+                        <TamIcone nom="Project" />
+                        <span>
+                          {dossierChoisi
+                            ? `${refDe(dossierChoisi)}${proposes[a.id] === dossierChoisi ? " (même n° RG)" : ""}`
+                            : rgDe(a)
+                              ? `RG ${rgDe(a)} : choisir le dossier`
+                              : "Choisir le dossier"}
+                        </span>
+                      </span>
+                    }
+                    options={vivants.map((d) => ({
+                      libelle: `${d.clair ? `${d.clair.reference} — ${d.clair.intitule}` : `Dossier chiffré (${d.dossier.id.slice(0, 8)})`}${proposes[a.id] === d.dossier.id ? " · proposé" : ""}`,
+                      icone: "Project" as NomTamIcone,
+                      action: () => setChoix({ dossier: d.dossier.id, type: typeChoisi }),
+                    }))}
+                  />
                   <span className="tam-pilule" data-valeur="">
                     <TamIcone nom="Attachment" />
                     <span>
@@ -387,44 +426,11 @@ export default function Arrivees() {
                   <TamIcone nom="Lock" taille={14} />
                   L&apos;avis transite en clair chez le prestataire de courriel et dans sa réception le temps du rattachement, sept jours au plus : copie effacée le {dateLongue(a.expire_le)} s&apos;il n&apos;est pas rattaché.
                 </p>
-                <div className="tam-composeur" role="group" aria-label="Rattacher l'avis à son dossier">
-                  <div className="tam-champs-ligne">
-                    <Champ libelle="Dossier">
-                      <select value={dossierChoisi} onChange={(e) => setChoix({ dossier: e.target.value, type: typeChoisi })}>
-                        <option value="">— choisir —</option>
-                        {vivants.map((d) => (
-                          <option key={d.dossier.id} value={d.dossier.id}>
-                            {d.clair ? `${d.clair.reference} — ${d.clair.intitule}` : `Dossier chiffré (${d.dossier.id.slice(0, 8)})`}
-                            {proposes[a.id] === d.dossier.id ? " · proposé" : ""}
-                          </option>
-                        ))}
-                      </select>
-                    </Champ>
-                    <Champ libelle="Type d'avis">
-                      <select value={typeChoisi} onChange={(e) => setChoix({ dossier: dossierChoisi, type: e.target.value })}>
-                        <option value="">— à lire par le lecteur —</option>
-                        {(Object.keys(TYPES_AVIS) as (keyof typeof TYPES_AVIS)[]).map((k) => (
-                          <option key={k} value={k}>
-                            {TYPES_AVIS[k]}
-                          </option>
-                        ))}
-                      </select>
-                    </Champ>
-                  </div>
-                  <p className="tam-champ-aide">
-                    Chaque pièce jointe ({a.nb_pieces}) est chiffrée dans votre navigateur avec la clé du dossier, puis déposée ; le lecteur la lira et posera les délais. La copie reçue en clair est ensuite effacée.
+                {erreur ? (
+                  <p className="tam-note" data-teinte="rouge" role="alert">
+                    {erreur}
                   </p>
-                  {erreur ? (
-                    <p className="tam-note" data-teinte="rouge" role="alert">
-                      {erreur}
-                    </p>
-                  ) : null}
-                  <div className="tam-composeur-pied">
-                    <button type="button" className="tam-bouton tam-bouton--principal" disabled={envoi || !dossierChoisi} onClick={() => void rattacher(a, dossierChoisi, typeChoisi)}>
-                      {envoi ? "Chiffrement…" : "Chiffrer et rattacher"}
-                    </button>
-                  </div>
-                </div>
+                ) : null}
               </div>
             </div>
           </div>
