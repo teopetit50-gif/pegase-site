@@ -123,7 +123,7 @@ export type ChampsReception = {
   montant_estime: number | null;
 };
 
-export function reserveExemple(id: string, entite_id: string, c: ChampsReception, objetNom: string | null): Reserve {
+export function reserveExemple(id: string, entite_id: string, c: ChampsReception, objetNom: string | null, photos: Photo[] = []): Reserve {
   const ech = echeanceExemple(c.mode, c.date_reception);
   const statut: Reserve["statut"] = c.avarie || c.manquant ? "a_examiner" : "sans_suite";
   const base = { statut, echeance: ech, protestation_le: null };
@@ -135,16 +135,22 @@ export function reserveExemple(id: string, entite_id: string, c: ChampsReception
     regle_source: REGLES[c.mode].source, echeance: ech, jours_restants: ecart(ech, aujourdhui()),
     calcul_detail: `${REGLES[c.mode].jours} jours${REGLES[c.mode].ouvrables ? " ouvrables" : ""} à compter du ${c.date_reception.split("-").reverse().join("/")} (exemple : sans les jours fériés)`,
     statut, protestation_le: null, protestation_moyen: null, motif: statut === "sans_suite" ? "livraison conforme : ni avarie ni manquant" : null, etat: etatDe(base),
-    photos: [],
+    photos,
   };
 }
 
 const U = (fin: string) => `00000000-0000-4000-8000-0000000${fin}`;
 export const RESERVES_EXEMPLE = (): Reserve[] => [
   reserveExemple(U("0v01"), SIEGE, { date_reception: ilYa(1), mode: "routier", transporteur: "Transports Deschamps", document_transport: "LV-2026-0457", objet_id: null, expediteur: "Scieries du Jura",
-    colis_attendus: 12, colis_recus: 11, avarie: true, manquant: true, constat: "Une palette de panneaux MDF aux angles écrasés ; un colis de quincaillerie manquant.", reserves_sur_bon: "Palette abîmée, un colis manquant", montant_estime: 1840 }, null),
+    colis_attendus: 12, colis_recus: 11, avarie: true, manquant: true, constat: "Une palette de panneaux MDF aux angles écrasés ; un colis de quincaillerie manquant.", reserves_sur_bon: "Palette abîmée, un colis manquant", montant_estime: 1840 }, null, [
+    /* « une livraison reçue avec avarie : le transport, les colis et les photos du constat » (photos Unsplash, public/secteurs-groupes/constat) */
+    { chemin: "exemple/v01-1.jpg", nom: "palette-angles-ecrases.jpg", octets: 183621, type: "image/jpeg", depose_le: ilYa(1), url: "/secteurs-groupes/constat/avarie-cartons.jpg" },
+    { chemin: "exemple/v01-2.jpg", nom: "film-dechire.jpg", octets: 133143, type: "image/jpeg", depose_le: ilYa(1), url: "/secteurs-groupes/constat/avarie-dechirure.jpg" },
+  ]),
   reserveExemple(U("0v02"), ANNECY, { date_reception: ilYa(2), mode: "maritime", transporteur: "CMA CGM", document_transport: "BL-LEH-55120", objet_id: null, expediteur: "Vernis Lacroix",
-    colis_attendus: null, colis_recus: null, avarie: true, manquant: false, constat: "Fûts de vernis cabossés, un fût fuyant.", reserves_sur_bon: null, montant_estime: 2600 }, null),
+    colis_attendus: null, colis_recus: null, avarie: true, manquant: false, constat: "Fûts de vernis cabossés, un fût fuyant.", reserves_sur_bon: null, montant_estime: 2600 }, null, [
+    { chemin: "exemple/v02-1.jpg", nom: "conteneur-a-quai.jpg", octets: 304033, type: "image/jpeg", depose_le: ilYa(2), url: "/secteurs-groupes/constat/avarie-camion.jpg" },
+  ]),
 ];
 
 /* le texte de la protestation, pour l'exemple (même gabarit que private.grp_lettre_reserve) */
