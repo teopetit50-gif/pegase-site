@@ -132,7 +132,9 @@ proposées » plus bas.
 reçue après), FILED n° 52 (la liste des exports n'a, en exemple, que le sceau mensuel), FILED n° 54 (l'écran ne
 montre qu'une boîte par fournisseur : limite de l'écran, pas de l'exemple), CASHD n° 46 (devise), TIROMA n° 38 (un
 second cabinet d'exemple complet serait nécessaire), DALIRO n° 15 et OFFLOAD n° 13 (le fichier de la page
-vient d'être retouché par une autre session : je n'y ai pas touché).
+vient d'être retouché par une autre session : je n'y ai pas touché), FILED n° 49 (la prévision à soixante jours
+demande une tranche « de 31 à 60 jours » dans `calculs.ts`, `APayer.tsx`, `BoiteAPayer.tsx` et `TableauFiled.tsx` ;
+ce dernier venait d'être commité par la session des pages manquantes : laissé pour ne pas croiser son travail).
 
 Reclassées sans changement de code, après vérification à l’écran : CASHD n° 52 et 53 (« hors périmètre », « attente de
 contact ») sont déjà dans la pastille Statut de la fiche d’un compte (« Ne plus contacter », « Contact à désigner ») —
