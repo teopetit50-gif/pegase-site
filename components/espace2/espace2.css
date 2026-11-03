@@ -1943,6 +1943,11 @@ a.v2-jauge:hover {
 .v2-palette-champ input:focus-visible {
   box-shadow: none;
 }
+/* 03/11/2026 — à 390, l'invite était coupée net (« …un modul ») */
+.v2-palette-champ input {
+  min-width: 0;
+  text-overflow: ellipsis;
+}
 .v2-palette-champ input::placeholder {
   color: var(--v2-gray-700);
 }
@@ -3177,3 +3182,36 @@ html.v2-calme .v2-vivant .v2-carte::before, html.v2-calme .v2-vivant .v2-dr-cart
 .v2-ret-faq summary svg { color: var(--v2-gray-900); flex-shrink: 0; transition: transform 0.2s; }
 .v2-ret-faq details[open] summary svg { transform: rotate(90deg); }
 .v2-ret-faq details p { margin: 0; padding: 0 10px 12px; font-size: 13px; line-height: 20px; color: var(--v2-gray-900); }
+
+/* ——— le ruban « Données d'exemple » de la barre du haut ———
+   03/11/2026 : déplacé de habillage.css, que la coquille ne charge pas. Sur
+   13 pages sur 18 ouvertes directement (Activité, Tâches, Contacts…), le
+   ruban sortait en texte nu, et à 390 il passait sur deux lignes par-dessus
+   le sélecteur de module. */
+.v2 .v2-ruban-source .esp-ruban {
+  height: 24px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--v2-gray-200);
+  color: var(--v2-gray-1000);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+/* 27/10 — « Données d'exemple » une seule fois, dans la barre du haut, sur
+   toutes les pages (TPROD-04) : le ruban de REPUT, sorti du monde `.esp` ;
+   celui que certains écrans posent eux-mêmes ferait doublon */
+.v2 .v2-ruban-source { display: inline-flex; flex: none; margin-left: 8px; }
+.v2 .v2-ruban-source .esp-ruban { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.v2 .v2-ruban-source .esp-ruban-point { width: 7px; height: 7px; border-radius: 9999px; background: currentColor; }
+/* il suit le titre ; sous 768 px, il prend sa propre ligne sous la barre : à
+   375 px, il glissait sous « + » et « Rechercher » (27/10) */
+.v2 .v2-haut-droite { margin-left: auto; }
+@media (max-width: 767px) {
+  .v2 .v2-haut:has(> .v2-ruban-source) { flex-wrap: wrap; height: auto; row-gap: 0; }
+  .v2 .v2-haut:has(> .v2-ruban-source) > .v2-haut-gauche { flex: 1 1 0; min-height: 48px; }
+  .v2 .v2-haut:has(> .v2-ruban-source) > .v2-haut-droite { min-height: 48px; }
+  .v2 .v2-haut > .v2-ruban-source { order: 3; flex-basis: 100%; margin: 0 0 10px; }
+}

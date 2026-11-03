@@ -422,8 +422,7 @@ html.v2-actif .dlg-panneau .esp-pastille--contour {
   background: transparent;
   box-shadow: inset 0 0 0 1px var(--v2-a-400);
 }
-.v2 .esp .esp-ruban,
-.v2 .v2-ruban-source .esp-ruban {
+.v2 .esp .esp-ruban {
   height: 24px;
   padding: 0 10px;
   border: 0;
@@ -435,21 +434,8 @@ html.v2-actif .dlg-panneau .esp-pastille--contour {
   letter-spacing: 0;
   text-transform: none;
 }
-/* 27/10 — « Données d'exemple » une seule fois, dans la barre du haut, sur
-   toutes les pages (TPROD-04) : le ruban de REPUT, sorti du monde `.esp` ;
-   celui que certains écrans posent eux-mêmes ferait doublon */
-.v2 .v2-ruban-source { display: inline-flex; flex: none; margin-left: 8px; }
-.v2 .v2-ruban-source .esp-ruban { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
-.v2 .v2-ruban-source .esp-ruban-point { width: 7px; height: 7px; border-radius: 9999px; background: currentColor; }
-/* il suit le titre ; sous 768 px, il prend sa propre ligne sous la barre : à
-   375 px, il glissait sous « + » et « Rechercher » (27/10) */
-.v2 .v2-haut-droite { margin-left: auto; }
-@media (max-width: 767px) {
-  .v2 .v2-haut:has(> .v2-ruban-source) { flex-wrap: wrap; height: auto; row-gap: 0; }
-  .v2 .v2-haut:has(> .v2-ruban-source) > .v2-haut-gauche { flex: 1 1 0; min-height: 48px; }
-  .v2 .v2-haut:has(> .v2-ruban-source) > .v2-haut-droite { min-height: 48px; }
-  .v2 .v2-haut > .v2-ruban-source { order: 3; flex-basis: 100%; margin: 0 0 10px; }
-}
+/* le ruban de la barre du haut (.v2-ruban-source) vit dans espace2.css
+   depuis le 03/11/2026 : ce fichier n'est pas chargé sur toutes les pages */
 .v2 .esp .esp-ruban[data-source="exemple"] { display: none; }
 
 /* ——— avis (la « note ») : 29/10, comme .v2-note — ni fond ni bord teinté,
@@ -951,6 +937,19 @@ html.v2-actif .dlg-sortie:hover:not(:disabled) {
   .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]) > :is(input, select, textarea) { grid-column: 2; grid-row: 1 / span 2; width: 100%; }
 }
 .v2 .resa.esp .esp-carte .esp-form > :last-child { border-bottom: 0; }
+/* 03/11/2026 — CASHD, textes des relances (/cashd/suivi?vue=relances&textes=1) :
+   le champ « Corps » prenait la moitié d'une carte déjà coupée en deux
+   (144 px) ; une zone de texte passe sous son libellé, sur toute la largeur. */
+@container principale (min-width: 640px) {
+  .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]):has(> textarea) { grid-template-columns: minmax(0, 1fr); }
+  .v2 .resa.esp .esp-carte .esp-form .rv-libelle:not([style]):has(> textarea) > textarea { grid-column: 1; grid-row: auto; }
+}
+/* … et « Les variables », reprises de la légende d'un graphique (cinq
+   colonnes), s'écrasaient dans le volet d'aperçu jusqu'à le faire déborder :
+   une variable par ligne, son code puis ce qu'elle donne. */
+.v2 .esp .c2-variables .c2-legende { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.v2 .esp .c2-variables .c2-legende > div { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0 10px; align-items: baseline; }
+.v2 .esp .c2-variables .c2-legende dd { margin: 0; }
 
 /* les écrans « liste | fiche » : la grille de Users et le volet d'Advisors.
    Les tuiles s'espacent de 8 px comme celles d'Observability ; la liste

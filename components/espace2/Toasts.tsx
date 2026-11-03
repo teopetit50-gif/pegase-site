@@ -5,7 +5,7 @@
    reculent et rétrécissent derrière le dernier ; au survol, la pile se
    déplie. Annoncés aux lecteurs d'écran (aria-live polite). */
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Info, XCircle } from "lucide-react";
 
 type Teinte = "neutre" | "vert" | "rouge";
@@ -15,6 +15,22 @@ const Contexte = createContext<(texte: string, teinte?: Teinte) => void>(() => {
 
 export function useToast() {
   return useContext(Contexte);
+}
+
+/* 03/11/2026 — une copie qui le dit (plusieurs « Copier » remplissaient le
+   presse-papier en silence : on croyait le bouton mort) */
+export function copierEtDire(texte: string, quoi = "Copié dans le presse-papier.") {
+  const p = navigator.clipboard?.writeText(texte) ?? Promise.reject(new Error("presse-papier absent"));
+  p.then(
+    () => annoncer(quoi, "vert"),
+    () => annoncer("Le presse-papier a refusé la copie.", "rouge"),
+  );
+}
+
+/* 03/11/2026 — pour un geste rendu hors d'un composant (une copie lancée
+   depuis une fonction utilitaire) : le fournisseur écoute cet événement */
+export function annoncer(texte: string, teinte: Teinte = "neutre") {
+  window.dispatchEvent(new CustomEvent("v2-toast", { detail: { texte, teinte } }));
 }
 
 const DUREE = 4000;
@@ -50,6 +66,14 @@ export function FournisseurToasts({ children }: { children: React.ReactNode }) {
     [minuter],
   );
 
+  useEffect(() => {
+    const ecoute = (e: Event) => {
+      const d = (e as CustomEvent<{ texte: string; teinte?: Teinte }>).detail;
+      if (d?.texte) pousser(d.texte, d.teinte);
+    };
+    window.addEventListener("v2-toast", ecoute);
+    return () => window.removeEventListener("v2-toast", ecoute);
+  }, [pousser]);
   const valeur = useMemo(() => pousser, [pousser]);
   const visibles = toasts.slice(-VISIBLES);
 

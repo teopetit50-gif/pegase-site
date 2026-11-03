@@ -20,9 +20,9 @@
    contexte que l'ancien espace (components/espace/source.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useId, useState } from "react";
+import { Suspense, useEffect, useId, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Network, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
@@ -40,12 +40,18 @@ import { MODULES, MODULES_PRINCIPAUX, ONGLETS_RESEAU, RACINE, moduleDe, moduleMe
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
 import { useTheme } from "./theme";
+import { useRecalerMenus } from "./recaler";
 import { useCalme } from "./mouvement";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe } from "./filed/calculs";
 import { useAujourdhui } from "./horloge";
 import "./espace2.css";
 import "./client.css";
+/* 03/11/2026 — les fenêtres reprises de /espace (Nouveau chantier, Nouvelle
+   question, Modifier le compte…) prennent leurs jetons sombres dans cette
+   feuille ; chargée page par page, elle manquait sur une page ouverte
+   directement et la fenêtre sortait blanche dans le thème sombre. */
+import "./habillage.css";
 
 /* un lien vers /espace/… mène à /espace2/… ; « ?ancien=1 » le garde vers l'écran actuel */
 export const versV2 = (href: string) => (/^\/espace(\/|\?|$)/.test(href) && !href.includes("ancien=1") ? href.replace(/^\/espace/, RACINE) : null);
@@ -62,6 +68,9 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
     html.classList.add(...police.split(" "), "v2-actif", "oc-actif");
     return () => html.classList.remove(...police.split(" "), "v2-actif", "oc-actif");
   }, [police]);
+
+  /* les menus ancrés restent dans l'écran (voir ./recaler.ts) */
+  useRecalerMenus();
 
   /* Les écrans repris de /espace écrivent leurs liens en dur vers /espace/… :
      dans le nouvel espace, ils mènent à /espace2/…. Les attributs href sont
@@ -275,8 +284,8 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             </button>
             {/* les raccourcis vers les moteurs : un menu, comme les icônes d'outils de Supabase ; 21/10, l'icône pilotage remplace le losange */}
             {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
-            <MenuDeroulant etiquette="Moteurs : raccourcis vers chaque moteur" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<><img className="oc-logo-sombre" src="/omega-icone-pilotage.png" alt="" width={16} height={16} /><img className="oc-logo-clair" src="/logo-pegase.png" alt="" width={16} height={16} /></>}>
-              <SectionMenu titre="Moteurs">
+            <MenuDeroulant etiquette="Systèmes : raccourcis vers chaque système" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<><img className="oc-logo-sombre" src="/omega-icone-pilotage.png" alt="" width={16} height={16} /><img className="oc-logo-clair" src="/logo-pegase.png" alt="" width={16} height={16} /></>}>
+              <SectionMenu titre="Systèmes">
                 {MODULES.map((m) => (
                   <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />}>
                     {m.nom} <span className="v2-gris">· {m.libelle}</span>
@@ -324,7 +333,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   );
 }
 
-type Lien = { libelle: string; href: string; icone?: React.ReactNode; exact?: boolean; /** l'adresse qui allume l'entrée, quand le lien mène à une sous-page */ racine?: string; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
+type Lien = { libelle: string; href: string; icone?: React.ReactNode; exact?: boolean; /** l'entrée allumée quand l'adresse ne porte pas sa requête (la vue par défaut) */ parDefaut?: boolean; /** les requêtes qui allument aussi l'entrée */ requetes?: string[]; /** l'adresse qui allume l'entrée, quand le lien mène à une sous-page */ racine?: string; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
 
 /* une section du rail : une icône, et le volet des pages qu'elle ouvre
    (comme « Database » → Schema Visualizer, Tables… chez Supabase) */
@@ -831,7 +840,7 @@ function LogoClient({ chemin, nom, demo }: { chemin: string | null; nom: string;
 const SOUS_CASHD = [
   { libelle: "Tableau de bord", href: `${RACINE}/cashd` },
   /* une seule entrée pour la boîte (débiteurs et relances en onglets) : la troisième est le tableau des envois, comme ailleurs */
-  { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi?vue=debiteurs` },
+  { libelle: "Débiteurs et relances", href: `${RACINE}/cashd/suivi?vue=debiteurs`, parDefaut: true, requetes: ["vue=debiteurs", "vue=relances"] },
   { libelle: "Envois", href: `${RACINE}/cashd/suivi?vue=envois` },
   { libelle: "Trésorerie", href: `${RACINE}/cashd/suivi?vue=tresorerie` },
 ];
@@ -899,12 +908,40 @@ function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
       </li>
     );
   }
+  /* 03/11/2026 — une entrée qui porte une requête (CASHD : « ?vue=envois ») ne
+     s'allumait jamais : le chemin seul ne la contient pas. Elle se compare
+     aussi à la requête de l'adresse, lue sous Suspense comme le veut Next. */
+  if (!lien.exact && lien.href.includes("?")) {
+    return (
+      <li>
+        <Suspense fallback={<LienSimple lien={lien} dedans={false} />}>
+          <LienAvecRequete lien={lien} chemin={chemin} />
+        </Suspense>
+      </li>
+    );
+  }
   return (
     <li>
-      <Link href={lien.href} className="v2-lien" aria-current={dedans ? "page" : undefined}>
-        <span>{lien.libelle}</span>
-        {lien.compteur ? <span className="v2-lien-compteur">{lien.compteur}</span> : null}
-      </Link>
+      <LienSimple lien={lien} dedans={dedans} />
     </li>
   );
+}
+
+function LienSimple({ lien, dedans }: { lien: Lien; dedans: boolean }) {
+  return (
+    <Link href={lien.href} className="v2-lien" aria-current={dedans ? "page" : undefined}>
+      <span>{lien.libelle}</span>
+      {lien.compteur ? <span className="v2-lien-compteur">{lien.compteur}</span> : null}
+    </Link>
+  );
+}
+
+function LienAvecRequete({ lien, chemin }: { lien: Lien; chemin: string }) {
+  const requete = useSearchParams();
+  const [base, q] = lien.href.split("?");
+  const colle = (r: string) => [...new URLSearchParams(r)].every(([k, v]) => requete?.get(k) === v);
+  /* une vue absente de l'adresse est la première vue (« débiteurs » pour CASHD) */
+  const absente = [...new URLSearchParams(q)].every(([k]) => !requete?.get(k));
+  const dedans = chemin === base && ((lien.requetes ?? [q]).some(colle) || (absente && lien.parDefaut === true));
+  return <LienSimple lien={lien} dedans={dedans} />;
 }

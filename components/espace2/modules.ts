@@ -212,6 +212,9 @@ export const ONGLETS_RESEAU: Onglet[] = [
 export function titreDe(chemin: string): string {
   /* les pages de la formation portent toutes « Formation » */
   if (chemin.startsWith(`${RACINE}/formation/`)) return "Formation";
+  /* l'écosystème (page interne du gérant) n'a pas d'onglet : 03/11/2026, la
+     barre affichait « Espace client » */
+  if (chemin === `${RACINE}/ecosysteme`) return "Écosystème";
   /* une sous-page du réseau (la fiche d'un membre…) porte le nom de son onglet */
   if (chemin === `${RACINE}/reseau` || chemin.startsWith(`${RACINE}/reseau/`)) return [...ONGLETS_RESEAU].reverse().find((o) => chemin === o.href || chemin.startsWith(`${o.href}/`))?.libelle ?? "Réseau";
   const portee = porteeDe(chemin);
