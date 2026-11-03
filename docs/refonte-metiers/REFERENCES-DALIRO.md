@@ -32,7 +32,7 @@ les zones (voir les colonnes « vérifié »).
 | À ranger | `/espace2/daliro/a-ranger` | Linear, Triage | `linear-triage.md` | `a-ranger-*` | 6.1 · 4.4 % / 6.1 · 4.5 % | lignes 253,61+59n, titre 267,71 ; volet droit à `--dx -30 --dy -10` |
 | À faire | `/espace2/daliro/a-faire` | Linear, My issues | `linear-my-issues.md` | `a-faire-*` | 11.0 · 7.3 % / 11.3 · 7.3 % | groupes 36, lignes 44, colonnes 287/311/375/398 ; avatar et date à `--dx -60` |
 | Avenants et situations | `/espace2/daliro/avenants` | Linear, Board | `linear-board.md` | `avenants-*` | 12.5 · 8.7 % / 13.5 · 8.9 % | carte 262,154.5 (Linear 262,154), colonnes 340 au pas de 348, en-tête de colonne 50 |
-| Équipes | `/espace2/daliro/equipes` (+ `?intervenant=`) | Cal.com, Availability (+ page d'un horaire) | `calcom-availability.md` | `equipes-*`, `equipes-fiche-*` | 7.4 · 5 % / 7.6 ; fiche 6.9 · 3.8 % / 7.8 | titre, segmenté, carte de liste, plages, menu ⋯ ; semaine, boutons + et ⧉ |
+| Équipes (03/11) | `/espace2/daliro/equipes` (+ `?onglet=`, `?intervenant=`, `?passage=`, `?vue=calendrier`) | Cal.com, Bookings (liste, détail d'une réservation, vue calendrier) | `calcom-bookings.md` | `equipes-*` (1440 sombre et clair, 390 clair) | 8.7 · 5.0 % / 8.3 · 5.3 % ; 390 clair 14.6 · 9.9 % | barre à 25 du bord, carte 16 dessous, tête de groupe 44, case 17 / date 43 / contenu 219 du bord de la carte (Cal.com : 17 / 43 / 219), ⋯ à 24 du bord droit, ligne de 3 lignes 108 ; 390 : segmenté défilant, titre 16/24, date sous le contenu, ⋯ 36 |
 | Annuaire | `/espace2/daliro/annuaire` (+ `?entreprise=`) | Attio, People et fiche d'un contact | `attio-people.md` (après import) | `annuaire-*`, `annuaire-fiche-*` | 11.6 · 7 % / 11.3 ; fiche 7.9 · 5.5 % / 7.6 | barres, colonnes 250/215/288/310, pied ; fiche : avatar, actions, onglets, 3×2 |
 | Réglages | `/espace2/daliro/reglages` | Linear, Settings › Labels puis Templates | `linear-labels-templates.md` | `reglages-*`, `reglages-organisation-*` | Labels 7.1 · 5.2 % ; Templates 3.5–3.8 · 2.1 % | titre 73, en-tête du tableau 161, lignes 193 |
 
@@ -52,8 +52,22 @@ les zones (voir les colonnes « vérifié »).
 - **À faire** : tâches du jour (passages à confirmer ou noter faits, avenants à signer, situations) en lignes ; le
   geste mène à la fiche du chantier (volet de détails ⌘ I).
 - **Avenants et situations** : tous les gestes dans le détail ouvert au clic (ou `?avenant=` / `?situation=`).
-- **Équipes** : le planning façon Float quitte la page ; glisser (« Déplacer vers… »), étirer (+, ×), poser des heures
-  et absences (« Date overrides ») sont sur la page d'un intervenant ; rien ne part avant « Enregistrer ».
+- **Équipes** (03/11, Cal.com Bookings à la place d'Availability, que Teo n'aimait pas : « trouve un autre truc ») :
+  un passage = une réservation (date, heures ou demi-journée, pastille du chantier, tâche « avec » l'intervenant, lot,
+  réponse J-2) ; une absence = une ligne à ses jours, et un passage qui tombe sur une absence le dit en ambre.
+  Onglets : À venir (« Aujourd'hui » / « À suivre ») · Non confirmés (J-2 sans réponse ou déclinée : « Décliné » et
+  « Confirmé » notent la réponse, le drapeau ouvre les remplaçants) · Plusieurs jours (« ↻ N jours restants ») · Passés
+  · Annulés. Filtrer : intervenant, sous-traitants ou équipes internes, chantier. Détail flottant (`?passage=`,
+  `?absence=`), ⌃ ⌄ pour passer d'une ligne à l'autre. Menu ⋯ (celui du détail de Cal.com, mêmes groupes et icônes) :
+  Recaler la suite (F16, G23) · Relancer le sous-traitant · Changer les jours et les heures (déplacer, étirer,
+  raccourcir, poser des heures : `btp_deplacer_passage`, comme l'ancienne fiche) · Remplaçants · Ajouter au calendrier
+  › (.ics, texte) · Noter fait (F17, G24) · Noter la réponse (F14) · Ouvrir dans le planning · Noter une absence (G61) ·
+  Annuler l'absence de ces jours (G62) · Noter le passage décliné · Masquer cet intervenant. Une absence : changer les
+  jours (noter la nouvelle puis annuler l'ancienne), noter une autre absence, l'annuaire, l'annuler (G62, confirmée).
+  **La page d'un intervenant (`?intervenant=`) ne reste pas** : Bookings n'a pas de page par personne, il a un filtre
+  par participant. `?intervenant=` (le lien « Disponibilités » de l'annuaire) filtre donc la liste, et chaque geste de
+  l'ancienne fiche passe au détail d'un passage ou d'une absence : la page d'un horaire de Cal.com était la partie
+  qui ne se lisait pas comme un planning.
 - **Annuaire** : lecture seule (B26), vues par rôle, filtre « À surveiller ».
 - **Réglages** : bibliothèque de prix (poser, valider, trier, filtrer, regrouper) ; accord J-2 (donner, renouveler,
   activer seul, révoquer, chacun confirmé) ; contrôles d'organisation vers l'annuaire.
@@ -67,7 +81,16 @@ Motif admis (geste du métier sans place dans la référence) :
 - Chantiers : « x / y ouverts » (quota de la formule) dans l'en-tête ; jalons de passage dans les barres.
 - Fiche : vues Terrain, Argent, Réception (ajoutées comme vues de l'initiative) ; lignes Début, Étape, Notre place,
   TVA dans les propriétés du volet ; la lecture de Daliro (transcription, demandes) dans les cartes d'Activité.
-- Annuaire : colonne « Rôles » ; Équipes : nom du chantier après chaque plage horaire.
+- Annuaire : colonne « Rôles ».
+- Équipes : « Annulés » n'a pas de geste de base (aucune porte n'annule un passage ; portes inchangées) : « Cancel
+  event » devient « Noter le passage décliné » (réponse J-2 déclinée, confirmée par une fenêtre) ; le drapeau rouge
+  (« Report booking ») ouvre les remplaçants dans Non confirmés et Annulés, et « Annuler l'absence de ces jours » dans
+  le menu ⋯ ; « Join Cal Video » est la pastille du chantier (ouvre sa fiche) ; « Host » = « Donneur d'ordre » ; la
+  section « Additional notes » = « Lot et confirmation » + « Réponses » (fil J-2). Les lignes d'absence, la mention
+  ambre « Absent … : passage à revoir » et la barre de sélection (cases cochées : copier, .ics) n'ont pas d'équivalent
+  dessiné dans le relevé ; leurs couleurs sont celles de la pastille « Unconfirmed ». « Noter une absence » n'a pas de
+  bouton dans la barre (Bookings n'a pas de « + New ») : il est dans chaque menu ⋯, dans le détail et dans l'état vide
+  d'un intervenant filtré.
 - À faire : le volet de détails remplace la page d'un ticket (une tâche n'a pas de page à elle).
 
 Éléments de la référence sans geste Daliro derrière : **plus aucun** depuis le 02/11 au soir (décision de Teo,
@@ -80,7 +103,17 @@ Autres :
 - Annuaire : icônes d'Attio tirées de ses fichiers publics (jeu 16 px ; « Activité » du jeu 12 px agrandi) ; l'icône de personnes de l'en-tête est redessinée dans le même carré bleu, l'épingle de colonne est l'épingle simple (la barrée n'est pas dans le jeu).
 - Fiche, onglet Lots : la capture de Linear montre l'onglet Projects en liste, le relevé (29/10) en Timeline ; la Timeline est gardée.
 - Contenu : 6 chantiers d'exemple contre 13 projets chez Linear (Chantiers) ; 13 entreprises contre 77 contacts
-  (Annuaire) ; plages horaires des intervenants (Équipes). La géométrie est vérifiée sur les lignes présentes.
+  (Annuaire) ; passages des intervenants (Équipes : titres plus courts que « … between Wizyy and … », 4e ligne
+  « En cours, jusqu'au … » à la place de « in 2 minutes »). La géométrie est vérifiée sur les lignes présentes.
+- Équipes (Bookings) : la coquille de l'espace 2 donne une carte <main> de 1128 au lieu de 1176 : tout ce qui est
+  aligné à droite (⋯, filtres enregistrés, bascule) est 48 px plus à gauche ; « Saved filters » = « Filtres
+  enregistrés » (plus long), segmenté de 422 au lieu de 408 (libellés français). Sombre : pastilles ambre / rouge,
+  ligne ouverte (blanc à 3 %) et titres de section du détail (#9ca3af) pris hors relevé (Cal.com ne les donne qu'en
+  clair). Non confirmés, détail et vue calendrier : les captures de référence sont à l'échelle 0,556
+  (`1440-clair-unconfirmed.png`, `1440-clair-detail-*.png`), la comparaison est côte à côte, pas en superposition
+  (`equipes-nonconf-1440-clair.png`, `equipes-detail-1440-*.png`, `equipes-calendrier-1440-clair.png`). Le menu
+  « Filter » de Cal.com n'a pas été mesuré (relevé) : popover repris du menu ⋯. Le compteur « 3 » de la barre
+  latérale (non confirmées) n'a pas sa place dans la coquille de l'espace 2.
 - Barres de défilement : celles de Linear sont les barres flottantes de macOS (absentes de Chromium headless).
 - L'exemple étendu d'Avenants, de Réglages et d'À faire se pose dans les données partagées à la première visite de
   la page qui le porte.
@@ -120,9 +153,17 @@ qu'on ne défait pas demandent une confirmation. Utilités communes : `component
 | Réglages | case à cocher de ligne | barre : valider les prix choisis (confirmation), exporter | porte `btp_valider_prix` ; CSV |
 | Réglages | « New group » | « Nouveau corps d'état » : nommer le groupe et poser son premier prix | porte `btp_poser_prix` |
 | Réglages | barre latérale Labels / Templates | bascule Bibliothèque / Organisation | adresse (`?page=organisation`) |
-| Équipes | Set as default | l'intervenant passe en tête, badge « Par défaut », présélectionné pour les absences | localStorage |
-| Équipes | Duplicate, corbeille | copier le planning de 30 jours ; retirer de la liste (confirmation, « les remettre ») | presse-papier ; localStorage |
-| Équipes | crayons | renommer une équipe (localStorage) ; ouvrir la fiche d'un sous-traitant ; modifier une absence | localStorage ; adresse ; portes `btp_noter_indisponibilite`, `btp_annuler_indisponibilite` |
+| Équipes (Bookings) | onglets Upcoming … Canceled | À venir, Non confirmés, Plusieurs jours, Passés, Annulés | adresse (`?onglet=`) |
+| Équipes (Bookings) | Filter | intervenant, sous-traitants / équipes internes, chantier ; puces retirables | adresse (`?intervenant=`, `?type=`, `?chantier=`) |
+| Équipes (Bookings) | Saved filters | filtres gardés (appliquer, oublier, enregistrer l'actuel) ; copier le planning affiché ; remettre les intervenants masqués (remplace « Set as default » et « les remettre » d'Availability) | localStorage ; presse-papier |
+| Équipes (Bookings) | liste / calendrier | vue calendrier jour, semaine (64 px par heure, ligne « Journée »), mois | adresse (`?vue=`, `?echelle=`, `?jour=`) |
+| Équipes (Bookings) | case à cocher | barre : copier la sélection, l'ajouter au calendrier (.ics) | presse-papier ; fichier .ics |
+| Équipes (Bookings) | Reject / Confirm | noter la réponse « décliné » / « confirmé » (fenêtre, texte facultatif) | porte `btp_repondre_confirmation` |
+| Équipes (Bookings) | drapeau rouge | remplaçants possibles (fenêtre de ChantierVue) | porte `btp_proposer_remplacants` |
+| Équipes (Bookings) | menu ⋯ du détail | voir « Où sont passés les gestes » ; Request reschedule = relancer : WhatsApp, SMS ou courriel s'ouvre avec le texte relu (rien ne part de Daliro) | portes `btp_recaler`, `btp_deplacer_passage`, `btp_terminer_passage`, `btp_noter_indisponibilite`, `btp_annuler_indisponibilite` ; `wa.me` / `sms:` / `mailto:` ; localStorage (masquer) |
+| Équipes (Bookings) | Join Cal Video ‖ ⧉, ⌃ ⌄ × | ouvrir le chantier ‖ copier le passage ; ligne précédente / suivante ; fermer | adresse ; presse-papier |
+| Équipes (Bookings) | nom du participant | filtre sur l'intervenant ; dans le détail, « Ouvrir dans l'annuaire » ou « Renommer » (une de nos équipes, ce navigateur) | adresse ; localStorage |
+| Équipes (Bookings) | « 10 ↕ rows per page », ‹ › | 10, 25 ou 50 lignes ; pages | adresse (`?n=`, `?page=`) |
 | Annuaire | repli de la barre, View settings, Add column, épingle, éclair | colonnes, regroupement par rôle, colonne fixée, tri | localStorage ; adresse (`?cols=`, `?groupe=`, `?epingle=`, `?tri=`) |
 | Annuaire | Import / Export | exporter la liste affichée (il n'y a pas d'import : l'annuaire se remplit par les chantiers) | CSV |
 | Annuaire | « + New Person », « + » d'en-tête | nouvelle entreprise dans les Entreprises de l'espace (aucune porte ne crée un tiers, la fenêtre le dit) | localStorage |
@@ -133,7 +174,7 @@ qu'on ne défait pas demandent une confirmation. Utilités communes : `component
 
 Superpositions refaites après ces ajouts (1440, sombre / clair) : vue d'ensemble 3.4 / 3.5 ; fiche 5.5 / 5.5 ;
 À ranger 6.1 ; À faire 11.0 / 11.5 ; Avenants 12.5 / 13.6 ; Réglages 7.4 (bibliothèque), 3.7 / 4.1 (organisation) ;
-Équipes 7.5 / 7.4, fiche d'intervenant 7.9 / 7.0 ; Annuaire 12.0 / 12.5, fiche 7.0 / 7.4.
+Équipes (Bookings, 03/11) 8.7 / 8.3, 390 14.6 ; Annuaire 12.0 / 12.5, fiche 7.0 / 7.4.
 Restent : sur Réglages, la bascule Bibliothèque / Organisation est posée dans la carte (la barre latérale de
 réglages de Linear est la place de celle de l'espace 2) ; sur À faire à 390, la case à cocher est masquée (Linear
 lui donne une largeur nulle) ; couleur de la case cochée (violet de l'espace) et du champ de commentaire en sombre
