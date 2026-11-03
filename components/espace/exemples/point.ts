@@ -24,13 +24,16 @@ export function pointExemple(decalage = 0): { point: PointDuJour; lignes: LigneP
     contenu: "complet",
     incomplet: decalage === 0,
     motifs: decalage === 0 ? [{ module: "reput", motif: "Le connecteur Google n'a pas répondu avant 6 h 50 ; les avis de la nuit manquent." }] : [],
-    nb_sections: 5,
-    nb_items: decalage === 0 ? 11 : 7,
-    nb_critiques: decalage === 0 ? 2 : 0,
+    nb_sections: decalage === 0 ? 10 : 5,
+    nb_items: decalage === 0 ? 24 : 7,
+    nb_critiques: decalage === 0 ? 5 : 0,
     version: 1,
     remis_le: `${jour}T05:00:00.000Z`,
     ouvert_le: `${jour}T06:12:00.000Z`,
   };
+
+  /* « 23/10/2026 » : la date que les textes des sections réelles écrivent en toutes lettres */
+  const dateFr = (d: number) => new Date(`${aujourdHui(d)}T12:00:00`).toLocaleDateString("fr-FR");
 
   const l = (
     section_rang: number,
@@ -77,6 +80,23 @@ export function pointExemple(decalage = 0): { point: PointDuJour; lignes: LigneP
     l(4, 1, { titre: "Équipe", module: "rh", entite_nom: "Agence de Grenoble", texte: "Sofia Carvalho demande 5 jours du 13 au 17 octobre ; Yanis Dupré assurerait le remplacement.", gravite: "info", lien: "/espace/validations" }),
     l(5, 1, { titre: "Clients", module: "reput", texte: "Les avis de la nuit n'ont pas pu être lus (connecteur Google indisponible à 6 h 50). Section incomplète.", gravite: "attention", section_incomplete: true }),
     l(5, 2, { titre: "Clients", module: "reput", texte: "Hier : 1 avis 5 étoiles (M. Perrin, « cuisine posée en une journée »), réponse envoyée.", gravite: "info" }),
+    /* Les modules métier déposent eux aussi leurs sections (b6_23 pour DALIRO, b2_18 et b3t_04 pour
+       TAVARO, b3_06 pour TIROMA, b4_14 pour TAMILA) : le site promet « vos trois listes du matin »,
+       « chaque agence reçoit sa page », « les créneaux libérés remontent le matin », « vos délais et
+       audiences ». Chaque ligne nomme un objet que l'aiguillage sait ouvrir (aiguillage.ts). */
+    l(6, 1, { titre: "Chantiers", module: "daliro", texte: "Résidence Les Tilleuls : l'avenant n° 1 « Garde-corps supplémentaires sur les balcons du R+3 » (1 884,00 € HT) est validé mais pas signé — faites-le signer avant d'exécuter.", gravite: "attention", lien: "/espace/daliro", objet_type: "btp_avenants", objet_id: "00000000-0000-4000-8000-00000000d081" }),
+    l(6, 2, { titre: "Chantiers", module: "daliro", texte: "Serrurerie Dumont n'a pas confirmé son passage du lendemain sur Résidence Les Tilleuls : relancez avant le départ.", gravite: "attention", lien: "/espace/daliro", objet_type: "btp_chantiers", objet_id: "00000000-0000-4000-8000-00000000d001" }),
+    l(6, 3, { titre: "Chantiers", module: "daliro", texte: `Résidence Les Tilleuls : « Garde-corps acier, balcons R+3 » chez Serrurerie Dumont devait être commandé avant le ${dateFr(-4)} — commandez aujourd'hui ou recalez le passage.`, gravite: "attention", lien: "/espace/daliro", objet_type: "btp_chantiers", objet_id: "00000000-0000-4000-8000-00000000d001" }),
+    l(7, 1, { titre: "Retours et parc", module: "tavaro", entite_nom: "Lyon Part-Dieu", texte: "1 proposition de 418,20 € attend votre décision (C-2026-0398) ; 3 retours sont bloqués, dont 1 pour preuve manquante.", gravite: "attention", lien: "/tavaro/facturation", objet_type: "loc_propositions", objet_id: "00000000-0000-4000-8000-0000000pr002" }),
+    l(7, 2, { titre: "Retours et parc", module: "tavaro", entite_nom: "Lyon Part-Dieu", texte: "Une remise en location est à finir avant le prochain départ : voyant de pression des pneus allumé au retour.", gravite: "attention", lien: "/espace2/tavaro", objet_type: "loc_remises", objet_id: "00000000-0000-4000-8000-0000000rm001" }),
+    l(8, 1, { titre: "Cabinet dentaire", module: "tiroma", texte: "Couronne de Michel Dorville : le travail n'est pas revenu du laboratoire et la pose est dans deux jours.", gravite: "critique", lien: "/espace2/tiroma/avant", objet_type: "tiroma_travaux_labo", objet_id: "w-1" }),
+    l(8, 2, { titre: "Cabinet dentaire", module: "tiroma", texte: "3 créneaux se libèrent d'ici jeudi : le premier demain à 9 h, fauteuil 2 (45 min) — à proposer dès ce matin.", gravite: "attention", lien: "/espace2/tiroma/creneaux", objet_type: "tiroma_evenements_agenda", objet_id: "9101" }),
+    l(8, 3, { titre: "Cabinet dentaire", module: "tiroma", texte: "11 plans signés attendent un rendez-vous, le plus ancien depuis 42 jours.", gravite: "info", lien: "/espace2/tiroma/plans", objet_type: "tiroma_plans", objet_id: "pl-1" }),
+    l(10, 1, { titre: "Permis et chantier", module: "lorani", texte: "Question sans réponse depuis 21 jours : la date de dépose de l'échafaudage côté cour (Façade rue Mercière).", gravite: "attention", lien: "/espace2/lorani/questions", objet_type: "lorani_point", objet_id: "00000000-0000-4000-8000-00000000a0ca" }),
+    l(10, 2, { titre: "Permis et chantier", module: "lorani", texte: "PCMI « Maison Lemoine » : la mairie réclame des pièces, à déposer avant la fin du délai.", gravite: "critique", lien: "/espace2/lorani", objet_type: "lorani_permis", objet_id: "00000000-0000-4000-8000-00000000c001" }),
+    l(9, 1, { titre: "Délais et audiences", module: "tamila", texte: "3 délais de procédure attendent votre confirmation, le plus ancien posé il y a trois mois.", gravite: "critique", lien: "/espace2/tamila" }),
+    l(9, 2, { titre: "Délais et audiences", module: "tamila", texte: "16 avis RPVA reçus par courriel sont à rattacher à leur dossier ; le premier s'efface dans huit jours s'il ne l'est pas.", gravite: "attention", lien: "/espace2/tamila/arrivees" }),
+    l(9, 3, { titre: "Délais et audiences", module: "tamila", texte: "2 dossiers vivants n'ont plus aucune diligence depuis plus de trente jours.", gravite: "info", lien: "/espace2/tamila/pilotage" }),
   ];
   return { point, lignes };
 }
