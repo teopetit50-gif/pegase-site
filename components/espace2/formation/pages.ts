@@ -296,36 +296,96 @@ export const PAGES: Record<string, PageFormation> = {
               `[Refusées](${E}/filed/refusees) : les pièces à corriger, ou impossibles à reprendre.`,
             ],
           },
+          { p: "Dans une pièce, cliquez sur une valeur lue : elle se surligne dans le document." },
         ],
       },
       {
-        id: "gestes",
-        titre: "Ce que vous faites",
+        id: "arrivee",
+        titre: "Ce qui arrive",
         niveau: 2,
-        blocs: [{ p: "« Déposer un document » ajoute une pièce à la main. Dans la boîte, un e-mail se marque comme lu ou s'écarte." }],
+        blocs: [],
+      },
+      {
+        id: "deposer",
+        titre: "Déposer un document",
+        niveau: 3,
+        video: v("filed-deposer"),
+        blocs: [{ p: "« Déposer un document » ajoute une pièce à la main. Elle reçoit un numéro, est lue, puis contrôlée comme tout document reçu." }],
+      },
+      {
+        id: "boite",
+        titre: "Trier la boîte de réception",
+        niveau: 3,
+        video: v("filed-boite"),
+        blocs: [{ p: `Dans la [boîte de réception](${E}/filed/boite), un e-mail se marque comme lu, ou s'écarte s'il n'apporte aucune pièce.` }],
       },
       {
         id: "dossier",
         titre: "Dans le dossier d'une facture",
-        niveau: 3,
+        niveau: 2,
         video: v("filed-dossier-facture"),
+        blocs: [{ p: "Tous les gestes sur une facture partent de son dossier. La pièce d'origine reste consultable telle qu'elle est arrivée." }],
+      },
+      {
+        id: "corriger",
+        titre: "Corriger une valeur",
+        niveau: 3,
+        video: v("filed-corriger"),
         blocs: [
           {
-            liste: [
-              "Confirmer le fournisseur, proposer un IBAN, bloquer ou débloquer un fournisseur.",
-              "Corriger une valeur, ou lever une anomalie.",
-              "Ouvrir un litige, puis le clore.",
-              "Rattacher la commande, puis transmettre à la comptabilité.",
-            ],
+            p: "« Corriger une valeur » rectifie un montant, une échéance ou un numéro mal lu ; une valeur dont FILED n'est pas sûr se confirme. Chaque correction crée une nouvelle version de la facture, et les contrôles sont rejoués.",
           },
         ],
       },
       {
+        id: "litige",
+        titre: "Ouvrir un litige",
+        niveau: 3,
+        video: v("filed-litige"),
+        blocs: [{ p: "« Ouvrir un litige » signale une facture contestée auprès du fournisseur ; « Clore le litige » la libère une fois l'affaire réglée." }],
+      },
+      {
+        id: "commande",
+        titre: "Rattacher une commande",
+        niveau: 3,
+        video: v("filed-commande"),
+        blocs: [{ p: "« Désigner une commande » rattache la facture à sa commande, puis chaque ligne s'apparie à la sienne." }],
+      },
+      {
+        id: "fournisseurs",
+        titre: "Vos fournisseurs",
+        niveau: 2,
+        video: v("filed-fournisseur"),
+        blocs: [
+          {
+            p: `Un fournisseur naît de sa première facture et attend d'être confirmé dans [Fournisseurs](${E}/filed/fournisseurs). La personne qui a déposé la pièce ne peut pas confirmer elle-même : une autre le fait, en disant ce qu'elle a vérifié.`,
+          },
+          { p: `Un IBAN proposé part dans [À valider](${E}/validations) : une personne habilitée l'approuve avant tout paiement.` },
+        ],
+      },
+      {
         id: "payer",
+        titre: "Payer et comptabiliser",
+        niveau: 2,
+        blocs: [],
+      },
+      {
+        id: "a-payer",
         titre: "Payer",
         niveau: 3,
         video: v("filed-payer"),
-        blocs: [{ p: `Dans [À payer](${E}/filed/a-payer), « Noter un paiement » enregistre le règlement d'une facture.` }],
+        blocs: [{ p: `Une facture validée arrive dans [À payer](${E}/filed/a-payer), par échéance. « Noter un paiement » enregistre son règlement.` }],
+      },
+      {
+        id: "comptabilite",
+        titre: "Transmettre à la comptabilité",
+        niveau: 3,
+        video: v("filed-comptabilite"),
+        blocs: [
+          {
+            p: `« Transmettre à la comptabilité » passe l'écriture d'une facture validée. [Comptabilité](${E}/filed/comptabilite) montre le hors-taxes, la TVA déductible, et « Exporter le FEC » sort le fichier des écritures pour votre expert-comptable.`,
+          },
+        ],
       },
       {
         id: "garde-fous",
@@ -335,11 +395,33 @@ export const PAGES: Record<string, PageFormation> = {
         blocs: [
           {
             liste: [
-              "Le HT, la TVA et le TTC sont recoupés : si le compte ne tombe pas juste, la pièce est mise de côté.",
+              `Le HT, la TVA et le TTC sont recoupés : si le compte ne tombe pas juste, la pièce est mise de côté dans [Contrôles et fraude](${E}/filed/controles). Un contrôle ne se lève qu'avec un motif.`,
               "Un IBAN proposé doit être validé par une personne habilitée avant tout paiement.",
               "Une correction crée une nouvelle version de la facture, et les contrôles sont rejoués.",
               "Une écriture transmise ne se modifie plus, et aucune pièce n'est effacée.",
             ],
+          },
+        ],
+      },
+      {
+        id: "circuit",
+        titre: "Le circuit de validation",
+        niveau: 3,
+        video: v("filed-circuit"),
+        blocs: [
+          {
+            p: `Le [circuit](${E}/filed/circuit) dit qui approuve une facture, une anomalie à lever ou un IBAN. Ses règles se lisent de haut en bas, la première qui correspond l'emporte. Une absence se couvre par une délégation datée, depuis « À valider ».`,
+          },
+        ],
+      },
+      {
+        id: "refusees",
+        titre: "Les factures refusées",
+        niveau: 3,
+        video: v("filed-refusees"),
+        blocs: [
+          {
+            p: `Une facture refusée arrive dans [Refusées](${E}/filed/refusees) avec sa raison. Corrigée dans les 24 h qui suivent le refus, elle est reprise ; sinon elle se classe sans suite, ou le fournisseur envoie une facture rectificative.`,
           },
         ],
       },
@@ -520,6 +602,7 @@ export const PAGES: Record<string, PageFormation> = {
         id: "ecrans",
         titre: "Les écrans",
         niveau: 2,
+        video: v("reput-demandes"),
         blocs: [
           {
             liste: [
@@ -543,14 +626,18 @@ export const PAGES: Record<string, PageFormation> = {
         titre: "Répondre",
         niveau: 3,
         video: v("reput-repondre"),
-        blocs: [{ p: "Sur une demande : « Valider et envoyer », « Corriger la réponse » ou « Refuser la réponse »." }],
+        blocs: [{ p: "Sur une demande : « Valider et envoyer », « Corriger la réponse » ou « Refuser la réponse » ; un refus se motive et la demande vous revient." }],
       },
       {
         id: "base",
         titre: "Tenir la base à jour",
         niveau: 3,
         video: v("reput-base"),
-        blocs: [{ p: "Une fiche se crée, se corrige, puis se met en vigueur ; une fiche retirée ne sert plus. Une question hors de la base vous est transférée." }],
+        blocs: [
+          {
+            p: `REPUT ne répond qu'avec votre [base de connaissances](${E}/reput/base). « Nouvelle fiche » crée un brouillon ; « Valider et mettre en vigueur » le fait citer dès la prochaine réponse ; une fiche retirée ne sert plus. Une question hors de la base vous est transférée.`,
+          },
+        ],
       },
       {
         id: "sujets",
@@ -559,7 +646,23 @@ export const PAGES: Record<string, PageFormation> = {
         video: v("reput-partir-seul"),
         blocs: [
           {
-            p: "Sujet par sujet, vous pouvez autoriser l'envoi sans relecture. « Couper l'envoi automatique » remet toutes les réponses en validation ; il faut en donner le motif.",
+            p: `Dans [Sujets autorisés](${E}/reput/sujets), « Autoriser l'envoi seul » laisse partir sans relecture les réponses tirées de votre base sur ce sujet. « Couper l'envoi automatique » remet toutes les réponses en validation ; il faut en donner le motif.`,
+          },
+          { p: "Un sujet peut aussi être confié à un service : seuls ses membres valident alors ses réponses." },
+        ],
+      },
+      {
+        id: "urgences",
+        titre: "Urgences et réclamations",
+        niveau: 2,
+        video: v("reput-urgences"),
+        blocs: [
+          {
+            liste: [
+              "Une urgence, une réclamation, un client en litige ou une personne qui demande à parler à quelqu'un ne reçoivent jamais de réponse automatique : la demande revient à une personne.",
+              "Chaque sujet porte le délai que vous avez fixé : par exemple une heure pour une urgence, quatre pour une réclamation. Passé ce délai, la demande remonte au responsable.",
+              "Par défaut, personne n'est appelé hors horaires : le client reçoit tout de suite une réponse avec vos horaires, et son urgence passe en tête à l'ouverture.",
+            ],
           },
         ],
       },
@@ -567,11 +670,11 @@ export const PAGES: Record<string, PageFormation> = {
         id: "garde-fous",
         titre: "Les garde-fous",
         niveau: 2,
-        video: v("reput-avis-urgences"),
+        video: v("reput-reglages"),
         blocs: [
           {
             liste: [
-              "Chaque réponse préparée porte une mention qui dit qu'elle vient d'un assistant ; vous en choisissez le texte dans les réglages.",
+              `Chaque réponse préparée porte une mention qui dit qu'elle vient d'un assistant ; vous en choisissez le texte dans les [réglages](${E}/reput/reglages).`,
               "Un accusé de réception part dans la minute.",
               "Une demande d'avis part trois jours après le règlement, avec deux relances au plus, pas plus d'une fois en six mois, et sans tri des clients mécontents.",
               "Les premières semaines, tout vous est soumis.",
@@ -598,7 +701,7 @@ export const PAGES: Record<string, PageFormation> = {
               `[Comptes à risque](${E}/offload) : chaque client par niveau, régulier, ralentit, saison manquée, décroche, s'est tu.`,
               `[Échéances et renouvellements](${E}/offload/echeances), [affaires restées en plan](${E}/offload/affaires) et [groupes clients](${E}/offload/groupes).`,
               `[Garde-fous](${E}/offload/garde-fous) : vos règles, et l'arrêt d'OFFLOAD.`,
-              `[Pilotage](${E}/offload/pilotage).`,
+              `[Pilotage](${E}/offload/pilotage) : les reprises, les réponses et le chiffre repris.`,
             ],
           },
         ],
@@ -607,15 +710,49 @@ export const PAGES: Record<string, PageFormation> = {
         id: "gestes",
         titre: "Ce que vous faites",
         niveau: 2,
+        blocs: [],
+      },
+      {
+        id: "reprise",
+        titre: "Préparer une reprise",
+        niveau: 3,
         video: v("offload-reprise"),
         blocs: [
           {
-            liste: [
-              "« Préparer une nouvelle reprise » : le message part en validation, et une tâche d'appel est créée.",
-              "Reprendre un compte en main, ou le remettre dans le cycle, en donnant le motif.",
-              "Sur une affaire restée en plan : relancer encore, ou la clore sans suite.",
-              "Dans les garde-fous : écrire une règle en français, ou « Suspendre OFFLOAD ».",
-            ],
+            p: "« Préparer une nouvelle reprise » : le message part en validation, et une tâche d'appel est créée. Un compte se reprend aussi en main, ou se remet dans le cycle, en donnant le motif.",
+          },
+        ],
+      },
+      {
+        id: "echeances",
+        titre: "Les échéances",
+        niveau: 3,
+        video: v("offload-echeances"),
+        blocs: [
+          {
+            p: `Dans [Échéances et renouvellements](${E}/offload/echeances), le message de la semaine qui précède attend votre validation. « Noter une intervention » date l'échéance suivante depuis l'intervention.`,
+          },
+        ],
+      },
+      {
+        id: "affaires",
+        titre: "Les affaires restées en plan",
+        niveau: 3,
+        video: v("offload-affaires"),
+        blocs: [
+          {
+            p: `Dans les [affaires restées en plan](${E}/offload/affaires), glissez une affaire sur « En attente » pour relancer encore (un nouveau message est préparé, en validation), ou sur « Closes sans suite ».`,
+          },
+        ],
+      },
+      {
+        id: "groupes",
+        titre: "Les groupes clients",
+        niveau: 3,
+        video: v("offload-groupes"),
+        blocs: [
+          {
+            p: `Les [groupes clients](${E}/offload/groupes) réunissent les entités d'un même client, par la colonne « groupe » de votre export ou par rattachement. Le plafond de sollicitation vaut alors pour tout le groupe.`,
           },
         ],
       },
@@ -627,9 +764,10 @@ export const PAGES: Record<string, PageFormation> = {
         blocs: [
           {
             liste: [
-              "Sans règle de votre part, les messages restent sans prix ni délai, toujours au vouvoiement.",
+              "Sans règle de votre part, les messages restent sans prix ni délai, toujours au vouvoiement. Une règle s'écrit en une phrase ; OFFLOAD répond ce qu'il en fera, et retient tout message qui l'enfreint.",
               "Une réponse du client arrête la séquence.",
               "OFFLOAD s'arrête seul au-delà de 20 % de messages non remis sur 7 jours, ou si deux messages visent la même adresse ; seul le gérant ou un administrateur le relance.",
+              "« Suspendre OFFLOAD » arrête toutes les reprises.",
               "En mode essai, rien ne part chez le client.",
             ],
           },

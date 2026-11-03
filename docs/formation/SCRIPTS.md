@@ -3,7 +3,7 @@
 > Fichier produit par `node outils/formation-scripts.mjs` à partir de
 > `components/espace2/formation/videos.ts`. Ne pas le modifier à la main.
 
-42 vidéos au catalogue, 19 scripts écrits, 0 tournées.
+56 vidéos au catalogue, 44 scripts écrits, 0 tournées.
 
 ## Pour tourner
 
@@ -112,19 +112,153 @@ Identifiant : `routine-a-valider` · à tourner · départ : https://omegaai.fr/
 
 ### Une facture qui arrive
 
-Identifiant : `filed-facture-arrive` · script à écrire
+Identifiant : `filed-facture-arrive` · à tourner · départ : https://omegaai.fr/espace2/filed
+
+*Objectif : Suivre une facture depuis son arrivée jusqu'à son dossier, et lire ce que FILED en a compris.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir FILED, Documents reçus, et montrer la liste. | Chaque facture qui arrive, par e-mail ou déposée à la main, apparaît ici. FILED la lit, recoupe ses montants et la range. |
+| 2 | Ouvrir une facture de la liste. | Ouvrez une pièce : vous voyez son fournisseur, ses montants, son échéance, et où elle en est. |
+| 3 | Cliquer sur une valeur lue (le total TTC, par exemple). | Cliquez sur une valeur : elle se surligne dans la pièce. Vous voyez exactement où FILED l'a lue. |
+| 4 | Montrer l'activité de la pièce, en bas. | L'activité retrace tout ce qui est arrivé à la pièce depuis sa réception. |
+
+### Déposer un document
+
+Identifiant : `filed-deposer` · à tourner · départ : https://omegaai.fr/espace2/filed
+
+*Objectif : Ajouter à la main une facture reçue sur papier ou hors de la messagerie.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Bouton « Déposer un document ». | Une facture vous arrive sur papier, ou par un autre canal ? Déposez-la ici. |
+| 2 | Montrer la fenêtre de dépôt, sans valider. | Le fichier reçoit un numéro, il est lu, puis contrôlé comme tout document reçu par e-mail. |
+
+### La boîte de réception
+
+Identifiant : `filed-boite` · à tourner · départ : https://omegaai.fr/espace2/filed/boite
+
+*Objectif : Trier les e-mails reçus par FILED.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Boîte de réception, onglets Nouveaux, Lus, Traités. | La boîte de réception montre les e-mails que FILED a reçus. Les pièces jointes en sont tirées automatiquement. |
+| 2 | Ouvrir un e-mail, puis « Marquer comme lu ». | Un e-mail que vous avez vu se marque comme lu. |
+| 3 | Sur un autre e-mail sans intérêt, « Écarter ». | Une publicité ou un e-mail sans pièce s'écarte, pour garder la boîte propre. |
 
 ### Le dossier d'une facture
 
-Identifiant : `filed-dossier-facture` · script à écrire
+Identifiant : `filed-dossier-facture` · à tourner · départ : https://omegaai.fr/espace2/filed
 
-### Payer une facture
+*Objectif : Trouver dans le dossier tout ce qu'on peut faire sur une facture.*
 
-Identifiant : `filed-payer` · script à écrire
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir une facture, puis son menu de gestes. | Tous les gestes sur une facture partent de son dossier : corriger une valeur, ouvrir un litige, rattacher une commande, transmettre à la comptabilité. |
+| 2 | Cliquer sur « Voir la pièce ». | La pièce d'origine reste toujours consultable, telle qu'elle est arrivée. |
+
+### Corriger une valeur
+
+Identifiant : `filed-corriger` · à tourner · départ : https://omegaai.fr/espace2/filed
+
+*Objectif : Rectifier un montant, une date ou un numéro mal lu.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le dossier, « Corriger une valeur… », choisir le montant, saisir la bonne valeur. | Si FILED a mal lu une valeur, corrigez-la. Indiquez la bonne valeur et pourquoi. |
+| 2 | Montrer la nouvelle version de la facture et les contrôles rejoués. | La correction crée une nouvelle version de la facture, et tous les contrôles sont rejoués. L'ancienne version reste dans l'historique. |
+| 3 | Sur une autre facture, « Confirmer la valeur non vérifiée… ». | Quand FILED n'est pas sûr d'une valeur, il vous demande de la confirmer. |
 
 ### Contrôles et fraude
 
-Identifiant : `filed-controles` · script à écrire
+Identifiant : `filed-controles` · à tourner · départ : https://omegaai.fr/espace2/filed/controles
+
+*Objectif : Comprendre ce qui bloque une facture et lever un contrôle à bon escient.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Contrôles et fraude, sur « Bloquants » puis « À vérifier ». | FILED contrôle chaque facture : le compte entre HT, TVA et TTC, l'IBAN, les doublons. Ce qui bloque est ici, et ce qui demande un œil aussi. |
+| 2 | Ouvrir un contrôle, puis « Lever avec un motif… ». | Si vous avez vérifié et que tout est en ordre, levez le contrôle en donnant le motif. Il reste au journal. |
+
+### Confirmer un fournisseur et son IBAN
+
+Identifiant : `filed-fournisseur` · à tourner · départ : https://omegaai.fr/espace2/filed/fournisseurs
+
+*Objectif : Confirmer un nouveau fournisseur et faire valider son IBAN avant tout paiement.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Fournisseurs, onglet « À confirmer ». | Un fournisseur naît de sa première facture. Avant de le payer, il faut le confirmer. |
+| 2 | « Confirmer ce fournisseur… », saisir ce qui a été vérifié. | Dites ce que vous avez vérifié : un bon de commande, un appel au numéro connu, un contrat. Celui qui a déposé la pièce ne peut pas confirmer lui-même : une autre personne le fait. |
+| 3 | « Proposer un IBAN… », saisir d'où il vient. | Un IBAN proposé part en validation dans « À valider ». Une personne habilitée doit l'approuver avant tout paiement. |
+
+### Ouvrir un litige
+
+Identifiant : `filed-litige` · à tourner · départ : https://omegaai.fr/espace2/filed
+
+*Objectif : Mettre une facture fournisseur en litige, puis le clore.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le dossier d'une facture, « Ouvrir un litige… », saisir le motif. | Une livraison incomplète, un prix qui ne correspond pas ? Ouvrez un litige sur la facture. |
+| 2 | Montrer « Clore le litige… » dans le même menu. | Une fois l'affaire réglée avec le fournisseur, closez le litige. |
+
+### Rattacher une commande
+
+Identifiant : `filed-commande` · à tourner · départ : https://omegaai.fr/espace2/filed
+
+*Objectif : Rapprocher une facture de sa commande, ligne par ligne.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le dossier, « Désigner une commande… », choisir la commande. | Rattachez la facture à la commande qu'elle concerne. |
+| 2 | « Apparier la ligne 1… ». | Puis appariez ses lignes à celles de la commande : vous voyez tout de suite ce qui a été facturé en plus ou en moins. |
+
+### Payer une facture
+
+Identifiant : `filed-payer` · à tourner · départ : https://omegaai.fr/espace2/filed/a-payer
+
+*Objectif : Retrouver les factures validées par échéance et noter leur paiement.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir À payer. | Une facture validée dans « À valider » arrive ici, rangée par échéance. |
+| 2 | Sur une facture, « Noter un paiement… », saisir la date et la référence. | Quand vous l'avez réglée, notez le paiement. La facture sort de la liste. |
+
+### Transmettre à la comptabilité
+
+Identifiant : `filed-comptabilite` · à tourner · départ : https://omegaai.fr/espace2/filed/comptabilite
+
+*Objectif : Passer une facture validée en comptabilité et sortir le FEC.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Dans le dossier d'une facture validée, « Transmettre à la comptabilité… ». | Une facture validée se transmet à la comptabilité : FILED en passe l'écriture. |
+| 2 | Ouvrir Comptabilité, montrer la vue d'ensemble et la TVA déductible. | L'écran Comptabilité montre les factures comptabilisées, le hors-taxes et la TVA déductible. |
+| 3 | Cliquer sur « Exporter le FEC ». | Exportez le fichier des écritures comptables pour votre expert-comptable. Une écriture transmise ne se modifie plus. |
+
+### Le circuit de validation
+
+Identifiant : `filed-circuit` · à tourner · départ : https://omegaai.fr/espace2/filed/circuit
+
+*Objectif : Lire qui approuve quoi, et couvrir une absence.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Circuit de validation. | Le circuit dit qui approuve une facture, une anomalie à lever ou un IBAN à confirmer. |
+| 2 | Pointer les règles, de haut en bas. | Les règles se lisent de haut en bas : la première qui correspond l'emporte. Elles se posent à l'installation, avec vous. |
+| 3 | Montrer l'onglet des délégations. | Pour une absence, une délégation datée, posée depuis « À valider », fait décider quelqu'un d'autre à votre place. |
+
+### Les factures refusées
+
+Identifiant : `filed-refusees` · à tourner · départ : https://omegaai.fr/espace2/filed/refusees
+
+*Objectif : Savoir quoi faire d'une facture refusée.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Refusées, onglets « À corriger » et « Reprise impossible ». | Une facture refusée arrive ici, avec la raison du refus. |
+| 2 | Ouvrir une facture « À corriger ». | Si elle peut être corrigée, faites-le dans les 24 heures qui suivent le refus. Passé ce délai, elle se classe sans suite, ou le fournisseur envoie une facture rectificative. |
 
 ## CASHD
 
@@ -272,35 +406,152 @@ Identifiant : `cashd-qui-valide` · à tourner · départ : https://omegaai.fr/e
 
 ## REPUT
 
+### Une demande qui arrive
+
+Identifiant : `reput-demandes` · à tourner · départ : https://omegaai.fr/espace2/reput
+
+*Objectif : Lire une demande client et la réponse que REPUT a préparée.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir REPUT, Demandes. | REPUT reçoit les demandes de vos clients et prépare une réponse à partir de votre base de connaissances. |
+| 2 | Ouvrir une demande, montrer la question puis la réponse préparée et la fiche citée. | Vous voyez la question du client, la réponse préparée, et la fiche de votre base dont elle est tirée. |
+| 3 | Montrer une demande hors de la base. | Ce que la base ne couvre pas, REPUT ne l'invente pas : il vous transfère la demande. |
+
 ### Répondre à une demande
 
-Identifiant : `reput-repondre` · script à écrire
+Identifiant : `reput-repondre` · à tourner · départ : https://omegaai.fr/espace2/reput
+
+*Objectif : Valider, corriger ou refuser une réponse préparée.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Sur une demande, « Valider et envoyer ». | Si la réponse vous convient, validez-la et elle part. |
+| 2 | Sur une autre, « Corriger la réponse », modifier une phrase, valider. | Si elle ne vous ressemble pas, corrigez-la avant de l'envoyer. |
+| 3 | Sur une troisième, « Refuser la réponse… », saisir le motif. | Si elle est fausse, refusez-la en disant pourquoi : la demande vous revient. |
 
 ### La base de connaissances
 
-Identifiant : `reput-base` · script à écrire
+Identifiant : `reput-base` · à tourner · départ : https://omegaai.fr/espace2/reput/base
+
+*Objectif : Créer, corriger et mettre en vigueur une fiche.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Base de connaissances, survoler les états : en vigueur, brouillon, à revoir. | REPUT ne répond qu'avec ce qui est dans votre base. Chaque fiche est en vigueur, en brouillon ou à revoir. |
+| 2 | « Nouvelle fiche », saisir une question et sa réponse. | Ajoutez une fiche pour chaque question qui revient : vos horaires, vos délais, vos tarifs. |
+| 3 | « Valider et mettre en vigueur ». | Une fois en vigueur, la prochaine réponse la cite. Un brouillon attend qu'un valideur le mette en vigueur. |
+| 4 | Sur une fiche périmée, « Retirer la fiche… ». | Une fiche retirée ne sert plus. |
 
 ### Laisser partir seul
 
-Identifiant : `reput-partir-seul` · script à écrire
+Identifiant : `reput-partir-seul` · à tourner · départ : https://omegaai.fr/espace2/reput/sujets
 
-### Avis et urgences
+*Objectif : Autoriser, sujet par sujet, l'envoi sans relecture, et savoir le couper.*
 
-Identifiant : `reput-avis-urgences` · script à écrire
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Sujets autorisés. | Au début, chaque réponse attend votre validation. Quand un sujet vous convient, vous pouvez le laisser partir seul. |
+| 2 | Sur un sujet simple (les horaires), « Autoriser l'envoi seul ». | Les réponses tirées de votre base sur ce sujet partent alors sans relecture. |
+| 3 | Montrer « Couper l'envoi automatique… » et le motif demandé. | À tout moment, coupez l'envoi automatique en donnant le motif : toutes les réponses attendent de nouveau votre validation. |
+
+### Urgences et réclamations
+
+Identifiant : `reput-urgences` · à tourner · départ : https://omegaai.fr/espace2/reput/urgences
+
+*Objectif : Savoir comment REPUT traite une urgence, une réclamation, ou un client qui demande une personne.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Urgences et escalade. | Certaines demandes ne reçoivent jamais de réponse automatique : les urgences, les réclamations, les clients en litige, et ceux qui demandent à parler à quelqu'un. |
+| 2 | Pointer le délai d'une urgence (une heure) et d'une réclamation (quatre heures). | Chaque sujet porte le délai que vous avez fixé. Passé ce délai, la demande remonte au responsable. |
+| 3 | Montrer la règle hors horaires. | Par défaut, personne n'est appelé la nuit : le client reçoit tout de suite une réponse honnête avec vos horaires, et son urgence passe en tête à l'ouverture. |
+
+### Réglages et demandes d'avis
+
+Identifiant : `reput-reglages` · à tourner · départ : https://omegaai.fr/espace2/reput/reglages
+
+*Objectif : Régler la signature, la mention, l'accusé de réception et les demandes d'avis.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Réglages et avis, montrer la signature et la mention de réponse automatisée. | Ici, vous réglez la signature de vos réponses, et le texte de la mention qui dit qu'elles sont préparées par un assistant. |
+| 2 | Montrer l'accusé de réception. | Un accusé de réception part dans la minute, pour que le client sache que sa demande est arrivée. |
+| 3 | Montrer les demandes d'avis. | Une demande d'avis part trois jours après le règlement, avec deux relances au plus, jamais plus d'une fois en six mois, et sans écarter les clients mécontents. |
 
 ## OFFLOAD
 
 ### Les comptes à risque
 
-Identifiant : `offload-comptes-risque` · script à écrire
+Identifiant : `offload-comptes-risque` · à tourner · départ : https://omegaai.fr/espace2/offload
+
+*Objectif : Lire, chaque matin, quels clients ralentissent ou décrochent.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir OFFLOAD, Comptes à risque. | Chaque matin, OFFLOAD relit votre base clients et compare chaque client à son propre rythme de commandes. |
+| 2 | Pointer les niveaux : régulier, ralentit, saison manquée, décroche, s'est tu. | Chaque client a un niveau : régulier, ralentit, saison manquée, décroche, ou s'est tu. |
+| 3 | Ouvrir un compte qui décroche, montrer son rythme et sa valeur en jeu. | Ouvrez un compte : vous voyez son rythme habituel, depuis quand il s'écarte, et ce qu'il pèse sur une année. |
 
 ### Préparer une reprise
 
-Identifiant : `offload-reprise` · script à écrire
+Identifiant : `offload-reprise` · à tourner · départ : https://omegaai.fr/espace2/offload
+
+*Objectif : Préparer un message de reprise de contact et l'appel qui va avec.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Sur un compte à risque, « Préparer une nouvelle reprise ». | Pour reprendre contact avec un client, préparez une reprise. |
+| 2 | Montrer le message préparé, puis « Valider les messages ». | Le message part en validation, et une tâche d'appel est créée pour vous ou votre commercial. |
+| 3 | Montrer la séquence arrêtée après une réponse du client. | Dès que le client répond, la séquence s'arrête : la suite se fait de personne à personne. |
+
+### Échéances et renouvellements
+
+Identifiant : `offload-echeances` · à tourner · départ : https://omegaai.fr/espace2/offload/echeances
+
+*Objectif : Suivre les échéances périodiques de vos clients et noter une intervention.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Échéances et renouvellements. | OFFLOAD suit aussi les échéances qui reviennent : un entretien annuel, un contrôle, un renouvellement. |
+| 2 | Montrer le message de la semaine qui précède, en validation. | La semaine qui précède une échéance, un message est préparé et attend votre validation. |
+| 3 | Sur une échéance, « Noter une intervention… ». | Quand l'intervention est faite, notez-la : l'échéance suivante est datée depuis cette date. |
+
+### Les affaires restées en plan
+
+Identifiant : `offload-affaires` · à tourner · départ : https://omegaai.fr/espace2/offload/affaires
+
+*Objectif : Décider du sort d'une affaire qui n'a pas abouti.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Affaires restées en plan. | Les affaires restées sans suite sont rangées ici : en attente, closes sans suite, ou retirées. |
+| 2 | Glisser une affaire sur « En attente ». | Pour relancer encore, glissez-la sur « En attente » : un nouveau message est préparé, en validation. |
+| 3 | Glisser une autre affaire sur « Closes sans suite ». | Si elle est perdue, closez-la sans suite : elle n'est plus relancée. |
+
+### Les groupes clients
+
+Identifiant : `offload-groupes` · à tourner · départ : https://omegaai.fr/espace2/offload/groupes
+
+*Objectif : Regrouper les entités d'un même client.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Groupes clients. | Un même client peut avoir plusieurs entités ou plusieurs sites. Les groupes les réunissent. |
+| 2 | Montrer « À rattacher (même domaine de courriel) ». | OFFLOAD vous propose les comptes qui partagent le même domaine de courriel. Rattachez-les à leur groupe. |
+| 3 | Rester sur le groupe rattaché. | Une fois rattachés, le plafond de sollicitation vaut pour tout le groupe : il n'est pas relancé par chacune de ses entités. |
 
 ### Les garde-fous
 
-Identifiant : `offload-garde-fous` · script à écrire
+Identifiant : `offload-garde-fous` · à tourner · départ : https://omegaai.fr/espace2/offload/garde-fous
+
+*Objectif : Écrire une règle en français et savoir suspendre OFFLOAD.*
+
+| # | À l'écran | À dire |
+|---|---|---|
+| 1 | Ouvrir Garde-fous. | Sans règle de votre part, les messages restent sans prix ni délai, toujours au vouvoiement. |
+| 2 | Écrire une règle, par exemple « ne jamais parler de remise », et lire la réponse. | Écrivez une règle en une phrase. OFFLOAD vous répond ce qu'il en fera, ou qu'il ne l'a pas comprise. Tout message qui enfreint une règle est retenu. |
+| 3 | Montrer « Suspendre OFFLOAD », sans cliquer. | En cas de doute, suspendez OFFLOAD : plus aucune reprise ne part. |
 
 ## DALIRO
 

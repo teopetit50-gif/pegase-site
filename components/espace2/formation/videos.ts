@@ -414,17 +414,462 @@ export const VIDEOS: Record<string, FicheVideo> = {
   },
 
   /* ═══════════════ Lots suivants : titres seulement, scripts à écrire ═══════════════ */
-  "filed-facture-arrive": { titre: "Une facture qui arrive", page: "filed" },
-  "filed-dossier-facture": { titre: "Le dossier d'une facture", page: "filed" },
-  "filed-payer": { titre: "Payer une facture", page: "filed" },
-  "filed-controles": { titre: "Contrôles et fraude", page: "filed" },
-  "reput-repondre": { titre: "Répondre à une demande", page: "reput" },
-  "reput-base": { titre: "La base de connaissances", page: "reput" },
-  "reput-partir-seul": { titre: "Laisser partir seul", page: "reput" },
-  "reput-avis-urgences": { titre: "Avis et urgences", page: "reput" },
-  "offload-comptes-risque": { titre: "Les comptes à risque", page: "offload" },
-  "offload-reprise": { titre: "Préparer une reprise", page: "offload" },
-  "offload-garde-fous": { titre: "Les garde-fous", page: "offload" },
+  /* ═══════════════ Lot 2 · FILED ═══════════════ */
+  "filed-facture-arrive": {
+    titre: "Une facture qui arrive",
+    page: "filed",
+    depart: "/espace2/filed",
+    objectif: "Suivre une facture depuis son arrivée jusqu'à son dossier, et lire ce que FILED en a compris.",
+    etapes: [
+      {
+        ecran: "Ouvrir FILED, Documents reçus, et montrer la liste.",
+        dire: "Chaque facture qui arrive, par e-mail ou déposée à la main, apparaît ici. FILED la lit, recoupe ses montants et la range.",
+      },
+      { ecran: "Ouvrir une facture de la liste.", dire: "Ouvrez une pièce : vous voyez son fournisseur, ses montants, son échéance, et où elle en est." },
+      {
+        ecran: "Cliquer sur une valeur lue (le total TTC, par exemple).",
+        dire: "Cliquez sur une valeur : elle se surligne dans la pièce. Vous voyez exactement où FILED l'a lue.",
+      },
+      {
+        ecran: "Montrer l'activité de la pièce, en bas.",
+        dire: "L'activité retrace tout ce qui est arrivé à la pièce depuis sa réception.",
+      },
+    ],
+  },
+  "filed-deposer": {
+    titre: "Déposer un document",
+    page: "filed",
+    depart: "/espace2/filed",
+    objectif: "Ajouter à la main une facture reçue sur papier ou hors de la messagerie.",
+    etapes: [
+      {
+        ecran: "Bouton « Déposer un document ».",
+        dire: "Une facture vous arrive sur papier, ou par un autre canal ? Déposez-la ici.",
+      },
+      {
+        ecran: "Montrer la fenêtre de dépôt, sans valider.",
+        dire: "Le fichier reçoit un numéro, il est lu, puis contrôlé comme tout document reçu par e-mail.",
+      },
+    ],
+  },
+  "filed-boite": {
+    titre: "La boîte de réception",
+    page: "filed",
+    depart: "/espace2/filed/boite",
+    objectif: "Trier les e-mails reçus par FILED.",
+    etapes: [
+      {
+        ecran: "Ouvrir Boîte de réception, onglets Nouveaux, Lus, Traités.",
+        dire: "La boîte de réception montre les e-mails que FILED a reçus. Les pièces jointes en sont tirées automatiquement.",
+      },
+      {
+        ecran: "Ouvrir un e-mail, puis « Marquer comme lu ».",
+        dire: "Un e-mail que vous avez vu se marque comme lu.",
+      },
+      { ecran: "Sur un autre e-mail sans intérêt, « Écarter ».", dire: "Une publicité ou un e-mail sans pièce s'écarte, pour garder la boîte propre." },
+    ],
+  },
+  "filed-dossier-facture": {
+    titre: "Le dossier d'une facture",
+    page: "filed",
+    depart: "/espace2/filed",
+    objectif: "Trouver dans le dossier tout ce qu'on peut faire sur une facture.",
+    etapes: [
+      {
+        ecran: "Ouvrir une facture, puis son menu de gestes.",
+        dire: "Tous les gestes sur une facture partent de son dossier : corriger une valeur, ouvrir un litige, rattacher une commande, transmettre à la comptabilité.",
+      },
+      { ecran: "Cliquer sur « Voir la pièce ».", dire: "La pièce d'origine reste toujours consultable, telle qu'elle est arrivée." },
+    ],
+  },
+  "filed-corriger": {
+    titre: "Corriger une valeur",
+    page: "filed",
+    depart: "/espace2/filed",
+    objectif: "Rectifier un montant, une date ou un numéro mal lu.",
+    etapes: [
+      {
+        ecran: "Dans le dossier, « Corriger une valeur… », choisir le montant, saisir la bonne valeur.",
+        dire: "Si FILED a mal lu une valeur, corrigez-la. Indiquez la bonne valeur et pourquoi.",
+      },
+      {
+        ecran: "Montrer la nouvelle version de la facture et les contrôles rejoués.",
+        dire: "La correction crée une nouvelle version de la facture, et tous les contrôles sont rejoués. L'ancienne version reste dans l'historique.",
+      },
+      {
+        ecran: "Sur une autre facture, « Confirmer la valeur non vérifiée… ».",
+        dire: "Quand FILED n'est pas sûr d'une valeur, il vous demande de la confirmer.",
+      },
+    ],
+  },
+  "filed-controles": {
+    titre: "Contrôles et fraude",
+    page: "filed",
+    depart: "/espace2/filed/controles",
+    objectif: "Comprendre ce qui bloque une facture et lever un contrôle à bon escient.",
+    etapes: [
+      {
+        ecran: "Ouvrir Contrôles et fraude, sur « Bloquants » puis « À vérifier ».",
+        dire: "FILED contrôle chaque facture : le compte entre HT, TVA et TTC, l'IBAN, les doublons. Ce qui bloque est ici, et ce qui demande un œil aussi.",
+      },
+      {
+        ecran: "Ouvrir un contrôle, puis « Lever avec un motif… ».",
+        dire: "Si vous avez vérifié et que tout est en ordre, levez le contrôle en donnant le motif. Il reste au journal.",
+      },
+    ],
+  },
+  "filed-fournisseur": {
+    titre: "Confirmer un fournisseur et son IBAN",
+    page: "filed",
+    depart: "/espace2/filed/fournisseurs",
+    objectif: "Confirmer un nouveau fournisseur et faire valider son IBAN avant tout paiement.",
+    etapes: [
+      {
+        ecran: "Ouvrir Fournisseurs, onglet « À confirmer ».",
+        dire: "Un fournisseur naît de sa première facture. Avant de le payer, il faut le confirmer.",
+      },
+      {
+        ecran: "« Confirmer ce fournisseur… », saisir ce qui a été vérifié.",
+        dire: "Dites ce que vous avez vérifié : un bon de commande, un appel au numéro connu, un contrat. Celui qui a déposé la pièce ne peut pas confirmer lui-même : une autre personne le fait.",
+      },
+      {
+        ecran: "« Proposer un IBAN… », saisir d'où il vient.",
+        dire: "Un IBAN proposé part en validation dans « À valider ». Une personne habilitée doit l'approuver avant tout paiement.",
+      },
+    ],
+  },
+  "filed-litige": {
+    titre: "Ouvrir un litige",
+    page: "filed",
+    depart: "/espace2/filed",
+    objectif: "Mettre une facture fournisseur en litige, puis le clore.",
+    etapes: [
+      {
+        ecran: "Dans le dossier d'une facture, « Ouvrir un litige… », saisir le motif.",
+        dire: "Une livraison incomplète, un prix qui ne correspond pas ? Ouvrez un litige sur la facture.",
+      },
+      { ecran: "Montrer « Clore le litige… » dans le même menu.", dire: "Une fois l'affaire réglée avec le fournisseur, closez le litige." },
+    ],
+  },
+  "filed-commande": {
+    titre: "Rattacher une commande",
+    page: "filed",
+    depart: "/espace2/filed",
+    objectif: "Rapprocher une facture de sa commande, ligne par ligne.",
+    etapes: [
+      {
+        ecran: "Dans le dossier, « Désigner une commande… », choisir la commande.",
+        dire: "Rattachez la facture à la commande qu'elle concerne.",
+      },
+      {
+        ecran: "« Apparier la ligne 1… ».",
+        dire: "Puis appariez ses lignes à celles de la commande : vous voyez tout de suite ce qui a été facturé en plus ou en moins.",
+      },
+    ],
+  },
+  "filed-payer": {
+    titre: "Payer une facture",
+    page: "filed",
+    depart: "/espace2/filed/a-payer",
+    objectif: "Retrouver les factures validées par échéance et noter leur paiement.",
+    etapes: [
+      {
+        ecran: "Ouvrir À payer.",
+        dire: "Une facture validée dans « À valider » arrive ici, rangée par échéance.",
+      },
+      {
+        ecran: "Sur une facture, « Noter un paiement… », saisir la date et la référence.",
+        dire: "Quand vous l'avez réglée, notez le paiement. La facture sort de la liste.",
+      },
+    ],
+  },
+  "filed-comptabilite": {
+    titre: "Transmettre à la comptabilité",
+    page: "filed",
+    depart: "/espace2/filed/comptabilite",
+    objectif: "Passer une facture validée en comptabilité et sortir le FEC.",
+    etapes: [
+      {
+        ecran: "Dans le dossier d'une facture validée, « Transmettre à la comptabilité… ».",
+        dire: "Une facture validée se transmet à la comptabilité : FILED en passe l'écriture.",
+      },
+      {
+        ecran: "Ouvrir Comptabilité, montrer la vue d'ensemble et la TVA déductible.",
+        dire: "L'écran Comptabilité montre les factures comptabilisées, le hors-taxes et la TVA déductible.",
+      },
+      {
+        ecran: "Cliquer sur « Exporter le FEC ».",
+        dire: "Exportez le fichier des écritures comptables pour votre expert-comptable. Une écriture transmise ne se modifie plus.",
+      },
+    ],
+  },
+  "filed-circuit": {
+    titre: "Le circuit de validation",
+    page: "filed",
+    depart: "/espace2/filed/circuit",
+    objectif: "Lire qui approuve quoi, et couvrir une absence.",
+    etapes: [
+      {
+        ecran: "Ouvrir Circuit de validation.",
+        dire: "Le circuit dit qui approuve une facture, une anomalie à lever ou un IBAN à confirmer.",
+      },
+      {
+        ecran: "Pointer les règles, de haut en bas.",
+        dire: "Les règles se lisent de haut en bas : la première qui correspond l'emporte. Elles se posent à l'installation, avec vous.",
+      },
+      {
+        ecran: "Montrer l'onglet des délégations.",
+        dire: "Pour une absence, une délégation datée, posée depuis « À valider », fait décider quelqu'un d'autre à votre place.",
+      },
+    ],
+  },
+  "filed-refusees": {
+    titre: "Les factures refusées",
+    page: "filed",
+    depart: "/espace2/filed/refusees",
+    objectif: "Savoir quoi faire d'une facture refusée.",
+    etapes: [
+      {
+        ecran: "Ouvrir Refusées, onglets « À corriger » et « Reprise impossible ».",
+        dire: "Une facture refusée arrive ici, avec la raison du refus.",
+      },
+      {
+        ecran: "Ouvrir une facture « À corriger ».",
+        dire: "Si elle peut être corrigée, faites-le dans les 24 heures qui suivent le refus. Passé ce délai, elle se classe sans suite, ou le fournisseur envoie une facture rectificative.",
+      },
+    ],
+  },
+  /* ═══════════════ Lot 2 · REPUT ═══════════════ */
+  "reput-demandes": {
+    titre: "Une demande qui arrive",
+    page: "reput",
+    depart: "/espace2/reput",
+    objectif: "Lire une demande client et la réponse que REPUT a préparée.",
+    etapes: [
+      {
+        ecran: "Ouvrir REPUT, Demandes.",
+        dire: "REPUT reçoit les demandes de vos clients et prépare une réponse à partir de votre base de connaissances.",
+      },
+      {
+        ecran: "Ouvrir une demande, montrer la question puis la réponse préparée et la fiche citée.",
+        dire: "Vous voyez la question du client, la réponse préparée, et la fiche de votre base dont elle est tirée.",
+      },
+      {
+        ecran: "Montrer une demande hors de la base.",
+        dire: "Ce que la base ne couvre pas, REPUT ne l'invente pas : il vous transfère la demande.",
+      },
+    ],
+  },
+  "reput-repondre": {
+    titre: "Répondre à une demande",
+    page: "reput",
+    depart: "/espace2/reput",
+    objectif: "Valider, corriger ou refuser une réponse préparée.",
+    etapes: [
+      {
+        ecran: "Sur une demande, « Valider et envoyer ».",
+        dire: "Si la réponse vous convient, validez-la et elle part.",
+      },
+      {
+        ecran: "Sur une autre, « Corriger la réponse », modifier une phrase, valider.",
+        dire: "Si elle ne vous ressemble pas, corrigez-la avant de l'envoyer.",
+      },
+      { ecran: "Sur une troisième, « Refuser la réponse… », saisir le motif.", dire: "Si elle est fausse, refusez-la en disant pourquoi : la demande vous revient." },
+    ],
+  },
+  "reput-base": {
+    titre: "La base de connaissances",
+    page: "reput",
+    depart: "/espace2/reput/base",
+    objectif: "Créer, corriger et mettre en vigueur une fiche.",
+    etapes: [
+      {
+        ecran: "Ouvrir Base de connaissances, survoler les états : en vigueur, brouillon, à revoir.",
+        dire: "REPUT ne répond qu'avec ce qui est dans votre base. Chaque fiche est en vigueur, en brouillon ou à revoir.",
+      },
+      {
+        ecran: "« Nouvelle fiche », saisir une question et sa réponse.",
+        dire: "Ajoutez une fiche pour chaque question qui revient : vos horaires, vos délais, vos tarifs.",
+      },
+      {
+        ecran: "« Valider et mettre en vigueur ».",
+        dire: "Une fois en vigueur, la prochaine réponse la cite. Un brouillon attend qu'un valideur le mette en vigueur.",
+      },
+      { ecran: "Sur une fiche périmée, « Retirer la fiche… ».", dire: "Une fiche retirée ne sert plus." },
+    ],
+  },
+  "reput-partir-seul": {
+    titre: "Laisser partir seul",
+    page: "reput",
+    depart: "/espace2/reput/sujets",
+    objectif: "Autoriser, sujet par sujet, l'envoi sans relecture, et savoir le couper.",
+    etapes: [
+      {
+        ecran: "Ouvrir Sujets autorisés.",
+        dire: "Au début, chaque réponse attend votre validation. Quand un sujet vous convient, vous pouvez le laisser partir seul.",
+      },
+      {
+        ecran: "Sur un sujet simple (les horaires), « Autoriser l'envoi seul ».",
+        dire: "Les réponses tirées de votre base sur ce sujet partent alors sans relecture.",
+      },
+      {
+        ecran: "Montrer « Couper l'envoi automatique… » et le motif demandé.",
+        dire: "À tout moment, coupez l'envoi automatique en donnant le motif : toutes les réponses attendent de nouveau votre validation.",
+      },
+    ],
+  },
+  "reput-urgences": {
+    titre: "Urgences et réclamations",
+    page: "reput",
+    depart: "/espace2/reput/urgences",
+    objectif: "Savoir comment REPUT traite une urgence, une réclamation, ou un client qui demande une personne.",
+    etapes: [
+      {
+        ecran: "Ouvrir Urgences et escalade.",
+        dire: "Certaines demandes ne reçoivent jamais de réponse automatique : les urgences, les réclamations, les clients en litige, et ceux qui demandent à parler à quelqu'un.",
+      },
+      {
+        ecran: "Pointer le délai d'une urgence (une heure) et d'une réclamation (quatre heures).",
+        dire: "Chaque sujet porte le délai que vous avez fixé. Passé ce délai, la demande remonte au responsable.",
+      },
+      {
+        ecran: "Montrer la règle hors horaires.",
+        dire: "Par défaut, personne n'est appelé la nuit : le client reçoit tout de suite une réponse honnête avec vos horaires, et son urgence passe en tête à l'ouverture.",
+      },
+    ],
+  },
+  "reput-reglages": {
+    titre: "Réglages et demandes d'avis",
+    page: "reput",
+    depart: "/espace2/reput/reglages",
+    objectif: "Régler la signature, la mention, l'accusé de réception et les demandes d'avis.",
+    etapes: [
+      {
+        ecran: "Ouvrir Réglages et avis, montrer la signature et la mention de réponse automatisée.",
+        dire: "Ici, vous réglez la signature de vos réponses, et le texte de la mention qui dit qu'elles sont préparées par un assistant.",
+      },
+      { ecran: "Montrer l'accusé de réception.", dire: "Un accusé de réception part dans la minute, pour que le client sache que sa demande est arrivée." },
+      {
+        ecran: "Montrer les demandes d'avis.",
+        dire: "Une demande d'avis part trois jours après le règlement, avec deux relances au plus, jamais plus d'une fois en six mois, et sans écarter les clients mécontents.",
+      },
+    ],
+  },
+  /* ═══════════════ Lot 2 · OFFLOAD ═══════════════ */
+  "offload-comptes-risque": {
+    titre: "Les comptes à risque",
+    page: "offload",
+    depart: "/espace2/offload",
+    objectif: "Lire, chaque matin, quels clients ralentissent ou décrochent.",
+    etapes: [
+      {
+        ecran: "Ouvrir OFFLOAD, Comptes à risque.",
+        dire: "Chaque matin, OFFLOAD relit votre base clients et compare chaque client à son propre rythme de commandes.",
+      },
+      {
+        ecran: "Pointer les niveaux : régulier, ralentit, saison manquée, décroche, s'est tu.",
+        dire: "Chaque client a un niveau : régulier, ralentit, saison manquée, décroche, ou s'est tu.",
+      },
+      { ecran: "Ouvrir un compte qui décroche, montrer son rythme et sa valeur en jeu.", dire: "Ouvrez un compte : vous voyez son rythme habituel, depuis quand il s'écarte, et ce qu'il pèse sur une année." },
+    ],
+  },
+  "offload-reprise": {
+    titre: "Préparer une reprise",
+    page: "offload",
+    depart: "/espace2/offload",
+    objectif: "Préparer un message de reprise de contact et l'appel qui va avec.",
+    etapes: [
+      {
+        ecran: "Sur un compte à risque, « Préparer une nouvelle reprise ».",
+        dire: "Pour reprendre contact avec un client, préparez une reprise.",
+      },
+      {
+        ecran: "Montrer le message préparé, puis « Valider les messages ».",
+        dire: "Le message part en validation, et une tâche d'appel est créée pour vous ou votre commercial.",
+      },
+      {
+        ecran: "Montrer la séquence arrêtée après une réponse du client.",
+        dire: "Dès que le client répond, la séquence s'arrête : la suite se fait de personne à personne.",
+      },
+    ],
+  },
+  "offload-echeances": {
+    titre: "Échéances et renouvellements",
+    page: "offload",
+    depart: "/espace2/offload/echeances",
+    objectif: "Suivre les échéances périodiques de vos clients et noter une intervention.",
+    etapes: [
+      {
+        ecran: "Ouvrir Échéances et renouvellements.",
+        dire: "OFFLOAD suit aussi les échéances qui reviennent : un entretien annuel, un contrôle, un renouvellement.",
+      },
+      {
+        ecran: "Montrer le message de la semaine qui précède, en validation.",
+        dire: "La semaine qui précède une échéance, un message est préparé et attend votre validation.",
+      },
+      {
+        ecran: "Sur une échéance, « Noter une intervention… ».",
+        dire: "Quand l'intervention est faite, notez-la : l'échéance suivante est datée depuis cette date.",
+      },
+    ],
+  },
+  "offload-affaires": {
+    titre: "Les affaires restées en plan",
+    page: "offload",
+    depart: "/espace2/offload/affaires",
+    objectif: "Décider du sort d'une affaire qui n'a pas abouti.",
+    etapes: [
+      {
+        ecran: "Ouvrir Affaires restées en plan.",
+        dire: "Les affaires restées sans suite sont rangées ici : en attente, closes sans suite, ou retirées.",
+      },
+      {
+        ecran: "Glisser une affaire sur « En attente ».",
+        dire: "Pour relancer encore, glissez-la sur « En attente » : un nouveau message est préparé, en validation.",
+      },
+      { ecran: "Glisser une autre affaire sur « Closes sans suite ».", dire: "Si elle est perdue, closez-la sans suite : elle n'est plus relancée." },
+    ],
+  },
+  "offload-groupes": {
+    titre: "Les groupes clients",
+    page: "offload",
+    depart: "/espace2/offload/groupes",
+    objectif: "Regrouper les entités d'un même client.",
+    etapes: [
+      {
+        ecran: "Ouvrir Groupes clients.",
+        dire: "Un même client peut avoir plusieurs entités ou plusieurs sites. Les groupes les réunissent.",
+      },
+      {
+        ecran: "Montrer « À rattacher (même domaine de courriel) ».",
+        dire: "OFFLOAD vous propose les comptes qui partagent le même domaine de courriel. Rattachez-les à leur groupe.",
+      },
+      {
+        ecran: "Rester sur le groupe rattaché.",
+        dire: "Une fois rattachés, le plafond de sollicitation vaut pour tout le groupe : il n'est pas relancé par chacune de ses entités.",
+      },
+    ],
+  },
+  "offload-garde-fous": {
+    titre: "Les garde-fous",
+    page: "offload",
+    depart: "/espace2/offload/garde-fous",
+    objectif: "Écrire une règle en français et savoir suspendre OFFLOAD.",
+    etapes: [
+      {
+        ecran: "Ouvrir Garde-fous.",
+        dire: "Sans règle de votre part, les messages restent sans prix ni délai, toujours au vouvoiement.",
+      },
+      {
+        ecran: "Écrire une règle, par exemple « ne jamais parler de remise », et lire la réponse.",
+        dire: "Écrivez une règle en une phrase. OFFLOAD vous répond ce qu'il en fera, ou qu'il ne l'a pas comprise. Tout message qui enfreint une règle est retenu.",
+      },
+      {
+        ecran: "Montrer « Suspendre OFFLOAD », sans cliquer.",
+        dire: "En cas de doute, suspendez OFFLOAD : plus aucune reprise ne part.",
+      },
+    ],
+  },
   "daliro-chantiers": { titre: "Vos chantiers", page: "daliro" },
   "daliro-avenants": { titre: "Avenants et prix", page: "daliro" },
   "lorani-calendrier": { titre: "Le calendrier des permis", page: "lorani" },

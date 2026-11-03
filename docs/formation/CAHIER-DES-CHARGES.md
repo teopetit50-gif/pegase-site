@@ -87,8 +87,8 @@ l'adresse calculée dans `videos.ts` change.
 
 | Lot | Contenu | État |
 |---|---|---|
-| 1 | Cahier des charges ; catalogue et scripts de **Bien démarrer + CASHD** ; CASHD détaillé geste par geste ; outil de dépôt ; sous-titres dans le lecteur | **ce lot** |
-| 2 | Scripts et pages détaillées de **FILED, REPUT, OFFLOAD** | à venir |
+| 1 | Cahier des charges ; catalogue et scripts de **Bien démarrer + CASHD** ; CASHD détaillé geste par geste ; outil de dépôt ; sous-titres dans le lecteur | en ligne le 03/11 |
+| 2 | Scripts et pages détaillées de **FILED, REPUT, OFFLOAD** | en ligne le 03/11 |
 | 3 | Scripts et pages des **six métiers** | à venir |
 | 4 | Le reste du socle et le **Réseau Omega** | à venir |
 | 5 | La **vitrine publique**, dès que 6 vidéos sont tournées | attend le tournage |
@@ -98,7 +98,5 @@ Pendant tout ce temps, Teo tourne au fil des scripts, dans l'ordre du sommaire.
 
 ## 5. Ce qui attend Teo
 - Tourner les vidéos du lot 1 à partir de `docs/formation/SCRIPTS.md`.
-- Le tableau `/omega` → Formation est stocké en base (`omega_lignes`) : les
-  sessions n'y écrivent pas sans accord. Deux possibilités : Teo y crée
-  lui-même les lignes, ou il autorise une session à les importer depuis le
-  catalogue.
+- Les questions ouvertes sont dans `docs/formation/QUESTIONS-POUR-TEO.md`
+  (l'import du catalogue dans `/omega` → Formation, le choix du visuel).

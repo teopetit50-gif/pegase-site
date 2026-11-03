@@ -80,3 +80,34 @@ for (const [page, nom] of Object.entries(PAGES)) {
 const sortie = join(racine, "docs/formation/SCRIPTS.md");
 writeFileSync(sortie, md);
 console.log(`${sortie} : ${fiches.length} vidéos, ${ecrites.length} scripts.`);
+
+/* L'import du catalogue dans le tableau « formation » de /omega (omega_lignes).
+   C'est une écriture en base de production : le fichier est PRÉPARÉ ici, il ne
+   s'exécute qu'avec l'accord de Teo (docs/formation/QUESTIONS-POUR-TEO.md).
+   Une vidéo déjà importée (même « Identifiant ») n'est pas recréée. */
+const q = (t) => "'" + String(t).replace(/'/g, "''") + "'";
+let sql = `-- Produit par node outils/formation-scripts.mjs : NE PAS EXÉCUTER sans l'accord de Teo.
+-- Importe le catalogue des vidéos de la formation dans /omega → Formation.
+begin;
+`;
+fiches.forEach(([id, f], i) => {
+  const script = (f.etapes ?? []).map((e, n) => `${n + 1}. À l'écran : ${e.ecran}\nÀ dire : ${e.dire}`).join("\n\n");
+  const donnees = {
+    Identifiant: id,
+    Module: PAGES[f.page] ?? f.page,
+    Vidéo: f.titre,
+    Statut: f.tournee ? "En ligne" : f.etapes?.length ? "À tourner" : "Script à écrire",
+    "Ce qu'on y apprend": f.objectif ?? "",
+    Script: (f.depart ? `Départ : https://omegaai.fr${f.depart}\n\n` : "") + script,
+    Durée: f.tournee ? `${Math.round(f.tournee.duree / 60)} min` : "",
+    Lien: "",
+  };
+  sql += `insert into omega_lignes (tableau, ordre, donnees)
+select 'formation', ${1000 + i}, ${q(JSON.stringify(donnees))}::jsonb
+where not exists (select 1 from omega_lignes where tableau = 'formation' and donnees->>'Identifiant' = ${q(id)});
+`;
+});
+sql += "commit;\n";
+const fichierSql = join(racine, "docs/formation/import-omega-lignes.sql");
+writeFileSync(fichierSql, sql);
+console.log(`${fichierSql} : ${fiches.length} lignes préparées (non exécutées).`);
