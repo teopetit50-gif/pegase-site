@@ -371,3 +371,11 @@
     transition: none !important;
   }
 }
+
+/* 03/11/2026 — les sous-titres des vidéos de Teo, dans la police de la page */
+.fm-video-media::cue {
+  font-family: inherit;
+  font-size: 0.95em;
+  color: #fff;
+  background: rgb(0 0 0 / 0.72);
+}

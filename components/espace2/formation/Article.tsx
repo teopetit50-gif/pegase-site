@@ -56,14 +56,14 @@ export default function Article({ page }: { page: PageFormation }) {
         <h1 className="fm-h1">{page.titre}</h1>
         <p className="fm-intro">{riche(page.intro)}</p>
 
-        {page.video && <Lecteur src={page.video.src} affiche={page.video.affiche} titre={page.video.titre} duree={page.video.duree} />}
+        {page.video && <Lecteur {...page.video} />}
 
         {page.sections.map((s) => {
           const Titre = s.niveau === 2 ? "h2" : "h3";
           return (
             <section key={s.id} className="fm-section">
               <Titre id={s.id}>{s.titre}</Titre>
-              {s.video && <Lecteur src={s.video.src} affiche={s.video.affiche} titre={s.video.titre} duree={s.video.duree} />}
+              {s.video && <Lecteur {...s.video} />}
               {blocs(s.blocs)}
             </section>
           );

@@ -20,7 +20,7 @@ const horloge = (s: number) => {
 
 /* `duree` : la durée affichée avant que la vidéo ait chargé ses métadonnées
    (sur téléphone, elle ne les charge souvent qu'au premier appui) */
-export default function Lecteur({ src, affiche, titre, duree: dureeConnue = 0 }: { src: string; affiche: string; titre: string; duree?: number }) {
+export default function Lecteur({ src, affiche, titre, duree: dureeConnue = 0, sousTitres }: { src: string; affiche: string; titre: string; duree?: number; sousTitres?: string }) {
   const cadre = useRef<HTMLDivElement | null>(null);
   const video = useRef<HTMLVideoElement | null>(null);
   const repos = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -121,7 +121,10 @@ export default function Lecteur({ src, affiche, titre, duree: dureeConnue = 0 }:
         onTimeUpdate={(e) => setTemps(e.currentTarget.currentTime)}
         onVolumeChange={(e) => setMuet(e.currentTarget.muted)}
         onEnded={() => setCommandes(true)}
-      />
+      >
+        {/* 03/11/2026 — les vidéos de Teo sont sous-titrées (cahier des charges de la formation), affichées d'office */}
+        {sousTitres && <track kind="captions" src={sousTitres} srcLang="fr" label="Français" default />}
+      </video>
       <div className="fm-video-voile" aria-hidden="true" />
 
       <div className="fm-video-commandes">
