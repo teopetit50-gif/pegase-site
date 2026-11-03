@@ -99,7 +99,8 @@ fiches.forEach(([id, f], i) => {
     Module: PAGES[f.page] ?? f.page,
     Vidéo: f.titre,
     Statut: f.tournee ? "En ligne" : f.etapes?.length ? "À tourner" : "Script à écrire",
-    "Ce qu'on y apprend": f.objectif ?? "",
+    /* la clé lue et écrite par components/omega/Formation.tsx (« y » n'est que dans le libellé affiché) */
+    "Ce qu'on apprend": f.objectif ?? "",
     Script: (f.depart ? `Départ : https://omegaai.fr${f.depart}\n\n` : "") + script,
     Durée: f.tournee ? `${Math.round(f.tournee.duree / 60)} min` : "",
     Lien: "",

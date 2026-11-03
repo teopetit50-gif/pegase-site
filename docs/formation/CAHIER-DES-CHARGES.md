@@ -20,6 +20,8 @@ fond (les contenus), ensuite le visuel.
 | Dépôt | Teo colle le **lien du fichier** (Drive, Dropbox, WeTransfer…) sur la ligne de la vidéo dans `/omega` → Formation. Une session le récupère et le met en ligne. |
 | Hébergement | Les **fichiers du site** (`public/formation/`), compressés. On passera à Vercel Blob si l'ensemble dépasse 150 Mo. |
 | Lot pilote | **Bien démarrer** (guide, principes, première semaine) **+ CASHD**. |
+| Visuel (03/11, au retour de Teo) | **B + C** : un accueil de la Formation qui présente les parcours en cartes, avec leur nombre de vidéos et leur durée (direction B) ; des pages de module en lignes, avec la vignette et la durée à gauche, le titre et le texte à droite, et la vidéo qui s'ouvre sur place (direction C). |
+| Import dans `/omega` → Formation (03/11) | **Fait** par la session de coordination, directement en base. 89 lignes avec leur objectif et leur script (ordres 1000 à 1088). Les 22 lignes du plan du 09/10 sont rangées dans le module « Ancien plan (09/10) », sans suppression. Pour les prochains imports : `docs/formation/import-omega-lignes.sql`, qui ne recrée pas une vidéo déjà présente. |
 
 Points qui n'ont pas été posés à Teo et qui suivent l'existant : le texte est
 en français, au vouvoiement, sans superlatif, et on dit « système », jamais

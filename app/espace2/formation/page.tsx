@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import Article from "@/components/espace2/formation/Article";
-import { PAGES } from "@/components/espace2/formation/pages";
+import { AccueilFormation } from "@/components/espace2/formation/Formation";
 
 /* ══════════════════════════════════════════════════════════════════════
    /espace2/formation — le guide de démarrage de l'espace client (29/10/2026)
@@ -19,6 +18,10 @@ import { PAGES } from "@/components/espace2/formation/pages";
    Pour la remplacer, déposer le nouveau fichier sous le même nom (et son
    image d'affiche, decouvrir-omega.jpg, 1280 × 720) — rien d'autre à
    toucher.
+
+   03/11/2026 — visuel « B + C » choisi par Teo : cette adresse devient
+   l'accueil de la Formation (les parcours en cartes) ; le guide de
+   démarrage passe à /espace2/formation/guide.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -26,5 +29,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <Article page={PAGES.guide} />;
+  return <AccueilFormation />;
 }

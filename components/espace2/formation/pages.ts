@@ -886,7 +886,7 @@ export const PAGES: Record<string, PageFormation> = {
         ],
       },
     ],
-    suivant: { titre: "Revenir au guide de démarrage", href: F },
+    suivant: { titre: "Revenir à l'accueil de la formation", href: F },
   },
 
   /* ——— les modules métier : le panneau ne montre que celui de l'entreprise ——— */

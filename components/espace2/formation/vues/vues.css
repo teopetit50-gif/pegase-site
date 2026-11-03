@@ -1,0 +1,304 @@
+/* Le visuel de la Formation, « B + C » choisi par Teo (03/11/2026) :
+   accueil en cartes (B), pages de module en lignes (C). Jetons --v2-*,
+   thème sombre et clair. */
+
+.mq {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 48px 24px 96px;
+  color: var(--v2-gray-900);
+  font-size: 15px;
+  line-height: 24px;
+}
+.mq--etroit {
+  max-width: 880px;
+}
+.mq-sur {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: var(--v2-gray-700);
+}
+.mq-h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 38px;
+  font-weight: 590;
+  letter-spacing: -0.7px;
+  color: var(--v2-gray-1000);
+}
+.mq-intro {
+  margin: 12px 0 0;
+  max-width: 620px;
+  color: var(--v2-gray-900);
+}
+.mq-chiffres {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--v2-gray-700);
+}
+
+/* ——— l'accueil ——— */
+.mq-parcours {
+  margin-top: 48px;
+}
+.mq-parcours-tete h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+.mq-parcours-tete p {
+  margin: 4px 0 16px;
+  font-size: 13px;
+  color: var(--v2-gray-700);
+}
+.mq-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.mq-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--v2-a-400);
+  border-radius: 10px;
+  background: var(--v2-bg-100);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.mq-carte:hover {
+  background: var(--v2-a-100);
+  border-color: var(--v2-a-500);
+}
+.mq-carte-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--v2-a-200);
+  color: var(--v2-gray-1000);
+  margin-bottom: 6px;
+}
+.mq-carte-titre {
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+.mq-carte-resume {
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--v2-gray-800);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mq-carte-meta {
+  margin-top: auto;
+  padding-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--v2-gray-700);
+}
+
+.mq-pas-texte p {
+  margin: 0 0 12px;
+}
+.mq-pas-texte a {
+  color: inherit;
+  text-decoration-color: var(--v2-a-600);
+  text-underline-offset: 0.175em;
+}
+
+/* ——— la page d'un module ——— */
+.mq-pas {
+  list-style: none;
+  margin: 32px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mq-pas-ligne {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px 0;
+  border-top: 1px solid var(--v2-a-400);
+}
+.mq-pas-ligne[data-ouvert] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.mq-vignette {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 1px solid var(--v2-a-400);
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  background: var(--v2-a-100);
+  cursor: pointer;
+  align-self: start;
+}
+.mq-vignette img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.mq-vignette-lire {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+}
+.mq-vignette-duree {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 0.6);
+  color: #fff;
+  font-size: 11px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.mq-vignette:hover .mq-vignette-lire {
+  background: rgb(0 0 0 / 0.8);
+}
+.mq-pas-rang {
+  margin: 0;
+  font-size: 12px;
+  color: var(--v2-gray-700);
+}
+.mq-pas-texte h2 {
+  margin: 2px 0 8px;
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+
+@media (max-width: 640px) {
+  .mq-pas-ligne {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .mq {
+    padding: 32px 16px 64px;
+  }
+}
+
+/* ——— la page d'un module : ce qui s'ajoute aux maquettes ——— */
+.mq-fil {
+  color: inherit;
+  text-decoration: none;
+}
+.mq-fil:hover {
+  color: var(--v2-gray-1000);
+}
+.mq-tete-video {
+  margin-top: 24px;
+}
+.mq-pas-section {
+  padding: 32px 0 8px;
+  border-top: 1px solid var(--v2-a-400);
+}
+.mq-pas-section[data-niveau="3"] {
+  border-top: 0;
+  padding-top: 8px;
+}
+.mq-pas-section h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+.mq-pas-section h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+.mq-pas-section + .mq-pas-ligne {
+  border-top: 0;
+}
+.mq-pas-section p {
+  margin: 0 0 12px;
+}
+.mq-pas-section ul,
+.mq-pas-texte ul {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+.mq-pas-section li,
+.mq-pas-texte li {
+  margin: 4px 0;
+}
+.mq-pas-section a {
+  color: inherit;
+  text-decoration-color: var(--v2-a-600);
+  text-underline-offset: 0.175em;
+}
+.mq-pas-section .fm-sous {
+  margin: 12px 0 4px;
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+.mq-suivant {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 40px;
+  padding: 16px;
+  border: 1px solid var(--v2-a-400);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+.mq-suivant:hover {
+  background: var(--v2-a-100);
+}
+.mq-suivant-sur {
+  font-size: 13px;
+  color: var(--v2-gray-700);
+}
+.mq-suivant-titre {
+  font-weight: 590;
+  color: var(--v2-gray-1000);
+}
+/* la remise à zéro d'Espace 2 retire puces et soulignements : on les rend au texte de la formation */
+.mq-pas-section ul,
+.mq-pas-texte ul {
+  list-style: disc;
+}
+.mq-pas-section li::marker,
+.mq-pas-texte li::marker {
+  color: var(--v2-gray-700);
+}
+.mq-pas-section a,
+.mq-pas-texte a,
+.mq-intro a {
+  text-decoration-line: underline;
+  text-decoration-color: var(--v2-a-600);
+  text-underline-offset: 0.175em;
+  color: inherit;
+}
+.mq-pas-section a:hover,
+.mq-pas-texte a:hover,
+.mq-intro a:hover {
+  text-decoration-color: currentColor;
+}

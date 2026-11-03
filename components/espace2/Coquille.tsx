@@ -568,7 +568,9 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
       {
         titre: "Bien démarrer",
         liens: [
-          { libelle: "Guide de démarrage", href: `${RACINE}/formation`, exact: true },
+          /* 03/11/2026 — visuel « B + C » : /formation est l'accueil en cartes, le guide passe à /formation/guide */
+          { libelle: "Accueil de la formation", href: `${RACINE}/formation`, exact: true },
+          { libelle: "Guide de démarrage", href: `${RACINE}/formation/guide` },
           { libelle: "Comment marche Omega", href: `${RACINE}/formation/principes` },
           { libelle: "Votre première semaine", href: `${RACINE}/formation/premiere-semaine` },
         ],
