@@ -62,11 +62,11 @@ function quand(iso: string): string {
 const pct = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${Math.round(v * 100)} %`);
 
 /* une rangée de « Team resources » : icône 16, texte 13/500 ; le complément en tertiaire */
-function Rangee({ icone, texte, suite, onClick, href }: { icone: NomTavIcone; texte: string; suite?: string; onClick?: () => void; href?: string }) {
+function Rangee({ icone, texte, suite, onClick, href, titre }: { icone: NomTavIcone; texte: string; suite?: string; onClick?: () => void; href?: string; titre?: string }) {
   const contenu = (
     <>
       <TavIcone nom={icone} />
-      <span className="tav-h-rangee-texte">{texte}</span>
+      <span className="tav-h-rangee-texte" title={titre || undefined}>{texte}</span>
       {suite ? <span className="tav-h-rangee-suite">{suite}</span> : null}
     </>
   );
@@ -281,7 +281,8 @@ export default function VueEnsemble() {
 
   const aller: { cle: string; libelle: string; icone: NomTavIcone; href: string; compte?: string }[] = [
     ...FAMILLES.map((f) => ({ cle: f.cle, libelle: f.libelle, icone: ICONE_FAMILLE[f.cle], href: `${BASE}/retours?famille=${f.cle}`, compte: String(compteurs[f.cle]) })),
-    { cle: "encaisser", libelle: "À encaisser", icone: "Euro", href: `${BASE}/retours`, compte: montant(compteurs.encaisser) },
+    /* « à encaisser » mène à la vue Factures, celle qui porte les impayés — pas à la liste des contrats */
+    { cle: "encaisser", libelle: "À encaisser", icone: "Euro", href: `${BASE}/retours?vue=factures&factures=impayees`, compte: montant(compteurs.encaisser) },
     { cle: "parc", libelle: "Parc et atelier", icone: "Car", href: `${BASE}/parc` },
     { cle: "amendes", libelle: "Amendes et péages", icone: "Triage", href: `${BASE}/amendes` },
     { cle: "incidents", libelle: "Incidents", icone: "Bandage", href: `${BASE}/incidents` },
@@ -429,7 +430,8 @@ export default function VueEnsemble() {
                     <Rangee
                       key={c.contrat_id}
                       icone="Shield"
-                      texte={`${c.numero} · ${c.client} · ${c.action}`}
+                      texte={`${c.numero} · ${c.client} · score ${c.score} · ${c.action}`}
+                      titre={c.raisons.join(", ")}
                       suite={c.controle ? (c.controle.identite === "conforme" && c.controle.permis === "conforme" ? "pièces conformes" : "pièce non conforme") : "pièces à contrôler"}
                       onClick={peutNoter ? () => setCible(c) : undefined}
                     />
