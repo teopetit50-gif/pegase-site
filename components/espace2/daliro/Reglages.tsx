@@ -357,7 +357,8 @@ export default function Reglages() {
     ...(peutActiver ? [{ libelle: "Activer moi-même…", icone: "Shield" as NomDalIcone, action: () => ouvrir({ type: "activer" }) }] : []),
     ...(peutRevoquer ? [{ libelle: "Révoquer l'accord…", icone: "StatusCanceled" as NomDalIcone, action: () => ouvrir({ type: "revoquer" }) }] : []),
   ];
-  const nbLignesOrga = (dirige ? canaux.length : 1) + 1 + controlesOrga.length;
+  /* + 2 : le journal des validations et les rôles et droits */
+  const nbLignesOrga = (dirige ? canaux.length : 1) + 2 + controlesOrga.length;
 
   /* ——— la sélection (cases à cocher de Linear) et ses gestes groupés ——— */
   const [selection, setSelection] = useState<string[]>([]);
@@ -723,6 +724,18 @@ export default function Reglages() {
                 <span className="dal-rg-modele-texte">
                   <span className="dal-rg-modele-nom">Journal des validations</span>
                   <span className="dal-rg-modele-meta">Qui a demandé, validé ou refusé : avenants, situations et prix de Daliro, dans l&apos;activité de l&apos;espace</span>
+                </span>
+              </li>
+              {/* 03/11/2026 (docs/verification/PROMESSES-ECRANS.md) : « Rôles et droits — vous décidez qui valide un
+                  avenant » ; les rôles se règlent sur la page Équipe de l'espace, sans lien depuis Daliro jusqu'ici */}
+              <li className="dal-rg-modele">
+                <Link href={`${RACINE}/equipe`} className="dal-rg-modele-lien" aria-label="Rôles et droits — ouvrir l'équipe de l'espace" />
+                <span className="dal-rg-vignette" aria-hidden="true">
+                  <DalIcone nom="Shield" />
+                </span>
+                <span className="dal-rg-modele-texte">
+                  <span className="dal-rg-modele-nom">Rôles et droits</span>
+                  <span className="dal-rg-modele-meta">Qui valide un avenant, une situation ou un prix : les rôles de chaque personne, sur la page Équipe de l&apos;espace</span>
                 </span>
               </li>
               {controlesOrga.map((k) => (
