@@ -51,6 +51,9 @@ type Modele = {
   niveau: Niveau;
   raisons: (dernier: string) => Raison[];
   rythme: number | null;
+  /* « un compte suivi en direct par un commercial est exclu du cycle automatique » */
+  statut?: "suivi" | "exclu" | "arrete";
+  motif?: string;
 };
 
 const MODELES: Modele[] = [
@@ -89,6 +92,7 @@ const MODELES: Modele[] = [
     ],
   },
   {
+    statut: "exclu", motif: "Suivi en direct par Sofia : appelée le 28 oct., elle garde la main sur ce compte.",
     n: 5, ref: "C005", nom: "Boulangerie Lemaire", contact: "M. Lemaire", email: "contact@lemaire.exemple", telephone: "02 99 00 00 05", commercial: "Sofia", ville: "Rennes",
     ages: Array.from({ length: 24 }, (_, k) => 9 + 30 * k), montants: () => 480, niveau: "ok", rythme: 30, raisons: () => [],
   },
@@ -170,10 +174,12 @@ const REPRISE_MARTIN: Reprise = {
   envoi1: { statut: "a_valider", mode: "essai", verrou: null, sujet: "Atelier Bertin — votre commande" }, envoi2: null,
 };
 const REPRISE_FROID: Reprise = {
-  id: id("c42", 2), compte_id: id("c40", 2), statut: "envoyee", issue: null, motif: null, ouverte_par: "detection",
-  envoye1_le: new Date(Date.now() - 4 * 86400000).toISOString(), envoye2_le: null, repondu_le: null, close_le: null,
+  /* « un compte sans réponse reçoit un second message, puis il sort du cycle » : le second est parti hier */
+  id: id("c42", 2), compte_id: id("c40", 2), statut: "relancee", issue: null, motif: null, ouverte_par: "detection",
+  envoye1_le: new Date(Date.now() - 4 * 86400000).toISOString(), envoye2_le: new Date(Date.now() - 1 * 86400000).toISOString(), repondu_le: null, close_le: null,
   cree_le: new Date(Date.now() - 5 * 86400000).toISOString(),
-  envoi1: { statut: "envoye", mode: "essai", verrou: null, sujet: "Atelier Bertin — votre commande" }, envoi2: null,
+  envoi1: { statut: "envoye", mode: "essai", verrou: null, sujet: "Atelier Bertin — votre commande" },
+  envoi2: { statut: "envoye", mode: "essai", verrou: null, sujet: "Atelier Bertin — votre commande (relance)" },
 };
 const REPRISE_DUBREUIL: Reprise = {
   id: id("c42", 3), compte_id: id("c40", 3), statut: "repondue", issue: "reponse", motif: "Le client a répondu : la conversation revient à votre équipe.",
@@ -217,8 +223,8 @@ export function exempleOffload(): { tableau: Tableau; fiches: Record<string, Fic
     const signal = signalDe(m, achats);
     const compte: Compte = {
       id: id("c40", m.n), entite_id: ENTITE, ref: m.ref, nom: m.nom, contact: m.contact, email: m.email, telephone: m.telephone,
-      commercial: m.commercial, groupe: null, ville: m.ville, secteur: null, source: m.ages.length ? "import" : "saisie", statut: "suivi",
-      statut_motif: null, signal, reprise: REPRISES[id("c40", m.n)]?.[0] ?? null,
+      commercial: m.commercial, groupe: null, ville: m.ville, secteur: null, source: m.ages.length ? "import" : "saisie", statut: m.statut ?? "suivi",
+      statut_motif: m.motif ?? null, signal, reprise: REPRISES[id("c40", m.n)]?.[0] ?? null,
     };
     fiches[compte.id] = {
       compte, signal, mois: moisDe(achats), achats, nb_achats: achats.length, reprises: REPRISES[compte.id] ?? [],
