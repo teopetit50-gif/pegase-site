@@ -1,0 +1,1291 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO › Équipes — copie 1:1 de « Bookings » de Cal.com (03/11/2026,
+   règles de Teo : docs/refonte-metiers/REGLES.md). Préfixe dal-bk-.
+
+   Relevé : docs/refonte-metiers/releves/calcom-bookings.md (branche
+   claude/refs-plain-attio-cal-a3a72b), coque et jetons communs à
+   calcom-availability.md. Ce que le relevé ne donne pas est lu au pixel sur
+   1440-reel-clair.png (écart case → date 10 px, lignes de la colonne date et
+   du contenu à 24 px, soit 20 + 4) ou repris des jetons d'Availability
+   (sombre). Valeurs estimées, écrites dans REFERENCES-DALIRO.md : les
+   pastilles ambre et rouge en sombre, la ligne ouverte en sombre, la barre
+   de sélection (Cal.com ne la montre pas dans le relevé).
+
+   Cadre : la carte <main> de Cal.com (256,8 1176×852, r 16) dans le <main>
+   de la coquille d'espace2, marges 8 8 8 0 ; contenu à 40 px des bords,
+   24 en haut ; la barre d'outils à 25 px du bord de la carte, la liste 16 px
+   dessous. Le détail flotte à 8 px des bords de la carte, 512 de large.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal-bk {
+  --c-page: #fafafa;
+  --c-main: #fff;
+  --c-main-bd: rgb(17 17 17 / 0.06);
+  --c-main-ombre: 0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d;
+  --c-titre: #000;
+  --c-fort: #262626;
+  --c-second: #696969;
+  --c-sec-titre: #6b7280;
+  --c-carte: #fff;
+  --c-carte-bd: rgb(13 13 13 / 0.08);
+  --c-carte-ombre: 0 1px 2px #0000000d;
+  --c-avant: rgb(0 0 0 / 0.03);
+  --c-filet: rgb(13 13 13 / 0.08);
+  --c-ouverte: #fafafa;
+  --c-btn: #fff;
+  --c-btn-bd: rgb(20 20 20 / 0.1);
+  --c-seg: rgb(26 26 26 / 0.04);
+  --c-seg-ind: #fff;
+  --c-seg-inactif: oklab(0.522 0 0 / 0.72);
+  --c-plein: #262626;
+  --c-plein-texte: #fafafa;
+  --c-plein-ombre: inset 0 1px 0 #ffffff29, 0 1px 2px #26262640;
+  --c-vert: #00a63e;
+  --c-vert-pastille: #007a55;
+  --c-vert-fond: rgb(0 191 128 / 0.08);
+  --c-ambre: #bb4d00;
+  --c-ambre-fond: rgb(255 153 0 / 0.08);
+  --c-rouge: #c10007;
+  --c-rouge-fond: rgb(251 44 54 / 0.08);
+  --c-gris-fond: rgb(26 26 26 / 0.06);
+  --c-hote: #1447e6;
+  --c-hote-fond: rgb(38 128 255 / 0.08);
+  --c-lien: #155dfc;
+  --c-pied: #3c3e44;
+  --c-menu: #fff;
+  --c-menu-survol: rgb(17 17 17 / 0.04);
+  --c-avatar: #262626;
+  --c-avatar-texte: #fafafa;
+
+  position: relative;
+  min-height: calc(100dvh - 48px);
+  padding: 8px 8px 8px 0;
+  background: var(--c-page);
+  color: var(--c-fort);
+  font-family: var(--font-dal-cal), "Cal Sans", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+html[data-v2-theme="dark"] .v2 .dal-bk,
+html:not([data-v2-theme="light"]) .v2 .dal-bk {
+  --c-page: #111111;
+  --c-main: #141414;
+  --c-main-bd: rgb(255 255 255 / 0.05);
+  --c-titre: #fafafa;
+  --c-fort: #f5f5f5;
+  --c-second: #818181;
+  --c-sec-titre: #9ca3af;
+  --c-carte: #191919;
+  --c-carte-bd: rgb(255 255 255 / 0.06);
+  --c-avant: rgb(255 255 255 / 0.03);
+  --c-filet: rgb(255 255 255 / 0.06);
+  --c-ouverte: rgb(255 255 255 / 0.03);
+  --c-btn: rgb(255 255 255 / 0.03);
+  --c-btn-bd: rgb(255 255 255 / 0.08);
+  --c-seg: rgb(255 255 255 / 0.04);
+  --c-seg-ind: rgb(255 255 255 / 0.08);
+  --c-seg-inactif: rgb(129 129 129 / 0.72);
+  --c-plein: #f5f5f5;
+  --c-plein-texte: #262626;
+  --c-vert: #05df72;
+  --c-vert-pastille: #00d492;
+  --c-vert-fond: rgb(0 187 124 / 0.16);
+  --c-ambre: #ffb900;
+  --c-ambre-fond: rgb(255 153 0 / 0.16);
+  --c-rouge: #ff6467;
+  --c-rouge-fond: rgb(251 44 54 / 0.16);
+  --c-gris-fond: rgb(255 255 255 / 0.08);
+  --c-hote: #8ec5ff;
+  --c-hote-fond: rgb(38 128 255 / 0.16);
+  --c-lien: #51a2ff;
+  --c-pied: #d4d4d4;
+  --c-menu: #191919;
+  --c-menu-survol: rgb(255 255 255 / 0.04);
+  --c-avatar: #f5f5f5;
+  --c-avatar-texte: #262626;
+}
+html[data-v2-theme="light"] .v2 .dal-bk {
+  --c-page: #fafafa;
+  --c-main: #fff;
+  --c-main-bd: rgb(17 17 17 / 0.06);
+  --c-titre: #000;
+  --c-fort: #262626;
+  --c-second: #696969;
+  --c-sec-titre: #6b7280;
+  --c-carte: #fff;
+  --c-carte-bd: rgb(13 13 13 / 0.08);
+  --c-avant: rgb(0 0 0 / 0.03);
+  --c-filet: rgb(13 13 13 / 0.08);
+  --c-ouverte: #fafafa;
+  --c-btn: #fff;
+  --c-btn-bd: rgb(20 20 20 / 0.1);
+  --c-seg: rgb(26 26 26 / 0.04);
+  --c-seg-ind: #fff;
+  --c-seg-inactif: oklab(0.522 0 0 / 0.72);
+  --c-plein: #262626;
+  --c-plein-texte: #fafafa;
+  --c-vert: #00a63e;
+  --c-vert-pastille: #007a55;
+  --c-vert-fond: rgb(0 191 128 / 0.08);
+  --c-ambre: #bb4d00;
+  --c-ambre-fond: rgb(255 153 0 / 0.08);
+  --c-rouge: #c10007;
+  --c-rouge-fond: rgb(251 44 54 / 0.08);
+  --c-gris-fond: rgb(26 26 26 / 0.06);
+  --c-hote: #1447e6;
+  --c-hote-fond: rgb(38 128 255 / 0.08);
+  --c-lien: #155dfc;
+  --c-pied: #3c3e44;
+  --c-menu: #fff;
+  --c-menu-survol: rgb(17 17 17 / 0.04);
+  --c-avatar: #262626;
+  --c-avatar-texte: #fafafa;
+}
+
+.v2 .dal-bk *,
+.v2 .dal-bk *::before,
+.v2 .dal-bk *::after {
+  box-sizing: border-box;
+}
+.v2 .dal-bk :where(button, select, input) {
+  font: inherit;
+  color: inherit;
+  margin: 0;
+}
+.v2 .dal-bk :where(button) {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.v2 .dal-bk :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+.v2 .dal-bk :where(p) {
+  margin: 0;
+}
+.v2 .dal-bk svg {
+  flex: none;
+}
+
+/* ——— la carte <main> ——— */
+.v2 .dal-bk-main {
+  position: relative;
+  height: calc(100dvh - 48px - 16px);
+  overflow: auto;
+  scrollbar-width: thin;
+  background: var(--c-main);
+  border: 1px solid var(--c-main-bd);
+  border-radius: 16px;
+  box-shadow: var(--c-main-ombre);
+  padding: 24px 40px 40px;
+}
+
+/* ——— barre d'outils : segmenté 30 · Filter 28 · Saved filters 28 + bascule 30 ——— */
+.v2 .dal-bk-barre {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  margin-bottom: 16px;
+}
+.v2 .dal-bk-segment {
+  display: flex;
+  flex: none;
+  gap: 2px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--c-seg);
+}
+.v2 .dal-bk-segment > a,
+.v2 .dal-bk-segment > button {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: var(--c-seg-inactif);
+  white-space: nowrap;
+}
+.v2 .dal-bk-segment > [aria-current="page"] {
+  color: var(--c-fort);
+  background: var(--c-seg-ind);
+  box-shadow: 0 1px 2px #0000000d;
+}
+.v2 .dal-bk-filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.v2 .dal-bk-droite {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.v2 .dal-bk-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 10px;
+  background: var(--c-btn);
+  border: 1px solid var(--c-btn-bd);
+  box-shadow: var(--c-carte-ombre);
+  font-weight: 500;
+  color: var(--c-fort);
+  white-space: nowrap;
+}
+.v2 .dal-bk-bouton--choix {
+  font-weight: 400;
+  color: var(--c-second);
+}
+.v2 .dal-bk-bouton--choix svg {
+  margin-right: -3px;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-bouton--icone {
+  width: 32px;
+  padding: 0;
+  justify-content: center;
+}
+.v2 .dal-bk-puce {
+  padding-right: 4px;
+  font-weight: 400;
+}
+.v2 .dal-bk-puce > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-puce > button:hover {
+  background: var(--c-menu-survol);
+}
+.v2 .dal-bk-vues {
+  display: flex;
+  gap: 2px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--c-seg);
+}
+.v2 .dal-bk-vues button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: var(--c-seg-inactif);
+}
+.v2 .dal-bk-vues button[aria-checked="true"] {
+  color: var(--c-fort);
+  background: var(--c-seg-ind);
+  box-shadow: 0 1px 2px #0000000d;
+}
+.v2 .dal-bk-carre {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--c-btn);
+  border: 1px solid var(--c-btn-bd);
+  box-shadow: var(--c-carte-ombre);
+  color: var(--c-fort);
+  flex: none;
+}
+.v2 .dal-bk-carre--28 {
+  width: 28px;
+  height: 28px;
+}
+.v2 .dal-bk-carre--nu {
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+.v2 .dal-bk-carre--nu:hover:not(:disabled) {
+  background: var(--c-menu-survol);
+}
+.v2 .dal-bk-carre:disabled,
+.v2 .dal-bk-bouton:disabled {
+  opacity: 0.64;
+  cursor: default;
+}
+.v2 .dal-bk-carre--rouge {
+  color: var(--c-rouge);
+}
+.v2 .dal-bk-note {
+  margin: 0 0 12px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-note[data-teinte="rouge"] {
+  color: var(--c-rouge);
+}
+
+/* ——— la carte de liste ——— */
+.v2 .dal-bk-carte {
+  position: relative;
+  background: var(--c-carte);
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 16px;
+  box-shadow: var(--c-carte-ombre);
+}
+.v2 .dal-bk-carte::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  background: var(--c-avant);
+  pointer-events: none;
+}
+.v2 .dal-bk-groupe + .dal-bk-groupe {
+  border-top: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-groupe-tete {
+  position: relative;
+  height: 44px;
+  padding: 12px 24px 12px 16px;
+  font-weight: 500;
+  color: var(--c-second);
+  border-bottom: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-panneau {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .dal-bk-ligne {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 24px 16px 16px;
+  background: var(--c-carte);
+  cursor: pointer;
+}
+/* la carte ne coupe pas (les menus ⋯ en sortent) : ses coins sont ceux de ses rangées */
+.v2 .dal-bk-carte > .dal-bk-groupe:first-child .dal-bk-groupe-tete,
+.v2 .dal-bk-carte > .dal-bk-groupe:first-child > .dal-bk-panneau:first-child > .dal-bk-ligne:first-child {
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+.v2 .dal-bk-carte > .dal-bk-groupe:last-child > .dal-bk-panneau > .dal-bk-ligne:last-child,
+.v2 .dal-bk-pied {
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+.v2 .dal-bk-carte:has(.dal-bk-pied) > .dal-bk-groupe:last-child > .dal-bk-panneau > .dal-bk-ligne:last-child {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.v2 .dal-bk-ligne + .dal-bk-ligne {
+  border-top: 1px solid var(--c-filet);
+}
+/* la ligne ouverte en gris, jamais en bleu (Teo, 02/11) */
+.v2 .dal-bk-ligne[data-ouverte] {
+  background: var(--c-ouverte);
+}
+.v2 .dal-bk-case {
+  appearance: none;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 2px -6px 0 0;
+  border: 1px solid var(--c-btn-bd);
+  border-radius: 4px;
+  background: var(--c-btn);
+  box-shadow: var(--c-carte-ombre);
+  cursor: pointer;
+}
+.v2 .dal-bk-case:checked {
+  background: var(--c-plein)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fafafa' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E")
+    center / 12px no-repeat;
+  border-color: var(--c-plein);
+}
+.v2 .dal-bk-quand {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 160px;
+}
+.v2 .dal-bk-date {
+  font-weight: 500;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-heure {
+  color: var(--c-second);
+}
+/* la pastille « Join Cal Video » : ici, le chantier */
+.v2 .dal-bk-video {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 160px;
+  height: 24px;
+  margin-top: 4px;
+  padding: 0 7px 0 3px;
+  border-radius: 8px;
+  background: var(--c-btn);
+  border: 1px solid var(--c-btn-bd);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-video-texte {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal-bk-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--c-avatar);
+  color: var(--c-avatar-texte);
+}
+.v2 .dal-bk-quoi {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.v2 .dal-bk-titre {
+  max-width: 100%;
+  font-weight: 600;
+  color: var(--c-fort);
+  text-align: left;
+}
+.v2 .dal-bk-titre[data-barre] {
+  text-decoration: line-through;
+}
+.v2 .dal-bk-gris {
+  color: var(--c-second);
+}
+.v2 .dal-bk-nom {
+  color: inherit;
+  text-align: left;
+}
+.v2 .dal-bk-nom:hover {
+  text-decoration: underline;
+}
+.v2 .dal-bk-bientot {
+  color: var(--c-vert);
+}
+.v2 .dal-bk-alerte {
+  color: var(--c-ambre);
+}
+.v2 .dal-bk-recurrent {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-pastille {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--c-ambre);
+  background: var(--c-ambre-fond);
+}
+.v2 .dal-bk-pastille[data-teinte="vert"] {
+  color: var(--c-vert-pastille);
+  background: var(--c-vert-fond);
+}
+.v2 .dal-bk-pastille[data-teinte="rouge"] {
+  color: var(--c-rouge);
+  background: var(--c-rouge-fond);
+}
+.v2 .dal-bk-pastille[data-teinte="gris"] {
+  color: var(--c-second);
+  background: var(--c-gris-fond);
+}
+.v2 .dal-bk-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+}
+/* « Reject » / « Confirm » : 24 de haut, r 8, 12/500 */
+.v2 .dal-bk-petit {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 8px;
+  background: var(--c-btn);
+  border: 1px solid var(--c-btn-bd);
+  box-shadow: var(--c-carte-ombre);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--c-fort);
+  white-space: nowrap;
+}
+.v2 .dal-bk-petit--plein {
+  background: var(--c-plein);
+  border-color: var(--c-plein);
+  color: var(--c-plein-texte);
+  box-shadow: var(--c-plein-ombre);
+}
+
+/* pied de pagination : « 10 ↕ rows per page … 1-3 of 3 ‹ › » */
+.v2 .dal-bk-pied {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 16px 8px 12px;
+  border-top: 1px solid var(--c-filet);
+  color: var(--c-pied);
+}
+.v2 .dal-bk-par-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .dal-bk-select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.v2 .dal-bk-select select {
+  appearance: none;
+  height: 28px;
+  padding: 0 24px 0 9px;
+  border-radius: 10px;
+  background: var(--c-btn);
+  border: 1px solid var(--c-btn-bd);
+  box-shadow: var(--c-carte-ombre);
+  color: var(--c-fort);
+  cursor: pointer;
+}
+.v2 .dal-bk-select svg {
+  position: absolute;
+  right: 7px;
+  pointer-events: none;
+}
+.v2 .dal-bk-pages {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ——— l'état vide : encadré r 14, 80 / 24 ——— */
+.v2 .dal-bk-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 80px 24px;
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 14px;
+  text-align: center;
+}
+.v2 .dal-bk-vide-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--c-btn);
+  border: 1px solid var(--c-carte-bd);
+  box-shadow: 0 1px 3px #0000000d, 0 1px 2px -1px #0000000d;
+}
+.v2 .dal-bk-vide-titre {
+  margin-bottom: -16px;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--c-titre);
+}
+.v2 .dal-bk-vide-texte {
+  max-width: 384px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-lien {
+  color: var(--c-lien);
+  font-weight: 500;
+}
+.v2 .dal-bk-lien:hover {
+  text-decoration: underline;
+}
+
+/* ——— menus (⋯, Filter, Saved filters) : r 10, items 28, p 4 8, r 6 ——— */
+.v2 .dal-bk-menu-boite {
+  position: relative;
+}
+.v2 .dal-bk-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 40;
+  min-width: 183px;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 4px;
+  background: var(--c-menu);
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 10px;
+  box-shadow: var(--c-main-ombre);
+  cursor: default;
+}
+.v2 .dal-bk-menu--haut {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+.v2 .dal-bk-menu--gauche {
+  right: auto;
+  left: 0;
+}
+.v2 .dal-bk-menu-titre {
+  padding: 4px 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--c-second);
+}
+.v2 .dal-bk-menu-ligne {
+  position: relative;
+}
+.v2 .dal-bk-menu-ligne--double {
+  display: flex;
+  align-items: center;
+}
+.v2 .dal-bk-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-align: left;
+  white-space: nowrap;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-menu-option:hover,
+.v2 .dal-bk-menu-option:focus-visible,
+.v2 .dal-bk-menu-option[aria-expanded="true"] {
+  background: var(--c-menu-survol);
+  outline: none;
+}
+.v2 .dal-bk-menu-option--rouge {
+  color: var(--c-rouge);
+}
+.v2 .dal-bk-menu-fleche {
+  margin-left: auto;
+}
+.v2 .dal-bk-menu-texte {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal-bk-menu-sous {
+  color: var(--c-second);
+}
+.v2 .dal-bk-menu-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-menu-x:hover {
+  background: var(--c-menu-survol);
+}
+.v2 .dal-bk-menu-vide {
+  padding: 4px 8px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-menu-sep {
+  height: 1px;
+  margin: 4px -4px;
+  background: var(--c-filet);
+}
+.v2 .dal-bk-sous-menu {
+  margin: 2px 0 2px 24px;
+  padding-left: 4px;
+  border-left: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-filtre {
+  width: 280px;
+}
+.v2 .dal-bk-filtre-liste {
+  max-height: 320px;
+  overflow: auto;
+}
+.v2 .dal-bk-cherche {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 8px;
+  color: var(--c-second);
+}
+.v2 .dal-bk-cherche input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-coche {
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
+}
+
+/* ——— la sélection (cases cochées) ——— */
+.v2 .dal-bk-selection {
+  position: sticky;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px auto 0;
+  padding: 8px 8px 8px 16px;
+  background: var(--c-menu);
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 14px;
+  box-shadow: var(--c-main-ombre);
+  font-weight: 500;
+}
+
+/* ——— le détail : panneau flottant 512, r 16, sans voile ——— */
+.v2 .dal-bk-detail {
+  position: fixed;
+  z-index: 50;
+  top: calc(var(--dal-bk-haut, 56px) + 8px);
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  width: 512px;
+  max-width: calc(100vw - 32px);
+  background: var(--c-carte);
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px #0000000d, 0 4px 6px -4px #0000000d;
+  cursor: default;
+}
+.v2 .dal-bk-detail-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 16px 0 24px;
+  flex: none;
+}
+.v2 .dal-bk-detail-nav {
+  display: flex;
+  gap: 4px;
+}
+.v2 .dal-bk-detail-corps {
+  flex: 1;
+  overflow: auto;
+  padding: 0 24px 24px;
+}
+.v2 .dal-bk-detail-titre {
+  margin: 0 0 24px;
+  font-size: 20px;
+  line-height: 25px;
+  font-weight: 700;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-detail section {
+  margin-bottom: 16px;
+}
+.v2 .dal-bk-detail h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: var(--c-sec-titre);
+}
+.v2 .dal-bk-fort {
+  font-weight: 500;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-personne {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 4px;
+}
+.v2 .dal-bk-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: 1px solid var(--c-btn-bd);
+  color: var(--c-fort);
+}
+.v2 .dal-bk-avatar--plein {
+  border: 0;
+  background: var(--c-avatar);
+  color: var(--c-avatar-texte);
+  font-size: 12px;
+  font-weight: 600;
+}
+.v2 .dal-bk-hote {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  margin-left: 4px;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 500;
+  color: var(--c-hote);
+  background: var(--c-hote-fond);
+  vertical-align: 1px;
+}
+.v2 .dal-bk-ligne-icone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .dal-bk-renomme {
+  width: 100%;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--c-btn-bd);
+  border-radius: 6px;
+  background: var(--c-btn);
+  color: var(--c-fort);
+  font-weight: 500;
+}
+.v2 .dal-bk-detail-pied {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  height: 65px;
+  padding: 0 16px;
+  border-top: 1px solid var(--c-filet);
+  flex: none;
+}
+.v2 .dal-bk-groupe-bouton {
+  display: inline-flex;
+}
+.v2 .dal-bk-groupe-bouton .dal-bk-bouton {
+  height: 32px;
+}
+.v2 .dal-bk-groupe-bouton .dal-bk-bouton:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.v2 .dal-bk-groupe-bouton .dal-bk-bouton + .dal-bk-bouton {
+  margin-left: -1px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+/* les fenêtres de la page */
+.dal-bk-choix {
+  display: flex;
+  gap: 16px;
+}
+.dal-bk-choix label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ——— la vue calendrier : carte r 14, heures 64 de large, 64 px par heure ——— */
+.v2 .dal-bk-cal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.v2 .dal-bk-cal-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.v2 .dal-bk-cal-mois {
+  margin-left: 8px;
+  font-weight: 500;
+}
+.v2 .dal-bk-segment--droite {
+  margin-left: auto;
+}
+.v2 .dal-bk-semaine {
+  --dal-bk-cols: 7;
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.v2 .dal-bk-sem-tete,
+.v2 .dal-bk-sem-journee,
+.v2 .dal-bk-sem-grille {
+  display: grid;
+  grid-template-columns: 64px repeat(var(--dal-bk-cols), minmax(0, 1fr));
+}
+.v2 .dal-bk-sem-tete {
+  border-bottom: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-fuseau {
+  align-self: end;
+  padding: 0 10px 8px 0;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  text-align: right;
+  color: var(--c-second);
+}
+.v2 .dal-bk-sem-jour {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--c-second);
+  border-left: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-num[data-aujourdhui] {
+  background: var(--c-plein);
+  color: var(--c-plein-texte);
+}
+.v2 .dal-bk-sem-journee {
+  min-height: 31px;
+  border-bottom: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-heure-col {
+  padding: 8px 10px 0 0;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: right;
+  color: var(--c-second);
+}
+.v2 .dal-bk-sem-cellule {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px;
+  border-left: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-sem-grille {
+  position: relative;
+  height: min(1536px, calc(100dvh - 300px));
+  min-height: 320px;
+  overflow: auto;
+}
+.v2 .dal-bk-heures {
+  position: relative;
+  height: 1536px;
+}
+.v2 .dal-bk-heures span {
+  position: absolute;
+  right: 0;
+  padding-right: 10px;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: right;
+  color: var(--c-second);
+}
+.v2 .dal-bk-sem-col {
+  position: relative;
+  height: 1536px;
+  border-left: 1px solid var(--c-filet);
+  background: repeating-linear-gradient(to bottom, var(--c-filet) 0 1px, transparent 1px 64px);
+}
+.v2 .dal-bk-sem-col .dal-bk-evt {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+}
+.v2 .dal-bk-maintenant {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--c-rouge);
+}
+.v2 .dal-bk-evt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--c-btn-bd);
+  background: var(--c-btn);
+  font-size: 12px;
+  line-height: 16px;
+  text-align: left;
+  color: var(--c-fort);
+}
+.v2 .dal-bk-evt[data-teinte="ambre"],
+.v2 .dal-bk-evt[data-genre="absence"] {
+  color: var(--c-ambre);
+  background: var(--c-ambre-fond);
+  border-color: transparent;
+}
+.v2 .dal-bk-evt[data-ouverte] {
+  background: var(--c-gris-fond);
+}
+.v2 .dal-bk-evt-titre,
+.v2 .dal-bk-evt-sous {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal-bk-evt-titre {
+  font-weight: 500;
+}
+.v2 .dal-bk-evt-sous {
+  color: var(--c-second);
+}
+.v2 .dal-bk-mois {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border: 1px solid var(--c-carte-bd);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.v2 .dal-bk-mois-tete {
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--c-second);
+  border-bottom: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-mois-case {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 104px;
+  padding: 4px;
+  border-top: 1px solid var(--c-filet);
+  border-left: 1px solid var(--c-filet);
+}
+.v2 .dal-bk-mois-case:nth-child(7n + 1) {
+  border-left: 0;
+}
+.v2 .dal-bk-mois-case[data-dehors] {
+  opacity: 0.5;
+}
+.v2 .dal-bk-plus {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--c-second);
+  text-align: left;
+}
+
+/* ——— 1024 : la bascule liste / calendrier passe sous les onglets (2e ligne) ——— */
+@media (max-width: 1100px) {
+  .v2 .dal-bk-barre {
+    flex-wrap: wrap;
+  }
+}
+
+/* ——— 768 et moins : la page pleine largeur (la carte <main> disparaît, comme Availability) ——— */
+@media (max-width: 768px) {
+  .v2 .dal-bk {
+    padding: 0;
+    background: var(--c-main);
+  }
+  .v2 .dal-bk-main {
+    height: auto;
+    min-height: calc(100dvh - 48px);
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 24px 16px 96px;
+  }
+  .v2 .dal-bk-segment {
+    flex: 1 1 100%;
+    min-width: 0;
+    height: 34px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v2 .dal-bk-segment > a,
+  .v2 .dal-bk-segment > button {
+    height: 30px;
+    padding: 0 9px;
+    font-size: 16px;
+  }
+  .v2 .dal-bk-barre {
+    row-gap: 18px;
+  }
+  .v2 .dal-bk-droite {
+    margin-left: 0;
+  }
+  .v2 .dal-bk-bouton {
+    height: 32px;
+    font-size: 16px;
+  }
+  .v2 .dal-bk-detail {
+    top: 8px;
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+  }
+  .v2 .dal-bk-cal-barre .dal-bk-segment {
+    flex: none;
+  }
+  /* la carte n'a plus que 464 px à côté du rail de la coquille : la ligne passe en colonne (celle du téléphone) */
+  .v2 .dal-bk-ligne {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "case quoi actions" ". quand actions";
+    row-gap: 8px;
+    column-gap: 16px;
+  }
+  .v2 .dal-bk-case {
+    grid-area: case;
+    margin-right: 0;
+  }
+  .v2 .dal-bk-quoi {
+    grid-area: quoi;
+  }
+  .v2 .dal-bk-quand {
+    grid-area: quand;
+    width: auto;
+  }
+  .v2 .dal-bk-actions {
+    grid-area: actions;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}
+
+/* ——— sous 640 (le palier sm: de Cal.com) : la ligne en colonne, relevée sur 390-clair-upcoming.png :
+   titre 16/600/24, textes 14, date et heures sous le contenu, pastille du chantier 28,
+   bouton ⋯ 36 centré à droite ——— */
+@media (max-width: 639px) {
+  .v2 .dal-bk-ligne {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "quoi actions" "quand actions";
+    row-gap: 8px;
+    column-gap: 16px;
+    padding: 16px 24px;
+  }
+  .v2 .dal-bk-case,
+  .v2 .dal-bk-vues {
+    display: none;
+  }
+  .v2 .dal-bk-quoi {
+    grid-area: quoi;
+  }
+  .v2 .dal-bk-quand {
+    grid-area: quand;
+    width: auto;
+  }
+  .v2 .dal-bk-actions {
+    grid-area: actions;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .v2 .dal-bk-titre {
+    font-size: 16px;
+    line-height: 24px;
+  }
+  .v2 .dal-bk-date {
+    margin-top: 4px;
+  }
+  .v2 .dal-bk-video {
+    height: 28px;
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .v2 .dal-bk-carre {
+    width: 36px;
+    height: 36px;
+  }
+  .v2 .dal-bk-carre--28 {
+    width: 32px;
+    height: 32px;
+  }
+  .v2 .dal-bk-groupe-tete {
+    padding: 12px 24px;
+  }
+  .v2 .dal-bk-pied {
+    flex-wrap: wrap;
+  }
+  .v2 .dal-bk-semaine .dal-bk-sem-jour {
+    padding: 8px 2px;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .v2 .dal-bk-sem-tete,
+  .v2 .dal-bk-sem-journee,
+  .v2 .dal-bk-sem-grille {
+    grid-template-columns: 40px repeat(var(--dal-bk-cols), minmax(0, 1fr));
+  }
+  .v2 .dal-bk-mois-case {
+    min-height: 64px;
+  }
+}

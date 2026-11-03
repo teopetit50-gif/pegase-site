@@ -3,10 +3,11 @@ import localFont from "next/font/local";
 import { Suspense } from "react";
 import Equipes from "@/components/espace2/daliro/Equipes";
 
-/* /espace2/daliro/equipes — copie 1:1 de « Availability » de Cal.com
-   (02/11/2026) : un intervenant par ligne (passages des 30 prochains jours,
-   absences), sa page (?intervenant=) sur celle d'un horaire : la semaine
-   jour par jour, ses heures et ses jours qu'on change, ses absences.
+/* /espace2/daliro/equipes — copie 1:1 de « Bookings » de Cal.com
+   (03/11/2026, à la place d'Availability) : les passages des intervenants
+   en réservations (À venir, Non confirmés, Plusieurs jours, Passés,
+   Annulés), filtres (?intervenant=, ?type=, ?chantier=), détail d'un
+   passage (?passage=) ou d'une absence (?absence=), vue calendrier.
    Police : Cal Sans VF, le fichier de Cal.com (licence OFL). */
 
 const calSans = localFont({
@@ -18,7 +19,7 @@ const calSans = localFont({
 
 export const metadata: Metadata = {
   title: "Équipes",
-  description: "Les passages prévus de vos équipes et sous-traitants sur 30 jours, leurs heures et leurs absences.",
+  description: "Les passages de vos équipes et sous-traitants, leurs confirmations à J-2 et leurs absences.",
 };
 
 export default function PageEquipes() {
