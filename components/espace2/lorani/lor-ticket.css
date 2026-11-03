@@ -120,6 +120,7 @@ html[data-v2-theme="light"] .v2 .lor-tk { --lor-tk-filet: lch(89.84 0 282); --lo
 .v2 .lor-tk-activite-tete h3 { font-size: 15px; font-weight: 600; line-height: 23px; color: var(--lor-t1); }
 .v2 .lor-tk-activite-droite { display: flex; align-items: center; gap: 4px; }
 .v2 .lor-tk-abonne { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 9999px; font-size: 12px; font-weight: 500; color: var(--lor-t3); }
+.v2 .lor-tk-abonne:hover { background: var(--lor-onglet-actif); color: var(--lor-t2); }
 .v2 .lor-tk-abonnes { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: var(--lor-t3); }
 .v2 .lor-tk-evenements { display: flex; flex-direction: column; margin-top: 16px; padding-bottom: 13px; }
 .v2 .lor-tk-evenement { display: flex; align-items: flex-start; padding: 5px 0; border-radius: 8px; font-size: 12px; font-weight: 450; line-height: 16.8px; color: var(--lor-t3); }

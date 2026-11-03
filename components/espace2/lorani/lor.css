@@ -198,3 +198,31 @@ html[data-v2-theme="light"] .v2 .lor {
 .v2 .lor-option > svg { width: 16px; height: 16px; fill: var(--lor-menu-gris); }
 .v2 .lor-option-libelle { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2 .lor-option-droite { color: var(--lor-menu-gris); font-size: 12px; }
+
+/* ——— 02/11/2026 : la barre d'actions groupées (cases cochées), en bas comme dans Linear ——— */
+.v2 .lor-sel {
+  position: fixed; z-index: 70; left: 50%; bottom: 20px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px;
+  max-width: calc(100vw - 32px); height: 40px; padding: 0 6px 0 14px; border-radius: 10px; overflow-x: auto;
+  background: var(--lor-menu); border: 0.5px solid var(--lor-menu-trait); box-shadow: var(--lor-menu-ombre);
+  font-size: 13px; font-weight: 500; color: var(--lor-menu-texte); white-space: nowrap;
+}
+.v2 .lor-sel-compte { padding-right: 6px; }
+.v2 .lor-sel-sep { width: 0.5px; height: 20px; margin: 0 4px; background: var(--lor-menu-sep); }
+.v2 .lor-sel .lor-sel-action, .v2 .lor-sel .lor-sel-fermer { height: 28px; padding: 0 10px; border-radius: 8px; color: var(--lor-menu-texte); }
+.v2 .lor-sel .lor-sel-action:hover:not(:disabled), .v2 .lor-sel .lor-sel-fermer:hover { background: var(--lor-menu-survol); color: var(--lor-menu-fort); }
+.v2 .lor-sel .lor-sel-fermer { font-size: 16px; color: var(--lor-menu-gris); }
+/* une case cochée reste visible, comme dans Linear */
+.v2 .lor-coche { display: inline-flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--lor-case); background: transparent; }
+.v2 .lor-coche[aria-checked="true"] { background: var(--lor-fait); border-color: var(--lor-fait); }
+.v2 .lor-coche[aria-checked="true"]::after { content: ""; width: 7px; height: 4px; margin-top: -2px; border-left: 1.5px solid #fff; border-bottom: 1.5px solid #fff; transform: rotate(-45deg); }
+/* le groupe « Épinglés » des listes (titre 11/450 et filet, comme les groupes d'une Initiative) */
+.v2 .lor-groupe-epingles { display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 16px; font-size: 11px; font-weight: 450; color: var(--lor-t3); }
+.v2 .lor-groupe-epingles::after { content: ""; flex: 1; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-marque { display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; height: 18px; padding: 0 6px; border-radius: 9999px; background: var(--lor-onglet-actif); font-size: 11px; font-weight: 500; color: var(--lor-t2); }
+.v2 .lor-ancre-rel { position: relative; }
+.v2 .lor-menu-report { min-width: 260px; }
+.v2 .lor .lor-date { height: 24px; padding: 0 6px; border-radius: 6px; border: 0.5px solid var(--lor-menu-trait); background: transparent; font: inherit; font-size: 12px; color: var(--lor-menu-texte); color-scheme: light dark; }
+.v2 .lor-option-ok { height: 24px; padding: 0 8px; border-radius: 6px; background: var(--lor-menu-survol); font-size: 12px; }
+.v2 .lor-option-ok:disabled { opacity: 0.5; }
+.v2 .lor-rond[aria-pressed="true"] svg { color: var(--lor-t2); }
+.v2 .lor.lor-contenu { display: contents; }

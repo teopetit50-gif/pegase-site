@@ -46,7 +46,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProjetCarte, { type PartieProjet } from "@/components/espace/lorani/ProjetCarte";
 import Formulaires, { type Form } from "@/components/espace/lorani/Formulaires";
-import { dossierDate } from "@/components/espace/lorani/dossier-date";
+import { dossierDate, lignesDossier } from "@/components/espace/lorani/dossier-date";
+import { bordereauVisas } from "./bordereau-visas";
 import { ETATS, FAMILLES, NATURES_PROJET, PHASES, ROLES_PROJET, prochaineDate, titrePermis, type Famille } from "@/components/espace/lorani/etats";
 import { bordereau } from "@/components/espace/lorani/pieces-exigees";
 import type { Permis, Projet } from "@/components/espace/lorani/types";
@@ -55,10 +56,13 @@ import { RACINE } from "@/components/espace2/modules";
 import { VoletContexte, useVoletPage } from "../lin/Volet";
 import { useToast } from "../Toasts";
 import { useLorani } from "./donnees";
+import { copier as copierTexte, datesReport, exporterCsv, useMarques, useReports } from "./lor-local";
+import { BarreSelection, BoutonEtoile, useSelection } from "./lor-selection";
 import {
   IconeAffichage,
   IconeCalendrierLor,
   IconeLin,
+  IconeNouvelleVue,
   IconePlus,
   IconePoints,
   IconePrioriteLor,
@@ -225,7 +229,8 @@ export default function PageProjet({ id }: { id: string }) {
   const chemin = usePathname();
   const router = useRouter();
   /* « ?deposer=1 » (la page d'un permis y mène) : la fenêtre du courrier s'ouvre d'emblée */
-  const [form, setForm] = useState<Form>(() => (params.get("deposer") ? { type: "courrier", projet: id } : null));
+  /* « ?deposer=1 » (la page d'un permis y mène) : la fenêtre du courrier s'ouvre d'emblée ; « ?nouveau=permis » (Dupliquer, sur la page d'un permis) : celle d'un nouveau permis */
+  const [form, setForm] = useState<Form>(() => (params.get("deposer") ? { type: "courrier", projet: id } : params.get("nouveau") === "permis" ? { type: "permis", projet: id } : null));
   const [envoi, setEnvoi] = useState(false);
   const [details, setDetails] = useState(false);
   const [onglet, setOngletProgres] = useState<"sante" | "etat" | "chefs">("sante");
@@ -235,6 +240,12 @@ export default function PageProjet({ id }: { id: string }) {
   const [groupes, setGroupes] = useState(true);
   const [ouvertAff, setOuvertAff, menuAffRef] = useMenu();
   const [replies, setReplies] = useState<Record<string, boolean>>({});
+  /* 02/11 : étoile (épingler), cloche (suivre), cases (sélection), Add new view — ./lor-local.ts */
+  const favoris = useMarques("favoris");
+  const suivis = useMarques("suivis");
+  const reports = useReports();
+  const selection = useSelection();
+  const [ouvertVue, setOuvertVue, menuVueRef] = useMenu();
 
   const p = params.get("partie");
   const cle: Cle = estCle(p) ? p : "projet";
@@ -386,6 +397,15 @@ export default function PageProjet({ id }: { id: string }) {
   for (const x of dossier.pieces.filter((x) => x.objet_id === projet.id)) evenements.push({ cle: `pi-${x.id}`, quand: x.cree_le ?? projet.cree_le, qui: x.source === "courriel" ? "Guichet" : "Lorani", quoi: `a reçu ${x.nom_fichier}` });
   evenements.sort((a, b) => b.quand.localeCompare(a.quand));
 
+  const registre = params.get("vue") === "registre";
+  const lignesRegistre = cle === "activite" && registre ? lignesDossier(projet, dossier, nommer) : [];
+  /* le chantier : la formule de révision de chaque marché (b5_34, lue avec le marché) et le bordereau des visas */
+  const marchesProjet = dossier.marches.filter((m) => m.projet_id === projet.id && m.actif) as ((typeof dossier.marches)[number] & { revision_idbank?: string | null; revision_mois_zero?: string | null; revision_partie_fixe?: number | null })[];
+  const imprimerBordereau = () => {
+    const b = bordereauVisas(projet, dossier);
+    telecharger(b.nom, b.octets, "application/pdf");
+    toast(`Bordereau des visas : ${pluriel(b.nombre, "document")}.`);
+  };
   const permisTries = [...permis].sort((a, b) => (prochaineDate(a) ?? "9").localeCompare(prochaineDate(b) ?? "9"));
   const tableau = (
     <div className="lor-in-tableau" role="table" aria-label="Permis du projet">
@@ -444,9 +464,31 @@ export default function PageProjet({ id }: { id: string }) {
                   const urg: 0 | 1 | 2 | 3 | 4 = ecart === null ? 0 : ecart < 0 ? 1 : ecart <= 7 ? 2 : ecart <= 30 ? 3 : 4;
                   const n = proposeesPar[x.id] ?? 0;
                   return (
-                    <Link key={x.id} href={`${BASE}/permis/${encodeURIComponent(x.id)}`} className="lor-in-grille lor-in-ligne" role="row">
-                      <span className="lor-in-c-case" aria-hidden="true">
-                        <span className="lor-in-case" />
+                    <Link
+                      key={x.id}
+                      href={`${BASE}/permis/${encodeURIComponent(x.id)}`}
+                      className="lor-in-grille lor-in-ligne"
+                      role="row"
+                      data-coche={selection.a(`permis:${x.id}`) ? "" : undefined}
+                      onKeyDown={(e) => {
+                        if (e.key === "x" && !e.metaKey && !e.ctrlKey) {
+                          e.preventDefault();
+                          selection.basculer(`permis:${x.id}`);
+                        }
+                      }}
+                    >
+                      <span
+                        className="lor-in-c-case"
+                        role="checkbox"
+                        aria-checked={selection.a(`permis:${x.id}`)}
+                        aria-label="Sélectionner"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          selection.basculer(`permis:${x.id}`);
+                        }}
+                      >
+                        <span className="lor-in-case lor-coche" aria-checked={selection.a(`permis:${x.id}`)} />
                       </span>
                       <span className="lor-in-c-titre lor-in-nom" role="cell">
                         <span className="lor-in-icone-ligne" aria-hidden="true">
@@ -615,6 +657,7 @@ export default function PageProjet({ id }: { id: string }) {
                   </h2>
                 </Link>
               </nav>
+              <BoutonEtoile cle={`projet:${projet.id}`} nom={projet.nom} />
               <div className="lor-in-ancre" ref={menuPointsRef}>
                 <button type="button" className="lor-rond" aria-label="Options du projet" title="Options du projet" aria-expanded={ouvertPoints} onClick={() => setOuvertPoints((o) => !o)}>
                   <IconePoints />
@@ -625,6 +668,16 @@ export default function PageProjet({ id }: { id: string }) {
             <div className="lor-in-l1-droite">
               <button type="button" className="lor-rond lor-in-rond-24" aria-label="Copier le lien du projet" title="Copier le lien du projet" onClick={copier}>
                 <IconeLin nom="copierLien" />
+              </button>
+              <button
+                type="button"
+                className="lor-rond"
+                aria-pressed={suivis.a(`projet:${projet.id}`)}
+                aria-label={suivis.a(`projet:${projet.id}`) ? "Ne plus suivre le projet" : "Suivre le projet"}
+                title={suivis.a(`projet:${projet.id}`) ? "Ne plus suivre : ses courriers reprennent leur place dans le Courrier" : "Suivre : les courriers du projet passent en tête du Courrier, marqués « suivi » (gardé dans ce navigateur)"}
+                onClick={() => suivis.basculer(`projet:${projet.id}`)}
+              >
+                <IconeSprite nom="Subscribe" />
               </button>
               <div className="lor-in-ancre" ref={menuPlusRef}>
                 <button type="button" className="lor-rond" aria-label="Ajouter au projet" title="Ajouter au projet" aria-expanded={ouvertPlus} disabled={!peutEcrire} onClick={() => setOuvertPlus((o) => !o)}>
@@ -644,6 +697,24 @@ export default function PageProjet({ id }: { id: string }) {
               <Link href={`${BASE}/honoraires?projet=${encodeURIComponent(projet.id)}`} className="lor-vue">
                 Honoraires
               </Link>
+              <div className="lor-in-ancre" ref={menuVueRef}>
+                <button type="button" className="lor-rond lor-rond--sourd" aria-label="Nouvelle vue" title="Nouvelle vue : les permis d'une santé dans la vue d'ensemble" aria-expanded={ouvertVue} onClick={() => setOuvertVue((o) => !o)}>
+                  <IconeNouvelleVue />
+                </button>
+                {ouvertVue ? (
+                  <div className="lor-menu lor-in-menu" role="menu" aria-label="Nouvelle vue" style={{ left: 0, top: 34 }}>
+                    <div className="lor-menu-liste">
+                      {FAMILLES.map((f) => (
+                        <Link key={f.cle} role="menuitem" href={`${BASE}?famille=${f.cle}`} className="lor-option" onClick={() => setOuvertVue(false)} title={f.sous}>
+                          <IconeSanteLor etat={SANTE[f.cle]} />
+                          <span className="lor-option-libelle">Vue « {f.libelle} »</span>
+                          <span className="lor-option-droite">{dossier.permis.filter((x) => familleDe(x) === f.cle).length}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
             </nav>
             <button type="button" className="lor-rond lor-in-details-btn" aria-label={details ? "Fermer les détails du projet" : "Ouvrir les détails du projet"} title={`${details ? "Fermer" : "Ouvrir"} les détails du projet  ⌘ I`} aria-expanded={details} onClick={() => setDetails((d) => !d)}>
               <IconeVolet ouvert={details} />
@@ -780,6 +851,15 @@ export default function PageProjet({ id }: { id: string }) {
                       <p className="lor-in-maj-texte lor-in-sourd">Aucun permis ni compte rendu : saisissez le permis, ou déposez le récépissé de la mairie.</p>
                     )}
                     <div className="lor-in-maj-actions">
+                      <button
+                        type="button"
+                        className="lor-rond"
+                        aria-label="Copier ce point"
+                        title="Copier ce point (pour un courriel ou l'assistant)"
+                        onClick={async () => toast((await copierTexte(`${projet.nom} — ${(document.querySelector(".lor-in-maj-texte")?.textContent ?? "").trim()}`)) ? "Point copié." : "La copie a été refusée par le navigateur.")}
+                      >
+                        <IconeLin nom="reaction" />
+                      </button>
                       <Link href={lien("chantier")} className="lor-in-com" title={`${pluriel(pointsOuverts, "point")} en suspens au chantier`} aria-label={`${pluriel(pointsOuverts, "point")} en suspens`}>
                         <IconeSprite nom="Comment" />
                         {pointsOuverts ? <span>{pointsOuverts}</span> : null}
@@ -829,6 +909,57 @@ export default function PageProjet({ id }: { id: string }) {
               </div>
             ) : cle === "activite" ? (
               <div className="lor-in-colonne lor-in-colonne--activite">
+                {/* deux vues de l'onglet : le fil d'activité, ou le registre daté (dossier-date.ts) — « ?vue=registre » */}
+                <div className="lor-in-vues-activite" role="tablist" aria-label="Vues de l'activité">
+                  <Link role="tab" aria-selected={!registre} href={lien("activite")} scroll={false} className="lor-vue" data-actif={!registre ? "" : undefined}>
+                    Fil d&apos;activité
+                  </Link>
+                  <Link role="tab" aria-selected={registre} href={`${lien("activite")}&vue=registre`} scroll={false} className="lor-vue" data-actif={registre ? "" : undefined}>
+                    Registre daté
+                  </Link>
+                </div>
+                {registre ? (
+                  <>
+                    <div className="lor-in-registre-tete">
+                      <p className="lor-in-sourd">
+                        {pluriel(lignesRegistre.length, "ligne")} : contrôles et constats décidés, visas, situations, décennales, ordres de service, réserves, comptes rendus diffusés, offres. Chaque date est celle que la base a enregistrée au moment des faits.
+                      </p>
+                      <button type="button" className="lor-texte-btn" onClick={exporter} title="Registre PDF et Excel (une feuille par lot), dans une archive : le dossier de défense décennale">
+                        <IconeSprite nom="Folder" />
+                        Exporter le dossier daté
+                      </button>
+                    </div>
+                    {[...new Set(lignesRegistre.map((x) => (x.date ?? "sans date").slice(0, 7)))].reverse().map((mois) => (
+                      <section key={mois} className="lor-in-mois" aria-label={mois === "sans date" ? "Sans date" : fmtMois.format(midi(`${mois}-15`))}>
+                        <h3>{mois === "sans date" ? "Sans date" : fmtMois.format(midi(`${mois}-15`))}</h3>
+                        <ul>
+                          {lignesRegistre
+                            .filter((x) => (x.date ?? "sans date").startsWith(mois))
+                            .reverse()
+                            .map((x, i) => (
+                              <li key={`${mois}-${i}`} className="lor-in-ev lor-in-registre">
+                                <span className="lor-in-rubrique">{x.rubrique}</span>
+                                <span>
+                                  <span className="lor-in-ev-qui">{x.objet}</span>
+                                  {x.lot ? ` · lot ${x.lot}` : ""} · {x.etat}
+                                  {x.par ? ` (${x.par})` : ""}
+                                  {x.piece ? ` · pièce : ${x.piece}` : ""}
+                                  {x.date ? (
+                                    <>
+                                      {" "}
+                                      · <time dateTime={x.date}>{court(x.date)}</time>
+                                    </>
+                                  ) : null}
+                                </span>
+                              </li>
+                            ))}
+                        </ul>
+                      </section>
+                    ))}
+                    {!lignesRegistre.length ? <p className="lor-in-vide">Aucune décision n&apos;est encore enregistrée sur ce projet : le registre se remplit avec les contrôles, les visas, les situations, les ordres de service, les réserves et les comptes rendus diffusés.</p> : null}
+                  </>
+                ) : (
+                <>
                 <button type="button" className="lor-in-composeur" disabled={gris} onClick={() => setForm({ type: "courrier", projet: projet.id })}>
                   <span className="lor-in-segmente" aria-hidden="true">
                     <span data-actif="">Courrier</span>
@@ -859,6 +990,8 @@ export default function PageProjet({ id }: { id: string }) {
                     </ul>
                   </section>
                 ))}
+                </>
+                )}
               </div>
             ) : cle === "permis" ? (
               <div className="lor-in-large">
@@ -874,6 +1007,36 @@ export default function PageProjet({ id }: { id: string }) {
               </div>
             ) : (
               <div className="lor-in-large lor-in-vue">
+                {cle === "chantier" ? (
+                  <section className="lor-in-chantier-tete" aria-label="Bordereau et révision des prix">
+                    <div className="lor-in-projets-tete">
+                      <h3>Visas et révision des prix</h3>
+                      <div className="lor-in-projets-outils">
+                        <button type="button" className="lor-texte-btn" onClick={imprimerBordereau} title="Bordereau VSO · VAO · refus, imprimable (PDF fabriqué dans le navigateur)">
+                          <IconeSprite nom="PdfFile" />
+                          Bordereau des visas
+                        </button>
+                      </div>
+                    </div>
+                    <ul className="lor-in-revisions">
+                      {marchesProjet.map((m) => {
+                        const l = dossier.lots.find((x) => x.id === m.lot_id);
+                        return (
+                          <li key={m.id} className="lor-in-ev">
+                            <span className="lor-in-rubrique">{l ? `Lot ${l.numero}` : "Lot"}</span>
+                            <span>
+                              <span className="lor-in-ev-qui">{m.titulaire}</span> ·{" "}
+                              {m.revision_idbank
+                                ? `révision C = a + (1 − a) × In / I0 sur l'index INSEE ${m.revision_idbank}${m.revision_mois_zero ? `, I0 de ${fmtMois.format(midi(m.revision_mois_zero))}` : ""}, partie fixe a = ${(m.revision_partie_fixe ?? 0.15).toLocaleString("fr-FR")} ; la révision de chaque situation est calculée en base`
+                                : "aucune formule de révision saisie : prix fermes pour Lorani"}
+                            </span>
+                          </li>
+                        );
+                      })}
+                      {!marchesProjet.length ? <li className="lor-in-vide">Aucun marché de travaux : la révision se règle par marché.</li> : null}
+                    </ul>
+                  </section>
+                ) : null}
                 <Habille>
                   <div className="lin lor-in-pont">
                     <ProjetCarte key={`${cle}-${projet.id}`} projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={setForm} agir={agir} parties={ong.parties} confirmerEnvois />
@@ -896,6 +1059,25 @@ export default function PageProjet({ id }: { id: string }) {
             <div ref={setCible} className="lvp-cible" hidden />
           )}
         </div>
+        <BarreSelection
+          nombre={selection.cles.length}
+          vider={selection.vider}
+          actions={[
+            { cle: "epingler", libelle: "Épingler", faire: () => favoris.poser(selection.cles, true) },
+            { cle: "suivre", libelle: "Suivre", faire: () => suivis.poser(selection.cles, true) },
+            ...datesReport()
+              .slice(0, 2)
+              .map((d) => ({ cle: `rep-${d.cle}`, libelle: `Reporter · ${d.libelle.toLowerCase()}`, faire: () => { selection.cles.forEach((k) => reports.reporter(k, d.date)); selection.vider(); } })),
+            {
+              cle: "csv",
+              libelle: "Exporter en CSV",
+              faire: () => {
+                const choisis = permis.filter((x) => selection.a(`permis:${x.id}`));
+                exporterCsv(`permis-${projet.nom}`, ["Permis", "Numéro", "État", "Prochaine date", "Chef de projet"], choisis.map((x) => [titrePermis(x, projet.nom), x.numero ?? "", ETATS[x.etat]?.libelle ?? x.etat, prochaineDate(x) ?? "", chef ?? ""]));
+              },
+            },
+          ]}
+        />
         {formulaires}
       </div>
     </VoletContexte.Provider>

@@ -142,3 +142,8 @@
 
 /* la case « Marché public » de F1 (la fenêtre est hors de .lor) */
 .lor-pj-coche { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+/* 02/11 : une ligne cochée garde sa case visible ; le rappel des reportés sous la liste */
+.v2 .lor-pj-ligne[data-coche] .lor-pj-c-case { opacity: 1; }
+.v2 .lor-pj-ligne[data-coche]::before { background: var(--lor-survol); }
+.v2 .lor-pj-reportes { display: block; margin: 8px 16px; font-size: 12px; color: var(--lor-t3); }
+.v2 .lor-pj-reportes:hover { color: var(--lor-t2); }
