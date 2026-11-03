@@ -97,6 +97,8 @@ const MODELES: Modele[] = [
     ages: Array.from({ length: 24 }, (_, k) => 9 + 30 * k), montants: () => 480, niveau: "ok", rythme: 30, raisons: () => [],
   },
   {
+    /* « une demande d'arrêt vaut retrait immédiat et définitif du cycle » */
+    statut: "arrete", motif: "A répondu « stop » par SMS le 15 oct. : retiré du cycle, plus aucune sollicitation.",
     n: 6, ref: "S-7F21A0C4", nom: "Atelier Nomade", contact: null, email: null, telephone: "06 00 00 00 06", commercial: null, ville: "Brest",
     ages: [], montants: () => 0, niveau: "sans_achat", rythme: null,
     raisons: () => [{ code: "sans_achat", points: 0, phrase: "Aucun achat connu : rien ne permet de dater ce compte, il est présenté à part." }],

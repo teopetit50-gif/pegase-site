@@ -50,6 +50,10 @@ export function echeancesExemple(): EcheanceLigne[] {
     { id: "e4", type: "contrat", nature: "commerciale", due_le: jour(25), base_le: null, statut: "a_venir", s_eteint: true,
       motif: "Le contrat CTR-2025-01 s'éteint sans reconduction tacite : il faut le renouveler.",
       compte_id: c2, compte_nom: "Froid Services Ouest", equipement: null, contrat: { id: "k1", numero: "CTR-2025-01", libelle: "Maintenance préventive", reconduction: "expresse" } },
+    /* « une échéance déjà honorée ailleurs sort du cycle dès que la date est connue » (03/11/2026) */
+    { id: "e5", type: "entretien", nature: "commerciale", due_le: jour(9), base_le: jour(9 - 365), statut: "honoree_ailleurs", s_eteint: false,
+      motif: `Le client a fait faire l'entretien ailleurs le ${new Date(jour(-20)).toLocaleDateString("fr-FR")} : l'échéance sort du cycle, aucune relance.`,
+      compte_id: c1, compte_nom: "Garage Martin", equipement: { id: "q4", ref: "CO-0410", designation: "Compresseur d'air", site: "Atelier", type_entretien: "Entretien annuel" }, contrat: null },
   ];
 }
 
