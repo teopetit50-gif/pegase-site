@@ -137,6 +137,10 @@ export const CONTRATS_EXEMPLE: Contrat[] = [
   /* 8 — rendu à l'heure, plein fait : rien à facturer */
   contrat(8, { numero: "C-2026-0299", entite_id: GRENOBLE, depart_le: ilYa(30, 9), retour_prevu_le: ilYa(28, 9), retour_reel_le: ilYa(28, 8), statut: "clos",
     vehicule_id: VEHICULES_EXEMPLE[1].id, categorie_id: CATEGORIES_EXEMPLE[1].id, locataire_id: LOCATAIRES_EXEMPLE[7].id, km_depart: 47500, km_retour: 47800, km_inclus: 400 }),
+  /* 9 — Grenoble, facturé hier ; le client n'a pas d'adresse électronique : la facture est « à envoyer
+     vous-même » (03/11/2026 : les vues « À envoyer vous-même » et « Émises hier » étaient vides) */
+  contrat(9, { numero: "C-2026-0404", entite_id: GRENOBLE, depart_le: ilYa(5, 9), retour_prevu_le: ilYa(2, 9), retour_reel_le: ilYa(2, 10), statut: "clos",
+    vehicule_id: VEHICULES_EXEMPLE[5].id, categorie_id: CATEGORIES_EXEMPLE[1].id, locataire_id: LOCATAIRES_EXEMPLE[3].id, km_depart: 61200, km_retour: 61540, km_inclus: 400 }),
 ];
 
 export const AMENDEMENTS_EXEMPLE: Amendement[] = [
@@ -173,6 +177,9 @@ export const PROPOSITIONS_EXEMPLE: Proposition[] = [
   prop(6, { contrat_id: u("co", 6), entite_id: GRENOBLE, statut: "facturee", total_ht: 250, total_tva: 50, total_ttc: 300, total_frais_ttc: 300, total_dommages_ttc: 0, calculee_le: ilYa(45, 19), demande_id: u("de", 6), plafond_eur: 1500,
     entrees: { retour_reel_le: ilYa(45, 18), km_retour: 90400, carburant_depart_8: 8, carburant_retour_8: 3 },
     calcul_carburant: { manquant: 5, unite: "litre", quantite: 50, prix_unitaire: 1.9, frais_service: 15, montant_ht: 110 }, calcul_km: { montant_ht: 0, motif: "illimite" }, calcul_retard: { retard_min: 0, montant_ht: 0, motif: "rendu_a_l_heure" } }),
+  prop(9, { contrat_id: u("co", 9), entite_id: GRENOBLE, statut: "facturee", total_ht: 49.2, total_tva: 9.84, total_ttc: 59.04, total_frais_ttc: 59.04, total_dommages_ttc: 0, calculee_le: ilYa(1, 9), demande_id: u("de", 9),
+    entrees: { retour_reel_le: ilYa(2, 10), km_retour: 61540, carburant_depart_8: 8, carburant_retour_8: 5 },
+    calcul_carburant: { manquant: 3, unite: "litre", quantite: 18, prix_unitaire: 1.9, frais_service: 15, montant_ht: 49.2 }, calcul_km: { parcourus: 340, inclus: 400, depassement: 0, montant_ht: 0 }, calcul_retard: { retard_min: 0, montant_ht: 0, motif: "rendu_a_l_heure" } }),
   /* contrat 8 : rien à facturer */
   prop(8, { contrat_id: u("co", 8), entite_id: GRENOBLE, statut: "rien_a_facturer", total_ht: 0, total_tva: 0, total_ttc: 0, total_frais_ttc: 0, total_dommages_ttc: 0, calculee_le: ilYa(28, 9),
     entrees: { retour_reel_le: ilYa(28, 8), km_retour: 47800, carburant_depart_8: 8, carburant_retour_8: 8 },
@@ -206,6 +213,8 @@ export const LIGNES_EXEMPLE: LigneProposition[] = [
   ligne(16, u("pr", 6), 1, { nature: "frais", famille: "carburant", code: "CARBURANT_LITRE", libelle: "Gazole manquant, au litre", unite: "litre", quantite: 50, prix_unitaire: 1.9, montant_ht: 95 }),
   ligne(17, u("pr", 6), 2, { nature: "frais", famille: "carburant", code: "CARBURANT_SERVICE", libelle: "Frais de service carburant", quantite: 1, prix_unitaire: 15, montant_ht: 15 }),
   ligne(18, u("pr", 6), 3, { nature: "frais", famille: "frais", code: "CLE_PERDUE", libelle: "Clé perdue (refabrication)", quantite: 1, prix_unitaire: 190, montant_ht: 140, preuves: [{ note: "déclaration du conducteur" }] }),
+  ligne(19, u("pr", 9), 1, { nature: "frais", famille: "carburant", code: "CARBURANT_LITRE", libelle: "Gazole manquant, au litre", unite: "litre", quantite: 18, prix_unitaire: 1.9, montant_ht: 34.2 }),
+  ligne(20, u("pr", 9), 2, { nature: "frais", famille: "carburant", code: "CARBURANT_SERVICE", libelle: "Frais de service carburant", quantite: 1, prix_unitaire: 15, montant_ht: 15 }),
 ];
 
 const fac = (n: number, o: Partial<Facture> & Pick<Facture, "contrat_id" | "contrat_numero" | "proposition_id" | "nature" | "reference" | "emise_le" | "echeance_le" | "statut" | "total_ht" | "total_tva" | "total_ttc" | "destinataire">): Facture => ({
@@ -223,6 +232,8 @@ export const FACTURES_EXEMPLE: Facture[] = [
   fac(52, { contrat_id: u("co", 5), contrat_numero: "C-2026-0340", proposition_id: u("pr", 5), nature: "dommages", reference: "FA-2026-000105", emise_le: ilYa(18, 11), echeance_le: ilYa(18, 11).slice(0, 10), statut: "reglee", total_ht: 180, total_tva: 0, total_ttc: 180, destinataire: dest(LOCATAIRES_EXEMPLE[6]), regle_le: ilYa(16, 9), mode_reglement: "carte" }),
   fac(61, { contrat_id: u("co", 6), contrat_numero: "C-2026-0322", proposition_id: u("pr", 6), nature: "frais", reference: "FA-2026-000071", emise_le: ilYa(45, 19), echeance_le: ilYa(15, 19).slice(0, 10), statut: "envoyee", total_ht: 250, total_tva: 50, total_ttc: 300, destinataire: dest(LOCATAIRES_EXEMPLE[5]), relances: 1, relance_le: ilYa(7, 9),
     mentions: { mandat: "Facture établie par Omega au nom et pour le compte de Autoloc Bertin.", objet: "Frais complémentaires de location", contrat: "C-2026-0322", penalites: "En cas de retard de paiement : pénalités au taux de la BCE majoré de 10 points, et indemnité forfaitaire de recouvrement de 40 € (C. com. L441-10)." } }),
+  /* émise hier, pas encore partie : Luc Berger n'a pas d'adresse électronique, l'agence l'envoie elle-même */
+  fac(91, { contrat_id: u("co", 9), contrat_numero: "C-2026-0404", proposition_id: u("pr", 9), demande_id: u("de", 9), nature: "frais", reference: "FA-2026-000124", emise_le: ilYa(1, 10), echeance_le: dans(29, 10).slice(0, 10), statut: "emise", total_ht: 49.2, total_tva: 9.84, total_ttc: 59.04, destinataire: dest(LOCATAIRES_EXEMPLE[3]), envoi_id: null }),
 ];
 
 const lf = (n: number, facture_id: string, rang: number, l: LigneProposition): LigneFacture => ({ id: u("fl", n), facture_id, rang, code: l.code, libelle: l.libelle, famille: l.famille, unite: l.unite, quantite: l.quantite, prix_unitaire: l.prix_unitaire, montant_ht: l.montant_ht, regime_tva: l.regime_tva, taux_tva: l.taux_tva, montant_tva: l.montant_tva, montant_ttc: l.montant_ttc, preuves: l.preuves,
@@ -233,6 +244,7 @@ export const LIGNES_FACTURES_EXEMPLE: LigneFacture[] = [
   lf(5, u("fa", 51), 1, LIGNES_EXEMPLE[10]), lf(6, u("fa", 51), 2, LIGNES_EXEMPLE[11]), lf(7, u("fa", 51), 3, LIGNES_EXEMPLE[12]), lf(8, u("fa", 51), 4, LIGNES_EXEMPLE[13]),
   lf(9, u("fa", 52), 1, LIGNES_EXEMPLE[14]),
   lf(10, u("fa", 61), 1, LIGNES_EXEMPLE[15]), lf(11, u("fa", 61), 2, LIGNES_EXEMPLE[16]), lf(12, u("fa", 61), 3, LIGNES_EXEMPLE[17]),
+  lf(13, u("fa", 91), 1, LIGNES_EXEMPLE[18]), lf(14, u("fa", 91), 2, LIGNES_EXEMPLE[19]),
 ];
 
 export const AVOIRS_EXEMPLE: Avoir[] = [
@@ -244,6 +256,7 @@ export const DEMANDES_EXEMPLE: DemandeCourte[] = [
   { id: u("de", 4), type_action: "facture.envoyer", statut: "executee", approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], echeance: ilYa(12, 23), demandeur_id: SOFIA },
   { id: u("de", 5), type_action: "facture.envoyer", statut: "executee", approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], echeance: ilYa(18, 23), demandeur_id: SOFIA },
   { id: u("de", 6), type_action: "facture.envoyer", statut: "executee", approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], echeance: ilYa(45, 23), demandeur_id: EXEMPLE_MOI },
+  { id: u("de", 9), type_action: "facture.envoyer", statut: "executee", approbations_requises: 1, roles_autorises: ["gerant", "admin", "valideur"], echeance: ilYa(1, 23), demandeur_id: SOFIA },
   { id: u("de", 51), type_action: "avoir.emettre", statut: "executee", approbations_requises: 1, roles_autorises: ["gerant", "admin"], echeance: ilYa(13, 14), demandeur_id: SOFIA },
 ];
 
