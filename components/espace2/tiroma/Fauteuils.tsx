@@ -28,6 +28,8 @@ import { Cal_Sans } from "next/font/google";
 import { useSearchParams } from "next/navigation";
 import { CAPACITES } from "@/components/espace/tiroma/libelles";
 import type { Dossier, MotifAbsenceMembre } from "@/components/espace/tiroma/types";
+import { chargerAgenda, type RdvAgenda } from "@/components/espace/tiroma/portes";
+import { agendaExemple } from "./exemplesAgenda";
 import { RACINE } from "../modules";
 import { useTiroma } from "./donnees";
 import { copier, exporterCSV, useFavoris, useVues } from "./navigateur";
@@ -51,9 +53,11 @@ function enJours(jour: string, n: number): string {
   return jourISO(d);
 }
 
-type Onglet = "charge" | "vides" | "equipe" | "regrouper" | "longues";
+type Onglet = "charge" | "agenda" | "vides" | "equipe" | "regrouper" | "longues";
 const ONGLETS: { cle: Onglet; libelle: string }[] = [
   { cle: "charge", libelle: "Charge du jour" },
+  /* 04/11/2026 (docs/verification/PROMESSES-ECRANS.md, TIROMA n° 47) : l'agenda des rendez-vous, fauteuil par fauteuil */
+  { cle: "agenda", libelle: "Agenda" },
   { cle: "vides", libelle: "Demi-journées vides" },
   { cle: "equipe", libelle: "Équipe absente" },
   { cle: "regrouper", libelle: "À regrouper" },
@@ -100,8 +104,74 @@ const L = {
   plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
 };
 
-function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>): Groupe[] {
+const STATUTS_RDV: Record<RdvAgenda["statut"], { texte: string; teinte?: "vert" | "orange" | "rouge" }> = {
+  prevu: { texte: "Prévu" },
+  honore: { texte: "Honoré", teinte: "vert" },
+  manque: { texte: "Manqué", teinte: "rouge" },
+  annule: { texte: "Annulé", teinte: "rouge" },
+  reporte: { texte: "Reporté", teinte: "orange" },
+  supprime: { texte: "Supprimé", teinte: "rouge" },
+};
+export type JourAgenda = { jour: string; rdv: RdvAgenda[] | null; erreur: string | null };
+
+/* l'agenda d'un jour : un groupe par fauteuil, une ligne par rendez-vous (une réservation de Bookings), et les
+   créneaux libérés du dossier (créneaux à sauver) posés à leur heure, « libre » */
+function lignesAgenda(d: Dossier, a: JourAgenda): Groupe[] {
+  const rdv = (a.rdv ?? []).filter((r) => r.statut !== "supprime");
+  const praticien = (id: string | null) => d.praticiens.find((p) => p.id === id)?.nom_affiche ?? null;
+  const typeRdv = (id: string | null) => d.types.find((x) => x.id === id)?.libelle_source ?? null;
+  const fauteuils = [...d.fauteuils.filter((f) => f.actif), { id: "", nom: "Sans fauteuil" }];
+  const libres = d.creneaux.filter((c) => c.libre && jourISO(new Date(c.debut)) === a.jour);
+  return fauteuils
+    .map((f) => {
+      const ls: Ligne[] = rdv
+        .filter((r) => (r.fauteuil_id ?? "") === f.id)
+        .map((r) => {
+          const acte = r.libelle ?? typeRdv(r.type_rdv_id) ?? "Rendez-vous";
+          const minutes = Math.round((new Date(r.fin).getTime() - new Date(r.debut).getTime()) / 6e4);
+          return {
+            cle: `rdv:${r.id}`,
+            filtre: f.nom,
+            date: jourCourt(r.debut),
+            heures: `${heure(r.debut)} - ${heure(r.fin)}`,
+            pastille: STATUTS_RDV[r.statut],
+            titre: `${acte}${r.patient_nom ? ` · ${r.patient_nom}` : ""}`,
+            qui: [f.id ? f.nom : null, praticien(r.praticien_id), `${minutes} min`].filter(Boolean).join(" · "),
+            detail: [
+              { titre: "Quand", lignes: [{ libelle: jourLong(r.debut), valeur: `${heure(r.debut)} - ${heure(r.fin)} (${minutes} min)` }] },
+              { titre: "Où", lignes: [{ libelle: "Fauteuil", valeur: f.id ? f.nom : "—" }, { libelle: "Praticien", valeur: praticien(r.praticien_id) ?? "—" }] },
+              { titre: "Rendez-vous", lignes: [{ libelle: "Patient", valeur: r.patient_nom ?? "—" }, { libelle: "Acte", valeur: acte }, { libelle: "État", valeur: STATUTS_RDV[r.statut].texte }, ...(r.seance_rang ? [{ libelle: "Séance du plan", valeur: String(r.seance_rang) }] : [])] },
+            ],
+            liens: r.plan_id ? [{ libelle: "Ouvrir le plan", href: `${RACINE}/tiroma/plans?plan=${encodeURIComponent(r.plan_id)}` }] : undefined,
+          };
+        });
+      for (const c of libres.filter((x) => (x.fauteuil_id ?? "") === f.id)) {
+        ls.push({
+          cle: `libre:${c.evenement_id}`,
+          filtre: f.nom,
+          date: jourCourt(c.debut),
+          heures: `${heure(c.debut)} - ${heure(c.fin)}`,
+          pastille: { texte: "Créneau à sauver", teinte: "orange" },
+          titre: `Libre · ${c.minutes} min ${c.type === "annulation" ? "libérées par une annulation" : c.type === "report" ? "libérées par un report" : "libres"}`,
+          qui: [f.id ? f.nom : null, c.praticien_nom].filter(Boolean).join(" · "),
+          mention: c.candidats.length ? `${c.candidats.length} patient${c.candidats.length > 1 ? "s" : ""} à proposer` : undefined,
+          detail: [
+            { titre: "Quand", lignes: [{ libelle: jourLong(c.debut), valeur: `${heure(c.debut)} - ${heure(c.fin)} (${c.minutes} min)` }] },
+            { titre: "À proposer", lignes: c.candidats.length ? c.candidats.map((k) => ({ libelle: `${k.rang}. ${k.patient_nom}`, valeur: k.motif })) : [{ libelle: "Aucun patient", valeur: "" }] },
+          ],
+          liens: [{ libelle: "Ouvrir le créneau", href: `${RACINE}/tiroma/creneaux?creneau=${encodeURIComponent(String(c.evenement_id))}` }],
+        });
+      }
+      ls.sort((x, y) => x.heures.localeCompare(y.heures));
+      const n = ls.filter((l) => l.cle.startsWith("rdv:")).length;
+      return { libelle: `${f.nom} · ${n} rendez-vous`, lignes: ls };
+    })
+    .filter((g) => g.lignes.length);
+}
+
+function lignes(d: Dossier, onglet: Onglet, clore: (id: string) => Promise<void>, agenda?: JourAgenda): Groupe[] {
   const titulaire = d.profil === "titulaire";
+  if (onglet === "agenda") return agenda ? lignesAgenda(d, agenda) : [];
   if (onglet === "charge") {
     const c = titulaire ? d.charge : null;
     if (!c) return [];
@@ -250,6 +320,7 @@ function Vide({ titre, texte }: { titre: string; texte: string }) {
 }
 
 const VIDES: Record<Onglet, [string, string]> = {
+  agenda: ["Aucun rendez-vous ce jour-là", "Le logiciel du cabinet n'a exporté aucun rendez-vous pour ce jour : changez de jour avec ‹ ›."],
   charge: ["Aucune charge à montrer", "Aucun fauteuil ou aucun horaire : posez-les dans les réglages. Vue réservée au titulaire."],
   vides: ["Aucune demi-journée vide", "Aucune demi-journée sous le seuil sur les quatorze prochains jours."],
   equipe: ["Personne n'est absent", "Notez l'absence d'une assistante : Tiroma dit quels soins basculer et vers quel fauteuil."],
@@ -368,6 +439,64 @@ function Calendrier({ lignes: ls, semaine, setSemaine, ouvrir }: { lignes: Ligne
   );
 }
 
+/* l'agenda en grille (vue calendrier de Cal.com, colonnes = fauteuils) : 8 h - 19 h, un bloc par rendez-vous */
+const DEBUT_GRILLE = 8 * 60;
+const FIN_GRILLE = 19 * 60;
+const PX_MIN = 1.4;
+function GrilleAgenda({ groupes, ouvrir }: { groupes: Groupe[]; ouvrir: (cle: string) => void }) {
+  const colonnes = groupes.map((g) => ({ nom: g.lignes[0]?.filtre ?? "", lignes: g.lignes }));
+  const minutes = (iso: string) => {
+    const x = new Date(iso);
+    return x.getHours() * 60 + x.getMinutes();
+  };
+  const heures = Array.from({ length: (FIN_GRILLE - DEBUT_GRILLE) / 60 }, (_, i) => DEBUT_GRILLE / 60 + i);
+  return (
+    <div className="cal-ag" style={{ "--cal-ag-colonnes": colonnes.length } as React.CSSProperties}>
+      <div className="cal-ag-tete">
+        <span className="cal-cal-coin" />
+        {colonnes.map((c) => (
+          <span key={c.nom} className="cal-cal-jour cal-ag-fauteuil"><Icone d={L.fauteuil} taille={14} />{c.nom}</span>
+        ))}
+      </div>
+      <div className="cal-ag-corps" style={{ height: (FIN_GRILLE - DEBUT_GRILLE) * PX_MIN }}>
+        <div className="cal-ag-heures">
+          {heures.map((h) => (
+            <span key={h} className="cal-ag-heure" style={{ top: (h * 60 - DEBUT_GRILLE) * PX_MIN }}>{String(h).padStart(2, "0")}:00</span>
+          ))}
+        </div>
+        {colonnes.map((c) => (
+          <div key={c.nom} className="cal-ag-colonne">
+            {heures.map((h) => <span key={h} className="cal-ag-trait" style={{ top: (h * 60 - DEBUT_GRILLE) * PX_MIN }} />)}
+            {c.lignes.map((l) => {
+              const [debut, fin] = l.heures.split(" - ");
+              const iso = (hhmm: string) => `2000-01-01T${hhmm}:00`;
+              const m0 = Math.max(DEBUT_GRILLE, minutes(iso(debut)));
+              const m1 = Math.min(FIN_GRILLE, minutes(iso(fin)));
+              if (m1 <= m0) return null;
+              const libre = l.cle.startsWith("libre:");
+              return (
+                <div
+                  key={l.cle}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter") ouvrir(l.cle); }}
+                  className={`cal-cal-evt cal-ag-evt${l.pastille?.teinte ? ` cal-cal-evt--${l.pastille.teinte}` : ""}`}
+                  data-libre={libre ? "" : undefined}
+                  style={{ top: (m0 - DEBUT_GRILLE) * PX_MIN, height: Math.max(14, (m1 - m0) * PX_MIN - 2) }}
+                  title={`${l.heures} · ${l.titre}`}
+                  onClick={() => ouvrir(l.cle)}
+                >
+                  <span className="cal-ag-evt-heure">{debut}</span> {libre ? "libre · Créneau à sauver" : l.titre}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Fauteuils() {
   const t = useTiroma();
   const params = useSearchParams();
@@ -384,6 +513,23 @@ export default function Fauteuils() {
   const [avis, setAvis] = useState<string | null>(null);
   const [confirmeLot, setConfirmeLot] = useState(false);
   const [semaine, setSemaine] = useState(0);
+  /* l'agenda : le jour montré (décalage depuis aujourd'hui), lu en base ou dans l'exemple */
+  const [decalage, setDecalage] = useState(0);
+  const jourAgenda = enJours(jourISO(new Date()), decalage);
+  const [agendaLu, setAgendaLu] = useState<JourAgenda | null>(null);
+  const entiteCabinet = d?.cabinet.entite_id ?? null;
+  useEffect(() => {
+    if (onglet !== "agenda" || t.source !== "reelle" || !entiteCabinet) return;
+    let vivant = true;
+    chargerAgenda(entiteCabinet, jourAgenda)
+      .then((rdv) => vivant && setAgendaLu({ jour: jourAgenda, rdv, erreur: null }))
+      .catch((e: unknown) => vivant && setAgendaLu({ jour: jourAgenda, rdv: null, erreur: e instanceof Error ? e.message : "La base n'a pas répondu." }));
+    return () => {
+      vivant = false;
+    };
+  }, [onglet, t.source, entiteCabinet, jourAgenda]);
+  const agenda: JourAgenda =
+    t.source === "exemple" ? { jour: jourAgenda, rdv: agendaExemple(jourAgenda, d?.creneaux ?? []), erreur: null } : agendaLu && agendaLu.jour === jourAgenda ? agendaLu : { jour: jourAgenda, rdv: null, erreur: null };
   const [favoris, poserFavori] = useFavoris();
   const [vues, poserVue] = useVues();
   const annoncer = (texte: string) => {
@@ -415,7 +561,7 @@ export default function Fauteuils() {
     };
   }, [menu]);
 
-  const groupesBruts = d ? lignes(d, onglet, (id) => { const a = d.equipe?.find((x) => x.absence_id === id); return a ? t.cloreAbsence(a) : Promise.resolve(); }) : [];
+  const groupesBruts = d ? lignes(d, onglet, (id) => { const a = d.equipe?.find((x) => x.absence_id === id); return a ? t.cloreAbsence(a) : Promise.resolve(); }, agenda) : [];
   const valeursFiltre = [...new Set(groupesBruts.flatMap((g) => g.lignes.map((l) => l.filtre).filter((x): x is string => !!x)))];
   const groupes = groupesBruts.map((g) => ({ ...g, lignes: g.lignes.filter((l) => !filtreVal || l.filtre === filtreVal) })).filter((g) => g.lignes.length);
   const toutes = groupes.flatMap((g) => g.lignes);
@@ -441,6 +587,8 @@ export default function Fauteuils() {
   else if (t.source === "reelle" && reel && !reel.compte) etat = "Cette session n'est rattachée à aucune organisation.";
   else if (t.source === "reelle" && reel && !reel.cabinets.length) etat = <>Aucun cabinet installé. <Link href={`${RACINE}/tiroma/reglages`}>Installer le cabinet</Link></>;
   else if (!d) etat = "Lecture du cabinet…";
+  else if (onglet === "agenda" && agenda.erreur) etat = `L'agenda n'a pas pu être lu. ${agenda.erreur}`;
+  else if (onglet === "agenda" && !agenda.rdv) etat = "Lecture de l'agenda…";
 
   return (
     <div className={`tir-cal ${calSans.variable}`}>
@@ -497,9 +645,20 @@ export default function Fauteuils() {
             </div>
           </div>
 
+          {onglet === "agenda" && d ? (
+            <div className="cal-cal-barre cal-ag-barre">
+              <button type="button" className="cal-icone-bouton cal-icone-bouton--bord" aria-label="Jour précédent" onClick={() => { setDecalage(decalage - 1); setOuverte(null); }}><Icone d={'<path d="m15 18-6-6 6-6"/>'} /></button>
+              <button type="button" className="cal-icone-bouton cal-icone-bouton--bord" aria-label="Jour suivant" onClick={() => { setDecalage(decalage + 1); setOuverte(null); }}><Icone d={'<path d="m9 18 6-6-6-6"/>'} /></button>
+              <button type="button" className="cal-bouton" onClick={() => { setDecalage(0); setOuverte(null); }}>Aujourd&apos;hui</button>
+              <span className="cal-cal-mois">{jourLong(jourAgenda)}</span>
+            </div>
+          ) : null}
           {etat ? <div className="cal-etat">{etat}</div> : null}
           {!etat && !groupes.length ? <Vide titre={VIDES[onglet][0]} texte={VIDES[onglet][1]} /> : null}
-          {!etat && groupes.length && vueCal === "calendrier" ? (
+          {!etat && groupes.length && vueCal === "calendrier" && onglet === "agenda" ? (
+            <GrilleAgenda groupes={groupes} ouvrir={(cle) => { setOuverte(cle); setAbsence(false); }} />
+          ) : null}
+          {!etat && groupes.length && vueCal === "calendrier" && onglet !== "agenda" ? (
             <Calendrier lignes={toutes} semaine={semaine} setSemaine={setSemaine} ouvrir={(cle) => { setOuverte(cle); setAbsence(false); }} />
           ) : null}
           {!etat && groupes.length && vueCal === "liste" ? (

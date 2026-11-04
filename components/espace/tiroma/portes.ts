@@ -360,3 +360,47 @@ export async function chargerActesPlan(plan_id: string): Promise<ActePlan[]> {
   if (error) throw new ErreurPorte(message(error));
   return ((data ?? []) as ActePlan[]).map((a) => ({ ...a, dents: a.dents ?? [], montant: a.montant === null ? null : Number(a.montant), reste_a_charge: a.reste_a_charge === null ? null : Number(a.reste_a_charge) }));
 }
+
+/* ——— l'agenda d'un jour, fauteuil par fauteuil (04/11/2026, TIROMA n° 47 de docs/verification/PROMESSES-ECRANS.md) ———
+   Aucune porte SQL : tiroma_rendez_vous et tiroma_patients se lisent en SELECT dans le périmètre de la
+   personne (RLS « on voit les rendez-vous / les patients de son perimetre ») ; fauteuils, praticiens et
+   types de rendez-vous sont déjà dans le dossier. Les rendez-vous supprimés ou disparus de l'export ne
+   sont pas montrés. */
+export type RdvAgenda = {
+  id: string;
+  debut: string;
+  fin: string;
+  statut: "prevu" | "honore" | "manque" | "annule" | "reporte" | "supprime";
+  fauteuil_id: string | null;
+  praticien_id: string | null;
+  type_rdv_id: string | null;
+  plan_id: string | null;
+  seance_rang: number | null;
+  patient_nom: string | null;
+  libelle: string | null;
+};
+
+export async function chargerAgenda(entite_id: string, jour: string): Promise<RdvAgenda[]> {
+  const supabase = createClient();
+  const debut = new Date(`${jour}T00:00:00`);
+  const fin = new Date(debut);
+  fin.setDate(fin.getDate() + 1);
+  const { data, error } = await supabase
+    .from("tiroma_rendez_vous")
+    .select("id, debut, fin, statut, fauteuil_id, praticien_id, type_rdv_id, plan_id, seance_rang, patient_id")
+    .eq("entite_id", entite_id)
+    .gte("debut", debut.toISOString())
+    .lt("debut", fin.toISOString())
+    .neq("statut", "supprime")
+    .is("disparu_le", null)
+    .order("debut");
+  if (error) throw new ErreurPorte(message(error));
+  const rdv = (data ?? []) as (Omit<RdvAgenda, "patient_nom" | "libelle"> & { patient_id: string | null })[];
+  const ids = [...new Set(rdv.map((r) => r.patient_id).filter((x): x is string => !!x))];
+  const noms = new Map<string, string>();
+  if (ids.length) {
+    const p = await supabase.from("tiroma_patients").select("id, nom, prenom").in("id", ids);
+    for (const x of (p.data ?? []) as { id: string; nom: string; prenom: string | null }[]) noms.set(x.id, [x.prenom, x.nom].filter(Boolean).join(" "));
+  }
+  return rdv.map(({ patient_id, ...r }) => ({ ...r, patient_nom: patient_id ? (noms.get(patient_id) ?? null) : null, libelle: null }));
+}

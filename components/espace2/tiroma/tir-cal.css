@@ -777,3 +777,100 @@ html[data-v2-theme="light"] .v2 .tir-cal {
 .v2 .tir-cal .cal-cal-evt--vert {
   border-left-color: var(--cal-vert);
 }
+
+/* ——— l'agenda par fauteuil (04/11/2026, TIROMA n° 47) : la vue calendrier de Cal.com, une colonne par fauteuil,
+   8 h - 19 h à 1,4 px la minute ; les blocs reprennent .cal-cal-evt ——— */
+.v2 .tir-cal .cal-ag-barre {
+  margin-bottom: 12px;
+}
+.v2 .tir-cal .cal-ag {
+  border: 1px solid var(--cal-bord);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.v2 .tir-cal .cal-ag-tete,
+.v2 .tir-cal .cal-ag-corps {
+  display: grid;
+  grid-template-columns: 64px repeat(var(--cal-ag-colonnes), minmax(0, 1fr));
+}
+.v2 .tir-cal .cal-ag-fauteuil {
+  font-weight: 500;
+  color: var(--cal-fort);
+}
+.v2 .tir-cal .cal-ag-fauteuil svg {
+  flex: none;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-ag-corps {
+  position: relative;
+}
+.v2 .tir-cal .cal-ag-heures,
+.v2 .tir-cal .cal-ag-colonne {
+  position: relative;
+}
+.v2 .tir-cal .cal-ag-colonne {
+  border-left: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-ag-heure {
+  position: absolute;
+  right: 10px;
+  transform: translateY(2px);
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-ag-trait {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--cal-bord);
+}
+.v2 .tir-cal .cal-ag-trait:first-child {
+  border-top: 0;
+}
+.v2 .tir-cal .cal-ag-evt {
+  position: absolute;
+  cursor: pointer;
+  left: 3px;
+  right: 3px;
+  padding: 1px 6px;
+  font-size: 11px;
+  line-height: 14px;
+  -webkit-line-clamp: 4;
+}
+.v2 .tir-cal .cal-ag-evt[data-libre] {
+  background: transparent;
+  border: 1px dashed #ff9900;
+  border-left-width: 3px;
+  color: var(--cal-second);
+}
+.v2 .tir-cal .cal-ag-evt-heure {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 480px) {
+  .v2 .tir-cal .cal-ag-tete,
+  .v2 .tir-cal .cal-ag-corps {
+    grid-template-columns: 44px repeat(var(--cal-ag-colonnes), minmax(0, 1fr));
+  }
+  .v2 .tir-cal .cal-ag-heure {
+    right: 6px;
+    font-size: 10px;
+  }
+  .v2 .tir-cal .cal-ag-fauteuil {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+  .v2 .tir-cal .cal-ag-fauteuil svg {
+    display: none;
+  }
+}
+
+/* l'onglet Agenda allonge le contrôle segmenté : sous 1600 px, la barre passe à la ligne au lieu de déborder */
+@media (max-width: 1600px) {
+  .v2 .tir-cal .cal-outils {
+    flex-wrap: wrap;
+    height: auto;
+    row-gap: 8px;
+  }
+}
