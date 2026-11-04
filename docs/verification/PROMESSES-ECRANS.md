@@ -17,26 +17,26 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 
 ## Totaux par produit
 
-**Après les corrections du 3 novembre (trois passages) et du 4 novembre (session « suite de la vérification », section « Le 4 novembre » plus bas), mis en ligne et vérifiés sur omegaai.fr.**
+**Après les corrections du 3 novembre (trois passages) et du 4 novembre (session « suite de la vérification », deux lots, section « Le 4 novembre » plus bas), mis en ligne et vérifiés sur omegaai.fr.**
 63 promesses sont passées à « Montrée » depuis le relevé par les trois passages, puis **26 promesses « aucune page »**
 ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au soir ») : 89 en tout. Les **6 dernières
 « aucune page »** ont reçu leur écran le 4 novembre, sans migration ni porte nouvelle (section « Construites le 4 novembre ») :
-il ne reste plus aucune promesse « aucune page ».
+il ne reste plus aucune promesse « aucune page ». Avec les 36 du 4 novembre (section « Le 4 novembre »), 443 promesses sont montrées sur 520.
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
-| Socle et pages transverses | 15 | 2 | 1 | 1 | 0 | 5 | 3 | **27** |
-| FILED — factures fournisseurs | 49 | 3 | 7 | 0 | 0 | 3 | 3 | **65** |
-| CASHD — relances d’impayés | 56 | 3 | 2 | 1 | 0 | 2 | 2 | **66** |
+| Socle et pages transverses | 18 | 1 | 0 | 0 | 0 | 5 | 3 | **27** |
+| FILED — factures fournisseurs | 59 | 0 | 0 | 0 | 0 | 3 | 3 | **65** |
+| CASHD — relances d’impayés | 59 | 3 | 0 | 0 | 0 | 2 | 2 | **66** |
 | REPUT — demandes clients | 37 | 0 | 0 | 0 | 0 | 3 | 3 | **43** |
-| OFFLOAD — nouvelles affaires | 42 | 1 | 0 | 4 | 0 | 0 | 1 | **48** |
-| DALIRO — BTP | 28 | 1 | 1 | 0 | 0 | 2 | 3 | **35** |
-| LORANI — architectes | 60 | 1 | 1 | 2 | 0 | 7 | 2 | **73** |
+| OFFLOAD — nouvelles affaires | 47 | 0 | 0 | 0 | 0 | 0 | 1 | **48** |
+| DALIRO — BTP | 29 | 1 | 0 | 0 | 0 | 2 | 3 | **35** |
+| LORANI — architectes | 64 | 0 | 0 | 0 | 0 | 7 | 2 | **73** |
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
-| TAVARO — location automobile | 34 | 0 | 2 | 0 | 0 | 3 | 3 | **42** |
-| TIROMA — cabinet dentaire | 42 | 2 | 1 | 0 | 0 | 4 | 3 | **52** |
-| VARELO — groupes | 21 | 2 | 0 | 1 | 0 | 2 | 1 | **27** |
-| **Tous** | **410** | **15** | **15** | **9** | **0** | **45** | **26** | **520** |
+| TAVARO — location automobile | 36 | 0 | 0 | 0 | 0 | 3 | 3 | **42** |
+| TIROMA — cabinet dentaire | 45 | 0 | 0 | 0 | 0 | 4 | 3 | **52** |
+| VARELO — groupes | 23 | 1 | 0 | 0 | 0 | 2 | 1 | **27** |
+| **Tous** | **443** | **6** | **0** | **0** | **0** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -143,7 +143,9 @@ Reclassées sans changement de code, après vérification à l’écran : CASHD 
 contact ») sont déjà dans la pastille Statut de la fiche d’un compte (« Ne plus contacter », « Contact à désigner ») —
 `captures-promesses/cashd/52-statut-hors-perimetre.jpg`.
 
-Restent volontairement ouvertes : TAVARO n° 41 (factures « à envoyer vous-même » et « émises hier » : une facture
+*Mise à jour du 4 novembre : cette liste est périmée. TAVARO n° 41, CASHD n° 45, TAMILA n° 12 et DALIRO n° 23, 30, 32 ont été réglés au troisième passage (corrections n° 21, 25, 22, 30, 27, 29) ; CASHD n° 46 et DALIRO n° 15 l'ont été le 4 novembre ; « Ne plus contacter » s'appelle désormais « Liste blanche » (CASHD n° 59). L'état à jour est dans la section « Le 4 novembre ».*
+
+Restent volontairement ouvertes (état du 3 novembre) : TAVARO n° 41 (factures « à envoyer vous-même » et « émises hier » : une facture
 d’exemple de plus casserait la chaîne proposition → facture de l’exemple), CASHD n° 45 (le lien de paiement est réglé
 dans l’exemple, mais les textes de relance d’exemple ne le reprennent pas), CASHD n° 46 (une facture en devise
 fausserait les totaux, que le calcul d’exemple tient en euros), TAMILA n° 12 (renvois cliquables : il faudrait fabriquer
@@ -1182,51 +1184,65 @@ attendent ta décision avant toute réécriture. Les autres sont des corrections
 Session « suite de la vérification ». Règle : corriger ce qui se corrige sans migration, sans porte nouvelle,
 sans écriture en base et sans toucher au site public ; laisser la raison écrite pour le reste.
 
-### Promesses passées à « Montrée » (3)
+### Promesses passées à « Montrée » le 4 novembre (36)
 
-- **Socle n° 13** (Ailleurs → Montrée) — `/espace2/reglages`, « Membres et équipe » : ligne « Niveaux d'autonomie » qui mène aux
-  trois écrans où l'autonomie se règle règle par règle (FILED Circuit, REPUT Sujets, OFFLOAD Garde-fous).
-- **FILED n° 52** (Code invisible → Montrée) — `/espace2/filed/comptabilite`, section « Exports programmés » : la liste de
-  `filed_exports` (lecture seule) avec, en exemple, l'export du lundi « Factures à payer » (tableur, 3 lignes, téléchargeable) et le
-  sceau mensuel.
-- **TAVARO n° 18** (Ailleurs → Montrée) — fiche d'un contrat, Propriétés : « Crit'Air 1 » (ou « Crit'Air à vérifier »), lu dans la
-  conformité du parc. Le volet des propriétés est replié sous 1 280 px, comme chez Linear.
+Premier lot (session seule), puis second lot à la demande du coordinateur (« toutes celles qui se font à l'écran »),
+construit avec trois agents (OFFLOAD, FILED, Tiroma et Lorani). Chaque ligne : où la voir en données d'exemple.
 
-### Restent ouvertes, avec leur raison (39)
+| Produit | n° | Où elle se voit |
+|---|---|---|
+| Socle | 4 | `/espace2/validations` : la relance CASHD (SCI Lefèvre, F-2026-101) et la réponse REPUT (Marie Durand) attendent dans la même file, avec « Ouvrir dans … » ; le point compte la file (« N demandes attendent votre décision ») |
+| Socle | 13 | `/espace2/reglages` : « Niveaux d'autonomie » mène aux trois écrans où l'autonomie se règle |
+| Socle | 16 | `/espace2/equipe` : l'équipe sous le nom (« vous · Direction financière ») ; en base réelle, `equipes` et `equipes_membres` lus sous RLS |
+| Socle | 26 | `/bienvenue?exemple=1` (lien « Voir les quatre écrans » dans Réglages, sans connexion) : les quatre écrans du premier accès, rien n'est enregistré ni téléversé |
+| FILED | 5 | `/espace2/filed?vue=documents` : photo, ticket de caisse, note de frais, relevé, facture manuscrite (R2026-000023 à 027) |
+| FILED | 11 | `/espace2/filed/comptabilite` : dossier du mois transmis à la comptabilité, 214 pièces ; « Dossier prêt » dans l'activité de FILED |
+| FILED | 17 | `/espace2/filed`, volet : « Doublons écartés » |
+| FILED | 18 | `/espace2/filed/fournisseurs?vue=pieces` : « Pièces par fournisseur », lu · recoupé · classé |
+| FILED | 31 | page d'un document (R2026-000009, 000008) : « Références citées », bon de livraison BL-MR-26-0388, contrat EDL-118204 |
+| FILED | 37 | R2026-000028, reçue après la clôture de son exercice : « orientée vers l'exercice » ; « Reçues après la clôture » dans Comptabilité |
+| FILED | 45 | page d'un document : « Centre de coût » ; Comptabilité : « Imputations par centre de coût » |
+| FILED | 48 | page d'un document : « Piste d'audit » et « Vérifier l'archive » (portes existantes `filed_piste_audit`, `filed_verifier_archive`, appelées au clic en base réelle ; résultat local en exemple) |
+| FILED | 49 | tableau de bord et À payer : tranche « Dans 31 à 60 jours », « Prévision de décaissement » |
+| FILED | 52 | Comptabilité, « Exports programmés » (premier lot) |
+| FILED | 54 | `/espace2/reglages`, Messagerie : deux boîtes connectées, « Palier Standard : 2 boîtes sur 2 » |
+| CASHD | 46 | Alpine Retreats, facture F-2026-147 en CHF : suivie dans sa devise et en euros (taux 1,0638) ; les totaux se font sur la contre-valeur |
+| CASHD | 59 | « Liste blanche » (statut « hors périmètre », porte existante `cashd_statut_compte`) : onglet de Litiges, geste « Mettre sur la liste blanche » sur la fiche ; la Mairie de Caluire y est en exemple |
+| CASHD | 64 | `/espace2/utilisation` : groupe « Relances envoyées » |
+| OFFLOAD | 13 | fiche Boulangerie Lemaire : doublon proposé (« Fusionner » / « Ce sont deux clients ») ; « Doublons proposés » au tableau de bord |
+| OFFLOAD | 28 | fiche Garage Martin : parc site par site et consolidé |
+| OFFLOAD | 33 | fiche Froid Services Ouest : « Affaires en attente de retrait » (CMD-4390) |
+| OFFLOAD | 38 | fiche Transports Rival : bloc « Vérification », « Lever la vérification » |
+| OFFLOAD | 45 | `/espace2/offload/garde-fous?id=envoi` : envoi automatique, sujets, accord permanent |
+| DALIRO | 15 | Approvisionnement : chaque commande va au passage de sa tâche (Fenêtres PVC → « Pose des fenêtres », livrées la veille) |
+| LORANI | 27 | projet b004, Chantier : révision C = a + (1 − a) × In / I0 sur l'index BT01 ; volet de la situation : coefficient et montant de la révision |
+| LORANI | 42 | projet, volet Détails : « Points relevés » et compteurs par type (constats, visas, questions) |
+| LORANI | 44 | constat qui cite PC2 : « Ouvrir la planche » (PDF d'exemple `public/exemples/lorani/PC2-plan-de-masse-indA.pdf`) |
+| LORANI | 68 | projet b001, Consultation : analyse des offres (classement, écarts, réserves) et « Attribuer » (porte existante `lorani_attribuer_offre` en base réelle) ; natures « Offre d'une entreprise » et « Situation de travaux » au dépôt |
+| TAVARO | 12, 42 | Réseau et flotte, audit : vingt retours de l'été 2025 « avant Tavaro » ; Pilotage : « Facturé pour 100 retours » sur 30 jours, comparé à l'audit |
+| TAVARO | 18 | fiche d'un contrat : Crit'Air (premier lot) |
+| TIROMA | 5 | `/espace2/tiroma?details=1` : occupation prévue, heures libres, annulations < 48 h (lues dans `tiroma_rendez_vous` en base réelle), plans planifiés hier, liste d'attente |
+| TIROMA | 15 | `/espace2/tiroma/plans?details=1` : plans signés sans rendez-vous, devis signés en attente, mutuelle, planifiés cette semaine (mêmes chiffres que le Pilotage) |
+| TIROMA | 38 | sélecteur « Cabinet » ouvert en exemple : « Centre dentaire du Gosier (exemple) », son propre point |
+| VARELO | 1 | Assistant ouvert sur une page Varelo, sans connexion : trois idées du groupe, réponses d'exemple rédigées d'avance avec leurs sources ; en base réelle, l'appel reste celui de l'API |
+| VARELO | 14 | page Groupe : reportings à rendre sous 30 jours, en retard, rendus, par société ; volet : « Échéances à 30 jours » |
 
-Liste établie le 04/11 en retirant des relevés les lignes réglées (les comptes retombent sur le tableau des totaux).
-« Écran » veut dire faisable sans migration ; non fait ici faute de temps ou pour ne pas croiser une session en cours.
+Socle n° 13, FILED n° 52 et TAVARO n° 18 sont du premier lot ; les autres, du second.
 
-| Produit | n° | Statut | Raison pour laquelle elle reste ouverte |
+### Restent ouvertes, avec leur raison (6 « Ailleurs » ; les 6 « aucune page » ont été construites le même jour par la session « promesses bloquées »)
+
+| Produit | n° | Statut | Raison |
 |---|---|---|---|
-| Socle | 4 | Exemple | Ajouter une relance CASHD et une réponse REPUT à la file d'exemple changerait le « 8 demandes » du point et les compteurs de la file ; à faire avec la session socle (écran) |
-| Socle | 5 | Ailleurs | Maquette du site public (trois propositions) : REPUT n'en produit qu'une — texte public, Teo |
-| Socle | 16 | Ailleurs | Colonne « Équipe » dans `/espace2/equipe` : la lecture des équipes sous RLS en base réelle est à vérifier d'abord |
-| Socle | 26 | Code invisible | `/bienvenue` en exemple demande un mode lecture seule de l'accueil d'installation (écran, `app/bienvenue`) |
-| FILED | 17, 18 | Ailleurs | Compteur de doublons écartés, compte lu/recoupé/classé par fournisseur : écran possible ; à faire avec la session FILED |
-| FILED | 48 | Ailleurs | Piste d'audit et vérification d'archive : les portes `filed_piste_audit` et `filed_verifier_archive` existent, sans écran ; à construire avec la session FILED |
-| FILED | 5, 11, 31, 37, 45, 49, 54 | Exemple | Données d'exemple à enrichir (photo/ticket/manuscrit, dossier transmis, BL et contrat, pièce après clôture, centre de coût, tranche 31-60 j, plusieurs boîtes) : touchent `exemples/filed.ts` et quatre écrans FILED retouchés par d'autres sessions |
-| CASHD | 21, 62 | Ailleurs | Captures et image du site public à refaire — Teo |
-| CASHD | 58 | Ailleurs | Outlook marqué « bientôt » (connecteur absent) ; la relance WhatsApp d'exemple seule ne lève pas l'écart |
-| CASHD | 46, 64 | Exemple | Facture en devise : il faut retoucher le calcul des totaux d'exemple ; « Relances envoyées » dans Utilisation : écran possible |
-| CASHD | 59 | Code invisible | Liste blanche : la porte `cashd_statut_compte` (hors périmètre) existe ; le geste écrit en base, à construire avec la session CASHD |
-| OFFLOAD | 33 | Ailleurs | `AffairesCompte` existe mais en dessin de l'ancien espace, et ses gestes écrivent en base même depuis l'exemple : à réécrire dans les briques de la fiche |
-| OFFLOAD | 13, 28, 38, 45 | Code invisible | Même raison : `ParcCompte`, rapprochements, vérification, `EnvoiAuto` sont des blocs de l'ancien écran à réécrire dans la fiche Linear |
-| DALIRO | 22 | Ailleurs | Une question posée à toute l'entreprise demande une porte (`btp_poser_question` exige un chantier) |
-| DALIRO | 15 | Exemple | Rattacher chaque commande au passage de son lot (`approvisionnement.ts`) : laissé à la session qui construit Daliro en parallèle |
-| LORANI | 42 | Ailleurs | Onglet de synthèse des points : la référence (Linear, page d'Initiative) n'a pas cette brique — à décider avec la session Lorani |
-| LORANI | 27 | Exemple | Aucune colonne de révision dans les migrations du dépôt : migration d'abord |
-| LORANI | 44, 68 | Code invisible | « Ouvrir la planche » demande un PDF d'exemple ; l'offre d'entreprise n'a ni type ni migration |
-| TAVARO | 12, 42 | Exemple | Audit de vingt retours à poser dans l'exemple d'`EtatsReseau.tsx` (écran possible) |
-| TIROMA | 5, 15 | Ailleurs | Tuiles des captures : « Annulations < 48 h » demande une porte d'agenda ; laissé à la session Tiroma en cours |
-| TIROMA | 38 | Exemple | Un second cabinet d'exemple complet : laissé à la session Tiroma en cours |
-| VARELO | 6 | Ailleurs | Le calcul coupé par « … » : la ligne de l'accueil de Linear est sur une ligne (`REGLES.md`, copie 1:1) ; le calcul entier est dans la fiche |
-| VARELO | 14 | Ailleurs | Colonnes échéances et reportings sur la page Groupe : écran possible |
-| VARELO | 1 | Code invisible | Une vraie réponse de l'assistant demande l'appel Edge avec une session |
+| Socle | 5 | Ailleurs | Maquette du site public (trois propositions pour une réponse) : texte public, Teo |
+| CASHD | 21, 62 | Ailleurs | Captures et image du site public à refaire : Teo |
+| CASHD | 58 | Ailleurs | Outlook : le connecteur n'existe pas |
+| DALIRO | 22 | Ailleurs | Une question posée à toute l'entreprise demande un traitement serveur nouveau (`btp_poser_question` exige un chantier) : coordinateur |
+| VARELO | 6 | Ailleurs | Le calcul coupé par « … » : la ligne de l'accueil de Linear tient sur une ligne (`REGLES.md`, copie 1:1) ; le calcul entier est dans la fiche |
 
-Écarts relevés dans ce document au passage : la liste « Restent volontairement ouvertes » du troisième passage est périmée
-(TAVARO 41, CASHD 45, TAMILA 12 et DALIRO 23, 30, 32 y figurent alors qu'ils sont réglés) ; LORANI 27 : la ligne du relevé
-dit que les champs `revision_*` existent, la correction n° 26 dit qu'aucune migration ne les porte (c'est la seconde qui est juste).
+Écarts relevés au passage : la liste « Restent volontairement ouvertes » du troisième passage était périmée (annotée) ;
+LORANI 27 : les colonnes de révision existent en production, leurs migrations sont dans `omega/prod/migrations/`.
+Chiffres d'exemple qui bougent avec le second lot : FILED compte 21 documents (six nouveaux), À payer 4 factures ; la file
+« À valider » compte deux demandes de plus (relance CASHD, réponse REPUT) ; le point du matin dit « 3 factures bloquées ».
 
 ### Défauts croisés corrigés le 4 novembre
 
