@@ -48,7 +48,7 @@ import { RACINE } from "../modules";
 import { useDaliro } from "./donnees";
 import { DalIcone } from "./DalIcone";
 import { PlainIcone } from "./DalPlainIcone";
-import { LIBELLES, UNITES, echeance, echeances, exemple, jour, ongletDe, qte, resteAFaire, versCsv, type CommandeBrute, type Onglet } from "./approvisionnement";
+import { LIBELLES, UNITES, echeance, echeances, exemple, jour, ongletDe, qte, resteAFaire, versCsv, type CommandeBrute, type Onglet } from "./approvisionnement-donnees";
 import "./dalp.css";
 
 const ICI = `${RACINE}/daliro/approvisionnement`;
