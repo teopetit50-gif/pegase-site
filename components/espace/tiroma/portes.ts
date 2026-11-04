@@ -332,3 +332,31 @@ export async function retirerContact(id: string, motif: string | null): Promise<
   const { error } = await supabase.rpc("tiroma_retirer_contact", { p_contact: id, p_motif: motif });
   if (error) throw new ErreurPorte(message(error));
 }
+
+/* ——— les actes d'un plan, dent par dent (04/11/2026, TIROMA n° 14 de docs/verification/PROMESSES-ECRANS.md) ———
+   Aucune porte SQL : tiroma_plan_actes se lit en SELECT sous RLS (« on voit les lignes des plans qu'on voit »).
+   dents : numérotation FDI (52 dents valides, private.tiroma_dents_fdi). */
+export type ActePlan = {
+  id: string;
+  rang: number;
+  code: string | null;
+  libelle: string | null;
+  dents: number[];
+  famille: string | null;
+  seance: number | null;
+  duree_min: number | null;
+  montant: number | null;
+  reste_a_charge: number | null;
+  statut: "a_faire" | "planifie" | "fait";
+  fait_le: string | null;
+};
+
+export async function chargerActesPlan(plan_id: string): Promise<ActePlan[]> {
+  const { data, error } = await createClient()
+    .from("tiroma_plan_actes")
+    .select("id, rang, code, libelle, dents, famille, seance, duree_min, montant, reste_a_charge, statut, fait_le")
+    .eq("plan_id", plan_id)
+    .order("rang");
+  if (error) throw new ErreurPorte(message(error));
+  return ((data ?? []) as ActePlan[]).map((a) => ({ ...a, dents: a.dents ?? [], montant: a.montant === null ? null : Number(a.montant), reste_a_charge: a.reste_a_charge === null ? null : Number(a.reste_a_charge) }));
+}

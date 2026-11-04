@@ -32,6 +32,8 @@ import { useTiroma, type Mutuelle } from "./donnees";
 import { TirAvatar, TirCarte, TirMenu, type OptionMenu } from "./TirCadre";
 import { TirIcone, type NomTirIcone } from "./TirIcone";
 import { copier, exporterCSV, useFavoris, useSuivis } from "./navigateur";
+import { chargerActesPlan, type ActePlan } from "@/components/espace/tiroma/portes";
+import { actesExemple } from "./exemplesActes";
 import "./tir-mes.css";
 import "./tir-board.css";
 
@@ -184,6 +186,129 @@ function PuceVue({ p }: { p: Puce }) {
   );
 }
 
+/* ——— le schéma dentaire d'un plan (04/11/2026, TIROMA n° 14 de docs/verification/PROMESSES-ECRANS.md) ———
+   Numérotation FDI, vue du praticien face au patient : en haut 18 → 11 | 21 → 28, en bas 48 → 41 | 31 → 38 ;
+   les dents de lait (51-85) ne s'affichent que si un acte en concerne une. Une dent concernée est surlignée,
+   à la couleur de son acte le moins avancé (à faire, planifié, fait). */
+const ARCADES_DEFINITIVES = [
+  [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28],
+  [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38],
+];
+const ARCADES_LAIT = [
+  [55, 54, 53, 52, 51, 61, 62, 63, 64, 65],
+  [85, 84, 83, 82, 81, 71, 72, 73, 74, 75],
+];
+/* les dents d'un acte : les suites de trois dents voisines ou plus s'écrivent « 44-46 » */
+function dentsCourtes(dents: number[]): string {
+  const l = [...new Set(dents)].sort((a, b) => a - b);
+  const out: string[] = [];
+  for (let i = 0; i < l.length; ) {
+    let j = i;
+    while (j + 1 < l.length && l[j + 1] === l[j] + 1 && Math.floor(l[j + 1] / 10) === Math.floor(l[i] / 10)) j++;
+    if (j - i >= 2) out.push(`${l[i]}-${l[j]}`);
+    else for (let k = i; k <= j; k++) out.push(String(l[k]));
+    i = j + 1;
+  }
+  return out.join(", ");
+}
+const STATUT_ACTE: Record<ActePlan["statut"], string> = { a_faire: "à faire", planifie: "planifié", fait: "fait" };
+const ORDRE_STATUT: ActePlan["statut"][] = ["a_faire", "planifie", "fait"];
+
+function SchemaDentaire({ actes }: { actes: ActePlan[] }) {
+  const parDent = new Map<number, ActePlan[]>();
+  for (const a of actes) for (const d of a.dents) parDent.set(d, [...(parDent.get(d) ?? []), a]);
+  const lait = [...parDent.keys()].some((d) => d >= 51);
+  const rangee = (dents: number[], bas: boolean) => (
+    <div className="tir-bd-dents" data-bas={bas ? "" : undefined}>
+      {dents.map((d, i) => {
+        const l = parDent.get(d) ?? [];
+        const statut = ORDRE_STATUT.find((s) => l.some((a) => a.statut === s));
+        return (
+          <span
+            key={d}
+            className="tir-bd-dent"
+            data-statut={statut}
+            data-milieu={i === dents.length / 2 ? "" : undefined}
+            title={l.length ? `${d} : ${l.map((a) => `${a.libelle ?? a.code ?? "acte"} (${STATUT_ACTE[a.statut]})`).join(" ; ")}` : String(d)}
+          >
+            {d}
+          </span>
+        );
+      })}
+    </div>
+  );
+  return (
+    <figure className="tir-bd-schema" aria-label={`Schéma dentaire : ${[...parDent.keys()].sort((a, b) => a - b).join(", ") || "aucune dent désignée"}`}>
+      <div className="tir-bd-arcade">
+        {rangee(ARCADES_DEFINITIVES[0], false)}
+        {lait ? rangee(ARCADES_LAIT[0], false) : null}
+        <span className="tir-bd-occlusion" aria-hidden="true" />
+        {lait ? rangee(ARCADES_LAIT[1], true) : null}
+        {rangee(ARCADES_DEFINITIVES[1], true)}
+      </div>
+      <figcaption className="tir-bd-legende">
+        <span><i data-statut="a_faire" />À faire</span>
+        <span><i data-statut="planifie" />Planifié</span>
+        <span><i data-statut="fait" />Fait</span>
+      </figcaption>
+    </figure>
+  );
+}
+
+/* les actes du plan : lus dans tiroma_plan_actes (base réelle) ou dans l'exemple */
+function useActes(planId: string | null, source: "exemple" | "reelle"): { actes: ActePlan[] | null; erreur: string | null } {
+  const [lu, setLu] = useState<{ cle: string; actes: ActePlan[] | null; erreur: string | null }>({ cle: "", actes: null, erreur: null });
+  const cle = `${source}:${planId ?? ""}`;
+  useEffect(() => {
+    if (!planId || source !== "reelle") return;
+    let vivant = true;
+    chargerActesPlan(planId)
+      .then((actes) => vivant && setLu({ cle, actes, erreur: null }))
+      .catch((e: unknown) => vivant && setLu({ cle, actes: null, erreur: e instanceof Error ? e.message : "La base n'a pas répondu." }));
+    return () => {
+      vivant = false;
+    };
+  }, [planId, source, cle]);
+  if (!planId) return { actes: null, erreur: null };
+  if (source === "exemple") return { actes: actesExemple(planId), erreur: null };
+  return lu.cle === cle ? { actes: lu.actes, erreur: lu.erreur } : { actes: null, erreur: null };
+}
+
+function ActesDuPlan({ planId }: { planId: string }) {
+  const t = useTiroma();
+  const { actes, erreur } = useActes(planId, t.source);
+  return (
+    <>
+      <div className="tir-bd-volet-section">Schéma dentaire et actes</div>
+      {erreur ? <p className="tir-bd-note" role="alert">Les actes n&apos;ont pas pu être lus. {erreur}</p> : null}
+      {!erreur && actes === null ? <p className="tir-bd-note">Lecture des actes…</p> : null}
+      {actes && actes.length === 0 ? <p className="tir-bd-note">Le logiciel du cabinet n&apos;a exporté aucun acte pour ce plan.</p> : null}
+      {actes && actes.length ? (
+        <>
+          <SchemaDentaire actes={actes} />
+          <ol className="tir-bd-actes">
+            {actes.map((a) => (
+              <li key={a.id} className="tir-bd-acte" data-statut={a.statut}>
+                <span className="tir-bd-acte-dents">{a.dents.length ? dentsCourtes(a.dents) : "—"}</span>
+                <span className="tir-bd-acte-texte">
+                  <span className="tir-bd-acte-nom">{a.libelle ?? a.code ?? "Acte"}</span>
+                  <span className="tir-bd-acte-meta">
+                    {[a.seance ? `Séance ${a.seance}` : null, a.duree_min ? `${a.duree_min} min` : null, a.statut === "fait" && a.fait_le ? `fait le ${jourCourt(a.fait_le)}` : STATUT_ACTE[a.statut]].filter(Boolean).join(" · ")}
+                  </span>
+                </span>
+                <span className="tir-bd-acte-montant" title={a.reste_a_charge !== null ? `Reste à charge : ${euros(a.reste_a_charge)}` : undefined}>
+                  {euros(a.montant)}
+                  {a.reste_a_charge !== null ? <small>reste {euros(a.reste_a_charge)}</small> : null}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </>
+      ) : null}
+    </>
+  );
+}
+
 /* ——— le volet de la carte ouverte : propriétés et gestes ——— */
 function Volet({ c, fermer }: { c: Carte; fermer: () => void }) {
   const t = useTiroma();
@@ -224,6 +349,7 @@ function Volet({ c, fermer }: { c: Carte; fermer: () => void }) {
       {c.details.map((r) => (
         <div key={r.libelle} className="tir-bd-prop"><span>{r.libelle}</span><span>{r.valeur}</span></div>
       ))}
+      <ActesDuPlan planId={c.id} />
       {c.creneaux.length ? (
         <>
           <div className="tir-bd-volet-section">Un créneau pour ce plan</div>

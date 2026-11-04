@@ -392,3 +392,128 @@ html[data-v2-theme="light"] .v2 .tir.tir-bd {
     display: none;
   }
 }
+
+/* ——— schéma dentaire et actes d'un plan (04/11/2026, TIROMA n° 14) ———
+   seize dents par arcade, 18 × 20 au pas de 19, un écart de 4 au milieu ; la teinte suit l'acte le moins avancé */
+.v2 .tir-bd .tir-bd-schema {
+  margin: 4px 0 8px;
+  padding: 10px 0 8px;
+  border: 0.5px solid var(--tir-puce-bord);
+  border-radius: 8px;
+}
+.v2 .tir-bd .tir-bd-arcade {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.v2 .tir-bd .tir-bd-dents {
+  display: flex;
+  gap: 1px;
+}
+.v2 .tir-bd .tir-bd-dent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 20px;
+  border: 0.5px solid var(--tir-puce-bord);
+  border-radius: 6px 6px 4px 4px;
+  font-size: 9px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--tir-t3);
+}
+.v2 .tir-bd .tir-bd-dents[data-bas] .tir-bd-dent {
+  border-radius: 4px 4px 6px 6px;
+}
+.v2 .tir-bd .tir-bd-dent[data-milieu] {
+  margin-left: 4px;
+}
+.v2 .tir-bd .tir-bd-dent[data-statut],
+.v2 .tir-bd .tir-bd-legende i[data-statut] {
+  border-color: transparent;
+  color: #fff;
+  background: #5e6ad2;
+}
+.v2 .tir-bd .tir-bd-dent[data-statut="planifie"],
+.v2 .tir-bd .tir-bd-legende i[data-statut="planifie"] {
+  background: #f0bf00;
+  color: #1b1b1b;
+}
+.v2 .tir-bd .tir-bd-dent[data-statut="fait"],
+.v2 .tir-bd .tir-bd-legende i[data-statut="fait"] {
+  background: #4cb782;
+}
+.v2 .tir-bd .tir-bd-occlusion {
+  width: calc(100% - 24px);
+  margin: 2px 0;
+  border-top: 0.5px dashed var(--tir-puce-bord);
+}
+.v2 .tir-bd .tir-bd-legende {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--tir-t3);
+}
+.v2 .tir-bd .tir-bd-legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.v2 .tir-bd .tir-bd-legende i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.v2 .tir-bd .tir-bd-actes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .tir-bd .tir-bd-acte {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+.v2 .tir-bd .tir-bd-acte + .tir-bd-acte {
+  border-top: 0.5px solid var(--tir-puce-bord);
+}
+.v2 .tir-bd .tir-bd-acte-dents {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--tir-t1);
+  overflow-wrap: anywhere;
+}
+.v2 .tir-bd .tir-bd-acte-texte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.v2 .tir-bd .tir-bd-acte-nom {
+  font-weight: 450;
+  color: var(--tir-t2);
+}
+.v2 .tir-bd .tir-bd-acte[data-statut="fait"] .tir-bd-acte-nom {
+  color: var(--tir-t3);
+}
+.v2 .tir-bd .tir-bd-acte-meta,
+.v2 .tir-bd .tir-bd-acte-montant small {
+  font-size: 11px;
+  color: var(--tir-t3);
+}
+.v2 .tir-bd .tir-bd-acte-montant {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-variant-numeric: tabular-nums;
+  color: var(--tir-t2);
+  white-space: nowrap;
+}
