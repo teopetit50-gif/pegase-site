@@ -105,12 +105,6 @@ const IcEtiquette = () => (
     <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h9.38a2.5 2.5 0 0 1 1.94.92l2.86 3.5a2.5 2.5 0 0 1 0 3.16l-2.86 3.5a2.5 2.5 0 0 1-1.94.92H6.5A2.5 2.5 0 0 1 4 16.5zM6.5 7a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h9.38a.5.5 0 0 0 .39-.18l2.86-3.5a.5.5 0 0 0 0-.64l-2.86-3.5a.5.5 0 0 0-.39-.18z" />
   </Svg>
 );
-const IcLosange = ({ couleur }: { couleur: string }) => (
-  <svg viewBox="0 0 14 14" aria-hidden="true" style={{ color: couleur }}>
-    <path fill="currentColor" d="M7 1.5 12.5 6 7 10.5 1.5 6z" opacity=".55" />
-    <path fill="currentColor" d="M7 3.5 12.5 8 7 12.5 1.5 8z" />
-  </svg>
-);
 const IcFiltres = () => (
   <Svg>
     <path d="M3 7a1 1 0 0 1 1-1h7.17a3 3 0 0 1 5.66 0H20a1 1 0 1 1 0 2h-3.17a3 3 0 0 1-5.66 0H4a1 1 0 0 1-1-1m11 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2M3 17a1 1 0 0 1 1-1h3.17a3 3 0 0 1 5.66 0H20a1 1 0 1 1 0 2h-7.17a3 3 0 0 1-5.66 0H4a1 1 0 0 1-1-1m7 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2" />
@@ -512,6 +506,7 @@ export default function Questions() {
     ) : (
       <IcSansAssigne titre="Pas de chef de projet" />
     );
+  /* les étiquettes : seulement dans le détail d'une question ouverte (04/11 : la ligne les a perdues) */
   const pastilles = (q: Q) => (
     <>
       <span className="lor-pl-pastille">
@@ -532,19 +527,6 @@ export default function Questions() {
       ) : null}
     </>
   );
-  const pastilleLot = (q: Q) =>
-    q.lot ? (
-      <span className="lor-pl-pastille" title={q.lot}>
-        <IcLosange couleur={q.lotCouleur} />
-        {q.lot}
-      </span>
-    ) : (
-      <span className="lor-pl-pastille">
-        <IcLosange couleur="var(--pl-i2)" />
-        {q.dest ? NATURE_DEST[q.dest.nature] ?? "Intervenant" : "Agence"}
-      </span>
-    );
-
   const ligne = (q: Q) => (
     <li key={q.p.id}>
       <div className="lor-pl-ligne" data-coche={coches.includes(q.p.id) ? "" : undefined} onClick={() => ouvrir(q.p.id)} role="link" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && ouvrir(q.p.id)} aria-label={`${q.projet?.nom ?? ""} : ${q.p.texte}`}>
@@ -554,40 +536,34 @@ export default function Questions() {
         <span className="lor-pl-statut">
           <IconeEtat e={q.etat} titre={LIBELLE_ETAT[q.etat]} />
         </span>
+        {/* 04/11 — une ligne d'un seul étage (Teo : « un peu trop chargé ») : plus de pilules de lot ni
+            d'étiquettes, plus d'aperçu de la réponse, l'urgence en icône ; tout reste dans la fiche ouverte */}
         <span className="lor-pl-col">
           <span className="lor-pl-l1">
-            <span className="lor-pl-vignette">
-              <IcCompte />
-            </span>
             <span className="lor-pl-compte">{q.projet?.nom ?? "—"}</span>
             <span className="lor-pl-client">{destDe(q)}</span>
           </span>
-          <span className="lor-pl-l2">{pastilleLot(q)}</span>
         </span>
         <span className="lor-pl-col lor-pl-col--titre">
           <span className="lor-pl-l1">
             <span className="lor-pl-ref">{refDe(q)}</span>
             <span className="lor-pl-sujet">{q.p.texte}</span>
-            <span className="lor-pl-apercu">{q.p.reponse ?? (q.dest?.contact ? `À ${q.dest.contact}` : "Pas encore de réponse")}</span>
           </span>
-          <span className="lor-pl-l2">{pastilles(q)}</span>
         </span>
-        <span className="lor-pl-prio" title={`Urgence : ${LIBELLE_URGENCE[q.urgence]}`}>
+        <span className="lor-pl-prio" title={`Urgence : ${LIBELLE_URGENCE[q.urgence]}`} aria-label={`Urgence : ${LIBELLE_URGENCE[q.urgence]}`}>
           <IcPriorite u={q.urgence} />
-          <span>{LIBELLE_URGENCE[q.urgence]}</span>
         </span>
-        <span className="lor-pl-sla" data-retard={q.retard ? "" : undefined} title={q.p.echeance ? `Échéance le ${dateFr(q.p.echeance)}` : "Sans échéance"}>
+        <span className="lor-pl-sla" data-retard={q.retard ? "" : undefined} title={q.p.echeance ? `Échéance le ${dateFr(q.p.echeance)}${q.retard ? " : dépassée" : ""}` : "Sans échéance"}>
           {q.p.echeance && q.etat !== "soldee" ? dateCourteFr(q.p.echeance) : ""}
         </span>
-        <span className="lor-pl-quand" title={`Posée le ${dateFr(q.p.cree_le)}`}>
-          {q.cr ? <IcNote /> : <IcBulle />}
+        <span className="lor-pl-quand" title={`Posée le ${dateFr(q.p.cree_le)}${q.cr ? " en compte rendu" : ""}`}>
           {ilYaTexte(q.age)}
         </span>
         <span className="lor-pl-qui">{avatar(q)}</span>
       </div>
     </li>
   );
-  const fiche = (q: Q, colonne = false) => (
+  const fiche = (q: Q) => (
     <li key={q.p.id}>
       <Link href={`${CHEMIN}?point=${encodeURIComponent(q.p.id)}`} scroll={false} className="lor-pl-fiche" aria-current={ouverte?.p.id === q.p.id ? "true" : undefined}>
         <span className="lor-pl-fiche-l lor-pl-fiche-l--petit">
@@ -608,10 +584,6 @@ export default function Questions() {
           <span className="lor-pl-fiche-l">
             <span className="lor-pl-apercu">{q.p.reponse ?? (q.dest?.contact ? `À ${q.dest.contact}` : "Pas encore de réponse")}</span>
           </span>
-        </span>
-        <span className="lor-pl-l2">
-          {colonne ? null : pastilleLot(q)}
-          {pastilles(q)}
         </span>
         <span className="lor-pl-fiche-l">
           <span className="lor-pl-prio">
@@ -1080,7 +1052,7 @@ export default function Questions() {
               <b>Questions</b>
               <span>À traiter {aTraiter}</span>
             </header>
-            <ul>{ordre.map((q) => fiche(q, true))}</ul>
+            <ul>{ordre.map((q) => fiche(q))}</ul>
           </section>
           {fil}
         </>

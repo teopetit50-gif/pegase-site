@@ -257,14 +257,14 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 .v2 .lor-pl-groupe-sous { margin-left: 8px; font-size: 12px; color: var(--pl-t2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v2 .lor-pl-vide { padding: 48px 24px; text-align: center; color: var(--pl-t2); }
 
-/* ——— une ligne : 32 · 18 · 300 · 355,5 · 76 · 84 · 113,5 · 94 (1073 de large) ——— */
+/* ——— une ligne d'un seul étage (04/11, Teo : « trop chargé ») : 32 · 18 · 260 · sujet · 28 · 76 · 72 · 44 ——— */
 .v2 .lor-pl-ligne {
   position: relative;
   display: grid;
-  grid-template-columns: 32px 18px 300px minmax(0, 1fr) 76px 84px 113.5px 94px;
-  align-items: start;
-  min-height: 67px;
-  padding: 8px 0;
+  grid-template-columns: 32px 18px 260px minmax(0, 1fr) 28px 76px 72px 44px;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
   border-bottom: 0.5px solid var(--pl-b2);
   color: var(--pl-t1);
   cursor: default;
@@ -309,6 +309,7 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 .v2 .lor-pl-compte { font-weight: 550; flex-shrink: 0; max-width: 70%; overflow: hidden; text-overflow: ellipsis; }
 .v2 .lor-pl-client { color: var(--pl-t1); }
 .v2 .lor-pl-ref { font-weight: 550; color: var(--pl-t2); flex-shrink: 0; }
+.v2 .lor-pl-ligne .lor-pl-client { color: var(--pl-t2); }
 .v2 .lor-pl-sujet { font-weight: 550; flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .v2 .lor-pl-l1 .lor-pl-sujet { flex: 0 1 auto; }
 .v2 .lor-pl-apercu { color: var(--pl-t2); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
@@ -340,7 +341,7 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 .v2 .lor-pl-sla[data-retard] { color: var(--pl-rouge-t2); }
 .v2 .lor-pl-quand { display: flex; align-items: center; justify-content: flex-end; gap: 4px; height: 20px; padding-right: 12px; color: var(--pl-t2); white-space: nowrap; }
 .v2 .lor-pl-quand svg { width: 18px; height: 18px; color: var(--pl-i1); }
-.v2 .lor-pl-qui { display: flex; align-items: center; justify-content: flex-end; height: 20px; padding-right: 24px; }
+.v2 .lor-pl-qui { display: flex; align-items: center; justify-content: flex-end; height: 20px; padding-right: 16px; }
 .v2 .lor-pl-qui > svg { width: 18px; height: 18px; color: var(--pl-i1); }
 .v2 .lor-pl-avatar {
   position: relative;
@@ -592,12 +593,12 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 
 /* ——— largeurs ——— */
 @container lorpl (max-width: 1000px) {
-  .v2 .lor-pl-ligne { grid-template-columns: 32px 18px 260px minmax(0, 1fr) 76px 0 100px 52px; }
+  .v2 .lor-pl-ligne { grid-template-columns: 32px 18px 220px minmax(0, 1fr) 28px 0 64px 40px; }
   .v2 .lor-pl-sla { display: none; }
   .v2 .lor-pl-qui { padding-right: 16px; }
 }
 @container lorpl (max-width: 760px) {
-  .v2 .lor-pl-ligne { grid-template-columns: 32px 18px 200px minmax(0, 1fr) 0 0 92px 44px; }
+  .v2 .lor-pl-ligne { grid-template-columns: 32px 18px 160px minmax(0, 1fr) 0 0 60px 36px; }
   .v2 .lor-pl-ligne .lor-pl-prio { display: none; }
 }
 @media (max-width: 1100px) {
