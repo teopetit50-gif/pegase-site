@@ -3,7 +3,7 @@
    tables demandes_validation, approbations, delegations, regles_validation. */
 
 import type { Approbation, Delegation, Demande, EquipesContexte, Regle } from "../types";
-import { AGENCE, CLAIRE, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, MARC, SIEGE, SOFIA, YANIS, dans, ilYa } from "./socle";
+import { AGENCE, CLAIRE, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, MARC, SIEGE, SOFIA, YANIS, aujourdHui, dans, ilYa, jourMois } from "./socle";
 
 const C = EXEMPLE_CLIENT_ID;
 const id = (n: number) => `00000000-0000-4000-8000-0000000000d${n.toString(16)}`;
@@ -85,10 +85,10 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     type_action: "conge",
     objet_type: "conge",
     objet_id: "CG-2026-0318",
-    resume: "Congés de Sofia Carvalho du 13 au 17 octobre (5 jours)",
+    resume: `Congés de Sofia Carvalho du ${jourMois(10)} au ${jourMois(14)} (5 jours)`,
     montant: null,
     devise: "EUR",
-    payload: { du: "2026-10-13", au: "2026-10-17", solde_restant: "17,5 jours", remplacement: "Yanis Dupré" },
+    payload: { du: aujourdHui(10), au: aujourdHui(14), solde_restant: "17,5 jours", remplacement: "Yanis Dupré" },
     demandeur_type: "utilisateur",
     demandeur_id: SOFIA,
     statut: "en_attente",
@@ -139,10 +139,10 @@ export const DEMANDES_EXEMPLE: Demande[] = [
     type_action: "decouvert",
     objet_type: "compte_bancaire",
     objet_id: "FR76-…-9143",
-    resume: "Autorisation de découvert temporaire — 25 000,00 € jusqu'au 31 octobre",
+    resume: `Autorisation de découvert temporaire — 25 000,00 € jusqu'au ${jourMois(27)}`,
     montant: 25000,
     devise: "EUR",
-    payload: { banque: "Crédit Lyonnais", jusqu_au: "2026-10-31", motif: "Décalage d'encaissement chantier Confluence", exigences: { commentaire: true, piece_jointe: true, motif_refus: true } },
+    payload: { banque: "Crédit Lyonnais", jusqu_au: aujourdHui(27), motif: "Décalage d'encaissement chantier Confluence", exigences: { commentaire: true, piece_jointe: true, motif_refus: true } },
     demandeur_type: "utilisateur",
     demandeur_id: MARC,
     statut: "en_attente",

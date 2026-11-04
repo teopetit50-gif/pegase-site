@@ -191,7 +191,8 @@ export function useCarte(): Carte | null {
             { libelle: "Clients en retard", valeur: String(cashd.totaux.comptes_en_retard), teinte: cashd.totaux.comptes_en_retard ? "ambre" : undefined },
           ]
         : [],
-      aValider: { n: cashdAttente.length, texte: cashdAttente.length ? `${pluriel(cashdAttente.length, "relance")} à valider` : "Rien à valider", lien: `${RACINE}/validations` },
+      /* 04/11 — ce sont les demandes du module (virement, prélèvement), pas des relances : les relances prêtes se valident dans le suivi de CASHD */
+      aValider: { n: cashdAttente.length, texte: cashdAttente.length ? `${pluriel(cashdAttente.length, "paiement")} à valider` : "Rien à valider", lien: `${RACINE}/validations` },
       resultat: { titre: "Encaissements", texte: cashd ? `${montant(encaisse)} reçus` : "—", n: reglements30.length },
     };
 

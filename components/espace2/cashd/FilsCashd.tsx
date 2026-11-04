@@ -239,7 +239,10 @@ export function FilsLitiges() {
           ? { titre: "Aucun compte ne correspond", texte: "Essayez un autre nom ou retirez le filtre." }
           : onglet === "pause"
             ? { titre: "Aucun compte en pause", texte: "Toutes les factures ouvertes suivent leur séquence de relance." }
-            : { titre: "Aucun compte hors cycle", texte: "Toutes les factures ouvertes suivent leur séquence de relance." }
+            : onglet === "litige"
+              ? /* 04/11 — l'onglet par défaut ne montre que les litiges : il ne dit plus « aucun compte hors cycle » quand un compte est en pause */
+                { titre: "Aucun compte en litige", texte: base.some((b) => ONGLETS_LITIGES[1].garde(situationDe(b))) ? "Les comptes en pause sont sous l'onglet « En pause »." : "Toutes les factures ouvertes suivent leur séquence de relance." }
+              : { titre: "Aucun compte hors cycle", texte: "Toutes les factures ouvertes suivent leur séquence de relance." }
       }
     >
       <CarteCentrale

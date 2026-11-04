@@ -1869,7 +1869,7 @@ export default function TableauFiled() {
                 </summary>
                 <p className="lin-maj-auteur">
                   <IconeSante sante={aFaire.length ? (parSante("bloquee").length ? "bloquee" : "litige") : "reste"} />
-                  <span data-teinte={aFaire.length ? (parSante("bloquee").length ? "rouge" : "jaune") : "vert"}>{aFaire.length ? `${pluriel(aFaire.length, "facture")} à reprendre` : "Rien à reprendre"}</span>
+                  <span data-teinte={aFaire.length ? (parSante("bloquee").length ? "rouge" : "jaune") : "vert"}>{aFaire.length ? `${pluriel(aFaire.length, "facture")} à traiter` : "Rien à traiter"}</span>
                   <span className="lin-avatar-auteur" aria-hidden="true">
                     <FileText width={11} height={11} />
                   </span>

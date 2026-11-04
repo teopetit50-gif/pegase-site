@@ -30,7 +30,9 @@ function Fil({ passe, teinte = "bleu", decalage = 0 }: { passe: boolean; teinte?
 
 export default function MiniCarte() {
   const carte = useCarte();
-  const total = carte ? carte.agents.reduce((s, a) => s + a.aValider.n, 0) : 0;
+  /* 04/11 — seules les demandes qui sont dans « À valider » se comptent ici :
+     les réponses de REPUT et les messages d'OFFLOAD se relisent sur leur page */
+  const total = carte ? carte.agents.filter((a) => a.aValider.lien === `${RACINE}/validations`).reduce((s, a) => s + a.aValider.n, 0) : 0;
 
   return (
     <section className="v2-carte v2-carte-corps mc" aria-labelledby="mc-titre">

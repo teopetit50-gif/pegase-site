@@ -2716,7 +2716,8 @@ function FicheRelance({
             <p className="lin-ticket-desc c2b-corps">{corps}</p>
           ) : (
             <p className="lin-ticket-desc" data-vide="">
-              Le texte est dans la file de validation.
+              {/* 04/11 — une relance partie n'est plus dans la file : on ne dit plus qu'elle y est */}
+              {r && r.etat !== "a_valider" ? "Le texte de cette relance n'est pas conservé ici." : "Le texte est dans la file de validation."}
             </p>
           )}
           <div className="lin-ticket-icones">

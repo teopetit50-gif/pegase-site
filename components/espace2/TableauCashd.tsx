@@ -133,7 +133,7 @@ export default function TableauCashd() {
     { cle: "echu", libelle: "Échu", valeur: montant(totaux.echu), lien: `${RACINE}/cashd/balance`, teinte: totaux.echu ? "ambre" : undefined },
     { cle: "part", libelle: "Part échue", valeur: pct(partEchue), lien: `${RACINE}/cashd/balance` },
     { cle: "retard", libelle: "Comptes en retard", valeur: `${totaux.comptes_en_retard} / ${nbComptes}`, lien: `${RACINE}/cashd/suivi?vue=debiteurs`, teinte: totaux.comptes_en_retard ? "rouge" : undefined },
-    { cle: "relances", libelle: "Relances à valider", valeur: String(aValider.length), lien: `${RACINE}/validations`, teinte: aValider.length ? "ambre" : undefined },
+    { cle: "relances", libelle: "Relances à valider", valeur: String(aValider.length), lien: `${RACINE}/cashd/suivi?vue=relances`, teinte: aValider.length ? "ambre" : undefined },
     { cle: "litige", libelle: "En litige", valeur: montant(totaux.en_litige), lien: `${RACINE}/cashd/litiges` },
   ];
   return (
@@ -228,7 +228,7 @@ export default function TableauCashd() {
 
             <div className="sb-cellule">
               <div className="sb-cellule-tete">
-                <Link href={`${RACINE}/validations`}>Relances à valider</Link>
+                <Link href={`${RACINE}/cashd/suivi?vue=relances`}>Relances à valider</Link>
                 <span className="sb-cellule-compte">{aValider.length}</span>
               </div>
               {aValider.length ? (

@@ -4,7 +4,7 @@
    « rien à signaler ». */
 
 import type { LignePoint, PointDuJour } from "../types";
-import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, aujourdHui } from "./socle";
+import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, aujourdHui, jourMois } from "./socle";
 
 const C = EXEMPLE_CLIENT_ID;
 
@@ -86,10 +86,10 @@ export function pointExemple(decalage = 0): { point: PointDuJour; lignes: LigneP
     l(1, 3, { titre: "Trésorerie", module: "cashd", texte: "Prélèvement Électricité de Lyon (2 316,70 €) le 20 : couvert.", gravite: "info" }),
     l(2, 1, { titre: "Factures reçues", module: "filed", texte: "1 facture bloquée : Métallerie Roux, IBAN différent de celui connu. Appeler le fournisseur au numéro habituel avant toute levée.", gravite: "critique", lien: "/espace/filed", objet_type: "filed_document", objet_id: "R2026-000009" }),
     l(2, 2, { titre: "Factures reçues", module: "filed", texte: "1 facture en litige : TechPro, +360 € par rapport à la commande BC-2026-0077. Le fournisseur n'a pas encore répondu.", gravite: "attention", lien: "/espace/filed", objet_id: "R2026-000011" }),
-    l(2, 3, { titre: "Factures reçues", module: "filed", texte: "2 documents attendent : 1 en lecture, 1 à classer (scan du 1er octobre).", gravite: "info", lien: "/espace/filed" }),
+    l(2, 3, { titre: "Factures reçues", module: "filed", texte: `2 documents attendent : 1 en lecture, 1 à classer (scan du ${jourMois(-2)}).`, gravite: "info", lien: "/espace/filed" }),
     l(3, 1, { titre: "Validations", module: "socle", texte: "8 demandes attendent votre décision, dont 1 en retard et 2 à échéance aujourd'hui.", gravite: "attention", lien: "/espace/validations" }),
-    l(3, 2, { titre: "Validations", module: "socle", texte: "Vous décidez au nom de Claire Morel jusqu'au 21 octobre (délégation en cours).", gravite: "info" }),
-    l(4, 1, { titre: "Équipe", module: "rh", entite_nom: "Agence de Grenoble", texte: "Sofia Carvalho demande 5 jours du 13 au 17 octobre ; Yanis Dupré assurerait le remplacement.", gravite: "info", lien: "/espace/validations" }),
+    l(3, 2, { titre: "Validations", module: "socle", texte: `Vous décidez au nom de Claire Morel jusqu'au ${jourMois(16)} (délégation en cours).`, gravite: "info" }),
+    l(4, 1, { titre: "Équipe", module: "rh", entite_nom: "Agence de Grenoble", texte: `Sofia Carvalho demande 5 jours du ${jourMois(10)} au ${jourMois(14)} ; Yanis Dupré assurerait le remplacement.`, gravite: "info", lien: "/espace/validations" }),
     l(5, 1, { titre: "Clients", module: "reput", texte: "Les avis de la nuit n'ont pas pu être lus (connecteur Google indisponible à 6 h 50). Section incomplète.", gravite: "attention", section_incomplete: true }),
     l(5, 2, { titre: "Clients", module: "reput", texte: "Hier : 1 avis 5 étoiles (M. Perrin, « cuisine posée en une journée »), réponse envoyée.", gravite: "info" }),
     /* Les modules métier déposent eux aussi leurs sections (b6_23 pour DALIRO, b2_18 et b3t_04 pour

@@ -109,6 +109,9 @@ export function apercu(
 ): { sujet: string; corps: string } {
   const devis = cle.startsWith("devis");
   const ech = cle === "echeance";
+  /* 04/11 — les dates de l'aperçu suivent aujourd'hui, comme l'exemple de CASHD (émise il y a 75 jours, échue il y a 45) : elles ne sont jamais dépassées ni en désaccord avec la fiche */
+  const jour = (n: number) => new Date(Date.now() + n * 86_400_000).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Paris" });
+  const jourLong = (n: number) => new Date(Date.now() + n * 86_400_000).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Paris" }).replace(/^1 /, "1er ");
   const total = 12000;
   let reglement = "";
   /* c2_36 : les moyens de règlement, mise en demeure comprise */
@@ -130,12 +133,12 @@ export function apercu(
     emetteur: r.emetteur ?? "Atelier Bertin",
     compte: "C-LEFEVRE, secteur Immobilier",
     lignes: devis
-      ? "  • Devis D-2026-033 du 01/10/2026 : 4 800,00 €\n"
+      ? `  • Devis D-2026-033 du ${jour(-34)} : 4 800,00 €\n`
       : ech
-        ? "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, à régler le 26/08/2026 : 12 000,00 €\n" + enLigne
-        : "  • Facture F-2026-101 du 27/07/2026, 12 000,00 € TTC, échue le 26/08/2026 (45 jours de retard) : 12 000,00 € restant dus\n" + enLigne,
+        ? `  • Facture F-2026-101 du ${jour(-25)}, 12 000,00 € TTC, à régler le ${jour(5)} : 12 000,00 €\n` + enLigne
+        : `  • Facture F-2026-101 du ${jour(-75)}, 12 000,00 € TTC, échue le ${jour(-45)} (45 jours de retard) : 12 000,00 € restant dus\n` + enLigne,
     total: devis ? "4 800,00 €" : "12 000,00 €",
-    limite: "19 octobre 2026",
+    limite: jourLong(8),
     delai: "8",
     nb: "1",
     numero: devis ? "D-2026-033" : "F-2026-101",

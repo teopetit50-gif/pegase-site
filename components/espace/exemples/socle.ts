@@ -58,6 +58,12 @@ export function ilYa(jours: number, heure = 9): string {
   return dans(-jours, heure);
 }
 
+/** « 13 novembre », « 1er décembre » : un jour relatif à aujourd'hui, écrit en
+    toutes lettres (04/11 — les dates d'exemple ne doivent jamais être dépassées) */
+export function jourMois(jours: number): string {
+  return new Date(dans(jours, 12)).toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "Europe/Paris" }).replace(/^1 /, "1er ");
+}
+
 /** La date du jour en ISO court (AAAA-MM-JJ), heure locale. */
 export function aujourdHui(decalage = 0): string {
   const d = new Date();

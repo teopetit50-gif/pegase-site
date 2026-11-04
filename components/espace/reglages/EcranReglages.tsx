@@ -46,8 +46,9 @@ function journalExemple(): LigneJournal[] {
   return [
     l(1, ilYa(6, 9), "Omega", "filed.document.recu", "filed_documents", "R2026-000014", { source: "courriel" }),
     l(2, ilYa(6, 9), "Omega", "filed.controles.passes", "filed_factures", "PD-2026-1187", { bloquants: 0 }),
-    l(3, ilYa(5, 15), "Claire Martin", "demande.approuvee", "demandes", "Payer R2026-000014", { commentaire: "OK ; livraison reçue" }),
-    l(4, ilYa(3, 11), "Claire Martin", "filed.fournisseur.confirme", "filed_fournisseurs", "Papeterie Durand", {}),
+    /* 04/11 — la demande approuvée est celle que la file montre décidée (R2026-000008), par Claire Morel, de l'équipe */
+    l(3, ilYa(7, 10), "Claire Morel", "demande.approuvee", "demandes", "Payer R2026-000008", { commentaire: "OK ; facture conforme au contrat" }),
+    l(4, ilYa(3, 11), "Claire Morel", "filed.fournisseur.confirme", "filed_fournisseurs", "Papeterie Durand", {}),
     l(5, ilYa(1, 10), "Sofia Carvalho", "filed.document.depose", "filed_documents", "R2026-000016", { nom_fichier: "IV-2026-1187.pdf" }),
     l(6, ilYa(0, 8), "Omega", "point.envoye", "points", "Point du matin", { destinataires: 2 }),
   ];

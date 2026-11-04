@@ -1703,7 +1703,7 @@ export default function TableauReput() {
                     </dd>
                   </div>
                   <div>
-                    <dt>Urgences</dt>
+                    <dt>À escalader</dt>
                     <dd className={escalade.length ? undefined : "lin-props-vide"}>
                       <MenuOptions
                         plat
