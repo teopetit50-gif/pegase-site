@@ -306,8 +306,8 @@ export default function PageProjet({ id }: { id: string }) {
         <h1 className="v2-sr">Projet</h1>
         <header className="lor-in-l1">
           <nav className="lor-in-fil" aria-label="Fil d'Ariane">
-            <Link href={BASE} className="lor-in-maillon">
-              Permis
+            <Link href={`${BASE}/projets`} className="lor-in-maillon">
+              Projets
             </Link>
           </nav>
         </header>
@@ -668,6 +668,132 @@ export default function PageProjet({ id }: { id: string }) {
     </>
   );
 
+  /* 04/11 — chaque onglet du dossier a sa tête, au dessin de la Vue d'ensemble (Teo : « elles sont toutes
+     les mêmes, le design est mal fait ; pas comme la vue d'ensemble, qui est propre ») : une tuile, le
+     titre de l'onglet, une phrase qui dit où en est le sujet, et ses propriétés en pilules */
+  type Pil = { icone: React.ComponentProps<typeof IconeSprite>["nom"]; texte: string; titre?: string; vide?: boolean };
+  const tete = ((): { icone: Pil["icone"]; couleur: string; resume: string; pilules: Pil[] } | null => {
+    const de = <T extends { projet_id: string }>(xs: T[]) => xs.filter((x) => x.projet_id === projet.id);
+    if (cle === "equipe") {
+      const membres = de(dossier.membres);
+      const lots = de(dossier.lots);
+      const inter = de(dossier.intervenants);
+      return {
+        icone: "Members",
+        couleur: "#5e6ad2",
+        resume: `${chef ? `${chef} mène le projet` : "Pas encore de chef de projet"} · ${pluriel(membres.length, "membre")} de l'agence, ${pluriel(inter.length, "intervenant")} extérieur${inter.length > 1 ? "s" : ""}, ${pluriel(lots.length, "lot")}.`,
+        pilules: [
+          { icone: "ProjectLead", texte: chef ?? "Chef de projet", vide: !chef, titre: "Chef de projet : il reçoit les rappels" },
+          { icone: "Users", texte: pluriel(membres.length, "membre") },
+          { icone: "Team", texte: pluriel(inter.length, "intervenant") },
+          { icone: "Checklist", texte: pluriel(lots.length, "lot") },
+        ],
+      };
+    }
+    if (cle === "urbanisme") {
+      return {
+        icone: "Page",
+        couleur: "#26b5ce",
+        resume: plu?.zone
+          ? `Zone ${plu.zone}${plu.document?.titre ? ` du ${plu.document.titre}` : ""}.${exige ? (exige.manquantes === exige.total ? ` Aucune des ${exige.total} pièces du permis n'est encore déposée.` : ` ${exige.total - exige.manquantes} pièce${exige.total - exige.manquantes > 1 ? "s" : ""} sur ${exige.total} déposée${exige.total - exige.manquantes > 1 ? "s" : ""} pour le permis.`) : ""}`
+          : "Les règles d'urbanisme de la parcelle ne sont pas encore lues.",
+        pilules: [
+          { icone: "Label", texte: plu?.zone ? `Zone ${plu.zone}` : "Zone inconnue", vide: !plu?.zone },
+          { icone: "Attachment", texte: exige ? `${exige.total - exige.manquantes}/${exige.total} pièces` : "Pièces exigées", vide: !exige },
+          ...(territoire ? [{ icone: "Project" as const, texte: territoire }] : []),
+        ],
+      };
+    }
+    if (cle === "controle") {
+      const ctrl = de(dossier.controles);
+      const ids = new Set(ctrl.map((c) => c.id));
+      const constats = dossier.constats.filter((c) => ids.has(c.controle_id));
+      const ouverts = constats.filter((c) => c.statut === "ouvert").length;
+      return {
+        icone: "Shield",
+        couleur: "#4cb782",
+        resume: ctrl.length
+          ? `${pluriel(ctrl.length, "contrôle")} du dossier · ${ouverts ? `${pluriel(ouverts, "constat")} encore ouvert${ouverts > 1 ? "s" : ""}` : "aucun constat ouvert"} sur ${constats.length}.`
+          : "Aucun contrôle : déposez les pièces du dossier, Lorani les relit (PLU, CCTP et DPGF, RE2020, accessibilité, incendie).",
+        pilules: [
+          { icone: "Shield", texte: ctrl.length ? pluriel(ctrl.length, "contrôle") : "Aucun contrôle", vide: !ctrl.length },
+          { icone: "Judge", texte: ouverts ? `${pluriel(ouverts, "constat")} ouvert${ouverts > 1 ? "s" : ""}` : "Aucun constat ouvert", vide: !ouverts },
+        ],
+      };
+    }
+    if (cle === "consultation") {
+      const cons = de(dossier.consultations);
+      const offres = de(dossier.offres);
+      const ouvertes = cons.filter((c) => c.statut === "ouverte" || c.statut === "analysee").length;
+      const attribuees = cons.filter((c) => c.statut === "attribuee").length;
+      return {
+        icone: "Euro",
+        couleur: "#f2994a",
+        resume: cons.length
+          ? `${pluriel(cons.length, "consultation")} · ${offres.length ? pluriel(offres.length, "offre reçue", "offres reçues") : "aucune offre reçue"}, ${attribuees ? pluriel(attribuees, "lot attribué", "lots attribués") : "aucun lot attribué pour l'instant"}.`
+          : "Aucune consultation : lancez celle d'un lot pour recevoir et comparer les offres des entreprises.",
+        pilules: [
+          { icone: "Spreadsheet", texte: ouvertes ? `${pluriel(ouvertes, "consultation")} en cours` : "Aucune en cours", vide: !ouvertes },
+          { icone: "Email", texte: offres.length ? pluriel(offres.length, "offre") : "Aucune offre", vide: !offres.length },
+          { icone: "Signature", texte: attribuees ? pluriel(attribuees, "lot attribué", "lots attribués") : "Aucun lot attribué", vide: !attribuees },
+        ],
+      };
+    }
+    if (cle === "chantier") {
+      const situations = de(dossier.situations).filter((x) => x.statut === "a_viser").length;
+      const crs = de(dossier.comptesRendus);
+      return {
+        icone: "ConstructionBarrier",
+        couleur: "#d28f19",
+        resume: marchesProjet.length
+          ? `${pluriel(marchesProjet.length, "marché")} de travaux · ${situations ? `${pluriel(situations, "situation")} à viser` : "aucune situation à viser"}, ${pluriel(crs.length, "compte rendu", "comptes rendus")}, ${pluriel(pointsOuverts, "point")} en suspens.`
+          : `Pas encore de marché de travaux${crs.length ? ` · ${pluriel(crs.length, "compte rendu", "comptes rendus")}` : ""}${pointsOuverts ? `, ${pluriel(pointsOuverts, "point")} en suspens` : ""}.`,
+        pilules: [
+          { icone: "Spreadsheet", texte: marchesProjet.length ? pluriel(marchesProjet.length, "marché") : "Aucun marché", vide: !marchesProjet.length },
+          { icone: "Stopwatch", texte: situations ? `${pluriel(situations, "situation")} à viser` : "Rien à viser", vide: !situations },
+          { icone: "Write", texte: crs.length ? pluriel(crs.length, "compte rendu", "comptes rendus") : "Aucun compte rendu", vide: !crs.length },
+          { icone: "Comment", texte: pointsOuverts ? `${pluriel(pointsOuverts, "point")} en suspens` : "Aucun point en suspens", vide: !pointsOuverts },
+        ],
+      };
+    }
+    if (cle === "reception") {
+      const reserves = de(dossier.reserves);
+      const nonLevees = reserves.filter((r) => r.statut !== "levee").length;
+      const doe = de(dossier.doe).filter((d) => d.statut !== "sans_objet");
+      const recus = doe.filter((d) => d.statut === "recu").length;
+      return {
+        icone: "Signature",
+        couleur: "#4cb782",
+        resume: `${projet.reception_le ? `Réception prononcée le ${plein(projet.reception_le)}` : "Réception pas encore prononcée"} · ${reserves.length ? `${pluriel(nonLevees, "réserve")} non levée${nonLevees > 1 ? "s" : ""} sur ${reserves.length}` : "aucune réserve"}, ${doe.length ? `DOE ${recus}/${doe.length} pièces reçues` : "DOE à préparer"}.`,
+        pilules: [
+          { icone: "Calendar", texte: projet.reception_le ? court(projet.reception_le) : "Date de réception", vide: !projet.reception_le },
+          { icone: "Judge", texte: nonLevees ? `${pluriel(nonLevees, "réserve")} à lever` : "Aucune réserve à lever", vide: !nonLevees },
+          { icone: "Folder", texte: doe.length ? `DOE ${recus}/${doe.length}` : "DOE", vide: !doe.length },
+        ],
+      };
+    }
+    if (cle === "assurances") {
+      const att = de(dossier.attestations);
+      const conformes = att.filter((a) => a.statut === "conforme").length;
+      const aVoir = att.filter((a) => a.statut === "a_verifier").length;
+      const ko = att.filter((a) => a.statut === "non_conforme" || a.statut === "expiree").length;
+      return {
+        icone: "Policy",
+        couleur: "#5e6ad2",
+        resume: att.length
+          ? `${pluriel(att.length, "attestation")} · ${conformes} conforme${conformes > 1 ? "s" : ""}${aVoir ? `, ${aVoir} à vérifier` : ""}${ko ? `, ${ko} non conforme${ko > 1 ? "s" : ""} ou expirée${ko > 1 ? "s" : ""}` : ""}.`
+          : "Aucune attestation : demandez la décennale et la RC de chaque entreprise avant l'ouverture du chantier.",
+        pilules: [
+          { icone: "Shield", texte: conformes ? `${conformes} conforme${conformes > 1 ? "s" : ""}` : "Aucune conforme", vide: !conformes },
+          { icone: "ClockOutline", texte: aVoir ? `${aVoir} à vérifier` : "Rien à vérifier", vide: !aVoir },
+          { icone: "Stopwatch", texte: ko ? `${ko} à reprendre` : "Rien à reprendre", vide: !ko },
+        ],
+      };
+    }
+    return null;
+  })();
+  const ongletCourant = ONGLETS.find((o) => o.cle === cle);
+
   const avecVolet = details || ouvert;
 
   return (
@@ -678,8 +804,8 @@ export default function PageProjet({ id }: { id: string }) {
           <div className="lor-in-l1">
             <div className="lor-in-l1-gauche">
               <nav className="lor-in-fil" aria-label="Fil d'Ariane">
-                <Link href={BASE} className="lor-in-maillon">
-                  Permis
+                <Link href={`${BASE}/projets`} className="lor-in-maillon">
+                  Projets
                 </Link>
                 <span className="lor-in-sep" aria-hidden="true">
                   ›
@@ -724,11 +850,11 @@ export default function PageProjet({ id }: { id: string }) {
           <div className="lor-in-l2">
             <nav className="lor-in-onglets" aria-label="Vues du projet">
               {ONGLETS.map((o) => (
-                <Link key={o.cle} href={lien(o.cle)} scroll={false} className="lor-vue" data-actif={o.cle === cle ? "" : undefined} aria-current={o.cle === cle ? "page" : undefined}>
+                <Link key={o.cle} href={lien(o.cle)} scroll={false} className="v2-btn v2-btn--petit" data-actif={o.cle === cle ? "" : undefined} aria-current={o.cle === cle ? "page" : undefined}>
                   {o.libelle}
                 </Link>
               ))}
-              <Link href={`${BASE}/honoraires?projet=${encodeURIComponent(projet.id)}`} className="lor-vue">
+              <Link href={`${BASE}/honoraires?projet=${encodeURIComponent(projet.id)}`} className="v2-btn v2-btn--petit">
                 Honoraires
               </Link>
               <div className="lor-in-ancre" ref={menuVueRef}>
@@ -1040,7 +1166,27 @@ export default function PageProjet({ id }: { id: string }) {
                 {tableau}
               </div>
             ) : (
-              <div className="lor-in-large lor-in-vue">
+              <div className="lor-in-colonne lor-in-vue">
+                {tete ? (
+                  <>
+                    <div className="lor-in-tuile" style={{ "--lor-in-tuile": tete.couleur } as React.CSSProperties} aria-hidden="true">
+                      <IconeSprite nom={tete.icone} couleur={tete.couleur} taille={24} />
+                    </div>
+                    <h2 className="lor-in-titre">{ongletCourant?.libelle}</h2>
+                    <p className="lor-in-resume">{tete.resume}</p>
+                    <div className="lor-in-rang">
+                      <h3>Propriétés</h3>
+                      <div className="lor-in-pilules">
+                        {tete.pilules.map((x) => (
+                          <span key={x.texte} className="lor-in-pilule" data-vide={x.vide ? "" : undefined} title={x.titre}>
+                            <IconeSprite nom={x.icone} />
+                            {x.texte}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                ) : null}
                 {cle === "chantier" ? (
                   <section className="lor-in-chantier-tete" aria-label="Bordereau et révision des prix">
                     <div className="lor-in-projets-tete">

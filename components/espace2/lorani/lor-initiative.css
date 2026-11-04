@@ -198,11 +198,32 @@ html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, va
 .v2 .lor-in-large { max-width: 1001px; margin: 0 auto; padding-top: 32px; }
 .v2 .lor-in-note { margin-top: 16px; font-size: 12px; color: var(--lor-t3); }
 .v2 .lor-in-vue .v2-page { padding: 0; }
-/* 04/11 — les onglets du dossier (Réception, Chantier…) : plus de cadre blanc de l'ancien espace autour des
-   parties, qui collaient au bord sans marge (Teo : « c'est mal fait ») ; les parties sont posées sur la page
-   comme la section « Projects » d'une Initiative, séparées d'un filet */
+/* ══ 04/11 — les onglets d'un projet au dessin des pages SaaS (FILED, CASHD) ══
+   Teo : « toutes ces pages, je n'aime pas du tout, change le design avec les pages des SaaS ».
+   Les onglets sont les petits boutons à contour de ../lin/lin.css (« Aperçu, Documents… ») ; chaque
+   partie d'une vue (Réception et réserves, DOE, Chantier…) est un bloc pleine largeur dont la tête
+   est une bande de 36 comme les groupes de « Documents », titre 13/500, gestes à droite. Plus de
+   cadre blanc de l'ancien espace, plus de titres de 18. */
+.v2 .lor-in-onglets { padding: 1px; margin: -1px; }
+.v2 .lor-in-onglets .v2-btn, .v2 .lor-in-onglets .v2-btn:hover { background: transparent; box-shadow: 0 0 0 1px var(--v2-a-500); color: var(--v2-gray-900); font-weight: 450; }
+.v2 .lor-in-onglets .v2-btn:hover { box-shadow: 0 0 0 1px var(--v2-a-600); color: var(--v2-gray-1000); }
+.v2 .lor-in-onglets .v2-btn[data-actif] { box-shadow: 0 0 0 1px var(--v2-gray-700); color: var(--v2-gray-1000); }
+.v2 .lor-in-onglets .v2-btn:focus-visible { outline: 2px solid var(--v2-blue-700); outline-offset: 1px; }
+
 .v2 .lor .lor-in-pont > .esp-carte { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.v2 .lor .lor-in-pont > .esp-carte > .lvp-partie + .lvp-partie { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--lor-trait-carte); }
+.v2 .lor .lor-in-vue .lvp-partie + .lvp-partie { margin-top: 24px; }
+/* sous la tête (tuile, titre, résumé, propriétés), les parties sont des sections de la Vue
+   d'ensemble : titre 18/500 comme « Permis », gestes à droite, 48 entre deux sections */
+.v2 .lor .lor-in-vue > .lor-in-rang + *, .v2 .lor .lor-in-vue > .lor-in-chantier-tete + * { margin-top: 48px; }
+.v2 .lor .lor-in-vue .lvp-partie + .lvp-partie { margin-top: 48px; }
+.v2 .lor .lor-in-vue :is(.lit-lots-tete, .lor-in-projets-tete) { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 34px; margin: 0; padding: 0; background: none; }
+.v2 .lor .lor-in-vue :is(.lit-lots-titre, .lor-in-projets-tete h3) { flex: 1; min-width: 0; margin: 0; padding: 6px 0; font-size: 18px; font-weight: 500; line-height: 22px; letter-spacing: 0; color: var(--lor-t2); }
+.v2 .lor .lor-in-vue .lvp-compte { font-size: 13px; color: var(--lor-t3); }
+.v2 .lor .lor-in-vue .lvp-gestes { flex: none; }
+.v2 .lor .lor-in-vue .lvp-resume, .v2 .lor .lor-in-vue .lvp-vide, .v2 .lor .lor-in-vue .lor-in-vide { margin: 0; padding: 8px 0 0; font-size: 15px; font-weight: 450; line-height: 24px; letter-spacing: -0.1px; color: var(--lor-t3); }
+.v2 .lor .lor-in-vue .lvp-resume + .lvp-vide { padding-top: 0; }
+.v2 .lor .lor-in-vue .lvp-avis { margin: 8px 0 0; }
+.v2 .lor .lor-in-vue .lvp-liste { margin: 8px -8px 0; }
 /* le pont : les couleurs de lin.css (« dashboard ») remplacées par celles de Linear (lor.css) */
 .v2 .lor .lin.lor-in-pont {
   --lin-fond: var(--lor-carte);
@@ -298,6 +319,6 @@ html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, va
 .v2 .lor-in-registre-tete .lor-texte-btn { flex-shrink: 0; }
 .v2 .lor-in-rubrique { flex-shrink: 0; height: 18px; padding: 0 6px; border-radius: 9999px; background: var(--lor-onglet-actif); font-size: 11px; font-weight: 500; line-height: 18px; color: var(--lor-t2); white-space: nowrap; }
 .v2 .lor-in-registre { padding-left: 0; }
-.v2 .lor-in-chantier-tete { margin-bottom: 32px; }
+.v2 .lor-in-chantier-tete { margin-top: 48px; }
 .v2 .lor-in-revisions { margin-top: 8px; }
 .v2 .lor-in-revisions .lor-in-ev { padding-left: 0; }

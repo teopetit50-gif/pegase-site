@@ -121,6 +121,8 @@ export const MODULES: ModuleV2[] = [
   /* 29/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("lorani", "LORANI", "Permis", "Demandes de permis et délais d'instruction", Stamp, [
     { libelle: "Vue d'ensemble", href: `${RACINE}/lorani`, exact: true },
+    /* 04/11 — les projets n'avaient pas d'entrée : on n'y arrivait que par une question */
+    { libelle: "Projets", href: `${RACINE}/lorani/projets` },
     { libelle: "Courrier à ranger", href: `${RACINE}/lorani/courrier` },
     { libelle: "Questions et réponses", href: `${RACINE}/lorani/questions` },
     { libelle: "À viser", href: `${RACINE}/lorani/a-viser` },

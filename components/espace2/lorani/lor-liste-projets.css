@@ -1,0 +1,76 @@
+/* /espace2/lorani/projets — la liste des projets (04/11/2026) — ./ListeProjets.tsx
+   Au dessin des listes SaaS : barre de titre de 44 au filet 0.5, lignes de 48, rayon 8 au survol. */
+
+.v2 .lor-lp { display: flex; flex-direction: column; min-height: calc(100dvh - 48px); }
+.v2 .lor-lp-tete { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-bottom: 0.5px solid var(--lor-trait-carte); }
+.v2 .lor-lp-titre { font-size: 13px; font-weight: 500; color: var(--lor-t1); }
+.v2 .lor-lp-compte { font-size: 13px; font-weight: 450; color: var(--lor-t3); font-variant-numeric: tabular-nums; }
+.v2 .lor-lp-vide { margin: 0; padding: 24px 22px; font-size: 13px; color: var(--lor-t3); }
+
+.v2 .lor-lp-tableau { padding: 8px 8px 48px; }
+.v2 .lor-lp-grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px 64px 150px 110px 16px;
+  align-items: center;
+  column-gap: 16px;
+  padding: 0 12px 0 14px;
+}
+.v2 .lor-lp-entetes { height: 32px; font-size: 12px; font-weight: 500; color: var(--lor-t3); }
+.v2 .lor-lp-ligne {
+  height: 48px;
+  border-radius: 8px;
+  color: var(--lor-t1);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.12s;
+}
+.v2 .lor-lp-ligne + .lor-lp-ligne { box-shadow: inset 0 0.5px 0 var(--lor-trait-carte); }
+.v2 .lor-lp-ligne:hover { background: var(--lor-survol); box-shadow: none; }
+.v2 .lor-lp-ligne:hover + .lor-lp-ligne { box-shadow: none; }
+.v2 .lor-lp-ligne:focus-visible { outline: 2px solid var(--v2-blue-700); outline-offset: -2px; }
+.v2 .lor-lp-c-n { text-align: right; }
+.v2 .lor-lp-c-date[data-passe] { color: var(--lor-t3); }
+.v2 .lor-lp-sourd { color: var(--lor-t3); }
+.v2 .lor-lp-mobile { display: none; }
+
+.v2 .lor-lp-projet { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.v2 .lor-lp-tuile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: color-mix(in lch, var(--lor-lp-tuile) 15%, transparent);
+}
+.v2 .lor-lp-tuile svg { width: 14px; height: 14px; }
+.v2 .lor-lp-nom { flex: none; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+.v2 .lor-lp-lieu { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lor-t3); }
+.v2 .lor-lp-chevron { color: var(--lor-t3); transition: transform 0.12s, color 0.12s; }
+.v2 .lor-lp-ligne:hover .lor-lp-chevron { color: var(--lor-t1); transform: translateX(2px); }
+
+/* tablette : la phase tombe */
+@media (max-width: 1100px) {
+  .v2 .lor-lp-grille { grid-template-columns: minmax(0, 1fr) 56px 130px 96px 16px; }
+  .v2 .lor-lp-c-phase { display: none; }
+}
+/* téléphone : le projet, puis le chef et la date en dessous */
+@media (max-width: 640px) {
+  .v2 .lor-lp-entetes { display: none; }
+  .v2 .lor-lp-tableau { padding: 4px 4px 32px; }
+  .v2 .lor-lp-grille {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "projet date" "chef n";
+    row-gap: 2px;
+    padding: 0 10px;
+  }
+  .v2 .lor-lp-ligne { height: auto; min-height: 56px; padding-top: 8px; padding-bottom: 8px; }
+  .v2 .lor-lp-projet { grid-area: projet; }
+  .v2 .lor-lp-lieu { display: none; }
+  .v2 .lor-lp-nom { max-width: none; flex: 1 1 auto; }
+  .v2 .lor-lp-c-date { grid-area: date; }
+  .v2 .lor-lp-c-chef { grid-area: chef; padding-left: 34px; font-size: 12px; color: var(--lor-t3); }
+  .v2 .lor-lp-c-n { grid-area: n; font-size: 12px; color: var(--lor-t3); }
+  .v2 .lor-lp-mobile { display: inline; }
+  .v2 .lor-lp-c-phase, .v2 .lor-lp-chevron { display: none; }
+}
