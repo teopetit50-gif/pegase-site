@@ -27,13 +27,14 @@ import { Avis, Chargement, Pastille, type Teinte } from "../ui";
 import { chargerEnvoiAuto, donnerAccordAuto, effacerCompte, reglerEnvoiAuto, restituer, revoquerAccordAuto } from "./portes";
 import type { Compte, EnvoiAuto as Etat, SujetAuto } from "./types";
 
-const SUJETS: { code: SujetAuto; libelle: string }[] = [
+/* 04/11 — exportés pour la carte « Envoi automatique » des garde-fous d'Espace 2 (promesse OFFLOAD n° 45) */
+export const SUJETS: { code: SujetAuto; libelle: string }[] = [
   { code: "reprise", libelle: "Reprise d'un compte silencieux" },
   { code: "echeance", libelle: "Échéance qui revient" },
   { code: "affaire", libelle: "Commande en attente de retrait" },
 ];
 
-const ACCORDS: Record<Etat["accord"], { libelle: string; teinte: Teinte }> = {
+export const ACCORDS: Record<Etat["accord"], { libelle: string; teinte: Teinte }> = {
   actif: { libelle: "Accord actif", teinte: "vert" },
   a_valider: { libelle: "Accord à activer", teinte: "ambre" },
   absent: { libelle: "Pas d'accord", teinte: "gris" },

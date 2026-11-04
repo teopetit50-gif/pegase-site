@@ -32,23 +32,40 @@
    une pastille « ✕ » par filtre après les onglets), ouvre un compte ou un
    onglet de sa fiche, ou copie. Gabarit : ../lin/lin.css, retouches :
    ./offload.css.
+
+   04/11 — la fiche reprend ce que l'ancienne fiche montait à part, dans ses
+   propres briques (sections de l'aperçu, cartes de droite, menus) :
+     · le bandeau « À vérifier / À réattribuer » et « Lever la vérification »
+       (offload_lever_verification), promesse n° 38 ;
+     · le doublon proposé, ses raisons, et le geste de trancher
+       (offload_trancher_rapprochement), promesse n° 13 ;
+     · les affaires du compte, même inactif (offload_affaires_compte ;
+       retrait : offload_retirer_affaire), promesse n° 33 ;
+     · le parc, site par site et en consolidé (offload_parc_compte),
+       promesse n° 28 ;
+     · l'effacement des données d'une personne (offload_effacer_compte).
+   En exemple, aucun de ces gestes n'appelle une porte : l'état local change
+   et un toast le dit.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowRight, Building2, CheckCheck, Copy, ExternalLink, ListFilter, MapPin, MessageSquare, PanelRight, PhoneCall, RefreshCw, Send, ShieldCheck, SlidersHorizontal, UserMinus, UserRound } from "lucide-react";
+import { ArrowRight, Building2, CheckCheck, Copy, Eraser, ExternalLink, GitMerge, ListFilter, MapPin, MessageSquare, PackageCheck, PanelRight, PhoneCall, RefreshCw, Send, ShieldAlert, ShieldCheck, SlidersHorizontal, UserMinus, UserRound } from "lucide-react";
 import ExclusionsOffload from "./Exclusions";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { montant } from "@/components/espace/format";
 import { exempleOffload } from "@/components/espace/offload/exemples";
+import { STATUTS_AFFAIRE, affairesExemple } from "@/components/espace/offload/Affaires";
+import { STATUTS_ECHEANCE, parcExemple } from "@/components/espace/offload/Echeances";
 import { A_RISQUE, ISSUES, NIVEAUX, STATUTS_COMPTE, STATUTS_REPRISE } from "@/components/espace/offload/etats";
 import * as portes from "@/components/espace/offload/portes";
-import type { AValider, Compte, Fiche, Niveau, Reprise, StatutReprise, Tableau } from "@/components/espace/offload/types";
+import type { AffaireCompte, AValider, Compte, Fiche, Niveau, ParcCompte, Rapprochement, Reprise, StatutReprise, Tableau } from "@/components/espace/offload/types";
 import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
+import { useToast } from "../Toasts";
 import "./offload.css";
 
 type Sante = Niveau | "inconnu";
@@ -107,6 +124,35 @@ const teinteReprise = (s: StatutReprise): Teinte => {
   const t = STATUTS_REPRISE[s].teinte;
   return t === "vert" || t === "bleu" || t === "gris" ? t : "jaune";
 };
+/* 04/11 — les affaires d'exemple d'un compte, tirées de la page « Affaires » (mêmes références, mêmes montants) (promesse OFFLOAD n° 33) */
+type AffaireEx = AffaireCompte & { compte_id: string };
+const affairesEx = (): AffaireEx[] =>
+  affairesExemple().affaires.map((a) => ({
+    id: a.id,
+    compte_id: a.compte_id,
+    type: a.type,
+    reference: a.reference,
+    libelle: a.libelle,
+    disponible_le: a.disponible_le,
+    jours: a.jours,
+    valeur_ht: a.valeur_ht,
+    statut: a.statut,
+    motif: a.motif,
+    retire_le: null,
+    decision: null,
+  }));
+/* 04/11 — le parc lu site par site, puis en consolidé (promesse OFFLOAD n° 28) */
+const SANS_SITE = "Sans site";
+const parSite = (parc: ParcCompte) => {
+  const sites = new Map<string, ParcCompte["equipements"]>();
+  for (const q of parc.equipements) sites.set(q.site ?? SANS_SITE, [...(sites.get(q.site ?? SANS_SITE) ?? []), q]);
+  return [...sites.entries()].sort((a, b) => a[0].localeCompare(b[0], "fr")).map(([site, equipements]) => ({ site, equipements }));
+};
+const prochaineDe = (equipements: ParcCompte["equipements"]) =>
+  equipements
+    .filter((q) => q.echeance && !["honoree", "honoree_ailleurs", "close", "depassee"].includes(q.echeance.statut))
+    .map((q) => q.echeance!.due_le)
+    .sort()[0] ?? null;
 const trancheDe = (j: number) => SILENCES.findIndex((t) => j <= t.max);
 /* la première raison qui dit pourquoi : celle de la clôture n'explique rien du silence */
 const raisonDe = (c: Compte) => c.signal?.raisons.find((x) => x.code !== "avant_cloture") ?? c.signal?.raisons[0] ?? null;
@@ -418,6 +464,11 @@ export default function ComptesRisque() {
   const [ongletDetails, setOngletDetails] = useState<"niveaux" | "reprises" | "commerciaux">("niveaux");
   const [filtre, setFiltre] = useState("");
   const [ongletFiche, setOngletFiche] = useState<"apercu" | "reprises" | "pieces">("apercu");
+  const toast = useToast();
+  /* 04/11 — les affaires d'exemple, modifiées en mémoire par « Le client l'a retirée » (promesse OFFLOAD n° 33) */
+  const [affairesLocales, setAffairesLocales] = useState<AffaireEx[]>(affairesEx);
+  /* 04/11 — en base réelle, les affaires et le parc du compte ouvert (offload_affaires_compte, offload_parc_compte) (promesses OFFLOAD n° 33 et 28) */
+  const [annexes, setAnnexes] = useState<Record<string, { affaires: AffaireCompte[] | null; parc: ParcCompte | null }>>({});
 
   useEffect(() => {
     if (source !== "reelle") return;
@@ -480,6 +531,21 @@ export default function ComptesRisque() {
       window.clearTimeout(t);
     };
   }, [source, compteOuvert, reel, fichesReelles]);
+
+  /* 04/11 — les affaires et le parc du compte ouvert, lus en base à l'ouverture ; une porte qui refuse
+     laisse sa section vide sans gêner le reste de la fiche (promesses OFFLOAD n° 33 et 28) */
+  useEffect(() => {
+    if (source !== "reelle" || !compteOuvert || annexes[compteOuvert]) return;
+    let actif = true;
+    const t = window.setTimeout(async () => {
+      const [affaires, parc] = await Promise.all([portes.chargerAffairesCompte(compteOuvert).catch(() => null), portes.chargerParcCompte(compteOuvert).catch(() => null)]);
+      if (actif) setAnnexes((x) => ({ ...x, [compteOuvert]: { affaires, parc } }));
+    }, 0);
+    return () => {
+      actif = false;
+      window.clearTimeout(t);
+    };
+  }, [source, compteOuvert, annexes]);
 
   /* Échap referme un compte ouvert */
   useEffect(() => {
@@ -586,6 +652,108 @@ export default function ComptesRisque() {
     });
   };
 
+  /* 04/11 — lever la vérification d'un compte (activité cessée, interlocuteur parti) : ce qui a été vérifié
+     est obligatoire (offload_lever_verification) ; en exemple, l'état local seulement (promesse OFFLOAD n° 38) */
+  const leverVerification = async (c: Compte) => {
+    if (occupe || !c.verification) return;
+    const motif = window
+      .prompt(c.verification === "reattribuer" ? `Qui reprend le contact chez ${c.nom} ? (obligatoire)` : `Qu'avez-vous vérifié pour ${c.nom} ? (obligatoire)`, "")
+      ?.trim();
+    if (!motif) return;
+    if (source === "reelle") {
+      setOccupe(true);
+      try {
+        await portes.leverVerification(c.id, motif);
+        await relireCompte(c.id);
+        toast("Vérification levée : le compte peut repartir dans une vague. C'est au journal.", "vert");
+      } catch (e) {
+        toast(e instanceof Error ? e.message : "La base a refusé.", "rouge");
+      } finally {
+        setOccupe(false);
+      }
+      return;
+    }
+    setExemple((prev) => {
+      const suivant = structuredClone(prev);
+      for (const x of [suivant.fiches[c.id]?.compte, suivant.tableau.comptes.find((y) => y.id === c.id)]) if (x) Object.assign(x, { verification: null, verification_motif: null });
+      return suivant;
+    });
+    toast(`Exemple : rien n'est enregistré. En base réelle, la vérification de ${c.nom} est levée (« ${motif} ») et c'est au journal.`, "neutre");
+  };
+
+  /* 04/11 — trancher un doublon proposé : fusionner les deux fiches, ou dire que ce sont deux clients
+     (offload_trancher_rapprochement) ; en exemple, la proposition sort de la fiche (promesse OFFLOAD n° 13) */
+  const trancher = async (x: Rapprochement, accepter: boolean, compte: string) => {
+    if (occupe) return;
+    if (source === "reelle") {
+      setOccupe(true);
+      try {
+        await portes.trancherRapprochement(x.id, accepter);
+        await relireCompte(compte);
+        toast(accepter ? `Fiches fusionnées dans ${x.a_nom}.` : "Noté : ce sont deux clients, la proposition ne reviendra pas.", "vert");
+      } catch (e) {
+        toast(e instanceof Error ? e.message : "La base a refusé.", "rouge");
+      } finally {
+        setOccupe(false);
+      }
+      return;
+    }
+    setExemple((prev) => {
+      const suivant = structuredClone(prev);
+      suivant.tableau.rapprochements = (suivant.tableau.rapprochements ?? []).filter((y) => y.id !== x.id);
+      return suivant;
+    });
+    toast(
+      accepter
+        ? `Exemple : rien n'est enregistré. En base réelle, ${x.b_nom} (${x.b_ref}) est fusionnée dans ${x.a_nom} (${x.a_ref}), son historique compris.`
+        : "Exemple : rien n'est enregistré. En base réelle, les deux fiches restent séparées et la proposition ne revient pas.",
+      "neutre",
+    );
+  };
+
+  /* 04/11 — noter qu'une affaire a été retirée par le client (offload_retirer_affaire) (promesse OFFLOAD n° 33) */
+  const retirer = async (a: AffaireCompte, compte: string) => {
+    if (occupe) return;
+    if (source === "reelle") {
+      setOccupe(true);
+      try {
+        await portes.retirerAffaire(a.id, null);
+        const affaires = await portes.chargerAffairesCompte(compte);
+        setAnnexes((x) => ({ ...x, [compte]: { affaires, parc: x[compte]?.parc ?? null } }));
+        toast(`${a.reference} · retrait noté : l'affaire sort de la liste.`, "vert");
+      } catch (e) {
+        toast(e instanceof Error ? e.message : "La base a refusé.", "rouge");
+      } finally {
+        setOccupe(false);
+      }
+      return;
+    }
+    const aujourdhui = new Date().toISOString().slice(0, 10);
+    setAffairesLocales((l) => l.map((x) => (x.id === a.id ? { ...x, statut: "retiree", retire_le: aujourdhui } : x)));
+    toast(`Exemple : rien n'est enregistré. ${a.reference} · en base réelle, le retrait est noté et l'affaire sort de la liste.`, "neutre");
+  };
+
+  /* 04/11 — effacer les données d'une personne, à sa demande (offload_effacer_compte, gérant ou administrateur) */
+  const effacer = async (c: Compte) => {
+    if (occupe) return;
+    if (source !== "reelle") {
+      toast("Exemple : rien n'est enregistré. En base réelle, le nom, l'interlocuteur, le courriel, le téléphone et la ville sont effacés ; l'historique d'achats reste, sans nom.", "neutre");
+      return;
+    }
+    const motif = window.prompt(`D'où vient la demande d'effacement de ${c.nom} ? (obligatoire)`, "")?.trim();
+    if (!motif || !window.confirm("Effacer définitivement les données de cette personne ? Un import ne les réécrira pas.")) return;
+    setOccupe(true);
+    try {
+      await portes.effacerCompte(c.id, motif);
+      await relireCompte(c.id);
+      toast("Données de la personne effacées ; le compte sort du cycle. C'est au journal.", "vert");
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "La base a refusé.", "rouge");
+    } finally {
+      setOccupe(false);
+    }
+  };
+
   const lancerRecalcul = async () => {
     if (source !== "reelle" || !tableau?.client || occupe) return;
     setOccupe(true);
@@ -686,14 +854,18 @@ export default function ComptesRisque() {
   const optionsSuivi = (c: Compte): Option[] =>
     c.statut === "arrete"
       ? [{ cle: "arrete", libelle: STATUTS_COMPTE.arrete, meta: "ne reçoit plus rien", icone: <UserMinus width={16} height={16} />, coche: true }]
-      : (["suivi", "exclu"] as const).map((x) => ({
+      : [
+          ...(["suivi", "exclu"] as const).map((x) => ({
           cle: x,
           libelle: STATUTS_COMPTE[x],
           meta: x === "suivi" ? "dans le cycle" : "par le commercial",
           icone: x === "suivi" ? <Losange atteint /> : <UserRound width={16} height={16} />,
           coche: c.statut === x,
           action: () => void changerSuivi(c, x),
-        }));
+        })),
+          /* 04/11 — l'effacement à la demande de la personne, avec le suivi (offload_effacer_compte) */
+          { cle: "effacer", libelle: "Effacer les données de cette personne", meta: "à sa demande", icone: <Eraser width={16} height={16} />, action: () => void effacer(c) },
+        ];
   const etapesDe = (s: StatutReprise) => portee.filter((c) => c.reprise?.statut === s);
 
   /* ——— un compte ouvert : la page d'un projet ——— */
@@ -761,6 +933,25 @@ export default function ComptesRisque() {
     const optionsScore: Option[] = raisons.length
       ? raisons.map((r) => ({ cle: r.code, libelle: r.phrase, meta: r.points ? `+${r.points}` : "—", icone: <IconePriorite niveau={prioDe(r.points)} titre={`${r.points} points`} />, action: allerRaisons }))
       : [{ cle: "aucune", libelle: "Aucune raison relevée", icone: <IconePriorite niveau={0} titre="Aucune raison" />, action: allerRaisons }];
+    /* 04/11 — ce que l'ancienne fiche montait à part : doublon proposé (n° 13), affaires (n° 33), parc (n° 28) */
+    const doublons = (tableau.rapprochements ?? []).filter((x) => x.a === c.id || x.b === c.id);
+    const affaires: AffaireCompte[] | null = source === "exemple" ? affairesLocales.filter((a) => a.compte_id === c.id) : (annexes[c.id]?.affaires ?? null);
+    const affairesOuvertes = (affaires ?? []).filter((a) => a.statut !== "retiree" && a.statut !== "close_sans_suite");
+    const affairesCloses = (affaires ?? []).filter((a) => a.statut === "retiree" || a.statut === "close_sans_suite");
+    const immobilise = somme(affairesOuvertes.map((a) => a.valeur_ht ?? 0));
+    /* un compte qui n'achète plus : éteint, ou sans achat depuis plus d'un an */
+    const inactif = s === "eteint" || (sig?.jours_silence ?? 0) > 365;
+    const parc: ParcCompte | null = source === "exemple" ? parcExemple(c.id) : (annexes[c.id]?.parc ?? null);
+    const sites = parc ? parSite(parc) : [];
+    const nbSites = sites.filter((x) => x.site !== SANS_SITE).length;
+    const prochaine = parc ? prochaineDe(parc.equipements) : null;
+    const reglementaires = parc ? parc.equipements.filter((q) => q.nature === "reglementaire").length : 0;
+    const tombees = parc ? parc.equipements.filter((q) => q.echeance?.statut === "depassee").length : 0;
+    const aParc = !!parc && (parc.equipements.length > 0 || parc.contrats.length > 0);
+    const lienEcheances = `${RACINE}/offload/echeances?filtre=compte:${encodeURIComponent(c.id)}`;
+    /* 04/11 — la vérification se lit dans la fiche (offload_fiche), à défaut dans la liste (promesse OFFLOAD n° 38) */
+    const verif = fiche.compte?.verification ?? c.verification ?? null;
+    const verifMotif = fiche.compte?.verification_motif ?? c.verification_motif ?? null;
     return (
       <div className="lin">
         <header className="lin-tete">
@@ -910,6 +1101,38 @@ export default function ComptesRisque() {
                   />
                 </div>
 
+                {/* 04/11 — un compte « à vérifier » (message non remis, activité cessée) ou « à réattribuer »
+                    (interlocuteur parti) : le bandeau de la fiche et le geste qui lève la vérification (promesse OFFLOAD n° 38) */}
+                {verif ? (
+                  <details className="lin-maj" open aria-label="Vérification du compte">
+                    <summary className="lin-maj-tete">
+                      <span className="lin-maj-titre">
+                        Vérification
+                        <ChevronMaj />
+                      </span>
+                      <Link href={`${RACINE}/offload/garde-fous?id=arret`} className="lin-maj-lien">
+                        <ExternalLink width={14} height={14} aria-hidden="true" /> Garde-fous
+                      </Link>
+                    </summary>
+                    <p className="lin-maj-auteur">
+                      <ShieldAlert width={16} height={16} aria-hidden="true" style={{ color: "var(--lin-graph-jaune)" }} />
+                      <span data-teinte="jaune">{verif === "reattribuer" ? "À réattribuer" : "À vérifier"}</span>
+                      <Avatar />
+                      <span className="lin-maj-gris">OFFLOAD</span>
+                    </p>
+                    <p className="lin-maj-texte">
+                      {verif === "reattribuer" ? "L'interlocuteur a quitté l'entreprise : " : "Le compte passe en vérification : "}
+                      {verifMotif ?? "le compte attend une vérification."} Il ne repart dans aucune vague tant que la vérification n&apos;est pas levée.
+                    </p>
+                    <footer className="lin-maj-pied">
+                      <button type="button" className="v2-btn v2-btn--petit" disabled={occupe} onClick={() => void leverVerification({ ...c, verification: verif, verification_motif: verifMotif })}>
+                        <ShieldCheck width={14} height={14} aria-hidden="true" />
+                        <span>Lever la vérification</span>
+                      </button>
+                    </footer>
+                  </details>
+                ) : null}
+
                 <details className="lin-maj" open aria-label="Reprise de contact">
                   <summary className="lin-maj-tete">
                     <span className="lin-maj-titre">
@@ -976,6 +1199,39 @@ export default function ComptesRisque() {
                     )}
                   </footer>
                 </details>
+
+                {/* 04/11 — deux fiches qui désignent le même client : le rapprochement, ce qui le fonde,
+                    et le geste de trancher ; rien n'est fusionné sans votre accord (promesse OFFLOAD n° 13) */}
+                {doublons.map((x) => {
+                  const autre = x.a === c.id ? { nom: x.b_nom, ref: x.b_ref, id: x.b } : { nom: x.a_nom, ref: x.a_ref, id: x.a };
+                  const autreOuvrable = comptes.some((y) => y.id === autre.id);
+                  return (
+                    <section key={x.id} aria-label="Doublon proposé">
+                      <h2 className="lin-projet-h2">Doublon proposé — la fusion n&apos;a lieu qu&apos;après votre accord</h2>
+                      <p className="lin-maj-texte" style={{ marginTop: 0 }}>
+                        Cette fiche et{" "}
+                        {autreOuvrable ? <Link href={lienCompte(autre.id)}>{autre.nom}</Link> : <strong>{autre.nom}</strong>} ({autre.ref}) semblent désigner le même client.
+                      </p>
+                      <ul className="lin-projet-liste">
+                        {x.raisons.map((r) => (
+                          <li key={r} className="lin-offload-raison">
+                            <GitMerge width={16} height={16} aria-hidden="true" style={{ marginTop: 2 }} />
+                            <span>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+                        <button type="button" className="v2-btn v2-btn--petit" disabled={occupe} onClick={() => void trancher(x, true, c.id)}>
+                          <GitMerge width={14} height={14} aria-hidden="true" />
+                          <span>Fusionner dans {x.a_nom}</span>
+                        </button>
+                        <button type="button" className="v2-btn v2-btn--petit" disabled={occupe} onClick={() => void trancher(x, false, c.id)}>
+                          <span>Ce sont deux clients</span>
+                        </button>
+                      </div>
+                    </section>
+                  );
+                })}
 
                 <h2 className="lin-projet-h2" id="offload-raisons">
                   Pourquoi il est signalé{sig ? ` — score ${sig.score} sur 100, la somme des points` : ""}
@@ -1044,6 +1300,129 @@ export default function ComptesRisque() {
                 ) : (
                   <p className="lin-maj-texte lin-maj-gris">Aucune tâche sur ce compte.</p>
                 )}
+
+                {/* 04/11 — ce que le compte n'est pas venu reprendre, même s'il n'achète plus : la pièce
+                    commandée pour un compte inactif reste rattachée à sa fiche (promesse OFFLOAD n° 33) */}
+                {affaires && affaires.length ? (
+                  <>
+                    <h2 className="lin-projet-h2" id="offload-affaires">
+                      Affaires en attente de retrait{immobilise ? ` — ${montant(immobilise)} immobilisés` : ""}
+                    </h2>
+                    {inactif && affairesOuvertes.length ? (
+                      <p className="lin-maj-texte lin-maj-gris" style={{ marginTop: 0 }}>
+                        Compte inactif : il n&apos;achète plus{sig?.jours_silence ? ` depuis ${sig.jours_silence} jours` : ""}, mais ce qui a été commandé pour lui reste rattaché à sa fiche.
+                      </p>
+                    ) : null}
+                    <ul className="lin-projet-liste">
+                      {[...affairesOuvertes, ...affairesCloses].map((a) => {
+                        const close = a.statut === "retiree" || a.statut === "close_sans_suite";
+                        return (
+                          <li key={a.id} className="lin-offload-raison" style={close ? { opacity: 0.6 } : undefined}>
+                            <PackageCheck width={16} height={16} aria-hidden="true" style={{ marginTop: 2 }} />
+                            <span>
+                              {a.type === "intervention" ? "Intervention" : "Commande"} {a.reference}
+                              {a.libelle ? ` · ${a.libelle}` : ""} · {STATUTS_AFFAIRE[a.statut].libelle}
+                              <br />
+                              <span className="lin-maj-gris">
+                                {close
+                                  ? a.retire_le
+                                    ? `retirée le ${dateCourte(a.retire_le)}`
+                                    : (a.motif ?? "")
+                                  : `${pluriel(a.jours, "jour")} d'attente, depuis le ${dateCourte(a.disponible_le)}${a.motif ? ` · ${a.motif}` : ""}`}
+                              </span>
+                            </span>
+                            <span className="lin-meta">{a.valeur_ht !== null ? montant(a.valeur_ht) : "—"}</span>
+                            <MenuActions
+                              titre={`${a.reference}…`}
+                              options={[
+                                ...(close ? [] : [{ cle: "retiree", libelle: "Le client l'a retirée", icone: <PackageCheck width={16} height={16} />, action: () => void retirer(a, c.id) }]),
+                                { cle: "affaires", libelle: "Voir toutes les affaires", icone: <ArrowRight width={16} height={16} />, href: `${RACINE}/offload/affaires` },
+                              ]}
+                            />
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                ) : null}
+
+                {/* 04/11 — le parc du compte : les équipements installés, site par site, avec leur prochaine
+                    échéance datée depuis la dernière intervention ; puis le consolidé et les contrats (promesse OFFLOAD n° 28) */}
+                {aParc && parc ? (
+                  <>
+                    <h2 className="lin-projet-h2" id="offload-parc">
+                      Parc installé — site par site
+                    </h2>
+                    {sites.map(({ site, equipements }) => (
+                      <div key={site}>
+                        <p className="lin-offload-message-tete">
+                          <MapPin width={12} height={12} aria-hidden="true" /> {site} · {pluriel(equipements.length, "équipement")}
+                        </p>
+                        <ul className="lin-projet-liste">
+                          {equipements.map((q) => (
+                            <li key={q.id} className="lin-offload-raison">
+                              <IconeCalendrier passe={q.echeance?.statut === "depassee"} />
+                              <span>
+                                {q.designation} {q.ref}
+                                {q.type_entretien ? ` · ${q.type_entretien}` : ""}
+                                {q.nature === "reglementaire" ? " · réglementaire" : ""}
+                                <br />
+                                <span className="lin-maj-gris">
+                                  {q.interventions[0]
+                                    ? `dernière intervention le ${dateCourte(q.interventions[0].le)}${q.interventions[0].ailleurs ? " (faite ailleurs)" : ""}`
+                                    : q.derniere_intervention
+                                      ? `dernière intervention le ${dateCourte(q.derniere_intervention)}`
+                                      : "aucune intervention connue"}
+                                </span>
+                              </span>
+                              <span className="lin-meta">{q.echeance ? `${dateCourte(q.echeance.due_le)} · ${STATUTS_ECHEANCE[q.echeance.statut].libelle}` : "non datée"}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                    <h2 className="lin-projet-h2">Parc consolidé</h2>
+                    <ul className="lin-projet-liste">
+                      <li>
+                        <span>Équipements suivis</span>
+                        <span className="lin-meta">
+                          {pluriel(parc.equipements.length, "équipement")}
+                          {nbSites ? ` sur ${pluriel(nbSites, "site")}` : ""}
+                        </span>
+                      </li>
+                      <li>
+                        <span>Prochaine échéance</span>
+                        <span className="lin-meta">{dateCourte(prochaine)}</span>
+                      </li>
+                      <li>
+                        <span>Réglementaires</span>
+                        <span className="lin-meta">{reglementaires || "aucune"}</span>
+                      </li>
+                      <li>
+                        <span>Tombées sans intervention</span>
+                        <span className="lin-meta">{tombees || "aucune"}</span>
+                      </li>
+                      {parc.contrats.map((k) => (
+                        <li key={k.id} className="lin-offload-raison">
+                          <IconeDocument />
+                          <span>
+                            Contrat {k.numero}
+                            {k.libelle ? ` — ${k.libelle}` : ""}
+                            <br />
+                            <span className="lin-maj-gris">
+                              fin le {dateCourte(k.fin)}, reconduction {k.reconduction}
+                              {k.s_eteint ? " · s'éteint faute de reconduction" : ""}
+                            </span>
+                          </span>
+                          <span className="lin-meta">{k.s_eteint ? "S'éteint" : "Actif"}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href={lienEcheances} className="lin-voir-tout">
+                      Voir les échéances du compte <ArrowRight width={14} height={14} aria-hidden="true" />
+                    </Link>
+                  </>
+                ) : null}
               </>
             ) : ongletFiche === "reprises" ? (
               <>
@@ -1312,6 +1691,40 @@ export default function ComptesRisque() {
             </CarteDroite>
 
             <CarteAchats fiche={fiche} />
+
+            {/* 04/11 — le parc en carte de droite : un site par ligne, puis le consolidé (promesse OFFLOAD n° 28) */}
+            {aParc && parc ? (
+              <CarteDroite
+                titre="Parc"
+                action={
+                  <button type="button" className="lin-carte-lien" onClick={allerA("offload-parc")}>
+                    Détail
+                  </button>
+                }
+              >
+                <ul className="lin-repartition">
+                  {sites.map(({ site, equipements }) => {
+                    const p = prochaineDe(equipements);
+                    return (
+                      <li key={site}>
+                        <span>{site}</span>
+                        <span>
+                          {pluriel(equipements.length, "équipement")}
+                          {p ? ` · ${dateCourte(p)}` : ""}
+                        </span>
+                      </li>
+                    );
+                  })}
+                  <li>
+                    <span>Consolidé</span>
+                    <span>
+                      {pluriel(parc.equipements.length, "équipement")}
+                      {parc.contrats.length ? ` · ${pluriel(parc.contrats.length, "contrat")}` : ""}
+                    </span>
+                  </li>
+                </ul>
+              </CarteDroite>
+            ) : null}
 
             <CarteDroite
               titre="Activité"
@@ -1605,6 +2018,26 @@ export default function ComptesRisque() {
                 <Link href={adresse(actifs, true, "tous")} className="lin-voir-tout">
                   Voir tous les comptes <ArrowRight width={14} height={14} aria-hidden="true" />
                 </Link>
+
+                {/* 04/11 — les doublons proposés, chacun ouvre la fiche où il se tranche (promesse OFFLOAD n° 13) */}
+                {(tableau.rapprochements ?? []).length ? (
+                  <>
+                    <h3 className="lin-projet-h2">Doublons proposés</h3>
+                    <ul className="lin-projet-liste">
+                      {(tableau.rapprochements ?? []).map((x) => (
+                        <li key={x.id}>
+                          <Link href={lienCompte(comptes.some((y) => y.id === x.a) ? x.a : x.b)} className="lin-projet-lien">
+                            <GitMerge width={16} height={16} aria-hidden="true" />
+                            <span>
+                              {x.a_nom} ({x.a_ref}) et {x.b_nom} ({x.b_ref})
+                            </span>
+                            <span className="lin-meta">{pluriel(x.raisons.length, "raison")}</span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
               </>
             )}
           </article>

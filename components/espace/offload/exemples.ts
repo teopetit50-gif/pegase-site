@@ -10,7 +10,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { EXEMPLE_CLIENT_ID } from "../exemples/socle";
-import type { Achat, AValider, Compte, Fiche, Mois, Niveau, Raison, Reprise, Signal, Tableau, Tache } from "./types";
+import type { Achat, AValider, Compte, Fiche, Mois, Niveau, Raison, Rapprochement, Reprise, Signal, Tableau, Tache } from "./types";
 
 const ENTITE = "00000000-0000-4000-8000-0000000000e1";
 
@@ -54,6 +54,9 @@ type Modele = {
   /* « un compte suivi en direct par un commercial est exclu du cycle automatique » */
   statut?: "suivi" | "exclu" | "arrete";
   motif?: string;
+  /* 04/11 — « l'interlocuteur a quitté l'entreprise… signalé comme à réattribuer » : le compte passe en vérification (promesse OFFLOAD n° 38) */
+  verification?: "echec" | "reattribuer";
+  verificationMotif?: string;
 };
 
 const MODELES: Modele[] = [
@@ -84,6 +87,8 @@ const MODELES: Modele[] = [
     },
   },
   {
+    verification: "reattribuer",
+    verificationMotif: "le courriel du 29 oct. à achats@rival.exemple est revenu avec une réponse automatique : « M. Garnier a quitté l'entreprise ». Le compte attend un nouvel interlocuteur.",
     n: 4, ref: "C004", nom: "Transports Rival", contact: null, email: "achats@rival.exemple", telephone: "02 99 00 00 04", commercial: "Yanis", ville: "Nantes",
     ages: Array.from({ length: 24 }, (_, k) => 6 + 30 * k), montants: (i) => (i < 12 ? 300 : 1000), niveau: "ralentit", rythme: 30,
     raisons: () => [
@@ -218,6 +223,18 @@ function tachesExemple(): Tache[] {
 const MESSAGE_MARTIN = (dernier: string) =>
   `Bonjour Martin,\n\nJe reprends votre dossier : votre dernière commande chez Atelier Bertin date du ${fr(dernier)} (réf. F4900, « Entretien et pièces », 650 € HT), il y a 2 mois.\n\nAvez-vous de nouveaux besoins pour lesquels nous pourrions vous être utiles ? Un simple retour à ce message suffit : nous vous rappelons au moment qui vous convient.\n\nBien cordialement,\nL'équipe Atelier Bertin\n\nSi vous ne souhaitez plus recevoir nos messages, répondez simplement « stop » : nous ne vous écrirons plus.`;
 
+/* 04/11 — deux fiches qui désignent le même client : la seconde vient de l'export du CRM, la fusion attend votre accord (promesse OFFLOAD n° 13) */
+const RAPPROCHEMENTS: Rapprochement[] = [
+  {
+    id: id("c46", 1), a: id("c40", 5), a_nom: "Boulangerie Lemaire", a_ref: "C005", b: id("c40", 15), b_nom: "BOULANGERIE LEMAIRE SARL", b_ref: "CRM-0412",
+    raisons: [
+      "Même téléphone sur les deux fiches : 02 99 00 00 05.",
+      "Même adresse de courriel : contact@lemaire.exemple.",
+      "Même ville, Rennes ; les deux noms ne diffèrent que par la forme juridique (« SARL »).",
+    ],
+  },
+];
+
 export function exempleOffload(): { tableau: Tableau; fiches: Record<string, Fiche> } {
   const fiches: Record<string, Fiche> = {};
   const comptes: Compte[] = MODELES.map((m) => {
@@ -226,7 +243,7 @@ export function exempleOffload(): { tableau: Tableau; fiches: Record<string, Fic
     const compte: Compte = {
       id: id("c40", m.n), entite_id: ENTITE, ref: m.ref, nom: m.nom, contact: m.contact, email: m.email, telephone: m.telephone,
       commercial: m.commercial, groupe: null, ville: m.ville, secteur: null, source: m.ages.length ? "import" : "saisie", statut: m.statut ?? "suivi",
-      statut_motif: m.motif ?? null, signal, reprise: REPRISES[id("c40", m.n)]?.[0] ?? null,
+      statut_motif: m.motif ?? null, verification: m.verification ?? null, verification_motif: m.verificationMotif ?? null, signal, reprise: REPRISES[id("c40", m.n)]?.[0] ?? null,
     };
     fiches[compte.id] = {
       compte, signal, mois: moisDe(achats), achats, nb_achats: achats.length, reprises: REPRISES[compte.id] ?? [],
@@ -249,6 +266,7 @@ export function exempleOffload(): { tableau: Tableau; fiches: Record<string, Fic
     fiches,
     tableau: {
       client: EXEMPLE_CLIENT_ID,
+      rapprochements: RAPPROCHEMENTS,
       reglages: {
         client_id: EXEMPLE_CLIENT_ID, mode: "essai", delai_silence_jours: 90, montant_min: 200, jour_cloture: null, alerte_avant_cloture_jours: 10,
         signature: "L'équipe Atelier Bertin", delai_relance_jours: 7, quarantaine_jours: 90, plafond_reprises_jour: 20,

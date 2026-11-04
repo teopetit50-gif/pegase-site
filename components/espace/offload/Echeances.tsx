@@ -17,7 +17,7 @@ import { dateCourte } from "../format";
 import type { Source } from "../source";
 import { Chargement, Pastille, Vide, type Teinte } from "../ui";
 import { chargerEcheances } from "./portes";
-import type { EcheanceLigne } from "./types";
+import type { Contrat, EcheanceLigne, Equipement, ParcCompte } from "./types";
 
 export const STATUTS_ECHEANCE: Record<EcheanceLigne["statut"], { libelle: string; teinte: Teinte }> = {
   a_venir: { libelle: "À venir", teinte: "gris" },
@@ -55,6 +55,44 @@ export function echeancesExemple(): EcheanceLigne[] {
       motif: `Le client a fait faire l'entretien ailleurs le ${new Date(jour(-20)).toLocaleDateString("fr-FR")} : l'échéance sort du cycle, aucune relance.`,
       compte_id: c1, compte_nom: "Garage Martin", equipement: { id: "q4", ref: "CO-0410", designation: "Compresseur d'air", site: "Atelier", type_entretien: "Entretien annuel" }, contrat: null },
   ];
+}
+
+/* 04/11 — le parc d'un compte dans sa fiche, en exemple : tiré des mêmes échéances que la page
+   « Échéances » (mêmes équipements, mêmes sites, mêmes dates), plus les contrats qui ne tombent pas
+   dans les soixante jours (promesse OFFLOAD n° 28) */
+const CONTRATS_HORS_HORIZON: Record<string, Contrat[]> = {
+  "00000000-0000-4000-8c40-000000000001": [
+    { id: "k2", numero: "CTR-2024-07", libelle: "Entretien chaudière et climatisation", debut: jour(-480), fin: jour(250), reconduction: "tacite", statut: "actif", s_eteint: false },
+  ],
+};
+
+export function parcExemple(compte: string): ParcCompte {
+  const lignes = echeancesExemple().filter((e) => e.compte_id === compte);
+  const equipements: Equipement[] = lignes
+    .filter((e) => e.equipement)
+    .map((e) => {
+      const q = e.equipement!;
+      const ailleurs = e.statut === "honoree_ailleurs";
+      return {
+        id: q.id,
+        ref: q.ref,
+        designation: q.designation,
+        site: q.site,
+        type_entretien: q.type_entretien,
+        periodicite_mois: 12,
+        nature: e.nature,
+        derniere_intervention: ailleurs ? jour(-20) : e.base_le,
+        interventions: ailleurs ? [{ le: jour(-20), nature: "entretien", ailleurs: true, reference: null }] : e.base_le ? [{ le: e.base_le, nature: "entretien", ailleurs: false, reference: null }] : [],
+        echeance: { due_le: e.due_le, statut: e.statut, base_le: e.base_le },
+      };
+    });
+  const contrats: Contrat[] = [
+    ...lignes
+      .filter((e) => e.contrat)
+      .map((e) => ({ id: e.contrat!.id, numero: e.contrat!.numero, libelle: e.contrat!.libelle, debut: jour(-340), fin: e.due_le, reconduction: e.contrat!.reconduction, statut: "actif", s_eteint: e.s_eteint })),
+    ...(CONTRATS_HORS_HORIZON[compte] ?? []),
+  ];
+  return { equipements, contrats };
 }
 
 export default function Echeances({ source, onChoisir }: { source: Source; onChoisir: (compte: string) => void }) {

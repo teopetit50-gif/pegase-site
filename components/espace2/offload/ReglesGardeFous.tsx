@@ -16,15 +16,32 @@
      · « Suspendre OFFLOAD » / « Relancer OFFLOAD (gérant) » avec leur motif
        obligatoire → la carte de l'arrêt automatique (?id=arret) ;
      · les comptes à vérifier → la fiche de l'arrêt automatique.
+   04/11 — l'envoi automatique et l'accord permanent (components/espace/offload/EnvoiAuto.tsx :
+   chargerEnvoiAuto, reglerEnvoiAuto, donnerAccordAuto, revoquerAccordAuto) → une ligne de plus,
+   « Envoi automatique », et sa carte (?id=envoi) (promesse OFFLOAD n° 45).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Check, ListFilter, Pause, Play, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { Check, ListFilter, Pause, Play, Plus, Power, ShieldCheck, ShieldOff, Trash2 } from "lucide-react";
 import { useSource } from "@/components/espace/source";
-import { dateCourte, dateHeure, relatif } from "@/components/espace/format";
-import { chargerGardeFous, chargerTableau, ecrireRegle, reprendre, retirerRegle, suspendre } from "@/components/espace/offload/portes";
-import type { GardeFous as Etat, Regle as RegleOffload } from "@/components/espace/offload/types";
+import { dateCourte, dateHeure, nombreFr, relatif } from "@/components/espace/format";
+import { ACCORDS, SUJETS } from "@/components/espace/offload/EnvoiAuto";
+import { exempleOffload } from "@/components/espace/offload/exemples";
+import {
+  chargerEnvoiAuto,
+  chargerGardeFous,
+  chargerTableau,
+  donnerAccordAuto,
+  ecrireRegle,
+  reglerEnvoiAuto,
+  reprendre,
+  retirerRegle,
+  revoquerAccordAuto,
+  suspendre,
+} from "@/components/espace/offload/portes";
+import type { EnvoiAuto, GardeFous as Etat, Regle as RegleOffload, SujetAuto } from "@/components/espace/offload/types";
 import { useMaintenant } from "../horloge";
 import { RACINE } from "../modules";
 import { Badge, Note } from "../ui";
@@ -37,6 +54,8 @@ const CHEMIN = `${RACINE}/offload/garde-fous`;
 const sansAccents = (x: string) => x.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const ARRET = "arret";
 const NOUVELLE = "nouvelle";
+/* 04/11 — la ligne de l'envoi automatique (promesse OFFLOAD n° 45) */
+const ENVOI = "envoi";
 
 /* l'exemple de l'écran d'avant, tel quel */
 const EXEMPLE: Etat = {
@@ -67,6 +86,22 @@ const EXEMPLE: Etat = {
   ],
 };
 
+/* 04/11 — l'envoi automatique en exemple, accordé au mode essai du reste de l'exemple : la première vague
+   est relue nom par nom, les échéances et les commandes à retirer sont cochées pour partir seules, la
+   reprise attend une validation, et l'accord permanent n'est pas encore donné (promesse OFFLOAD n° 45) */
+const EXEMPLE_ENVOI: EnvoiAuto = {
+  envoi_auto: true,
+  sujets_auto: ["echeance", "affaire"],
+  accord: "absent",
+  politiques: [],
+  retenus_en_attente: 1,
+};
+/* 04/11 — les comptes à vérifier, nommés dans la carte de l'arrêt automatique et ouverts dans leur fiche (promesse OFFLOAD n° 38) */
+type AVerifier = { id: string; nom: string; verification: "echec" | "reattribuer" };
+const aVerifierDe = (comptes: { id: string; nom: string; verification?: "echec" | "reattribuer" | null }[]): AVerifier[] =>
+  comptes.filter((c) => !!c.verification).map((c) => ({ id: c.id, nom: c.nom, verification: c.verification as AVerifier["verification"] }));
+const EXEMPLE_A_VERIFIER = aVerifierDe(exempleOffload().tableau.comptes);
+
 type Statut = RegleOffload["statut"];
 const STATUTS: { cle: Statut; libelle: string; teinte: "vert" | "ambre" | "rouge" }[] = [
   { cle: "appliquee", libelle: "Appliquées", teinte: "vert" },
@@ -94,6 +129,10 @@ export default function ReglesGardeFous() {
   const [motifOuvert, setMotifOuvert] = useState(false);
   const [reponse, setReponse] = useState<string | null>(null);
   const [envoi, setEnvoi] = useState(false);
+  /* 04/11 — l'envoi automatique : l'exemple modifié en mémoire, ou la base (promesse OFFLOAD n° 45) */
+  const [envoiEx, setEnvoiEx] = useState<EnvoiAuto>(EXEMPLE_ENVOI);
+  const [envoiReel, setEnvoiReel] = useState<EnvoiAuto | null>(null);
+  const [aVerifierReel, setAVerifierReel] = useState<AVerifier[]>([]);
 
   /* ——— la base réelle : les garde-fous, et le client (offload_tableau le donne) ——— */
   const charger = useCallback(async () => {
@@ -103,6 +142,9 @@ export default function ReglesGardeFous() {
       const [g, t] = await Promise.all([chargerGardeFous(), chargerTableau()]);
       setReel(g ?? { suspendu_le: null, suspendu_motif: null, seuil_non_remis_pct: 20, a_verifier: 0, regles: [] });
       setClient(t?.client ?? null);
+      setAVerifierReel(aVerifierDe(t?.comptes ?? []));
+      /* 04/11 — l'envoi automatique du client (offload_envoi_auto) (promesse OFFLOAD n° 45) */
+      setEnvoiReel(t?.client ? await chargerEnvoiAuto(t.client).catch(() => null) : null);
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
       setReel({ suspendu_le: null, suspendu_motif: null, seuil_non_remis_pct: 20, a_verifier: 0, regles: [] });
@@ -114,6 +156,8 @@ export default function ReglesGardeFous() {
     return () => window.clearTimeout(t);
   }, [source, charger]);
   const etat = source === "exemple" ? EXEMPLE : reel;
+  const envoiAuto = source === "exemple" ? envoiEx : envoiReel;
+  const aVerifier = source === "exemple" ? EXEMPLE_A_VERIFIER : aVerifierReel;
 
   /* ——— l'adresse : onglet, famille, tri, règle ouverte ——— */
   const onglet = (STATUTS.find((s) => s.cle === params.get("onglet"))?.cle ?? "tous") as Statut | "tous";
@@ -165,6 +209,69 @@ export default function ReglesGardeFous() {
       },
     );
 
+  /* 04/11 — les gestes de l'envoi automatique : en exemple, l'état local et un toast, rien n'appelle la base ;
+     en base réelle, les portes offload_regler, offload_donner_accord_auto, offload_revoquer_accord_auto (promesse OFFLOAD n° 45) */
+  const agirEnvoi = async (reelle: () => Promise<unknown>, exemple: (e: EnvoiAuto) => EnvoiAuto, apres: string) => {
+    setErreurGeste(null);
+    if (source !== "reelle") {
+      setEnvoiEx((e) => exemple(e));
+      toast(`Exemple : rien n'est enregistré. En base réelle : ${apres.charAt(0).toLowerCase()}${apres.slice(1)}`, "neutre");
+      return;
+    }
+    if (!client) return;
+    setEnvoi(true);
+    try {
+      await reelle();
+      setEnvoiReel(await chargerEnvoiAuto(client));
+      toast(apres, "vert");
+    } catch (e) {
+      setErreurGeste(e instanceof Error ? e.message : "La base a refusé.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+  const basculerSujet = (code: SujetAuto, coche: boolean) => {
+    if (!envoiAuto) return;
+    const sujets = coche ? [...envoiAuto.sujets_auto.filter((x) => x !== code), code] : envoiAuto.sujets_auto.filter((x) => x !== code);
+    const lib = SUJETS.find((x) => x.code === code)?.libelle ?? code;
+    void agirEnvoi(
+      () => reglerEnvoiAuto(client ?? "", { sujets_auto: sujets }),
+      (e) => ({ ...e, sujets_auto: sujets }),
+      coche ? `« ${lib} » part désormais sans validation, dès que l'accord est actif.` : `« ${lib} » attend désormais une validation.`,
+    );
+  };
+  const donnerAccord = () =>
+    void agirEnvoi(
+      () => donnerAccordAuto(client ?? ""),
+      (e) => ({ ...e, accord: "a_valider" }),
+      "Accord donné : une autre personne qui décide l'active dans « À valider ».",
+    );
+  const revoquerAccord = () =>
+    void agirEnvoi(
+      () => revoquerAccordAuto(client ?? "", null),
+      (e) => ({ ...e, accord: "absent", politiques: e.politiques.map((p) => ({ ...p, statut: "revoquee" })) }),
+      "Accord révoqué : chaque message attend une validation.",
+    );
+  const basculerEnvoi = () => {
+    if (!envoiAuto) return;
+    const allume = envoiAuto.envoi_auto;
+    void agirEnvoi(
+      () => reglerEnvoiAuto(client ?? "", { envoi_auto: !allume }),
+      (e) => ({ ...e, envoi_auto: !allume, accord: allume ? "absent" : e.accord }),
+      allume ? "Envoi automatique éteint ; l'accord est révoqué." : "Envoi automatique rallumé ; donnez l'accord pour qu'il prenne effet.",
+    );
+  };
+  const accordActif = envoiAuto?.politiques.find((p) => p.statut === "active") ?? null;
+  const phraseEnvoi = !envoiAuto
+    ? ""
+    : !envoiAuto.envoi_auto
+      ? "Chaque message attend la validation d'une personne."
+      : envoiAuto.accord === "actif"
+        ? `Les messages des sujets cochés partent seuls jusqu'au ${dateCourte(accordActif?.fin ?? null)}${accordActif?.nombre_mensuel ? `, ${nombreFr(accordActif.nombre_mensuel)} au plus par mois` : ""}. Un message douteux est retenu et lu par une personne.`
+        : envoiAuto.accord === "a_valider"
+          ? "L'accord est donné : une autre personne qui décide l'active dans « À valider ». D'ici là, chaque message attend une validation."
+          : "Vos équipes relisent la première vague nom par nom. Ensuite, vous décidez ce qui part seul (les sujets cochés) et ce qui attend votre accord : tant que le gérant n'a pas donné l'accord permanent, chaque message attend une validation.";
+
   const dateMaintenant = maintenant === null ? new Date() : new Date(maintenant);
   const quand = (iso: string | null | undefined) => (iso ? relatif(iso, dateMaintenant) : null);
   const q = sansAccents(recherche.trim());
@@ -198,6 +305,32 @@ export default function ReglesGardeFous() {
           },
         ],
       });
+    /* 04/11 — l'envoi automatique, juste après l'arrêt (promesse OFFLOAD n° 45) */
+    const envoiVisible = !!envoiAuto && (onglet === "tous" || onglet === "appliquee") && !familleChoisie && (!q || sansAccents("envoi automatique accord permanent validation sujets").includes(q));
+    if (envoiAuto && envoiVisible)
+      liste.push({
+        id: ENVOI,
+        href: lienId(ENVOI),
+        ordre: 2,
+        nom: "Envoi automatique",
+        etat: !envoiAuto.envoi_auto
+          ? { libelle: "Éteint", teinte: "orange", cle: "desactivee" }
+          : envoiAuto.accord === "actif"
+            ? null
+            : { libelle: ACCORDS[envoiAuto.accord].libelle, cle: "attente" },
+        declencheur: "Chaque message préparé",
+        creee: { nom: "OFFLOAD", lettre: "O", couleur: "#4cb782" },
+        modifiee: { nom: "Vous", lettre: "V", couleur: "#f2994a" },
+        dernier: null,
+        options: [
+          { cle: "ouvrir", libelle: "Ouvrir", icone: <ListFilter width={18} height={18} />, href: lienId(ENVOI) },
+          ...(envoiAuto.envoi_auto && envoiAuto.accord === "absent"
+            ? [{ cle: "accord", libelle: "Donner l'accord permanent (gérant)", icone: <ShieldCheck width={18} height={18} />, action: donnerAccord }]
+            : envoiAuto.accord !== "absent"
+              ? [{ cle: "revoquer", libelle: "Révoquer l'accord", icone: <ShieldOff width={18} height={18} />, action: revoquerAccord }]
+              : []),
+        ],
+      });
     etat.regles
       .filter((r) => (onglet === "tous" || r.statut === onglet) && (!familleChoisie || r.famille === familleChoisie) && (!q || sansAccents(`${r.texte} ${r.reponse} ${famille(r.famille)}`).includes(q)))
       .forEach((r, i) => {
@@ -205,7 +338,8 @@ export default function ReglesGardeFous() {
         liste.push({
           id: r.id,
           href: lienId(r.id),
-          ordre: etat.regles.indexOf(r) + 2 || i + 2,
+          /* 04/11 — après l'arrêt et l'envoi automatique (promesse OFFLOAD n° 45) */
+          ordre: etat.regles.indexOf(r) + 3 || i + 3,
           nom: r.texte,
           etat: r.statut === "appliquee" ? null : { libelle: STATUT_SEUL[r.statut], teinte: r.statut === "non_comprise" ? "orange" : undefined, cle: r.statut === "non_comprise" ? "desactivee" : "attente" },
           declencheur: "Chaque message préparé",
@@ -230,12 +364,12 @@ export default function ReglesGardeFous() {
       });
     return liste;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [etat, onglet, familleChoisie, q, params, source, maintenant]);
+  }, [etat, envoiAuto, onglet, familleChoisie, q, params, source, maintenant]);
   const triees = trierRegles(regles, tri);
   const familles = Array.from(new Set((etat?.regles ?? []).map((r) => r.famille)));
 
   /* ——— la carte ouverte ——— */
-  const regleChoisie = id && id !== ARRET && id !== NOUVELLE ? (etat?.regles.find((r) => r.id === id) ?? null) : null;
+  const regleChoisie = id && id !== ARRET && id !== NOUVELLE && id !== ENVOI ? (etat?.regles.find((r) => r.id === id) ?? null) : null;
   const rang = id ? triees.findIndex((r) => r.id === id) : -1;
   const nav =
     rang >= 0
@@ -265,7 +399,7 @@ export default function ReglesGardeFous() {
         ...STATUTS.map((s) => ({
           cle: s.cle,
           libelle: s.libelle,
-          n: etat ? etat.regles.filter((r) => r.statut === s.cle).length + (s.cle === "appliquee" ? 1 : 0) : undefined,
+          n: etat ? etat.regles.filter((r) => r.statut === s.cle).length + (s.cle === "appliquee" ? 1 + (envoiAuto ? 1 : 0) : 0) : undefined,
           href: adresse((p) => {
             p.set("onglet", s.cle);
             p.delete("id");
@@ -461,8 +595,89 @@ export default function ReglesGardeFous() {
             {etat?.a_verifier
               ? `${etat.a_verifier} compte${etat.a_verifier > 1 ? "s" : ""} (message non remis, interlocuteur parti) : aucun ne repart dans une vague tant que la vérification n'est pas levée, depuis sa fiche`
               : "Aucun"}
+            {/* 04/11 — chaque compte à vérifier ouvre sa fiche, où se lève la vérification (promesse OFFLOAD n° 38) */}
+            {etat?.a_verifier && aVerifier.length
+              ? aVerifier.map((c) => (
+                  <span key={c.id} style={{ display: "block" }}>
+                    <Link href={`${RACINE}/offload?compte=${encodeURIComponent(c.id)}`}>
+                      {c.nom} · {c.verification === "reattribuer" ? "à réattribuer" : "à vérifier"}
+                    </Link>
+                  </span>
+                ))
+              : null}
           </dd>
         </dl>
+      </CarteCentrale>
+
+      {/* ——— 04/11 — l'envoi automatique et l'accord permanent (promesse OFFLOAD n° 45) ——— */}
+      <CarteCentrale
+        ouverte={id === ENVOI && !!envoiAuto}
+        fermer={fermer}
+        libelle="Envoi automatique"
+        sur="OFFLOAD · Envoi automatique"
+        statut={envoiAuto ? <>{envoiAuto.envoi_auto ? ACCORDS[envoiAuto.accord].libelle : "Éteint"}</> : undefined}
+        nav={nav}
+        gauche={
+          <Feuille
+            titre="ENVOI AUTOMATIQUE"
+            sous="Un message par compte et par trimestre"
+            nom={envoiAuto?.envoi_auto ? "Envoi automatique allumé" : "Envoi automatique éteint"}
+            texte={phraseEnvoi}
+          />
+        }
+        titre="Ce qui part seul, ce qui attend votre accord"
+        chiffre={envoiAuto?.retenus_en_attente ? `${nombreFr(envoiAuto.retenus_en_attente)} message${envoiAuto.retenus_en_attente > 1 ? "s" : ""} retenu${envoiAuto.retenus_en_attente > 1 ? "s" : ""} dans « À valider »` : undefined}
+        notes={
+          erreurGeste ? (
+            <Note teinte="rouge" role="alert">
+              <strong>Refusé par la base.</strong> {erreurGeste}
+            </Note>
+          ) : undefined
+        }
+        actions={
+          envoiAuto ? (
+            <>
+              {envoiAuto.envoi_auto && envoiAuto.accord === "absent" ? (
+                <button type="button" className="v2-btn v2-btn--primaire" disabled={envoi} onClick={donnerAccord}>
+                  <ShieldCheck width={14} height={14} aria-hidden="true" /> Donner l&apos;accord permanent (gérant)
+                </button>
+              ) : null}
+              {envoiAuto.accord !== "absent" ? (
+                <button type="button" className="v2-btn v2-btn--fantome" disabled={envoi} onClick={revoquerAccord}>
+                  <ShieldOff width={14} height={14} aria-hidden="true" /> Révoquer l&apos;accord
+                </button>
+              ) : null}
+              <button type="button" className="v2-btn v2-btn--fantome" disabled={envoi} onClick={basculerEnvoi}>
+                <Power width={14} height={14} aria-hidden="true" /> {envoiAuto.envoi_auto ? "Éteindre l'envoi automatique" : "Rallumer l'envoi automatique"}
+              </button>
+            </>
+          ) : undefined
+        }
+      >
+        {envoiAuto ? (
+          <>
+            <dl className="v2-det-fiche">
+              <dt>Envoi automatique</dt>
+              <dd>{envoiAuto.envoi_auto ? "Allumé : les sujets cochés partent sans validation une fois l'accord actif" : "Éteint : chaque message attend une validation"}</dd>
+              <dt>Accord permanent</dt>
+              <dd>
+                <Badge teinte={ACCORDS[envoiAuto.accord].teinte === "ambre" ? "ambre" : ACCORDS[envoiAuto.accord].teinte === "vert" ? "vert" : "gris"}>{ACCORDS[envoiAuto.accord].libelle}</Badge>
+                {accordActif ? ` jusqu'au ${dateCourte(accordActif.fin)}` : envoiAuto.accord === "absent" ? " : le gérant le donne ici, une autre personne l'active dans « À valider »" : ""}
+              </dd>
+              <dt>Toujours retenu</dt>
+              <dd>Un message douteux (compte à vérifier, adresse générique, historique trop court) ou d&apos;un sujet non coché : une personne le lit dans « À valider »</dd>
+            </dl>
+            <div className="v2-det-bloc">
+              <h3 className="v2-det-section-titre">Sujets envoyés sans validation</h3>
+              {SUJETS.map((x) => (
+                <label key={x.code} style={{ display: "flex", alignItems: "center", gap: 8, minHeight: 28 }}>
+                  <input type="checkbox" checked={envoiAuto.sujets_auto.includes(x.code)} disabled={envoi || !envoiAuto.envoi_auto} onChange={(e) => basculerSujet(x.code, e.target.checked)} />
+                  {x.libelle}
+                </label>
+              ))}
+            </div>
+          </>
+        ) : null}
       </CarteCentrale>
 
       {/* ——— une nouvelle règle ——— */}
