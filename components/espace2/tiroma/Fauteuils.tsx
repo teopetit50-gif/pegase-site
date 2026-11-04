@@ -595,7 +595,15 @@ export default function Fauteuils() {
       <div className="cal-carte">
         <div className="cal-defile">
           <div className="cal-outils">
-            <nav className="cal-segment" aria-label="Onglets">
+            <nav
+              className="cal-segment"
+              aria-label="Onglets"
+              ref={(el) => {
+                /* la rangée défile en elle-même quand la place manque : l'onglet ouvert reste en vue */
+                const actif = el?.querySelector<HTMLElement>('[aria-current="page"]');
+                if (el && actif && (actif.offsetLeft < el.scrollLeft || actif.offsetLeft + actif.offsetWidth > el.scrollLeft + el.clientWidth)) el.scrollLeft = actif.offsetLeft - 8;
+              }}
+            >
               {ONGLETS.map((o) => (
                 <Link key={o.cle} href={o.cle === "charge" ? BASE : `${BASE}?vue=${o.cle}`} className="cal-segment-item" aria-current={onglet === o.cle ? "page" : undefined} onClick={() => setOuverte(null)}>{o.libelle}</Link>
               ))}

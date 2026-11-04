@@ -866,11 +866,19 @@ html[data-v2-theme="light"] .v2 .tir-cal {
   }
 }
 
-/* l'onglet Agenda allonge le contrôle segmenté : sous 1600 px, la barre passe à la ligne au lieu de déborder */
-@media (max-width: 1600px) {
-  .v2 .tir-cal .cal-outils {
-    flex-wrap: wrap;
-    height: auto;
-    row-gap: 8px;
-  }
+/* l'onglet Agenda allonge le contrôle segmenté : la barre reste sur une ligne, la rangée d'onglets défile en elle-même
+   quand la place manque (comme Tamila sous 1024) ; les boutons de la barre gardent leur largeur */
+.v2 .tir-cal .cal-outils > .cal-segment:not(.cal-segment--icones) {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.v2 .tir-cal .cal-outils > .cal-segment:not(.cal-segment--icones)::-webkit-scrollbar {
+  display: none;
+}
+.v2 .tir-cal .cal-outils > :not(.cal-segment):not(.cal-pousse),
+.v2 .tir-cal .cal-outils > .cal-segment--icones,
+.v2 .tir-cal .cal-segment-item {
+  flex-shrink: 0;
 }
