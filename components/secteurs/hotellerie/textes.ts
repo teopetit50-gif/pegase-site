@@ -29,10 +29,10 @@ export const CONTACT = {
 };
 
 export const HERO = {
-  pastille: "Hôtels et résidences",
-  titre: "Les réservations se perdent entre une demande et sa réponse",
+  pastille: "Le logiciel des hôtels indépendants et des groupes",
+  titre: "Plus une seule réservation ne vous échappe, même à 2 h du matin",
   texte:
-    "Ostelo répond à vos clients à toute heure et dans leur langue, en lisant vos disponibilités, et repropose chaque chambre annulée à ceux qui avaient demandé ces dates. Avant l'arrivée, il propose le surclassement et le petit-déjeuner ; avant le départ, il vérifie que chaque extra est sur la note.",
+    "Ostelo répond à chaque client dans la minute, dans sa langue. Il remet en vente chaque chambre annulée, propose le surclassement avant l'arrivée et rattrape chaque extra oublié sur la note. Votre réception garde la main ; votre chiffre ne s'échappe plus.",
   audit: "Réserver un audit",
   demo: "Voir la démo",
   signature: "Conçu par",
@@ -141,7 +141,7 @@ export const LU = {
 /* Formules : aucun prix public (le prix s'estime, l'audit le fixe). */
 export type Valeur = boolean | string;
 export const FORMULES = {
-  titre: "Le prix dépend du nombre de chambres que vous exploitez",
+  titre: "Un prix à la taille de votre hôtel, fixé après l'audit",
   sous: "Les trois formules se distinguent par le nombre de chambres, de canaux et de fonctions ouvertes. Le prix est fixé pendant l'audit, une fois vos réservations et vos outils examinés.",
   comparer: ["Comparer", "les formules"],
   prix: "Prix fixé à l'audit,",

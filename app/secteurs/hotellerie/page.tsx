@@ -38,7 +38,7 @@ import "../btp/mobile.css";
    cette table, n'est donc pas posé.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Ostelo · chaque demande reçoit sa réponse, chaque chambre annulée est revendue";
+const TITRE = "Ostelo · plus une seule réservation ne vous échappe";
 const DESCRIPTION =
   "Ostelo répond à vos clients à toute heure et dans leur langue, repropose chaque chambre annulée à la liste d'attente, propose surclassement et petit-déjeuner avant l'arrivée et vérifie chaque extra sur la note. Conçu par Omega pour les hôtels.";
 
