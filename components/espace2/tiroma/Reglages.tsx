@@ -705,10 +705,11 @@ export default function Reglages() {
               <Link href={`${RACINE}/tiroma`} className="tir-rg-apercu">Aujourd&apos;hui<TirIcone nom="Chevron" taille={14} /></Link>
             </div>
           </header>
-          {t.source === "reelle" && reel && reel.cabinets.length > 1 ? (
+          {/* 04/11 — le sélecteur s'ouvre aussi en exemple, deux cabinets (promesse TIROMA n° 38) */}
+          {t.cabinets.length > 1 ? (
             <div className="tir-rg-choix">
-              <select className="tir-rg-input" aria-label="Cabinet" value={reel.dossier?.cabinet.id ?? ""} onChange={(e) => t.choisirCabinet(e.target.value)}>
-                {reel.cabinets.map((k) => <option key={k.id} value={k.id}>{k.entite_nom}</option>)}
+              <select className="tir-rg-input" aria-label="Cabinet" value={t.cabinetId ?? ""} onChange={(e) => t.choisirCabinet(e.target.value)}>
+                {t.cabinets.map((k) => <option key={k.id} value={k.id}>{k.entite_nom}</option>)}
               </select>
             </div>
           ) : null}

@@ -20,6 +20,21 @@ import type { Dossier, Marche, Projet, Situation, Visa } from "./types";
 
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} €`;
 const jour = (d: string | null) => (d ? dateCourte(`${d}T12:00:00`) : "—");
+/* 04/11 — la révision BT (b5_34, promesse LORANI n° 27) : la formule du marché et ce que la base a calculé sur la situation */
+export const INDEX_INSEE: Record<string, string> = { "001710986": "BT01", "001711007": "TP01" };
+const moisFr = (d: string | null | undefined) => (d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }) : "—");
+const nb = (n: number | null | undefined, chiffres = 4) => (n === null || n === undefined ? "—" : n.toLocaleString("fr-FR", { maximumFractionDigits: chiffres }));
+export function formuleRevision(m: Marche): string | null {
+  if (!m.revision_idbank) return null;
+  const a = m.revision_partie_fixe ?? 0.15;
+  return `C = ${nb(a)} + ${nb(Math.round((1 - a) * 1000) / 1000)} × In / I0 · index ${INDEX_INSEE[m.revision_idbank] ?? m.revision_idbank} (INSEE ${m.revision_idbank}) · mois zéro ${moisFr(m.revision_mois_zero)} · partie fixe ${nb(a)}`;
+}
+function revisionDe(s: Situation, m: Marche): string {
+  if (!m.revision_idbank) return "Prix fermes : aucune formule de révision saisie au marché.";
+  const r = s.revision;
+  if (!r || r.coefficient === undefined) return r?.manque ? `Pas encore calculée : ${r.manque}.` : "Calculée par la base à la réception de la situation.";
+  return `Index ${r.index ?? INDEX_INSEE[m.revision_idbank] ?? m.revision_idbank} de ${moisFr(r.mois_index)} In = ${nb(r.in, 2)}${r.provisoire ? " (provisoire)" : ""}, mois zéro ${moisFr(r.mois_zero)} I0 = ${nb(r.i0, 2)} · coefficient ${nb(r.coefficient)} · révision ${euros(r.revision_ht ?? 0)} HT sur ${euros(r.montant_periode ?? 0)} de la période`;
+}
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 const plus = (d: string, n: number) => {
   const x = new Date(`${d}T12:00:00`);
@@ -490,6 +505,7 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
                       ? `La situation facture ${pct(a.declare)} d’avancement, le chantier en est à ${pct(a.constate)} au compte rendu n° ${a.cr.numero} du ${jour(a.cr.visite_le)} : à rectifier, ou à justifier par l’entreprise.`
                       : `${pct(a.constate)} au compte rendu n° ${a.cr.numero} du ${jour(a.cr.visite_le)} (facturé ${pct(a.declare)}).`}
                 </Rangee>
+                <Rangee libelle="Révision" teinte={s.revision?.provisoire ? "jaune" : undefined}>{revisionDe(s, m)}</Rangee>
                 <Rangee libelle="Recalcul">
                   Retenue {eurosMt(mt.retenue_attendue)}{mt.avance ? ` · avance à rembourser ${eurosMt(mt.avance_a_rembourser)} sur ${eurosMt(mt.avance)}` : ""}{mt.penalites_applicables ? ` · pénalités ${eurosMt(mt.penalites_applicables)} (${mt.jours_retard} j)` : ""} · net attendu {eurosMt(mt.net_attendu)} HT
                 </Rangee>
@@ -517,6 +533,7 @@ export default function Chantier({ projet, dossier, peutEcrire, agir }: {
                 <Rangee libelle="Avancement" teinte={cumul > total ? "rouge" : undefined}>{euros(cumul)} · {avance} %</Rangee>
                 <Rangee libelle="Retenue">{m.retenue_pct.toLocaleString("fr-FR")} %</Rangee>
                 <Rangee libelle="Pour viser">{m.delai_verification_jours ?? 15} j</Rangee>
+                <Rangee libelle="Révision">{formuleRevision(m) ?? "Prix fermes : aucune formule saisie"}</Rangee>
                 <Rangee libelle="Dernière">{derniereLibelle(d)}</Rangee>
               </Rangees>
             </Detail>

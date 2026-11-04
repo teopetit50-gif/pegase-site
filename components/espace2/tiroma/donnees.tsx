@@ -13,7 +13,7 @@
    inchangées, aucune migration).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useState } from "react";
 import { useSource } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import type { NoteAppel } from "@/components/espace/tiroma/Appels";
@@ -23,6 +23,7 @@ import type { Inscription, Retrait } from "@/components/espace/tiroma/ListeAtten
 import type { Mutuelle } from "@/components/espace/tiroma/Plans";
 import type { NouveauContact } from "@/components/espace/tiroma/Rappels";
 import { DOSSIER_EXEMPLE_TIROMA as DOSSIER_EXEMPLE } from "./exemplesPlus";
+import { DOSSIER_EXEMPLE_GOSIER } from "./exempleGosier";
 import {
   ajouterFauteuil, ajouterFermeture, ajouterHoraire, ajouterPraticien, brancherCabinet, changerMode, changerStatut, chargerDossier,
   ajouterAttente, chercherPatients, classerType, installerCabinet, listerCabinets, monCompte, noterMutuelle, retirerAttente, retirerHoraire, type Compte,
@@ -58,11 +59,25 @@ function appliquerExemple(d: Dossier, a: Action): Dossier {
   }
 }
 
+/* 04/11 — un point du matin par centre (promesse TIROMA n° 38) : en exemple, deux cabinets, chacun son dossier modifié en
+   mémoire ; le sélecteur change celui que lisent toutes les sous-pages. La synthèse des deux centres reste la même. */
+const EXEMPLES: Dossier[] = [DOSSIER_EXEMPLE, { ...DOSSIER_EXEMPLE_GOSIER, synthese: DOSSIER_EXEMPLE.synthese }];
+type Exemples = { choisi: string; dossiers: Record<string, Dossier> };
+type ActionExemple = ((d: Dossier) => Dossier) | { choisir: string };
+function reduireExemples(e: Exemples, a: ActionExemple): Exemples {
+  if (typeof a !== "function") return e.dossiers[a.choisir] ? { ...e, choisi: a.choisir } : e;
+  return { ...e, dossiers: { ...e.dossiers, [e.choisi]: a(e.dossiers[e.choisi]) } };
+}
+const EXEMPLES_DEPART: Exemples = { choisi: EXEMPLES[0].cabinet.id, dossiers: Object.fromEntries(EXEMPLES.map((d) => [d.cabinet.id, d])) };
+
 export type ContexteTiroma = {
   source: "exemple" | "reelle";
   dossier: Dossier | null;
   reel: Reel | null;
   erreur: string | null;
+  /* 04/11 — les cabinets du sélecteur et celui qui est ouvert, en exemple comme en base réelle (promesse TIROMA n° 38) */
+  cabinets: CabinetT[];
+  cabinetId: string | null;
   choisirCabinet: (id: string) => void;
   installation: {
     entite: string; setEntite: (v: string) => void;
@@ -98,7 +113,8 @@ export function useTiroma(): ContexteTiroma {
 
 export function DonneesTiroma({ children }: { children: React.ReactNode }) {
   const { source } = useSource();
-  const [local, setLocal] = useState<Dossier>(DOSSIER_EXEMPLE);
+  const [exemples, setLocal] = useReducer(reduireExemples, EXEMPLES_DEPART);
+  const local = exemples.dossiers[exemples.choisi];
   const [reel, setReel] = useState<Reel | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [choix, setChoix] = useState<string | null>(null);
@@ -189,7 +205,14 @@ export function DonneesTiroma({ children }: { children: React.ReactNode }) {
   }, [source, reel, charger]);
 
   /* b3_09 : la liste d'attente commune — 04/11 : en exemple, on trouve
-     chaque patient que montrent les autres pages (sauf ceux déjà en attente) */
+     chaque patient que montrent les autres pages (sauf ceux déjà en attente) ;
+     04/11 — au Gosier, les patients de ses pages (promesse TIROMA n° 38) */
+  const PATIENTS_GOSIER: PatientCourt[] = useMemo(() => [
+    ...EXEMPLES[1].plans.map((p) => ({ id: p.patient_id, nom: p.patient_nom.split(" ").slice(1).join(" "), prenom: p.patient_nom.split(" ")[0], praticien_habituel_id: p.praticien_id, ne_pas_contacter: false })),
+    { id: "pg-15", nom: "Gotin", prenom: "Armelle", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pg-21", nom: "Mathurin", prenom: "Gérard", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pg-24", nom: "Lauret", prenom: "Patricia", praticien_habituel_id: null, ne_pas_contacter: false },
+  ], []);
   const PATIENTS_EXEMPLE: PatientCourt[] = useMemo(() => [
     { id: "pa-1", nom: "Delannoy", prenom: "Marguerite", praticien_habituel_id: null, ne_pas_contacter: false },
     { id: "pa-7", nom: "Hilaire", prenom: "Nadège", praticien_habituel_id: null, ne_pas_contacter: false },
@@ -210,11 +233,11 @@ export function DonneesTiroma({ children }: { children: React.ReactNode }) {
   const chercher = useCallback(async (texte: string) => {
     const plat = (x: string) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const t = plat(texte.trim());
-    if (source === "exemple") return PATIENTS_EXEMPLE.filter((p) => plat(p.nom).startsWith(t) || plat(p.prenom ?? "").startsWith(t));
+    if (source === "exemple") return (exemples.choisi === EXEMPLES[1].cabinet.id ? PATIENTS_GOSIER : PATIENTS_EXEMPLE).filter((p) => plat(p.nom).startsWith(t) || plat(p.prenom ?? "").startsWith(t));
     const d = reel?.dossier;
     if (!d) return [];
     return chercherPatients(d.cabinet.entite_id, texte);
-  }, [source, reel, PATIENTS_EXEMPLE]);
+  }, [source, reel, PATIENTS_EXEMPLE, PATIENTS_GOSIER, exemples.choisi]);
   const inscrire = useCallback(async (i: Inscription) => {
     if (source === "exemple") {
       await new Promise((r) => setTimeout(r, 250));
@@ -387,7 +410,17 @@ export function DonneesTiroma({ children }: { children: React.ReactNode }) {
   };
 
   const valeur: ContexteTiroma = {
-    source, dossier, reel, erreur, choisirCabinet: (id: string) => { setChoix(id); void charger(id); },
+    source, dossier, reel, erreur,
+    cabinets: source === "exemple" ? EXEMPLES.map((d) => d.cabinet) : (reel?.cabinets ?? []),
+    cabinetId: source === "exemple" ? exemples.choisi : (reel?.dossier?.cabinet.id ?? null),
+    choisirCabinet: (id: string) => {
+      if (source === "exemple") {
+        setLocal({ choisir: id });
+        return;
+      }
+      setChoix(id);
+      void charger(id);
+    },
     installation: { entite: entiteInst, setEntite: setEntiteInst, logiciel: logicielInst, setLogiciel: setLogicielInst, perimetre: perimetreInst, setPerimetre: setPerimetreInst, version: versionInst, setVersion: setVersionInst, enCours: installe, installer },
     agir, noterMutuelle: noter, chercher, inscrire, retirer, noterAppel: noterUnAppel, noterContact: noterUnContact, retirerContact: retirerUnContact,
     noterAbsence: noterUneAbsence, cloreAbsence: cloreUneAbsence, fixerObjectif: fixerUnObjectif, exporter: exporterLesDonnees, aligner: alignerLesRegles, relire,

@@ -67,10 +67,48 @@ const sansRdv = {
 };
 const syn = DOSSIER_EXEMPLE.synthese;
 
+/* 04/11 — « Plans planifiés hier » et « Planifiés cette semaine » (promesses TIROMA n° 5 et 15) : trois appels « plan »
+   conclus par un rendez-vous (deux hier, un avant-hier) ; ces plans ne sont plus « sans rendez-vous ». */
+const base = DOSSIER_EXEMPLE.appels;
+const appels = base
+  ? {
+      ...base,
+      derniers: {
+        ...base.derniers,
+        "pa-32": { motif: "plan" as const, issue: "rdv_pris" as const, appele_le: a(-2, 10, 20), rappeler_le: null, par: "Élodie", patient_nom: "Josiane Hyacinthe" },
+        "pa-30": { motif: "plan" as const, issue: "rdv_pris" as const, appele_le: a(-1, 9, 35), rappeler_le: null, par: "Élodie", patient_nom: "Évelyne Gaspard" },
+        "pa-31": { motif: "plan" as const, issue: "rdv_pris" as const, appele_le: a(-1, 11, 50), rappeler_le: null, par: "Karine", patient_nom: "Bruno Calixte" },
+      },
+    }
+  : base;
+
+/* 04/11 — « Annulations < 48 h » (promesse TIROMA n° 5) : les rendez-vous annulés des trente derniers jours et à venir,
+   avec l'heure où l'annulation a été relevée ; rdv-1 et rdv-4 sont les créneaux CR-1 et CR-3 à sauver. */
+const ANNULES: [string, number, number, number, number, number, number][] = [
+  /* rendez-vous, jour, heure, minute, annulé : jour, heure, minute */
+  ["rdv-1", 1, 9, 0, 0, 7, 42],
+  ["rdv-4", 2, 14, 0, 0, 6, 58],
+  ["rdv-41", -1, 16, 0, -1, 8, 10],
+  ["rdv-42", -2, 10, 30, -3, 19, 4],
+  ["rdv-43", -3, 9, 0, -6, 11, 0],
+  ["rdv-44", -5, 15, 0, -6, 17, 30],
+  ["rdv-45", -8, 11, 0, -12, 9, 0],
+  ["rdv-46", -10, 14, 30, -11, 9, 15],
+  ["rdv-47", -13, 8, 30, -13, 7, 50],
+  ["rdv-48", -16, 17, 0, -20, 10, 0],
+  ["rdv-49", -19, 16, 0, -20, 18, 0],
+  ["rdv-50", -24, 10, 0, -30, 8, 45],
+  ["rdv-51", -27, 17, 0, -28, 12, 0],
+];
+export const annulationsExemple = (liste: typeof ANNULES = ANNULES) =>
+  liste.map(([id, j, h, m, ja, ha, ma]) => ({ rendez_vous_id: id, debut: a(j, h, m), annule_le: a(ja, ha, ma), patient_nom: null }));
+
 export const DOSSIER_EXEMPLE_TIROMA: Dossier = {
   ...DOSSIER_EXEMPLE,
   creneaux: [...DOSSIER_EXEMPLE.creneaux.slice(0, 2), creneau, ...DOSSIER_EXEMPLE.creneaux.slice(2)],
   plans: tousPlans,
+  appels,
+  annulations: annulationsExemple(),
   pilotage: DOSSIER_EXEMPLE.pilotage ? { ...DOSSIER_EXEMPLE.pilotage, plans_sans_rdv: sansRdv } : DOSSIER_EXEMPLE.pilotage,
   synthese: syn
     ? (() => {

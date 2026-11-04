@@ -289,14 +289,22 @@ export type Dossier = {
   seancesLongues: SeanceMalPlacee[] | null;
   creneauxPlans: PlanCreneaux[] | null;
   controlesDus: ControlesDus | null;
+  /* 04/11 — les rendez-vous annulés des trente derniers jours et à venir (promesse TIROMA n° 5, « Annulations < 48 h ») */
+  annulations?: RdvAnnule[] | null;
 };
+
+/* 04/11 — un rendez-vous annulé, lu directement dans tiroma_rendez_vous (statut « annule ») avec l'heure où l'annulation
+   a été relevée (tiroma_evenements_agenda, type « annulation »), sous la RLS du cabinet ; aucune porte (promesse TIROMA n° 5) */
+export type RdvAnnule = { rendez_vous_id: string; debut: string; annule_le: string | null; patient_nom: string | null };
 
 /* ——— le registre des appels (b3_12) ——— */
 
 export type MotifAppel = "creneau" | "plan" | "devis" | "controle" | "attente" | "autre";
 export type IssueAppel = "rdv_pris" | "message" | "pas_de_reponse" | "rappeler" | "refus" | "ne_plus_contacter";
 
-export type DernierAppel = { motif: MotifAppel; issue: IssueAppel; appele_le: string; rappeler_le: string | null; par: string | null };
+/* 04/11 — patient_nom (facultatif) : le nom du patient quand il n'est ni dans les suites ni dans les plans (un plan déjà
+   planifié n'y est plus) ; l'onglet Activité d'Aujourd'hui le lit (promesse TIROMA n° 5, « Plans planifiés hier ») */
+export type DernierAppel = { motif: MotifAppel; issue: IssueAppel; appele_le: string; rappeler_le: string | null; par: string | null; patient_nom?: string | null };
 
 export type SuiviAppel = DernierAppel & {
   patient_id: string;

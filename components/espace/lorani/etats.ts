@@ -180,6 +180,10 @@ export const TYPES_PIECE: { cle: string; libelle: string }[] = [
   { cle: "lorani_attestation_re2020", libelle: "Attestation RE2020" },
   { cle: "lorani_plan_bet", libelle: "Fond de plan d’un BET" },
   { cle: "lorani_notice", libelle: "Notice (accessibilité, sécurité)" },
+  /* 04/11 — promesse LORANI n° 68 : deux natures que la base sait lire (passage des lectures : lorani_poser_offre_lue,
+     lorani_poser_situation_lue, omega/prod/migrations/…_b5_26_v2.sql) ; l'offre se range dans la consultation de son lot */
+  { cle: "lorani_offre", libelle: "Offre d’une entreprise" },
+  { cle: "lorani_situation_travaux", libelle: "Situation de travaux" },
 ];
 
 /* les pièces qui ne sont pas des courriers de la mairie : contrôle du dossier (b5_16), attestations (b5_18) */

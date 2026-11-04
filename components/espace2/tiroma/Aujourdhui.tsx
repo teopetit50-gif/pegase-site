@@ -37,6 +37,7 @@ import { useTiroma } from "./donnees";
 import { TirAvatar, TirCarte, TirMenu, type OptionMenu } from "./TirCadre";
 import { TirIcone, type NomTirIcone } from "./TirIcone";
 import { copier, dansJours, estReporte, exporterCSV, useFavoris, useReportes } from "./navigateur";
+import { ANNULATION_TARDIVE_H, heuresMinutes, tuilesMatin } from "./tuiles";
 import "./tir-mes.css";
 
 const BASE = `${RACINE}/tiroma`;
@@ -351,7 +352,7 @@ function lignesActivite(d: Dossier): Groupe[] {
   if (!registre) return [];
   const derniers = Object.entries(registre.derniers).map(([patient_id, a]) => {
     const suite = registre.a_reprendre.find((s) => s.patient_id === patient_id);
-    return { patient_id, nom: suite?.patient_nom ?? d.plans.find((p) => p.patient_id === patient_id)?.patient_nom ?? "Patient", ...a };
+    return { patient_id, nom: suite?.patient_nom ?? d.plans.find((p) => p.patient_id === patient_id)?.patient_nom ?? a.patient_nom ?? "Patient", ...a };
   });
   derniers.sort((a, b) => b.appele_le.localeCompare(a.appele_le));
   const aujourdhui = jourISO(new Date());
@@ -539,7 +540,16 @@ export default function Aujourdhui() {
   const [praticiens, setPraticiens] = useState<string[]>([]);
   const [faitsVisibles, setFaitsVisibles] = useState(true);
   const [puces, setPuces] = useState(true);
-  const [details, setDetails] = useState(false);
+  /* 04/11 — « ?details=1 » ouvre le volet d'emblée, « ?cabinet=<id> » choisit le cabinet (recette des promesses TIROMA n° 5 et 38) */
+  const [details, setDetails] = useState(() => params.get("details") === "1");
+  const cabinetUrl = params.get("cabinet");
+  const choisirCabinet = t.choisirCabinet;
+  const cabinetOuvert = t.cabinetId;
+  useEffect(() => {
+    if (cabinetUrl && cabinetUrl !== cabinetOuvert) choisirCabinet(cabinetUrl);
+    // le choix ne se fait qu'à l'arrivée sur l'adresse : ensuite, le sélecteur décide
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cabinetUrl]);
   const [plusOuvert, setPlusOuvert] = useState(false);
   /* 03/11/2026 — « 2 de plus » ne se fermait ni par Échap ni par un clic dehors */
   useEffect(() => {
@@ -758,11 +768,12 @@ export default function Aujourdhui() {
         {details && d ? (
           <aside className="tir-mi-volet" aria-label="Détails du cabinet">
             <div className="tir-mi-volet-titre">{d.cabinet.entite_nom ?? "Cabinet"}</div>
-            {t.source === "reelle" && reel && reel.cabinets.length > 1 ? (
+            {/* 04/11 — le sélecteur s'ouvre aussi en exemple, deux cabinets : un point du matin par centre (promesse TIROMA n° 38) */}
+            {t.cabinets.length > 1 ? (
               <label className="tir-mi-volet-ligne">
                 <span>Cabinet</span>
-                <select className="tir-mi-select" value={reel.dossier?.cabinet.id ?? ""} onChange={(e) => t.choisirCabinet(e.target.value)}>
-                  {reel.cabinets.map((k) => (
+                <select className="tir-mi-select" aria-label="Cabinet" value={t.cabinetId ?? ""} onChange={(e) => t.choisirCabinet(e.target.value)}>
+                  {t.cabinets.map((k) => (
                     <option key={k.id} value={k.id}>
                       {k.entite_nom}
                     </option>
@@ -775,6 +786,21 @@ export default function Aujourdhui() {
             <div className="tir-mi-volet-ligne"><span>Point du matin</span><span>{d.cabinet.heure_point.slice(0, 5)}</span></div>
             <div className="tir-mi-volet-ligne"><span>Dernier relevé</span><span>{d.cabinet.dernier_releve_le ? complet(d.cabinet.dernier_releve_le) : "—"}</span></div>
             <div className="tir-mi-volet-ligne"><span>Source</span><span>{t.source === "exemple" ? "Données d'exemple" : "Base réelle"}</span></div>
+            {/* 04/11 — les tuiles de la capture « point du matin » (promesse TIROMA n° 5), dans les rangées du volet de détails
+                de My issues (Linear n'a pas de tuiles) ; mêmes calculs que Plans et devis et le Pilotage (./tuiles.ts) */}
+            {(() => {
+              const m = tuilesMatin(d);
+              return (
+                <>
+                  <div className="tir-mi-volet-titre">Ce matin</div>
+                  <div className="tir-mi-volet-ligne" title="Charge prévue des fauteuils sur la journée"><span>Occupation prévue</span><span>{m.occupation !== null ? `${Math.round(m.occupation * 100)} %` : "réservé au titulaire"}</span></div>
+                  <div className="tir-mi-volet-ligne" title="Minutes ouvertes moins minutes prévues, tous fauteuils"><span>Heures libres aujourd&apos;hui</span><span>{m.libresMin !== null ? heuresMinutes(m.libresMin) : "réservé au titulaire"}</span></div>
+                  <div className="tir-mi-volet-ligne" title={`Rendez-vous annulés moins de ${ANNULATION_TARDIVE_H} h avant l'heure, sur les trente derniers jours et à venir`}><span>Annulations &lt; 48 h</span><span>{m.annulationsTardives ? `${m.annulationsTardives.n} sur 30 jours${m.annulationsTardives.aVenir ? ` · ${m.annulationsTardives.aVenir} à venir` : ""}` : "—"}</span></div>
+                  <div className="tir-mi-volet-ligne" title="Appels « plan » notés hier, conclus par un rendez-vous"><span>Plans planifiés hier</span><span>{m.plansHier ? `${m.plansHier.planifies} sur ${m.plansHier.appeles} appelé${m.plansHier.appeles > 1 ? "s" : ""}` : "—"}</span></div>
+                  <div className="tir-mi-volet-ligne"><span>Liste d&apos;attente</span><span>{m.attente} patient{m.attente > 1 ? "s" : ""}</span></div>
+                </>
+              );
+            })()}
             <p className="tir-mi-volet-note">Tiroma lit l&apos;agenda, les plans et les devis du logiciel du cabinet, sans y écrire.</p>
             <Link href={`${BASE}/reglages`} className="tir-mi-volet-lien">Le cabinet, dans les réglages</Link>
           </aside>

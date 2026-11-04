@@ -22,7 +22,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type {
   Attente, Cabinet, CapaciteLue, Charge, Creneau, Dossier, Fauteuil, Fermeture, Horaire, Logiciel, Membre, PatientCourt, PlanSansRdv, Praticien, Profil,
-  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs, ReglesCommunes, SoinsADeplacer, SeanceMalPlacee, PlanCreneaux, ControlesDus,
+  Regles, Releve, TypeRdv, Verification, RegistreAppels, CibleAppel, IssueAppel, Pilotage, Rappels, CanalPatient, ContactPatient, Synthese, Reinscription, AbsenceProbable, AbsenceEquipe, MotifAbsenceMembre, DemiJournees, Objectifs, ReglesCommunes, SoinsADeplacer, SeanceMalPlacee, PlanCreneaux, ControlesDus, RdvAnnule,
 } from "./types";
 
 export class ErreurPorte extends Error {}
@@ -137,10 +137,35 @@ export async function chargerDossier(cabinet: Cabinet, compte: Compte): Promise<
     soignant ? quiet(rpc<PlanCreneaux[] | null>("tiroma_creneaux_pour_plans", { p_client: c, p_entite: e, p_jours: 14, p_max: 3 }, null), null, "créneaux pour les plans") : null,
     soignant ? quiet(rpc<ControlesDus | null>("tiroma_controles_dus", { p_client: c, p_entite: e, p_limite: 200 }, null), null, "contrôles dus") : null,
   ]);
+  /* 04/11 — les annulations de trente jours, en lecture directe sous la RLS (promesse TIROMA n° 5) */
+  const annulations = await quiet(lireAnnulations(cabinet, 30), null, "annulations");
   return {
-    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs, reglesCommunes, soinsADeplacer, seancesLongues, creneauxPlans, controlesDus },
+    dossier: { cabinet, profil, fauteuils, praticiens, membres, horaires, fermetures, regles, releves, capacites, types, attente, creneaux, plans, verifications, charge, appels, pilotage, rappels, synthese, reinscription, absences, equipe, demiJournees, objectifs, reglesCommunes, soinsADeplacer, seancesLongues, creneauxPlans, controlesDus, annulations },
     avis,
   };
+}
+
+/** 04/11 — « Annulations < 48 h » (promesse TIROMA n° 5), sans porte : les rendez-vous annulés du cabinet dont l'heure
+    tombe dans les `jours` derniers jours ou à venir (tiroma_rendez_vous, lisible en SELECT par les membres sous la RLS),
+    avec la première annulation relevée (tiroma_evenements_agenda, reliée par sa clé étrangère composée). */
+export async function lireAnnulations(cabinet: Cabinet, jours = 30): Promise<RdvAnnule[]> {
+  const supabase = createClient();
+  const depuis = new Date(Date.now() - jours * 864e5).toISOString();
+  const { data, error } = await supabase
+    .from("tiroma_rendez_vous")
+    .select("id, debut, tiroma_evenements_agenda(type, detecte_le)")
+    .eq("client_id", cabinet.client_id)
+    .eq("entite_id", cabinet.entite_id)
+    .eq("statut", "annule")
+    .gte("debut", depuis)
+    .order("debut")
+    .limit(2000);
+  if (error) throw new ErreurPorte(message(error));
+  type Ligne = { id: string; debut: string; tiroma_evenements_agenda: { type: string; detecte_le: string }[] | null };
+  return ((data ?? []) as unknown as Ligne[]).map((r) => {
+    const quand = (r.tiroma_evenements_agenda ?? []).filter((e) => e.type === "annulation").map((e) => e.detecte_le).sort()[0] ?? null;
+    return { rendez_vous_id: r.id, debut: r.debut, annule_le: quand, patient_nom: null };
+  });
 }
 
 /** La liste d'attente ouverte, avec le nom des patients qu'on a le droit de voir (RLS). */

@@ -15,6 +15,8 @@ import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
 import { dateCourte } from "../format";
 import { analyserOffres, attribuerOffre, ecarterOffre, ouvrirConsultation } from "./portes";
+import { useSource } from "../source";
+import { useToast } from "@/components/espace2/Toasts";
 import { telecharger } from "./rapport";
 import { excelOffres, pdfOffres, STATUT_OFFRE, type DonneesRapportOffres } from "./rapport-offres";
 import type { Consultation, Dossier, Marche, Offre, Projet } from "./types";
@@ -48,6 +50,10 @@ export default function Offres({ projet, dossier, peutEcrire, agir }: {
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
   const volet = useVolet();
+  /* 04/11 — « Attribuer » (promesse LORANI n° 68) : porte lorani_attribuer_offre en base réelle ; en exemple, le dossier change
+     en mémoire et un toast le dit */
+  const { source } = useSource();
+  const toast = useToast();
   const lots = useMemo(() => dossier.lots.filter((l) => l.projet_id === projet.id).sort((a, b) => a.numero.localeCompare(b.numero)), [dossier.lots, projet.id]);
   const consultations = useMemo(() => dossier.consultations.filter((c) => c.projet_id === projet.id)
     .sort((a, b) => (lots.find((l) => l.id === a.lot_id)?.numero ?? "").localeCompare(lots.find((l) => l.id === b.lot_id)?.numero ?? "") || b.cree_le.localeCompare(a.cree_le)), [dossier.consultations, projet.id, lots]);
@@ -115,7 +121,9 @@ export default function Offres({ projet, dossier, peutEcrire, agir }: {
     if (form.type === "ecarter") {
       return lancer(() => ecarterOffre(o.id, m ?? ""), () => ({ ...dossier, offres: dossier.offres.map((x) => (x.id === o.id ? { ...x, statut: "ecartee", motif: m, rang: null } : x)) }));
     }
+    const dire = () => { if (source === "exemple") toast(`Exemple : rien n’est enregistré. Le lot est attribué à ${o.entreprise} sur cette page seulement.`); };
     return lancer(() => attribuerOffre(o.id, m), () => {
+      dire();
       const marche: Marche | null = dossier.marches.some((x) => x.lot_id === c?.lot_id && x.actif) || !c ? null : {
         id: `local-marche-${Date.now()}`, projet_id: projet.id, lot_id: c.lot_id, titulaire: o.entreprise, montant_ht: o.montant_ht ?? o.montant_calcule_ht ?? 0, avenants_ht: 0,
         retenue_pct: 5, delai_verification_jours: projet.marche_public ? 7 : 15, actif: true, delai_execution_jours: null, demarrage_le: null,
@@ -199,7 +207,7 @@ export default function Offres({ projet, dossier, peutEcrire, agir }: {
         <DialogContent>
           <DialogHeader>
             <DialogIcone><Scale width={18} height={18} aria-hidden="true" /></DialogIcone>
-            <DialogTitle>{form?.type === "retenir" ? "Retenir l’offre" : "Écarter l’offre"}</DialogTitle>
+            <DialogTitle>{form?.type === "retenir" ? "Attribuer le lot à cette offre" : "Écarter l’offre"}</DialogTitle>
             <DialogDescription>
               {form?.type === "retenir" || form?.type === "ecarter" ? `${form.offre.entreprise} · ${euros(form.offre.montant_ht)} HT annoncés, rang ${form.offre.rang ?? "—"} au classement comparable. ` : ""}
               {form?.type === "retenir" ? "La consultation sera attribuée et le marché du lot créé, pour suivre ses situations de travaux." : "Le motif est obligatoire ; il figure au rapport d’analyse."}
@@ -214,7 +222,7 @@ export default function Offres({ projet, dossier, peutEcrire, agir }: {
             </div>
           </DialogBody>
           <DialogFooter>
-            <button type="button" className="r-btn r-btn--noir" disabled={!decisionOk || envoi} onClick={soumettreDecision}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "retenir" ? "Retenir" : "Écarter"}</button>
+            <button type="button" className="r-btn r-btn--noir" disabled={!decisionOk || envoi} onClick={soumettreDecision}>{envoi ? <Loader variant="spin" /> : null} {form?.type === "retenir" ? "Attribuer" : "Écarter"}</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -392,7 +400,7 @@ export default function Offres({ projet, dossier, peutEcrire, agir }: {
                   ) : null}
                   {o.statut === "retenue" || o.statut === "ecartee" ? null : (
                     <Gestes>
-                      <Bouton fort disabled={!peutEcrire || envoi || attribuee} onClick={() => decider(o, "retenir")}>Retenir</Bouton>
+                      <Bouton fort disabled={!peutEcrire || envoi || attribuee} onClick={() => decider(o, "retenir")}>Attribuer</Bouton>
                       <Bouton disabled={!peutEcrire || envoi || attribuee} onClick={() => decider(o, "ecarter")}>Écarter</Bouton>
                     </Gestes>
                   )}
@@ -496,7 +504,7 @@ export default function Offres({ projet, dossier, peutEcrire, agir }: {
                         <td>
                           {o.statut === "retenue" || o.statut === "ecartee" ? <Pastille teinte={TEINTE_OFFRE[o.statut]}>{STATUT_OFFRE[o.statut]}</Pastille> : (
                             <span className="lor-offre-actions">
-                              <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi || attribuee} onClick={() => decider(o, "retenir")}>Retenir</button>
+                              <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!peutEcrire || envoi || attribuee} onClick={() => decider(o, "retenir")}>Attribuer</button>
                               <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!peutEcrire || envoi || attribuee} onClick={() => decider(o, "ecarter")}>Écarter</button>
                             </span>
                           )}

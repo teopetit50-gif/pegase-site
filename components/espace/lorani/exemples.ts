@@ -520,6 +520,29 @@ export const SITUATIONS_EXEMPLE: Situation[] = [
   { id: id("5", 4), projet_id: P_MERCIERE, marche_id: M(2), numero: 1, mois: mois(-65), cumul_ht: 12000, recue_le: j(-36), a_viser_avant: j(-21), statut: "visee", cumul_admis_ht: 12000, observation: null, visee_le: j(-33) },
   { id: id("5", 5), projet_id: P_MERCIERE, marche_id: M(2), numero: 2, mois: mois(-35), cumul_ht: 11000, recue_le: j(-9), a_viser_avant: j(6), statut: "a_viser", cumul_admis_ht: null, observation: null, visee_le: null, retenue_deduite_ht: 0 },
 ];
+/* 04/11 — la révision BT (b5_34, promesse LORANI n° 27) : le lot 01 est révisable sur l'index BT01 (idbank INSEE
+   001710986), mois zéro cinq mois avant la première situation, partie fixe 0,15 ; chaque situation porte ce que la base
+   y écrirait (private.lorani_situation_revision) : In, I0, le coefficient arrondi au dix-millième, le montant de la
+   période (cumul moins le cumul retenu de la précédente) et la révision HT. Valeurs d'index fictives. Le lot 02 reste à
+   prix fermes. */
+Object.assign(MARCHES_EXEMPLE[0], { revision_idbank: "001710986", revision_mois_zero: mois(-125), revision_partie_fixe: 0.15 });
+{
+  const I0 = 136.2;
+  /* la situation n° 3 : index du mois encore provisoire à l'INSEE */
+  const INDEX: Record<number, { in: number; provisoire: boolean }> = { 1: { in: 136.9, provisoire: false }, 2: { in: 137.4, provisoire: false }, 3: { in: 137.8, provisoire: true } };
+  let precedent = 0;
+  for (const s of SITUATIONS_EXEMPLE.filter((x) => x.marche_id === M(1)).sort((x, y) => x.numero - y.numero)) {
+    const ix = INDEX[s.numero];
+    const periode = s.cumul_ht - precedent;
+    const coefficient = Math.round((0.15 + 0.85 * (ix.in / I0)) * 10000) / 10000;
+    s.revision = {
+      index: "BT01", idbank: "001710986", partie_fixe: 0.15, mois_zero: mois(-125), i0: I0, mois: s.mois,
+      mois_index: s.mois, in: ix.in, provisoire: ix.provisoire,
+      coefficient, montant_periode: periode, revision_ht: Math.round(periode * (coefficient - 1) * 100) / 100,
+    };
+    precedent = s.cumul_admis_ht ?? s.cumul_ht;
+  }
+}
 export const VISAS_EXEMPLE: Visa[] = [
   { id: id("6", 1), projet_id: P_MERCIERE, lot_id: id("1", 8), document: "Calepinage des pierres — façade sud", indice: "B", recu_le: j(-2), commande_le: j(3), delai_visa_jours: 15, a_viser_avant: j(2), avis: "a_viser", observation: null, vise_le: null },
   { id: id("6", 2), projet_id: P_MERCIERE, lot_id: id("1", 9), document: "Plan d’échafaudage et notes de calcul", indice: "A", recu_le: j(-20), commande_le: null, delai_visa_jours: 15, a_viser_avant: j(-5), avis: "a_viser", observation: null, vise_le: null },

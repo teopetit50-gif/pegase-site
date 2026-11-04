@@ -20,6 +20,7 @@ import { Bouton, Detail, Gestes, Groupe, Ligne, Liste, Partie, Pilule, Point as 
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis, Pastille } from "../ui";
+import { useSource } from "../source";
 import { dateCourte } from "../format";
 import { ajouterPoints, choisirDecideur, deciderConstat, lancerControle, octetsPiece, preparerControle, reglerControles, reprendreControle, suspendreControle } from "./portes";
 import { ROLES_PROJET } from "./etats";
@@ -71,6 +72,9 @@ const REGLABLES: { cle: string; libelle: string; unite: string; defaut: number }
 ];
 const borneMax = (r: (typeof REGLABLES)[number]) => (r.cle === "metre_dpgf_pct" ? 50 : Math.min(50, Math.max(10 * r.defaut, 1)));
 const nombreFr = (n: number) => String(n).replace(".", ",");
+/* 04/11 — « Ouvrir la planche » (promesse LORANI n° 44) : en exemple, la pièce citée s'ouvre sur un PDF fictif posé
+   dans public/exemples/lorani (aucune porte appelée) ; seules les pièces qui y ont un fichier offrent le bouton. */
+const PDF_EXEMPLE: Record<string, string> = { "PC2-plan-de-masse-indA.pdf": "/exemples/lorani/PC2-plan-de-masse-indA.pdf" };
 
 type Choix = { piece_id: string; role: RolePieceControle; reference: string };
 type Form =
@@ -90,6 +94,7 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
   agir: (reel: () => Promise<void>, local: () => Dossier) => Promise<void>;
 }) {
   const volet = useVolet();
+  const { source } = useSource();
   const controles = useMemo(() => dossier.controles.filter((c) => c.projet_id === projet.id).sort((a, b) => b.cree_le.localeCompare(a.cree_le)), [dossier.controles, projet.id]);
   const piecesProjet = useMemo(() => dossier.pieces.filter((p) => p.objet_id === projet.id), [dossier.pieces, projet.id]);
   const [choisi, setChoisi] = useState<string | null>(null);
@@ -233,6 +238,31 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
       setErreur(e instanceof Error ? e.message : "Le rapport n'a pas pu être fabriqué.");
     } finally {
       setRapport(null);
+    }
+  };
+
+  /* 04/11 — « Ouvrir la planche » (promesse LORANI n° 44) : la pièce citée, ouverte à la page lue. Base réelle : la porte
+     octetsPiece (lien signé de dix minutes), la fenêtre ouverte d'abord pour ne pas être bloquée ; exemple : le PDF fictif. */
+  const ouvrable = (p: PieceProjet | undefined): p is PieceProjet => !!p && (source === "exemple" ? !!PDF_EXEMPLE[p.nom_fichier] : !!p.chemin);
+  const ouvrirPiece = async (p: PieceProjet, page: number | null | undefined) => {
+    const ancre = page ? `#page=${page}` : "";
+    if (source === "exemple") {
+      const url = PDF_EXEMPLE[p.nom_fichier];
+      if (url) window.open(`${url}${ancre}`, "_blank", "noopener");
+      return;
+    }
+    if (!p.chemin) return;
+    setErreur(null);
+    const fenetre = window.open("", "_blank");
+    try {
+      const octets = await octetsPiece(p.chemin);
+      const url = URL.createObjectURL(new Blob([octets as BlobPart], { type: p.mime || "application/pdf" }));
+      if (fenetre) fenetre.location.href = `${url}${ancre}`;
+      else window.open(`${url}${ancre}`, "_blank");
+      window.setTimeout(() => URL.revokeObjectURL(url), 600_000);
+    } catch (e) {
+      fenetre?.close();
+      setErreur(e instanceof Error ? e.message : "La pièce n'a pas pu être ouverte.");
     }
   };
 
@@ -563,7 +593,20 @@ export default function Controle({ projet, dossier, nommer, peutEcrire, agir }: 
         {k.correction ? <Texte><strong>Correction proposée :</strong> {k.correction}</Texte> : null}
         {k.valeurs.length ? (
           <SousListe titre="Valeurs lues">
-            {k.valeurs.map((v, i) => <SousLigne key={i} titre={citation(v, k.grandeur)} />)}
+            {k.valeurs.map((v, i) => {
+              const p = v.regle ? undefined : pieceDe(v.piece);
+              return (
+                <SousLigne
+                  key={i}
+                  titre={citation(v, k.grandeur)}
+                  valeur={ouvrable(p) ? (
+                    <Bouton title={`${p.nom_fichier}${v.page ? `, page ${v.page}` : ""}`} onClick={() => void ouvrirPiece(p, v.page)}>
+                      {p.type_piece === "lorani_planche" ? "Ouvrir la planche" : "Ouvrir la pièce"}
+                    </Bouton>
+                  ) : undefined}
+                />
+              );
+            })}
           </SousListe>
         ) : null}
       </>

@@ -34,6 +34,7 @@ import { TirIcone, type NomTirIcone } from "./TirIcone";
 import { copier, exporterCSV, useFavoris, useSuivis } from "./navigateur";
 import { chargerActesPlan, type ActePlan } from "@/components/espace/tiroma/portes";
 import { actesExemple } from "./exemplesActes";
+import { tuilesPlans } from "./tuiles";
 import "./tir-mes.css";
 import "./tir-board.css";
 
@@ -446,6 +447,10 @@ export default function PlansDevis() {
     .map((k) => ({ ...k, cartes: filtrees.filter((c) => c.colonne === k.cle) }))
     .filter((k) => vides || k.cartes.length || k.cle !== "refus");
   const carteOuverte = ouvert ? cartes.find((c) => c.id === ouvert) ?? null : null;
+  /* 04/11 — les tuiles de la capture plans.png (promesse TIROMA n° 15) : le volet de détails de la vue (bouton « Détails »,
+     « ?details=1 »), comme le panneau d'une vue Board de Linear ; mêmes chiffres que le Pilotage (./tuiles.ts) */
+  const detailsVue = !carteOuverte && params.get("details") === "1";
+  const tuiles = d ? tuilesPlans(d) : null;
 
   useEffect(() => {
     if (!contexte) return;
@@ -565,7 +570,19 @@ export default function PlansDevis() {
           <TirMenu libelle="Affichage" icone="Affichage" options={affichage} alignement="droite" classeBouton="tir-rond tir-rond--plein tir-bd-affichage" />
           {vides ? <span className="tir-bd-pastille" aria-hidden="true" /> : null}
         </span>
-        <button type="button" className="tir-rond tir-rond--plein" aria-label="Détails" aria-pressed={!!carteOuverte} onClick={() => (carteOuverte ? fermer() : cartes[0] && router.push(lien(cartes[0])))}>
+        <button
+          type="button"
+          className="tir-rond tir-rond--plein"
+          aria-label="Détails"
+          aria-pressed={!!carteOuverte || detailsVue}
+          onClick={() => {
+            if (carteOuverte) return fermer();
+            const q = new URLSearchParams(params.toString());
+            if (detailsVue) q.delete("details");
+            else q.set("details", "1");
+            router.push(q.toString() ? `${BASE}?${q.toString()}` : BASE);
+          }}
+        >
           <TirIcone nom="Volet" />
         </button>
       </div>
@@ -617,6 +634,23 @@ export default function PlansDevis() {
           </div>
         )}
         {carteOuverte ? <Volet key={carteOuverte.cle} c={carteOuverte} fermer={fermer} /> : null}
+        {detailsVue && tuiles ? (
+          <aside className="tir-bd-volet" aria-label="Détails de la vue">
+            <div className="tir-bd-volet-tete">
+              <span className="tir-bd-volet-id">Plans et devis</span>
+              <span className="tir-pousse" />
+              <button type="button" className="tir-rond" aria-label="Fermer" onClick={() => { const q = new URLSearchParams(params.toString()); q.delete("details"); router.push(q.toString() ? `${BASE}?${q.toString()}` : BASE); }}>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.7 3.7a.75.75 0 0 1 1.06 0L8 6.94l3.24-3.24a.75.75 0 1 1 1.06 1.06L9.06 8l3.24 3.24a.75.75 0 1 1-1.06 1.06L8 9.06l-3.24 3.24a.75.75 0 0 1-1.06-1.06L6.94 8 3.7 4.76a.75.75 0 0 1 0-1.06" /></svg>
+              </button>
+            </div>
+            <div className="tir-bd-volet-section">Cette vue</div>
+            <div className="tir-bd-prop"><span>Plans signés sans rendez-vous</span><span>{tuiles.sansRdv.nombre}</span></div>
+            <div className="tir-bd-prop"><span>Devis signés en attente</span><span>{euros(tuiles.sansRdv.montant)}</span></div>
+            <div className="tir-bd-prop"><span>En attente de la mutuelle</span><span>{tuiles.mutuelle}</span></div>
+            <div className="tir-bd-prop"><span>Planifiés cette semaine</span><span>{tuiles.planifiesSemaine ?? "—"}</span></div>
+            <p className="tir-bd-note">Les mêmes chiffres que la carte « Signé sans rendez-vous » du pilotage ; « planifiés » compte les appels notés depuis lundi qui ont donné un rendez-vous.</p>
+          </aside>
+        ) : null}
       </div>
       {contexte && carteCtx ? (
         <div className="tir-menu" role="menu" style={{ position: "fixed", left: contexte.x, top: contexte.y }} onClick={(e) => e.stopPropagation()}>

@@ -45,6 +45,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProjetCarte, { type PartieProjet } from "@/components/espace/lorani/ProjetCarte";
+import { INDEX_INSEE } from "@/components/espace/lorani/Chantier";
 import Formulaires, { type Form } from "@/components/espace/lorani/Formulaires";
 import { dossierDate, lignesDossier } from "@/components/espace/lorani/dossier-date";
 import { bordereauVisas } from "./bordereau-visas";
@@ -232,8 +233,9 @@ export default function PageProjet({ id }: { id: string }) {
   /* « ?deposer=1 » (la page d'un permis y mène) : la fenêtre du courrier s'ouvre d'emblée ; « ?nouveau=permis » (Dupliquer, sur la page d'un permis) : celle d'un nouveau permis */
   const [form, setForm] = useState<Form>(() => (params.get("deposer") ? { type: "courrier", projet: id } : params.get("nouveau") === "permis" ? { type: "permis", projet: id } : null));
   const [envoi, setEnvoi] = useState(false);
-  const [details, setDetails] = useState(false);
-  const [onglet, setOngletProgres] = useState<"sante" | "etat" | "chefs">("sante");
+  /* 04/11 — « ?details=1 » ouvre le volet de détails d'emblée (recette de la promesse LORANI n° 42) */
+  const [details, setDetails] = useState(() => params.get("details") === "1");
+  const [onglet, setOngletProgres] = useState<"sante" | "etat" | "chefs" | "points">("sante");
   const [ouvertPoints, setOuvertPoints, menuPointsRef] = useMenu();
   const [ouvertPlus, setOuvertPlus, menuPlusRef] = useMenu();
   const [ouvertProp, setOuvertProp, menuPropRef] = useMenu();
@@ -254,6 +256,12 @@ export default function PageProjet({ id }: { id: string }) {
   const lien = (c: Cle) => (c === "projet" ? chemin : `${chemin}?partie=${c}`);
   /* l'élément choisi dans une vue (un constat, un compte rendu…) s'ouvre dans le volet de droite */
   const { contexte, ouvert, setCible } = useVoletPage(`${id}/${cle}`);
+  /* 04/11 — « ?choisi=constat:<id> » ouvre cet élément dans le volet (recette de la promesse LORANI n° 44) */
+  const choisiUrl = params.get("choisi");
+  const choisirVolet = contexte.choisir;
+  useEffect(() => {
+    if (choisiUrl) choisirVolet(choisiUrl);
+  }, [choisiUrl, choisirVolet]);
 
   /* ⌘ I : le volet de détails, comme dans Linear */
   useEffect(() => {
@@ -334,6 +342,20 @@ export default function PageProjet({ id }: { id: string }) {
   const resume = [projet.reference ? `Réf. ${projet.reference}` : null, terrain || null, projet.parcelles.length ? pluriel(projet.parcelles.length, "parcelle") + ` ${projet.parcelles.join(", ")}` : null].filter(Boolean).join(" · ");
   const territoire = projet.territoire ? (projet.territoire === "metropole" ? "Métropole" : projet.territoire) : null;
 
+  /* 04/11 — « Points relevés — N » (promesse LORANI n° 42) : ce qui reste ouvert sur le projet, compté par type, avec les
+     mêmes règles que les pages qui les portent (Contrôle : constats ouverts du dernier contrôle ; À viser : visas et
+     situations à viser, réserves ouvertes ; Questions : questions non soldées). Posé dans les briques du volet de détails
+     de l'Initiative de Linear : une rangée de Propriétés et un segment de la carte Avancement, pas d'onglet en plus. */
+  const dernierControle = dossier.controles.filter((x) => x.projet_id === projet.id).sort((a, b) => b.cree_le.localeCompare(a.cree_le))[0] ?? null;
+  const pointsReleves = [
+    { cle: "constats", libelle: "Constats du contrôle", n: dernierControle ? dossier.constats.filter((k) => k.controle_id === dernierControle.id && k.statut === "ouvert").length : 0, toujours: true },
+    { cle: "visas", libelle: "Visas", n: dossier.visas.filter((v) => v.projet_id === projet.id && v.avis === "a_viser").length, toujours: true },
+    { cle: "situations", libelle: "Situations", n: dossier.situations.filter((x) => x.projet_id === projet.id && x.statut === "a_viser").length, toujours: false },
+    { cle: "reserves", libelle: "Réserves", n: dossier.reserves.filter((r) => r.projet_id === projet.id && r.statut === "ouverte").length, toujours: false },
+    { cle: "questions", libelle: "Questions", n: dossier.points.filter((x) => x.projet_id === projet.id && x.nature === "question" && x.statut !== "clos").length, toujours: true },
+  ].filter((x) => x.toujours || x.n);
+  const totalReleves = pointsReleves.reduce((t, x) => t + x.n, 0);
+
   /* le permis le plus pressé : celui dont la prochaine date est la plus proche */
   const presse = [...permis].filter((x) => prochaineDate(x)).sort((a, b) => (prochaineDate(a) ?? "").localeCompare(prochaineDate(b) ?? ""))[0] ?? permis[0];
   const santePresse: SanteLor = presse ? SANTE[familleDe(presse)] : "aucune";
@@ -402,7 +424,7 @@ export default function PageProjet({ id }: { id: string }) {
   const registre = params.get("vue") === "registre";
   const lignesRegistre = cle === "activite" && registre ? lignesDossier(projet, dossier, nommer) : [];
   /* le chantier : la formule de révision de chaque marché (b5_34, lue avec le marché) et le bordereau des visas */
-  const marchesProjet = dossier.marches.filter((m) => m.projet_id === projet.id && m.actif) as ((typeof dossier.marches)[number] & { revision_idbank?: string | null; revision_mois_zero?: string | null; revision_partie_fixe?: number | null })[];
+  const marchesProjet = dossier.marches.filter((m) => m.projet_id === projet.id && m.actif);
   const imprimerBordereau = () => {
     const b = bordereauVisas(projet, dossier);
     telecharger(b.nom, b.octets, "application/pdf");
@@ -542,6 +564,8 @@ export default function PageProjet({ id }: { id: string }) {
       ? FAMILLES.map((f) => ({ cle: f.cle, libelle: f.libelle, icone: <IconeSanteLor etat={SANTE[f.cle]} />, n: permis.filter((x) => familleDe(x) === f.cle).length })).filter((l) => l.n)
       : onglet === "etat"
         ? [...new Set(permis.map((x) => x.etat))].map((e) => ({ cle: e, libelle: ETATS[e]?.libelle ?? e, icone: <IconeStatutLor statut={AVANCEMENT[e]?.statut ?? "annule"} part={(AVANCEMENT[e]?.etapes ?? 4) / 7} />, n: permis.filter((x) => x.etat === e).length }))
+        : onglet === "points"
+          ? pointsReleves.map((x) => ({ cle: x.cle, libelle: x.libelle, icone: <IconeSprite nom="Label" />, n: x.n }))
         : chefs.length
           ? chefs.map((m) => ({ cle: m.id, libelle: nommer(m.user_id), icone: <Avatar nom={nommer(m.user_id)} taille={16} />, n: permis.length }))
           : [{ cle: "aucun", libelle: "Aucun chef de projet", icone: <IconeSansResponsable />, n: permis.length }];
@@ -584,6 +608,13 @@ export default function PageProjet({ id }: { id: string }) {
             {[projet.marche_public ? "Marché public" : null, territoire ?? "Territoire inconnu"].filter(Boolean).join(" · ")}
           </span>
         </div>
+        <div className="lor-in-rangee">
+          <span className="lor-in-rangee-libelle">Points relevés</span>
+          <button type="button" className="lor-in-rangee-valeur" data-vide={totalReleves ? undefined : ""} title={pointsReleves.map((x) => `${x.libelle} : ${x.n}`).join(" · ")} onClick={() => setOngletProgres("points")}>
+            <IconeSprite nom="Comment" />
+            {`${totalReleves} · ${pointsReleves.map((x) => `${x.libelle.toLowerCase()} ${x.n}`).join(", ")}`}
+          </button>
+        </div>
       </div>
       <div className="lor-in-carte">
         <div className="lor-in-carte-tete">
@@ -596,6 +627,7 @@ export default function PageProjet({ id }: { id: string }) {
               ["sante", "Santé"],
               ["etat", "État"],
               ["chefs", "Chefs"],
+              ["points", "Points"],
             ] as const
           ).map(([c, l]) => (
             <button key={c} type="button" role="tab" aria-selected={onglet === c} className="lor-in-segment" onClick={() => setOngletProgres(c)}>
@@ -1029,7 +1061,7 @@ export default function PageProjet({ id }: { id: string }) {
                             <span>
                               <span className="lor-in-ev-qui">{m.titulaire}</span> ·{" "}
                               {m.revision_idbank
-                                ? `révision C = a + (1 − a) × In / I0 sur l'index INSEE ${m.revision_idbank}${m.revision_mois_zero ? `, I0 de ${fmtMois.format(midi(m.revision_mois_zero))}` : ""}, partie fixe a = ${(m.revision_partie_fixe ?? 0.15).toLocaleString("fr-FR")} ; la révision de chaque situation est calculée en base`
+                                ? `révision C = a + (1 − a) × In / I0 sur l'index ${INDEX_INSEE[m.revision_idbank] ? `${INDEX_INSEE[m.revision_idbank]} (INSEE ${m.revision_idbank})` : `INSEE ${m.revision_idbank}`}${m.revision_mois_zero ? `, I0 de ${fmtMois.format(midi(m.revision_mois_zero))}` : ""}, partie fixe a = ${(m.revision_partie_fixe ?? 0.15).toLocaleString("fr-FR")} ; la révision de chaque situation est calculée en base`
                                 : "aucune formule de révision saisie : prix fermes pour Lorani"}
                             </span>
                           </li>

@@ -307,6 +307,15 @@ export type Marche = {
   /* b5_33 : l'avance (% du montant initial) et la pénalité de retard par jour prévue au marché */
   avance_pct?: number;
   penalite_jour_ht?: number | null;
+  /* 04/11 — b5_34, la révision par un index INSEE (promesse LORANI n° 27) : C = a + (1 − a) × In / I0 */
+  revision_idbank?: string | null;
+  revision_mois_zero?: string | null;
+  revision_partie_fixe?: number | null;
+};
+/* 04/11 — ce que la base écrit dans lorani_situations.revision (private.lorani_situation_revision, b5_34) ; {} sans formule */
+export type RevisionSituation = {
+  index?: string; idbank?: string; partie_fixe?: number; mois_zero?: string; i0?: number | null; mois?: string; mois_index?: string;
+  in?: number; provisoire?: boolean; coefficient?: number; montant_periode?: number; revision_ht?: number; manque?: string;
 };
 export type Situation = {
   id: string;
@@ -330,6 +339,8 @@ export type Situation = {
   avance_remboursee_ht?: number | null;
   penalites_ht?: number | null;
   montants?: Record<string, unknown>;
+  /* 04/11 — b5_34 (promesse LORANI n° 27) */
+  revision?: RevisionSituation | null;
 };
 export type Visa = {
   id: string;
