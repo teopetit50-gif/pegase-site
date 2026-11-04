@@ -188,3 +188,40 @@ html[data-v2-theme="light"] .v2 .lor-at {
 .v2 .lor-at-calcul:hover .lor-at-discret { color: var(--lor-at-second); }
 .v2 .lor-at .lor-marque { height: 16px; padding: 0 5px; border-radius: 4px; background: var(--lor-at-actif); color: var(--lor-at-second); font-size: 10px; }
 .v2 .lor-at-identite .lor-rond { margin-left: auto; color: var(--lor-at-second); }
+
+/* ══ un onglet d'un projet en page d'outil (04/11/2026) — ./OngletOutil.tsx ══
+   Le gabarit d'Honoraires posé sous les onglets du projet, pleine largeur. */
+.v2 .lor-at.lor-at-page { min-height: 0; background: transparent; }
+.v2 .lor-at-onglet[aria-current="page"] { color: var(--lor-at-texte); border-bottom-color: var(--lor-at-texte); }
+.v2 .lor-at-onglet:hover { color: var(--lor-at-texte); }
+.v2 .lor-at-resume { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lor-at-second); }
+.v2 .lor-at-page .lor-at-barre-vue > .lor-at-groupe { flex-shrink: 0; }
+.v2 .lor-at-avis--neutre { color: var(--lor-at-second); }
+.v2 .lor-at-grille--onglet .lor-at-rang { grid-template-columns: var(--lor-at-cols); min-width: 100%; }
+.v2 .lor-at-grille--onglet .lor-at-rang::after { content: none; }
+.v2 .lor-at-grille--onglet .lor-at-cell:first-child { padding-left: 16px; }
+.v2 .lor-at-grille--onglet .lor-at-cell:last-child { border-right: 0; }
+.v2 .lor-at-cell[data-droite] { justify-content: flex-end; font-variant-numeric: tabular-nums; }
+.v2 .lor-at-rang--ligne[tabindex] { cursor: pointer; }
+.v2 .lor-at-rang--ligne:hover, .v2 .lor-at-rang--ligne[aria-current="true"] { background: var(--lor-at-actif); }
+.v2 .lor-at-rang--ligne:focus-visible { outline: 2px solid var(--lor-at-bleu); outline-offset: -2px; }
+.v2 .lor-at-vide { padding: 14px 16px; border-bottom: 1px solid var(--lor-at-filet); color: var(--lor-at-discret); }
+.v2 .lor-at-pied-onglet .lor-at-cell { justify-content: flex-start; padding-left: 16px; border-right: 0; }
+.v2 .lor-at-etat { display: inline-flex; align-items: center; gap: 8px; }
+.v2 .lor-at-etat-point { width: 8px; height: 8px; border-radius: 3px; background: #8a8f98; }
+.v2 .lor-at-etat[data-teinte="vert"] .lor-at-etat-point { background: #00b55e; }
+.v2 .lor-at-etat[data-teinte="bleu"] .lor-at-etat-point { background: #266df0; }
+.v2 .lor-at-etat[data-teinte="rouge"] .lor-at-etat-point { background: #e5484d; }
+.v2 .lor-at-mono { font-variant-numeric: tabular-nums; color: var(--lor-at-second); }
+/* sous `.lor` (la page du projet), la remise à zéro des boutons de ./lor.css l'emportait : on redonne leur habit */
+.v2 .lor .lor-at-page .lor-at-bouton { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 4px 8px; border-radius: 8px; background: var(--lor-at-bouton); box-shadow: var(--lor-at-bouton-ombre); color: var(--lor-at-texte); font-weight: 500; }
+.v2 .lor .lor-at-page .lor-at-bouton:hover:not(:disabled) { background: var(--lor-at-actif); }
+.v2 .lor .lor-at-page .lor-at-bouton--bleu, .v2 .lor .lor-at-page .lor-at-bouton--bleu:hover:not(:disabled) { background: var(--lor-at-bleu); color: #fff; box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f; }
+.v2 .lor .lor-at-page .lor-at-bouton:disabled { opacity: 0.5; }
+.v2 .lor-at-pied-onglet .lor-at-cell { grid-column: 1 / -1; }
+/* la page du projet : l'onglet d'outil prend toute la largeur, sous la barre des onglets */
+.v2 .lor-in-defile[data-outil] { padding: 0 0 48px; }
+@media (max-width: 767px) {
+  .v2 .lor-at-page .lor-at-barre-vue { height: auto; min-height: 48px; flex-wrap: wrap; padding: 8px 12px; }
+  .v2 .lor-at-page .lor-at-resume { white-space: normal; flex-basis: 100%; }
+}

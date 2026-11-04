@@ -45,11 +45,12 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProjetCarte, { type PartieProjet } from "@/components/espace/lorani/ProjetCarte";
+import { Etat, OngletOutil, type Liste } from "./OngletOutil";
 import { INDEX_INSEE } from "@/components/espace/lorani/Chantier";
 import Formulaires, { type Form } from "@/components/espace/lorani/Formulaires";
 import { dossierDate, lignesDossier } from "@/components/espace/lorani/dossier-date";
 import { bordereauVisas } from "./bordereau-visas";
-import { ETATS, FAMILLES, NATURES_PROJET, PHASES, ROLES_PROJET, prochaineDate, titrePermis, type Famille } from "@/components/espace/lorani/etats";
+import { ETATS, FAMILLES, NATURES_INTERVENANT, NATURES_PROJET, PHASES, ROLES_PROJET, prochaineDate, titrePermis, type Famille } from "@/components/espace/lorani/etats";
 import { bordereau } from "@/components/espace/lorani/pieces-exigees";
 import type { Permis, Projet } from "@/components/espace/lorani/types";
 import Habille from "@/components/espace2/Habille";
@@ -277,6 +278,8 @@ export default function PageProjet({ id }: { id: string }) {
 
   /* après une création : la page du projet ou du permis créé, dès que le dossier relu le contient */
   const aOuvrir = useRef<{ id: string; type: "projet" | "permis" } | null>(null);
+  /* les parties de ProjetCarte montées cachées sous un onglet d'outil (voir `declencher`) */
+  const cache = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const c = aOuvrir.current;
     if (!c) return;
@@ -794,6 +797,620 @@ export default function PageProjet({ id }: { id: string }) {
   })();
   const ongletCourant = ONGLETS.find((o) => o.cle === cle);
 
+  /* 04/11 — les onglets refaits en vraies pages d'outil (./OngletOutil, gabarit d'Honoraires) : leurs
+     listes, et les gestes des parties de ProjetCarte, montées cachées (`cache`), qu'un bouton déclenche */
+  const declencher = (libelle: string) => {
+    const b = [...(cache.current?.querySelectorAll("button") ?? [])].find((x) => (x.textContent ?? "").trim().startsWith(libelle));
+    if (!b) return toast(`« ${libelle} » n'est pas possible pour l'instant.`);
+    if (b.disabled) return toast(peutEcrire ? `« ${libelle} » n'est pas possible pour l'instant.` : "Lecture seule : ce geste demande un compte qui peut écrire.");
+    b.click();
+  };
+  const listeParam = params.get("liste");
+  const lienListe = (l: string) => `${chemin}?partie=${cle}&liste=${l}`;
+  const lotDe = (lotId: string | null) => {
+    const l = lotId ? dossier.lots.find((x) => x.id === lotId) : null;
+    return l ? `Lot ${l.numero} · ${l.intitule}` : "Tout le projet";
+  };
+  const vide = (t: string) => <span className="lor-at-discret">{t}</span>;
+  const outil = ((): { listes: Liste[]; resume: string; avis: string | null } | null => {
+    const de = <T extends { projet_id: string }>(xs: T[]) => xs.filter((x) => x.projet_id === projet.id);
+    if (cle === "reception") {
+      const reserves = de(dossier.reserves).sort((a, b) => a.numero - b.numero);
+      const nonLevees = reserves.filter((r) => r.statut !== "levee").length;
+      const doe = de(dossier.doe);
+      const recus = doe.filter((d) => d.statut === "recu").length;
+      const NATURE_DOE: Record<(typeof doe)[number]["nature"], string> = { plans: "Plans conformes", notices: "Notices", fiches: "Fiches techniques", pv_essais: "PV d'essais", garanties: "Garanties", diuo: "DIUO", autre: "Autre" };
+      const finGpa = projet.reception_le ? (() => { const d = midi(projet.reception_le!); d.setUTCFullYear(d.getUTCFullYear() + 1); return d.toISOString().slice(0, 10); })() : null;
+      return {
+        resume: `${projet.reception_le ? `Réception prononcée le ${plein(projet.reception_le)}` : "Réception pas encore prononcée"} · ${reserves.length ? `${pluriel(nonLevees, "réserve")} non levée${nonLevees > 1 ? "s" : ""} sur ${reserves.length}` : "aucune réserve"} · ${doe.length ? `DOE : ${recus} pièce${recus > 1 ? "s" : ""} reçue${recus > 1 ? "s" : ""} sur ${doe.length}` : "DOE à préparer"}`,
+        avis: finGpa ? `Garantie de parfait achèvement jusqu'au ${plein(finGpa)}` : null,
+        listes: [
+          {
+            cle: "reserves",
+            libelle: "Réserves",
+            tri: "numéro",
+            vide: projet.reception_le ? "Aucune réserve : la réception est prononcée sans réserve." : "Aucune réserve. Elles se constatent aux opérations préalables, à la réception, puis pendant l'année de parfait achèvement.",
+            pied: reserves.length ? `${pluriel(reserves.length, "réserve")} · ${nonLevees} à lever` : undefined,
+            colonnes: [
+              { libelle: "N°", largeur: "72px" },
+              { libelle: "Réserve", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Lot", largeur: "minmax(150px, 220px)" },
+              { libelle: "Localisation", largeur: "minmax(130px, 190px)" },
+              { libelle: "Constatée", largeur: "104px" },
+              { libelle: "À lever avant", largeur: "120px" },
+              { libelle: "État", largeur: "150px" },
+            ],
+            rangs: reserves.map((r) => {
+              const retard = r.statut === "ouverte" && !!r.lever_avant && r.lever_avant < auj;
+              return {
+                id: r.id,
+                cle: `reserve:${r.id}`,
+                cellules: [
+                  <span key="n" className="lor-at-mono">n° {r.numero}</span>,
+                  <span key="t" className="lor-at-cell-texte">{r.intitule}</span>,
+                  <span key="l" className="lor-at-cell-texte">{lotDe(r.lot_id)}</span>,
+                  r.localisation ? <span key="o" className="lor-at-cell-texte">{r.localisation}</span> : vide("—"),
+                  court(r.constatee_le),
+                  r.lever_avant ? court(r.lever_avant) : vide("—"),
+                  r.statut === "levee" ? <Etat key="e" teinte="vert">Levée{r.levee_le ? ` le ${court(r.levee_le)}` : ""}</Etat> : r.statut === "contestee" ? <Etat key="e" teinte="gris">Contestée</Etat> : retard ? <Etat key="e" teinte="rouge">En retard</Etat> : <Etat key="e" teinte="bleu">Ouverte</Etat>,
+                ],
+              };
+            }),
+            gestes: [
+              { libelle: "Nouvelle réserve", desactive: gris },
+              { libelle: projet.reception_le ? "Date de réception" : "Prononcer la réception", principal: true, desactive: gris },
+            ],
+          },
+          {
+            cle: "doe",
+            libelle: "DOE",
+            tri: "lot",
+            vide: "Pas encore de liste : Lorani prépare la liste type (plans conformes, notices, fiches techniques, PV d'essais, garanties) pour chaque lot, et le DIUO du projet.",
+            pied: doe.length ? `${pluriel(doe.length, "pièce")} · ${recus} reçue${recus > 1 ? "s" : ""}` : undefined,
+            colonnes: [
+              { libelle: "Pièce", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Nature", largeur: "170px" },
+              { libelle: "Lot", largeur: "220px" },
+              { libelle: "Reçue le", largeur: "120px" },
+              { libelle: "État", largeur: "150px" },
+            ],
+            rangs: doe
+              .slice()
+              .sort((a, b) => (a.lot_id ?? "").localeCompare(b.lot_id ?? "") || a.intitule.localeCompare(b.intitule, "fr"))
+              .map((d) => ({
+                id: d.id,
+                cle: `doe:${d.id}`,
+                cellules: [
+                  <span key="t" className="lor-at-cell-texte">{d.intitule}</span>,
+                  NATURE_DOE[d.nature],
+                  <span key="l" className="lor-at-cell-texte">{lotDe(d.lot_id)}</span>,
+                  d.recu_le ? court(d.recu_le) : vide("—"),
+                  d.statut === "recu" ? <Etat key="e" teinte="vert">Reçue</Etat> : d.statut === "sans_objet" ? <Etat key="e" teinte="gris">Sans objet</Etat> : <Etat key="e" teinte="bleu">Attendue</Etat>,
+                ],
+              })),
+            gestes: [
+              ...(doe.some((d) => d.statut === "attendu") ? [{ libelle: "Demander les pièces manquantes", desactive: gris }] : []),
+              { libelle: doe.length ? "Compléter la liste" : "Préparer la liste", principal: true, desactive: gris || !dossier.lots.some((l) => l.projet_id === projet.id) },
+            ],
+          },
+        ],
+      };
+    }
+    const euros = (n: number | null | undefined) => (n === null || n === undefined ? vide("—") : `${Math.round(n).toLocaleString("fr-FR")} €`);
+    const resume = tete?.resume ?? "";
+    if (cle === "equipe") {
+      const inter = de(dossier.intervenants).filter((i) => i.actif);
+      const membres = de(dossier.membres);
+      const lots = de(dossier.lots).sort((a, b) => a.numero.localeCompare(b.numero, "fr", { numeric: true }));
+      const titulaire = (lotId: string) => dossier.marches.find((m) => m.lot_id === lotId && m.actif)?.titulaire ?? inter.find((i) => i.lot_id === lotId)?.organisme ?? null;
+      return {
+        resume,
+        avis: chefs.length ? `Les rappels partent à ${chefs.map((m) => nommer(m.user_id)).join(", ")}` : "Personne ne reçoit les rappels : nommez un chef de projet",
+        listes: [
+          {
+            cle: "intervenants",
+            libelle: "Intervenants",
+            tri: "rôle",
+            vide: "Aucun intervenant : ajoutez le maître d'ouvrage, le bureau de contrôle, les entreprises…",
+            pied: inter.length ? pluriel(inter.length, "intervenant") : undefined,
+            colonnes: [
+              { libelle: "Organisme", largeur: "minmax(220px, 1fr)" },
+              { libelle: "Rôle", largeur: "minmax(160px, 220px)" },
+              { libelle: "Contact", largeur: "minmax(140px, 200px)" },
+              { libelle: "Courriel ou téléphone", largeur: "minmax(160px, 240px)" },
+              { libelle: "Lot", largeur: "minmax(140px, 200px)" },
+            ],
+            rangs: inter
+              .slice()
+              .sort((a, b) => NATURES_INTERVENANT[a.nature].localeCompare(NATURES_INTERVENANT[b.nature], "fr") || a.organisme.localeCompare(b.organisme, "fr"))
+              .map((i) => ({
+                id: i.id,
+                cle: `intervenant:${i.id}`,
+                cellules: [
+                  <span key="o" className="lor-at-cell-texte">{i.organisme}</span>,
+                  <span key="r" className="lor-at-cell-texte">{NATURES_INTERVENANT[i.nature]}</span>,
+                  i.contact ? <span key="c" className="lor-at-cell-texte">{i.contact}</span> : vide("—"),
+                  i.email || i.telephone ? <span key="m" className="lor-at-cell-texte">{i.email ?? i.telephone}</span> : vide("—"),
+                  <span key="l" className="lor-at-cell-texte">{lotDe(i.lot_id)}</span>,
+                ],
+              })),
+            gestes: [{ libelle: "Ajouter un intervenant", principal: true, desactive: gris }],
+          },
+          {
+            cle: "agence",
+            libelle: "Agence",
+            tri: "rôle",
+            vide: "Personne de l'agence sur ce projet : ajoutez au moins le chef de projet, qui reçoit les rappels.",
+            pied: membres.length ? pluriel(membres.length, "membre") : undefined,
+            colonnes: [
+              { libelle: "Membre", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Rôle sur le projet", largeur: "minmax(200px, 320px)" },
+            ],
+            rangs: membres.map((m) => ({
+              id: m.id,
+              cle: `membre:${m.id}`,
+              cellules: [<span key="n" className="lor-at-cell-texte">{nommer(m.user_id)}</span>, ROLES_PROJET[m.role_projet]],
+            })),
+            gestes: [{ libelle: "Ajouter un membre", principal: true, desactive: gris }],
+          },
+          {
+            cle: "lots",
+            libelle: "Lots",
+            tri: "numéro",
+            vide: "Aucun lot : découpez le projet en lots pour suivre entreprises, marchés et assurances.",
+            pied: lots.length ? pluriel(lots.length, "lot") : undefined,
+            colonnes: [
+              { libelle: "N°", largeur: "72px" },
+              { libelle: "Lot", largeur: "minmax(220px, 1fr)" },
+              { libelle: "Entreprise", largeur: "minmax(160px, 240px)" },
+              { libelle: "Activités requises", largeur: "minmax(160px, 300px)" },
+            ],
+            rangs: lots.map((l) => ({
+              id: l.id,
+              cle: `lot:${l.id}`,
+              cellules: [
+                <span key="n" className="lor-at-mono">{l.numero}</span>,
+                <span key="i" className="lor-at-cell-texte">{l.intitule}</span>,
+                titulaire(l.id) ? <span key="t" className="lor-at-cell-texte">{titulaire(l.id)}</span> : vide("Pas encore désignée"),
+                l.activites_requises.length ? <span key="a" className="lor-at-cell-texte">{l.activites_requises.join(", ")}</span> : vide("—"),
+              ],
+            })),
+            gestes: [{ libelle: "Ajouter un lot", principal: true, desactive: gris }],
+          },
+        ],
+      };
+    }
+    if (cle === "urbanisme") {
+      const b = bordereau(projet, dossier);
+      const regles = plu
+        ? [
+            ...plu.zones.map((z, i) => ({ id: `z${i}`, type: "Zone", libelle: z.libelle ?? "—", detail: z.libelong ?? z.typezone ?? "" })),
+            ...(plu.servitudes ?? []).map((x, i) => ({ id: `s${i}`, type: "Servitude", libelle: x.nom ?? x.libelle_categorie, detail: x.libelle_categorie })),
+            ...plu.prescriptions.map((x, i) => ({ id: `p${i}`, type: "Prescription", libelle: x.libelle ?? "—", detail: x.typepsc ? `Type ${x.typepsc}${x.stypepsc ? `.${x.stypepsc}` : ""}` : "" })),
+          ]
+        : [];
+      return {
+        resume,
+        avis: plu?.document?.titre ? `${plu.document.titre}${plu.point_libelle ? ` · ${plu.point_libelle}` : ""}` : null,
+        listes: [
+          {
+            cle: "pieces",
+            libelle: "Pièces exigées",
+            tri: "code du Cerfa",
+            vide: "Pas de bordereau : il se calcule pour un permis de construire (PC ou PCMI).",
+            pied: b ? `${pluriel(b.pieces.length, "pièce")} · ${((n) => (n ? `${n} déposée${n > 1 ? "s" : ""}` : "aucune déposée"))(b.pieces.filter((x) => x.fournie).length)}` : undefined,
+            colonnes: [
+              { libelle: "Code", largeur: "90px" },
+              { libelle: "Pièce", largeur: "minmax(260px, 1fr)" },
+              { libelle: "Article", largeur: "minmax(130px, 170px)" },
+              { libelle: "État", largeur: "150px" },
+            ],
+            rangs: (b?.pieces ?? []).map((x) => ({
+              id: x.code,
+              cellules: [
+                <span key="c" className="lor-at-mono">{x.code}</span>,
+                <span key="l" className="lor-at-cell-texte" title={x.motif ?? undefined}>{x.libelle}</span>,
+                <span key="a" className="lor-at-discret">{x.article}</span>,
+                x.fournie ? <Etat key="e" teinte="vert">Déposée</Etat> : x.a_confirmer ? <Etat key="e" teinte="gris">À confirmer</Etat> : x.demandee ? <Etat key="e" teinte="bleu">Demandée</Etat> : <Etat key="e" teinte="bleu">À déposer</Etat>,
+              ],
+            })),
+            gestes: [],
+          },
+          {
+            cle: "regles",
+            libelle: "Règles du PLU",
+            tri: "type",
+            vide: plu ? "Aucune règle trouvée à cette adresse." : "Les règles d'urbanisme ne sont pas encore cherchées.",
+            pied: regles.length ? pluriel(regles.length, "règle") : undefined,
+            colonnes: [
+              { libelle: "Type", largeur: "140px" },
+              { libelle: "Règle", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Détail", largeur: "minmax(160px, 320px)" },
+            ],
+            rangs: regles.map((r) => ({ id: r.id, cellules: [r.type, <span key="l" className="lor-at-cell-texte">{r.libelle}</span>, r.detail ? <span key="d" className="lor-at-cell-texte lor-at-discret">{r.detail}</span> : vide("—")] })),
+            gestes: [
+              ...(plu?.reglement_url ? [{ libelle: "Règlement de la zone", faire: () => window.open(plu.reglement_url!, "_blank", "noopener") }] : []),
+              { libelle: "Chercher à nouveau", principal: true, desactive: gris },
+            ],
+          },
+        ],
+      };
+    }
+    if (cle === "controle") {
+      const ctrl = de(dossier.controles).sort((a, b) => b.cree_le.localeCompare(a.cree_le));
+      const ids = new Map(ctrl.map((c) => [c.id, c]));
+      const constats = dossier.constats.filter((c) => ids.has(c.controle_id));
+      const NATURE_CONSTAT: Record<(typeof constats)[number]["nature"], string> = { incoherence: "Incohérence", plu: "PLU", cctp_dpgf: "CCTP / DPGF", metre_dpgf: "Métré / DPGF", re2020: "RE2020", accessibilite: "Accessibilité", securite_incendie: "Sécurité incendie" };
+      const GRAVITE: Record<(typeof constats)[number]["gravite"], string> = { bloquant: "Bloquant", majeur: "Majeur", mineur: "Mineur" };
+      const gestesCtrl = [{ libelle: "Régler les contrôles", desactive: gris }, { libelle: "Nouveau contrôle", principal: true, desactive: gris }];
+      return {
+        resume,
+        avis: null,
+        listes: [
+          {
+            cle: "controles",
+            libelle: "Contrôles",
+            tri: "date",
+            vide: "Aucun contrôle : choisissez les pièces à croiser (planches entre elles, contre le règlement du PLU, CCTP contre DPGF).",
+            pied: ctrl.length ? pluriel(ctrl.length, "contrôle") : undefined,
+            colonnes: [
+              { libelle: "Contrôle", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Indice", largeur: "90px" },
+              { libelle: "Lancé le", largeur: "120px" },
+              { libelle: "Constats", largeur: "100px", droite: true },
+              { libelle: "État", largeur: "150px" },
+            ],
+            rangs: ctrl.map((c) => ({
+              id: c.id,
+              cle: `controle:${c.id}`,
+              cellules: [
+                <span key="t" className="lor-at-cell-texte">{c.intitule}</span>,
+                <span key="i" className="lor-at-mono">{c.indice}</span>,
+                c.lance_le ? court(c.lance_le) : vide("—"),
+                c.constats_nb,
+                c.statut === "clos" ? <Etat key="e" teinte="gris">Clos</Etat> : c.statut === "controle" ? <Etat key="e" teinte="vert">Contrôlé</Etat> : <Etat key="e" teinte="bleu">En lecture</Etat>,
+              ],
+            })),
+            gestes: gestesCtrl,
+          },
+          {
+            cle: "constats",
+            libelle: "Constats",
+            tri: "gravité",
+            vide: "Aucun constat : ils apparaissent quand Lorani a relu les pièces d'un contrôle.",
+            pied: constats.length ? `${pluriel(constats.length, "constat")} · ${constats.filter((c) => c.statut === "ouvert").length} ouvert${constats.filter((c) => c.statut === "ouvert").length > 1 ? "s" : ""}` : undefined,
+            colonnes: [
+              { libelle: "Constat", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Nature", largeur: "150px" },
+              { libelle: "Gravité", largeur: "100px" },
+              { libelle: "Contrôle", largeur: "minmax(140px, 220px)" },
+              { libelle: "État", largeur: "140px" },
+            ],
+            rangs: constats
+              .slice()
+              .sort((a, b) => ["bloquant", "majeur", "mineur"].indexOf(a.gravite) - ["bloquant", "majeur", "mineur"].indexOf(b.gravite))
+              .map((c) => ({
+                id: c.id,
+                cle: `constat:${c.id}`,
+                cellules: [
+                  <span key="t" className="lor-at-cell-texte">{c.titre}</span>,
+                  NATURE_CONSTAT[c.nature],
+                  GRAVITE[c.gravite],
+                  <span key="c" className="lor-at-cell-texte lor-at-discret">{ids.get(c.controle_id)?.intitule ?? "—"}</span>,
+                  c.statut === "ouvert" ? <Etat key="e" teinte="bleu">Ouvert</Etat> : c.statut === "ecarte" ? <Etat key="e" teinte="gris">Écarté</Etat> : <Etat key="e" teinte="vert">{c.statut === "corrige" ? "Corrigé" : "Accepté"}</Etat>,
+                ],
+              })),
+            gestes: gestesCtrl,
+          },
+        ],
+      };
+    }
+    if (cle === "consultation") {
+      const cons = de(dossier.consultations);
+      const offres = de(dossier.offres);
+      const consDe = new Map(cons.map((c) => [c.id, c]));
+      return {
+        resume,
+        avis: null,
+        listes: [
+          {
+            cle: "offres",
+            libelle: "Offres",
+            tri: "rang",
+            vide: "Aucune offre : déposez chaque offre comme « Offre d'une entreprise » (PDF ou Excel), Lorani la lit et l'aligne sur la DPGF.",
+            pied: offres.length ? pluriel(offres.length, "offre") : undefined,
+            colonnes: [
+              { libelle: "Entreprise", largeur: "minmax(220px, 1fr)" },
+              { libelle: "Lot", largeur: "minmax(140px, 220px)" },
+              { libelle: "Montant HT", largeur: "130px", droite: true },
+              { libelle: "Rang", largeur: "70px", droite: true },
+              { libelle: "Écart", largeur: "90px", droite: true },
+              { libelle: "État", largeur: "130px" },
+            ],
+            rangs: offres
+              .slice()
+              .sort((a, b) => (a.rang ?? 99) - (b.rang ?? 99))
+              .map((o) => ({
+                id: o.id,
+                cle: `offre:${o.id}`,
+                cellules: [
+                  <span key="e" className="lor-at-cell-texte">{o.entreprise}</span>,
+                  <span key="l" className="lor-at-cell-texte">{lotDe(consDe.get(o.consultation_id)?.lot_id ?? null)}</span>,
+                  euros(o.montant_comparable_ht ?? o.montant_ht),
+                  o.rang ?? vide("—"),
+                  o.ecart_estimation_pct === null ? vide("—") : `${o.ecart_estimation_pct > 0 ? "+" : ""}${o.ecart_estimation_pct.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} %`,
+                  o.statut === "retenue" ? <Etat key="s" teinte="vert">Retenue</Etat> : o.statut === "ecartee" ? <Etat key="s" teinte="gris">Écartée</Etat> : o.statut === "analysee" ? <Etat key="s" teinte="bleu">Analysée</Etat> : <Etat key="s" teinte="gris">Reçue</Etat>,
+                ],
+              })),
+            gestes: [{ libelle: "Ouvrir une consultation", principal: true, desactive: gris }],
+          },
+          {
+            cle: "consultations",
+            libelle: "Consultations",
+            tri: "lot",
+            vide: "Aucune consultation : ouvrez celle d'un lot, avec sa DPGF, pour recevoir et comparer les offres.",
+            pied: cons.length ? pluriel(cons.length, "consultation") : undefined,
+            colonnes: [
+              { libelle: "Consultation", largeur: "minmax(220px, 1fr)" },
+              { libelle: "Lot", largeur: "minmax(140px, 220px)" },
+              { libelle: "Estimation HT", largeur: "140px", droite: true },
+              { libelle: "Date limite", largeur: "120px" },
+              { libelle: "Offres", largeur: "80px", droite: true },
+              { libelle: "État", largeur: "130px" },
+            ],
+            rangs: cons.map((c) => ({
+              id: c.id,
+              cle: `consultation:${c.id}`,
+              cellules: [
+                <span key="t" className="lor-at-cell-texte">{c.intitule}</span>,
+                <span key="l" className="lor-at-cell-texte">{lotDe(c.lot_id)}</span>,
+                euros(c.estimation_ht),
+                c.date_limite ? court(c.date_limite) : vide("—"),
+                offres.filter((o) => o.consultation_id === c.id).length,
+                c.statut === "attribuee" ? <Etat key="s" teinte="vert">Attribuée</Etat> : c.statut === "infructueuse" ? <Etat key="s" teinte="gris">Infructueuse</Etat> : <Etat key="s" teinte="bleu">{c.statut === "analysee" ? "Analysée" : "Ouverte"}</Etat>,
+              ],
+            })),
+            gestes: [{ libelle: "Ouvrir une consultation", principal: true, desactive: gris }],
+          },
+        ],
+      };
+    }
+    if (cle === "chantier") {
+      const marches = de(dossier.marches).filter((m) => m.actif);
+      const marcheDe = new Map(dossier.marches.map((m) => [m.id, m]));
+      const situations = de(dossier.situations).sort((a, b) => b.recue_le.localeCompare(a.recue_le));
+      const visas = de(dossier.visas).sort((a, b) => b.recu_le.localeCompare(a.recu_le));
+      const crs = de(dossier.comptesRendus).sort((a, b) => b.numero - a.numero);
+      const os = de(dossier.ordresService).sort((a, b) => b.numero - a.numero);
+      const AVIS: Record<(typeof visas)[number]["avis"], [string, "vert" | "bleu" | "gris" | "rouge"]> = { a_viser: ["À viser", "bleu"], vso: ["VSO", "vert"], vao: ["VAO", "vert"], ref: ["Refusé", "rouge"] };
+      return {
+        resume,
+        avis: null,
+        listes: [
+          {
+            cle: "situations",
+            libelle: "Situations",
+            tri: "date de réception",
+            vide: marches.length ? "Aucune situation reçue." : "Pas encore de marché de travaux : posez le marché de chaque lot pour contrôler les situations des entreprises.",
+            pied: situations.length ? `${pluriel(situations.length, "situation")} · ${situations.filter((x) => x.statut === "a_viser").length} à viser` : undefined,
+            colonnes: [
+              { libelle: "N°", largeur: "64px" },
+              { libelle: "Entreprise", largeur: "minmax(200px, 1fr)" },
+              { libelle: "Lot", largeur: "minmax(140px, 200px)" },
+              { libelle: "Mois", largeur: "100px" },
+              { libelle: "Cumul HT", largeur: "130px", droite: true },
+              { libelle: "À viser avant", largeur: "120px" },
+              { libelle: "État", largeur: "130px" },
+            ],
+            rangs: situations.map((x) => {
+              const m = marcheDe.get(x.marche_id);
+              const retard = x.statut === "a_viser" && !!x.a_viser_avant && x.a_viser_avant < auj;
+              return {
+                id: x.id,
+                cle: `chantier-situation:${x.id}`,
+                cellules: [
+                  <span key="n" className="lor-at-mono">n° {x.numero}</span>,
+                  <span key="t" className="lor-at-cell-texte">{m?.titulaire ?? "—"}</span>,
+                  <span key="l" className="lor-at-cell-texte">{lotDe(m?.lot_id ?? null)}</span>,
+                  x.mois.slice(0, 7),
+                  euros(x.cumul_ht),
+                  x.a_viser_avant ? court(x.a_viser_avant) : vide("—"),
+                  x.statut === "a_viser" ? <Etat key="s" teinte={retard ? "rouge" : "bleu"}>{retard ? "En retard" : "À viser"}</Etat> : <Etat key="s" teinte="vert">{x.statut === "visee" ? "Visée" : "Rectifiée"}</Etat>,
+                ],
+              };
+            }),
+            gestes: [{ libelle: "Situation reçue", principal: true, desactive: gris || !marches.length, titre: marches.length ? undefined : "Posez d'abord un marché" }],
+          },
+          {
+            cle: "visas",
+            libelle: "Visas",
+            tri: "date de réception",
+            vide: "Aucun document à viser : plans d'exécution, notes de calcul et fiches produits des entreprises arrivent ici.",
+            pied: visas.length ? `${pluriel(visas.length, "document")} · ${visas.filter((v) => v.avis === "a_viser").length} à viser` : undefined,
+            colonnes: [
+              { libelle: "Document", largeur: "minmax(220px, 1fr)" },
+              { libelle: "Indice", largeur: "80px" },
+              { libelle: "Lot", largeur: "minmax(140px, 200px)" },
+              { libelle: "Reçu le", largeur: "110px" },
+              { libelle: "À viser avant", largeur: "120px" },
+              { libelle: "Avis", largeur: "120px" },
+            ],
+            rangs: visas.map((v) => ({
+              id: v.id,
+              cle: `chantier-visa:${v.id}`,
+              cellules: [
+                <span key="d" className="lor-at-cell-texte">{v.document}</span>,
+                <span key="i" className="lor-at-mono">{v.indice}</span>,
+                <span key="l" className="lor-at-cell-texte">{lotDe(v.lot_id)}</span>,
+                court(v.recu_le),
+                v.a_viser_avant ? court(v.a_viser_avant) : vide("—"),
+                <Etat key="a" teinte={v.avis === "a_viser" && v.a_viser_avant && v.a_viser_avant < auj ? "rouge" : AVIS[v.avis][1]}>{AVIS[v.avis][0]}</Etat>,
+              ],
+            })),
+            gestes: [{ libelle: "Bordereau des visas", faire: imprimerBordereau }, { libelle: "Document à viser", principal: true, desactive: gris }],
+          },
+          {
+            cle: "marches",
+            libelle: "Marchés",
+            tri: "lot",
+            vide: "Aucun marché de travaux : la révision et le contrôle des situations se règlent par marché.",
+            pied: marches.length ? `${pluriel(marches.length, "marché")} · ${Math.round(marches.reduce((t, m) => t + m.montant_ht + m.avenants_ht, 0)).toLocaleString("fr-FR")} € HT avec avenants` : undefined,
+            colonnes: [
+              { libelle: "Lot", largeur: "minmax(160px, 240px)" },
+              { libelle: "Titulaire", largeur: "minmax(200px, 1fr)" },
+              { libelle: "Montant HT", largeur: "140px", droite: true },
+              { libelle: "Avenants HT", largeur: "130px", droite: true },
+              { libelle: "Retenue", largeur: "90px", droite: true },
+              { libelle: "Révision des prix", largeur: "minmax(150px, 220px)" },
+            ],
+            rangs: marches.map((m) => ({
+              id: m.id,
+              cle: `chantier-marche:${m.id}`,
+              cellules: [
+                <span key="l" className="lor-at-cell-texte">{lotDe(m.lot_id)}</span>,
+                <span key="t" className="lor-at-cell-texte">{m.titulaire}</span>,
+                euros(m.montant_ht),
+                m.avenants_ht ? euros(m.avenants_ht) : vide("—"),
+                `${m.retenue_pct} %`,
+                m.revision_idbank ? (
+                  <span key="r" className="lor-at-cell-texte" title={`C = a + (1 − a) × In / I0, partie fixe a = ${(m.revision_partie_fixe ?? 0.15).toLocaleString("fr-FR")}`}>
+                    Index {INDEX_INSEE[m.revision_idbank] ?? m.revision_idbank}
+                  </span>
+                ) : (
+                  vide("Prix fermes")
+                ),
+              ],
+            })),
+            gestes: [{ libelle: "Nouveau marché", principal: true, desactive: gris }],
+          },
+          {
+            cle: "comptes-rendus",
+            libelle: "Comptes rendus",
+            tri: "numéro",
+            vide: "Aucun compte rendu. Après la visite, notez ce que vous avez vu et demandé : chaque ligne devient un point, suivi de compte rendu en compte rendu.",
+            pied: crs.length ? pluriel(crs.length, "compte rendu", "comptes rendus") : undefined,
+            colonnes: [
+              { libelle: "N°", largeur: "64px" },
+              { libelle: "Visite du", largeur: "120px" },
+              { libelle: "Avancement", largeur: "minmax(240px, 1fr)" },
+              { libelle: "Prochaine visite", largeur: "140px" },
+              { libelle: "État", largeur: "120px" },
+            ],
+            rangs: crs.map((c) => ({
+              id: c.id,
+              cle: `cr:${c.id}`,
+              cellules: [
+                <span key="n" className="lor-at-mono">n° {c.numero}</span>,
+                court(c.visite_le),
+                c.avancement ? <span key="a" className="lor-at-cell-texte">{c.avancement}</span> : vide("—"),
+                c.prochaine_visite ? court(c.prochaine_visite) : vide("—"),
+                c.statut === "diffuse" ? <Etat key="s" teinte="vert">Diffusé</Etat> : <Etat key="s" teinte="bleu">Brouillon</Etat>,
+              ],
+            })),
+            gestes: [{ libelle: "Nouveau compte rendu", principal: true, desactive: gris }],
+          },
+          {
+            cle: "ordres-service",
+            libelle: "Ordres de service",
+            tri: "numéro",
+            vide: "Aucun ordre de service : ils s'émettent depuis le marché d'un lot.",
+            pied: os.length ? pluriel(os.length, "ordre de service", "ordres de service") : undefined,
+            colonnes: [
+              { libelle: "N°", largeur: "64px" },
+              { libelle: "Objet", largeur: "minmax(220px, 1fr)" },
+              { libelle: "Entreprise", largeur: "minmax(140px, 220px)" },
+              { libelle: "Montant HT", largeur: "130px", droite: true },
+              { libelle: "Émis le", largeur: "110px" },
+              { libelle: "État", largeur: "170px" },
+            ],
+            rangs: os.map((o) => ({
+              id: o.id,
+              cle: `os:${o.id}`,
+              cellules: [
+                <span key="n" className="lor-at-mono">n° {o.numero}</span>,
+                <span key="t" className="lor-at-cell-texte">{o.objet}</span>,
+                <span key="e" className="lor-at-cell-texte">{marcheDe.get(o.marche_id)?.titulaire ?? "—"}</span>,
+                o.montant_ht ? euros(o.montant_ht) : vide("—"),
+                court(o.emis_le),
+                o.statut === "signe" ? <Etat key="s" teinte="vert">Signé</Etat> : o.statut === "signe_reserves" ? <Etat key="s" teinte="vert">Signé avec réserves</Etat> : o.statut === "refuse" ? <Etat key="s" teinte="rouge">Refusé</Etat> : <Etat key="s" teinte="bleu">Émis</Etat>,
+              ],
+            })),
+            gestes: [],
+          },
+        ],
+      };
+    }
+    if (cle === "assurances") {
+      const att = de(dossier.attestations);
+      const inter = new Map(dossier.intervenants.map((i) => [i.id, i]));
+      const lots = de(dossier.lots).sort((a, b) => a.numero.localeCompare(b.numero, "fr", { numeric: true }));
+      const ETAT_ATT: Record<(typeof att)[number]["statut"], [string, "vert" | "bleu" | "gris" | "rouge"]> = { conforme: ["Conforme", "vert"], a_verifier: ["À vérifier", "bleu"], non_conforme: ["Non conforme", "rouge"], expiree: ["Expirée", "rouge"] };
+      const gestesAss = [{ libelle: "Ouverture du chantier", desactive: gris }, { libelle: "Saisir une attestation", principal: true, desactive: gris }];
+      return {
+        resume,
+        avis: projet.ouverture_chantier ? `Ouverture du chantier le ${plein(projet.ouverture_chantier)}` : null,
+        listes: [
+          {
+            cle: "attestations",
+            libelle: "Attestations",
+            tri: "fin de validité",
+            vide: "Aucune attestation : demandez la décennale et la RC de chaque entreprise avant l'ouverture du chantier.",
+            pied: att.length ? `${pluriel(att.length, "attestation")} · ${att.filter((a) => a.statut === "conforme").length} conforme${att.filter((a) => a.statut === "conforme").length > 1 ? "s" : ""}` : undefined,
+            colonnes: [
+              { libelle: "Entreprise", largeur: "minmax(200px, 1fr)" },
+              { libelle: "Lot", largeur: "minmax(140px, 200px)" },
+              { libelle: "Assureur", largeur: "minmax(130px, 180px)" },
+              { libelle: "Police", largeur: "140px" },
+              { libelle: "Valable jusqu'au", largeur: "130px" },
+              { libelle: "État", largeur: "140px" },
+            ],
+            rangs: att
+              .slice()
+              .sort((a, b) => (a.fin ?? "9999").localeCompare(b.fin ?? "9999"))
+              .map((a) => ({
+                id: a.id,
+                cle: `attestation:${a.id}`,
+                cellules: [
+                  <span key="e" className="lor-at-cell-texte">{a.assure ?? (a.intervenant_id ? inter.get(a.intervenant_id)?.organisme : null) ?? "—"}</span>,
+                  <span key="l" className="lor-at-cell-texte">{lotDe(a.lot_id)}</span>,
+                  a.assureur ? <span key="a" className="lor-at-cell-texte">{a.assureur}</span> : vide("—"),
+                  a.numero_police ? <span key="p" className="lor-at-mono">{a.numero_police}</span> : vide("—"),
+                  a.fin ? court(a.fin) : vide("—"),
+                  <Etat key="s" teinte={ETAT_ATT[a.statut][1]}>{ETAT_ATT[a.statut][0]}</Etat>,
+                ],
+              })),
+            gestes: gestesAss,
+          },
+          {
+            cle: "activites",
+            libelle: "Activités par lot",
+            tri: "lot",
+            vide: "Aucun lot : les activités à assurer se déclarent par lot.",
+            pied: lots.length ? pluriel(lots.length, "lot") : undefined,
+            colonnes: [
+              { libelle: "Lot", largeur: "minmax(200px, 1fr)" },
+              { libelle: "Activités requises", largeur: "minmax(200px, 1fr)" },
+              { libelle: "Attestation", largeur: "150px" },
+            ],
+            rangs: lots.map((l) => {
+              const a = att.find((x) => x.lot_id === l.id);
+              return {
+                id: l.id,
+                cellules: [
+                  <span key="l" className="lor-at-cell-texte">{`Lot ${l.numero} · ${l.intitule}`}</span>,
+                  l.activites_requises.length ? <span key="r" className="lor-at-cell-texte">{l.activites_requises.join(", ")}</span> : vide("—"),
+                  a ? <Etat key="s" teinte={ETAT_ATT[a.statut][1]}>{ETAT_ATT[a.statut][0]}</Etat> : <Etat key="s" teinte="gris">Aucune</Etat>,
+                ],
+              };
+            }),
+            gestes: gestesAss,
+          },
+        ],
+      };
+    }
+    return null;
+  })();
+
   const avecVolet = details || ouvert;
 
   return (
@@ -889,7 +1506,7 @@ export default function PageProjet({ id }: { id: string }) {
         ) : null}
 
         <div className="lor-in-corps">
-          <div className="lor-in-defile">
+          <div className="lor-in-defile" data-outil={outil ? "" : undefined}>
             {cle === "projet" ? (
               <div className="lor-in-colonne">
                 <div className="lor-in-tuile" style={{ "--lor-in-tuile": nature.couleur } as React.CSSProperties} aria-hidden="true">
@@ -1166,8 +1783,19 @@ export default function PageProjet({ id }: { id: string }) {
                 {tableau}
               </div>
             ) : (
-              <div className="lor-in-colonne lor-in-vue">
-                {tete ? (
+              <div className={outil ? "lor-in-vue-outil" : "lor-in-colonne lor-in-vue"}>
+                {outil ? (
+                  <OngletOutil
+                    listes={outil.listes}
+                    courante={listeParam ?? outil.listes[0].cle}
+                    lienListe={lienListe}
+                    resume={outil.resume}
+                    avis={outil.avis}
+                    declencher={declencher}
+                    choisir={(c) => contexte.choisir(c)}
+                    choisie={contexte.choisie}
+                  />
+                ) : tete ? (
                   <>
                     <div className="lor-in-tuile" style={{ "--lor-in-tuile": tete.couleur } as React.CSSProperties} aria-hidden="true">
                       <IconeSprite nom={tete.icone} couleur={tete.couleur} taille={24} />
@@ -1187,7 +1815,7 @@ export default function PageProjet({ id }: { id: string }) {
                     </div>
                   </>
                 ) : null}
-                {cle === "chantier" ? (
+                {cle === "chantier" && !outil ? (
                   <section className="lor-in-chantier-tete" aria-label="Bordereau et révision des prix">
                     <div className="lor-in-projets-tete">
                       <h3>Visas et révision des prix</h3>
@@ -1217,12 +1845,15 @@ export default function PageProjet({ id }: { id: string }) {
                     </ul>
                   </section>
                 ) : null}
+                {/* l'onglet d'outil garde les parties montées, cachées : leurs fenêtres et leurs détails (volet) */}
+                <div ref={cache} hidden={!!outil}>
                 <Habille>
                   <div className="lin lor-in-pont">
                     <ProjetCarte key={`${cle}-${projet.id}`} projet={projet} dossier={dossier} nommer={nommer} peutEcrire={peutEcrire} envoi={envoi} ouvrirForm={setForm} agir={agir} parties={ong.parties} confirmerEnvois />
                   </div>
                 </Habille>
-                {cle === "equipe" ? (
+                </div>
+                {cle === "equipe" && !outil ? (
                   <p className="lor-in-note">
                     {chefs.length ? `Les rappels partent à ${chefs.map((m) => nommer(m.user_id)).join(", ")} (${ROLES_PROJET.chef_projet.toLowerCase()}).` : "Personne : les rappels n'ont pas de destinataire. Nommez un chef de projet."}
                   </p>
