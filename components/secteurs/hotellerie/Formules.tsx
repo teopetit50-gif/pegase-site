@@ -139,7 +139,7 @@ function CarteEtroite({ p }: { p: Plan }) {
 
 function Case({ v }: { v: Valeur }) {
   if (v === true)
-    return <span className="flex size-5 items-center justify-center rounded-full bg-emerald-500/10 font-sans font-semibold text-emerald-600 text-xs" aria-label="Inclus"><Check className="size-3" strokeWidth={3} /></span>;
+    return <span className="flex size-5 items-center justify-center rounded-full bg-green-500/20 font-sans font-semibold text-green-600 text-xs" aria-label="Inclus"><Check className="size-3" strokeWidth={3} /></span>;
   if (v === false)
     return <span className="flex size-5 items-center justify-center rounded-full bg-[#171717]/[0.065] font-sans font-semibold text-[#171717]/65 text-xs" aria-label="Non inclus"><Minus className="size-3" strokeWidth={3} /></span>;
   return <span className="text-sm">{v}</span>;

@@ -149,7 +149,7 @@ export const FORMULES = {
   conseille: "Conseillé",
   plans: [
     { id: "demarrage", name: "Essentiel", cta: "Réserver un audit" },
-    { id: "chantiers", name: "Hôtel", cta: "Réserver un audit", popular: true },
+    { id: "chantiers", name: "Hôtel", cta: "Réserver un audit" },
     { id: "entreprise", name: "Groupe", cta: "Réserver un audit" },
   ],
   groupes: [
