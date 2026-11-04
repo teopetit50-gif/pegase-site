@@ -87,6 +87,11 @@ const jourLong = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00`
 const heure = (iso: string) => new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 const complet = (iso: string) => new Date(iso.length === 10 ? `${iso}T12:00:00` : iso).toLocaleString("fr-FR", { dateStyle: "long", timeStyle: iso.length === 10 ? undefined : "short" });
 const euros = (n: number) => `${n.toLocaleString("fr-FR", { maximumFractionDigits: 0 })} €`;
+/* « 9 h », « 10 h 30 » : l'heure dite comme dans la capture du site */
+const heureParlee = (iso: string) => {
+  const x = new Date(iso);
+  return `${x.getHours()} h${x.getMinutes() ? ` ${String(x.getMinutes()).padStart(2, "0")}` : ""}`;
+};
 const jourISO = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function couleurFamille(f: string | null): string {
@@ -269,7 +274,66 @@ function lignesDuJour(d: Dossier) {
   demain.setDate(demain.getDate() + 1);
   const fin = new Date();
   fin.setDate(fin.getDate() + horizon);
+  /* 04/11/2026 (docs/verification/PROMESSES-ECRANS.md, TIROMA n° 3) : « Trois décisions pour ce matin » de la capture
+     du site. My issues n'a pas de bandeau : les décisions sont un groupe de la liste, le premier, une ligne par
+     décision (le créneau le plus proche à sauver, les plans signés qui dorment, le fauteuil sans assistante). */
+  const decisions: Ligne[] = [];
+  const premierCreneau = [...creneaux].sort((a, b) => a.priorite - b.priorite)[0];
+  const creneauSource = premierCreneau ? d.creneaux.find((c) => `cr-${c.evenement_id}` === premierCreneau.cle) : undefined;
+  if (premierCreneau && creneauSource) {
+    decisions.push({ ...premierCreneau, cle: `de-${premierCreneau.cle}`, ident: "DÉ-1", titre: `Un créneau de ${heureParlee(creneauSource.debut)} à sauver, ${jourLong(creneauSource.debut)} — ${creneauSource.candidats[0] ? `appeler ${creneauSource.candidats[0].patient_nom}` : "aucun patient ne convient"}` });
+  }
+  const dorment = [...d.plans].filter((p) => !p.ne_pas_contacter && (p.mutuelle_accord_sans_rdv || p.jours_depuis >= 21)).sort((a, b) => Number(b.mutuelle_accord_sans_rdv) - Number(a.mutuelle_accord_sans_rdv) || b.jours_depuis - a.jours_depuis).slice(0, 2);
+  if (dorment.length) {
+    decisions.push({
+      cle: "de-plans",
+      ident: `DÉ-${decisions.length + 1}`,
+      priorite: 2,
+      statut: "todo",
+      titre: `${dorment.length > 1 ? "Deux plans signés qui dorment" : "Un plan signé qui dort"} — ${dorment.map((p) => `${p.patient_nom} (${p.jours_depuis} j)`).join(", ")}`,
+      puces: [
+        { type: "etiquette", couleur: ROSE, texte: "Plan signé" },
+        { type: "cycle", texte: euros(dorment.reduce((x, p) => x + (p.montant ?? 0), 0)), titre: "Montant des plans" },
+      ],
+      personne: dorment[0].praticien_nom,
+      date: jourCourt(dorment[0].signe_le ?? dorment[0].depuis),
+      dateTitre: `Signé le ${complet(dorment[0].signe_le ?? dorment[0].depuis)}`,
+      href: `${BASE}/plans?plan=${encodeURIComponent(dorment[0].plan_id)}`,
+    });
+  }
+  const sansAssistante = titulaire && d.charge ? [...d.charge.fauteuils].filter((f) => f.sans_assistante_exigee > 0).sort((a, b) => b.sans_assistante_exigee - a.sans_assistante_exigee)[0] : undefined;
+  const absente = (d.equipe ?? []).find((a) => a.soins.length);
+  if (sansAssistante) {
+    decisions.push({
+      cle: "de-assistante",
+      ident: `DÉ-${decisions.length + 1}`,
+      priorite: 2,
+      statut: "todo",
+      titre: `Un fauteuil sans assistante : ${sansAssistante.nom}, ${sansAssistante.sans_assistante_exigee} soin${sansAssistante.sans_assistante_exigee > 1 ? "s" : ""} qui en exige${sansAssistante.sans_assistante_exigee > 1 ? "nt" : ""} une, à basculer`,
+      puces: [{ type: "projet", icone: "Box", couleur: "lch(80 90 85)", texte: sansAssistante.nom }],
+      personne: null,
+      date: jourCourt(d.charge!.jour),
+      dateTitre: complet(d.charge!.jour),
+      href: `${BASE}/fauteuils?fauteuil=${encodeURIComponent(sansAssistante.fauteuil_id)}`,
+    });
+  } else if (absente) {
+    decisions.push({
+      cle: "de-assistante",
+      ident: `DÉ-${decisions.length + 1}`,
+      priorite: 2,
+      statut: "todo",
+      titre: `Absence de ${absente.membre}${absente.fauteuil_nom ? ` : ${absente.fauteuil_nom} sans assistante` : ""}, ${absente.soins.length} soin${absente.soins.length > 1 ? "s" : ""} à basculer`,
+      puces: absente.fauteuil_nom ? [{ type: "projet", icone: "Box", couleur: "lch(80 90 85)", texte: absente.fauteuil_nom }] : [],
+      personne: absente.membre,
+      date: jourCourt(absente.debut),
+      dateTitre: complet(absente.debut),
+      href: `${BASE}/fauteuils?vue=equipe`,
+    });
+  }
+  const EN_LETTRES = ["Aucune", "Une", "Deux", "Trois"];
+
   const groupes: Groupe[] = [
+    ...(decisions.length ? [{ cle: "decisions", libelle: `${EN_LETTRES[decisions.length]} décision${decisions.length > 1 ? "s" : ""} pour ce matin`, icone: "IssueStatusTriage" as NomTirIcone, couleurIcone: "#ff7336", compteur: decisions.length, lignes: decisions }] : []),
     { cle: "creneaux", libelle: "Créneaux à sauver", icone: "Cycle", couleurIcone: "lch(48 59.31 288.43)", compteur: creneaux.length, dates: `${jourCourt(jourISO(demain))} → ${jourCourt(jourISO(fin))}`, lignes: creneaux.sort(parPriorite), plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
     { cle: "plans", libelle: "Plans sans rendez-vous", compteur: plans.length, lignes: plans, plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
     { cle: "avant", libelle: "Avant les rendez-vous", compteur: avant.length, dates: critiques ? `${critiques} critique${critiques > 1 ? "s" : ""}` : `à J-${d.regles?.labo_verif_jours ?? 2}`, lignes: avant.sort(parPriorite), plus: `${BASE}/creneaux?vue=attente&inscrire=1`, plusTitre: "Nouvelle inscription en liste d'attente" },
