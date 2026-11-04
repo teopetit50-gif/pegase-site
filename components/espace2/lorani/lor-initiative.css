@@ -198,6 +198,11 @@ html[data-v2-theme="light"] .v2 .lor-in-tuile { background: color-mix(in lch, va
 .v2 .lor-in-large { max-width: 1001px; margin: 0 auto; padding-top: 32px; }
 .v2 .lor-in-note { margin-top: 16px; font-size: 12px; color: var(--lor-t3); }
 .v2 .lor-in-vue .v2-page { padding: 0; }
+/* 04/11 — les onglets du dossier (Réception, Chantier…) : plus de cadre blanc de l'ancien espace autour des
+   parties, qui collaient au bord sans marge (Teo : « c'est mal fait ») ; les parties sont posées sur la page
+   comme la section « Projects » d'une Initiative, séparées d'un filet */
+.v2 .lor .lor-in-pont > .esp-carte { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.v2 .lor .lor-in-pont > .esp-carte > .lvp-partie + .lvp-partie { margin-top: 32px; padding-top: 32px; border-top: 1px solid var(--lor-trait-carte); }
 /* le pont : les couleurs de lin.css (« dashboard ») remplacées par celles de Linear (lor.css) */
 .v2 .lor .lin.lor-in-pont {
   --lin-fond: var(--lor-carte);

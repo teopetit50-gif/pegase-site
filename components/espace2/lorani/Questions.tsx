@@ -177,17 +177,12 @@ const IcCacheOeil = () => (
   </Svg>
 );
 
-/* priorité de Plain : trois barres (Normal, Low, High) ou le carré rouge (Urgent) */
+/* priorité de Plain : trois barres ; 04/11 — plus de carré rouge pour Urgent ni de jaune pour Haute
+   (Teo : « j'aime pas ça ») : trois barres pleines, plus foncées pour Urgent */
 type Urgence = "urgent" | "haute" | "normale" | "basse";
 const LIBELLE_URGENCE: Record<Urgence, string> = { urgent: "Urgent", haute: "Haute", normale: "Normale", basse: "Basse" };
 function IcPriorite({ u }: { u: Urgence }) {
-  if (u === "urgent")
-    return (
-      <svg viewBox="0 0 18 18" aria-hidden="true">
-        <path fill="var(--pl-rouge-i)" fillRule="evenodd" clipRule="evenodd" d="M2.674 3.778C2 4.787 2 6.19 2 9c0 2.809 0 4.213.674 5.222.292.437.667.812 1.104 1.104C4.787 16 6.19 16 9 16c2.809 0 4.213 0 5.222-.674a4.003 4.003 0 0 0 1.104-1.104C16 13.213 16 11.81 16 9c0-2.809 0-4.213-.674-5.222a4.002 4.002 0 0 0-1.104-1.104C13.213 2 11.81 2 9 2c-2.809 0-4.213 0-5.222.674a4 4 0 0 0-1.104 1.104ZM9 10c.283 0 .52-.096.713-.287A.968.968 0 0 0 10 9V6a.968.968 0 0 0-.287-.713A.968.968 0 0 0 9 5a.968.968 0 0 0-.713.287A.968.968 0 0 0 8 6v3c0 .283.096.52.287.713.192.191.43.287.713.287Zm0 3c.283 0 .52-.096.713-.287A.968.968 0 0 0 10 12a.968.968 0 0 0-.287-.713A.967.967 0 0 0 9 11a.967.967 0 0 0-.713.287A.968.968 0 0 0 8 12c0 .283.096.52.287.713.192.191.43.287.713.287Z" />
-      </svg>
-    );
-  const c = u === "haute" ? ["var(--pl-jaune-i)", "var(--pl-jaune-i)", "var(--pl-jaune-i)"] : u === "normale" ? ["var(--pl-prio-vide)", "var(--pl-prio-plein)", "var(--pl-prio-plein)"] : ["var(--pl-prio-vide)", "var(--pl-prio-vide)", "var(--pl-prio-plein)"];
+  const c = u === "urgent" ? ["var(--pl-t1)", "var(--pl-t1)", "var(--pl-t1)"] : u === "haute" ? ["var(--pl-prio-plein)", "var(--pl-prio-plein)", "var(--pl-prio-plein)"] : u === "normale" ? ["var(--pl-prio-vide)", "var(--pl-prio-plein)", "var(--pl-prio-plein)"] : ["var(--pl-prio-vide)", "var(--pl-prio-vide)", "var(--pl-prio-plein)"];
   return (
     <svg viewBox="0 0 18 18" aria-hidden="true">
       <rect width="12" height="2" x="3" y="4" rx=".5" fill={c[0]} />
@@ -801,7 +796,6 @@ export default function Questions() {
         <div className="lor-pl-fil-flux">
           <p className="lor-pl-jour">{new Date(ouverte.p.cree_le).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</p>
           <div className="lor-pl-message">
-            {avatar(ouverte, "40")}
             <div className="lor-pl-message-carte">
               <p className="lor-pl-message-tete">
                 <b>{ouverte.chef ? nommer(ouverte.chef) : "L'agence"} → {destDe(ouverte)}{ouverte.dest?.email ? ` (${ouverte.dest.email})` : ""}</b>
@@ -833,7 +827,6 @@ export default function Questions() {
             <>
               {ouverte.p.repondu_le ? <p className="lor-pl-jour">{new Date(`${ouverte.p.repondu_le}T12:00:00`).toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</p> : null}
               <div className="lor-pl-message">
-                <span className="lor-pl-avatar lor-pl-avatar--40 lor-pl-avatar--neutre">{initiales(destDe(ouverte))}</span>
                 <div className="lor-pl-message-carte">
                   <p className="lor-pl-message-tete">
                     <b>{destDe(ouverte)}{ouverte.dest?.contact ? ` (${ouverte.dest.contact})` : ""}</b>
@@ -846,7 +839,6 @@ export default function Questions() {
           ) : null}
           {ouverte.chef ? (
             <div className="lor-pl-message">
-              <span />
               <div className="lor-pl-message-carte lor-pl-message-carte--note">
                 <p className="lor-pl-message-tete">
                   <b>Suivi de Lorani</b>

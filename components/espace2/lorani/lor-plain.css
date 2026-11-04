@@ -350,8 +350,9 @@ html[data-v2-theme="light"] .v2 .lor-pl {
   width: 18px;
   height: 18px;
   border-radius: 4px;
-  background: #3e9b6e;
-  color: #fff;
+  /* 04/11 — plus de tuile verte (Teo) : l'initiale du chef sur un gris neutre */
+  background: var(--pl-r3);
+  color: var(--pl-t1);
   font-size: 10px;
   font-weight: 600;
   line-height: 1;
@@ -525,16 +526,19 @@ html[data-v2-theme="light"] .v2 .lor-pl {
 .v2 .lor-pl-fil-corps { position: relative; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; }
 .v2 .lor-pl-fil-flux { display: flex; flex-direction: column; gap: 8px; padding: 24px 12px 24px 12px; flex: 1; }
 .v2 .lor-pl-jour { padding: 0 0 8px 56px; font-size: 12px; font-weight: 550; line-height: 16px; }
-.v2 .lor-pl-message { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 8px; }
+/* 04/11 — le fil sans avatars de 40 px : les cartes prennent toute la largeur */
+.v2 .lor-pl-message { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .v2 .lor-pl-message-carte { display: flex; flex-direction: column; gap: 6px; padding: 12px 16px 16px; border-radius: 8px; background: var(--pl-message); min-width: 0; }
-.v2 .lor-pl-message-carte--note { background: var(--pl-jaune-r1); }
+/* la note interne : plus de fond jaune (Teo, 04/11 : « c'est moche ») ; un simple cadre, en retrait */
+.v2 .lor-pl-message-carte--note { background: transparent; box-shadow: inset 0 0 0 1px var(--pl-b2); }
 .v2 .lor-pl-message-tete { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
 .v2 .lor-pl-message-tete b { font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2 .lor-pl-message-tete time { font-size: 12px; line-height: 16px; color: var(--pl-t2); white-space: nowrap; }
-.v2 .lor-pl-message-carte--note .lor-pl-message-tete b { font-size: 12px; color: var(--pl-jaune-t1); }
-.v2 .lor-pl-message-carte--note .lor-pl-message-tete time, .v2 .lor-pl-message-pied { color: var(--pl-jaune-t2); }
+.v2 .lor-pl-message-carte--note .lor-pl-message-tete b { font-size: 12px; color: var(--pl-t1); }
+.v2 .lor-pl-message-carte--note .lor-pl-message-corps { color: var(--pl-t2); }
+.v2 .lor-pl-message-carte--note .lor-pl-message-tete time, .v2 .lor-pl-message-pied { color: var(--pl-i1); }
 .v2 .lor-pl-message-corps { white-space: pre-wrap; overflow-wrap: anywhere; }
-.v2 .lor-pl-message-pied { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 550; line-height: 16px; }
+.v2 .lor-pl-message-pied { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 450; line-height: 16px; }
 .v2 .lor-pl-message-pied svg { width: 14px; height: 14px; }
 .v2 .lor-pl-evenement { display: flex; align-items: center; gap: 6px; min-height: 21px; padding-left: 56px; font-size: 12px; line-height: 16px; color: var(--pl-t2); flex-wrap: wrap; }
 .v2 .lor-pl-evenement::before { content: ""; width: 4px; height: 4px; margin: 0 6px 0 -14px; border-radius: 50%; background: var(--pl-i2); }
