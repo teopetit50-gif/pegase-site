@@ -174,3 +174,19 @@ export function libelleChamp(champ: string): string {
   if (m) return `Ligne ${m[1]} — ${m[2] === "designation" ? "désignation" : m[2] === "montant_ht" ? "montant HT" : m[2]}`;
   return champ.replace(/[._]/g, " ");
 }
+
+/* 04/11 — la forme de la pièce reçue (promesse FILED n° 5) : une photo (pieces.mime image/…), un ticket de
+   caisse, une note de frais, un relevé, une facture écrite à la main (pieces.type_piece, posé par le lecteur).
+   Nulle pour un PDF de facture ordinaire. */
+const FORMES: Record<string, string> = {
+  ticket_caisse: "Ticket de caisse",
+  note_de_frais: "Note de frais",
+  releve: "Relevé",
+  manuscrit: "Facture écrite à la main",
+};
+export function formePiece(piece: { mime: string; type_piece: string | null; methode?: string | null } | null | undefined): string | null {
+  if (!piece) return null;
+  if (piece.type_piece && FORMES[piece.type_piece]) return FORMES[piece.type_piece];
+  if (piece.mime.startsWith("image/")) return "Photo";
+  return null;
+}

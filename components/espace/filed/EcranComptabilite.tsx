@@ -25,6 +25,7 @@ import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, Dia
 import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
 import { EXEMPLE_CLIENT_ID, ENTITES } from "../exemples/socle";
+import { EXERCICES_FILED_EXEMPLE } from "../exemples/filed";
 import { useSource } from "../source";
 import { Avis, Chargement, Pastille, Ruban } from "../ui";
 import { montant } from "../format";
@@ -32,12 +33,15 @@ import { COMPTES_SYSTEME, SOUS_TITRE_FEC, exporterFec, quand, reglerCompte, tele
 import { monClient } from "./portes";
 import ExportsFiled from "./ExportsFiled";
 
-export type Exercice = { id: string; libelle: string; debut: string; fin: string; statut: string; entite_id: string | null };
+/* 04/11 — cloture_le (filed_exercices, a4_01) : la date après laquelle une pièce est orientée vers l'exercice suivant (promesse FILED n° 37) */
+export type Exercice = { id: string; libelle: string; debut: string; fin: string; statut: string; entite_id: string | null; cloture_le?: string | null };
 export type Compte = { role: RoleCompte; numero: string; libelle: string; regle: boolean };
 export type Contexte = { client: string; role: string | null; entites: { id: string; nom: string; siren?: string | null }[]; exercices: Exercice[]; comptes: Compte[] };
 
 const annee = new Date().getFullYear();
-export const EXERCICES_EXEMPLE: Exercice[] = [{ id: "ex-2026", libelle: `Exercice ${annee}`, debut: `${annee}-01-01`, fin: `${annee}-12-31`, statut: "ouvert", entite_id: null }];
+/* 04/11 — les exercices d'exemple partagés avec Espace 2 : le siège en année civile, l'agence de Grenoble avec un
+   exercice clos et le suivant ouvert (exemples/filed.ts, promesse FILED n° 37) */
+export const EXERCICES_EXEMPLE: Exercice[] = EXERCICES_FILED_EXEMPLE;
 const comptesDefaut = (): Compte[] => COMPTES_SYSTEME.map((c) => ({ role: c.role, numero: c.numero, libelle: c.defaut, regle: false }));
 
 /* l'exemple : un FEC fabriqué à partir des écritures d'exemple, au format exact (tabulations, CRLF) */

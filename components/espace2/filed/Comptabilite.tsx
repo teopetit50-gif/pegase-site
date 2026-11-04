@@ -22,19 +22,22 @@ import { Pencil } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { createClient } from "@/lib/supabase/client";
-import { DOSSIERS_EXEMPLE } from "@/components/espace/exemples/filed";
+import { CENTRES_COUT_EXEMPLE, DOSSIERS_EXEMPLE, IMPUTATIONS_EXEMPLE, MENTION_EXERCICE_EXEMPLE, dossiersTransmisExemple } from "@/components/espace/exemples/filed";
 import { EXEMPLE_CLIENT_ID, ENTITES } from "@/components/espace/exemples/socle";
 import { useSource } from "@/components/espace/source";
 import { Avis } from "@/components/espace/ui";
 import { montant, nombreFr } from "@/components/espace/format";
 import { COMPTES_SYSTEME, SOUS_TITRE_FEC, exporterFec, quand, reglerCompte, telecharger, type ExportFec, type RoleCompte } from "@/components/espace/filed/factureElectronique";
 import { EXERCICES_EXEMPLE, fecExemple, type Compte, type Contexte } from "@/components/espace/filed/EcranComptabilite";
-import { chargerVueFournisseurs, monClient, type FactureDuFournisseur } from "@/components/espace/filed/portes";
+import { chargerCentres, chargerVueFournisseurs, monClient, type CentreLu, type FactureDuFournisseur } from "@/components/espace/filed/portes";
 import ChargesReprise from "./ChargesReprise";
+import { useMonte } from "../horloge";
 import { exemples as exportsExemple, nature as natureExport, nomFichier as fichierExport, periode as periodeExport, type ExportFiled } from "@/components/espace/filed/ExportsFiled";
 import { AvisRapport, CarteRapport, CourbeRapport, Rapport, SectionRapport, TableauRapport, pluriel, serieDatee, useParametresRapport } from "../lin/Rapports";
 
 const annee = new Date().getFullYear();
+/* 04/11 — une date calendaire (AAAA-MM-JJ) en JJ/MM/AAAA, sans glissement de fuseau */
+const jourFr = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 const comptesDefaut = (): Compte[] => COMPTES_SYSTEME.map((c) => ({ role: c.role, numero: c.numero, libelle: c.defaut, regle: false }));
 const COMPTABILISEES = new Set(["validee", "comptabilisee"]);
 type Ecriture = { jour: string; ht: number; tva: number; ttc: number; nature: "facture" | "avoir" };
@@ -55,7 +58,7 @@ export default function Comptabilite() {
       if (!moi) throw new Error("Aucun compte rattaché à cette session.");
       const supabase = createClient();
       const [ex, cs, vue] = await Promise.all([
-        supabase.from("filed_exercices").select("id, libelle, debut, fin, statut, entite_id").eq("client_id", moi.client_id).order("debut", { ascending: false }),
+        supabase.from("filed_exercices").select("id, libelle, debut, fin, statut, entite_id, cloture_le").eq("client_id", moi.client_id).order("debut", { ascending: false }),
         supabase.from("filed_comptes_systeme").select("role, numero, libelle").eq("client_id", moi.client_id),
         chargerVueFournisseurs().catch(() => null),
       ]);
@@ -122,6 +125,62 @@ export default function Comptabilite() {
     };
   }, [source, ctx?.client]);
   const exportsListe = useMemo(() => (source === "exemple" ? exportsExemple() : exportsReels), [source, exportsReels]);
+
+  /* ——— 04/11 — les dossiers transmis à la comptabilité (promesse FILED n° 11) : en exemple, les deux derniers FEC
+     mensuels ; en base réelle, le dernier export de cette session (le journal des exports n'est pas relu ici) ——— */
+  const monte = useMonte();
+  const transmis = useMemo(() => (source === "exemple" && monte ? dossiersTransmisExemple() : []), [source, monte]);
+
+  /* ——— 04/11 — les centres de coût et ce qui leur est imputé (promesse FILED n° 45) ——— */
+  const [centresReels, setCentresReels] = useState<CentreLu[] | null>(null);
+  useEffect(() => {
+    if (source !== "reelle" || !ctx?.client) return;
+    let actif = true;
+    chargerCentres(ctx.client)
+      .then((c) => actif && setCentresReels(c))
+      .catch(() => actif && setCentresReels([]));
+    return () => {
+      actif = false;
+    };
+  }, [source, ctx?.client]);
+  const centres: CentreLu[] | null = useMemo(() => {
+    if (source !== "exemple") return centresReels;
+    return CENTRES_COUT_EXEMPLE.map((c) => {
+      const ds = DOSSIERS_EXEMPLE.filter((d) => d.facture && IMPUTATIONS_EXEMPLE[d.document.reference]?.centre === c.code && (!filtre || d.document.entite_id === filtre));
+      const signe = (d: (typeof ds)[number]) => (d.facture!.nature === "avoir" ? -1 : 1);
+      return {
+        code: c.code,
+        libelle: c.libelle,
+        actif: true,
+        nb_factures: ds.length,
+        montant_ht: Math.round(ds.reduce((t, d) => t + signe(d) * (d.facture!.montant_ht ?? 0), 0) * 100) / 100,
+        nb_validees: ds.filter((d) => IMPUTATIONS_EXEMPLE[d.document.reference]?.statut === "validee").length,
+      };
+    });
+  }, [source, centresReels, filtre]);
+
+  /* ——— 04/11 — les pièces orientées vers l'exercice suivant, par exercice clos (promesse FILED n° 37) ——— */
+  const [orienteesReelles, setOrienteesReelles] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (source !== "reelle" || !ctx?.client) return;
+    let actif = true;
+    void createClient()
+      .from("filed_factures_exercices")
+      .select("exercice_naturel_id")
+      .eq("client_id", ctx.client)
+      .eq("orientee", true)
+      .then(({ data }) => {
+        if (!actif) return;
+        const n: Record<string, number> = {};
+        for (const x of (data ?? []) as { exercice_naturel_id: string | null }[]) if (x.exercice_naturel_id) n[x.exercice_naturel_id] = (n[x.exercice_naturel_id] ?? 0) + 1;
+        setOrienteesReelles(n);
+      });
+    return () => {
+      actif = false;
+    };
+  }, [source, ctx?.client]);
+  const orientees = source === "exemple" ? ({ "ex-agence-clos": 1 } as Record<string, number>) : orienteesReelles;
+  const nomSociete = (id: string | null) => (id ? (ctx?.entites.find((e) => e.id === id)?.nom ?? ENTITES.find((e) => e.id === id)?.nom ?? "Société") : "Toute l'organisation");
 
   /* ——— l'export ——— */
   const [entite, setEntite] = useState("");
@@ -277,13 +336,15 @@ export default function Comptabilite() {
             taille="pleine"
             titre="Export"
             info={`${SOUS_TITRE_FEC} Un exercice ou une période, une société ; le fichier est téléchargé tel quel (UTF-8, tabulations, CRLF).`}
-            chiffre={resultat ? nombreFr(resultat.lignes) : "—"}
+            chiffre={resultat ? nombreFr(resultat.lignes) : transmis[0] ? nombreFr(transmis[0].lignes) : "—"}
             legende={
               resultat
                 ? `${pluriel(resultat.ecritures, "écriture")} · débit ${montant(resultat.total_debit)} = crédit ${montant(resultat.total_credit)}`
-                : peutExporter
-                  ? "lignes du dernier export"
-                  : "réservé au gérant, à l'administrateur et au valideur"
+                : transmis[0]
+                  ? `lignes du dernier export · dossier de ${transmis[0].mois} transmis à la comptabilité, ${transmis[0].pieces} pièces`
+                  : peutExporter
+                    ? "lignes du dernier export"
+                    : "réservé au gérant, à l'administrateur et au valideur"
             }
             etat={resultat ? (resultat.equilibre ? "vert" : "orange") : "gris"}
             etatTitre={resultat && !resultat.equilibre ? "Une écriture déséquilibrée" : undefined}
@@ -361,6 +422,104 @@ export default function Comptabilite() {
               </div>
             ) : (
               <p className="rap-sous">L&apos;export du FEC est réservé au gérant, à l&apos;administrateur et au valideur.</p>
+            )}
+          </CarteRapport>
+        </SectionRapport>
+
+        {/* 04/11 — les dossiers transmis : « Dossier prêt — <mois> transmis à la comptabilité, 214 pièces » (promesse FILED n° 11) */}
+        {source === "exemple" ? (
+          <SectionRapport titre="Dossiers transmis à la comptabilité" meta="Le FEC du mois écoulé, préparé par FILED et transmis par une personne">
+            <CarteRapport
+              taille="pleine"
+              titre="Dossier prêt"
+              info="Chaque début de mois, les pièces du mois écoulé partent en un FEC ; l'export est inscrit au journal avec son empreinte."
+              chiffre={transmis[0] ? nombreFr(transmis[0].pieces) : "—"}
+              legende={transmis[0] ? `pièces dans le dossier de ${transmis[0].mois}, transmis le ${quand(transmis[0].transmis_le)}` : ""}
+              etat="vert"
+            >
+              <TableauRapport libelle="Dossiers transmis à la comptabilité" colonnes={[{ libelle: "Dossier" }, { libelle: "Période" }, { libelle: "Pièces", num: true }, { libelle: "Lignes du FEC", num: true }, { libelle: "Total débit = crédit", num: true }, { libelle: "Transmis" }]}>
+                {transmis.map((x) => (
+                  <tr key={x.du}>
+                    <td style={{ fontWeight: 500 }}>Dossier prêt — {x.mois.replace(/^./, (c) => c.toUpperCase())} transmis à la comptabilité, {x.pieces} pièces</td>
+                    <td>
+                      {jourFr(x.du)} → {jourFr(x.au)}
+                    </td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{nombreFr(x.pieces)}</td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{nombreFr(x.lignes)}</td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{montant(x.total)}</td>
+                    <td>
+                      {quand(x.transmis_le)} · {x.par}
+                    </td>
+                  </tr>
+                ))}
+              </TableauRapport>
+            </CarteRapport>
+          </SectionRapport>
+        ) : null}
+
+        {/* 04/11 — les exercices et leur clôture : une pièce reçue après est orientée vers l'exercice suivant (promesse FILED n° 37) */}
+        <SectionRapport titre="Exercices" meta="Une pièce reçue après la clôture est orientée vers l'exercice suivant, avec sa mention">
+          <CarteRapport
+            taille="pleine"
+            titre="Exercices comptables"
+            info="filed_exercices : un exercice par société (ou pour toute l'organisation) ; clos à une date, il ne reçoit plus de pièce."
+            chiffre={ctx ? nombreFr(ctx.exercices.filter((x) => x.statut === "cloture").length) : "—"}
+            legende={ctx ? `clos sur ${pluriel(ctx.exercices.length, "exercice")}` : ""}
+            etat="vert"
+          >
+            {!ctx ? (
+              <p className="rap-sous">Lecture…</p>
+            ) : !ctx.exercices.length ? (
+              <p className="rap-sous">Aucun exercice ouvert : les pièces ne portent pas encore d&apos;exercice.</p>
+            ) : (
+              <>
+                <TableauRapport libelle="Exercices comptables" colonnes={[{ libelle: "Exercice" }, { libelle: "Société" }, { libelle: "Période" }, { libelle: "Statut" }, { libelle: "Reçues après la clôture", num: true }]}>
+                  {ctx.exercices.map((x) => (
+                    <tr key={x.id}>
+                      <td style={{ fontWeight: 500 }}>{x.libelle}</td>
+                      <td>{nomSociete(x.entite_id)}</td>
+                      <td>
+                        {jourFr(x.debut)} → {jourFr(x.fin)}
+                      </td>
+                      <td>{x.statut === "cloture" ? `clos le ${x.cloture_le ? jourFr(x.cloture_le) : "—"}` : "ouvert"}</td>
+                      <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{x.statut === "cloture" ? nombreFr(orientees[x.id] ?? 0) : "—"}</td>
+                    </tr>
+                  ))}
+                </TableauRapport>
+                {source === "exemple" ? <p className="rap-sous">{MENTION_EXERCICE_EXEMPLE} Le contrôle « Exercice » l&apos;a marquée : R2026-000028.</p> : null}
+              </>
+            )}
+          </CarteRapport>
+        </SectionRapport>
+
+        {/* 04/11 — chaque pièce affectée au plan comptable et au centre de coût qui la portent (promesse FILED n° 45) */}
+        <SectionRapport titre="Centres de coût" meta="Le centre de coût que porte chaque facture, proposé par FILED ou posé par une personne">
+          <CarteRapport
+            taille="pleine"
+            titre="Imputations par centre de coût"
+            info="filed_imputations : compte du plan comptable et centre de coût, ligne par ligne ; une imputation proposée attend qu'une personne la valide."
+            chiffre={centres ? nombreFr(centres.filter((c) => c.nb_factures).length) : "—"}
+            legende={centres ? `centres imputés sur ${pluriel(centres.length, "centre")}` : ""}
+            etat="vert"
+          >
+            {!centres ? (
+              <p className="rap-sous">Lecture…</p>
+            ) : !centres.length ? (
+              <p className="rap-sous">Aucun centre de coût n&apos;est encore défini.</p>
+            ) : (
+              <TableauRapport libelle="Imputations par centre de coût" colonnes={[{ libelle: "Centre de coût" }, { libelle: "Factures", num: true }, { libelle: "dont validées", num: true }, { libelle: "Montant HT", num: true }]}>
+                {centres.map((c) => (
+                  <tr key={c.code}>
+                    <td style={{ fontWeight: 500 }}>
+                      {c.code} — {c.libelle}
+                      {c.actif ? null : <span className="rap-pastille">retiré</span>}
+                    </td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{nombreFr(c.nb_factures)}</td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{nombreFr(c.nb_validees)}</td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{montant(c.montant_ht)}</td>
+                  </tr>
+                ))}
+              </TableauRapport>
             )}
           </CarteRapport>
         </SectionRapport>

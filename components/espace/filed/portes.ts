@@ -330,3 +330,90 @@ export type LigneEngage = { entite_id: string | null; entite: string | null; fou
 export type DelaiTraitement = { nb_factures: number; delai_moyen_jours: number | null; delai_median_jours: number | null; delai_max_jours: number | null };
 export const engageMois = (p_client: string, p_mois: string) => rpc<LigneEngage[]>("filed_engage_mois", { p_client, p_mois });
 export const delaiTraitement = async (p_client: string) => ((await rpc<DelaiTraitement[]>("filed_delai_traitement", { p_client })) ?? [])[0] ?? null;
+
+/* 04/11 — La piste d'audit et la vérification d'archive (a4_05, promesse FILED n° 48) : deux portes en lecture,
+   ouvertes au gérant, à l'admin, au valideur et au collaborateur qui voient la pièce.
+     filed_piste_audit(p_facture) → table (survenu_le, source, etape, message, acteur, detail) : réception,
+       historique, contrôles, demandes et décisions, imputations, archives, lignes du journal opposable ;
+     filed_verifier_archive(p_facture) → jsonb : { archivee, integre, version, version_courante, empreinte_archive,
+       empreinte_recalculee, journal, journal_porte_empreinte, archive_le } ou { archivee: false, motif }. */
+export type LignePiste = { survenu_le: string; source: string; etape: string; message: string; acteur: string | null; detail: Record<string, unknown> | null };
+export type VerificationArchive = {
+  archivee: boolean;
+  integre?: boolean | null;
+  motif?: string;
+  version?: number;
+  version_courante?: number;
+  empreinte_archive?: string;
+  empreinte_recalculee?: string;
+  journal?: number | null;
+  journal_porte_empreinte?: boolean;
+  archive_le?: string;
+};
+export const pisteAudit = async (p_facture: string) => (await rpc<LignePiste[]>("filed_piste_audit", { p_facture })) ?? [];
+export const verifierArchive = (p_facture: string) => rpc<VerificationArchive>("filed_verifier_archive", { p_facture });
+
+/* 04/11 — L'imputation d'une facture (filed_imputations, filed_plan_comptable, filed_centres_cout, a4_01) et son
+   exercice (filed_factures_exercices, a4_02), en lecture sous RLS (promesses FILED n° 37 et 45). */
+export type ImputationLue = { rang: number; compte: string; compte_libelle: string | null; centre: string | null; centre_libelle: string | null; montant_ht: number | null; statut: string; origine: string; confiance: number | null; mention: string | null };
+export type ExerciceLu = { libelle: string | null; orientee: boolean; mention: string | null };
+export async function chargerImputation(p_facture: string): Promise<{ lignes: ImputationLue[]; exercice: ExerciceLu | null }> {
+  const supabase = createClient();
+  const [im, ex] = await Promise.all([
+    supabase
+      .from("filed_imputations")
+      .select("rang, montant_ht, statut, origine, confiance, mention, compte:filed_plan_comptable(numero, libelle), centre:filed_centres_cout(code, libelle)")
+      .eq("facture_id", p_facture)
+      .in("statut", ["proposee", "validee"])
+      .order("rang"),
+    supabase.from("filed_factures_exercices").select("exercice_id, orientee, mention").eq("facture_id", p_facture).maybeSingle(),
+  ]);
+  if (im.error) throw new ErreurPorte(message(im.error));
+  const un = <T,>(x: T | T[] | null | undefined): T | null => (Array.isArray(x) ? (x[0] ?? null) : (x ?? null));
+  const lignes = ((im.data ?? []) as Record<string, unknown>[]).map((l) => {
+    const c = un(l.compte as { numero: string; libelle: string } | null);
+    const k = un(l.centre as { code: string; libelle: string } | null);
+    return {
+      rang: Number(l.rang ?? 1),
+      compte: c?.numero ?? "—",
+      compte_libelle: c?.libelle ?? null,
+      centre: k?.code ?? null,
+      centre_libelle: k?.libelle ?? null,
+      montant_ht: l.montant_ht === null || l.montant_ht === undefined ? null : Number(l.montant_ht),
+      statut: String(l.statut ?? ""),
+      origine: String(l.origine ?? ""),
+      confiance: l.confiance === null || l.confiance === undefined ? null : Number(l.confiance),
+      mention: (l.mention as string | null) ?? null,
+    };
+  });
+  let exercice: ExerciceLu | null = null;
+  const e = ex.data as { exercice_id: string | null; orientee: boolean; mention: string | null } | null;
+  if (e) {
+    const lib = e.exercice_id ? await supabase.from("filed_exercices").select("libelle").eq("id", e.exercice_id).maybeSingle() : null;
+    exercice = { libelle: (lib?.data as { libelle: string } | null)?.libelle ?? null, orientee: !!e.orientee, mention: e.mention ?? null };
+  }
+  return { lignes, exercice };
+}
+
+/* 04/11 — Les centres de coût et ce qui leur est imputé, pour Comptabilité (promesse FILED n° 45) */
+export type CentreLu = { code: string; libelle: string; actif: boolean; nb_factures: number; montant_ht: number; nb_validees: number };
+export async function chargerCentres(p_client: string): Promise<CentreLu[]> {
+  const supabase = createClient();
+  const [cs, im] = await Promise.all([
+    supabase.from("filed_centres_cout").select("id, code, libelle, actif").eq("client_id", p_client).order("code"),
+    supabase.from("filed_imputations").select("facture_id, centre_id, montant_ht, statut").eq("client_id", p_client).in("statut", ["proposee", "validee"]),
+  ]);
+  if (cs.error) throw new ErreurPorte(message(cs.error));
+  const lignes = (im.data ?? []) as { facture_id: string; centre_id: string | null; montant_ht: number; statut: string }[];
+  return ((cs.data ?? []) as { id: string; code: string; libelle: string; actif: boolean }[]).map((c) => {
+    const l = lignes.filter((x) => x.centre_id === c.id);
+    return {
+      code: c.code,
+      libelle: c.libelle,
+      actif: c.actif,
+      nb_factures: new Set(l.map((x) => x.facture_id)).size,
+      montant_ht: Math.round(l.reduce((s, x) => s + Number(x.montant_ht ?? 0), 0) * 100) / 100,
+      nb_validees: new Set(l.filter((x) => x.statut === "validee").map((x) => x.facture_id)).size,
+    };
+  });
+}

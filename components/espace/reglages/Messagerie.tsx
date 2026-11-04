@@ -13,6 +13,11 @@
    Liste : public.messageries (RLS gérants et admins). Déconnecter :
    public.messagerie_revoquer(id) → ce qui reste à faire par le client.
    Microsoft : affiché, pas encore branché.
+   04/11 — plusieurs boîtes (promesse FILED n° 54 : « Une boîte mail
+   connectée » / « Deux boîtes » / « Boîtes illimitées » selon le palier) :
+   la liste montre chaque boîte Gmail connectée (messageries_une_boite :
+   une ligne par adresse), chacune avec sa déconnexion, et « Ajouter une
+   boîte Gmail » ; l'exemple en a deux.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useState } from "react";
@@ -40,10 +45,16 @@ function droits(portees: string[] | null): string {
   return d.length ? d.join(", ") : "—";
 }
 
-const EXEMPLE: Connexion = { id: "ex-gmail", fournisseur: "gmail", adresse: "factures@atelier-bertin.fr", etat: "active", erreur: null, portees: ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.compose"], connecte_le: ilYa(5, 9) };
+const PORTEES_EXEMPLE = ["https://www.googleapis.com/auth/gmail.readonly", "https://www.googleapis.com/auth/gmail.compose"];
+const EXEMPLES: Connexion[] = [
+  { id: "ex-gmail", fournisseur: "gmail", adresse: "factures@atelier-bertin.fr", etat: "active", erreur: null, portees: PORTEES_EXEMPLE, connecte_le: ilYa(5, 9) },
+  { id: "ex-gmail-grenoble", fournisseur: "gmail", adresse: "grenoble@atelier-bertin.fr", etat: "active", erreur: null, portees: PORTEES_EXEMPLE, connecte_le: ilYa(32, 14) },
+];
+/* les paliers de FILED (lib/produits/factures.ts) : combien de boîtes chacun compte */
+const PALIERS = "Une boîte en Découverte, deux en Standard, illimitées en Entreprise.";
 
 export default function Messagerie({ source, client, gere, pret }: { source: "exemple" | "reelle"; client: string | null; gere: boolean; pret: boolean }) {
-  const [exemple, setExemple] = useState<Connexion[]>([EXEMPLE]);
+  const [exemple, setExemple] = useState<Connexion[]>(EXEMPLES);
   const [reel, setReel] = useState<Connexion[] | null>(null);
   const [envoi, setEnvoi] = useState<string | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -75,7 +86,8 @@ export default function Messagerie({ source, client, gere, pret }: { source: "ex
   }, [source, gere, charger]);
 
   const liste = source === "exemple" ? exemple : (reel ?? []);
-  const gmail = liste.find((c) => c.fournisseur === "gmail" && c.etat !== "revoquee") ?? null;
+  const gmails = liste.filter((c) => c.fournisseur === "gmail" && c.etat !== "revoquee");
+  const actives = gmails.filter((c) => c.etat === "active").length;
 
   const connecter = async () => {
     setErreur(null);
@@ -145,33 +157,62 @@ export default function Messagerie({ source, client, gere, pret }: { source: "ex
         ) : (
           <ul className="esp-fil" aria-label="Messageries">
             <li>
-              <span className="esp-fil-point" data-teinte={gmail?.etat === "active" ? "vert" : gmail?.etat === "a_reconnecter" ? "rouge" : undefined} />
+              <span className="esp-fil-point" data-teinte={actives ? "vert" : undefined} />
               <div style={{ display: "grid", gap: 6 }}>
                 <div className="esp-fil-texte esp-item-haut">
                   <strong>Gmail</strong>
-                  {gmail?.etat === "active" ? <Pastille teinte="vert">connectée</Pastille> : gmail?.etat === "a_reconnecter" ? <Pastille teinte="rouge">à reconnecter</Pastille> : gmail?.etat === "deconnexion" ? <Pastille teinte="gris">déconnexion en cours</Pastille> : <Pastille teinte="gris">non connectée</Pastille>}
+                  {gmails.length ? <Pastille teinte={actives ? "vert" : "rouge"}>{gmails.length > 1 ? `${gmails.length} boîtes connectées` : actives ? "connectée" : "à reconnecter"}</Pastille> : <Pastille teinte="gris">non connectée</Pastille>}
                 </div>
-                {gmail && gmail.etat !== "revoquee" ? (
-                  <div className="esp-fil-meta">
-                    <span className="esp-mono">{gmail.adresse ?? "adresse inconnue"}</span>
-                    {gmail.connecte_le ? ` · connectée le ${dateHeure(gmail.connecte_le)}` : ""} · droits : {droits(gmail.portees)}
+                <div className="esp-fil-meta">
+                  {source === "exemple" ? `Palier Standard : ${gmails.length} boîte${gmails.length > 1 ? "s" : ""} sur 2. ` : ""}
+                  {PALIERS}
+                </div>
+                {!gmails.length ? (
+                  <div className="esp-actions">
+                    <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!!envoi} onClick={() => void connecter()}>
+                      {envoi === "connecter" ? <Loader variant="spin" /> : <Mail width={13} height={13} aria-hidden="true" />} Connecter Gmail
+                    </button>
                   </div>
                 ) : null}
-                {gmail?.etat === "a_reconnecter" ? <div className="esp-fil-meta">{gmail.erreur ?? "Google a retiré l'accès (mot de passe changé ou accès révoqué)."} Reconnectez-la.</div> : null}
-                <div className="esp-actions">
-                  {!gmail || gmail.etat === "a_reconnecter" ? (
-                    <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!!envoi} onClick={() => void connecter()}>
-                      {envoi === "connecter" ? <Loader variant="spin" /> : <Mail width={13} height={13} aria-hidden="true" />} {gmail ? "Reconnecter Gmail" : "Connecter Gmail"}
-                    </button>
-                  ) : null}
-                  {gmail && gmail.etat !== "deconnexion" ? (
-                    <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!envoi} onClick={() => void deconnecter(gmail)}>
-                      {envoi === gmail.id ? <Loader variant="spin" /> : <Unplug width={13} height={13} aria-hidden="true" />} Déconnecter
-                    </button>
-                  ) : null}
-                </div>
               </div>
             </li>
+            {gmails.map((gmail) => (
+              <li key={gmail.id}>
+                <span className="esp-fil-point" data-teinte={gmail.etat === "active" ? "vert" : gmail.etat === "a_reconnecter" ? "rouge" : undefined} />
+                <div style={{ display: "grid", gap: 6 }}>
+                  <div className="esp-fil-texte esp-item-haut">
+                    <strong className="esp-mono">{gmail.adresse ?? "adresse inconnue"}</strong>
+                    {gmail.etat === "active" ? <Pastille teinte="vert">connectée</Pastille> : gmail.etat === "a_reconnecter" ? <Pastille teinte="rouge">à reconnecter</Pastille> : <Pastille teinte="gris">déconnexion en cours</Pastille>}
+                  </div>
+                  <div className="esp-fil-meta">
+                    Gmail{gmail.connecte_le ? ` · connectée le ${dateHeure(gmail.connecte_le)}` : ""} · droits : {droits(gmail.portees)}
+                  </div>
+                  {gmail.etat === "a_reconnecter" ? <div className="esp-fil-meta">{gmail.erreur ?? "Google a retiré l'accès (mot de passe changé ou accès révoqué)."} Reconnectez-la.</div> : null}
+                  <div className="esp-actions">
+                    {gmail.etat === "a_reconnecter" ? (
+                      <button type="button" className="r-btn r-btn--noir r-btn--petit" disabled={!!envoi} onClick={() => void connecter()}>
+                        {envoi === "connecter" ? <Loader variant="spin" /> : <Mail width={13} height={13} aria-hidden="true" />} Reconnecter Gmail
+                      </button>
+                    ) : null}
+                    {gmail.etat !== "deconnexion" ? (
+                      <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!envoi} onClick={() => void deconnecter(gmail)}>
+                        {envoi === gmail.id ? <Loader variant="spin" /> : <Unplug width={13} height={13} aria-hidden="true" />} Déconnecter
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+              </li>
+            ))}
+            {gmails.length ? (
+              <li>
+                <span className="esp-fil-point" />
+                <div className="esp-actions">
+                  <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={!!envoi} onClick={() => void connecter()}>
+                    {envoi === "connecter" ? <Loader variant="spin" /> : <Mail width={13} height={13} aria-hidden="true" />} Ajouter une boîte Gmail
+                  </button>
+                </div>
+              </li>
+            ) : null}
             <li>
               <span className="esp-fil-point" />
               <div style={{ display: "grid", gap: 6 }}>

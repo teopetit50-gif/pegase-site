@@ -64,10 +64,10 @@ import { useTempsReel } from "@/components/espace/tempsReel";
 import { Avis } from "@/components/espace/ui";
 import { masquerIban, montant, nombreFr, pourcent } from "@/components/espace/format";
 import { pastilleProvenance } from "@/components/espace/filed/factureElectronique";
-import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE } from "@/components/espace/exemples/filed";
+import { COMMANDES_EXEMPLE, DOSSIERS_EXEMPLE, FOURNISSEURS_EXEMPLE, LIGNES_COMMANDE_EXEMPLE, MOTIFS_EXEMPLE, dossiersTransmisExemple } from "@/components/espace/exemples/filed";
 import { ENTITES, EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE } from "@/components/espace/exemples/socle";
 import type { Commande, DossierFiled, Fournisseur, LigneCommande, MotifRefus } from "@/components/espace/types";
-import { CHAMPS_PAR_NOTION, FAMILLES, FAMILLES_CONTROLE, NATURES, SOURCES, etatDocument, famille, grouperControles, statutFacture, type Famille } from "@/components/espace/filed/etats";
+import { CHAMPS_PAR_NOTION, FAMILLES, FAMILLES_CONTROLE, NATURES, SOURCES, etatDocument, famille, formePiece, grouperControles, statutFacture, type Famille } from "@/components/espace/filed/etats";
 import type { DemandeDossier, EtatDossier } from "@/components/espace/filed/DossierVue";
 import { chargerCommandes, chargerDossier, chargerFournisseurs, chargerListe, deposerDocument, etatPaiement, monClient, type Apercu, type EtatPaiement, type FactureDuFournisseur } from "@/components/espace/filed/portes";
 import { lireCible, trouverCible } from "@/components/espace/filed/lien";
@@ -76,13 +76,14 @@ import "@/components/espace/espace.css";
 import "../habillage.css";
 import { useToast, copierEtDire } from "../Toasts";
 import { useAujourdhui, useMonte } from "../horloge";
-import { A_PAYER, GROUPES, aPayer, du, etatsExemple, groupeDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
+import { A_PAYER, GROUPES, aPayer, du, etatsExemple, groupeDe, minuit, prevision, totaux, type Etats, type Groupe } from "./calculs";
 import { CarteDroite, Choix, GraphiqueProgres, IconePriorite, Menu, MenuActions, MenuOptions, type Option } from "../lin/Lin";
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeImport, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { RACINE } from "../modules";
 import "./tableau-filed.css";
 import PilotageFiled from "./Pilotage";
 import CabinetFiled from "./Cabinet";
+import { Imputation, PisteAudit, References } from "./PieceComptable";
 
 /* l'écran du dossier (pièce en regard, lecteur PDF) ne se charge qu'à l'ouverture de l'onglet « Dossier » */
 /* le dossier de toujours ne rend plus son écran ici : l'Aperçu lui emprunte ses fenêtres de correction (28/10/2026) */
@@ -118,6 +119,8 @@ type Ligne = {
   /* le reste à payer (filed_etat_paiement), sinon le dû */
   reste: number;
   points: number;
+  /* 04/11 — la forme de la pièce (photo, ticket, note de frais, relevé, manuscrit), quand le dossier est lu (promesse FILED n° 5) */
+  forme: string | null;
 };
 
 /* la santé d'un document : sa famille (etats.ts → famille()), dans l'ordre des onglets — ce qui bloque d'abord */
@@ -129,9 +132,10 @@ const SANTES: Record<Famille, { libelle: string; teinte: "vert" | "jaune" | "rou
   reste: { libelle: "Traitée", teinte: "vert" },
 };
 const familleDe = (f: Famille) => FAMILLES.find((x) => x.cle === f)!;
-const ORDRE_GROUPES: Groupe[] = ["retard", "semaine", "mois", "plus_tard", "sans"];
+/* 04/11 — « Dans 31 à 60 jours » entre « Ce mois-ci » et « Plus tard » (promesse FILED n° 49) */
+const ORDRE_GROUPES: Groupe[] = ["retard", "semaine", "mois", "deux_mois", "plus_tard", "sans"];
 const groupeLibelle = (g: Groupe) => GROUPES.find((x) => x.cle === g)!.libelle;
-const NIVEAUX: Record<Groupe, 0 | 1 | 2 | 3 | 4> = { retard: 4, semaine: 3, mois: 2, plus_tard: 1, sans: 0 };
+const NIVEAUX: Record<Groupe, 0 | 1 | 2 | 3 | 4> = { retard: 4, semaine: 3, mois: 2, deux_mois: 1, plus_tard: 1, sans: 0 };
 /* les étapes d'une facture, de la lecture à la comptabilité : les jalons du tableau de bord,
    et les valeurs du filtre « etape » (le statut de la facture) */
 const ETAPES: { cle: string; libelle: string; test: (l: Ligne) => boolean }[] = [
@@ -376,7 +380,7 @@ function CarteAPayer({ lignes, titre, fournisseurs }: { lignes: Ligne[]; titre: 
       {dans.length ? (
         <GraphiqueProgres
           libelle={`Dû cumulé par échéance : ${montant(arrondi(somme(total)))}, dont ${montant(arrondi(somme(valides)))} validés et ${montant(arrondi(somme(aValider)))} à valider`}
-          etiquettes={["Échu", "7 j", "30 j", "+30 j", "Sans date"]}
+          etiquettes={["Échu", "7 j", "30 j", "60 j", "+60 j", "Sans date"]}
           series={[
             { cle: "du", teinte: "gris", valeurs: cumul(total) },
             { cle: "a-valider", teinte: "jaune", valeurs: cumul(aValider) },
@@ -583,6 +587,11 @@ export default function TableauFiled() {
   const etats = useMemo<Etats>(() => (source === "exemple" ? etatsEx : (reel?.etats ?? {})), [source, etatsEx, reel]);
   const pret = aujourdhui !== null && (source === "exemple" ? monte : !!reel);
 
+  const formes = useMemo(() => {
+    const m = new Map<string, string | null>();
+    for (const d of source === "exemple" ? local : Object.values(reel?.dossiers ?? {})) m.set(d.document.id, formePiece(d.piece));
+    return m;
+  }, [source, local, reel]);
   const lignes: Ligne[] = useMemo(() => {
     if (aujourdhui === null) return [];
     return apercus.map((a) => {
@@ -600,9 +609,10 @@ export default function TableauFiled() {
         enJeu: !!f && f.nature !== "avoir" && !payee && f.statut !== "refusee" && f.statut !== "ecartee",
         reste: f ? aPayer(f, etats) : 0,
         points: (a.facture?.nb_bloquants ?? 0) + (a.facture?.nb_attention ?? 0),
+        forme: formes.get(a.document.id) ?? null,
       };
     });
-  }, [apercus, etats, aujourdhui]);
+  }, [apercus, etats, aujourdhui, formes]);
 
   /* le document ouvert : ?objet=document:<id> (ou facture:, fournisseur:, comme les liens des autres écrans) */
   const cible = useMemo(() => lireCible(params.toString()), [params]);
@@ -874,7 +884,8 @@ export default function TableauFiled() {
     const dernier = historique[0];
     const controles = dossier ? grouperControles(dossier.controles) : null;
     const memeFournisseur = lignes.filter((x) => (l.a.fournisseur ? x.a.fournisseur?.id === l.a.fournisseur.id || (!!x.f && x.f.fournisseur_id === l.a.fournisseur.id) : x.id === l.id));
-    const nature = doc.nature ? NATURES[doc.nature] : "Document";
+    /* 04/11 — une note de frais ou un ticket se dit tel quel, plutôt que « Autre » (promesse FILED n° 5) */
+    const nature = l.forme && l.forme !== "Photo" && l.forme !== "Facture écrite à la main" ? l.forme : doc.nature ? NATURES[doc.nature] : "Document";
     const resume = fac
       ? `${phrase(`${nature}${fac.numero ? ` n° ${fac.numero}` : ""}${fac.date_emission ? ` du ${dateCourte(fac.date_emission)}` : ""} : ${montant(fac.montant_ttc, fac.devise)} TTC${fac.echeance_lue ? `, échéance le ${dateCourte(fac.echeance_lue)}` : ""}`)}${l.payee ? " Elle est payée." : l.payable ? ` Il reste ${montant(arrondi(l.reste), fac.devise)} à payer.` : ""}`
       : `${nature} reçu le ${dateCourte(doc.recu_le)} : ${etatDocument(doc.etat).libelle.toLowerCase()}.${doc.motif ? ` ${doc.motif}` : ""}`;
@@ -1105,6 +1116,7 @@ export default function TableauFiled() {
                   <>
                     <IconeDocument />
                     {doc.nom_fichier}
+                    {l.forme ? <span className="lin-maj-gris">{l.forme}</span> : null}
                   </>
                 }
                 options={[
@@ -1261,6 +1273,11 @@ export default function TableauFiled() {
                 filed_factures_tva, filed_factures.regime_tva et .mentions (a4_22, a4_27), lus avec la facture */}
             {fac ? <TvaEtMentions fac={fac} tva={dossier?.tva ?? []} /> : null}
 
+            {/* 04/11 — la commande, le bon de livraison et le contrat cités (promesse FILED n° 31) ; le compte, le centre
+                de coût et l'exercice que porte la facture (promesses FILED n° 37 et 45) */}
+            {fac ? <References fac={dossier?.facture ?? fac} /> : null}
+            {fac && dossier?.facture ? <Imputation key={`imp-${doc.id}`} dossier={dossier} source={source === "exemple" ? "exemple" : "reelle"} /> : null}
+
             {/* « Il lit chaque document, le range et prépare la réponse » : filed_reponses (a4_38), en lecture ;
                 elle part après validation, dans « À valider » */}
             {dossier?.reponses?.length ? (
@@ -1354,6 +1371,10 @@ export default function TableauFiled() {
                 </li>
               </ul>
             )}
+
+            {/* 04/11 — la piste d'audit et la vérification d'archive, par filed_piste_audit et filed_verifier_archive
+                (a4_05) ; en exemple, un résultat local, aucun appel (promesse FILED n° 48) */}
+            {fac && dossier?.facture ? <PisteAudit key={`piste-${doc.id}`} dossier={dossier} source={source === "exemple" ? "exemple" : "reelle"} /> : null}
           </article>
 
           <aside className="lin-cartes-droite" aria-label="Propriétés du document">
@@ -1721,6 +1742,10 @@ export default function TableauFiled() {
     const aConfirmer = [...fournisseursVus.values()].filter((f) => f.statut === "a_confirmer").length;
     const avecPoints = portee.filter((l) => GARDES.controle(l, "points"));
     const refusees = portee.filter((l) => l.f?.statut === "refusee");
+    /* 04/11 — « Doublons écartés », comptés sur les documents chargés (promesse FILED n° 17) */
+    const doublons = portee.filter((l) => l.a.document.etat === "doublon");
+    /* 04/11 — le dernier dossier transmis à la comptabilité, en exemple (promesse FILED n° 11) */
+    const transmis = source === "exemple" && aujourdhui !== null ? (dossiersTransmisExemple(new Date(aujourdhui))[0] ?? null) : null;
     const recents = portee
       .slice()
       .sort((x, y) => y.a.document.recu_le.localeCompare(x.a.document.recu_le))
@@ -1911,6 +1936,19 @@ export default function TableauFiled() {
                   </li>
                 ))}
               </ul>
+              {/* 04/11 — la prévision de décaissement à trente et soixante jours, au sens de filed_echeancier (promesse FILED n° 49) */}
+              {aujourdhui !== null ? (
+                <p className="lin-maj-texte lin-maj-gris">
+                  {(() => {
+                    const p = prevision(
+                      aPayerP.map((l) => l.f!),
+                      etats,
+                      aujourdhui,
+                    );
+                    return `Prévision de décaissement : ${montant(p.trente)} à 30 jours, ${montant(p.soixante)} à 60 jours (échu compris).`;
+                  })()}
+                </p>
+              ) : null}
 
               <h3 className="lin-projet-h2">Plus grosses factures à payer</h3>
               {plusGrosses.length ? (
@@ -2029,6 +2067,32 @@ export default function TableauFiled() {
                     </dd>
                   </div>
                   <div>
+                    <dt>Doublons écartés</dt>
+                    <dd>
+                      <MenuOptions
+                        plat
+                        titre="Doublons écartés…"
+                        declencheur={
+                          <>
+                            <Copy width={16} height={16} aria-hidden="true" className="lin-ic" />
+                            {doublons.length}
+                          </>
+                        }
+                        options={[
+                          ...doublons.map((l): Option => ({
+                            cle: l.id,
+                            libelle: l.nom,
+                            meta: `${l.a.document.reference} · ${l.a.document.doublon_de ? "doublon d'une pièce reçue" : "doublon"}`,
+                            icone: <IconeDocumentRecu l={l} />,
+                            href: ficheDe(l.id),
+                          })),
+                          { cle: "regle", libelle: "Le contrôle « Doublon écarté »", icone: <ListFilter width={16} height={16} />, href: `${RACINE}/filed/controles?id=doublon-ecarte` },
+                        ]}
+                        largeur={320}
+                      />
+                    </dd>
+                  </div>
+                  <div>
                     <dt>Fournisseurs</dt>
                     <dd>
                       <MenuOptions
@@ -2090,7 +2154,7 @@ export default function TableauFiled() {
               <CarteAPayer lignes={portee} titre="Échéances" fournisseurs />
 
               {aujourdhui ? <PilotageFiled source={source === "exemple" ? "exemple" : "reelle"} dossiers={local} aujourdhui={new Date(aujourdhui)} /> : null}
-              {aujourdhui ? <CabinetFiled source={source === "exemple" ? "exemple" : "reelle"} aujourdhui={new Date(aujourdhui)} /> : null}
+              {aujourdhui ? <CabinetFiled source={source === "exemple" ? "exemple" : "reelle"} aujourdhui={new Date(aujourdhui)} dossiers={local} etats={etatsEx} /> : null}
 
               <CarteDroite
                 titre="Activité"
@@ -2100,8 +2164,16 @@ export default function TableauFiled() {
                   </Link>
                 }
               >
-                {recents.length ? (
+                {recents.length || transmis ? (
                   <ul className="lin-activite">
+                    {transmis ? (
+                      <li>
+                        <Losange atteint />
+                        <span>
+                          <b>Dossier prêt</b> · {transmis.mois.replace(/ \d{4}$/, "").replace(/^./, (c) => c.toUpperCase())} transmis à la comptabilité, {transmis.pieces} pièces · {dateCourte(transmis.transmis_le)}
+                        </span>
+                      </li>
+                    ) : null}
                     {recents.map((l) => (
                       <li key={l.id}>
                         <Losange atteint={l.sante === "reste"} />
@@ -2274,6 +2346,7 @@ export default function TableauFiled() {
                       <span className="lin-jalon-puce">
                         <Losange atteint={l.sante === "reste"} />
                         {l.a.document.reference} · {statut.libelle}
+                        {l.forme ? ` · ${l.forme}` : ""}
                       </span>
                     </span>
                     <span className="lin-table-sante" role="cell" data-teinte={SANTES[l.sante].teinte}>

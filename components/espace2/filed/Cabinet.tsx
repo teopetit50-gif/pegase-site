@@ -7,8 +7,33 @@
 
 import { useEffect, useState } from "react";
 import { dateCourte, montant } from "@/components/espace/format";
-import { vueEnsemble, type DossierCabinet } from "@/components/espace/filed/portes";
+import { famille } from "@/components/espace/filed/etats";
+import { vueEnsemble, type DossierCabinet, type FactureDuFournisseur } from "@/components/espace/filed/portes";
+import type { DossierFiled } from "@/components/espace/types";
 import { CarteDroite } from "../lin/Lin";
+import { A_PAYER, groupeDe, prevision, type Etats } from "./calculs";
+
+/* 04/11 — la ligne d'Atelier Bertin se calcule sur les documents d'exemple chargés, comme le reste du tableau de
+   bord (un même chiffre partout) : pièces des 30 derniers jours, bloquées, en attente d'approbation, à compléter,
+   litiges, à payer sous 30 jours (échu compris) et en retard. */
+function atelierBertin(dossiers: DossierFiled[], etats: Etats, aujourdhui: Date): Partial<DossierCabinet> {
+  const jour = new Date(aujourdhui.getFullYear(), aujourdhui.getMonth(), aujourdhui.getDate()).getTime();
+  const factures: FactureDuFournisseur[] = dossiers
+    .filter((d) => d.facture)
+    .map((d) => ({ ...d.facture!, reference: d.document.reference, nature: d.facture!.nature }) as unknown as FactureDuFournisseur);
+  const aPayer = factures.filter((f) => A_PAYER.has(f.statut) && f.nature !== "avoir" && etats[f.id]?.etat !== "payee");
+  const recus = dossiers.map((d) => d.document.recu_le).sort();
+  return {
+    pieces_mois: dossiers.filter((d) => new Date(d.document.recu_le).getTime() >= jour - 30 * 86_400_000).length,
+    bloquees: factures.filter((f) => f.statut === "bloquee").length,
+    attente: factures.filter((f) => f.statut === "a_valider").length,
+    a_completer: factures.filter((f) => f.statut === "a_completer").length,
+    litiges: dossiers.filter((d) => famille(d.document, d.facture) === "litige").length,
+    a_payer_30j: prevision(aPayer, etats, jour).trente,
+    en_retard: aPayer.filter((f) => groupeDe(f, jour) === "retard").length,
+    dernier_recu_le: recus[recus.length - 1] ?? null,
+  };
+}
 
 const EXEMPLE = (aujourdhui: Date): DossierCabinet[] => {
   const il = (j: number) => new Date(aujourdhui.getTime() - j * 86_400_000).toISOString();
@@ -19,7 +44,7 @@ const EXEMPLE = (aujourdhui: Date): DossierCabinet[] => {
   ];
 };
 
-export default function CabinetFiled({ source, aujourdhui }: { source: "exemple" | "reelle"; aujourdhui: Date }) {
+export default function CabinetFiled({ source, aujourdhui, dossiers: locaux, etats }: { source: "exemple" | "reelle"; aujourdhui: Date; dossiers?: DossierFiled[]; etats?: Etats }) {
   const [reel, setReel] = useState<DossierCabinet[]>([]);
   useEffect(() => {
     if (source !== "reelle") return;
@@ -31,7 +56,8 @@ export default function CabinetFiled({ source, aujourdhui }: { source: "exemple"
       actif = false;
     };
   }, [source]);
-  const dossiers = (source === "exemple" ? EXEMPLE(aujourdhui) : reel).slice().sort((a, b) => Number(b.epingle) - Number(a.epingle) || (a.rang ?? 99) - (b.rang ?? 99) || a.organisation.localeCompare(b.organisation));
+  const exemple = EXEMPLE(aujourdhui).map((d) => (d.client_id === "ex-1" && locaux ? ({ ...d, ...atelierBertin(locaux, etats ?? {}, aujourdhui) } as DossierCabinet) : d));
+  const dossiers = (source === "exemple" ? exemple : reel).slice().sort((a, b) => Number(b.epingle) - Number(a.epingle) || (a.rang ?? 99) - (b.rang ?? 99) || a.organisation.localeCompare(b.organisation));
   if (dossiers.length < 2) return null;
   return (
     <CarteDroite titre={`Vos dossiers · ${dossiers.length}`}>

@@ -117,7 +117,15 @@ type Ligne = {
   identiteTexte: string;
   deposant: boolean;
   aTraiter: boolean;
+  /* 04/11 — les pièces du fournisseur : lues, recoupées (contrôles passés), classées (validées) — promesse FILED n° 18 */
+  lues: number;
+  recoupees: number;
+  classees: number;
 };
+
+/* 04/11 — une facture recoupée a passé ses contrôles (HT, TVA, TTC, IBAN, doublon) : ni bloquée, ni à compléter,
+   ni refusée ; classée, elle est validée ou comptabilisée (promesse FILED n° 18) */
+const RECOUPEES = new Set(["a_valider", "validee", "comptabilisee"]);
 
 /* ——— les filtres : ?filtre=colonne:bloque&filtre=identite:invalide&filtre=iban:aucun, une valeur par dimension ——— */
 type Dimension = "colonne" | "identite" | "iban";
@@ -250,6 +258,9 @@ export default function TableauFournisseurs() {
         identiteTexte: id.texte,
         deposant: f.statut === "a_confirmer" && !!moi && vue.deposants[f.id] === moi,
         aTraiter: col === "a_confirmer" || col === "iban" || identite === "invalide",
+        lues: factures.length,
+        recoupees: factures.filter((y) => RECOUPEES.has(y.statut)).length,
+        classees: factures.filter((y) => A_PAYER.has(y.statut)).length,
       };
     });
   }, [vue, moi]);
@@ -257,6 +268,8 @@ export default function TableauFournisseurs() {
   /* ——— l'adresse : le fournisseur ouvert (?id=), les filtres (?filtre=), « à traiter » (?traiter=1) ——— */
   const id = params.get("id");
   const traiter = params.get("traiter") === "1";
+  /* 04/11 — ?vue=pieces : le tableau « Pièces par fournisseur » (promesse FILED n° 18) */
+  const vuePieces = params.get("vue") === "pieces";
   const filtresActifs = lireFiltres(params);
   const adresse = useCallback(
     (modif: (p: URLSearchParams) => void) => {
@@ -538,6 +551,14 @@ export default function TableauFournisseurs() {
     <header className="lin-tete">
       <span className="lin-tete-titre">Fournisseurs</span>
       <MenuActions rond aGauche titre="Actions de la page" options={optionsPage} />
+      <nav className="lin-onglets fou-vues" aria-label="Vues des fournisseurs">
+        <Link href={adresse((p) => p.delete("vue"))} className="v2-btn v2-btn--petit" data-actif={vuePieces ? undefined : ""} aria-current={vuePieces ? undefined : "page"} scroll={false} replace>
+          Par statut
+        </Link>
+        <Link href={adresse((p) => p.set("vue", "pieces"))} className="v2-btn v2-btn--petit" data-actif={vuePieces ? "" : undefined} aria-current={vuePieces ? "page" : undefined} scroll={false} replace>
+          Pièces par fournisseur
+        </Link>
+      </nav>
       <div className="lin-tete-ronds">
         <button
           type="button"
@@ -778,6 +799,8 @@ export default function TableauFournisseurs() {
         <p className="lin-vide">Lecture des fournisseurs…</p>
       ) : !base.length ? (
         <p className="lin-vide">{erreur ? "Aucun fournisseur lu." : "Aucun fournisseur. Les fournisseurs naissent de la première facture lue."}</p>
+      ) : vuePieces ? (
+        piecesParFournisseur()
       ) : (
         <div className="lin-tableau-page">{tableau}</div>
       )}
@@ -785,6 +808,73 @@ export default function TableauFournisseurs() {
       {fenetre()}
     </div>
   );
+
+  /* ——— 04/11 — « Pièces par fournisseur » : une ligne par fournisseur, ses pièces lues, recoupées et classées, et
+     la barre des trois (promesse FILED n° 18) ; mêmes filtres et même recherche que le tableau ——— */
+  function piecesParFournisseur() {
+    const lignes = base.filter((l) => dansLaPortee(l)).sort((a, b) => b.lues - a.lues || a.f.nom.localeCompare(b.f.nom, "fr"));
+    const max = Math.max(1, ...lignes.map((l) => l.lues));
+    const tot = { lues: lignes.reduce((t, l) => t + l.lues, 0), recoupees: lignes.reduce((t, l) => t + l.recoupees, 0), classees: lignes.reduce((t, l) => t + l.classees, 0) };
+    return (
+      <div className="fou-pieces">
+        <p className="fou-pieces-sous">
+          Lue : la facture est lue et ses valeurs posées. Recoupée : le HT, la TVA et le TTC tombent juste et les contrôles sont passés. Classée : validée, jusqu&apos;au dossier de la comptabilité.
+        </p>
+        <table className="fou-pieces-table" aria-label="Pièces par fournisseur">
+          <thead>
+            <tr>
+              <th scope="col">Fournisseur</th>
+              <th scope="col" className="fou-num">
+                Pièces
+              </th>
+              <th scope="col">Lu · recoupé · classé</th>
+              <th scope="col" className="fou-num">
+                Lues
+              </th>
+              <th scope="col" className="fou-num">
+                Recoupées
+              </th>
+              <th scope="col" className="fou-num">
+                Classées
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {lignes.map((l) => (
+              <tr key={l.id}>
+                <th scope="row">
+                  <Link href={adresse((p) => p.set("id", l.id))} scroll={false}>
+                    {l.f.nom}
+                  </Link>
+                </th>
+                <td className="fou-num">{l.lues}</td>
+                <td>
+                  <span className="fou-barres" title={`${l.lues} lues, ${l.recoupees} recoupées, ${l.classees} classées`} aria-hidden="true">
+                    <span data-teinte="lue" style={{ width: `${(l.lues / max) * 100}%` }} />
+                    <span data-teinte="recoupee" style={{ width: `${(l.recoupees / max) * 100}%` }} />
+                    <span data-teinte="classee" style={{ width: `${(l.classees / max) * 100}%` }} />
+                  </span>
+                </td>
+                <td className="fou-num">{l.lues}</td>
+                <td className="fou-num">{l.recoupees}</td>
+                <td className="fou-num">{l.classees}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row">{pluriel(lignes.length, "fournisseur")}</th>
+              <td className="fou-num">{tot.lues}</td>
+              <td />
+              <td className="fou-num">{tot.lues}</td>
+              <td className="fou-num">{tot.recoupees}</td>
+              <td className="fou-num">{tot.classees}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    );
+  }
 
   /* ——— le fournisseur ouvert : la carte au milieu de l'écran, comme la carte de décision d'« À valider »
      (Teo, 28/10 : « plutôt que d'ouvrir un truc sur la droite, ça ouvre une card au milieu ») ———

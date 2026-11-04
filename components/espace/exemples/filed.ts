@@ -9,7 +9,7 @@
    la place du dessin, les boîtes sont les mêmes. */
 
 import type { Commande, DossierFiled, Facture, LigneCommande, MotifRefus } from "../types";
-import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, AGENCE, ilYa, dans, CLAIRE, SOFIA } from "./socle";
+import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, SIEGE, AGENCE, ilYa, dans, CLAIRE, SOFIA, MARC } from "./socle";
 
 const C = EXEMPLE_CLIENT_ID;
 const u = (p: string, n: number) => `00000000-0000-4000-8000-00000000${p}${n.toString(16).padStart(2, "0")}`;
@@ -817,7 +817,387 @@ D09.reponses = [
   },
 ];
 
-export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08, D20, D21, D22];
+/* ——— 04/11 — Les références citées sur la pièce : commande, bon de livraison, contrat (promesse FILED n° 31).
+   filed_factures.refs, que le lecteur remplit (refs.commande sert déjà au rapprochement, a4_23) ; les valeurs
+   lues correspondantes sont posées sur la pièce, à droite sous l'échéance. ——— */
+function poserRefs(d: DossierFiled, refs: { commande?: string; bon_livraison?: string; contrat?: string }) {
+  d.facture!.refs = { ...d.facture!.refs, ...refs };
+  const lib = { commande: "Votre commande", bon_livraison: "Bon de livraison", contrat: "Contrat" } as const;
+  (Object.keys(refs) as (keyof typeof refs)[]).forEach((k, i) => {
+    d.valeurs.push({ id: `${d.piece!.id.slice(0, -2)}r${i}`, champ: `refs.${k}`, valeur: refs[k], texte: `${lib[k]} : ${refs[k]}`, page: 1, boite: { x: 0.52, y: 0.245 + i * 0.026, l: 0.41, h: 0.022 }, source: "ia", confiance: 0.95, verifiee: false });
+  });
+}
+poserRefs(D09, { commande: "BC-2026-0064", bon_livraison: "BL-MR-26-0388" });
+poserRefs(D11, { commande: "BC-2026-0077", bon_livraison: "BL-TP-26-1452" });
+poserRefs(D08, { contrat: "Contrat Pro n° EDL-118204" });
+poserRefs(D21, { contrat: "Marché de sous-traitance ST-2026-06, lot 06" });
+
+/* ——— 04/11 — Des pièces de formes variées (promesse FILED n° 5) : une photo prise sur le parking, un ticket
+   de caisse froissé, une note de frais, un relevé, une facture écrite à la main. La forme se lit sur
+   pieces.mime (image/…) et pieces.type_piece ; la visionneuse d'exemple les dessine chacune à sa manière
+   (filed/FactureDessinee.tsx). ——— */
+
+/* R2026-000023 — Garage Moulin : la facture photographiée sur le parking du garage, validée, à payer sous 45 jours
+   (c'est aussi la tranche 31-60 j de l'échéancier, promesse FILED n° 49) */
+const MOULIN = { nom: "Garage Moulin", siren: "443 208 915", tva: "FR 19 443208915", adresse: "88 route de Vienne, 69008 Lyon", iban: "FR76 1180 6000 2200 0418 7720 931", code: "MOULIN" };
+const D23 = validee(23, { fournisseur: MOULIN, numero: "GM-26-3307", emission: fr(ilYa(3)), echeance: fr(dans(45)), ht: 684, designation: "Utilitaire FG-218-KX : plaquettes, disques et vidange", iban: true, expediteur: "yanis.dupre@atelier-bertin.fr" });
+D23.document = { ...D23.document, nom_fichier: "IMG_4821.jpg", recu_le: ilYa(3, 18), lu_le: ilYa(3, 18), traite_le: ilYa(2, 10) };
+D23.piece = { ...D23.piece!, nom_fichier: "IMG_4821.jpg", mime: "image/jpeg", methode: "ocr", chemin: `${C}/filed_document/${u("dd", 23)}/IMG_4821.jpg` };
+D23.pages = [{ n: 1, texte: "", largeur: 3024, hauteur: 4032 }];
+D23.controles = [
+  ctrl(D23.facture!.id, "lecture.photo", "info", "ok", "Photo redressée (prise de biais, inclinaison de 8°) avant la lecture : toutes les valeurs obligatoires sont lisibles."),
+  ctrl(D23.facture!.id, "fournisseur.siren_valide", "bloquant", "ok", "SIREN valide et actif au registre."),
+  ctrl(D23.facture!.id, "fournisseur.iban_connu", "bloquant", "ok", "IBAN identique à celui validé."),
+  ctrl(D23.facture!.id, "tva.coherence", "bloquant", "ok", "684,00 € × 20 % = 136,80 € : la TVA correspond."),
+  ctrl(D23.facture!.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC, au centime."),
+  ctrl(D23.facture!.id, "doublon.numero_fournisseur", "bloquant", "ok", "Aucune autre facture GM-26-3307 reçue."),
+  ctrl(D23.facture!.id, "echeance.delai_legal", "info", "ok", "Échéance à 48 jours de l'émission : dans le délai légal (60 jours max)."),
+];
+D23.historique = [
+  hist("reception", "Reçue par courriel de yanis.dupre@atelier-bertin.fr : une photo (JPEG) de la facture, prise sur le parking du garage.", ilYa(3, 18)),
+  hist("lecture", "Photo redressée puis lue par OCR en 9 s — 1 page, 15 valeurs, confiance moyenne 0,93.", ilYa(3, 18)),
+  hist("controles", "7 contrôles passés, 0 anomalie.", ilYa(3, 18)),
+  hist("validee", "Validée par Claire Morel : à payer, échéance dans 45 jours.", ilYa(2, 10), "Claire Morel"),
+];
+
+/* R2026-000024 — Quincaillerie de la Saône : un ticket de caisse froissé, scanné par Marc ; payé en carte au comptoir */
+const SAONE = { nom: "Quincaillerie de la Saône", siren: "391 554 802", tva: "FR 57 391554802", adresse: "3 quai Saint-Vincent, 69001 Lyon", iban: "", code: "QSAONE" };
+const f24 = facture(24, {
+  fournisseur: SAONE,
+  numero: "T-0412-118",
+  emission: fr(ilYa(5)),
+  echeance: fr(ilYa(5)),
+  ht: 32,
+  tva: 6.4,
+  ttc: 38.4,
+  taux: 20,
+  lignes: [
+    { designation: "Vis inox 5×50, boîte de 200", quantite: 2, unite: "boîte", pu: 11.5 },
+    { designation: "Chevilles nylon 8 mm, sachet", quantite: 3, unite: "sachet", pu: 3 },
+  ],
+  verifiees: true,
+});
+f24.facture.statut = "comptabilisee";
+f24.facture.iban = null;
+f24.facture.mentions = { paiement: "Payé par carte bancaire au comptoir" };
+f24.piece = { ...f24.piece, nom_fichier: "scan_ticket_quincaillerie.pdf", methode: "ocr", type_piece: "ticket_caisse" };
+f24.pages = [{ n: 1, texte: "", largeur: 300, hauteur: 640 }];
+/* le ticket a sa propre mise en page : des valeurs en colonne étroite */
+f24.valeurs = valeurs(u("ee", 24), [
+  { champ: "fournisseur.nom", texte: "QUINCAILLERIE DE LA SAÔNE", boite: [0.08, 0.05, 0.84, 0.04], verifiee: true },
+  { champ: "fournisseur.siren", texte: "SIREN 391 554 802", valeur: "391 554 802", boite: [0.08, 0.1, 0.84, 0.03], verifiee: true, source: "regle" },
+  { champ: "facture.numero", texte: "Ticket T-0412-118", valeur: "T-0412-118", boite: [0.08, 0.15, 0.6, 0.03], verifiee: true },
+  { champ: "facture.date_emission", texte: fr(ilYa(5)), boite: [0.08, 0.185, 0.6, 0.03], verifiee: true },
+  { champ: "lignes.1.designation", texte: "2 × Vis inox 5×50", boite: [0.08, 0.26, 0.6, 0.03] },
+  { champ: "lignes.1.montant_ht", texte: "23,00", valeur: 23, boite: [0.68, 0.26, 0.24, 0.03], source: "regle" },
+  { champ: "lignes.2.designation", texte: "3 × Chevilles 8 mm", boite: [0.08, 0.3, 0.6, 0.03] },
+  { champ: "lignes.2.montant_ht", texte: "9,00", valeur: 9, boite: [0.68, 0.3, 0.24, 0.03], source: "regle" },
+  { champ: "totaux.ht", texte: "HT 32,00", valeur: 32, boite: [0.4, 0.4, 0.52, 0.03], verifiee: true, source: "regle" },
+  { champ: "totaux.tva", texte: "TVA 20 % 6,40", valeur: 6.4, boite: [0.4, 0.435, 0.52, 0.03], verifiee: true, source: "regle" },
+  { champ: "totaux.ttc", texte: "TOTAL 38,40 €", valeur: 38.4, boite: [0.4, 0.475, 0.52, 0.04], verifiee: true, source: "regle" },
+]);
+const D24: DossierFiled = {
+  document: doc(24, { reference: "R2026-000024", nom_fichier: "scan_ticket_quincaillerie.pdf", recu_le: ilYa(5, 17), etat: "classe", source: "depot", expediteur: null, depose_par: MARC, traite_le: ilYa(4, 9) } as never),
+  ...f24,
+  controles: [
+    ctrl(f24.facture.id, "mentions.ticket", "info", "ok", "Ticket de caisse sous 150 € HT : facture simplifiée, mentions réduites admises (CGI, art. 242 nonies A)."),
+    ctrl(f24.facture.id, "lecture.froisse", "info", "ok", "Pièce froissée : les plis n'ont masqué aucune valeur obligatoire."),
+    ctrl(f24.facture.id, "tva.coherence", "bloquant", "ok", "32,00 € × 20 % = 6,40 € : la TVA correspond."),
+    ctrl(f24.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
+  ],
+  levees: [],
+  ibans: [],
+  appariements: [],
+  rapprochement: null,
+  historique: [
+    hist("reception", "Déposé depuis l'espace par Marc Lévy : le scan d'un ticket de caisse froissé.", ilYa(5, 17), "Marc Lévy"),
+    hist("lecture", "Lu par OCR en 4 s — ticket reconnu, 11 valeurs, aucune masquée par les plis.", ilYa(5, 17)),
+    hist("controles", "4 contrôles passés, 0 anomalie.", ilYa(5, 17)),
+    hist("paiement", "Payé par carte bancaire au comptoir : rien à virer.", ilYa(5, 17)),
+    hist("classement", "Classé et transmis à la comptabilité.", ilYa(4, 9)),
+  ],
+};
+
+/* R2026-000025 — la note de frais de Sofia Carvalho : trois justificatifs ; remboursée par la paie, pas par un virement fournisseur */
+const D25: DossierFiled = {
+  document: doc(25, {
+    reference: "R2026-000025",
+    nom_fichier: "note-de-frais_Sofia-Carvalho.pdf",
+    recu_le: ilYa(4, 19),
+    etat: "classe",
+    nature: "autre",
+    source: "depot",
+    expediteur: null,
+    depose_par: SOFIA,
+    motif: "Note de frais de Sofia Carvalho (déplacement à l'agence de Grenoble) : 3 justificatifs rattachés, 186,70 € TTC, dont 16,97 € de TVA récupérable. Remboursée avec la paie.",
+    traite_le: ilYa(3, 10),
+  } as never),
+  facture: null,
+  lignes: [],
+  tva: [],
+  controles: [],
+  levees: [],
+  fournisseur: null,
+  ibans: [],
+  appariements: [],
+  rapprochement: null,
+  piece: { id: u("ee", 25), nom_fichier: "note-de-frais_Sofia-Carvalho.pdf", mime: "application/pdf", chemin: `${C}/filed_document/${u("dd", 25)}/note-de-frais.pdf`, nb_pages: 2, statut: "lue", type_piece: "note_de_frais", methode: "ocr" },
+  pages: [
+    {
+      n: 1,
+      texte: `NOTE DE FRAIS\nSofia Carvalho — Atelier Bertin SAS\nDéplacement : agence de Grenoble, le ${fr(ilYa(6))}\n\nTrain Lyon ↔ Grenoble ........ 64,00 €\nDéjeuner client .............. 42,70 €\nHôtel, une nuit .............. 80,00 €\n\nTotal TTC ................... 186,70 €\nDont TVA récupérable ......... 16,97 €\n\nSignature : S. Carvalho`,
+      largeur: 595,
+      hauteur: 842,
+    },
+    { n: 2, texte: "Justificatifs agrafés\n\n1. Billet de train aller-retour\n2. Addition du restaurant\n3. Facture de l'hôtel", largeur: 595, hauteur: 842 },
+  ],
+  valeurs: [],
+  historique: [
+    hist("reception", "Déposée depuis l'espace par Sofia Carvalho.", ilYa(4, 19), "Sofia Carvalho"),
+    hist("lecture", "Lue par OCR — note de frais reconnue, 3 justificatifs rattachés (train, repas, hôtel).", ilYa(4, 19)),
+    hist("classement", "Classée en note de frais : remboursée avec la paie, la TVA récupérable est portée en comptabilité.", ilYa(3, 10), "Claire Morel"),
+  ],
+};
+
+/* R2026-000026 — le relevé de compte de Papeterie Durand : recoupé avec les factures reçues */
+const D26: DossierFiled = {
+  document: doc(26, {
+    reference: "R2026-000026",
+    nom_fichier: "releve-compte-papeterie-durand.pdf",
+    recu_le: ilYa(1, 7),
+    etat: "classe",
+    nature: "releve",
+    expediteur: "compta@papeterie-durand.fr",
+    motif: "Relevé de compte de Papeterie Durand : 1 facture ouverte, PD-2026-1187 (486,20 €), retrouvée et validée (R2026-000014). Le solde du relevé est conforme.",
+    traite_le: ilYa(1, 7),
+  }),
+  facture: null,
+  lignes: [],
+  tva: [],
+  controles: [],
+  levees: [],
+  fournisseur: null,
+  ibans: [],
+  appariements: [],
+  rapprochement: null,
+  piece: { id: u("ee", 26), nom_fichier: "releve-compte-papeterie-durand.pdf", mime: "application/pdf", chemin: `${C}/filed_document/${u("dd", 26)}/releve.pdf`, nb_pages: 1, statut: "lue", type_piece: "releve", methode: "natif" },
+  pages: [
+    {
+      n: 1,
+      texte: `PAPETERIE DURAND — Relevé de compte client\nAtelier Bertin SAS, au ${fr(ilYa(1))}\n\nPD-2026-1187 du ${fr(ilYa(4))} ...... 486,20 € (non échue)\n\nSolde dû ........................ 486,20 €`,
+      largeur: 595,
+      hauteur: 842,
+    },
+  ],
+  valeurs: [],
+  historique: [
+    hist("reception", "Reçu par courriel de compta@papeterie-durand.fr.", ilYa(1, 7)),
+    hist("lecture", "Lu en 3 s — relevé fournisseur, 1 facture citée.", ilYa(1, 7)),
+    hist("recoupement", "Recoupé : PD-2026-1187 est reçue (R2026-000014) et validée ; solde conforme, rien ne manque.", ilYa(1, 7)),
+    hist("classement", "Classé avec les pièces de Papeterie Durand.", ilYa(1, 7)),
+  ],
+};
+
+/* R2026-000027 — Fabre, ébéniste : une facture écrite à la main ; deux valeurs lues avec une confiance faible, à confirmer */
+const FABRE = { nom: "Fabre, ébéniste", siren: "812 330 471", tva: "FR 08 812330471", adresse: "14 montée de la Grande-Côte, 69001 Lyon", iban: "FR76 1009 6180 5600 0211 4433 806", code: "FABRE" };
+const f27 = facture(27, {
+  fournisseur: FABRE,
+  numero: "47",
+  emission: fr(ilYa(6)),
+  echeance: fr(dans(24)),
+  ht: 420,
+  tva: 84,
+  ttc: 504,
+  taux: 20,
+  lignes: [
+    { designation: "Reprise de deux portes d'armoire, chêne", quantite: 1, unite: "forfait", pu: 300 },
+    { designation: "Quincaillerie et vernis", quantite: 1, unite: "forfait", pu: 120 },
+  ],
+});
+f27.lignes = f27.lignes.map((x, i) => ({ ...x, id: u("12", 70 + i) }));
+f27.facture.statut = "a_completer";
+f27.facture.champs_douteux = ["facture.numero", "totaux.tva"];
+f27.facture.anomalies = ["lecture.confiance"];
+f27.facture.nb_attention = 1;
+f27.valeurs = f27.valeurs.map((v) => (v.champ === "facture.numero" ? { ...v, texte: "n° 47", confiance: 0.58 } : v.champ === "totaux.tva" ? { ...v, confiance: 0.61 } : { ...v, confiance: Math.min(v.confiance ?? 0.9, 0.84) }));
+f27.piece = { ...f27.piece, nom_fichier: "facture_fabre_manuscrite.pdf", methode: "ocr", type_piece: "manuscrit" };
+const D27: DossierFiled = {
+  document: doc(27, { reference: "R2026-000027", nom_fichier: "facture_fabre_manuscrite.pdf", recu_le: ilYa(6, 15), etat: "a_traiter", expediteur: "contact@atelier-fabre.fr" }),
+  ...f27,
+  controles: [
+    ctrl(f27.facture.id, "lecture.confiance", "attention", "anomalie", "Facture écrite à la main : le numéro (« 47 » ou « 41 ») et la TVA (84,00 €) sont lus avec une confiance faible (0,58 et 0,61). Une personne les confirme sur la pièce avant la validation.", null, { champs: ["facture.numero", "totaux.tva"] }),
+    ctrl(f27.facture.id, "fournisseur.siren_valide", "bloquant", "ok", "SIREN valide et actif au registre."),
+    ctrl(f27.facture.id, "fournisseur.iban_connu", "bloquant", "ok", "IBAN identique à celui validé."),
+    ctrl(f27.facture.id, "tva.coherence", "bloquant", "ok", "420,00 € × 20 % = 84,00 € : la TVA lue correspond au calcul."),
+    ctrl(f27.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
+  ],
+  levees: [],
+  ibans: [{ id: u("ib", 27), fournisseur_id: f27.fournisseur.id, iban_masque: masque(FABRE.iban), statut: "valide", propose_le: ilYa(200) }],
+  appariements: [],
+  rapprochement: null,
+  historique: [
+    hist("reception", "Reçue par courriel de contact@atelier-fabre.fr : le scan d'une facture écrite à la main.", ilYa(6, 15)),
+    hist("lecture", "Lue par OCR manuscrit en 12 s — 1 page, 15 valeurs, dont 2 à confirmer (confiance 0,58 et 0,61).", ilYa(6, 15)),
+    hist("controles", "5 contrôles : 1 point à vérifier (lecture manuscrite).", ilYa(6, 15)),
+  ],
+};
+
+/* ——— 04/11 — Un exercice clos et une pièce reçue après la clôture (promesse FILED n° 37). L'agence de Grenoble
+   clôt son exercice au dernier jour de l'avant-dernier mois (le 30/09 un 4 novembre) ; la clôture est posée il y a 9 jours ; une facture émise
+   quatre jours avant la fin de l'exercice arrive il y a 2 jours : le contrôle « exercice.cloture » la marque et
+   l'oriente vers l'exercice suivant, avec la mention de private.filed_orienter_exercice (a4_02). ——— */
+const isoJour = (d: Date) => `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
+const FIN_EXO = (() => {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() - 1, 0);
+})();
+const DEBUT_EXO = new Date(FIN_EXO.getFullYear() - 1, FIN_EXO.getMonth(), FIN_EXO.getDate() + 1);
+const SUIVANT_DEBUT = new Date(FIN_EXO.getFullYear(), FIN_EXO.getMonth(), FIN_EXO.getDate() + 1);
+const SUIVANT_FIN = new Date(FIN_EXO.getFullYear() + 1, FIN_EXO.getMonth(), FIN_EXO.getDate());
+const LIB_CLOS = `${DEBUT_EXO.getFullYear()}-${FIN_EXO.getFullYear()} (Grenoble)`;
+const LIB_SUIVANT = `${SUIVANT_DEBUT.getFullYear()}-${SUIVANT_FIN.getFullYear()} (Grenoble)`;
+const CLOTURE_LE = ilYa(9).slice(0, 10);
+/* les exercices d'exemple (filed_exercices) : le siège en année civile, l'agence au 30 du mois de clôture */
+export const EXERCICES_FILED_EXEMPLE = [
+  { id: "ex-siege", libelle: `${new Date().getFullYear()} (Siège)`, debut: `${new Date().getFullYear()}-01-01`, fin: `${new Date().getFullYear()}-12-31`, statut: "ouvert", entite_id: SIEGE, cloture_le: null as string | null },
+  { id: "ex-agence-clos", libelle: LIB_CLOS, debut: isoJour(DEBUT_EXO), fin: isoJour(FIN_EXO), statut: "cloture", entite_id: AGENCE, cloture_le: CLOTURE_LE as string | null },
+  { id: "ex-agence", libelle: LIB_SUIVANT, debut: isoJour(SUIVANT_DEBUT), fin: isoJour(SUIVANT_FIN), statut: "ouvert", entite_id: AGENCE, cloture_le: null as string | null },
+];
+const ALPES = { nom: "Alpes Nettoyage Services", siren: "750 214 683", tva: "FR 64 750214683", adresse: "9 avenue Alsace-Lorraine, 38000 Grenoble", iban: "FR76 1390 6000 3200 0477 1290 214", code: "ALPESN" };
+const EMISSION_28 = new Date(FIN_EXO.getFullYear(), FIN_EXO.getMonth(), FIN_EXO.getDate() - 4, 12);
+const f28 = facture(28, {
+  fournisseur: ALPES,
+  numero: "ANS-2026-0917",
+  emission: fr(EMISSION_28.toISOString()),
+  echeance: fr(dans(20)),
+  ht: 760,
+  tva: 152,
+  ttc: 912,
+  taux: 20,
+  lignes: [{ designation: "Nettoyage des bureaux de l'agence, fin d'exercice", quantite: 1, unite: "forfait", pu: 760 }],
+  verifiees: true,
+});
+f28.lignes = f28.lignes.map((x, i) => ({ ...x, id: u("12", 80 + i) }));
+f28.facture.statut = "a_valider";
+f28.facture.date_reception = ilYa(2).slice(0, 10);
+f28.facture.anomalies = ["exercice.cloture"];
+f28.facture.nb_attention = 1;
+export const MENTION_EXERCICE_EXEMPLE = `Pièce du ${fr(EMISSION_28.toISOString())} reçue le ${fr(ilYa(2))}, après la clôture de l'exercice ${LIB_CLOS} (clos le ${fr(CLOTURE_LE)}) : orientée vers l'exercice ${LIB_SUIVANT}.`;
+const D28: DossierFiled = {
+  document: doc(28, { reference: "R2026-000028", nom_fichier: "ANS-2026-0917.pdf", recu_le: ilYa(2, 11), etat: "a_traiter", expediteur: "facturation@alpes-nettoyage.fr", entite_id: AGENCE }),
+  ...f28,
+  controles: [
+    ctrl(f28.facture.id, "exercice.cloture", "attention", "anomalie", MENTION_EXERCICE_EXEMPLE, null, { exercice: "ex-agence", exercice_naturel: "ex-agence-clos", orientee: true, date_reception: ilYa(2).slice(0, 10) }),
+    ctrl(f28.facture.id, "mentions.numero_present", "bloquant", "ok", "Numéro de facture présent."),
+    ctrl(f28.facture.id, "fournisseur.iban_connu", "bloquant", "ok", "IBAN identique à celui validé."),
+    ctrl(f28.facture.id, "tva.coherence", "bloquant", "ok", "760,00 € × 20 % = 152,00 €."),
+    ctrl(f28.facture.id, "totaux.ht_tva_ttc", "bloquant", "ok", "HT + TVA = TTC."),
+  ],
+  levees: [],
+  ibans: [{ id: u("ib", 28), fournisseur_id: f28.fournisseur.id, iban_masque: masque(ALPES.iban), statut: "valide", propose_le: ilYa(330) }],
+  appariements: [],
+  rapprochement: null,
+  historique: [
+    hist("reception", "Reçue par courriel de facturation@alpes-nettoyage.fr.", ilYa(2, 11)),
+    hist("lecture", "Lue en 5 s — PDF natif, 1 page.", ilYa(2, 11)),
+    hist("controles", "5 contrôles : la pièce est arrivée après la clôture de l'exercice de l'agence.", ilYa(2, 11)),
+    hist("exercice", MENTION_EXERCICE_EXEMPLE, ilYa(2, 11)),
+  ],
+};
+
+for (const [d, c] of [
+  [D23, "Entretien des véhicules"],
+  [D24, "Petit outillage et quincaillerie"],
+  [D27, "Mobilier et agencement"],
+  [D28, "Nettoyage des locaux"],
+] as [DossierFiled, string][])
+  Object.assign(d.facture!, { categorie: c, categorie_source: "lecteur", categorie_le: d.document.recu_le });
+
+/* ——— 04/11 — L'imputation de chaque facture : compte du plan comptable et centre de coût (filed_imputations,
+   filed_centres_cout, a4_01), proposée par FILED (apprise, récurrente) ou posée par une personne (promesse FILED
+   n° 45). Seules les lignes « validee » comptent dans l'engagé par centre (filed_engage_mois). ——— */
+export type CentreCout = { code: string; libelle: string; entite_id: string | null };
+export const CENTRES_COUT_EXEMPLE: CentreCout[] = [
+  { code: "CC-01", libelle: "Siège — frais généraux", entite_id: SIEGE },
+  { code: "CC-03", libelle: "Vie de l'équipe", entite_id: null },
+  { code: "CC-05", libelle: "Informatique", entite_id: null },
+  { code: "CC-07", libelle: "Véhicules", entite_id: null },
+  { code: "CC-12", libelle: "Chantier Croix-Rousse", entite_id: SIEGE },
+  { code: "CC-20", libelle: "Agence de Grenoble", entite_id: AGENCE },
+];
+export type ImputationExemple = {
+  compte: string;
+  compte_libelle: string;
+  centre: string | null;
+  statut: "proposee" | "validee";
+  origine: "apprise" | "recurrente" | "saisie";
+  confiance: number | null;
+  mention?: string | null;
+};
+const imp = (compte: string, compte_libelle: string, centre: string | null, statut: ImputationExemple["statut"], origine: ImputationExemple["origine"], confiance: number | null = null): ImputationExemple => ({ compte, compte_libelle, centre, statut, origine, confiance });
+/* par référence de réception */
+export const IMPUTATIONS_EXEMPLE: Record<string, ImputationExemple> = {
+  "R2026-000014": imp("6064", "Fournitures administratives", "CC-01", "validee", "apprise", 0.96),
+  "R2026-000009": imp("2135", "Installations générales, agencements", "CC-12", "proposee", "apprise", 0.81),
+  "R2026-000011": imp("2183", "Matériel de bureau et informatique", "CC-20", "proposee", "apprise", 0.88),
+  "R2026-000012": imp("2135", "Installations générales, agencements", "CC-12", "proposee", "apprise", 0.81),
+  "R2026-000008": imp("6061", "Fournitures non stockables (eau, énergie)", "CC-01", "validee", "recurrente", 1),
+  "R2026-000016": imp("6236", "Catalogues et imprimés", "CC-01", "proposee", "saisie"),
+  "R2026-000017": imp("6064", "Fournitures administratives", "CC-01", "proposee", "apprise", 0.74),
+  "R2026-000018": imp("6241", "Transports sur achats", "CC-12", "validee", "apprise", 0.93),
+  "R2026-000019": imp("6226", "Honoraires", "CC-01", "validee", "recurrente", 1),
+  "R2026-000020": imp("6257", "Réceptions", "CC-03", "validee", "saisie"),
+  "R2026-000021": imp("604", "Achats d'études et prestations de services", "CC-12", "validee", "apprise", 0.9),
+  "R2026-000022": imp("6516", "Droits d'auteur et de reproduction", "CC-05", "proposee", "apprise", 0.79),
+  "R2026-000023": imp("6155", "Entretien et réparations sur biens mobiliers", "CC-07", "validee", "apprise", 0.95),
+  "R2026-000024": imp("6068", "Autres matières et fournitures", "CC-12", "validee", "saisie"),
+  "R2026-000027": imp("6155", "Entretien et réparations sur biens mobiliers", "CC-01", "proposee", "saisie"),
+  "R2026-000028": { ...imp("6283", "Nettoyage des locaux", "CC-20", "proposee", "recurrente", 1), mention: MENTION_EXERCICE_EXEMPLE },
+};
+/* l'exercice que porte chaque facture (filed_factures_exercices) : seule la pièce de l'agence est orientée */
+export const EXERCICE_DE_EXEMPLE = (reference: string, entite: string | null, emission: string | null) => {
+  if (reference === "R2026-000028") return { libelle: EXERCICES_FILED_EXEMPLE[2].libelle, orientee: true, mention: MENTION_EXERCICE_EXEMPLE };
+  const e = emission ? EXERCICES_FILED_EXEMPLE.find((x) => (x.entite_id === entite || (!x.entite_id && !entite)) && x.debut <= emission && emission <= x.fin) : null;
+  return e ? { libelle: e.libelle, orientee: false, mention: null } : null;
+};
+
+/* ——— 04/11 — Les paiements d'exemple (filed_reglements) : le virement partiel à Rivière, le ticket réglé en carte ——— */
+export const REGLEMENTS_EXEMPLE: Record<string, { montant: number | null; ilYa: number }> = {
+  "R2026-000018": { montant: 1000, ilYa: 2 },
+  "R2026-000024": { montant: null, ilYa: 5 },
+};
+
+/* ——— 04/11 — Les dossiers transmis à la comptabilité (le FEC du mois, journal « filed.fec.exporte ») :
+   « Dossier prêt — <mois> transmis à la comptabilité, 214 pièces » (promesse FILED n° 11). Le dernier part au
+   début du mois, pour le mois écoulé ; le précédent un mois plus tôt. ——— */
+const MOIS_LONGS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+export type DossierTransmis = { mois: string; du: string; au: string; transmis_le: string; pieces: number; lignes: number; ecritures: number; total: number; nom_fichier: string; par: string };
+export function dossiersTransmisExemple(maintenant = new Date()): DossierTransmis[] {
+  const un = (decalage: number, pieces: number, lignes: number, total: number): DossierTransmis => {
+    /* transmis la veille au soir (le dernier), ou trente jours plus tôt (le précédent) */
+    const transmis = new Date(maintenant.getFullYear(), maintenant.getMonth(), maintenant.getDate() - 1 - decalage * 30, 18, 12);
+    const debut = new Date(transmis.getFullYear(), transmis.getMonth() - 1, 1);
+    const fin = new Date(transmis.getFullYear(), transmis.getMonth(), 0);
+    return {
+      mois: `${MOIS_LONGS[debut.getMonth()]} ${debut.getFullYear()}`,
+      du: isoJour(debut),
+      au: isoJour(fin),
+      transmis_le: transmis.toISOString(),
+      pieces,
+      lignes,
+      ecritures: pieces,
+      total,
+      nom_fichier: `842015337FEC${isoJour(fin).replace(/-/g, "")}.txt`,
+      par: "Claire Morel",
+    };
+  };
+  return [un(0, 214, 663, 186_412.37), un(1, 198, 611, 171_905.12)];
+}
+
+/* 04/11 — un doublon de plus n'est pas fabriqué : le compteur « Doublons écartés » (promesse FILED n° 17) compte
+   les documents chargés marqués doublon (ici R2026-000010). */
+
+export const DOSSIERS_EXEMPLE: DossierFiled[] = [D15, D16, D17, D09, D18, D19, D11, D13, D12, D14, D10, D08, D20, D21, D22, D23, D24, D25, D26, D27, D28];
 
 /* Les fournisseurs d'exemple pour « rattacher » : les six connus. */
 export const FOURNISSEURS_EXEMPLE = [D14, D09, D11, D08, D16, D17].map((d) => d.fournisseur!);

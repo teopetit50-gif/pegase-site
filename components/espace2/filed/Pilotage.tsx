@@ -9,6 +9,7 @@
 import { useEffect, useState } from "react";
 import { montant, nombreFr } from "@/components/espace/format";
 import { ENTITES } from "@/components/espace/exemples/socle";
+import { CENTRES_COUT_EXEMPLE, IMPUTATIONS_EXEMPLE } from "@/components/espace/exemples/filed";
 import { delaiTraitement, engageMois, monClient, type DelaiTraitement, type LigneEngage } from "@/components/espace/filed/portes";
 import type { DossierFiled } from "@/components/espace/types";
 import { CarteDroite } from "../lin/Lin";
@@ -23,6 +24,11 @@ const STATUTS = new Set(["bloquee", "a_valider", "validee", "comptabilisee"]);
 const arrondi = (v: number) => Math.round(v * 100) / 100;
 const jours = (v: number | null | undefined) => (v === null || v === undefined ? "—" : `${nombreFr(v)} j`);
 
+const centreValide = (reference: string) => {
+  const x = IMPUTATIONS_EXEMPLE[reference];
+  const c = x?.statut === "validee" && x.centre ? CENTRES_COUT_EXEMPLE.find((k) => k.code === x.centre) : null;
+  return c ? `${c.code} — ${c.libelle}` : "Non imputé";
+};
 /* l'exemple, calculé comme la porte : factures émises ce mois, non écartées, avoirs en moins ; sans imputation, « Non imputé » */
 const cleMois = (d: Date) => `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}`;
 function engageExemple(dossiers: DossierFiled[], mois: string): LigneEngage[] {
@@ -38,7 +44,8 @@ function engageExemple(dossiers: DossierFiled[], mois: string): LigneEngage[] {
       fournisseur_id: d.fournisseur?.id ?? null,
       fournisseur: d.fournisseur?.nom ?? "Fournisseur non rattaché",
       centre_id: null,
-      centre: d.fournisseur?.code === "GIRAUDP" ? "CC-12 — Chantier Croix-Rousse" : d.fournisseur?.code === "CANUTS" ? "CC-03 — Vie de l'équipe" : "Non imputé",
+      /* 04/11 — le centre de l'imputation validée (IMPUTATIONS_EXEMPLE, comme la page d'un document et Comptabilité) */
+      centre: centreValide(d.document.reference),
       nb_factures: 1,
       montant_ht: signe * (f.montant_ht ?? 0),
       montant_ttc: signe * (f.montant_ttc ?? 0),

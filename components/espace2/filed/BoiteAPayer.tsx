@@ -45,7 +45,7 @@ import { statutFacture } from "@/components/espace/filed/etats";
 import { vueExemple } from "@/components/espace/filed/EcranFournisseurs";
 import { MOYENS_PAIEMENT, chargerVueFournisseurs, etatPaiement, noterPaiement, type EtatPaiement, type FactureDuFournisseur, type MoyenPaiement, type VueFournisseurs } from "@/components/espace/filed/portes";
 import type { Fournisseur } from "@/components/espace/types";
-import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, totaux, type Etats, type Groupe } from "./calculs";
+import { A_PAYER, GROUPES, JOUR, aPayer, du, etatsExemple, groupeDe, jourDe, minuit, prevision, totaux, type Etats, type Groupe } from "./calculs";
 import { Choix, IconePriorite, Menu, MenuActions, MenuOptions, Surlignage, useEpingles, type Option } from "../lin/Lin";
 import { IconeBoiteX, IconeCalendrier, IconeDiese, IconeDocument, IconeGroupe, IconeJauge, IconeNonLus, IconeSante, IconeStatutProjet, type EtatProjet } from "../lin/icones";
 import { Note } from "../ui";
@@ -74,9 +74,10 @@ const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 /* les couleurs d'icône de projet de Linear, une par fournisseur (les mêmes que la première page) */
 const COULEURS = ["#26b5ce", "#5e6ad2", "#4cb782", "#f2994a", "#eb5757", "#bb87fc", "#f2c94c", "#95a2b3"];
 const couleurDe = (id: string) => COULEURS[[...id].reduce((t, c) => t + c.charCodeAt(0), 0) % COULEURS.length];
-const ORDRE_GROUPES: Groupe[] = ["retard", "semaine", "mois", "plus_tard", "sans"];
+/* 04/11 — « Dans 31 à 60 jours » : la prévision à soixante jours (promesse FILED n° 49) */
+const ORDRE_GROUPES: Groupe[] = ["retard", "semaine", "mois", "deux_mois", "plus_tard", "sans"];
 const groupeLibelle = (g: Groupe) => GROUPES.find((x) => x.cle === g)!.libelle;
-const NIVEAUX: Record<Groupe, 0 | 1 | 2 | 3 | 4> = { retard: 4, semaine: 3, mois: 2, plus_tard: 1, sans: 0 };
+const NIVEAUX: Record<Groupe, 0 | 1 | 2 | 3 | 4> = { retard: 4, semaine: 3, mois: 2, deux_mois: 1, plus_tard: 1, sans: 0 };
 
 /* l'état de paiement d'une ligne (filed_etat_paiement) ; un avoir ne se paie pas, il se déduit */
 type Paiement = "a_payer" | "partielle" | "payee" | "avoir";
@@ -743,6 +744,21 @@ export default function BoiteAPayer() {
                 );
               })}
             </ul>
+            {/* 04/11 — la prévision de décaissement à trente et soixante jours, comme filed_echeancier (promesse FILED n° 49) */}
+            {aujourdhui !== null
+              ? (() => {
+                  const p = prevision(
+                    base.filter((l) => l.paiement !== "payee").map((l) => l.f),
+                    etats,
+                    aujourdhui,
+                  );
+                  return (
+                    <p className="apayer-vide-sous">
+                      Prévision de décaissement : <strong>{montant(p.trente)}</strong> à 30 jours, <strong>{montant(p.soixante)}</strong> à 60 jours (échu compris).
+                    </p>
+                  );
+                })()
+              : null}
             {sansIban ? (
               <p className="apayer-vide-sous">
                 <strong className="apayer-alerte">

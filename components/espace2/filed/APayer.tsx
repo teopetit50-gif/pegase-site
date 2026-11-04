@@ -95,7 +95,7 @@ export default function APayer() {
     [validees, etats, montrerPayees],
   );
   const parGroupe = useMemo(() => {
-    const g: Record<Groupe, FactureDuFournisseur[]> = { retard: [], semaine: [], mois: [], plus_tard: [], sans: [] };
+    const g: Record<Groupe, FactureDuFournisseur[]> = { retard: [], semaine: [], mois: [], deux_mois: [], plus_tard: [], sans: [] }; /* 04/11 — tranche 31-60 j (promesse FILED n° 49) */
     if (aujourdhui !== null) for (const l of lignes) g[groupeDe(l, aujourdhui)].push(l);
     return g;
   }, [lignes, aujourdhui]);
@@ -181,7 +181,7 @@ export default function APayer() {
           return (
             <button key={g.cle} type="button" className="v2-stat" aria-pressed={filtre === g.cle} onClick={() => setFiltre(filtre === g.cle ? null : g.cle)}>
               <span className="v2-stat-etiquette">
-                <span className="v2-point" data-teinte={n && g.cle !== "plus_tard" && g.cle !== "sans" ? g.teinte : "gris"} aria-hidden="true" />
+                <span className="v2-point" data-teinte={n && g.cle !== "deux_mois" && g.cle !== "plus_tard" && g.cle !== "sans" ? g.teinte : "gris"} aria-hidden="true" />
                 {g.libelle}
               </span>
               <span className="v2-stat-valeur">{chargement ? <Squelette largeur={32} hauteur={28} /> : n}</span>
@@ -274,7 +274,7 @@ export default function APayer() {
               <section key={g.cle} aria-labelledby={`groupe-${g.cle}`}>
                 <div className="v2-section-titre">
                   <h2 className="v2-h2" id={`groupe-${g.cle}`}>
-                    <Etat teinte={g.cle === "plus_tard" || g.cle === "sans" ? "gris" : g.teinte}>{g.libelle}</Etat>
+                    <Etat teinte={g.cle === "deux_mois" || g.cle === "plus_tard" || g.cle === "sans" ? "gris" : g.teinte}>{g.libelle}</Etat>
                   </h2>
                   <span className="v2-gris v2-tabulaire" style={{ fontSize: 13 }}>
                     {visibles.length} facture{visibles.length > 1 ? "s" : ""} · {totaux(visibles, etats)}
