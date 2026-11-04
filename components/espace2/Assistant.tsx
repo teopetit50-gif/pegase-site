@@ -12,6 +12,7 @@
    (LecteurContexte), pour que l'assistant réponde sur les chiffres. */
 
 import { useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { usePathname } from "next/navigation";
 import { ArrowUp, History, MessageSquare, Plus, Sparkles, Trash2, X } from "lucide-react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import { ecrireStockage, useStockage } from "./Collection";
@@ -22,6 +23,19 @@ type Conversation = { id: string; titre: string; maj: string; messages: Message[
 
 const CLE = "espace2-assistant-conversations";
 const IDEES = ["Combien de factures me reste-t-il à payer ?", "Quels clients sont le plus en retard ?", "Rédiger une relance polie pour une facture impayée"];
+
+/* 04/11 — VARELO : une seule IA pour le groupe (promesse VARELO n° 1). Sur ses pages, les idées
+   parlent du groupe ; sans connexion, chacune a une réponse d'exemple rédigée d'avance, qui cite ses
+   sources (rien n'est envoyé à l'API, rien n'est lu en base). Connecté, la vraie réponse reste celle de l'API. */
+const IDEES_VARELO = ["Quelles sociétés du groupe demandent mon attention ce matin ?", "Quels reportings dois-je rendre ce mois-ci ?", "Résume le groupe pour la présidence en trois lignes"];
+const REPONSES_EXEMPLE: Record<string, string> = {
+  [IDEES_VARELO[0]]:
+    "Trois points ce matin, société par société :\n\n• Atelier Bertin — Agence de Grenoble : sa trésorerie est sous le plancher fixé par le groupe ; c'est l'alerte de la page Groupe.\n• Bertin Menuiserie (Annecy) : sa balance a plus d'un mois (tenue au tableur, pas encore branchée) ; elle est à redéposer.\n• Atelier Bertin — Siège (Lyon) : des décisions attendent dans la file de validation, chacune avec son calcul.\n\nSources : Groupe (balances déposées), Sources et structure (branchements), file « À valider ».\n\nRéponse d'exemple, rédigée d'avance : connecté, l'assistant répond sur vos propres données.",
+  [IDEES_VARELO[1]]:
+    "Trois obligations de reporting courent dans le groupe :\n\n• Siège (Lyon) → Fabricant Alpicuisine : ventes et stock du mois, par le portail, dans les 10 jours qui suivent la fin du mois.\n• Agence de Grenoble → Banque du Dauphiné : covenants et trésorerie, chaque trimestre, par courriel.\n• Bertin Menuiserie (Annecy) → Réseau Menuisiers de France : chiffre d'affaires de la semaine, sur l'extranet, sous 2 jours.\n\nLes échéances datées et celles en retard sont sur la page Opérations, colonne par colonne.\n\nSources : Opérations (reportings), Référentiel (sociétés), Contrats.\n\nRéponse d'exemple, rédigée d'avance : connecté, l'assistant répond sur vos propres données.",
+  [IDEES_VARELO[2]]:
+    "• Les ventes à date, le résultat et la trésorerie de chaque société sont sur une page, la page Groupe, avec l'écart sur l'objectif et sur l'an dernier.\n• Une société est sous son plancher de trésorerie ; la balance d'une autre a plus d'un mois et est à redéposer.\n• Les échéances du mois (reportings, réserves à émettre, contrats à dénoncer) sont suivies dans Opérations et Contrats, et aucune n'est laissée sans responsable.\n\nSources : Groupe, Opérations, Contrats.\n\nRéponse d'exemple, rédigée d'avance : connecté, l'assistant répond sur vos propres données.",
+};
 
 function lire(brut: string | null): Conversation[] {
   try {
@@ -49,6 +63,9 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
   const [texte, setTexte] = useState("");
   const fil = useRef<HTMLDivElement>(null);
   const contexte = useRef("");
+  const chemin = usePathname() ?? "";
+  const surVarelo = chemin.startsWith("/espace2/varelo");
+  const idees = surVarelo ? IDEES_VARELO : IDEES;
 
   const conv = conversations.find((c) => c.id === courante) ?? null;
   const messages = enCours ?? conv?.messages ?? [];
@@ -63,7 +80,17 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
 
   const envoyer = async (question: string) => {
     const q = question.trim();
-    if (!q || envoi || !connecte) return;
+    if (!q || envoi) return;
+    /* sans connexion : seule une idée qui a sa réponse d'exemple répond, sans appel */
+    if (!connecte) {
+      const r = surVarelo ? REPONSES_EXEMPLE[q] : undefined;
+      if (!r) return;
+      const id = courante ?? crypto.randomUUID();
+      if (!courante) setCourante(id);
+      enregistrer(id, [...messages, { role: "user", content: q }, { role: "assistant", content: r }]);
+      defiler();
+      return;
+    }
     const id = courante ?? crypto.randomUUID();
     if (!courante) setCourante(id);
     const historique: Message[] = [...messages, { role: "user", content: q }];
@@ -199,13 +226,15 @@ export default function Assistant({ ouvert, changer, connecte, prenom }: { ouver
               </h2>
               {saisie}
               <div className="v2-ia-idees">
-                {IDEES.map((i) => (
-                  <button key={i} type="button" className="v2-val-bouton" disabled={!connecte} onClick={() => void envoyer(i)}>
+                {idees.map((i) => (
+                  <button key={i} type="button" className="v2-val-bouton" disabled={!connecte && !(surVarelo && REPONSES_EXEMPLE[i])} onClick={() => void envoyer(i)}>
                     {i}
                   </button>
                 ))}
               </div>
-              <p className="v2-ia-gris v2-ia-note">L&apos;assistant lit les données affichées dans votre espace, sans rien modifier.</p>
+              <p className="v2-ia-gris v2-ia-note">
+                {!connecte && surVarelo ? "Données d'exemple : les trois idées ont une réponse rédigée d'avance. " : ""}L&apos;assistant lit les données affichées dans votre espace, sans rien modifier.
+              </p>
             </div>
           ) : (
             <>

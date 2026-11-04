@@ -10,6 +10,11 @@
 
 import type { Balance, Fiche, Piece, ReglementEtat, Tableau, Totaux, Tranche } from "./types";
 
+/* 04/11 — les taux de l'exemple (les mêmes que la carte « Taux de change ») : une pièce en devise
+   garde son reste dans sa devise, et les totaux se font sur sa contre-valeur en euros (promesse CASHD n° 46) */
+const TAUX_EUR: Record<string, number> = { CHF: 1.0638, USD: 0.9195 };
+const enEuros = (p: Piece, v: number) => (p.devise && p.devise !== "EUR" ? Math.round(v * (TAUX_EUR[p.devise] ?? 1) * 100) / 100 : v);
+
 export function jourParis(d = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
 }
@@ -32,13 +37,15 @@ export function etatPiece(p: Piece, jour = jourParis()): Piece {
     else if (retard <= 90) tranche = "61_90";
     else tranche = "plus_90";
   }
-  return { ...p, reste_du: p.nature === "avoir" ? p.reste_du : reste, retard_jours: retard, tranche, jours_ecoules: joursEntre(p.date_emission, jour) };
+  const resteDu = p.nature === "avoir" ? p.reste_du : reste;
+  const devise = p.devise && p.devise !== "EUR" && TAUX_EUR[p.devise] ? { reste_du_eur: Math.round(resteDu * TAUX_EUR[p.devise] * 100) / 100 } : {};
+  return { ...p, ...devise, reste_du: resteDu, retard_jours: retard, tranche, jours_ecoules: joursEntre(p.date_emission, jour) };
 }
 
 export function balanceDe(f: Fiche): Balance {
   const pieces = f.pieces.map((p) => etatPiece(p)).filter((p) => p.nature === "facture" || p.nature === "acompte");
   const somme = (filtre: (p: Piece) => boolean, part: (p: Piece) => number = (p) => p.reste_du - (p.montant_conteste ?? 0)) =>
-    Math.round(pieces.filter(filtre).reduce((s, p) => s + part(p), 0) * 100) / 100;
+    Math.round(pieces.filter(filtre).reduce((s, p) => s + enEuros(p, part(p)), 0) * 100) / 100;
   const horsLitige = (t: Tranche) => (p: Piece) => p.tranche === t && p.statut !== "litige";
   const credits =
     f.pieces.filter((p) => p.nature === "avoir" && p.statut === "ouverte").reduce((s, p) => s + p.reste_du, 0) +

@@ -40,7 +40,21 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function PageBienvenue() {
+export default async function PageBienvenue({ searchParams }: { searchParams: Promise<{ exemple?: string }> }) {
+  /* 04/11 — /bienvenue?exemple=1 : les quatre écrans en lecture seule, pour un visiteur sans session
+     (la Formation les décrit ; promesse socle n° 26). Rien n'est lu ni enregistré. */
+  const { exemple } = await searchParams;
+  if (exemple === "1") {
+    const supabaseExemple = await createClient();
+    const { data: sess } = await supabaseExemple.auth.getClaims();
+    if (!sess?.claims)
+      return (
+        <div className={geist.variable}>
+          <Bienvenue suite="/espace2" email="claire.morel@atelier-bertin.fr" depart={{ entreprise: "Atelier Bertin", siren: "849300124", metier: "" }} exemple />
+        </div>
+      );
+  }
+
   /* sans session, ou déjà fait : rien à remplir ici */
   if (!(await bienvenueAFaire())) redirect("/espace2");
 

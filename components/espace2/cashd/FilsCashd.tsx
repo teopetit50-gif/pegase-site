@@ -62,15 +62,17 @@ const SITUATIONS: { cle: Situation; libelle: string; sous: string; prio: Priorit
   { cle: "recouvrement", libelle: "En recouvrement", sous: "dossier remis", prio: 4, icone: <IconeAnneau />, teinte: "orange" },
   { cle: "pause", libelle: "En pause", sous: "relances suspendues", prio: 2, icone: <IconeHorloge /> },
   { cle: "attente_contact", libelle: "Contact à désigner", sous: "personne à qui écrire", prio: 2, icone: <IconeAnneau />, teinte: "bleu" },
-  { cle: "hors_perimetre", libelle: "Ne plus contacter", sous: "sorti du périmètre", prio: 1, icone: <IconeCroix /> },
+  { cle: "hors_perimetre", libelle: "Liste blanche", sous: "jamais relancé : collectivité, grand compte, relation personnelle", prio: 1, icone: <IconeCroix /> },
 ];
 const situationDe = (b: Balance): Situation => (b.statut === "actif" ? "partiel" : b.statut);
 const infoSituation = (s: Situation) => SITUATIONS.find((x) => x.cle === s)!;
 
-type OngletLitiges = "litige" | "pause" | "tous";
+type OngletLitiges = "litige" | "pause" | "blanche" | "tous";
 const ONGLETS_LITIGES: { cle: OngletLitiges; libelle: string; garde: (s: Situation) => boolean }[] = [
   { cle: "litige", libelle: "En litige", garde: (s) => s === "litige" || s === "partiel" || s === "recouvrement" },
-  { cle: "pause", libelle: "En pause", garde: (s) => s === "pause" || s === "attente_contact" || s === "hors_perimetre" },
+  { cle: "pause", libelle: "En pause", garde: (s) => s === "pause" || s === "attente_contact" },
+  /* 04/11 — la liste blanche a son onglet (promesse CASHD n° 59) */
+  { cle: "blanche", libelle: "Liste blanche", garde: (s) => s === "hors_perimetre" },
   { cle: "tous", libelle: "Toutes les situations", garde: () => true },
 ];
 type TriLitiges = "litige" | "encours" | "echeance" | "nom";
@@ -239,6 +241,8 @@ export function FilsLitiges() {
           ? { titre: "Aucun compte ne correspond", texte: "Essayez un autre nom ou retirez le filtre." }
           : onglet === "pause"
             ? { titre: "Aucun compte en pause", texte: "Toutes les factures ouvertes suivent leur séquence de relance." }
+            : onglet === "blanche"
+              ? { titre: "Liste blanche vide", texte: "Un compte s'y met depuis sa fiche (« Mettre sur la liste blanche ») : il n'est alors jamais relancé." }
             : onglet === "litige"
               ? /* 04/11 — l'onglet par défaut ne montre que les litiges : il ne dit plus « aucun compte hors cycle » quand un compte est en pause */
                 { titre: "Aucun compte en litige", texte: base.some((b) => ONGLETS_LITIGES[1].garde(situationDe(b))) ? "Les comptes en pause sont sous l'onglet « En pause »." : "Toutes les factures ouvertes suivent leur séquence de relance." }

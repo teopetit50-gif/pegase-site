@@ -30,6 +30,8 @@ type Props = {
   suite: string;
   email: string;
   depart: { entreprise: string; siren: string; metier: string };
+  /** 04/11 — l'exemple, sans session : les quatre écrans se parcourent, rien n'est enregistré ni téléversé (promesse socle n° 26) */
+  exemple?: boolean;
 };
 
 type Invitation = { email: string; role: "collaborateur" | "gerant" };
@@ -41,7 +43,7 @@ const TEXTE = "text-[15px] leading-[1.6] text-[var(--bv-texte-2)]";
 const LIEN =
   "bv-lien rounded-md text-[15px] text-[var(--bv-texte-2)] transition-colors hover:text-[var(--bv-texte)]";
 
-export function Bienvenue({ suite, email, depart }: Props) {
+export function Bienvenue({ suite, email, depart, exemple = false }: Props) {
   const reduit = useReducedMotion();
   const [etape, setEtape] = useState(1);
   const [sens, setSens] = useState(1);
@@ -80,6 +82,7 @@ export function Bienvenue({ suite, email, depart }: Props) {
     if (!f) return;
     setLogoErreur(null);
     setLogo(URL.createObjectURL(f));
+    if (exemple) return;
     setLogoEnvoi(true);
     const d = new FormData();
     d.set("logo", f);
@@ -92,6 +95,10 @@ export function Bienvenue({ suite, email, depart }: Props) {
 
   function terminer(avecInvitations: boolean, choixMessagerie = messagerie) {
     setErreur(null);
+    if (exemple) {
+      window.location.assign(suite);
+      return;
+    }
     demarrer(async () => {
       const r = await enregistrerBienvenue({
         entreprise,
@@ -124,6 +131,12 @@ export function Bienvenue({ suite, email, depart }: Props) {
 
   return (
     <main className="bv flex flex-col">
+      {exemple ? (
+        <p role="note" className="px-4 pt-4 text-center text-[13.5px] leading-5 text-[var(--bv-texte-2)]">
+          Exemple : les quatre écrans du premier accès, tels qu&apos;un client les voit. Rien n&apos;est enregistré ;
+          la dernière étape ramène à l&apos;espace d&apos;exemple.
+        </p>
+      ) : null}
       <div className="flex flex-1 items-center justify-center px-4 py-6 sm:px-6 lg:py-10">
         <div className="bv-carte grid w-full max-w-[1200px] lg:min-h-[680px] lg:grid-cols-2">
           {/* ——— colonne du formulaire ——— */}
@@ -571,11 +584,13 @@ export function Bienvenue({ suite, email, depart }: Props) {
         <a href="/contact" className="underline-offset-4 hover:underline">
           Aide
         </a>
-        <form action="/auth/signout" method="post">
-          <button type="submit" className="underline-offset-4 hover:underline">
-            Se déconnecter
-          </button>
-        </form>
+        {exemple ? null : (
+          <form action="/auth/signout" method="post">
+            <button type="submit" className="underline-offset-4 hover:underline">
+              Se déconnecter
+            </button>
+          </form>
+        )}
       </footer>
     </main>
   );

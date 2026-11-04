@@ -192,7 +192,15 @@ export function useCarte(): Carte | null {
           ]
         : [],
       /* 04/11 — ce sont les demandes du module (virement, prélèvement), pas des relances : les relances prêtes se valident dans le suivi de CASHD */
-      aValider: { n: cashdAttente.length, texte: cashdAttente.length ? `${pluriel(cashdAttente.length, "paiement")} à valider` : "Rien à valider", lien: `${RACINE}/validations` },
+      aValider: {
+        n: cashdAttente.length,
+        texte: (() => {
+          const rel = cashdAttente.filter((d) => d.type_action === "relance").length;
+          const pay = cashdAttente.length - rel;
+          return cashdAttente.length ? `${[pay ? pluriel(pay, "paiement") : "", rel ? pluriel(rel, "relance") : ""].filter(Boolean).join(" et ")} à valider` : "Rien à valider";
+        })(),
+        lien: `${RACINE}/validations`,
+      },
       resultat: { titre: "Encaissements", texte: cashd ? `${montant(encaisse)} reçus` : "—", n: reglements30.length },
     };
 

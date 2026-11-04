@@ -39,6 +39,8 @@ import { Building2, Check, MoreHorizontal, Search, Settings, UserMinus, UserPlus
 import { Loader } from "@/components/ui/loader";
 import { CLAIRE, ENTITES, EXEMPLE_CLIENT_ID, MARC, PERSONNES, SIEGE, SOFIA, YANIS } from "@/components/espace/exemples/socle";
 import { useSource } from "@/components/espace/source";
+import { EQUIPES_EXEMPLE } from "@/components/espace/exemples/validations";
+import { createClient } from "@/lib/supabase/client";
 import { ROLES, ajouterMembre, changerRole, chargerEquipe, libelleRole, reglerPerimetre, retirerMembre, type Membre, type Role, type VueEquipe } from "@/components/espace/equipe/portes";
 import { Note, Squelette } from "../ui";
 import { Menu } from "./Lin";
@@ -163,6 +165,30 @@ export default function Equipe() {
   }, [source, charger]);
 
   const vue = source === "exemple" ? exemple : reel;
+
+  /* 04/11 — les équipes de chaque personne (« mêmes droits par service », promesse socle n° 16) : en exemple
+     celles de la file de validation, en base réelle equipes et equipes_membres, lus sous vos droits */
+  const [equipesReelles, setEquipesReelles] = useState<Record<string, string[]>>({});
+  useEffect(() => {
+    if (source !== "reelle" || !reel?.client) return;
+    let actif = true;
+    const sb = createClient();
+    void Promise.all([sb.from("equipes").select("id, nom").eq("client_id", reel.client), sb.from("equipes_membres").select("equipe_id, user_id")]).then(([e, m]) => {
+      if (!actif || e.error || m.error) return;
+      const noms = new Map((e.data ?? []).map((x: { id: string; nom: string }) => [x.id, x.nom]));
+      const parPersonne: Record<string, string[]> = {};
+      for (const x of (m.data ?? []) as { equipe_id: string; user_id: string }[]) {
+        const n = noms.get(x.equipe_id);
+        if (n) (parPersonne[x.user_id] ??= []).push(n);
+      }
+      setEquipesReelles(parPersonne);
+    });
+    return () => {
+      actif = false;
+    };
+  }, [source, reel?.client]);
+  const equipesDe = (user: string): string[] =>
+    source === "exemple" ? Object.entries(EQUIPES_EXEMPLE.membres).filter(([, ms]) => ms.includes(user)).map(([id]) => EQUIPES_EXEMPLE.noms[id] ?? "Équipe") : (equipesReelles[user] ?? []);
   const gere = vue?.monRole === "gerant" || vue?.monRole === "admin";
   const touche = (m: Membre) => gere && (m.role !== "gerant" || vue?.monRole === "gerant");
   const nomSociete = (id: string) => vue?.societes.find((s) => s.id === id)?.nom ?? id.slice(0, 8);
@@ -372,10 +398,16 @@ export default function Equipe() {
                   </span>
                   <span className="lrg-nom">
                     <span className="lrg-nom-titre">{m.nom}</span>
-                    {moi ? (
+                    {moi || equipesDe(m.user_id).length ? (
                       <span className="lrg-nom-sous">
-                        <span className="lrg-point" aria-hidden="true" style={{ display: "inline-block", marginRight: 4, verticalAlign: "-1px" }} />
-                        vous
+                        {moi ? (
+                          <>
+                            <span className="lrg-point" aria-hidden="true" style={{ display: "inline-block", marginRight: 4, verticalAlign: "-1px" }} />
+                            vous
+                          </>
+                        ) : null}
+                        {moi && equipesDe(m.user_id).length ? " · " : ""}
+                        {equipesDe(m.user_id).join(", ")}
                       </span>
                     ) : null}
                   </span>

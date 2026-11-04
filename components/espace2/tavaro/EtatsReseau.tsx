@@ -25,13 +25,36 @@ import type { AvisFlotte, CanalSortie, Dossier, FicheVehicule, LigneBareme, Regl
 /* ——— l'audit des retours et l'indicateur du mois (AuditVue : B34, B35, F17, F18, G44-G46) ——— */
 export const FAMILLES_AUDIT: Record<string, string> = { carburant: "Carburant", kilometres: "Kilomètres", retard: "Retard", dommage: "Dommages", nettoyage: "Nettoyage", frais: "Frais", autre: "Autre" };
 const nombre = (s: string) => (s.trim() ? Number(s.replace(",", ".").replace(/\s/g, "")) : null);
+/* 04/11 — l'exemple : un audit clos de vingt retours d'avant Tavaro (ce qui avait été facturé,
+   ce que Tavaro aurait chiffré), pour que l'indicateur « avant / après » se lise (promesses TAVARO n° 12 et 42) */
+const AUDIT_EXEMPLE: { audits: Audit[]; lignes: LigneAudit[] } = (() => {
+  const id = "00000000-0000-4000-8000-0000000au001";
+  const ilYa = (j: number) => new Date(Date.now() - j * 86_400_000).toISOString();
+  /* [contrat, facturé avant, carburant, km, retard, dommages, nettoyage] — en euros TTC */
+  const R: [string, number, number, number, number, number, number][] = [
+    ["C-2025-0702", 0, 38.4, 0, 0, 0, 0], ["C-2025-0705", 25, 0, 0, 25, 0, 0], ["C-2025-0711", 0, 0, 0, 0, 0, 0], ["C-2025-0716", 0, 61.2, 18.6, 0, 0, 0],
+    ["C-2025-0719", 120, 0, 0, 0, 180, 0], ["C-2025-0724", 0, 0, 0, 0, 0, 45], ["C-2025-0730", 0, 22.8, 0, 0, 0, 0], ["C-2025-0733", 0, 0, 0, 0, 0, 0],
+    ["C-2025-0741", 30, 30.6, 0, 0, 0, 0], ["C-2025-0748", 0, 0, 42.3, 0, 0, 0], ["C-2025-0752", 0, 0, 0, 50, 0, 0], ["C-2025-0757", 0, 0, 0, 0, 0, 0],
+    ["C-2025-0763", 0, 47.1, 0, 0, 0, 0], ["C-2025-0768", 0, 0, 0, 0, 95, 0], ["C-2025-0771", 0, 0, 0, 0, 0, 0], ["C-2025-0779", 45, 45.9, 0, 0, 0, 0],
+    ["C-2025-0782", 0, 0, 0, 0, 0, 30], ["C-2025-0788", 0, 15.3, 0, 25, 0, 0], ["C-2025-0791", 0, 0, 0, 0, 0, 0], ["C-2025-0796", 0, 0, 27.9, 0, 0, 0],
+  ];
+  const FAM: [string, string][] = [["carburant", "Carburant manquant"], ["kilometres", "Kilomètres au-delà du forfait"], ["retard", "Retour en retard"], ["dommage", "Dommage relevé au retour"], ["nettoyage", "Nettoyage"]];
+  return {
+    audits: [{ id, libelle: "Vingt retours de l'été 2025, avant Tavaro", statut: "clos", cree_le: ilYa(40), clos_le: ilYa(33) }],
+    lignes: R.map(([numero, avant, ...m], i) => {
+      const lignes = m.flatMap((v, k) => (v ? [{ code: FAM[k][0], famille: FAM[k][0], libelle: FAM[k][1], montant_ttc: v, statut: "chiffre" }] : []));
+      return { id: `${id}-${i + 1}`, audit_id: id, contrat_id: `hist:${numero}`, facture_historique_ttc: avant, chiffre_ttc: Math.round(lignes.reduce((s, l) => s + l.montant_ttc, 0) * 100) / 100, statut_chiffrage: "chiffre", lignes };
+    }),
+  };
+})();
+
 type SaisieAudit = { contrat: string; historique: string; retour: string; km: string; dep8: string; ret8: string; dommages: string[] };
 
 export function useAuditEtat({ source, role, moi, dossiers, bareme, reglages }: { source: "exemple" | "reelle"; role: Role | null; moi: string; dossiers: Dossier[]; bareme: LigneBareme[]; reglages: Reglages | null }) {
   const [monte, setMonte] = useState(false);
   const [maintenant, setMaintenant] = useState(0);
   const [reel, setReel] = useState<{ audits: Audit[]; lignes: LigneAudit[]; indicateur: Indicateur | null } | null>(null);
-  const [local, setLocal] = useState<{ audits: Audit[]; lignes: LigneAudit[] }>({ audits: [], lignes: [] });
+  const [local, setLocal] = useState<{ audits: Audit[]; lignes: LigneAudit[] }>(AUDIT_EXEMPLE);
   const [choix, setChoix] = useState<string | null>(null);
   const [saisie, setSaisie] = useState<SaisieAudit | null>(null);
   const [nom, setNom] = useState<string | null>(null);
@@ -51,16 +74,19 @@ export function useAuditEtat({ source, role, moi, dossiers, bareme, reglages }: 
   const audits = donnees?.audits ?? [];
   const audit = audits.find((a) => a.id === choix) ?? audits[0] ?? null;
   const lignes = (donnees?.lignes ?? []).filter((l) => l.audit_id === audit?.id);
-  const numero = (c: string) => dossiers.find((d) => d.contrat.id === c)?.contrat.numero ?? "—";
+  const numero = (c: string) => dossiers.find((d) => d.contrat.id === c)?.contrat.numero ?? (c.startsWith("hist:") ? c.slice(5) : "—");
 
   /* l'indicateur : la porte en base réelle ; le même calcul sur l'exemple */
   const indicateur = useMemo<Indicateur | null>(() => {
     if (source === "reelle") return reel?.indicateur ?? null;
     if (!maintenant) return null;
-    const mois = new Date(maintenant).toISOString().slice(0, 7);
-    const retours = dossiers.filter((d) => (d.contrat.retour_reel_le ?? "").slice(0, 7) === mois).length;
-    const factures = dossiers.flatMap((d) => d.factures).filter((f) => (f.date_facture ?? "").slice(0, 7) === mois).reduce((s, f) => s + f.total_ttc, 0);
-    const avoirs = dossiers.flatMap((d) => d.avoirs).filter((a) => (a.date_avoir ?? "").slice(0, 7) === mois).reduce((s, a) => s + a.montant_ttc, 0);
+    /* 04/11 — en exemple, une fenêtre glissante de 30 jours : un mois calendaire tout juste commencé donnait 0 € (promesse TAVARO n° 42) */
+    const mois = "30 derniers jours";
+    const depuis = new Date(maintenant - 30 * 86_400_000).toISOString().slice(0, 10);
+    const dedans = (iso: string | null | undefined) => (iso ?? "").slice(0, 10) >= depuis;
+    const retours = dossiers.filter((d) => d.contrat.retour_reel_le && dedans(d.contrat.retour_reel_le)).length;
+    const factures = dossiers.flatMap((d) => d.factures).filter((f) => dedans(f.date_facture)).reduce((s, f) => s + f.total_ttc, 0);
+    const avoirs = dossiers.flatMap((d) => d.avoirs).filter((a) => dedans(a.date_avoir)).reduce((s, a) => s + a.montant_ttc, 0);
     const clos = local.audits.find((a) => a.statut === "clos");
     const ls = local.lignes.filter((l) => l.audit_id === clos?.id);
     return { mois, retours, factures_ttc: factures, avoirs_ttc: avoirs, pour_100_retours: retours ? Math.round(((factures - avoirs) * 100) / retours * 100) / 100 : null,

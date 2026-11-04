@@ -71,7 +71,7 @@ export default function MiniCarte() {
       {carte && total ? (
         <p className="mc-pied">
           <Link href={`${RACINE}/validations`} className="v2-va-lien">
-            {total} élément{total > 1 ? "s" : ""} vous attend{total > 1 ? "ent" : ""} dans « À valider » <ArrowRight width={14} height={14} />
+            {total} décision{total > 1 ? "s" : ""} de vos agents vous attend{total > 1 ? "ent" : ""} dans « À valider » <ArrowRight width={14} height={14} />
           </Link>
         </p>
       ) : null}

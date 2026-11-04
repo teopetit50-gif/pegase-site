@@ -8,7 +8,8 @@ export const STATUTS_COMPTE: Record<StatutCompte, { libelle: string; teinte: Tei
   pause: { libelle: "En pause", teinte: "ambre" },
   litige: { libelle: "En litige", teinte: "rouge" },
   recouvrement: { libelle: "En recouvrement", teinte: "noir" },
-  hors_perimetre: { libelle: "Ne plus contacter", teinte: "gris" },
+  /* 04/11 — « hors périmètre » est la liste blanche : jamais relancé (promesse CASHD n° 59) */
+  hors_perimetre: { libelle: "Liste blanche", teinte: "gris" },
   attente_contact: { libelle: "Contact à désigner", teinte: "ambre" },
 };
 

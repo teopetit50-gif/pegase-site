@@ -87,7 +87,8 @@ function suivi(factureId: string, s: Partial<Suivi>): Suivi {
 
 const sci = compte(1, { reference: "C-LEFEVRE", nom: "SCI Lefèvre Patrimoine", secteur: "Immobilier", siren: "552100554", contact_facturation_nom: "Mme Lefèvre", contact_facturation_email: "compta@lefevre-patrimoine.fr", contact_commercial_email: "commercial.lefevre@atelier-bertin.fr", plafond_encours: 20000 });
 const hotel = compte(2, { reference: "C-BROTTEAUX", nom: "Hôtel des Brotteaux", groupe: "Groupe Brotteaux", secteur: "Hôtellerie", contact_facturation_email: "factures@hotel-brotteaux.fr", contact_commercial_email: "yanis.dupre@atelier-bertin.fr" });
-const mairie = compte(3, { reference: "C-CALUIRE", nom: "Mairie de Caluire", secteur: "Collectivité", contact_facturation_email: "mandatement@caluire.fr" });
+/* 04/11 — la collectivité est sur la liste blanche, établie à l'installation : jamais relancée (promesse CASHD n° 59) */
+const mairie = compte(3, { reference: "C-CALUIRE", nom: "Mairie de Caluire", secteur: "Collectivité", contact_facturation_email: "mandatement@caluire.fr", statut: "hors_perimetre", statut_motif: "Collectivité : liste blanche établie à l'installation (paiement par mandat administratif)", statut_le: `${decale(-60)}T09:00:00Z` });
 const giraud = compte(4, { reference: "C-GIRAUD", nom: "Peintures Giraud SARL", secteur: "Bâtiment", contact_facturation_nom: "M. Giraud", contact_facturation_email: "compta@peintures-giraud.fr" });
 const martin = compte(5, { reference: "C-MARTIN", nom: "Boulangerie Martin", secteur: "Commerce", contact_facturation_email: "boulangerie.martin@orange.fr", statut: "pause", statut_motif: "Le gérant a appelé : paiement promis vendredi", statut_le: `${decale(-2)}T09:12:00Z` });
 
@@ -130,7 +131,7 @@ export const FICHES_EXEMPLE: Fiche[] = [
     balance: null,
     pieces: [piece(31, mairie.id, { numero: "F-2026-150", date_emission: decale(-1), echeance: decale(29), montant_ttc: 2400 })],
     reglements: [],
-    suivi: [suivi(id(31), { palier_suivant: "rappel", palier_suivant_le: decale(36) })],
+    suivi: [suivi(id(31), { etat_sequence: "hors_perimetre" })],
   },
   {
     compte: giraud,
@@ -163,11 +164,14 @@ export const FICHES_EXEMPLE: Fiche[] = [
       piece(61, alpine.id, { numero: "F-2026-109", date_emission: decale(-50), echeance: decale(-20), montant_ttc: 2800, regle: 1000 }),
       /* échéancier accepté : l'échéance d'origine est remplacée, la relance attend la nouvelle date */
       piece(62, alpine.id, { numero: "F-2026-131", date_emission: decale(-40), echeance: decale(20), echeance_origine: decale(-10), montant_ttc: 3600 }),
+      /* 04/11 — une facture en francs suisses, suivie dans sa devise et en euros au taux du jour (promesse CASHD n° 46) */
+      piece(63, alpine.id, { numero: "F-2026-147", devise: "CHF", date_emission: decale(-6), echeance: decale(24), montant_ttc: 2400 }),
     ],
     reglements: [{ id: id(93), compte_id: alpine.id, compte: alpine.nom, recu_le: decale(-3), montant: 1000, mode: "virement", reference: "F-2026-109", libelle: "SWIFT ALPINE RETREATS PART PAYMENT", statut: "actif", impute: 1000, a_imputer: 0 }],
     suivi: [
       suivi(id(61), { palier_suivant: "rappel", palier_suivant_le: decale(0), etat_sequence: "en_cours" }),
       suivi(id(62), { palier_suivant: "rappel", palier_suivant_le: decale(27) }),
+      suivi(id(63), { palier_suivant: "rappel", palier_suivant_le: decale(31) }),
     ],
   },
   {

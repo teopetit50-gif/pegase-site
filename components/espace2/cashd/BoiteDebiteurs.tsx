@@ -116,7 +116,7 @@ const STATUTS: { cle: StatutCompte; aide: string }[] = [
   { cle: "litige", aide: "relances arrêtées" },
   { cle: "recouvrement", aide: "confié" },
   { cle: "attente_contact", aide: "pas d'adresse" },
-  { cle: "hors_perimetre", aide: "jamais relancé" },
+  { cle: "hors_perimetre", aide: "jamais relancé : collectivité, grand compte, relation personnelle" },
 ];
 const santeStatut = (statut: StatutCompte, b: Balance): Sante => (statut === "actif" ? (b.echu > 0 ? "retard" : "a_jour") : statut === "litige" || statut === "recouvrement" ? "litige" : "pause");
 const ORDRE_PALIERS = ["echeance", "rappel", "relance", "mise_en_demeure"] as const;
@@ -502,12 +502,12 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
       if (source === "reelle") {
         const r = await portes.changerStatut(fiche.compte.id, statut, motif);
         await relire();
-        return statut === "actif" ? "Le compte est repris : les relances reprennent au prochain matin." : `Compte mis en pause ; ${r.relances_coupees} relance(s) prête(s) coupée(s).`;
+        return statut === "actif" ? "Le compte est repris : les relances reprennent au prochain matin." : `${statut === "hors_perimetre" ? "Compte mis sur la liste blanche : il ne sera jamais relancé" : "Compte mis en pause"} ; ${r.relances_coupees} relance(s) prête(s) coupée(s).`;
       }
       majFiche(fiche.compte.id, (f) => ({ ...f, compte: { ...f.compte, statut, statut_motif: motif, statut_le: new Date().toISOString() } }));
       if (statut !== "actif")
         setRelancesLocales((prev) => prev.map((r) => (r.compte_id === fiche.compte.id && r.etat === "a_valider" ? { ...r, etat: "coupee", statut: "coupee", motif: `compte en pause : ${motif}` } : r)));
-      return statut === "actif" ? "Le compte est repris (exemple)." : "Compte mis en pause (exemple) : ses relances prêtes sont coupées.";
+      return statut === "actif" ? "Le compte est repris (exemple)." : statut === "hors_perimetre" ? "Compte mis sur la liste blanche (exemple) : il ne sera jamais relancé, ses relances prêtes sont coupées." : "Compte mis en pause (exemple) : ses relances prêtes sont coupées.";
     },
     echeancier: async (facture, echeances, motif) => {
       if (source === "reelle") {
@@ -1979,7 +1979,9 @@ function FicheDebiteur({
     },
     c.statut === "actif"
       ? { cle: "pause", libelle: "Mettre en pause", icone: <PauseCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "statut", vers: "pause" }) }
-      : { cle: "reprendre", libelle: "Reprendre les relances", icone: <PlayCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "statut", vers: "actif" }) },
+      : { cle: "reprendre", libelle: c.statut === "hors_perimetre" ? "Retirer de la liste blanche" : "Reprendre les relances", icone: <PlayCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "statut", vers: "actif" }) },
+    /* 04/11 — la liste blanche, modifiable à tout moment (promesse CASHD n° 59) : la porte cashd_statut_compte, statut hors_perimetre */
+    ...(c.statut === "actif" ? [{ cle: "liste-blanche", libelle: "Mettre sur la liste blanche", icone: <PauseCircle width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "statut", vers: "hors_perimetre" }) }] : []),
     ...(facturesJoignables.length ? [{ cle: "piece", libelle: "Joindre une pièce", icone: <Paperclip width={16} height={16} aria-hidden="true" />, action: () => ouvrir({ type: "piece" }) }] : []),
     {
       cle: "dossier",
@@ -2238,6 +2240,8 @@ function FicheDebiteur({
                               ? "Reprendre les relances"
                               : geste.vers === "pause"
                                 ? "Mettre le compte en pause"
+                                : geste.vers === "hors_perimetre"
+                                  ? "Mettre le compte sur la liste blanche"
                                 : `Passer le compte à « ${STATUTS_COMPTE[geste.vers].libelle} »`
                             : geste?.type === "echeancier"
                               ? `Échéancier de ${geste.facture.numero}`

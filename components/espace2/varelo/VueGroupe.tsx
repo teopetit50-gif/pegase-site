@@ -31,6 +31,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { dateCourte, montant } from "@/components/espace/format";
 import { DialogueBalanceGenerale, DialogueObjectif, useGroupePage } from "@/components/espace/varelo/GroupePage";
+import { useReportingsGroupe } from "@/components/espace/varelo/CarteReportings";
 import type { PageSociete } from "@/components/espace/varelo/groupe";
 import { RACINE } from "../modules";
 import { useVarelo } from "./donnees";
@@ -61,6 +62,18 @@ export default function VueGroupe() {
   const params = useSearchParams();
   const societes = useMemo(() => v.donnees?.societes ?? [], [v.donnees]);
   const g = useGroupePage({ source: v.source, contexte: v.contexte, client_id: v.client_id });
+  /* 04/11 — les échéances de chaque société sur la même page : ses reportings dus sous 30 jours, en retard,
+     rendus (les mêmes que la page Opérations ; promesse VARELO n° 14) */
+  const rp = useReportingsGroupe({ source: v.source, contexte: v.contexte, client_id: v.client_id, onFait: v.setFait });
+  const echeancesDe = (entite: string | null) => {
+    const ds = rp.tous.filter((d) => entite === null || d.entite_id === entite);
+    return {
+      a30: ds.filter((d) => d.statut === "a_faire" && d.jours_restants >= 0 && d.jours_restants <= 30).length,
+      retard: ds.filter((d) => d.etat === "en_retard").length,
+      rendus: ds.filter((d) => d.statut !== "a_faire").length,
+      total: ds.length,
+    };
+  };
   const [onglet, setOnglet] = useState<Onglet>("toutes");
   const [pole, setPole] = useState<string | null>(null);
   const [masquees, setMasquees] = useState<Colonne[]>([]);
@@ -138,6 +151,10 @@ export default function VueGroupe() {
               Ventes de {montant(l.ventes)} au {dateCourte(l.arrete_le)}, résultat {montant(l.resultat)}, trésorerie {montant(l.tresorerie)}
               {l.tresorerie_plancher !== null ? ` (plancher ${montant(l.tresorerie_plancher)})` : ""}
               {l.objectif_a_date !== null && l.ecart_objectif !== null ? ` ; ${l.ecart_objectif >= 0 ? "+" : ""}${montant(l.ecart_objectif)} sur l'objectif à date` : ""}
+              {(() => {
+                const ec = echeancesDe(l.entite_id);
+                return ec.total ? ` ; reportings : ${ec.a30} à rendre sous 30 jours${ec.retard ? `, ${ec.retard} en retard` : ""}, ${ec.rendus} rendu${ec.rendus > 1 ? "s" : ""} sur ${ec.total}` : "";
+              })()}
             </span>
           </span>
         </span>
@@ -447,6 +464,11 @@ export default function VueGroupe() {
           ["Sous le plancher", String(base.filter((l) => l.sous_plancher).length)],
           ["Écart sur l'objectif", montant(somme((l) => l.ecart_objectif ?? 0))],
           ["Balance la plus ancienne", base.length ? `${Math.max(...base.map((l) => l.age_jours))} jours` : "–"],
+          ...(() => {
+            const ecs = base.map((l) => echeancesDe(l.entite_id));
+            const t = (k: "a30" | "retard" | "rendus" | "total") => ecs.reduce((x, e) => x + e[k], 0);
+            return [["Échéances à 30 jours", String(t("a30"))], ["Reportings en retard", String(t("retard"))], ["Reportings rendus", `${t("rendus")} / ${t("total")}`]] as [string, string][];
+          })(),
         ];
         return (
           <aside className="var-b-volet" aria-label="Totaux">

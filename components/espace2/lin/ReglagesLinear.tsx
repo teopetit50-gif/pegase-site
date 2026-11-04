@@ -156,6 +156,14 @@ export default function ReglagesLinear() {
                     <span className="lrg-aide">Vous n&apos;êtes pas connecté : seul l&apos;exemple est visible. Connectez-vous depuis le cockpit pour voir vos données.</span>
                   </li>
                 ) : null}
+                {!connecte ? (
+                  /* 04/11 — les quatre écrans du premier accès, visibles en exemple (promesse socle n° 26) */
+                  <Ligne libelle="Le premier accès" aide="Les quatre écrans qu'un client remplit à sa première connexion : son espace, son métier, sa messagerie, son équipe. En exemple, rien n'est enregistré.">
+                    <Link href="/bienvenue?exemple=1" className="lrg-btn lrg-btn--texte">
+                      Voir les quatre écrans
+                    </Link>
+                  </Ligne>
+                ) : null}
               </ul>
             </Section>
 

@@ -554,7 +554,7 @@ export default function Pilotage() {
     `Délai de remise en location (médiane) : ${duree(medRemise)} sur ${remises.length} remises ; ${aTemps} prêtes à temps.`,
     `Délai de la dépanneuse (annoncé, médiane) : ${duree(medDep)} sur ${depannages.length} interventions ; ${horsCible} au-delà du délai de la grille.`,
     ...(directionLarge ? [`Véhicules à sortir : ${aSortir.length} (${aSortir.map((f) => f.immatriculation).join(", ") || "aucun"}).`] : []),
-    ...(indicateur?.pour_100_retours !== null && indicateur ? [`Ce mois-ci : ${euros(indicateur.pour_100_retours)} facturés pour 100 retours${indicateur.avant_pour_100_retours !== null ? ` (avant : ${euros(indicateur.avant_pour_100_retours)})` : ""}.`] : []),
+    ...(indicateur?.pour_100_retours !== null && indicateur ? [`${/^\d{4}-\d{2}$/.test(indicateur.mois) ? "Ce mois-ci" : "Sur les 30 derniers jours"} : ${euros(indicateur.pour_100_retours)} facturés pour 100 retours${indicateur.avant_pour_100_retours !== null ? ` (avant : ${euros(indicateur.avant_pour_100_retours)})` : ""}.`] : []),
     "Question : qu'est-ce qui progresse, qu'est-ce qui recule, et par quoi commencer ?",
   ].join("\n");
 

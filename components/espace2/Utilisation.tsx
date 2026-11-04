@@ -30,12 +30,15 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { ArrowRight, Banknote, Building2, Check, ChevronDown, ChevronRight, FileText, Inbox, ListFilter, PanelRight, Receipt, Tag } from "lucide-react";
+import { ArrowRight, Banknote, Building2, Check, ChevronDown, ChevronRight, FileText, Inbox, ListFilter, Mail, PanelRight, Receipt, Tag } from "lucide-react";
 import { useSource } from "@/components/espace/source";
 import { montant } from "@/components/espace/format";
 import { ETATS } from "@/components/espace/filed/etats";
 import { STATUTS } from "@/components/espace/validations/regles";
 import type { Demande } from "@/components/espace/types";
+import { RELANCES_EXEMPLE } from "@/components/espace/cashd/exemples";
+import { chargerRelances, monClient } from "@/components/espace/cashd/portes";
+import type { Relance } from "@/components/espace/cashd/types";
 import { PERIODES, type Periode } from "./Suivi";
 import { Note, Squelette } from "./ui";
 import { useDonnees, type Doc } from "./donnees";
@@ -58,7 +61,7 @@ const jourDeIso = (iso: string) => jourCourt(new Date(iso).getTime(), new Date(i
 
 type Mesure = "documents" | "demandes" | "montants";
 type Repartition = "fournisseurs" | "etats" | "types" | "decisions";
-type Groupe = "docs" | "factures" | "reglements" | "demandes" | "decisions" | "attente";
+type Groupe = "docs" | "factures" | "reglements" | "relances" | "demandes" | "decisions" | "attente";
 const MESURES: { cle: Mesure; libelle: string }[] = [
   { cle: "documents", libelle: "Documents" },
   { cle: "demandes", libelle: "Demandes" },
@@ -238,6 +241,22 @@ export default function Utilisation() {
   /* 21/10 — l'horloge du navigateur (horloge.ts) : null au rendu serveur, les squelettes en attendant */
   const aujourdhui = useAujourdhui();
   const depuis = aujourdhui === null ? null : aujourdhui - periode.jours * JOUR + JOUR;
+
+  /* 04/11 — les relances envoyées, unité comptée comme la pièce (/tarifs ; promesse CASHD n° 64) : l'exemple
+     de CASHD, ou les relances lues sous vos droits (lecture seule) */
+  const [relancesReelles, setRelancesReelles] = useState<Relance[] | null>(null);
+  useEffect(() => {
+    if (source !== "reelle") return;
+    let actif = true;
+    void monClient()
+      .then((c) => (c ? chargerRelances(c.client_id) : []))
+      .then((r) => actif && setRelancesReelles(r))
+      .catch(() => actif && setRelancesReelles([]));
+    return () => {
+      actif = false;
+    };
+  }, [source]);
+  const relances = useMemo(() => (source === "exemple" ? RELANCES_EXEMPLE : (relancesReelles ?? [])), [source, relancesReelles]);
 
   const m = useMemo(() => {
     if (!donnees || depuis === null) return null;
@@ -488,6 +507,28 @@ export default function Utilisation() {
           .sort(parDateDesc),
       },
       {
+        cle: "relances",
+        anchor: "relances",
+        titre: "Relances envoyées",
+        icone: icone(Mail),
+        href: `${RACINE}/cashd/suivi?vue=envois`,
+        hrefLibelle: "Ouvrir les envois de CASHD",
+        lignes: relances
+          .map((r) => ({ r, le: r.envoye_le ?? r.envoi_main?.envoye_le ?? null }))
+          .filter(({ le }) => dans(le))
+          .map<Ligne>(({ r, le }) => ({
+            id: `rel-${r.id}`,
+            ref: r.pieces[0]?.numero ?? "—",
+            titre: r.compte ?? "Client",
+            etat: "fait",
+            etatLibelle: "Envoyée",
+            montant: montant(r.montant),
+            date: le,
+            href: `${RACINE}/cashd/suivi?vue=envois`,
+          }))
+          .sort(parDateDesc),
+      },
+      {
         cle: "demandes",
         anchor: "demandes",
         titre: "Demandes reçues",
@@ -519,7 +560,7 @@ export default function Utilisation() {
     ];
 
     return { docs: docs.length, demandes: demandes.length, series, repartitions, groupes };
-  }, [donnees, depuis, periode.jours]);
+  }, [donnees, depuis, periode.jours, relances]);
 
   const attente = <Squelette largeur={96} hauteur={14} />;
   const bornes = depuis !== null && aujourdhui !== null ? { de: jourCourt(depuis, periode.jours > 120), a: jourCourt(aujourdhui) } : null;

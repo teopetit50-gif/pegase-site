@@ -5,6 +5,18 @@
 
 import type { LignePoint, PointDuJour } from "../types";
 import { EXEMPLE_CLIENT_ID, EXEMPLE_MOI, aujourdHui, jourMois } from "./socle";
+import { DEMANDES_EXEMPLE } from "./validations";
+
+/* 04/11 — la ligne « N demandes attendent » se compte sur la file d'exemple : le même chiffre que « À valider » */
+function ligneFile(): string {
+  const maintenant = Date.now();
+  const jour = aujourdHui();
+  const ouvertes = DEMANDES_EXEMPLE.filter((d) => d.statut === "en_attente");
+  const retard = ouvertes.filter((d) => d.echeance && new Date(d.echeance).getTime() < maintenant).length;
+  const ajd = ouvertes.filter((d) => d.echeance && new Date(d.echeance).getTime() >= maintenant && d.echeance.slice(0, 10) === jour).length;
+  const details = [retard ? `${retard} en retard` : "", ajd ? `${ajd} à échéance aujourd'hui` : ""].filter(Boolean).join(" et ");
+  return `${ouvertes.length} demande${ouvertes.length > 1 ? "s attendent" : " attend"} votre décision${details ? `, dont ${details}` : ""}.`;
+}
 
 const C = EXEMPLE_CLIENT_ID;
 
@@ -84,10 +96,10 @@ export function pointExemple(decalage = 0): { point: PointDuJour; lignes: LigneP
     l(1, 1, { titre: "Trésorerie", module: "cashd", entite_nom: "Siège (Lyon)", texte: "Solde consolidé 31 420 € ce matin. Le virement Métallerie Roux (12 480 €) attend encore une approbation : si rien ne bouge aujourd'hui, l'échéance est dépassée.", gravite: "critique", lien: "/espace/validations", objet_type: "demande_validation" }),
     l(1, 2, { titre: "Trésorerie", module: "cashd", texte: "Encaissement attendu : Confluence Promotion, 38 500 € (échéance dans 4 jours, relance envoyée hier).", gravite: "attention" }),
     l(1, 3, { titre: "Trésorerie", module: "cashd", texte: "Prélèvement Électricité de Lyon (2 316,70 €) le 20 : couvert.", gravite: "info" }),
-    l(2, 1, { titre: "Factures reçues", module: "filed", texte: "1 facture bloquée : Métallerie Roux, IBAN différent de celui connu. Appeler le fournisseur au numéro habituel avant toute levée.", gravite: "critique", lien: "/espace/filed", objet_type: "filed_document", objet_id: "R2026-000009" }),
+    l(2, 1, { titre: "Factures reçues", module: "filed", texte: "3 factures bloquées, dont Métallerie Roux : IBAN différent de celui connu. Appeler le fournisseur au numéro habituel avant toute levée.", gravite: "critique", lien: "/espace/filed", objet_type: "filed_document", objet_id: "R2026-000009" }),
     l(2, 2, { titre: "Factures reçues", module: "filed", texte: "1 facture en litige : TechPro, +360 € par rapport à la commande BC-2026-0077. Le fournisseur n'a pas encore répondu.", gravite: "attention", lien: "/espace/filed", objet_id: "R2026-000011" }),
     l(2, 3, { titre: "Factures reçues", module: "filed", texte: `2 documents attendent : 1 en lecture, 1 à classer (scan du ${jourMois(-2)}).`, gravite: "info", lien: "/espace/filed" }),
-    l(3, 1, { titre: "Validations", module: "socle", texte: "8 demandes attendent votre décision, dont 1 en retard et 2 à échéance aujourd'hui.", gravite: "attention", lien: "/espace/validations" }),
+    l(3, 1, { titre: "Validations", module: "socle", texte: ligneFile(), gravite: "attention", lien: "/espace/validations" }),
     l(3, 2, { titre: "Validations", module: "socle", texte: `Vous décidez au nom de Claire Morel jusqu'au ${jourMois(16)} (délégation en cours).`, gravite: "info" }),
     l(4, 1, { titre: "Équipe", module: "rh", entite_nom: "Agence de Grenoble", texte: `Sofia Carvalho demande 5 jours du ${jourMois(10)} au ${jourMois(14)} ; Yanis Dupré assurerait le remplacement.`, gravite: "info", lien: "/espace/validations" }),
     l(5, 1, { titre: "Clients", module: "reput", texte: "Les avis de la nuit n'ont pas pu être lus (connecteur Google indisponible à 6 h 50). Section incomplète.", gravite: "attention", section_incomplete: true }),

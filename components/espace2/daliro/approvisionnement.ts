@@ -142,29 +142,30 @@ export function echeance(k: Commande, auj: string): { phrase: string; date: stri
 /* 04/11 — des identifiants fixes : une adresse ?commande= copiée se rouvre (ils changeaient à chaque chargement) */
 const idFixe = (genre: "c" | "l", i: number) => `00000000-0000-4000-8${genre === "c" ? "d1" : "d2"}0-${String(i + 1).padStart(12, "0")}`;
 
-type Modele = { objet: string; fournisseur: string; quantite: number | null; unite: string | null; delai: number; cas: "commander" | "commandee" | "tardive" | "attendue" | "partielle" | "recue" | "location" | "rendue" };
+/** pour : la tâche du passage qui attend la livraison (04/11, promesse DALIRO n° 15 — les fenêtres vont à « Pose des fenêtres ») */
+type Modele = { objet: string; pour?: RegExp; fournisseur: string; quantite: number | null; unite: string | null; delai: number; cas: "commander" | "commandee" | "tardive" | "attendue" | "partielle" | "recue" | "location" | "rendue" };
 const MODELES: Modele[] = [
-  { objet: "Garde-corps acier, balcons R+3", fournisseur: "Serrurerie Dumont", quantite: 12, unite: "ml", delai: 8, cas: "commander" },
-  { objet: "Plaques de plâtre BA13 hydro", fournisseur: "Point P Lyon 3", quantite: 64, unite: "u", delai: 3, cas: "commander" },
-  { objet: "Blocs-portes isoplanes 83 cm", fournisseur: "Menuiseries Rhône-Alpes", quantite: 9, unite: "u", delai: 10, cas: "commander" },
-  { objet: "Câble R2V 3G2,5 en couronne", fournisseur: "Rexel Villeurbanne", quantite: 300, unite: "ml", delai: 2, cas: "commander" },
-  { objet: "Plan de travail stratifié sur mesure", fournisseur: "Agencements Berthier", quantite: 4, unite: "u", delai: 12, cas: "commander" },
-  { objet: "Lames de terrasse en pin traité", fournisseur: "Bois & Matériaux Gerland", quantite: 48, unite: "m2", delai: 6, cas: "commander" },
-  { objet: "Projecteurs LED 100 W étanches", fournisseur: "Rexel Villeurbanne", quantite: 8, unite: "u", delai: 4, cas: "commander" },
-  { objet: "Platines d'ancrage galvanisées", fournisseur: "Serrurerie Dumont", quantite: 24, unite: "u", delai: 5, cas: "commander" },
-  { objet: "Enduit de lissage en sac de 25 kg", fournisseur: "Point P Lyon 3", quantite: 30, unite: "u", delai: 2, cas: "commander" },
-  { objet: "Peinture glycéro pour menuiseries", fournisseur: "Tollens Lyon Est", quantite: 40, unite: "l", delai: 3, cas: "commander" },
-  { objet: "Tableau électrique 4 rangées équipé", fournisseur: "Rexel Villeurbanne", quantite: 1, unite: "u", delai: 7, cas: "commander" },
-  { objet: "Poutres lamellé-collé 8 m", fournisseur: "Charpentes du Lyonnais", quantite: 6, unite: "u", delai: 15, cas: "commander" },
-  { objet: "Rubans LED 24 V pour vitrines", fournisseur: "Rexel Villeurbanne", quantite: 18, unite: "ml", delai: 3, cas: "commander" },
-  { objet: "Plots réglables pour terrasse", fournisseur: "Bois & Matériaux Gerland", quantite: 120, unite: "u", delai: 4, cas: "commander" },
-  { objet: "Silicone sanitaire translucide", fournisseur: "Point P Lyon 3", quantite: 24, unite: "u", delai: 1, cas: "commander" },
-  { objet: "Fenêtres PVC sur mesure", fournisseur: "Menuiseries Rhône-Alpes", quantite: 14, unite: "u", delai: 15, cas: "commandee" },
-  { objet: "Gaines ICTA 20 mm", fournisseur: "Rexel Villeurbanne", quantite: 200, unite: "ml", delai: 2, cas: "attendue" },
-  { objet: "Comptoirs en chêne massif", fournisseur: "Agencements Berthier", quantite: 2, unite: "u", delai: 20, cas: "tardive" },
-  { objet: "Raccords inox du four", fournisseur: "Cedeo Lyon 7", quantite: 6, unite: "u", delai: 3, cas: "commandee" },
-  { objet: "Carrelage grès cérame 60×60", fournisseur: "Carrelages Lumière", quantite: 85, unite: "m2", delai: 7, cas: "partielle" },
-  { objet: "Bandes à joint et ruban armé", fournisseur: "Point P Lyon 3", quantite: 20, unite: "u", delai: 2, cas: "recue" },
+  { objet: "Garde-corps acier, balcons R+3", pour: /Pose des garde-corps/i, fournisseur: "Serrurerie Dumont", quantite: 12, unite: "ml", delai: 8, cas: "commander" },
+  { objet: "Plaques de plâtre BA13 hydro", pour: /Ossatures|plaques/i, fournisseur: "Point P Lyon 3", quantite: 64, unite: "u", delai: 3, cas: "commander" },
+  { objet: "Blocs-portes isoplanes 83 cm", pour: /blocs-portes/i, fournisseur: "Menuiseries Rhône-Alpes", quantite: 9, unite: "u", delai: 10, cas: "commander" },
+  { objet: "Câble R2V 3G2,5 en couronne", pour: /gaines|tableau/i, fournisseur: "Rexel Villeurbanne", quantite: 300, unite: "ml", delai: 2, cas: "commander" },
+  { objet: "Plan de travail stratifié sur mesure", pour: /comptoirs/i, fournisseur: "Agencements Berthier", quantite: 4, unite: "u", delai: 12, cas: "commander" },
+  { objet: "Lames de terrasse en pin traité", pour: /Lames de terrasse/i, fournisseur: "Bois & Matériaux Gerland", quantite: 48, unite: "m2", delai: 6, cas: "commander" },
+  { objet: "Projecteurs LED 100 W étanches", pour: /Projecteurs/i, fournisseur: "Rexel Villeurbanne", quantite: 8, unite: "u", delai: 4, cas: "commander" },
+  { objet: "Platines d'ancrage galvanisées", pour: /platines/i, fournisseur: "Serrurerie Dumont", quantite: 24, unite: "u", delai: 5, cas: "commander" },
+  { objet: "Enduit de lissage en sac de 25 kg", pour: /enduits/i, fournisseur: "Point P Lyon 3", quantite: 30, unite: "u", delai: 2, cas: "commander" },
+  { objet: "Peinture glycéro pour menuiseries", pour: /Peinture/i, fournisseur: "Tollens Lyon Est", quantite: 40, unite: "l", delai: 3, cas: "commander" },
+  { objet: "Tableau électrique 4 rangées équipé", pour: /tableau/i, fournisseur: "Rexel Villeurbanne", quantite: 1, unite: "u", delai: 7, cas: "commander" },
+  { objet: "Poutres lamellé-collé 8 m", pour: /charpente/i, fournisseur: "Charpentes du Lyonnais", quantite: 6, unite: "u", delai: 15, cas: "commander" },
+  { objet: "Rubans LED 24 V pour vitrines", pour: /Rubans LED/i, fournisseur: "Rexel Villeurbanne", quantite: 18, unite: "ml", delai: 3, cas: "commander" },
+  { objet: "Plots réglables pour terrasse", pour: /plots/i, fournisseur: "Bois & Matériaux Gerland", quantite: 120, unite: "u", delai: 4, cas: "commander" },
+  { objet: "Silicone sanitaire translucide", pour: /Faïence/i, fournisseur: "Point P Lyon 3", quantite: 24, unite: "u", delai: 1, cas: "commander" },
+  { objet: "Fenêtres PVC sur mesure", pour: /Pose des fenêtres/i, fournisseur: "Menuiseries Rhône-Alpes", quantite: 14, unite: "u", delai: 15, cas: "commandee" },
+  { objet: "Gaines ICTA 20 mm", pour: /gaines/i, fournisseur: "Rexel Villeurbanne", quantite: 200, unite: "ml", delai: 2, cas: "attendue" },
+  { objet: "Comptoirs en chêne massif", pour: /comptoirs/i, fournisseur: "Agencements Berthier", quantite: 2, unite: "u", delai: 20, cas: "tardive" },
+  { objet: "Raccords inox du four", pour: /four/i, fournisseur: "Cedeo Lyon 7", quantite: 6, unite: "u", delai: 3, cas: "commandee" },
+  { objet: "Carrelage grès cérame 60×60", pour: /Faïence|Ragréage/i, fournisseur: "Carrelages Lumière", quantite: 85, unite: "m2", delai: 7, cas: "partielle" },
+  { objet: "Bandes à joint et ruban armé", pour: /enduits/i, fournisseur: "Point P Lyon 3", quantite: 20, unite: "u", delai: 2, cas: "recue" },
   { objet: "Nacelle 12 m, 2 jours", fournisseur: "Loca-Nacelles Lyon", quantite: null, unite: null, delai: 1, cas: "location" },
   { objet: "Échafaudage roulant 6 m", fournisseur: "Kiloutou Vénissieux", quantite: null, unite: null, delai: 1, cas: "location" },
   { objet: "Benne à gravats 10 m³", fournisseur: "Lyon Bennes Services", quantite: null, unite: null, delai: 1, cas: "rendue" },
@@ -178,9 +179,13 @@ export function exemple(tableaux: Tableau[]): CommandeBrute[] {
   if (!vivants.length) return [];
   return MODELES.map((m, i) => {
     /* deux commandes en retard (passages proches), les autres sur les passages à venir */
-    const futurs = passages.filter((x) => x.p.debut > decalerOuvres(auj, m.delai + (i % 4) + 1));
-    const choix = i < 2 || !futurs.length ? passages : futurs;
-    const { t, p } = choix.length ? choix[(i * 5) % choix.length]! : { t: vivants[i % vivants.length]!, p: null };
+    /* 04/11 — chaque commande va au passage de sa tâche (les fenêtres à « Pose des fenêtres »), le premier
+       qui laisse le délai du fournisseur ; à défaut de passage de cette tâche, la répartition d'avant */
+    const lies = m.pour ? passages.filter((x) => m.pour!.test(x.p.tache ?? "")).sort((a, b) => a.p.debut.localeCompare(b.p.debut)) : [];
+    const reserve = lies.length ? lies : passages;
+    const futurs = reserve.filter((x) => x.p.debut > decalerOuvres(auj, m.delai + (lies.length ? 0 : (i % 4) + 1)));
+    const choix = (i < 2 && !lies.length) || !futurs.length ? reserve : futurs;
+    const { t, p } = choix.length ? choix[lies.length ? 0 : (i * 5) % choix.length]! : { t: vivants[i % vivants.length]!, p: null };
     const four = t.tiers.find((x) => x.nom === m.fournisseur);
     const livrer = p ? decalerOuvres(p.debut, -1) : decalerOuvres(auj, 6);
     const base: CommandeBrute = {
