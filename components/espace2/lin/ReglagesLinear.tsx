@@ -182,6 +182,14 @@ export default function ReglagesLinear() {
                     Ouvrir « À valider »
                   </Link>
                 </Ligne>
+                {/* 04/11 — l'autonomie se règle règle par règle, dans chaque système : on y mène (promesse socle n° 13) */}
+                <Ligne libelle="Niveaux d'autonomie" aide="Ce qu'un système fait seul ou soumet à une personne se règle règle par règle, dans chaque système.">
+                  <span style={{ display: "inline-flex", flexWrap: "wrap", gap: 4 }}>
+                    <Link href="/espace2/filed/circuit" className="lrg-btn lrg-btn--texte">FILED</Link>
+                    <Link href="/espace2/reput/sujets" className="lrg-btn lrg-btn--texte">REPUT</Link>
+                    <Link href="/espace2/offload/garde-fous" className="lrg-btn lrg-btn--texte">OFFLOAD</Link>
+                  </span>
+                </Ligne>
               </ul>
             </Section>
 

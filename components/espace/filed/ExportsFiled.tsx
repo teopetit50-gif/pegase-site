@@ -31,7 +31,7 @@ export type ExportFiled = {
 const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
 const jour = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
 
-function nature(x: ExportFiled): string {
+export function nature(x: ExportFiled): string {
   if (x.tableau === "sceau_historique") {
     const d = x.du ? new Date(`${x.du}T12:00:00`) : null;
     return d ? `Sceau de l'historique — ${MOIS[d.getMonth()]} ${d.getFullYear()}` : "Sceau de l'historique";
@@ -39,22 +39,30 @@ function nature(x: ExportFiled): string {
   return x.tableau.replace(/_/g, " ").replace(/^./, (c) => c.toUpperCase());
 }
 
-function periode(x: ExportFiled): string {
+export function periode(x: ExportFiled): string {
   if (x.du && x.au) return x.du === x.au ? jour(x.du) : `${jour(x.du)} → ${jour(x.au)}`;
   return x.du ? `depuis le ${jour(x.du)}` : x.au ? `jusqu'au ${jour(x.au)}` : "—";
 }
 
-const nomFichier = (x: ExportFiled) => `filed-${x.tableau.replace(/_/g, "-")}-${(x.du ?? x.genere_le).slice(0, 10)}.csv`;
+export const nomFichier = (x: ExportFiled) => `filed-${x.tableau.replace(/_/g, "-")}-${(x.du ?? x.genere_le).slice(0, 10)}.csv`;
 
-/* l'exemple : le sceau du mois écoulé, au format du balayage (a4_64) */
-function exemples(): ExportFiled[] {
+/* l'exemple : un export programmé de tableau (chaque lundi) et le sceau du
+   mois écoulé, au format du balayage (a4_64) */
+export function exemples(): ExportFiled[] {
   const now = new Date();
   const debut = new Date(now.getFullYear(), now.getMonth() - 1, 1);
   const fin = new Date(now.getFullYear(), now.getMonth(), 0);
   const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const empreinte = "9f2c4e1a7b3d5c8e0f6a2b4c6d8e0a1b3c5d7e9f1a3b5c7d9e1f3a5b7c9d1e3f";
   const contenu = `mois;dernier_rang;empreinte;lignes_du_mois;chaine;verifie_le\n${iso(debut).slice(0, 7)};412;${empreinte};37;intacte;${now.toISOString().slice(0, 19)}Z\n`;
-  return [{ id: "exemple-sceau", tableau: "sceau_historique", du: iso(debut), au: iso(fin), nb_lignes: 1, sha256: empreinte, contenu, genere_le: now.toISOString() }];
+  /* 04/11 — l'export programmé vers un tableur (promesse FILED n° 52) : le lundi de cette semaine, 7 h */
+  const lundi = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7), 7);
+  const avant = new Date(lundi.getTime() - 7 * 86_400_000);
+  const tableur = "fournisseur;facture;echeance;reste_a_payer\nMétallerie Roux;MR-2026-0412;" + iso(new Date(lundi.getTime() + 3 * 86_400_000)) + ";12480,00\nPapeterie Durand;PD-2026-1187;" + iso(new Date(lundi.getTime() + 6 * 86_400_000)) + ";486,20\nÉlectricité de Lyon;2026-09;" + iso(new Date(lundi.getTime() + 12 * 86_400_000)) + ";2316,70\n";
+  return [
+    { id: "exemple-tableur", tableau: "factures_a_payer", du: iso(avant), au: iso(lundi), nb_lignes: 3, sha256: "4b7e19c0a2d85f3e6c1a9b0d7e2f4c8a5b3d6e9f0a1c2b4d5e7f8a9b0c1d2e3f", contenu: tableur, genere_le: lundi.toISOString() },
+    { id: "exemple-sceau", tableau: "sceau_historique", du: iso(debut), au: iso(fin), nb_lignes: 1, sha256: empreinte, contenu, genere_le: now.toISOString() },
+  ];
 }
 
 export default function ExportsFiled({ source, client }: { source: "reelle" | "exemple"; client: string }) {

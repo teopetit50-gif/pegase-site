@@ -31,6 +31,7 @@ import { COMPTES_SYSTEME, SOUS_TITRE_FEC, exporterFec, quand, reglerCompte, tele
 import { EXERCICES_EXEMPLE, fecExemple, type Compte, type Contexte } from "@/components/espace/filed/EcranComptabilite";
 import { chargerVueFournisseurs, monClient, type FactureDuFournisseur } from "@/components/espace/filed/portes";
 import ChargesReprise from "./ChargesReprise";
+import { exemples as exportsExemple, nature as natureExport, nomFichier as fichierExport, periode as periodeExport, type ExportFiled } from "@/components/espace/filed/ExportsFiled";
 import { AvisRapport, CarteRapport, CourbeRapport, Rapport, SectionRapport, TableauRapport, pluriel, serieDatee, useParametresRapport } from "../lin/Rapports";
 
 const annee = new Date().getFullYear();
@@ -103,6 +104,24 @@ export default function Comptabilite() {
   const signe = (e: Ecriture, v: number) => (e.nature === "avoir" ? -Math.abs(v) : v);
   const totalHt = ecritures.reduce((s, e) => s + signe(e, e.ht), 0);
   const totalTva = ecritures.reduce((s, e) => s + signe(e, e.tva), 0);
+
+  /* ——— les exports programmés (filed_exports) ——— */
+  const [exportsReels, setExportsReels] = useState<ExportFiled[] | null>(null);
+  useEffect(() => {
+    if (source !== "reelle" || !ctx?.client) return;
+    let actif = true;
+    void createClient()
+      .from("filed_exports")
+      .select("id, tableau, du, au, nb_lignes, sha256, contenu, genere_le")
+      .eq("client_id", ctx.client)
+      .order("genere_le", { ascending: false })
+      .limit(50)
+      .then(({ data }) => actif && setExportsReels((data ?? []) as ExportFiled[]));
+    return () => {
+      actif = false;
+    };
+  }, [source, ctx?.client]);
+  const exportsListe = useMemo(() => (source === "exemple" ? exportsExemple() : exportsReels), [source, exportsReels]);
 
   /* ——— l'export ——— */
   const [entite, setEntite] = useState("");
@@ -342,6 +361,45 @@ export default function Comptabilite() {
               </div>
             ) : (
               <p className="rap-sous">L&apos;export du FEC est réservé au gérant, à l&apos;administrateur et au valideur.</p>
+            )}
+          </CarteRapport>
+        </SectionRapport>
+
+        {/* 04/11 — les exports programmés vers un tableur et le sceau mensuel (filed_exports, lecture seule) :
+            le bloc d'ExportsFiled n'était monté par aucun écran (promesse FILED n° 52) */}
+        <SectionRapport titre="Exports programmés" meta="Ce que FILED produit seul, à date fixe : tableaux pour vos tableurs, sceau mensuel de l'historique">
+          <CarteRapport
+            taille="pleine"
+            titre="Les exports de FILED"
+            info="Chaque fichier se télécharge pendant 90 jours ; ensuite seule son empreinte reste."
+            chiffre={exportsListe ? nombreFr(exportsListe.length) : "—"}
+            legende={exportsListe ? `${exportsListe.length > 1 ? "exports gardés" : "export gardé"}` : ""}
+            etat="vert"
+          >
+            {!exportsListe ? (
+              <p className="rap-sous">Lecture…</p>
+            ) : !exportsListe.length ? (
+              <p className="rap-sous">Aucun export pour l&apos;instant : le premier sceau arrive au début du mois prochain.</p>
+            ) : (
+              <TableauRapport libelle="Les exports de FILED" colonnes={[{ libelle: "Export" }, { libelle: "Période" }, { libelle: "Lignes", num: true }, { libelle: "Produit le" }, { libelle: "", num: true }]}>
+                {exportsListe.map((x) => (
+                  <tr key={x.id}>
+                    <td style={{ fontWeight: 500 }}>{natureExport(x)}</td>
+                    <td>{periodeExport(x)}</td>
+                    <td style={{ fontVariantNumeric: "tabular-nums", textAlign: "right" }}>{nombreFr(x.nb_lignes)}</td>
+                    <td>{quand(x.genere_le)}</td>
+                    <td style={{ textAlign: "right" }}>
+                      {x.contenu ? (
+                        <button type="button" className="rap-lien" onClick={() => telecharger(fichierExport(x), x.contenu ?? "")}>
+                          Télécharger
+                        </button>
+                      ) : (
+                        <span className="rap-pastille" title="Le contenu est vidé après 90 jours ; l'empreinte reste">empreinte seule</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </TableauRapport>
             )}
           </CarteRapport>
         </SectionRapport>

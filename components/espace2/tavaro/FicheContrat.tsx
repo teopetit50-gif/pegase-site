@@ -45,6 +45,7 @@ import { BoutonFactureElectronique } from "@/components/espace/tavaro/FactureEle
 import { MODES_CAUTION, etatDe, libelleZone } from "@/components/espace/tavaro/edl";
 import { useToast } from "../Toasts";
 import { useTavaro } from "./donnees";
+import { CRITAIR } from "@/components/espace/tavaro/operations";
 import { TavMenu } from "./TavCadre";
 import { copier as copierTexte, dansJours, exporterCsv, useFavoris, useReportes, useSuivis } from "./navigateur";
 import { TavIcone, type NomTavIcone } from "./TavIcone";
@@ -165,7 +166,7 @@ function Pilule({ icone, etat, children, vide, onClick, titre }: { icone?: NomTa
 }
 
 export default function FicheContrat({ dossier, volet = false, retour }: { dossier: Dossier; volet?: boolean; retour?: { libelle: string; href: string } }) {
-  const { source, role, moiId: moi, monde, agences, nommer, gestes, gestesEtats } = useTavaro();
+  const { source, role, moiId: moi, monde, agences, nommer, gestes, gestesEtats, operations } = useTavaro();
   const bareme = monde?.lignesBareme ?? [];
   const reglages = monde?.reglages ?? null;
   const toast = useToast();
@@ -703,6 +704,11 @@ export default function FicheContrat({ dossier, volet = false, retour }: { dossi
               <Pilule icone="Shield" vide={c.franchise_eur === null}>{c.franchise_eur !== null ? `Franchise ${montant(c.franchise_eur)}${c.rachat_franchise ? `, rachat (${montant(c.franchise_reduite_eur ?? 0)})` : c.franchise_reduite_eur !== null ? `, réduite ${montant(c.franchise_reduite_eur)}` : ""}` : "Franchise inconnue"}</Pilule>
               <Pilule icone="Euro">{`${montant(c.tarif_jour_eur)} par jour`}</Pilule>
               <Pilule icone="Speedometer" vide={!c.km_illimite && c.km_inclus === null && c.km_inclus_jour === null}>{forfait.charAt(0).toUpperCase() + forfait.slice(1)}</Pilule>
+              {/* 04/11 — la vignette du véhicule, à rappeler au comptoir (promesse TAVARO n° 18 ; le référentiel est au Parc) */}
+              {vehicule ? (() => {
+                const critair = operations.ops.conformite.find((x) => x.vehicule_id === vehicule.id)?.critair ?? null;
+                return <Pilule icone="Sign" vide={!critair} titre="À rappeler au client s'il entre dans une zone à faibles émissions">{critair ? CRITAIR[critair] : "Crit'Air à vérifier"}</Pilule>;
+              })() : null}
             </div>
             <h3 className="tav-t-prop-titre">Étiquettes</h3>
             <div className="tav-t-prop-etiquettes">
