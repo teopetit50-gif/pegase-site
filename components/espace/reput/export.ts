@@ -30,14 +30,16 @@ export function libelleStatut(d: Demande, m: Monde): string {
   return LIBELLES[d.statut] ?? d.statut;
 }
 
-export function csvDemandes(m: Monde): string {
+/* 04/11/2026 (REPUT n° 3 et 41) : deux colonnes de plus quand l'écran les connaît, le site et l'arrivée hors horaires */
+export function csvDemandes(m: Monde, plus?: { site: (d: Demande) => string; horsHoraires: (d: Demande) => boolean }): string {
   const entete = ["Reçue le", "Canal", "Client", "Sujet", "Langue", "Urgente", "Tirée de la base", "Statut", "Répondue le", "Délai de réponse (min)",
-                  "Délai de traitement dépassé"];
+                  "Délai de traitement dépassé", ...(plus ? ["Site", "Hors horaires"] : [])];
   const lignes = m.demandes.map((d) => {
     const sujet = m.sujets.find((s) => s.code === d.sujet)?.libelle ?? d.sujet ?? "";
     const delai = d.envoyee_le ? Math.max(1, Math.round((new Date(d.envoyee_le).getTime() - new Date(d.recu_le).getTime()) / 60000)) : "";
     return [heureParis(d.recu_le), d.canal, d.de_nom ?? d.adresse_reponse ?? "", sujet, d.langue ?? "", d.urgence ? "oui" : "non",
-            d.couverte === null ? "" : d.couverte ? "oui" : "non", libelleStatut(d, m), heureParis(d.envoyee_le), delai, d.escaladee_le ? "oui" : "non"];
+            d.couverte === null ? "" : d.couverte ? "oui" : "non", libelleStatut(d, m), heureParis(d.envoyee_le), delai, d.escaladee_le ? "oui" : "non",
+            ...(plus ? [plus.site(d), plus.horsHoraires(d) ? "oui" : "non"] : [])];
   });
   return "﻿" + [entete, ...lignes].map((l) => l.map(cellule).join(";")).join("\r\n");
 }

@@ -120,3 +120,19 @@
 .v2 .lin button.lin-maj-pied-rond:disabled {
   opacity: 0.5;
 }
+
+/* « Hors horaires » (04/11/2026, REPUT n° 3) : une puce de la ligne, la lune à la teinte de la nuit ; elle reste
+   visible en mobile, où les autres puces de la ligne se cachent (l'icône seule) */
+.v2 .lin-reput-hors svg {
+  color: #8b7ff0;
+}
+.v2 a.lin-reput-hors:hover {
+  color: var(--lin-titre);
+}
+@container principale (max-width: 640px) {
+  .v2 .lin-table-nom .lin-reput-hors {
+    display: inline-flex;
+    font-size: 0;
+    gap: 0;
+  }
+}

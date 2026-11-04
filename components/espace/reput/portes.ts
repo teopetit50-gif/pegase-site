@@ -12,7 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Accords, Avis, Client, Demande, Equipe, Fiche, Indicateurs, Monde, Reception, Reglages, Reponse, Sujet } from "./types";
+import type { Accords, Avis, Client, Demande, Equipe, Fiche, HorairesReput, Indicateurs, Monde, Plage, Reception, Reglages, Reponse, SiteReput, Sujet } from "./types";
 
 export class ErreurPorte extends Error {}
 
@@ -203,3 +203,29 @@ export async function chargerAppels(demande: string): Promise<AppelAstreinte[]> 
   return (data ?? []) as AppelAstreinte[];
 }
 export const prendreUrgence = (demande: string) => rpc<{ prise: boolean }>("reput_prendre_urgence", { p_demande: demande });
+
+/* ——— les heures d'envoi et les sites (04/11/2026, REPUT n° 3 et 41 de docs/verification/PROMESSES-ECRANS.md) ———
+   Aucune porte SQL. reglages_envois se lit par les membres (RLS « membres lisent les reglages d'envoi ») ;
+   entites par les membres, dans leur périmètre (voit_entite) : un responsable de site ne reçoit que le sien.
+   Les plages suivent private.reglages_envois_effectifs : celles du module, sinon celles de l'organisation,
+   sinon lundi-vendredi 08:00-19:00 — les heures qu'applique le verrou HORS_HEURES du socle. */
+export const PLAGES_DEFAUT: Plage[] = [{ jours: [1, 2, 3, 4, 5], debut: "08:00", fin: "19:00" }];
+
+export async function chargerHoraires(client: Client): Promise<HorairesReput> {
+  const supabase = createClient();
+  const [r, e] = await Promise.all([
+    supabase.from("reglages_envois").select("module, plages").eq("client_id", client.client_id),
+    supabase.from("entites").select("id, nom, fuseau, principale").eq("client_id", client.client_id).order("principale", { ascending: false }).order("nom"),
+  ]);
+  if (e.error) throw new ErreurPorte(message(e.error));
+  const reglages = (r.error ? [] : (r.data ?? [])) as { module: string | null; plages: Plage[] | null }[];
+  const duModule = reglages.find((x) => x.module === "reput")?.plages ?? null;
+  const organisation = reglages.find((x) => x.module === null)?.plages ?? null;
+  const sites = ((e.data ?? []) as SiteReput[]).map((x) => ({ ...x, fuseau: x.fuseau || "Europe/Paris" }));
+  return {
+    plages: duModule ?? organisation ?? PLAGES_DEFAUT,
+    origine: duModule ? "reput" : organisation ? "organisation" : "defaut",
+    fuseau: sites.find((x) => x.principale)?.fuseau ?? "Europe/Paris",
+    sites,
+  };
+}

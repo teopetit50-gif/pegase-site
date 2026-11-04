@@ -165,6 +165,14 @@ export type Monde = {
   fiches: Fiche[];
   sujets: Sujet[];
   accords: Accords;
+  /* 04/11/2026 (docs/verification/PROMESSES-ECRANS.md, REPUT n° 3 et 41) : les heures d'envoi et les sites */
+  horaires?: HorairesReput;
 };
+
+/* les heures d'envoi du socle (reglages_envois.plages : module « reput », sinon l'organisation, sinon le défaut
+   de private.reglages_envois_effectifs), lues dans le fuseau de l'entité (entites.fuseau) */
+export type Plage = { jours: number[]; debut: string; fin: string };
+export type SiteReput = { id: string; nom: string; fuseau: string; principale: boolean };
+export type HorairesReput = { plages: Plage[]; origine: "reput" | "organisation" | "defaut"; fuseau: string; sites: SiteReput[] };
 
 export type Client = { client_id: string; user_id: string; role: string };

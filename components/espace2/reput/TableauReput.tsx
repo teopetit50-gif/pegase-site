@@ -45,6 +45,7 @@ import {
   MessageCircle,
   MessageSquare,
   MessageSquareText,
+  Moon,
   PanelRight,
   PenLine,
   PhoneMissed,
@@ -62,7 +63,8 @@ import RendezVous from "@/components/espace/reput/RendezVous";
 import SujetSecondaire from "@/components/espace/reput/SujetSecondaire";
 import { mondeExemple } from "@/components/espace/reput/exemples";
 import { csvDemandes, libelleStatut, telecharger } from "@/components/espace/reput/export";
-import { chargerMonde, corriger, decider, monClient } from "@/components/espace/reput/portes";
+import { chargerHoraires, chargerMonde, corriger, decider, monClient } from "@/components/espace/reput/portes";
+import { arriveeCourte, arriveeLocale, avecSitesExemple, fuseauDe, horsHoraires, libellePlages, nomSite } from "./horaires";
 import type { Canal, Client, Demande, Monde, Reponse, StatutDemande, StatutReponse } from "@/components/espace/reput/types";
 import { CarteDroite, Choix, IconePriorite, Menu, MenuActions, MenuOptions, type Option, type Serie } from "../lin/Lin";
 import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe, IconeJauge, IconeStatutProjet, type EtatProjet } from "../lin/icones";
@@ -166,15 +168,18 @@ const ficheDe = (id: string) => `${RACINE}/reput?demande=${encodeURIComponent(id
    la page affiche. Les filtres vivent dans l'adresse (?filtre=sante:a_valider,
    un « filtre » par dimension, cumulables) pour survivre au rechargement et se
    partager ; le tableau de bord en tire sa « portée » et tous ses chiffres. */
-type Dimension = "sante" | "etape" | "urgence" | "canal" | "sujet" | "base";
+type Dimension = "sante" | "etape" | "urgence" | "canal" | "sujet" | "base" | "site" | "horaires";
 type Filtres = Partial<Record<Dimension, string>>;
-const DIMENSIONS: Dimension[] = ["sante", "etape", "urgence", "canal", "sujet", "base"];
+/* 04/11/2026 (docs/verification/PROMESSES-ECRANS.md, REPUT n° 3 et 41) : « site » (l'entite_id de la demande, « - » sans
+   site) et « horaires » (hors : arrivée hors des heures d'envoi, ./horaires.ts) */
+const DIMENSIONS: Dimension[] = ["sante", "etape", "urgence", "canal", "sujet", "base", "site", "horaires"];
+const SANS_SITE = "-";
 /* « escalade » : ce que liste la page Urgences ; « retard » : le délai du sujet est dépassé */
 const URGENCES: Record<string, string> = { escalade: "Urgences et escalade", retard: "Délai du sujet dépassé" };
 const BASES: Record<string, string> = { tiree: "Tirée de votre base", hors: "Hors de votre base" };
 const SANS_SUJET = "-";
 const valeurValide = (dim: Dimension, v: string) =>
-  dim === "sante" ? v in SANTES : dim === "etape" ? ETAPES.some((e) => e.cle === v) : dim === "canal" ? v in CANAUX : dim === "urgence" ? v in URGENCES : dim === "base" ? v in BASES : v.length > 0;
+  dim === "sante" ? v in SANTES : dim === "etape" ? ETAPES.some((e) => e.cle === v) : dim === "canal" ? v in CANAUX : dim === "urgence" ? v in URGENCES : dim === "base" ? v in BASES : dim === "horaires" ? v === "hors" : v.length > 0;
 function lireFiltres(params: { get: (k: string) => string | null; getAll: (k: string) => string[] }): Filtres {
   const f: Filtres = {};
   for (const brut of params.getAll("filtre")) {
@@ -211,6 +216,8 @@ function correspond(m: Monde, d: Demande, f: Filtres, maintenant: number): boole
   if (f.canal && d.canal !== f.canal) return false;
   if (f.sujet && (d.sujet || SANS_SUJET) !== f.sujet) return false;
   if (f.urgence === "escalade" && !aEscalader(d)) return false;
+  if (f.site && (d.entite_id ?? SANS_SITE) !== f.site) return false;
+  if (f.horaires === "hors" && !horsHoraires(m, d)) return false;
   if (f.urgence === "retard" && !delaiDepasse(m, d, maintenant)) return false;
   if (f.etape || f.base) {
     const rep = reponseDe(m, d);
@@ -226,6 +233,8 @@ function libelleFiltre(m: Monde, dim: Dimension, v: string): { libelle: string; 
   if (dim === "canal") return { libelle: CANAUX[v as Canal], icone: <IconeCanal canal={v as Canal} /> };
   if (dim === "urgence") return { libelle: URGENCES[v], icone: <IconePriorite niveau={v === "escalade" ? 4 : 3} titre={URGENCES[v]} /> };
   if (dim === "base") return { libelle: BASES[v], icone: <IconeDocument /> };
+  if (dim === "site") return { libelle: nomSite(m, v === SANS_SITE ? null : v), icone: <IconeGroupe /> };
+  if (dim === "horaires") return { libelle: "Hors horaires", icone: <Moon width={14} height={14} aria-hidden="true" /> };
   return { libelle: v === SANS_SUJET ? "Non classé" : (m.sujets.find((s) => s.code === v)?.libelle ?? v), icone: <IconeDiese /> };
 }
 /* les chiffres des sept derniers jours, recalculés sur la portée quand un filtre est posé
@@ -556,7 +565,7 @@ export default function TableauReput() {
   const routeur = useRouter();
   const params = useSearchParams();
   const maintenant = useMaintenant();
-  const [local, setLocal] = useState<Monde>(() => mondeExemple());
+  const [local, setLocal] = useState<Monde>(() => avecSitesExemple(mondeExemple()));
   const [reel, setReel] = useState<{ monde: Monde; client: Client } | null>(null);
   const [erreur, setErreur] = useState<string | null>(null);
   const [tri, setTri] = useState<Tri>("priorite");
@@ -574,7 +583,8 @@ export default function TableauReput() {
     try {
       const client = await monClient();
       if (!client) throw new Error("Aucun compte rattaché à cette session.");
-      setReel({ monde: await chargerMonde(client), client });
+      const [monde, horaires] = await Promise.all([chargerMonde(client), chargerHoraires(client).catch(() => undefined)]);
+      setReel({ monde: { ...monde, horaires }, client });
     } catch (e) {
       setErreur(e instanceof Error ? e.message : "La base n'a pas répondu.");
     }
@@ -622,7 +632,12 @@ export default function TableauReput() {
   const role = source === "exemple" ? "valideur" : (client?.role ?? "lecteur");
   const decideur = role === "gerant" || role === "admin" || role === "valideur";
   const demandes = m.demandes;
-  const exporter = () => telecharger(`demandes-clients-${new Date(maint).toISOString().slice(0, 10)}.csv`, csvDemandes(m));
+  /* l'export daté suit les filtres de la page (le site d'abord : « export daté par site ») ; il dit le site et l'arrivée hors horaires */
+  const exporter = () => {
+    const site = filtres.site ? `-${nomSite(m, filtres.site === SANS_SITE ? null : filtres.site).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}` : "";
+    const portee = { ...m, demandes: m.demandes.filter((d) => correspond(m, d, filtres, maint)) };
+    telecharger(`demandes-clients${site}-${new Date(maint).toISOString().slice(0, 10)}.csv`, csvDemandes(portee, m.horaires ? { site: (d) => nomSite(m, d.entite_id), horsHoraires: (d) => horsHoraires(m, d) } : undefined));
+  };
   const boutonExporter = (
     <button type="button" className="v2-btn v2-btn--petit" onClick={exporter}>
       <Download width={14} height={14} aria-hidden="true" />
@@ -1212,6 +1227,32 @@ export default function TableauReput() {
                     />
                   </dd>
                 </div>
+                {m.horaires ? (
+                  <div>
+                    <dt>Horaires</dt>
+                    <dd>
+                      {horsHoraires(m, d) ? (
+                        <Link href={lienFiltres({ horaires: "hors" }, "demandes")} className="lin-jalon-puce lin-reput-hors" title={`Arrivée ${arriveeLocale(d.recu_le, fuseauDe(m.horaires, d))} ; heures d'envoi : ${libellePlages(m.horaires.plages)}`} scroll={false}>
+                          <Moon width={12} height={12} aria-hidden="true" />
+                          Hors horaires · {arriveeCourte(d.recu_le, fuseauDe(m.horaires, d))}
+                        </Link>
+                      ) : (
+                        <span title={`Heures d'envoi : ${libellePlages(m.horaires.plages)}`}>Pendant les heures d&apos;envoi</span>
+                      )}
+                    </dd>
+                  </div>
+                ) : null}
+                {m.horaires && m.horaires.sites.length > 1 ? (
+                  <div>
+                    <dt>Site</dt>
+                    <dd>
+                      <Link href={lienFiltres({ site: d.entite_id ?? SANS_SITE })} className="lin-jalon-puce" scroll={false}>
+                        <IconeGroupe />
+                        {nomSite(m, d.entite_id)}
+                      </Link>
+                    </dd>
+                  </div>
+                ) : null}
                 <div>
                   <dt>Sujet</dt>
                   <dd className={sujet ? undefined : "lin-props-vide"}>
@@ -1387,6 +1428,11 @@ export default function TableauReput() {
       }),
     );
     const horsCanal = horsDe("canal");
+    /* la lecture par site (REPUT n° 41) : le consolidé, puis un site par menu ; la RLS ne montre à un responsable que le sien */
+    const horsSite = horsDe("site");
+    const sitesPortee = m.horaires && m.horaires.sites.length > 1
+      ? [...new Set(horsSite.map((d) => d.entite_id ?? SANS_SITE))].map((id) => ({ id, n: portee.filter((d) => (d.entite_id ?? SANS_SITE) === id).length })).sort((a, b) => nomSite(m, a.id === SANS_SITE ? null : a.id).localeCompare(nomSite(m, b.id === SANS_SITE ? null : b.id), "fr"))
+      : [];
     const listeFiltree = lienFiltres(filtres, "demandes");
     const etatReglages = !m.reglages ? "Non réglé" : m.reglages.actif ? (m.reglages.envoi_auto === false ? "Actif, sans envoi automatique" : "Actif") : "En pause";
 
@@ -1496,6 +1542,38 @@ export default function TableauReput() {
                 ))}
                 {parCanal.length ? null : <span className="lin-puce lin-puce--vide">Aucun message reçu</span>}
               </div>
+              {sitesPortee.length ? (
+                <div className="lin-projet-ligne">
+                  <span className="lin-projet-etiquette">Sites</span>
+                  {filtres.site ? null : (
+                    <span className="lin-puce" title="Toutes les demandes, tous sites confondus">
+                      <IconeJauge />
+                      Consolidé · {horsSite.length}
+                    </span>
+                  )}
+                  {sitesPortee.map(({ id, n }) => (
+                    <MenuOptions
+                      key={id}
+                      titre={`Lire le site : ${nomSite(m, id === SANS_SITE ? null : id)}…`}
+                      declencheur={
+                        <>
+                          <IconeGroupe />
+                          {nomSite(m, id === SANS_SITE ? null : id)} · {n}
+                        </>
+                      }
+                      options={[
+                        filtrer("site", id, {
+                          cle: "filtre",
+                          libelle: filtres.site === id ? "Revenir au consolidé" : "Lire ce site seul",
+                          meta: String(horsSite.filter((d) => (d.entite_id ?? SANS_SITE) === id).length),
+                          icone: <IconeGroupe />,
+                        }),
+                      ]}
+                      largeur={300}
+                    />
+                  ))}
+                </div>
+              ) : null}
               <div className="lin-projet-ligne">
                 <span className="lin-projet-etiquette">7 jours</span>
                 <MenuOptions
@@ -1515,6 +1593,7 @@ export default function TableauReput() {
                     }),
                     filtrer("base", "hors", { cle: "hors", libelle: "Hors de votre base", meta: String(ind.hors_base), icone: <IconeDocument /> }),
                     filtrer("urgence", "retard", { cle: "retard", libelle: URGENCES.retard, meta: String(retards.length), icone: <IconeCalendrier passe /> }),
+                    filtrer("horaires", "hors", { cle: "horaires", libelle: "Arrivées hors horaires", meta: String(horsDe("horaires").filter((d) => horsHoraires(m, d)).length), icone: <Moon width={14} height={14} aria-hidden="true" /> }),
                   ]}
                   largeur={360}
                 />
@@ -1980,6 +2059,12 @@ export default function TableauReput() {
                     <span className="lin-table-nom" role="cell">
                       <IconeDemande d={d} />
                       <span className="lin-table-titre">{nomDe(d)}</span>
+                      {horsHoraires(m, d) && m.horaires ? (
+                        <span className="lin-jalon-puce lin-reput-hors" title={`Arrivée ${arriveeLocale(d.recu_le, fuseauDe(m.horaires, d))}, hors des heures d'envoi (${libellePlages(m.horaires.plages)})`}>
+                          <Moon width={12} height={12} aria-hidden="true" />
+                          Hors horaires
+                        </span>
+                      ) : null}
                       {sujet ? (
                         <span className="lin-jalon-puce">
                           <IconeDiese />
