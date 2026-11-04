@@ -15,6 +15,7 @@ import { Bande } from "@/components/secteurs/hotellerie/Bande";
    `.p-btp` ; un réglage fait sur la page BTP vaut aussi ici. */
 import "../btp/btp.css";
 import "../btp/mobile.css";
+import "./mobile.css";
 import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════

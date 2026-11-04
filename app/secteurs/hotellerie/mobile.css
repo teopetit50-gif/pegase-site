@@ -1,0 +1,20 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   /secteurs/hotellerie — CORRECTIFS MOBILES PROPRES À OSTELO (04/11/2026)
+
+   La page reprend la peau et l'échelle mobile de la page BTP
+   (../btp/btp.css, ../btp/mobile.css). Ce qui suit ne vaut que pour elle :
+   portée `.p-hotellerie`, rien au-dessus de 767 px.
+
+   Teo, sur téléphone : « la version mobile a des problèmes, règle-les
+   tous ».
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* Appel final : les deux orbites d'icônes tournaient PAR-DESSUS le titre
+     et le paragraphe (même plan, z-10), une icône sur « d'Ostelo ». Sur
+     téléphone, les orbites partent ; les trois disques restent en décor. */
+  .p-hotellerie .rounded-full.btp-orbite,
+  .p-hotellerie .rounded-full.btp-contre-orbite {
+    display: none;
+  }
+}
