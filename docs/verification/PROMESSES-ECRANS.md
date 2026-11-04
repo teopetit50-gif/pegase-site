@@ -19,23 +19,24 @@ Aucune connexion, aucun passage en « Base réelle », aucune écriture, aucun e
 
 **Après les corrections du 3 novembre (trois passages) et du 4 novembre (session « suite de la vérification », section « Le 4 novembre » plus bas), mis en ligne et vérifiés sur omegaai.fr.**
 63 promesses sont passées à « Montrée » depuis le relevé par les trois passages, puis **26 promesses « aucune page »**
-ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au soir ») : 89 en tout. Il reste 6
-« aucune page », dont 5 attendent une porte (Teo).
+ont reçu leur écran le soir (section « Promesses sans page : le 3 novembre au soir ») : 89 en tout. Les **6 dernières
+« aucune page »** ont reçu leur écran le 4 novembre, sans migration ni porte nouvelle (section « Construites le 4 novembre ») :
+il ne reste plus aucune promesse « aucune page ».
 
 | Produit | Montrée | Ailleurs | Exemple à compléter | Code invisible | Aucune page | Sans back-end | À reformuler | Total |
 |---|---|---|---|---|---|---|---|---|
 | Socle et pages transverses | 15 | 2 | 1 | 1 | 0 | 5 | 3 | **27** |
 | FILED — factures fournisseurs | 49 | 3 | 7 | 0 | 0 | 3 | 3 | **65** |
 | CASHD — relances d’impayés | 56 | 3 | 2 | 1 | 0 | 2 | 2 | **66** |
-| REPUT — demandes clients | 35 | 0 | 0 | 0 | 2 | 3 | 3 | **43** |
+| REPUT — demandes clients | 37 | 0 | 0 | 0 | 0 | 3 | 3 | **43** |
 | OFFLOAD — nouvelles affaires | 42 | 1 | 0 | 4 | 0 | 0 | 1 | **48** |
-| DALIRO — BTP | 27 | 1 | 1 | 0 | 1 | 2 | 3 | **35** |
+| DALIRO — BTP | 28 | 1 | 1 | 0 | 0 | 2 | 3 | **35** |
 | LORANI — architectes | 60 | 1 | 1 | 2 | 0 | 7 | 2 | **73** |
 | TAMILA — avocats | 26 | 0 | 0 | 0 | 0 | 14 | 2 | **42** |
 | TAVARO — location automobile | 34 | 0 | 2 | 0 | 0 | 3 | 3 | **42** |
-| TIROMA — cabinet dentaire | 39 | 2 | 1 | 0 | 3 | 4 | 3 | **52** |
+| TIROMA — cabinet dentaire | 42 | 2 | 1 | 0 | 0 | 4 | 3 | **52** |
 | VARELO — groupes | 21 | 2 | 0 | 1 | 0 | 2 | 1 | **27** |
-| **Tous** | **404** | **15** | **15** | **9** | **6** | **45** | **26** | **520** |
+| **Tous** | **410** | **15** | **15** | **9** | **0** | **45** | **26** | **520** |
 
 Au relevé (3 novembre au matin, avant toute correction) :
 
@@ -197,28 +198,32 @@ Northlight Type Ltd, en livres), des mentions sur R2026-000014 et R2026-000019 ;
 exercices repris ; le délai de règlement des sept comptes CASHD ; quatre changements de réglage ; l'auteur des fiches
 REPUT ; trois exclusions OFFLOAD. FILED compte donc 15 documents d'exemple au lieu de 12.
 
-### Non construites, porte manquante (b) — 5 lignes, à Teo
+### Construites le 4 novembre — les 6 dernières « aucune page » (session « promesses bloquées »)
 
-**Écart à signaler** (vérifié en production, en lecture, par le coordinateur le 03/11 à 19 h 25) : `filed_categories`,
-les colonnes `filed_factures.categorie*`, `filed_vue_ensemble()`, `filed_epingler_dossier()`, `filed_reponses` (lots
-a4_38, a4_47, a4_52) et la vue `reput_indicateurs_services` (c3_12) **existent en production sans leur migration dans
-le dépôt**. Rien n'est corrigé ce soir ; il faudra rapatrier ces migrations dans `omega/migrations` et
-`omega/modules/reput/migrations`. Le « résumé de la pièce » (FILED n° 28) n'a, lui, aucune colonne : seule la
-catégorie est montrée.
+On les croyait bloquées faute de porte. Le coordinateur a vérifié en production, le 04/11, en lecture seule, les règles
+de sécurité (RLS) et les fonctions : les six se construisent à l'écran, **sans migration ni porte nouvelle**. Chaque
+lecture et chaque geste passe par la RLS du lecteur ; chaque promesse a ses données d'exemple. Une promesse par commit
+(REPUT n° 3 et 41 partagent leurs fichiers : un seul commit), `tsc`, `eslint`, `npm run build` verts, recette 390 / 768 /
+1024 / 1440 / 1700 en sombre et en clair sans débordement de page, puis vérifié sur omegaai.fr.
 
-| Produit · n° | Promesse | Ce qui manque |
-|---|---|---|
-| REPUT · 3 | Étiquette « Hors horaires » sur chaque demande | Le verrou HORS_HEURES vit au socle (envoi différé) ; aucune colonne ni porte ne dit d'une demande qu'elle est arrivée hors horaires. |
-| REPUT · 41 | Consolidé et lecture par site, export daté | La vue `reput_indicateurs_services` existe en prod (avec `entite_id`), mais Espace 2 n'a aucun choix de site pour REPUT ni règle « un responsable de site ne voit que le sien » côté écran ; le périmètre par site relève du socle (`perimetre_couvre`). À décider : un filtre par site sur l'aperçu suffit-il ? |
-| DALIRO · 28 | « …et qui voit les prix » | `private.btp_voit_prix` ne dit que pour la personne connectée ; aucune porte ne liste ni ne règle `voit_prix` par personne. |
-| TIROMA · 14 | Schéma dentaire et actes par dent d'un plan | `tiroma_plan_actes.dents` existe ; aucune porte ne renvoie les actes d'un plan. |
-| TIROMA · 47 | Agenda des rendez-vous par fauteuil, page Patients | `tiroma_rendez_vous` existe ; aucune porte d'agenda, et une page nouvelle demanderait un relevé de référence. |
+| Produit · n° | Promesse | Écran construit | Adresse (données d'exemple) | Back-end lu | Commit |
+|---|---|---|---|---|---|
+| DALIRO · 28 | « …et qui voit les prix » | Carte « Qui voit les prix · 3 sur 4 » de Réglages › Organisation (seconde carte de la page Templates relevée) : une ligne par personne, d'où vient le droit (gérant, droit personnel daté, équipe, formule Démarrage) ; « … » de la ligne : accorder ou retirer, avec fenêtre de confirmation. Un compte qui n'est pas gérant ne voit que sa ligne | `/espace2/daliro/reglages?page=organisation` (Claire Morel gérante, Marc Lévy droit personnel, Yanis Dupré par « Conducteurs de travaux », Sofia Carvalho sans) | `annuaire`, `droits` (SELECT gérant ; INSERT et DELETE « le gerant accorde/retire les droits »), `equipes`, `equipes_membres`, `btp_reglages.formule` ; règle de `private.a_le_droit_pour` rejouée à l'écran ; portes dans `components/espace/daliro/portes.ts` | `796fd67` |
+| TIROMA · 14 | Schéma dentaire et actes par dent d'un plan | Volet d'un plan ou d'un devis (Plans et devis) : section « Schéma dentaire et actes » — arcades FDI 18→28 / 48→38 (dents de lait si un acte en vise), dents surlignées à la couleur de leur acte (à faire, planifié, fait), puis les actes : dents, libellé, séance, durée, état, montant et reste à charge | `/espace2/tiroma/plans?plan=pl-3` (Bridge 44-46), `?plan=pl-17` (orthodontie), et les quatorze plans et devis | `tiroma_plan_actes` (SELECT « on voit les lignes des plans qu'on voit ») ; `chargerActesPlan` dans `components/espace/tiroma/portes.ts` | `378e4aa` |
+| TIROMA · 47 | Agenda des rendez-vous par fauteuil | Onglet « Agenda » de Fauteuils (contrôle segmenté de Bookings, aucune page nouvelle) : un groupe par fauteuil, une ligne par rendez-vous (heure, acte · patient, praticien, état) ; vue calendrier = grille 8 h-19 h, une colonne par fauteuil ; ‹ › et « Aujourd'hui » ; les créneaux libérés posés « libre · Créneau à sauver » ; volet de détail | `/espace2/tiroma/fauteuils?vue=agenda` (et `&affichage=calendrier`) : aujourd'hui, 14 / 6 / 5 rendez-vous comme « Charge du jour » ; demain, deux créneaux à sauver | `tiroma_rendez_vous`, `tiroma_patients` (SELECT dans le périmètre) ; fauteuils, praticiens, types et créneaux du dossier ; `chargerAgenda` dans `components/espace/tiroma/portes.ts` | `3e6ee06` |
+| TIROMA · 3 | Bandeau « Trois décisions pour ce matin » | **Décision** : pas de bandeau (My issues n'en a pas). Les trois décisions sont le **premier groupe** de la liste d'Aujourd'hui, « Trois décisions pour ce matin · 3 » : le créneau le plus proche à sauver (« Un créneau de 9 h à sauver… appeler … »), les plans signés qui dorment, le fauteuil sans assistante | `/espace2/tiroma` (onglet Point du matin) | données déjà lues (créneaux, plans, charge, équipe) | `87b17af` |
+| REPUT · 3 | Étiquette « Hors horaires » sur chaque demande | Puce « ☾ Hors horaires » sur la ligne de la liste (l'icône seule en mobile) ; propriété « Horaires » de la fiche (« Hors horaires · mer. 02 h 00 », heures d'envoi en infobulle), qui ouvre la liste filtrée ; option « Arrivées hors horaires » du menu « 7 jours » de l'aperçu ; colonne « Hors horaires » de l'export | `/espace2/reput?vue=demandes`, `?demande=…c3d07` (Sophie Garnier) | `reput_reglages` n'a pas d'horaires : ce sont les heures d'envoi du verrou HORS_HEURES, `reglages_envois.plages` (module « reput », sinon l'organisation, sinon lun.-ven. 08:00-19:00, comme `private.reglages_envois_effectifs`), lues dans le fuseau de l'entité (`entites.fuseau`) ; calcul dans `components/espace2/reput/horaires.ts` | `9c38a4e` |
+| REPUT · 41 | Consolidé et lecture par site, export daté | Ligne « Sites » de l'aperçu : « Consolidé · 10 », puis un menu par site (« Lire ce site seul » / « Revenir au consolidé ») ; filtre `site` dans l'adresse, en pastille ; propriété « Site » de la fiche ; « Exporter » suit les filtres (fichier `demandes-clients-<site>-<date>.csv`, colonnes Site et Hors horaires). « Un responsable de site ne voit que le sien » : la RLS (`perimetre_couvre`, `voit_entite`) | `/espace2/reput` ; `?filtre=site:…c3a2` (Atelier de Villeurbanne) | `reput_demandes.entite_id`, `entites` (périmètre) ; décision du coordinateur : un filtre par site sur l'aperçu et l'export suffit | `9c38a4e` |
 
-### Reste pour Teo, sans porte à écrire
+Données d'exemple ajoutées : quatre personnes et leurs droits (Daliro) ; les actes, dents et montants des quatorze plans
+et devis (Tiroma, `exemplesActes.ts`, sommes égales aux montants des plans) ; l'agenda des trois fauteuils, aujourd'hui
+calé sur la charge du jour et les autres jours sur un gabarit (`exemplesAgenda.ts`) ; les heures d'envoi d'un artisan
+(semaine 8 h-19 h, samedi 9 h-12 h) et les dix demandes REPUT réparties entre le Showroom de Lyon et l'Atelier de
+Villeurbanne (`horaires.ts`). Tous les patients et personnes sont inventés.
 
-- **TIROMA · 3** — bandeau « Trois décisions pour ce matin » : les données sont là, mais Aujourd'hui copie Linear My
-  issues, qui n'a pas de bandeau. En poser un serait inventer un dessin. Retirer le bandeau de la capture du site, ou
-  le poser dans le point du matin ?
+Écart à signaler : l'onglet « Agenda » allonge le contrôle segmenté de Fauteuils ; sous 1 600 px la barre d'outils passe
+à la ligne au lieu de déborder (`tir-cal.css`). REPUT : en exemple, huit demandes sur dix sont arrivées hors horaires —
+c'est l'heure de l'exemple (la nuit et tôt le matin), pas un défaut du calcul.
 
 Photos d'exemple : recadrages des photos déjà publiées sur l'accueil (`public/exemples/CREDITS-PHOTOS.txt`).
 
@@ -437,7 +442,7 @@ Totaux : Montrée 41 · Ailleurs 3 · Exemple à compléter 12 · Code invisible
 
 Totaux : Montrée 22 · Ailleurs 0 · Exemple à compléter 5 · Code invisible 5 · Aucune page 5 · Sans back-end 3 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 4, n° 5, n° 19, n° 20, n° 21, n° 24, n° 26, n° 27, n° 34, n° 35.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 3, n° 4, n° 5, n° 19, n° 20, n° 21, n° 24, n° 26, n° 27, n° 34, n° 35, n° 41.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -546,7 +551,7 @@ Totaux : Montrée 35 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 17 · Ailleurs 3 · Exemple à compléter 8 · Code invisible 0 · Aucune page 2 · Sans back-end 2 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 23, n° 25, n° 26, n° 27, n° 30, n° 32.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 13, n° 20, n° 21, n° 23, n° 25, n° 26, n° 27, n° 28, n° 30, n° 32.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
@@ -774,7 +779,7 @@ Totaux : Montrée 28 · Ailleurs 1 · Exemple à compléter 5 · Code invisible 
 
 Totaux : Montrée 37 · Ailleurs 3 · Exemple à compléter 2 · Code invisible 0 · Aucune page 3 · Sans back-end 4 · À reformuler 3.
 
-**Réglées depuis le relevé (désormais « Montrée ») : n° 4, n° 45.**
+**Réglées depuis le relevé (désormais « Montrée ») : n° 3, n° 4, n° 14, n° 45, n° 47.**
 
 | n° | Promesse (citation exacte) | Page du site (fichier) | Espace 2 : adresse + bloc | Statut | Preuve |
 |---|---|---|---|---|---|
