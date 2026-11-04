@@ -214,10 +214,10 @@ html[data-v2-theme="light"] .v2 .lor-at {
 .v2 .lor-at-etat[data-teinte="rouge"] .lor-at-etat-point { background: #e5484d; }
 .v2 .lor-at-mono { font-variant-numeric: tabular-nums; color: var(--lor-at-second); }
 /* sous `.lor` (la page du projet), la remise à zéro des boutons de ./lor.css l'emportait : on redonne leur habit */
-.v2 .lor .lor-at-page .lor-at-bouton { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 4px 8px; border-radius: 8px; background: var(--lor-at-bouton); box-shadow: var(--lor-at-bouton-ombre); color: var(--lor-at-texte); font-weight: 500; }
-.v2 .lor .lor-at-page .lor-at-bouton:hover:not(:disabled) { background: var(--lor-at-actif); }
-.v2 .lor .lor-at-page .lor-at-bouton--bleu, .v2 .lor .lor-at-page .lor-at-bouton--bleu:hover:not(:disabled) { background: var(--lor-at-bleu); color: #fff; box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f; }
-.v2 .lor .lor-at-page .lor-at-bouton:disabled { opacity: 0.5; }
+.v2 .lor-at.lor-at-page .lor-at-bouton { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 4px 8px; border-radius: 8px; background: var(--lor-at-bouton); box-shadow: var(--lor-at-bouton-ombre); color: var(--lor-at-texte); font-weight: 500; }
+.v2 .lor-at.lor-at-page .lor-at-bouton:hover:not(:disabled) { background: var(--lor-at-actif); }
+.v2 .lor-at.lor-at-page .lor-at-bouton--bleu, .v2 .lor-at.lor-at-page .lor-at-bouton--bleu:hover:not(:disabled) { background: var(--lor-at-bleu); color: #fff; box-shadow: inset 0 0 0 1px #0000000f, 0 2px 4px -2px #266df01f; }
+.v2 .lor-at.lor-at-page .lor-at-bouton:disabled { opacity: 0.5; }
 .v2 .lor-at-pied-onglet .lor-at-cell { grid-column: 1 / -1; }
 /* la page du projet : l'onglet d'outil prend toute la largeur, sous la barre des onglets */
 .v2 .lor-in-defile[data-outil] { padding: 0 0 48px; }
@@ -225,3 +225,10 @@ html[data-v2-theme="light"] .v2 .lor-at {
   .v2 .lor-at-page .lor-at-barre-vue { height: auto; min-height: 48px; flex-wrap: wrap; padding: 8px 12px; }
   .v2 .lor-at-page .lor-at-resume { white-space: normal; flex-basis: 100%; }
 }
+/* une carte autonome dans une page d'outil (DALIRO : approvisionnement, météo, heures, situations, réception) :
+   sans le cadre blanc de l'ancien espace, aux marges de la page */
+.v2 .lor-at-contenu { padding: 20px 16px 48px; }
+.v2 .lor-at-contenu .resa.esp { background: transparent; }
+.v2 .lor-at-contenu .v2-page { padding: 0; }
+.v2 .lor-at-contenu .esp-carte { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.v2 .lor-at-contenu .lvp-partie > .lit-lots-tete { display: none; }

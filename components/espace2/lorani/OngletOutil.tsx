@@ -31,6 +31,8 @@ export type Liste = {
   tri?: string;
   pied?: string;
   gestes: Geste[];
+  /* une carte autonome (elle charge ses données et porte ses gestes) : posée à la place de la grille */
+  contenu?: ReactNode;
 };
 
 export function OngletOutil({
@@ -61,7 +63,7 @@ export function OngletOutil({
           {listes.map((x) => (
             <Link key={x.cle} href={lienListe(x.cle)} scroll={false} className="lor-at-onglet" aria-current={x.cle === l.cle ? "page" : undefined}>
               {x.libelle}
-              <span className="lor-at-compteur">{x.rangs.length}</span>
+              {x.contenu ? null : <span className="lor-at-compteur">{x.rangs.length}</span>}
             </Link>
           ))}
         </nav>
@@ -83,6 +85,10 @@ export function OngletOutil({
           ))}
         </div>
       </div>
+      {l.contenu ? (
+        <div className="lor-at-contenu">{l.contenu}</div>
+      ) : (
+      <>
       <div className="lor-at-barre-tri">
         <span className="lor-at-tri">
           <span className="lor-at-discret-fort">Trié par</span> {l.tri ?? "date"}
@@ -126,6 +132,8 @@ export function OngletOutil({
           </div>
         ) : null}
       </div>
+      </>
+      )}
     </div>
   );
 }
