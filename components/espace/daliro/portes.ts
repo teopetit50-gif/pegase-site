@@ -383,3 +383,68 @@ export async function questionsDuChantier(chantier: string): Promise<QuestionCha
   const l = await rpc<QuestionChantier[] | null>("btp_questions_du_chantier", { p_chantier: chantier });
   return Array.isArray(l) ? l : [];
 }
+
+/* ——— qui voit les prix (04/11/2026, DALIRO n° 28 de docs/verification/PROMESSES-ECRANS.md) ———
+   Aucune porte SQL : la RLS suffit (vérifiée en production le 04/11). public.droits se lit en entier par le
+   gérant (chacun lit ses propres lignes), et le gérant y fait INSERT et DELETE (politiques « le gerant
+   accorde / retire les droits »). private.a_le_droit_pour donne voir_prix au gérant, à qui a une ligne
+   droits « voir_prix » à son nom ou à celui d'une de ses équipes (equipes_membres) ; en formule
+   « demarrage » de btp_reglages, tout le monde voit les prix (btp_voit_prix). L'écran rejoue cette règle
+   personne par personne, d'après l'annuaire. */
+export type OrigineVoitPrix = "gerant" | "personnel" | "equipe" | "formule" | "aucun";
+export type PersonneVoitPrix = {
+  user_id: string;
+  nom: string;
+  email: string | null;
+  role: string;
+  voit: boolean;
+  origine: OrigineVoitPrix;
+  /* la ligne droits à son nom (celle que le gérant peut retirer) */
+  droit_id: string | null;
+  /* les équipes qui lui donnent le droit */
+  equipes: string[];
+  accorde_le: string | null;
+};
+
+export function origineVoitPrix(p: { role: string; personnel: boolean; equipes: string[] }, demarrage: boolean): OrigineVoitPrix {
+  if (p.role === "gerant") return "gerant";
+  if (p.personnel) return "personnel";
+  if (p.equipes.length) return "equipe";
+  if (demarrage) return "formule";
+  return "aucun";
+}
+
+export async function chargerVoitPrix(p_client: string, demarrage: boolean): Promise<PersonneVoitPrix[]> {
+  const supabase = createClient();
+  const [a, d, q, m] = await Promise.all([
+    supabase.rpc("annuaire", { p_client }),
+    supabase.from("droits").select("id, user_id, equipe_id, cree_le").eq("client_id", p_client).eq("droit", "voir_prix"),
+    supabase.from("equipes").select("id, nom").eq("client_id", p_client),
+    supabase.from("equipes_membres").select("equipe_id, user_id").eq("client_id", p_client),
+  ]);
+  if (a.error) throw new ErreurPorte(message(a.error));
+  if (d.error) throw new ErreurPorte(message(d.error));
+  const droits = (d.data ?? []) as { id: string; user_id: string | null; equipe_id: string | null; cree_le: string }[];
+  const noms = new Map(((q.data ?? []) as { id: string; nom: string }[]).map((x) => [x.id, x.nom]));
+  const membres = (m.data ?? []) as { equipe_id: string; user_id: string }[];
+  const equipesDroit = new Set(droits.map((x) => x.equipe_id).filter((x): x is string => !!x));
+  return ((a.data ?? []) as { user_id: string; nom: string; email: string | null; role: string }[]).map((x) => {
+    const perso = droits.find((y) => y.user_id === x.user_id) ?? null;
+    const equipes = membres.filter((y) => y.user_id === x.user_id && equipesDroit.has(y.equipe_id)).map((y) => noms.get(y.equipe_id) ?? "Une équipe");
+    const origine = origineVoitPrix({ role: x.role, personnel: !!perso, equipes }, demarrage);
+    return { ...x, voit: origine !== "aucun", origine, droit_id: perso?.id ?? null, equipes, accorde_le: perso?.cree_le ?? null };
+  });
+}
+
+/* les deux gestes du gérant : une ligne droits à son nom, posée ou retirée (INSERT et DELETE directs, sous RLS) */
+export async function accorderVoitPrix(p_client: string, p_user: string): Promise<void> {
+  const r = await createClient().from("droits").insert({ client_id: p_client, droit: "voir_prix", user_id: p_user }).select("id");
+  if (r.error) throw new ErreurPorte(message(r.error));
+  if (!r.data?.length) throw new ErreurPorte("Seul le gérant accorde ce droit.");
+}
+
+export async function retirerVoitPrix(p_droit: string): Promise<void> {
+  const r = await createClient().from("droits").delete().eq("id", p_droit).eq("droit", "voir_prix").select("id");
+  if (r.error) throw new ErreurPorte(message(r.error));
+  if (!r.data?.length) throw new ErreurPorte("Seul le gérant retire ce droit.");
+}

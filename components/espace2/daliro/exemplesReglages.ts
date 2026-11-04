@@ -14,6 +14,8 @@
 
 import { aujourdHui, dans, ilYa } from "@/components/espace/exemples/socle";
 import type { AccordJ2, CanalAccordJ2, Prix } from "@/components/espace/daliro/types";
+import { CLAIRE, MARC, SOFIA, YANIS } from "@/components/espace/exemples/socle";
+import type { PersonneVoitPrix } from "@/components/espace/daliro/portes";
 
 const id = (n: number) => `00000000-0000-4000-8000-000000eb${String(n).padStart(4, "0")}`;
 
@@ -50,4 +52,18 @@ export function accordExemple(): AccordJ2 {
     fin: base.fin,
     canaux: [canal("email", "active", { ...base, utilises_mois: 7 }), canal("sms", "active", base), canal("whatsapp", "active", { ...base, utilises_mois: 12 })],
   };
+}
+
+/* Qui voit les prix (04/11/2026, DALIRO n° 28 de docs/verification/PROMESSES-ECRANS.md) : l'équipe d'exemple,
+   vue par la gérante. Une ligne par origine du droit : la gérante (de droit), un droit personnel accordé il y a
+   cinq semaines, une équipe qui porte le droit, et une personne qui ne voit pas les prix. La formule
+   d'exemple est « entreprise » : la règle « Démarrage, tout le monde voit » ne joue pas. */
+
+export function voitPrixExemple(): PersonneVoitPrix[] {
+  return [
+    { user_id: CLAIRE, nom: "Claire Morel", email: "claire.morel@example.com", role: "gerant", voit: true, origine: "gerant", droit_id: null, equipes: [], accorde_le: null },
+    { user_id: MARC, nom: "Marc Lévy", email: "marc.levy@example.com", role: "admin", voit: true, origine: "personnel", droit_id: id(101), equipes: [], accorde_le: ilYa(36) },
+    { user_id: YANIS, nom: "Yanis Dupré", email: "yanis.dupre@example.com", role: "valideur", voit: true, origine: "equipe", droit_id: null, equipes: ["Conducteurs de travaux"], accorde_le: null },
+    { user_id: SOFIA, nom: "Sofia Carvalho", email: "sofia.carvalho@example.com", role: "collaborateur", voit: false, origine: "aucun", droit_id: null, equipes: [], accorde_le: null },
+  ];
 }

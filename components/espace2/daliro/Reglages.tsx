@@ -35,7 +35,8 @@ import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { GRAVITES, UNITES, familleControle, libelleUnite } from "@/components/espace/daliro/etats";
-import { activerAccordJ2Seul, chargerAccordJ2, donnerAccordJ2, poserPrix, revoquerAccordJ2, validerPrix } from "@/components/espace/daliro/portes";
+import { accorderVoitPrix, activerAccordJ2Seul, chargerAccordJ2, chargerVoitPrix, donnerAccordJ2, poserPrix, retirerVoitPrix, revoquerAccordJ2, validerPrix, type PersonneVoitPrix } from "@/components/espace/daliro/portes";
+import { libelleRole } from "@/components/espace/equipe/portes";
 import type { AccordJ2, CanalAccordJ2, Gravite, Prix, Tableau } from "@/components/espace/daliro/types";
 import { dans } from "@/components/espace/exemples/socle";
 import { RACINE } from "../modules";
@@ -43,7 +44,7 @@ import { useToast } from "../Toasts";
 import { DalCarte } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { useDaliro } from "./donnees";
-import { PRIX_PLUS, accordExemple, canalAccord } from "./exemplesReglages";
+import { PRIX_PLUS, accordExemple, canalAccord, voitPrixExemple } from "./exemplesReglages";
 import { exporterCsv } from "./navigateur";
 import "./dal-reglages.css";
 
@@ -58,6 +59,7 @@ type Form =
   | { type: "donner" }
   | { type: "activer" }
   | { type: "revoquer" }
+  | { type: "voit"; personne: PersonneVoitPrix; accorder: boolean }
   | null;
 
 /* la pastille d'un prix : vert validé, jaune proposé (couleurs des étiquettes de Linear) */
@@ -311,6 +313,77 @@ export default function Reglages() {
       () => ({ etat: "revoque", fin: null, canaux: (accord?.canaux ?? []).map((c) => ({ ...c, statut: c.statut === "active" || c.statut === "a_valider" ? "revoquee" : c.statut, revoquee_le: dans(0), revoquee_par_libelle: "Vous", motif_revocation: ch("motif").trim() || null })) }),
       "L'accord est révoqué : chaque demande J-2 attend de nouveau sa validation.",
     );
+
+  /* ——— qui voit les prix (04/11/2026, DALIRO n° 28) : une ligne par personne, d'où vient le droit ———
+     En base réelle, le gérant lit toutes les lignes de droits ; un autre compte ne lit que les siennes,
+     la liste se réduit donc à sa propre ligne. Accorder et retirer : INSERT et DELETE dans droits (RLS). */
+  const gerant = source === "exemple" || client?.role === "gerant";
+  const demarrage = premier?.reglages?.formule === "demarrage";
+  const [voient, setVoient] = useState<PersonneVoitPrix[] | null>(null);
+  const [voientLu, setVoientLu] = useState<string | null>(null);
+  const [erreurVoient, setErreurVoient] = useState<string | null>(null);
+  if (voientLu !== cleAccord) {
+    setVoientLu(cleAccord);
+    setVoient(source === "exemple" ? voitPrixExemple() : null);
+  }
+  const lireVoient = useCallback(async () => {
+    if (source !== "reelle" || !client) return;
+    try {
+      const l = await chargerVoitPrix(client.client_id, demarrage);
+      setVoient(client.role === "gerant" ? l : l.filter((x) => x.user_id === client.user_id));
+      setErreurVoient(null);
+    } catch (e) {
+      setErreurVoient(e instanceof Error ? e.message : "La base n'a pas répondu.");
+    }
+  }, [source, client, demarrage]);
+  useEffect(() => {
+    if (source === "exemple") return;
+    const t = window.setTimeout(() => void lireVoient(), 0);
+    return () => window.clearTimeout(t);
+  }, [source, lireVoient]);
+  const faireVoit = async (p: PersonneVoitPrix, accorder: boolean) => {
+    setEnvoi(true);
+    setErreur(null);
+    try {
+      if (source === "reelle" && client) {
+        if (accorder) await accorderVoitPrix(client.client_id, p.user_id);
+        else if (p.droit_id) await retirerVoitPrix(p.droit_id);
+        await lireVoient();
+      } else {
+        await new Promise((r) => setTimeout(r, 250));
+        setVoient((l) =>
+          (l ?? []).map((x) => {
+            if (x.user_id !== p.user_id) return x;
+            if (accorder) return { ...x, voit: true, origine: "personnel" as const, droit_id: nid(), accorde_le: new Date().toISOString() };
+            const origine = x.equipes.length ? ("equipe" as const) : demarrage ? ("formule" as const) : ("aucun" as const);
+            return { ...x, voit: origine !== "aucun", origine, droit_id: null, accorde_le: null };
+          }),
+        );
+      }
+      toast(accorder ? `${p.nom} voit désormais les prix.` : `${p.nom} ne voit plus les prix à titre personnel.`, "vert");
+      setForm(null);
+    } catch (e) {
+      setErreur(e instanceof Error ? e.message : "La base a refusé l'action.");
+    } finally {
+      setEnvoi(false);
+    }
+  };
+  const metaVoit = (p: PersonneVoitPrix) => {
+    const role = libelleRole(p.role);
+    switch (p.origine) {
+      case "gerant":
+        return `${role} · voit les prix, en tant que gérant`;
+      case "personnel":
+        return `${role} · voit les prix, droit personnel${p.accorde_le ? ` accordé ${relatif(p.accorde_le, new Date(maintenant))}` : ""}`;
+      case "equipe":
+        return `${role} · voit les prix par ${p.equipes.length > 1 ? "les équipes" : "l'équipe"} ${p.equipes.map((e) => `« ${e} »`).join(", ")}`;
+      case "formule":
+        return `${role} · voit les prix : en formule Démarrage, toute l'équipe les voit`;
+      default:
+        return `${role} · ne voit pas les prix : les montants lui sont masqués`;
+    }
+  };
+  const nbVoient = (voient ?? []).filter((p) => p.voit).length;
 
   const enLecture = source === "reelle" && (!pret || (!premier && liste.length > 0));
   const sansChantier = source === "reelle" && pret && liste.length === 0;
@@ -676,7 +749,7 @@ export default function Reglages() {
               Organisation
             </h2>
             <p className="dal-rg-aide">
-              Ce qui vaut pour toute l&apos;entreprise, pas pour un chantier : l&apos;accord qui laisse partir seules les demandes de confirmation à J-2, et les contrôles de l&apos;annuaire.{" "}
+              Ce qui vaut pour toute l&apos;entreprise, pas pour un chantier : l&apos;accord qui laisse partir seules les demandes de confirmation à J-2, qui voit les prix, et les contrôles de l&apos;annuaire.{" "}
               <Link href={`${BASE}/annuaire`} className="dal-rg-docs">
                 Annuaire
                 <DalIcone nom="Fleche" taille={12} />
@@ -754,6 +827,45 @@ export default function Reglages() {
               ))}
             </ul>
           </div>
+          {/* 04/11/2026 (docs/verification/PROMESSES-ECRANS.md, DALIRO n° 28) : « …et qui voit les prix » — une
+              seconde carte, comme les cartes de modèles de la page relevée ; une ligne par personne */}
+          <div className="dal-rg-carte">
+            <div className="dal-rg-carte-tete">
+              <h3 className="dal-rg-carte-titre">{voient ? `Qui voit les prix · ${nbVoient} sur ${voient.length}` : "Qui voit les prix"}</h3>
+            </div>
+            <ul className="dal-rg-modeles" aria-label="Qui voit les prix">
+              {voient === null ? (
+                <li className="dal-rg-modele">
+                  <span className="dal-rg-modele-texte">
+                    <span className="dal-rg-modele-meta">{erreurVoient ? `Les droits n'ont pas pu être lus. ${erreurVoient}` : "Lecture des droits…"}</span>
+                  </span>
+                </li>
+              ) : (
+                voient.map((p) => {
+                  const gestes: { libelle: string; icone: NomDalIcone; action: () => void }[] = !gerant
+                    ? []
+                    : p.origine === "personnel" && p.droit_id
+                      ? [{ libelle: "Retirer le droit de voir les prix…", icone: "StatusCanceled", action: () => ouvrir({ type: "voit", personne: p, accorder: false }) }]
+                      : p.origine === "aucun" || p.origine === "formule"
+                        ? [{ libelle: "Accorder le droit de voir les prix…", icone: "Euro", action: () => ouvrir({ type: "voit", personne: p, accorder: true }) }]
+                        : [];
+                  return (
+                    <li key={p.user_id} className="dal-rg-modele" data-voit={p.voit ? "" : undefined}>
+                      <span className="dal-rg-vignette" aria-hidden="true" style={p.voit ? { color: "#4cb782" } : undefined}>
+                        <DalIcone nom={p.voit ? "Euro" : "Lock"} />
+                      </span>
+                      <span className="dal-rg-modele-texte">
+                        <span className="dal-rg-modele-nom">{p.nom}</span>
+                        <span className="dal-rg-modele-meta" title={metaVoit(p)}>{metaVoit(p)}</span>
+                      </span>
+                      {gestes.length ? <MenuLigne titre={`${p.nom} : droit de voir les prix`} options={gestes} /> : null}
+                    </li>
+                  );
+                })
+              )}
+            </ul>
+          </div>
+          {source === "reelle" && client && client.role !== "gerant" ? <p className="dal-rg-aide dal-rg-voit-note">Seul le gérant voit toute l&apos;équipe et accorde ou retire ce droit.</p> : null}
           {erreurAccord ? (
             <p className="dal-rg-vide" role="alert">
               L&apos;accord J-2 n&apos;a pas pu être lu. {erreurAccord}
@@ -943,6 +1055,40 @@ export default function Reglages() {
               <DialogFooter>
                 <button type="button" className="r-btn r-btn--noir" onClick={() => void faireRevoquer()} disabled={envoi}>
                   {envoi ? <Loader variant="spin" /> : null} Révoquer l&apos;accord
+                </button>
+              </DialogFooter>
+            </>
+          ) : null}
+          {form?.type === "voit" ? (
+            <>
+              <DialogHeader>
+                <DialogIcone>
+                  <DalIcone nom={form.accorder ? "Euro" : "Lock"} taille={18} />
+                </DialogIcone>
+                <DialogTitle>{form.accorder ? `Laisser ${form.personne.nom} voir les prix` : `Retirer à ${form.personne.nom} le droit de voir les prix`}</DialogTitle>
+                <DialogDescription>
+                  {form.accorder
+                    ? "Les prix unitaires, les montants des avenants, des situations et du point du mois lui seront visibles, sur tous les chantiers."
+                    : form.personne.equipes.length
+                      ? `Son droit personnel est retiré ; les prix lui restent visibles par ${form.personne.equipes.map((e) => `« ${e} »`).join(", ")}.`
+                      : demarrage
+                        ? "Son droit personnel est retiré ; en formule Démarrage, toute l'équipe continue de voir les prix."
+                        : "Les montants lui seront masqués ; le reste du chantier (quantités, planning, messages) lui reste visible."}
+                </DialogDescription>
+              </DialogHeader>
+              {erreur ? (
+                <DialogBody>
+                  <Avis teinte="rouge" role="alert">
+                    {erreur}
+                  </Avis>
+                </DialogBody>
+              ) : null}
+              <DialogFooter>
+                <button type="button" className="r-btn r-btn--fil" onClick={() => setForm(null)} disabled={envoi}>
+                  Annuler
+                </button>
+                <button type="button" className="r-btn r-btn--noir" onClick={() => void faireVoit(form.personne, form.accorder)} disabled={envoi}>
+                  {envoi ? <Loader variant="spin" /> : null} {form.accorder ? "Accorder le droit" : "Retirer le droit"}
                 </button>
               </DialogFooter>
             </>
