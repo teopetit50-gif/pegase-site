@@ -79,13 +79,46 @@ export function Partie({ id, titre, compte, gestes, avis, children }: { id?: str
   );
 }
 
+/* 04/11/2026 — posées dans une page d'outil (../lorani/OngletOutil, gabarit d'Honoraires), la liste, ses
+   groupes et ses lignes se dessinent en grille : la page fournit les titres des cinq colonnes (repère,
+   élément, précision, état, date). Ailleurs, rien ne change. */
+export const GrilleContexte = createContext<string[] | null>(null);
+
 /* ——— la liste et ses groupes : en-tête de 36 en retrait de 8, replier 20, nom 13/500, compte ——— */
 export function Liste({ children }: { children: ReactNode }) {
+  const entetes = useContext(GrilleContexte);
+  if (entetes)
+    return (
+      <div className="lvp-g" role="table">
+        <div className="lvp-g-rang lvp-g-tete" role="row">
+          {entetes.map((h, i) => (
+            <span key={i} className="lvp-g-cell" role="columnheader">
+              {h}
+            </span>
+          ))}
+        </div>
+        <ul className="lvp-g-corps">{children}</ul>
+      </div>
+    );
   return <ul className="lmi-liste lvp-liste">{children}</ul>;
 }
 
 export function Groupe({ nom, compte, precision, icone, children }: { nom: string; compte?: number; precision?: string | null; icone?: ReactNode; children: ReactNode }) {
   const [replie, setReplie] = useState(false);
+  const grille = useContext(GrilleContexte) !== null;
+  if (grille)
+    return (
+      <li className="lvp-g-groupe">
+        <button type="button" className="lvp-g-groupe-tete" aria-expanded={!replie} onClick={() => setReplie(!replie)}>
+          <ChevronDown aria-hidden="true" />
+          {icone ? <span className="lvp-g-groupe-icone" aria-hidden="true">{icone}</span> : null}
+          <span>{nom}</span>
+          {compte !== undefined ? <span className="lvp-g-groupe-compte">{compte}</span> : null}
+          {precision ? <span className="lvp-g-groupe-precision">{precision}</span> : null}
+        </button>
+        {replie ? null : <ul>{children}</ul>}
+      </li>
+    );
   return (
     <li className="lmi-groupe">
       <div className="lmi-groupe-tete">
@@ -117,6 +150,21 @@ export function Ligne({ cle, libelle, icone, id, titre, second, droite, date, da
 }) {
   const v = useVolet();
   const choisie = v?.choisie === cle;
+  const grille = useContext(GrilleContexte) !== null;
+  if (grille)
+    return (
+      <li className="lvp-g-rang lvp-g-ligne" data-choisie={choisie ? "" : undefined} role="row">
+        <button type="button" className="lvp-g-lien" aria-pressed={choisie} aria-label={libelle} onClick={() => v?.choisir(choisie ? null : cle)} />
+        <span className="lvp-g-cell lvp-g-ref" role="cell">
+          {icone ? <span className="lvp-g-icone" aria-hidden="true">{icone}</span> : null}
+          {id}
+        </span>
+        <span className="lvp-g-cell lvp-g-titre" role="cell">{titre}</span>
+        <span className="lvp-g-cell lvp-g-second" role="cell">{second}</span>
+        <span className="lvp-g-cell lvp-g-droite" role="cell">{droite}</span>
+        <span className="lvp-g-cell lvp-g-date" role="cell" title={dateTitre}>{date}</span>
+      </li>
+    );
   return (
     <li className="lmi-ligne lvp-ligne" data-choisie={choisie ? "" : undefined}>
       <button type="button" className="lmi-ligne-lien" aria-pressed={choisie} aria-label={libelle} onClick={() => v?.choisir(choisie ? null : cle)} />

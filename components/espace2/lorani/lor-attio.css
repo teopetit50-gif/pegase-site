@@ -227,8 +227,39 @@ html[data-v2-theme="light"] .v2 .lor-at {
 }
 /* une carte autonome dans une page d'outil (DALIRO : approvisionnement, météo, heures, situations, réception) :
    sans le cadre blanc de l'ancien espace, aux marges de la page */
-.v2 .lor-at-contenu { padding: 20px 16px 48px; }
 .v2 .lor-at-contenu .resa.esp { background: transparent; }
-.v2 .lor-at-contenu .v2-page { padding: 0; }
+.v2 .lor-at-contenu .v2-page:has(> #ecran.resa), .v2 .lor-at-contenu .v2-page { padding: 0; max-width: none; margin: 0; }
 .v2 .lor-at-contenu .esp-carte { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-.v2 .lor-at-contenu .lvp-partie > .lit-lots-tete { display: none; }
+
+/* ——— les lignes du kit lin/Volet en grille, dans une carte d'une page d'outil (04/11) ———
+   repère · élément · précision · état · date ; en-têtes de 40, lignes de 36, bandes de groupe de 32 */
+.v2 .lor-at-contenu { padding: 0 0 48px; }
+.v2 .lor-at-contenu .lvp-partie + .lvp-partie { margin-top: 28px; }
+.v2 .lor-at-contenu .lvp-partie:first-child > .lit-lots-tete { display: none; }
+.v2 .lor-at-contenu .lvp-partie > .lit-lots-tete { min-height: 0; padding: 0 16px 8px; }
+.v2 .lor-at-contenu .lvp-partie > .lit-lots-tete .lit-lots-titre { font-size: 13px; font-weight: 500; color: var(--lor-at-second); }
+.v2 .lor-at-contenu .lvp-partie > .lit-lots-tete .lvp-gestes { display: none; }
+.v2 .lor-at-contenu :is(.lvp-resume, .lvp-vide, .lvp-avis, .lvp-chiffres, .lvp-barre, .lvp-grille-cadre, .lvp-question) { margin-left: 16px; margin-right: 16px; }
+.v2 .lor-at-contenu .lvp-resume, .v2 .lor-at-contenu .lvp-vide { padding: 12px 0; color: var(--lor-at-second); }
+.v2 .lvp-g { --lvp-g-cols: minmax(90px, 130px) minmax(220px, 1.4fr) minmax(140px, 1fr) minmax(150px, 230px) 120px; margin-top: 0; overflow-x: auto; font-size: 14px; }
+.v2 .lvp-g ul { list-style: none; margin: 0; padding: 0; }
+.v2 .lvp-g-rang { position: relative; display: grid; grid-template-columns: var(--lvp-g-cols); min-width: 100%; height: 36px; }
+.v2 .lvp-g-tete { height: 40px; border-top: 1px solid var(--lor-at-filet); color: var(--lor-at-second); font-weight: 500; }
+.v2 .lvp-g-cell { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 0 12px; border-right: 1px solid var(--lor-at-filet); border-bottom: 1px solid var(--lor-at-filet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lvp-g-cell:first-child { padding-left: 16px; }
+.v2 .lvp-g-cell:last-child { border-right: 0; }
+.v2 .lvp-g-ref { color: var(--lor-at-second); font-variant-numeric: tabular-nums; }
+.v2 .lvp-g-icone { display: inline-flex; color: var(--lor-at-discret); }
+.v2 .lvp-g-icone svg { width: 14px; height: 14px; }
+.v2 .lvp-g-titre { color: var(--lor-at-texte); }
+.v2 .lvp-g-second { color: var(--lor-at-second); }
+.v2 .lvp-g-date { color: var(--lor-at-second); font-variant-numeric: tabular-nums; }
+.v2 .lvp-g-cell > * { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.v2 .lvp-g-lien { position: absolute; inset: 0; z-index: 1; width: 100%; background: transparent; border: 0; cursor: pointer; }
+.v2 .lvp-g-ligne:hover, .v2 .lvp-g-ligne[data-choisie] { background: var(--lor-at-actif); }
+.v2 .lvp-g-lien:focus-visible { outline: 2px solid var(--lor-at-bleu); outline-offset: -2px; }
+.v2 .lvp-g-groupe-tete { display: flex; align-items: center; gap: 8px; width: 100%; height: 32px; padding: 0 16px; border: 0; border-bottom: 1px solid var(--lor-at-filet); background: var(--lor-at-carte); color: var(--lor-at-texte); font: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: pointer; }
+.v2 .lvp-g-groupe-tete svg { width: 14px; height: 14px; color: var(--lor-at-second); transition: transform 0.15s; }
+.v2 .lvp-g-groupe-tete[aria-expanded="false"] svg { transform: rotate(-90deg); }
+.v2 .lvp-g-groupe-compte, .v2 .lvp-g-groupe-precision { color: var(--lor-at-second); font-weight: 450; }
+.v2 .lvp-g-groupe-icone { display: inline-flex; }

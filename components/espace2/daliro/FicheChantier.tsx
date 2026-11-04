@@ -46,7 +46,7 @@ import { STATUTS_AVENANT, familleControle } from "@/components/espace/daliro/eta
 import { Etat, OngletOutil, type Liste } from "../lorani/OngletOutil";
 import Habille from "@/components/espace2/Habille";
 import { RACINE } from "@/components/espace2/modules";
-import { VoletContexte } from "../lin/Volet";
+import { GrilleContexte, VoletContexte } from "../lin/Volet";
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
 import Essentiel from "./Essentiel";
@@ -210,10 +210,20 @@ export default function FicheChantier({ id }: { id: string }) {
     const vide = (x: string) => <span className="lor-at-discret">{x}</span>;
     const jour = (d: string | null | undefined) => (d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : null);
     const euros = (n: number | null | undefined) => (n === null || n === undefined ? vide("—") : `${Math.round(n).toLocaleString("fr-FR")} €`);
+    /* la carte posée dans sa liste : ses lignes en grille, sous les titres de colonnes de la carte */
+    const ENTETES: Partial<Record<SectionChantier, string[]>> = {
+      appro: ["Lot", "Commande", "Fournisseur", "État", "Date"],
+      meteo: ["", "Passage", "Motif", "Conseil", "Jour"],
+      situations: ["N°", "Situation", "Précision", "État", "Montant"],
+      heures: ["Lot", "Élément", "Précision", "", "Marge"],
+      reception: ["", "Réserve", "Précision", "État", "Date"],
+    };
     const carte = (sec: SectionChantier) => (
-      <Habille>
-        <ChantierVue key={`${sec}-${source}-${id}`} tableau={tb} source={source} onLocal={onLocal} relire={relire} sections={[sec]} />
-      </Habille>
+      <GrilleContexte.Provider value={ENTETES[sec] ?? null}>
+        <Habille>
+          <ChantierVue key={`${sec}-${source}-${id}`} tableau={tb} source={source} onLocal={onLocal} relire={relire} sections={[sec]} />
+        </Habille>
+      </GrilleContexte.Provider>
     );
     if (onglet === "terrain") {
       const points = [...tb.controles.map((k) => ({ k, p: "controle" })), ...tb.controles_organisation.map((k) => ({ k, p: "orga" }))].sort((a, b) => ["bloquant", "attention", "info"].indexOf(a.k.gravite) - ["bloquant", "attention", "info"].indexOf(b.k.gravite));
