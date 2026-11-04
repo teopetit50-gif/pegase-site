@@ -1,32 +1,28 @@
 "use client";
 
 /* ══════════════════════════════════════════════════════════════════════
-   La Carte en miniature, en tête de la vue d'ensemble (29/10/2026)
+   La Carte en miniature, en tête de la vue d'ensemble (29/10/2026,
+   en tableau le 01/11/2026)
 
-   Une ligne par agent : la source, l'agent et son chiffre, ce qui vous
-   attend, le résultat ; un point court sur chaque fil où quelque chose
-   passe. Chaque ligne ouvre la Carte sur son agent. Mêmes données que la
-   Carte (./donnees › useCarte). Sur un téléphone, les fils et la source
-   tombent : l'agent, l'attente et le résultat restent.
+   Un tableau, une ligne par agent : son état, ce qui est entré, le point
+   à surveiller, ce qui vous attend, ce qui en est sorti. Les colonnes ont
+   un titre, les chiffres sont alignés et restent sans couleur ; seule la
+   pastille d'état en porte une. Chaque ligne ouvre la Carte sur son agent.
+   Mêmes données que la Carte (./donnees › useCarte). Sur une tablette les
+   entrées tombent ; sur un téléphone chaque ligne passe en fiche.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import { Squelette } from "../ui";
 import { RACINE } from "../modules";
-import { useCarte } from "./donnees";
+import { useCarte, type Agent } from "./donnees";
 import "./mini-carte.css";
 
-/* le fil : une piste pointillée qui finit en flèche ; quand quelque chose passe, une comète la parcourt
-   (bleu : le travail des agents ; ambre : ce qui arrive sur vous ; vert : ce qui en sort). Le
-   décalage désynchronise les lignes, pour que les comètes ne partent pas toutes ensemble. */
-function Fil({ passe, teinte = "bleu", decalage = 0 }: { passe: boolean; teinte?: "bleu" | "ambre" | "vert"; decalage?: number }) {
-  return (
-    <span className="mc-fil" data-teinte={teinte} data-passe={passe ? "" : undefined} aria-hidden="true">
-      {passe ? <span className="mc-comete" style={{ animationDelay: `${decalage}ms` }} /> : null}
-    </span>
-  );
-}
+const ETAT: Record<Agent["etat"], string> = { pret: "Actif", lecture: "Lecture…", erreur: "Hors ligne" };
+
+/* le point à surveiller : le premier chiffre qui porte une alerte, sinon le deuxième du bloc de l'agent */
+const signalDe = (a: Agent) => a.lignes.find((l) => l.teinte && l.teinte !== "vert") ?? a.lignes[1];
 
 export default function MiniCarte() {
   const carte = useCarte();
@@ -45,28 +41,55 @@ export default function MiniCarte() {
         </Link>
       </div>
       {!carte ? (
-        <Squelette largeur="100%" hauteur={176} />
+        <Squelette largeur="100%" hauteur={232} />
       ) : (
-        <ul className="mc-lignes">
-          {carte.agents.map((a, i) => (
-            <li key={a.cle}>
-              <Link href={`${RACINE}/carte?bloc=agent:${a.cle}`} className="mc-ligne" data-erreur={a.etat === "erreur" ? "" : undefined} aria-label={`${a.nom} : ${a.source.texte}, ${a.aValider.texte}, ${a.resultat.texte}. Ouvrir sur la carte.`}>
-                <span className="mc-source">{a.source.texte}</span>
-                <Fil passe={a.etat === "pret" && a.source.n > 0} decalage={i * 370} />
-                <span className="mc-agent">
-                  <strong>{a.nom}</strong>
-                  <span>{a.etat === "erreur" ? "pas de réponse" : a.etat === "lecture" ? "lecture…" : (a.lignes[1] ? `${a.lignes[1].libelle.toLowerCase()} : ${a.lignes[1].valeur}` : "")}</span>
-                </span>
-                <Fil passe={a.aValider.n > 0} teinte={a.aValider.n ? "ambre" : "bleu"} decalage={i * 370 + 700} />
-                <span className="mc-vous" data-attente={a.aValider.n ? "" : undefined}>
-                  {a.aValider.n ? `${a.aValider.n} à valider` : "rien à valider"}
-                </span>
-                <Fil passe={a.resultat.n > 0} teinte="vert" decalage={i * 370 + 1400} />
-                <span className="mc-resultat">{a.resultat.texte}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="mc-tableau">
+          <div className="mc-entete" aria-hidden="true">
+            <span>Agent</span>
+            <span className="mc-col-entrees">Entrées</span>
+            <span>À surveiller</span>
+            <span className="mc-col-n">À valider</span>
+            <span>Résultat</span>
+            <span />
+          </div>
+          <ul className="mc-lignes">
+            {carte.agents.map((a) => {
+              const signal = a.etat === "pret" ? signalDe(a) : undefined;
+              return (
+                <li key={a.cle}>
+                  <Link
+                    href={`${RACINE}/carte?bloc=agent:${a.cle}`}
+                    className="mc-ligne"
+                    data-etat={a.etat}
+                    aria-label={`${a.nom}, ${ETAT[a.etat].toLowerCase()} : ${a.source.texte}, ${a.aValider.texte}, ${a.resultat.texte}. Ouvrir sur la carte.`}
+                  >
+                    <span className="mc-agent">
+                      <span className="mc-pastille" aria-hidden="true" />
+                      <strong>{a.nom}</strong>
+                      <span className="mc-etat">{ETAT[a.etat]}</span>
+                    </span>
+                    <span className="mc-col-entrees mc-texte">{a.source.texte}</span>
+                    <span className="mc-signal">
+                      {signal ? (
+                        <>
+                          <span className="mc-signal-libelle">{signal.libelle}</span>
+                          <span className="mc-signal-valeur">{signal.valeur}</span>
+                        </>
+                      ) : (
+                        <span className="mc-vide">—</span>
+                      )}
+                    </span>
+                    <span className="mc-col-n mc-attente" data-attente={a.aValider.n ? "" : undefined}>
+                      {a.aValider.n ? a.aValider.n : <span className="mc-vide">—</span>}
+                    </span>
+                    <span className="mc-texte mc-resultat">{a.resultat.texte}</span>
+                    <ChevronRight className="mc-chevron" width={16} height={16} aria-hidden="true" />
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       )}
       {carte && total ? (
         <p className="mc-pied">

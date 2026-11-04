@@ -1,7 +1,32 @@
-/* La Carte en miniature, sur la vue d'ensemble (29/10/2026) — ./MiniCarte.tsx */
+/* La Carte en miniature, sur la vue d'ensemble (29/10/2026, en tableau le 01/11/2026) — ./MiniCarte.tsx */
 
 .v2 .mc {
   margin-bottom: 12px;
+}
+/* le survol déborde un peu, pour que le texte reste aligné sur le titre */
+.v2 .mc-tableau {
+  margin: 0 -12px;
+}
+/* agent — entrées — à surveiller — à valider — résultat — chevron */
+.v2 .mc-entete,
+.v2 .mc-ligne {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(0, 1.1fr) minmax(0, 1.1fr) 88px minmax(0, 1.4fr) 16px;
+  align-items: center;
+  column-gap: 24px;
+}
+.v2 .mc-entete {
+  padding: 0 12px 8px;
+  border-bottom: 1px solid var(--v2-a-400);
+  color: var(--v2-gray-800);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.v2 .mc-col-n {
+  text-align: right;
 }
 .v2 .mc-lignes {
   list-style: none;
@@ -9,173 +34,151 @@
   padding: 0;
 }
 .v2 .mc-lignes li + li {
-  border-top: 1px solid var(--v2-a-400);
+  border-top: 1px solid var(--v2-a-300);
 }
-/* source — fil — agent — fil — vous — fil — résultat */
 .v2 .mc-ligne {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1.2fr) 72px minmax(0, 0.9fr) 72px minmax(0, 1.1fr);
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
+  min-height: 48px;
+  padding: 8px 12px;
+  border-radius: 6px;
   color: var(--v2-gray-1000);
   font-size: 13px;
   line-height: 18px;
-}
-.v2 .mc-ligne:hover .mc-agent strong {
-  color: var(--v2-blue-700);
-}
-.v2 .mc-ligne[data-erreur] {
-  opacity: 0.5;
-}
-.v2 .mc-source,
-.v2 .mc-resultat {
-  color: var(--v2-gray-900);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  transition: background-color 0.12s;
 }
+.v2 .mc-ligne:hover {
+  background: var(--v2-a-100);
+}
+.v2 .mc-ligne:focus-visible {
+  outline: 2px solid var(--v2-blue-700);
+  outline-offset: -2px;
+}
+
+/* l'agent : une pastille d'état, le nom, l'état en clair */
 .v2 .mc-agent {
-  display: grid;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 .v2 .mc-agent strong {
   font-weight: 600;
-  transition: color 0.15s;
+  letter-spacing: 0.02em;
 }
-.v2 .mc-agent span {
-  color: var(--v2-gray-900);
+.v2 .mc-etat {
+  color: var(--v2-gray-800);
   font-size: 12px;
+  white-space: nowrap;
+}
+.v2 .mc-pastille {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--v2-green-700);
+  box-shadow: 0 0 0 3px var(--v2-green-200);
+}
+.v2 .mc-ligne[data-etat="lecture"] .mc-pastille {
+  background: var(--v2-gray-600);
+  box-shadow: 0 0 0 3px var(--v2-a-200);
+}
+.v2 .mc-ligne[data-etat="erreur"] .mc-pastille {
+  background: var(--v2-red-700);
+  box-shadow: 0 0 0 3px var(--v2-red-200);
+}
+.v2 .mc-ligne[data-etat="erreur"] .mc-etat {
+  color: var(--v2-red-900);
+}
+
+.v2 .mc-texte {
+  min-width: 0;
+  color: var(--v2-gray-900);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.v2 .mc-vous {
-  justify-self: start;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--v2-a-200);
-  color: var(--v2-gray-900);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.v2 .mc-vous[data-attente] {
-  background: var(--v2-amber-200);
-  color: var(--v2-amber-900);
-  font-weight: 500;
-}
-/* le fil : une piste pointillée qui finit en flèche, et une comète qui la parcourt quand quelque chose passe */
-.v2 .mc-fil {
-  --mc-teinte: var(--v2-blue-700);
-  position: relative;
-  height: 12px;
-  /* la piste : des points de 2 px tous les 6 px, comme le fond du canevas */
-  background: radial-gradient(circle, var(--v2-a-500) 1px, transparent 1.4px) left center / 6px 6px repeat-x;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
-  overflow: visible;
-}
-.v2 .mc-fil[data-teinte="ambre"] {
-  --mc-teinte: var(--v2-amber-700);
-}
-.v2 .mc-fil[data-teinte="vert"] {
-  --mc-teinte: var(--v2-green-700);
-}
-/* la flèche au bout du fil, qui prend la couleur quand quelque chose passe */
-.v2 .mc-fil::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  border-top: 1.5px solid var(--v2-a-500);
-  border-right: 1.5px solid var(--v2-a-500);
-  transform: translate(-1px, -50%) rotate(45deg);
-}
-.v2 .mc-fil[data-passe]::after {
-  border-color: var(--mc-teinte);
-}
-/* la comète : une tête lumineuse et sa traînée qui s'estompe */
-.v2 .mc-comete {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 22px;
-  height: 3px;
-  margin-top: -1.5px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--mc-teinte) 60%, transparent) 55%, var(--mc-teinte));
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--mc-teinte) 70%, transparent));
-  opacity: 0;
-  animation: mc-comete 2.6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
-}
-.v2 .mc-comete::after {
-  content: "";
-  position: absolute;
-  right: -1px;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  margin-top: -2.5px;
-  border-radius: 999px;
-  background: var(--mc-teinte);
-  box-shadow: 0 0 6px 1px color-mix(in srgb, var(--mc-teinte) 60%, transparent);
-}
-@keyframes mc-comete {
-  0% {
-    left: -22px;
-    opacity: 0;
-  }
-  12% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 1;
-  }
-  85%,
-  100% {
-    left: calc(100% - 8px);
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .v2 .mc-comete {
-    display: none;
-  }
-}
-.v2 .mc-pied {
-  margin: 8px 0 0;
+.v2 .mc-vide {
+  color: var(--v2-gray-600);
 }
 
-/* tablette : la source tombe */
+/* à surveiller : le libellé discret, la valeur en avant, sans couleur (Teo, 04/11 : le jaune « c'est pas beau ») */
+.v2 .mc-signal {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  white-space: nowrap;
+}
+.v2 .mc-signal-libelle {
+  color: var(--v2-gray-900);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .mc-signal-valeur {
+  color: var(--v2-gray-1000);
+  font-weight: 500;
+}
+
+/* à valider : un nombre tout simple, en blanc quand il attend quelqu'un */
+.v2 .mc-attente {
+  color: var(--v2-gray-1000);
+  font-weight: 500;
+}
+
+.v2 .mc-chevron {
+  color: var(--v2-gray-600);
+  transition: color 0.12s, transform 0.12s;
+}
+.v2 .mc-ligne:hover .mc-chevron {
+  color: var(--v2-gray-1000);
+  transform: translateX(2px);
+}
+
+.v2 .mc-pied {
+  margin: 12px 0 0;
+}
+
+/* tablette : les entrées tombent */
 @media (max-width: 1100px) {
+  .v2 .mc-entete,
   .v2 .mc-ligne {
-    grid-template-columns: minmax(0, 1.2fr) 48px minmax(0, 0.9fr) 48px minmax(0, 1.1fr);
+    grid-template-columns: minmax(140px, 1fr) minmax(0, 1.1fr) 80px minmax(0, 1.3fr) 16px;
+    column-gap: 16px;
   }
-  .v2 .mc-source,
-  .v2 .mc-source + .mc-fil {
+  .v2 .mc-col-entrees {
     display: none;
   }
 }
-/* téléphone : l'agent sur toute la ligne, puis l'attente et le résultat */
+/* téléphone : chaque ligne devient une fiche — l'agent et son attente, puis le point à surveiller et le résultat */
 @media (max-width: 640px) {
-  .v2 .mc-ligne {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas: "agent agent" "vous resultat";
-    row-gap: 6px;
-  }
-  .v2 .mc-fil {
+  .v2 .mc-entete {
     display: none;
+  }
+  .v2 .mc-ligne {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "agent attente" "signal signal" "resultat resultat";
+    row-gap: 4px;
+    padding: 12px 4px;
   }
   .v2 .mc-agent {
     grid-area: agent;
   }
-  .v2 .mc-vous {
-    grid-area: vous;
+  .v2 .mc-attente {
+    grid-area: attente;
+  }
+  .v2 .mc-attente:not([data-attente]) {
+    display: none;
+  }
+  .v2 .mc-signal {
+    grid-area: signal;
+    padding-left: 14px;
   }
   .v2 .mc-resultat {
     grid-area: resultat;
+    padding-left: 14px;
+    font-size: 12px;
+  }
+  .v2 .mc-chevron {
+    display: none;
   }
 }
