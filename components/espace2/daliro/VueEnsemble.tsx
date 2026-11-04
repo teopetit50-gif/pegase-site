@@ -15,8 +15,8 @@
        confirmer, ouverts sur le quota), chacune mène à la liste des
        chantiers filtrée (?famille=<clé>) ; comptes exclusifs, comme le
        filtre de la liste (liste.ts, famille()) ;
-     · B06 : l'onglet « Point du mois » (?vue=point), la carte de l'écran
-       d'avant reprise habillée ;
+     · B06 : l'onglet « Point du mois » — retiré le 04/11/2026 (Teo :
+       « enlève cette sous-page ») ;
      · F01 / G01 : la fenêtre « Nouveau chantier », mêmes champs et même
        validation, puis useDaliro().creer et la fiche du chantier.
    Les données : components/espace2/daliro/donnees (exemple ou base réelle).
@@ -33,16 +33,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { HardHat } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
 import { FAMILLES, type Famille } from "@/components/espace/daliro/etats";
 import { famille } from "@/components/espace/daliro/liste";
-import type { Tableau } from "@/components/espace/daliro/types";
-import PointMensuelCarte from "@/components/espace/daliro/PointMensuelCarte";
-import { HabilleSb } from "../Habille";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
@@ -73,12 +70,13 @@ const URGENCE: Record<TeinteClair, number> = { rouge: 0, ambre: 1, bleu: 2, gris
 const ICONES: Record<Famille, NomDalIcone> = { bloque: "Alert", a_signer: "Signature", a_confirmer: "Calendar", ouvert: "Crane" };
 
 export default function VueEnsemble() {
-  const { source, pret, erreur, client, liste, tableau, premier, demander, demanderTous, maitresOuvrage, creer } = useDaliro();
+  const { source, pret, erreur, liste, tableau, premier, demander, demanderTous, maitresOuvrage, creer } = useDaliro();
   const auj = useMemo(() => jourLocal(), []);
-  const params = useSearchParams();
   const routeur = useRouter();
   const toast = useToast();
-  const vue = params.get("vue") === "point" ? "point" : "ensemble";
+  /* 04/11 — l'onglet « Point du mois » (?vue=point) est retiré à la demande de Teo ; un ancien lien
+     ?vue=point ouvre simplement la Vue d'ensemble */
+  const vue = "ensemble";
 
   /* en base réelle, le quota, le choix du maître d'ouvrage (F01) et la bibliothèque
      se lisent dans un tableau : on lit le premier chantier s'il ne l'est pas encore */
@@ -150,8 +148,6 @@ export default function VueEnsemble() {
   /* B06 : la carte se masque sans le droit de voir les prix, ou sans compte en base réelle */
   /* l'avatar de « Membres » : vous (le compte ne porte pas de nom lisible ici) */
   const initiales = "VO";
-  const voitPrix = premier ? premier.voit_prix : true;
-  const pointVisible = voitPrix && (source === "exemple" || !!client);
 
   const aller: { cle: string; libelle: string; icone: NomDalIcone; href: string; compte?: number }[] = [
     ...FAMILLES.map((fa) => ({ cle: fa.cle, libelle: FAMILLE_CLAIRE[fa.cle], icone: ICONES[fa.cle], href: `${BASE}/chantiers?famille=${fa.cle}`, compte: comptes[fa.cle] })),
@@ -161,7 +157,7 @@ export default function VueEnsemble() {
   ];
   /* les épinglés (étoile des pages et des fiches, ./navigateur) : en tête, comme une section de ressources */
   const favoris = useFavoris();
-  const titreVue = vue === "point" ? "Point du mois" : "Vue d'ensemble";
+  const titreVue = "Vue d'ensemble";
   const vueEpinglee = favoris.estEpingle("vue", `daliro-${vue}`);
   const epingles = favoris.favoris.filter((x) => !(x.type === "vue" && x.id === `daliro-${vue}`));
   const ICONE_EPINGLE: Record<string, NomDalIcone> = { btp_chantiers: "Project", btp_avenants: "Signature", btp_situations: "Spreadsheet", vue: "CustomView", btp_messages: "Chat", btp_tiers: "Users" };
@@ -194,7 +190,7 @@ export default function VueEnsemble() {
             aria-checked={vueEpinglee}
             aria-label={vueEpinglee ? `Désépingler « ${titreVue} »` : `Épingler « ${titreVue} »`}
             title={vueEpinglee ? `Désépingler « ${titreVue} »` : `Épingler « ${titreVue} » dans les épinglés`}
-            onClick={() => favoris.basculer({ type: "vue", id: `daliro-${vue}`, titre: titreVue, href: vue === "point" ? `${BASE}?vue=point` : BASE })}
+            onClick={() => favoris.basculer({ type: "vue", id: `daliro-${vue}`, titre: titreVue, href: BASE })}
           >
             {vueEpinglee ? <EtoilePleine /> : <DalIcone nom="Etoile" taille={14} />}
           </button>
@@ -211,11 +207,8 @@ export default function VueEnsemble() {
           </button>
         </div>
         <nav className="dal-ligne2" aria-label="Vues">
-          <Link href={BASE} scroll={false} className="dal-onglet" aria-current={vue === "ensemble" ? "page" : undefined}>
+          <Link href={BASE} scroll={false} className="dal-onglet" aria-current="page">
             Vue d&apos;ensemble
-          </Link>
-          <Link href={`${BASE}?vue=point`} scroll={false} className="dal-onglet" aria-current={vue === "point" ? "page" : undefined}>
-            Point du mois
           </Link>
           <Link href={`${BASE}/equipes`} className="dal-onglet">
             Équipes
@@ -227,36 +220,7 @@ export default function VueEnsemble() {
       </header>
 
       <div className="dal-defile">
-        {vue === "point" ? (
-          <div className="dal-h-corps">
-            <div className="dal-h-principal">
-              <section className="dal-h-section" aria-labelledby="dal-h-point">
-                <div className="dal-h-section-tete">
-                  <h2 id="dal-h-point" className="dal-h-section-titre">
-                    Point du mois
-                  </h2>
-                </div>
-                <p className="dal-h-aide">Les travaux repérés sur le terrain, ceux qui sont signés, ce qui reste à relancer et à facturer, chantier par chantier.</p>
-                {!pret ? (
-                  <p className="dal-h-aide">Lecture des chantiers…</p>
-                ) : pointVisible ? (
-                  <div style={{ marginTop: 16 }}>
-                    <HabilleSb>
-                      <PointMensuelCarte
-                        key={`point-${source}:${client?.client_id ?? ""}`}
-                        source={source}
-                        client={source === "reelle" ? (client?.client_id ?? null) : null}
-                        tableaux={liste.map((c) => tableau(c.id)).filter((t): t is Tableau => t !== null)}
-                      />
-                    </HabilleSb>
-                  </div>
-                ) : (
-                  <p className="dal-h-aide">Le point du mois montre des montants : il est réservé aux comptes qui voient les prix.</p>
-                )}
-              </section>
-            </div>
-          </div>
-        ) : (
+        {(
           <div className="dal-h-corps">
             <div className="dal-h-principal">
               <div className="dal-h-titre">
