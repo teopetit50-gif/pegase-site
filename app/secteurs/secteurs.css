@@ -619,6 +619,12 @@
   .sct .sct-cartes:has(> :nth-child(5):last-child) > :nth-child(n + 4) {
     grid-column: span 3;
   }
+  /* 04/11/2026 — SEPT SaaS (Ostelo) : trois, trois, puis une carte seule
+     qui gardait le tiers de la rangée (Varelo en colonne étroite). Une
+     carte seule sur sa rangée la prend entière, comme avant 1280. */
+  .sct .sct-cartes:has(> :nth-child(5)) > :last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
 }
 /* Le porteur de l'entrée au défilement (x, échelle, opacité) : la
    carte elle-même garde son survol libre. */

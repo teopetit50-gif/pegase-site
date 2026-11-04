@@ -15,6 +15,7 @@ import { Bande } from "@/components/secteurs/hotellerie/Bande";
    `.p-btp` ; un réglage fait sur la page BTP vaut aussi ici. */
 import "../btp/btp.css";
 import "../btp/mobile.css";
+import SeCombine from "@/components/secteurs/SeCombine";
 
 /* ══════════════════════════════════════════════════════════════════════
    /secteurs/hotellerie — OSTELO (04/11/2026)
@@ -32,10 +33,9 @@ import "../btp/mobile.css";
    hotellerie/ = components/secteurs/btp/ réécrit) ; seuls changent les
    textes, les maquettes et les icônes (public/secteurs-hotellerie/).
 
-   PAS ENCORE DANS LE MENU NI SUR /secteurs : la page n'a pas de ligne dans
-   lib/secteurs.ts (il y faudrait aussi une capture d'aperçu). Elle
-   s'atteint par son lien. Le bloc « Se combine avec » (SeCombine), qui lit
-   cette table, n'est donc pas posé.
+   Dans le menu (« Pour votre métier », Hôtels) et sur /secteurs depuis le
+   04/11 au soir (Teo : « je vois pas ») : sa ligne est dans lib/secteurs.ts,
+   sa capture dans public/apercus-secteurs/hotellerie.png.
    ══════════════════════════════════════════════════════════════════════ */
 
 const TITRE = "Ostelo · plus une seule réservation ne vous échappe";
@@ -106,6 +106,7 @@ export default function PageOstelo() {
           <Cta />
         </Section>
       </div>
+      <SeCombine slug="hotellerie" />
     </PageShell>
   );
 }

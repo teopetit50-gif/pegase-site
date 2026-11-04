@@ -1582,6 +1582,18 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+/* 04/11/2026 — SEPT logiciels depuis Ostelo (hôtels) : la dernière carte
+   restait seule sur sa rangée, à gauche. Seule, elle prend la rangée. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ofd .ofd-cartes3 > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1024px) {
+  .ofd .ofd-cartes3 > :last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+}
 .ofd .ofd-fiche--metier {
   min-height: 0;
 }

@@ -137,6 +137,26 @@ export const SECTEURS: Secteur[] = [
       { offre: "CASHD", raison: "Les devis de soins restés sans réponse relancés, chaque envoi validé par le cabinet." },
     ],
   },
+  /* 04/11/2026 — Ostelo, NOM DE TRAVAIL, le logiciel des hôtels (page
+     app/secteurs/hotellerie/, copiée de la page BTP). Signe PROVISOIRE
+     (public/logos/ostelo-mark.png, monogramme « O » au format des logos de
+     Teo) : à remplacer par le vrai, sans toucher au code. Capture
+     public/apercus-secteurs/hotellerie.png prise sur la page le 04/11. */
+  {
+    slug: "hotellerie",
+    metier: "Hôtels",
+    saas: "Ostelo",
+    texte: "Chaque demande a sa réponse, chaque chambre annulée est reprise.",
+    ligne: "Plus une réservation ne vous échappe",
+    detail:
+      "Ostelo répond à vos clients à toute heure et dans leur langue, en lisant vos disponibilités, et repropose chaque chambre annulée aux clients en liste d'attente. Avant l'arrivée il propose le surclassement, avant le départ il rattrape chaque extra oublié sur la note.",
+    apercu:
+      "Chaque matin, la réception trouve le travail de la nuit fait : les demandes traitées, les chambres annulées reprises, les extras à vérifier avant les départs.",
+    combine: [
+      { offre: "CASHD", raison: "Les acomptes et les factures des séminaires et des entreprises relancés à l'échéance, après votre validation." },
+      { offre: "FILED", raison: "Les factures de la blanchisserie, des fournisseurs et de l'énergie lues, contrôlées, transmises à la comptabilité." },
+    ],
+  },
   /* 25/09 (soir) — Varelo, NOM DE TRAVAIL, le produit des grands groupes :
      toutes les sociétés d'un groupe, pôle par pôle, direction par
      direction. C'était Namolu, pour les seuls groupes de distribution
