@@ -17,9 +17,8 @@
  *   · erreurs de console et exceptions ;
  *   · débordement horizontal (scrollWidth > clientWidth) ;
  *   · l'entrée Réseau allumée dans le rail (ou, sans rail, dans le volet) ;
- *   · l'exemple signalé une seule fois (le ruban de la barre du haut,
- *     aucune autre mention « exemple / démonstration / fictif » dans la
- *     page) ;
+ *   · aucune mention « exemple / démonstration / fictif » dans la page, ni
+ *     ruban dans la barre du haut (retiré le 04/11) ;
  *   · en base réelle, l'état vide commun (« Le réseau ouvre bientôt »)
  *     et aucun des 12 membres d'exemple à l'écran.
  */
@@ -123,14 +122,14 @@ for (const theme of THEMES) {
         dire(d.debordement <= 0, `${t} : débordement ${d.debordement} px`);
         dire(allume, `${t} : Réseau éteint (rail ${JSON.stringify(d.rail)}, volet ${JSON.stringify(d.volet)})`);
         if (SOURCE === 'exemple') {
-          dire(d.ruban === 1 && d.marques.length === 0, `${t} : exemple signalé ${d.ruban} fois par le ruban, + ${JSON.stringify(d.marques)}`);
+          dire(d.ruban === 0 && d.marques.length === 0, `${t} : exemple signalé ${d.ruban} fois par le ruban, + ${JSON.stringify(d.marques)}`);
         } else {
           dire(d.ruban === 0, `${t} : ruban d'exemple en base réelle`);
           dire(d.vide, `${t} : pas d'état vide en base réelle`);
           dire(d.noms.length === 0, `${t} : membres d'exemple en base réelle ${JSON.stringify(d.noms)}`);
         }
         const ok = d.theme === attendu && erreurs.length === 0 && d.debordement <= 0 && allume
-          && (SOURCE === 'exemple' ? d.ruban === 1 && d.marques.length === 0 : d.ruban === 0 && d.vide && d.noms.length === 0);
+          && (SOURCE === 'exemple' ? d.ruban === 0 && d.marques.length === 0 : d.ruban === 0 && d.vide && d.noms.length === 0);
         lignes.push({ cle, largeur, theme, ok, debordement: d.debordement, erreurs: erreurs.length, h1: d.h1 });
       }
     } finally {
