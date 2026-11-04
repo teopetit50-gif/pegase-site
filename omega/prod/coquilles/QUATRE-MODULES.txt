@@ -1,0 +1,19 @@
+# Fonctions Edge à déployer pour « la production des 4 modules » (FILED, CASHD, REPUT, OFFLOAD) et le socle dont ils
+# dépendent — décision de Teo du 26/10. Usage : bash omega/prod/deployer-coquilles.sh $(grep -v '^#' omega/prod/coquilles/QUATRE-MODULES.txt)
+# Hors liste (métiers, à ouvrir plus tard) : tamila-coffre, tamila-purge, tavaro-pdf, tavaro-questions, varelo-assistant,
+# daliro-questions. Hors liste tant que leurs secrets manquent : messagerie, messagerie-oauth (Google/Microsoft).
+lecteur
+lecteur-exports
+expediteur
+webhooks-brevo
+reception
+widget
+identite
+sortie
+alertes-quotidiennes
+export-complet
+taux-bce
+webhooks-ar24
+reput-reponse
+reput-astreinte
+reput-appels

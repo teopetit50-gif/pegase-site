@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1",
+    "pdf-lib": "npm:pdf-lib@1.17.1"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

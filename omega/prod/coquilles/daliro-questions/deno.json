@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@partage/": "https://raw.githubusercontent.com/teopetit50-gif/pegase-site/9e4cdfd4fecc7aef594a0787f6535174be9f8e42/omega/functions/_partage/",
+    "@std/assert": "jsr:@std/assert@^1.0.14"
+  },
+  "compilerOptions": {
+    "strict": true
+  }
+}

@@ -1,0 +1,28 @@
+-- Tâches pg_cron de la production (relevé ; la clé de service reste dans le Vault, pas ici).
+select cron.schedule('lorani-calendrier', '12 * * * *', 'select private.lorani_calendrier_passage()');
+select cron.schedule('lorani-lectures', '*/5 * * * *', 'select private.lorani_lectures_passage()');
+select cron.schedule('omega-chien-de-garde', '*/15 * * * *', 'select private.tache_chien_de_garde()');
+select cron.schedule('omega-controle-delais', '7 * * * *', 'select private.controler_delais()');
+select cron.schedule('omega-envois', '*/5 * * * *', 'select private.tache_envois()');
+select cron.schedule('omega-filed', '* * * * *', 'select private.filed_tache()');
+select cron.schedule('omega-mesure', '11 * * * *', 'select private.mesures_tache()');
+select cron.schedule('omega-points-assemblage', '*/5 * * * *', 'select private.points_assembler()');
+select cron.schedule('omega-points-controle', '2-59/5 * * * *', 'select private.points_controler()');
+select cron.schedule('omega-points-purge', '29 3 * * *', 'select private.points_purger()');
+select cron.schedule('omega-purge-historique-cron', '17 3 * * *', 'delete from cron.job_run_details where end_time < now() - interval ''7 days''');
+select cron.schedule('omega-purge-lectures', '17 3 * * *', 'select private.purger_lectures()');
+select cron.schedule('omega-purge-releves', '47 3 * * *', 'select private.purger_releves()');
+select cron.schedule('omega-purge-travaux', '43 3 * * *', 'select private.purger_travaux()');
+select cron.schedule('omega-releves', '*/15 * * * *', 'select private.controler_releves()');
+select cron.schedule('omega-releves-file', '* * * * *', 'select private.avancer_releves()');
+select cron.schedule('omega-suivis', '23 * * * *', 'select private.controler_suivis()');
+select cron.schedule('omega-verifier-sauvegardes', '7 8 * * *', 'select private.verifier_sauvegardes()');
+select cron.schedule('tamila-coffre', '11 * * * *', 'select private.tamila_tache_horaire()');
+select cron.schedule('tamila-decisions', '* * * * *', 'select private.tamila_traiter_decisions()');
+select cron.schedule('tamila-delais', '17 * * * *', 'select private.tamila_controler_delais()');
+select cron.schedule('tavaro-matin', '*/30 * * * *', 'select private.loc_deposer_points()');
+select cron.schedule('tavaro-mesure', '0 9 * * *', 'select private.loc_mesurer()');
+select cron.schedule('tavaro-ouvrier', '* * * * *', 'select private.loc_ouvrier()');
+select cron.schedule('tavaro-purge', '27 3 * * *', 'select private.loc_purger()');
+select cron.schedule('tiroma-horloge', '*/10 * * * *', 'select private.tiroma_horloge()');
+select cron.schedule('tiroma-purge', '37 3 * * *', 'select private.tiroma_purger()');
