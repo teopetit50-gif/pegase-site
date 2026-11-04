@@ -139,7 +139,8 @@ export function echeance(k: Commande, auj: string): { phrase: string; date: stri
 
 /* ——— l'exemple : des commandes sur les chantiers d'exemple, à tous les moments ——— */
 
-const nid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+/* 04/11 — des identifiants fixes : une adresse ?commande= copiée se rouvre (ils changeaient à chaque chargement) */
+const idFixe = (genre: "c" | "l", i: number) => `00000000-0000-4000-8${genre === "c" ? "d1" : "d2"}0-${String(i + 1).padStart(12, "0")}`;
 
 type Modele = { objet: string; fournisseur: string; quantite: number | null; unite: string | null; delai: number; cas: "commander" | "commandee" | "tardive" | "attendue" | "partielle" | "recue" | "location" | "rendue" };
 const MODELES: Modele[] = [
@@ -183,7 +184,7 @@ export function exemple(tableaux: Tableau[]): CommandeBrute[] {
     const four = t.tiers.find((x) => x.nom === m.fournisseur);
     const livrer = p ? decalerOuvres(p.debut, -1) : decalerOuvres(auj, 6);
     const base: CommandeBrute = {
-      id: nid(), chantier_id: t.chantier.id, lot_id: p?.lot_id ?? null, lot_code: p?.lot_code ?? null, passage_id: p?.id ?? null, passage_tache: p?.tache ?? null,
+      id: idFixe("c", i), chantier_id: t.chantier.id, lot_id: p?.lot_id ?? null, lot_code: p?.lot_code ?? null, passage_id: p?.id ?? null, passage_tache: p?.tache ?? null,
       fournisseur_id: four?.id ?? null, fournisseur_nom: m.fournisseur, objet: m.objet, quantite: m.quantite, unite: m.unite, quantite_texte: m.quantite != null ? qte(m.quantite, m.unite) : null,
       reference: null, delai_jours: m.delai, besoin_le: p ? null : decalerOuvres(auj, 7), statut: "a_commander", commandee_le: null, livraison_prevue: null, livree_le: null,
       note: null, motif: null, a_retourner: false, retour_prevu: null, retourne_le: null, livraisons: [],
@@ -200,18 +201,18 @@ export function exemple(tableaux: Tableau[]): CommandeBrute[] {
         return { ...base, statut: "commandee", commandee_le: plus(auj, -14), livraison_prevue: decalerOuvres(livrer < auj ? auj : livrer, 3), reference: cde, note: "Le menuisier annonce trois jours de plus pour le séchage du chêne." };
       case "partielle":
         return { ...base, statut: "livree_partielle", commandee_le: plus(auj, -12), livraison_prevue: plus(auj, -2), livree_le: plus(auj, -2), reference: cde,
-                 livraisons: [{ id: nid(), livree_le: plus(auj, -2), quantite: 60, bon_reference: "BL-5531", piece_id: null, note: "4 palettes sur 6" }] };
+                 livraisons: [{ id: idFixe("l", i), livree_le: plus(auj, -2), quantite: 60, bon_reference: "BL-5531", piece_id: null, note: "4 palettes sur 6" }] };
       case "recue":
         return { ...base, statut: "livree", commandee_le: plus(auj, -8), livraison_prevue: plus(auj, -4), livree_le: plus(auj, -4), reference: cde,
-                 livraisons: [{ id: nid(), livree_le: plus(auj, -4), quantite: m.quantite, bon_reference: "BL-5498", piece_id: null, note: null }] };
+                 livraisons: [{ id: idFixe("l", i), livree_le: plus(auj, -4), quantite: m.quantite, bon_reference: "BL-5498", piece_id: null, note: null }] };
       case "location":
         return { ...base, passage_id: null, passage_tache: null, lot_id: null, lot_code: null, besoin_le: plus(auj, -3), statut: "livree", commandee_le: plus(auj, -7), livraison_prevue: plus(auj, -3), livree_le: plus(auj, -3),
                  a_retourner: true, retour_prevu: i % 2 ? plus(auj, -1) : plus(auj, 3), reference: cde,
-                 livraisons: [{ id: nid(), livree_le: plus(auj, -3), quantite: null, bon_reference: `LN-${2291 + i}`, piece_id: null, note: null }] };
+                 livraisons: [{ id: idFixe("l", i), livree_le: plus(auj, -3), quantite: null, bon_reference: `LN-${2291 + i}`, piece_id: null, note: null }] };
       default:
         return { ...base, passage_id: null, passage_tache: null, lot_id: null, lot_code: null, besoin_le: plus(auj, -10), statut: "livree", commandee_le: plus(auj, -12), livraison_prevue: plus(auj, -10), livree_le: plus(auj, -10),
                  a_retourner: true, retour_prevu: plus(auj, -5), retourne_le: plus(auj, -5), reference: cde,
-                 livraisons: [{ id: nid(), livree_le: plus(auj, -10), quantite: null, bon_reference: "LBS-118", piece_id: null, note: null }] };
+                 livraisons: [{ id: idFixe("l", i), livree_le: plus(auj, -10), quantite: null, bon_reference: "LBS-118", piece_id: null, note: null }] };
     }
   });
 }

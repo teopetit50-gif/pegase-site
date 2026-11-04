@@ -102,7 +102,12 @@ export default function Carte() {
         else p.set(k, v);
       }
       const s = p.toString();
-      router.replace(s ? `${CHEMIN}?${s}` : CHEMIN, { scroll: false });
+      /* 04/11 — règle commune d'Espace 2 : ouvrir un bloc crée une étape
+         d'historique (Retour le referme) ; l'onglet remplace */
+      const ouvre = !!cles.bloc && cles.bloc !== sp.get("bloc");
+      const cible = s ? `${CHEMIN}?${s}` : CHEMIN;
+      if (ouvre) router.push(cible, { scroll: false });
+      else router.replace(cible, { scroll: false });
     },
     [router, sp],
   );

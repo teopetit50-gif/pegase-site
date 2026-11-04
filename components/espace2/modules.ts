@@ -13,7 +13,8 @@ import { Building, CarFront, FileText, FolderLock, HandCoins, HardHat, MessageSq
 
 export const RACINE = "/espace2";
 
-export type Onglet = { libelle: string; href: string; exact?: boolean };
+/** aussi : les adresses qui allument aussi l'entrée (une fiche ouverte depuis cette sous-page, 04/11) */
+export type Onglet = { libelle: string; href: string; exact?: boolean; aussi?: string[] };
 
 export const ONGLETS_ORGANISATION: Onglet[] = [
   { libelle: "Vue d'ensemble", href: RACINE, exact: true },
@@ -109,7 +110,7 @@ export const MODULES: ModuleV2[] = [
   /* 02/11/2026 — refonte de TAVARO : une sous-page par usage (docs/refonte-metiers/cloud/TAVARO.md) */
   m("tavaro", "TAVARO", "Location", "Contrats, retours et barèmes", CarFront, [
     { libelle: "Vue d'ensemble", href: `${RACINE}/tavaro`, exact: true },
-    { libelle: "Retours à facturer", href: `${RACINE}/tavaro/retours` },
+    { libelle: "Retours à facturer", href: `${RACINE}/tavaro/retours`, aussi: [`${RACINE}/tavaro/contrats`] },
     { libelle: "Parc et atelier", href: `${RACINE}/tavaro/parc` },
     { libelle: "Amendes, péages, contestations", href: `${RACINE}/tavaro/amendes` },
     { libelle: "Incidents", href: `${RACINE}/tavaro/incidents` },
@@ -138,7 +139,7 @@ export const MODULES: ModuleV2[] = [
   ]),
   /* 30/10/2026 — refonte : une page par usage (docs/refonte-metiers/DECOUPAGES.md) */
   m("tamila", "TAMILA", "Dossiers du cabinet", "Dossiers chiffrés et pièces", FolderLock, [
-    { libelle: "Vue d'ensemble", href: `${RACINE}/tamila`, exact: true },
+    { libelle: "Vue d'ensemble", href: `${RACINE}/tamila`, exact: true, aussi: [`${RACINE}/tamila/dossiers`] },
     { libelle: "Arrivées", href: `${RACINE}/tamila/arrivees` },
     { libelle: "Honoraires du cabinet", href: `${RACINE}/tamila/honoraires` },
     { libelle: "Pilotage", href: `${RACINE}/tamila/pilotage` },

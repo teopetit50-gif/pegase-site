@@ -389,10 +389,12 @@ export default function Point() {
                 {cartes.equipe
                   .filter((l) => !/d[ée]l[ée]gation/i.test(l.texte ?? ""))
                   .map((l) => {
-                    /* « Sofia Carvalho demande 5 jours du 13 au 17 octobre ; Yanis Dupré assurerait le remplacement. » */
+                    /* « Sofia Carvalho demande 5 jours du 14 au 18 novembre ; Yanis Dupré assurerait le remplacement. » */
                     const t = l.texte ?? "";
                     const qui = t.match(/^([A-ZÉ][\p{L}-]+\s[A-ZÉ][\p{L}-]+)/u)?.[1];
-                    const periode = t.match(/du (\d+) au (\d+ \p{L}+)/u);
+                    /* 04/11 — les dates d'exemple sont relatives : « du 14 au 18 novembre » comme « du 28 novembre au 2 décembre » */
+                    const brute = t.match(/du (\d+(?:er)?(?: \p{L}+)?) au (\d+(?:er)? (\p{L}+))/u);
+                    const periode = brute ? [brute[0], brute[1].replace(new RegExp(` ${brute[3]}$`), ""), brute[2]] : null;
                     const duree = t.match(/(\d+) jours?/)?.[0];
                     const remplacant = t.match(/;\s*([A-ZÉ][\p{L}-]+\s[A-ZÉ][\p{L}-]+) assurerait/u)?.[1];
                     return qui && periode ? (
@@ -450,8 +452,9 @@ export default function Point() {
                     Demain à {heure}, par {canal}
                   </span>
                 </span>
-                <Link href={`${RACINE}/reglages`} className="v2-pm-action">
-                  Personnaliser <ArrowRight width={14} height={14} aria-hidden="true" />
+                {/* 04/11 — aucun écran ne règle l'heure ni le canal du point (ils sont posés par Omega sur chaque point) : le lien demande le changement à Omega au lieu de promettre un réglage */}
+                <Link href="/contact" className="v2-pm-action">
+                  Demander un changement <ArrowRight width={14} height={14} aria-hidden="true" />
                 </Link>
               </li>
             </ul>

@@ -238,7 +238,9 @@ export default function Activite() {
   const aller = (href: string) => routeur.replace(href, { scroll: false });
   const setTypes = (t: Cle[]) => aller(lien({ types: t.length === TOUS_TYPES.length ? null : t.join(",") }));
   const setModules = (m: string[] | null) => aller(lien({ modules: m === null ? null : m.join(",") }));
-  const setChoisie = (id: string | null) => aller(lien({ objet: id }));
+  /* 04/11 — règle commune d'Espace 2 : ouvrir un élément crée une étape
+     d'historique (Retour le referme) ; filtres, tris et onglets remplacent */
+  const setChoisie = (id: string | null) => (id && id !== params.get("objet") ? routeur.push(lien({ objet: id }), { scroll: false }) : aller(lien({ objet: id })));
   /* la recherche : le champ répond tout de suite, l'adresse suit à 150 ms */
   const chercher = (v: string) => {
     setRecherche(v);

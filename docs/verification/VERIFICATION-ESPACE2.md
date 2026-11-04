@@ -14,7 +14,7 @@ formulaires, relever les « petites conneries » et corriger ce qui est simple. 
 | Formulaires validés | ≈ 85 (valeurs plausibles, vides, très longues, 2 000 caractères sans espace, adresses fausses, double envoi), plus ≈ 30 saisies invalides |
 | Défauts trouvés | **79** lignes de défaut (une ligne regroupe parfois le même défaut sur plusieurs pages : les menus hors écran, par exemple, en couvrent une trentaine) |
 | Corrigés et en ligne | **60** (7 commits, voir plus bas), dont 2 corrigés en partie avec un reste à décider |
-| À décider par Teo | **14** (dont 12 sans correction) |
+| À décider par Teo | **14**, tous tranchés le 04/11 par délégation (voir « Décisions du 4 novembre ») |
 | Laissés en l'état ou écartés après vérification (conformes à la référence, sans conséquence, non reproduits) | **7** |
 
 Erreurs de console : aucune exception, aucun écran blanc, aucun chargement sans fin, aucun lien en 404
@@ -52,7 +52,7 @@ Captures : `docs/verification/captures/` (avant / après).
 | 13 pages ouvertes directement (`/activite`, `/taches`, `/contacts`, `/notes`, `/point`, `/formation`…) | toutes, deux thèmes | Ruban « Données d'exemple » en texte nu ; à 390 sur deux lignes par-dessus le sélecteur de module, titre de la barre réduit à 0 px | gênant | avant-ruban-barre-390-clair.jpg | corrigé C (règles déplacées dans `espace2.css`) |
 | `/espace2/equipe` | 768 à 900, deux thèmes | Colonnes écrasées : avatars sur les adresses, « Nom » sur « E-mail », rôles en colonne d'une lettre, page qui défile de côté (830 px) | gênant | avant-equipe-768-sombre.jpg | corrigé S |
 | `/espace2/equipe` | 390 | Filtre « Tous » coupé (« Administrate… ») ; « Nom ↓ » sort de 6 px à gauche | gênant | — | corrigé C (recalage) + S |
-| `/espace2/equipe` | toutes | Clés brutes « gerant », « admin », « valideur »… sous la colonne E-mail de « Ce que chaque rôle permet » | cosmétique | — | **à décider** : voulu par le commentaire d'`Equipe.tsx` (« la clé ») ; les retirer ? |
+| `/espace2/equipe` | toutes | Clés brutes « gerant », « admin », « valideur »… sous la colonne E-mail de « Ce que chaque rôle permet » | cosmétique | — | **tranché 04/11** : clés retirées, la cellule reste vide (D3) |
 | `/espace2/contacts`, `/espace2/entreprises` | ≥ 1024 | La page défilait de 4 px de côté (case vide de l'en-tête) | cosmétique | — | corrigé S |
 | `/espace2/contacts`, `/espace2/entreprises` | toutes | Les 3–4 dernières lignes ne répondaient pas au clic (le fondu de « Voir plus » passait dessus) | gênant | — | corrigé S |
 | `/espace2/taches` | toutes | Échap ne fermait pas « Options d'affichage » | gênant | — | corrigé S |
@@ -61,14 +61,14 @@ Captures : `docs/verification/captures/` (avant / après).
 | `/espace2/utilisation` | 390 | Menu Période coupé à droite, page à 428 px | gênant | — | corrigé C (vérifié) |
 | `/espace2/reglages` (exemple) | toutes | « Télécharger l'archive (zip) » téléchargeait la page `reglages.html` | gênant | — | corrigé S |
 | barre du haut | ≥ 768 | « Moteurs : raccourcis vers chaque moteur » | cosmétique | — | corrigé C (« Systèmes ») |
-| coquille | — | L'organisation d'exemple s'appelle « CAMA » dans le menu, « Atelier Bertin » dans le menu du compte, l'aide et Réglages | cosmétique | — | **à décider** : quel nom garder |
-| `/notes`, `/activite`, `/carte` | toutes | Retour du navigateur après avoir ouvert une note / un événement / un bloc : quitte la page au lieu de refermer (`router.replace`) | gênant | — | **à décider** (règle commune : `push` à l'ouverture d'un élément, `replace` pour filtres et tris — même question sur les listes des systèmes et Opportunités) |
+| coquille | — | L'organisation d'exemple s'appelle « CAMA » dans le menu, « Atelier Bertin » dans le menu du compte, l'aide et Réglages | cosmétique | — | **tranché 04/11** : « Atelier Bertin » partout (D2) |
+| `/notes`, `/activite`, `/carte` | toutes | Retour du navigateur après avoir ouvert une note / un événement / un bloc : quitte la page au lieu de refermer (`router.replace`) | gênant | — | **tranché 04/11** : `push` à l'ouverture d'un élément, `replace` pour filtres, tris et onglets (D1) |
 | `/taches`, `/contacts`, `/entreprises` | toutes | « Créer » actif sur un formulaire vide | cosmétique | — | corrigé S (grisé, comme Linear) |
-| `/espace2/ecosysteme` | toutes | Barre du haut « Espace client », aucune entrée du volet allumée | cosmétique | — | titre corrigé C ; **à décider** : une entrée dans le rail pour cette page interne ? |
+| `/espace2/ecosysteme` | toutes | Barre du haut « Espace client », aucune entrée du volet allumée | cosmétique | — | titre corrigé C ; **tranché 04/11** : pas d'entrée (D5) |
 | palette ⌘K | 390 | Invite coupée net (« …un modul ») | cosmétique | — | corrigé C |
 | volet Réglages | toutes | « Accessibilité » et « Données » (ancres `#`) ne s'allument jamais | cosmétique | — | laissé : demande de revoir le volet des réglages (ancres) |
 | `/espace2/reglages` | toutes | « Gérer l'équipe » menait à l'ancien `/espace/equipe` (relevé par la session Formation) | gênant | — | corrigé F |
-| `/espace2/point` « Prochaine édition » | toutes | « Personnaliser » mène aux Réglages, qui ne contiennent ni l'heure ni le canal du point (relevé par la session Formation) | gênant | — | **à décider** : aucun écran ne règle l'heure et le canal du point ; en créer un, ou retirer le lien |
+| `/espace2/point` « Prochaine édition » | toutes | « Personnaliser » mène aux Réglages, qui ne contiennent ni l'heure ni le canal du point (relevé par la session Formation) | gênant | — | **tranché 04/11** : « Demander un changement » vers `/contact` (D6) |
 | composeurs sans bord (Tiroma fils, Membres, Plain fil, Contacts, Nouvelle tâche, volet des parties, volet Supabase) | toutes | Poignée de redimensionnement dans un champ sans bord (demande de Teo relayée) | cosmétique | — | corrigé F |
 | `/espace2/formation/<inconnue>` | — | Affiche la 404 mais répond 200 (`notFound()` après le début du flux) | sans conséquence | — | noté (page en `noindex`) |
 
@@ -87,10 +87,10 @@ Captures : `docs/verification/captures/` (avant / après).
 | `/reput/reglages?section=avis` | toutes | « pas un lien » enregistré comme page d'avis | gênant | — | corrigé Y (https exigé) |
 | `/reput/reglages?section=sites` | 390 | Pastille « Réglages propres » coupée à −63 px | gênant | — | corrigé S |
 | listes de fils (`/cashd/litiges`, `/cashd/devis`, `/filed/boite`, `/filed/refusees`, `/filed/controles`, `/reput/urgences`, `/offload/garde-fous`) | 390 | Boutons-icônes Filtres / Affichage sans nom accessible | gênant (accessibilité) | — | corrigé S |
-| `/offload/groupes?id=Groupe%20Ouest%20Froid` | toutes | « Froid Services Vannes » mène à `?compte=x` → « Ce compte n'est pas dans la liste » | cosmétique | — | **à décider** : ajouter ce compte aux données d'exemple d'OFFLOAD ou retirer la ligne |
+| `/offload/groupes?id=Groupe%20Ouest%20Froid` | toutes | « Froid Services Vannes » mène à `?compte=x` → « Ce compte n'est pas dans la liste » | cosmétique | — | **tranché 04/11** : la ligne reste, sans lien, « hors des comptes suivis » (D9) |
 | `/filed`, `/filed/comptabilite`, `/cashd?compte=<inconnu>` | — | Petits textes : « 3 documents : bloquées », « 7 factures à reprendre » pour 5 lignes, « Nouveau · arrivés… » dans la fiche d'un seul courriel, « 3  0 avoir », « plus d'encours » pour un identifiant inconnu | cosmétique | — | laissés : le code a changé depuis le relevé (lignes déplacées), à revoir avec la session FILED/CASHD |
 | `/reput?demande=…c3d04` | 390 | Défilement de 3 px de côté, élément non trouvé | cosmétique | — | non reproduit après les correctifs |
-| `/filed/controles`, blocs du circuit, listes | toutes | Onglets et filtres en `replace` : Retour quitte la page | gênant | — | **à décider** (même règle que pour le socle) |
+| `/filed/controles`, blocs du circuit, listes | toutes | Onglets et filtres en `replace` : Retour quitte la page | gênant | — | **tranché 04/11** : ouvrir un fil, une règle, un bloc ou une demande = `push` ; onglets et filtres = `replace` (D1) |
 | `/filed/circuit` | 1024 à 1700 | Blocs du canevas hors champ au chargement | — | — | écarté : canevas déplaçable, comportement voulu |
 
 ## Les six métiers
@@ -121,12 +121,12 @@ Captures : `docs/verification/captures/` (avant / après).
 | Tavaro `/reseau` | 1440 clair | « à valider par la direction » coupé net | cosmétique | — | corrigé B |
 | Varelo `/` | — | Titre d'onglet « Référentiel du groupe » sur Ce matin | cosmétique | — | corrigé B |
 | Tiroma `/avant?verif=labo:w-1` | — | Relance copiée « Bonjour (Laboratoire Corail), » | cosmétique | — | corrigé B |
-| Tiroma inscription en liste d'attente | — | Rien ne dit quand la recherche ne trouve personne | cosmétique | — | corrigé B (« Aucun patient trouvé ») ; les patients cherchables en exemple restent 5 : **à décider** si on élargit l'exemple |
+| Tiroma inscription en liste d'attente | — | Rien ne dit quand la recherche ne trouve personne | cosmétique | — | corrigé B (« Aucun patient trouvé ») ; **tranché 04/11** : 15 patients cherchables, sans accents (D10) |
 | Tiroma fil d'un créneau | — | « : » et « ; » seuls en début de ligne (espace non insécable manquant dans le texte généré) | cosmétique | — | laissé (texte généré par les données) |
-| Tavaro `/contrats/[id]` ; Tamila `/dossiers/[id]` (et `/faits`) | toutes | Aucune entrée du volet des pages allumée | gênant / cosmétique | — | **à décider** : une entrée accepte plusieurs adresses (`racines`) ou la fiche déménage sous sa page |
-| Tiroma Aujourd'hui, Daliro À faire, Lorani À viser | ≤ 1024, volet ouvert | Pilules écrasées et coupées sans « … » | — | — | écarté : relevé de Linear (« se compriment et se tronquent sans « … » ») ; **à décider** seulement si Teo veut le masquage progressif |
+| Tavaro `/contrats/[id]` ; Tamila `/dossiers/[id]` (et `/faits`) | toutes | Aucune entrée du volet des pages allumée | gênant / cosmétique | — | **tranché 04/11** : une entrée accepte d'autres adresses (`aussi`) (D4) |
+| Tiroma Aujourd'hui, Daliro À faire, Lorani À viser | ≤ 1024, volet ouvert | Pilules écrasées et coupées sans « … » | — | — | écarté : relevé de Linear ; **tranché 04/11** : on garde la copie de Linear (D12) |
 | Tiroma `/creneaux` | 1024 clair | Erreur React #418 une fois sur dix vues | cosmétique | — | non reproduite ; à surveiller |
-| Daliro `/approvisionnement?commande=` | — | Les identifiants d'exemple changent à chaque chargement (un lien copié n'ouvre plus rien) | cosmétique | — | **à décider** (exemple seulement) |
+| Daliro `/approvisionnement?commande=` | — | Les identifiants d'exemple changent à chaque chargement (un lien copié n'ouvre plus rien) | cosmétique | — | **tranché 04/11** : identifiants fixes (D11) |
 
 ## Le Réseau
 
@@ -134,10 +134,10 @@ Captures : `docs/verification/captures/` (avant / après).
 |---|---|---|---|---|---|
 | `/reseau`, `?pub=…` ; Opportunités | 390 et 768 | Le « … » d'une carte poussait toute la page de côté (604 px pour 390) | gênant, presque bloquant | avant/apres-reseau-fil-menu-390-sombre.jpg | corrigé C (recalage, page ramenée à gauche ; vérifié en ligne) |
 | `/reseau/membres` | toutes | La recherche n'entrait jamais dans l'adresse, perdue au retour d'une fiche | gênant | — | corrigé R |
-| `/reseau/opportunites?id=` | toutes | Retour quitte la page au lieu de fermer la carte | gênant | — | **à décider** (même règle `push`/`replace`) |
+| `/reseau/opportunites?id=` | toutes | Retour quitte la page au lieu de fermer la carte | gênant | — | **tranché 04/11** : ouvrir une carte = `push` (D1) |
 | `/reseau` « Je peux aider » | toutes | « Solelek Antilles et vous peuvent aider » | cosmétique | — | corrigé R (« pouvez ») |
-| `/reseau?ile=martinique&type=alertes` | — | Une publication faite sous un filtre disparaît malgré « Demande publiée » | gênant | — | **à décider** : lever le filtre ou lien « Voir » dans le message |
-| `/reseau/membres/inconnu` | toutes | 404 du site vitrine, hors d'Espace 2 | gênant | — | **à décider** : un `not-found.tsx` sous `app/espace2` |
+| `/reseau?ile=martinique&type=alertes` | — | Une publication faite sous un filtre disparaît malgré « Demande publiée » | gênant | — | **tranché 04/11** : les filtres qui la cachent sont levés, et le message le dit (D7) |
+| `/reseau/membres/inconnu` | toutes | 404 du site vitrine, hors d'Espace 2 | gênant | — | **tranché 04/11** : `app/espace2/not-found.tsx` (D8) |
 | `/reseau/messages` | 390 | Titre de sujet sans espace coupé net | cosmétique | — | corrigé R |
 | `/reseau/opportunites` | 390 | Pastille de recherche longue de milliers de pixels | cosmétique | — | corrigé R ; bouton « Effacer les filtres » dans l'état vide non fait |
 | `/reseau/opportunites` | toutes | « Accepter envoie une intro… » alors que rien ne part (gestes notés sur l'écran) | gênant | — | corrigé F (le texte dit que l'intro partira à l'ouverture du réseau) |
@@ -161,7 +161,7 @@ Captures : `docs/verification/captures/` (avant / après).
 - une série de textes coupés net, de barres de sélection trop larges, de volets cachés sous la barre,
   et quelques mots (« Filtrer », « Systèmes », « vous pouvez aider »).
 
-**Ce qui attend ta décision :**
+**Ce qui attendait ta décision** (tranché le 04/11 par délégation, voir « Décisions du 4 novembre » en fin de document) **:**
 1. **Retour du navigateur** : ouvrir une note, un événement, un bloc, une carte d'opportunité ou un
    onglet de liste remplace l'adresse, donc Retour quitte la page. Faut-il que l'ouverture d'un élément
    crée une étape dans l'historique (et les filtres non) ?
@@ -179,3 +179,27 @@ Captures : `docs/verification/captures/` (avant / après).
 8. **Pilules coupées sans « … »** dans les listes façon Linear (Tiroma, Daliro, Lorani) : c'est la
    copie de Linear ; veux-tu plutôt que les moins utiles disparaissent quand la place manque ?
 9. Le `package-lock.json` est à régénérer (`npm ci` échoue).
+
+---
+
+## Décisions du 4 novembre
+
+Teo a délégué les 14 points le 04/11 (« à toi de le faire »). Règle suivie : la solution la plus simple
+et la plus honnête pour le client ; aucun bouton qui promet ce qu'il ne fait pas ; dans une sous-page métier,
+la page de référence. Tout est en ligne (commit indiqué dans `git log`, message « Vérification, décisions du 04/11 »).
+
+| | Point | Décision | Raison |
+|---|---|---|---|
+| D1 | Retour du navigateur (notes, activité, carte, blocs du circuit FILED, listes de fils et de règles des systèmes, Opportunités) — 3 lignes | Ouvrir un élément ajoute une étape d'historique (`push`) ; filtres, tris, onglets et vues remplacent (`replace`). Fait dans `Notes.tsx`, `Activite.tsx`, `carte/Carte.tsx`, `filed/CircuitEditeur.tsx`, `lin/ListeFils.tsx`, `lin/ListeRegles.tsx`, `reseau/opportunites-vue.tsx` | C'est ce que fait Linear (ouvrir un ticket est une page), et Retour qui referme ce qu'on vient d'ouvrir est ce qu'attend un utilisateur ; un filtre par étape d'historique rendrait Retour pénible |
+| D2 | Nom de l'organisation d'exemple | « Atelier Bertin » partout (menu, contexte, nom accessible sans « Renault ») | Toutes les données d'exemple (21 fichiers, Réglages, l'aide) sont celles d'Atelier Bertin ; « CAMA » n'existait que dans le menu. Reste : le profil « vous » du Réseau (`reseau/membres-donnees.ts`, concession à Baie-Mahault) n'est pas réécrit — c'est un monde à part, à réaligner avec la session Réseau |
+| D3 | Clés brutes dans Équipe | Retirées : la colonne reste vide sur les lignes des rôles | « gerant », « admin » ne disent rien au client ; le libellé et ce que le rôle permet suffisent |
+| D4 | Fiches sans entrée allumée (Tavaro contrat, Tamila dossier et faits) | Un lien du volet accepte d'autres adresses (`aussi`, `modules.ts`) : `/tavaro/contrats/…` allume « Retours à facturer », `/tamila/dossiers/…` allume « Vue d'ensemble » | La fiche s'ouvre depuis ces pages ; déménager les adresses casserait les liens copiés et l'aiguillage. Vérifié : contrat C-2026-0412 → « Retours à facturer », dossier d010 → « Vue d'ensemble » |
+| D5 | Écosystème dans le rail | Pas d'entrée | Page interne réservée au compte gérant d'Omega (`omega_est_admin`) ; un client ne doit pas la voir dans son volet |
+| D6 | « Personnaliser » du point du matin | Remplacé par « Demander un changement », qui mène à `/contact` | Aucun réglage client n'existe (l'heure et le canal sont portés par chaque `points_du_jour`, posés par Omega ; seul Tiroma a `heure_point`, propre au cabinet) ; pas d'écran sans table, donc la seule chose vraie est la demande à Omega |
+| D7 | Publication faite sous un filtre qui disparaît (Réseau) | Les filtres qui la cachent (île, secteur, type) sont levés, et le message dit « filtres retirés pour la montrer » | On voit ce qu'on vient de publier ; un lien « Voir » demanderait un clic de plus pour la même chose |
+| D8 | Fiche de membre inconnue → 404 du site vitrine | `app/espace2/not-found.tsx` : « Cette page n'existe pas », dans la coquille, avec « Revenir à la vue d'ensemble » | L'utilisateur reste dans son espace (vaut aussi pour la Formation et l'Écosystème) |
+| D9 | « Froid Services Vannes » d'OFFLOAD | La ligne reste dans le groupe, sans lien, marquée « hors des comptes suivis » (de même « Dubreuil Agencement ») | Un groupe a des sociétés qu'on ne suit pas ; ajouter un compte suivi changerait tous les compteurs d'OFFLOAD (6 comptes, montants en jeu) |
+| D10 | Patients cherchables dans Tiroma | 15 patients : chaque patient que montrent les autres pages, sauf ceux déjà en attente ; recherche insensible aux accents | « Aucun patient trouvé » pour un nom vu sur la page d'à côté était faux |
+| D11 | Identifiants des commandes Daliro | Fixes (`idFixe`, `approvisionnement.ts`) | Une adresse `?commande=` copiée se rouvre |
+| D12 | Pilules coupées sans « … » | On garde la copie de Linear | `REGLES.md` : copie 1:1 ; le masquage progressif serait une invention |
+| — | (les lignes « Contrôles FILED » et « Opportunités ») | voir D1 | — |

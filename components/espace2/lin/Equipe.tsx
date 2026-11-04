@@ -25,7 +25,7 @@
        le filtre « Tous V » par rôle, dans l'URL (?role=, replace) ;
      · « Réglages » : le bouton cerclé, à la place d'« Export CSV » ;
      · « Ce que chaque rôle permet » : un second groupe du tableau, une
-       ligne par rôle (libellé, ce qu'il permet, la clé).
+       ligne par rôle (libellé, ce qu'il permet).
    Les droits sont ceux d'avant : seuls gérants et administrateurs agissent,
    seul un gérant touche un gérant, personne ne se retire ni ne change son
    propre rôle ici ; la base les vérifie aussi.
@@ -491,9 +491,8 @@ export default function Equipe() {
                 </span>
               </span>
             </div>
-            <div className="lrg-cel-email" role="cell">
-              {r.cle}
-            </div>
+            {/* 04/11 — la clé technique (« gerant », « admin »…) ne dit rien au client : la cellule reste vide */}
+            <div className="lrg-cel-email" role="cell" />
             <div className="lrg-cel-role" role="cell" />
             <div className="lrg-cel-soc" role="cell" />
             <div className="lrg-cel-menu" role="cell" />

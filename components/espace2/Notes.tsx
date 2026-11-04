@@ -290,7 +290,12 @@ export default function Notes() {
       else sp.set(k, v);
     }
     const s = sp.toString();
-    router.replace(s ? `${chemin}?${s}` : chemin, { scroll: false });
+    /* 04/11 — règle commune d'Espace 2 : ouvrir une note ou un modèle crée
+       une étape d'historique (Retour la referme) ; filtres et tris remplacent */
+    const ouvre = (["note", "modele"] as const).some((k) => champs[k] && champs[k] !== params.get(k));
+    const cible = s ? `${chemin}?${s}` : chemin;
+    if (ouvre) router.push(cible, { scroll: false });
+    else router.replace(cible, { scroll: false });
   };
   const [maintenant] = useState(() => Date.now());
 

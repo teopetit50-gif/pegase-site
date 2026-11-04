@@ -11,7 +11,7 @@
    son sujet, qu'on lit et qu'on reprend séparément.
 
    « vous » (l'auteur VOUS) est TOUJOURS l'organisation connectée d'Espace
-   2 (OrganisationContexte, « CAMA » en exemple), jamais un des 12 membres.
+   2 (OrganisationContexte, « Atelier Bertin » en exemple), jamais un des 12 membres.
    Dans un texte, `@slug` mentionne un membre et `@vous` l'organisation
    connectée.
 

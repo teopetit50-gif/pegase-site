@@ -129,7 +129,15 @@ function Fil() {
   /* ——— les gestes ——— */
   const publier = (b: Brouillon) => {
     setMiennes((m) => [{ ...b, id: `vous-${compteur.current++}`, auteur: VOUS, ilYa: 0, aident: [], reponses: [] }, ...m]);
-    toast(b.type === "alerte" ? "Alerte publiée dans le fil" : "Demande publiée dans le fil", "vert");
+    /* 04/11 — une publication faite sous un filtre qui la cache disparaissait
+       malgré « publiée » : on lève les filtres qui la cachent, et on le dit */
+    const lever: Record<string, null> = {};
+    if (ile && b.ile !== ile) lever.ile = null;
+    if (secteur) lever.secteur = null;
+    if (type && b.type !== type) lever.type = null;
+    const leves = Object.keys(lever).length > 0;
+    if (leves) poser(lever);
+    toast(`${b.type === "alerte" ? "Alerte publiée dans le fil" : "Demande publiée dans le fil"}${leves ? " (filtres retirés pour la montrer)" : ""}`, "vert");
   };
   const repondre = (id: string, texte: string) => {
     setReponses((r) => ({ ...r, [id]: [...(r[id] ?? []), { id: `vous-r-${compteur.current++}`, auteur: VOUS, ilYa: 0, texte }] }));

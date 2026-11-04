@@ -144,7 +144,12 @@ export default function CircuitEditeur() {
         else p.set(k, v);
       }
       const s = p.toString();
-      router.replace(s ? `${CHEMIN}?${s}` : CHEMIN, { scroll: false });
+      /* 04/11 — règle commune d'Espace 2 : ouvrir un bloc ou une demande crée
+         une étape d'historique (Retour la referme) ; l'onglet remplace */
+      const ouvre = (["bloc", "demande"] as const).some((k) => cles[k] && cles[k] !== sp.get(k));
+      const cible = s ? `${CHEMIN}?${s}` : CHEMIN;
+      if (ouvre) router.push(cible, { scroll: false });
+      else router.replace(cible, { scroll: false });
     },
     [router, sp],
   );

@@ -28,7 +28,7 @@
    réception) : liste de 400 à gauche, fiche ouverte à droite au gabarit
    d'un ticket Linear. Sombre et clair par les jetons du kit.
 
-   « Vous » est l'organisation connectée (OrganisationContexte, « CAMA »
+   « Vous » est l'organisation connectée (OrganisationContexte, « Atelier Bertin »
    en données d'exemple), jamais un des 12 membres.
 
    L'ADRESSE porte la vue : ?vue=recentes, ?salon=<id>,

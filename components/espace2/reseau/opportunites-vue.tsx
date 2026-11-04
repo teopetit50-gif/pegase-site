@@ -4,7 +4,7 @@
    Réseau Omega › Opportunités — reprise du 02/11/2026 (soir)
 
    Ce que le réseau fait gagner à « vous », l'organisation connectée
-   d'Espace 2 (useOrganisation : CAMA dans l'exemple). Jamais un membre.
+   d'Espace 2 (useOrganisation : Atelier Bertin dans l'exemple). Jamais un membre.
 
    LA DA est celle des cinq moteurs (demande de Teo, 02/11) : le kit
    ../lin (lin.css, Lin.tsx, CarteCentrale), au plus près de la page
@@ -180,7 +180,11 @@ function Tableau({ vous }: { vous: string }) {
       else q.delete("vue");
     }
     const s = q.toString();
-    routeur.replace(s ? `${chemin}?${s}` : chemin, { scroll: false });
+    /* 04/11 — règle commune d'Espace 2 : ouvrir une carte crée une étape
+       d'historique (Retour la referme) ; la vue remplace */
+    const cible = s ? `${chemin}?${s}` : chemin;
+    if (p.id && p.id !== params.get("id")) routeur.push(cible, { scroll: false });
+    else routeur.replace(cible, { scroll: false });
   };
 
   const [etapes, setEtapes] = useState<Record<string, Etape>>({});

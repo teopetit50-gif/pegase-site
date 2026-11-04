@@ -315,7 +315,8 @@ export function LigneFil({ fil, actif }: { fil: Fil; actif: boolean }) {
   const Heure = ICONES_HEURE[fil.heure.icone ?? "bulle"];
   return (
     <li>
-      <Link href={fil.href} replace scroll={false} className="pf-ligne" data-fil={fil.id} data-actif={actif ? "" : undefined} aria-current={actif ? "true" : undefined}>
+      {/* 04/11 — ouvrir un fil crée une étape d'historique (Retour le referme) ; onglets et filtres remplacent */}
+      <Link href={fil.href} scroll={false} className="pf-ligne" data-fil={fil.id} data-actif={actif ? "" : undefined} aria-current={actif ? "true" : undefined}>
         <span className="pf-c-poignee" aria-hidden="true">
           <span className="pf-poignee">
             <GripVertical />

@@ -188,8 +188,19 @@ export function DonneesTiroma({ children }: { children: React.ReactNode }) {
     await charger(reel?.dossier?.cabinet.id);
   }, [source, reel, charger]);
 
-  /* b3_09 : la liste d'attente commune */
+  /* b3_09 : la liste d'attente commune — 04/11 : en exemple, on trouve
+     chaque patient que montrent les autres pages (sauf ceux déjà en attente) */
   const PATIENTS_EXEMPLE: PatientCourt[] = useMemo(() => [
+    { id: "pa-1", nom: "Delannoy", prenom: "Marguerite", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-7", nom: "Hilaire", prenom: "Nadège", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-9", nom: "Dorville", prenom: "Michel", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-10", nom: "Laurent", prenom: "Christiane", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-12", nom: "Bertrand", prenom: "Inès", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-15", nom: "Céleste", prenom: "Joëlle", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-16", nom: "Bellance", prenom: "Firmin", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-17", nom: "Ternel", prenom: "Rose-Aimée", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-21", nom: "Saint-Ange", prenom: "Dimitri", praticien_habituel_id: null, ne_pas_contacter: false },
+    { id: "pa-22", nom: "Darius", prenom: "Maëlys", praticien_habituel_id: null, ne_pas_contacter: false },
     { id: "pa-3", nom: "Nestor", prenom: "Rosalie", praticien_habituel_id: null, ne_pas_contacter: false },
     { id: "pa-5", nom: "Rigoulet", prenom: "Sylvie", praticien_habituel_id: null, ne_pas_contacter: false },
     { id: "pa-6", nom: "Zami", prenom: "Patrice", praticien_habituel_id: null, ne_pas_contacter: false },
@@ -197,8 +208,9 @@ export function DonneesTiroma({ children }: { children: React.ReactNode }) {
     { id: "pa-13", nom: "Pétro", prenom: "Georges", praticien_habituel_id: null, ne_pas_contacter: false },
   ], []);
   const chercher = useCallback(async (texte: string) => {
-    const t = texte.trim().toLowerCase();
-    if (source === "exemple") return PATIENTS_EXEMPLE.filter((p) => p.nom.toLowerCase().startsWith(t) || (p.prenom ?? "").toLowerCase().startsWith(t));
+    const plat = (x: string) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const t = plat(texte.trim());
+    if (source === "exemple") return PATIENTS_EXEMPLE.filter((p) => plat(p.nom).startsWith(t) || plat(p.prenom ?? "").startsWith(t));
     const d = reel?.dossier;
     if (!d) return [];
     return chercherPatients(d.cabinet.entite_id, texte);

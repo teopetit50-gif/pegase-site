@@ -460,6 +460,7 @@ function FicheGroupe({
               <>
                 {c.nom} {c.ref ? <small>{c.ref}</small> : null}
                 {c.groupe ? <small>déjà dans {c.groupe}</small> : null}
+                {source === "exemple" && !c.id.startsWith("00000000-") ? <small>hors des comptes suivis</small> : null}
               </>
             ),
             sous:
@@ -467,7 +468,8 @@ function FicheGroupe({
                 ? `${libelleNiveau(c.niveau ?? null)}${c.ca_12m !== null && c.ca_12m !== undefined ? ` · ${montant(c.ca_12m)} sur 12 mois` : ""}${c.statut === "exclu" ? " · exclu du suivi" : ""}${c.verification ? " · à vérifier" : ""}`
                 : "Même domaine de courriel",
             droite: <Layers width={14} height={14} aria-hidden="true" />,
-            href: lienCompte(c.id),
+            /* 04/11 — en exemple, un compte du groupe qui n'est pas dans la liste des comptes suivis (Froid Services Vannes, Dubreuil Agencement) n'ouvre plus une fiche « pas dans la liste » : il se lit sans lien */
+            href: source === "exemple" && !c.id.startsWith("00000000-") ? undefined : lienCompte(c.id),
           }))}
         />
       )}

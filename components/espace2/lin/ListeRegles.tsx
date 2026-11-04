@@ -211,7 +211,8 @@ export function LigneRegle({ regle, actif }: { regle: Regle; actif: boolean }) {
   return (
     <li className="pw-ligne pw-grille" data-actif={actif ? "" : undefined} data-etat={regle.etat?.cle}>
       {/* comme chez Plain, le lien couvre la ligne ; le « ··· » reste au-dessus */}
-      <Link href={regle.href} replace scroll={false} className="pw-ligne-lien" data-regle={regle.id} aria-label={regle.nom} aria-current={actif ? "true" : undefined} />
+      {/* 04/11 — ouvrir une règle crée une étape d'historique (Retour la referme) */}
+      <Link href={regle.href} scroll={false} className="pw-ligne-lien" data-regle={regle.id} aria-label={regle.nom} aria-current={actif ? "true" : undefined} />
       <>
         <span className="pw-c-ordre">
           <span className="pw-poignee" aria-hidden="true">

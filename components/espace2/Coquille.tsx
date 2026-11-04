@@ -112,7 +112,7 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
       <SourceFournisseur connecte={!!utilisateur}>
         <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
-            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA"), connecte: !!utilisateur, prenom: utilisateur?.prenom ?? null }}>
+            <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin"), connecte: !!utilisateur, prenom: utilisateur?.prenom ?? null }}>
               <Cadre utilisateur={utilisateur}>{children}</Cadre>
             </OrganisationContexte.Provider>
           </FournisseurToasts>
@@ -333,7 +333,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   );
 }
 
-type Lien = { libelle: string; href: string; icone?: React.ReactNode; exact?: boolean; /** l'entrée allumée quand l'adresse ne porte pas sa requête (la vue par défaut) */ parDefaut?: boolean; /** les requêtes qui allument aussi l'entrée */ requetes?: string[]; /** l'adresse qui allume l'entrée, quand le lien mène à une sous-page */ racine?: string; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
+type Lien = { libelle: string; href: string; icone?: React.ReactNode; exact?: boolean; /** l'entrée allumée quand l'adresse ne porte pas sa requête (la vue par défaut) */ parDefaut?: boolean; /** les requêtes qui allument aussi l'entrée */ requetes?: string[]; /** l'adresse qui allume l'entrée, quand le lien mène à une sous-page */ racine?: string; /** les adresses qui allument aussi l'entrée (une fiche sans entrée à elle, 04/11) */ aussi?: string[]; compteur?: number; sous?: { libelle: string; href: string }[]; bientot?: boolean };
 
 /* une section du rail : une icône, et le volet des pages qu'elle ouvre
    (comme « Database » → Schema Visualizer, Tables… chez Supabase) */
@@ -353,7 +353,7 @@ function RubanSource() {
 function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | null; classe: string }) {
   const { source, changer, connecte } = useSource();
   const toast = useToast();
-  const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "CAMA");
+  const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
   const choisirSource = (s: "exemple" | "reelle") => {
     if (s === "reelle" && !connecte) return;
     changer(s);
@@ -361,9 +361,8 @@ function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | 
   };
   return (
     <MenuDeroulant
-      /* le nom accessible contient le texte visible (« RENAULT » en
-         démonstration) — WCAG 2.5.3 */
-      etiquette={`Organisation : ${utilisateur ? "" : "Renault, "}${organisation}. Changer d'organisation ou de données`}
+      /* le nom accessible contient le texte visible (le nom de l'organisation) — WCAG 2.5.3 */
+      etiquette={`Organisation : ${organisation}. Changer d'organisation ou de données`}
       classe={classe}
       placement="bottom start"
       largeur={260}
@@ -445,7 +444,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     if (cle === "offload") return [{ libelle: "Comptes à risque", href: `${RACINE}/offload`, exact: true }];
     /* 29/10/2026 — DALIRO et LORANI redécoupés : leurs sous-pages viennent de modules.ts */
     /* 30/10 et 02/11/2026 — TAMILA, TAVARO, TIROMA et VARELO redécoupés de même (docs/refonte-metiers/cloud/) */
-    if (cle === "daliro" || cle === "lorani" || cle === "tamila" || cle === "tavaro" || cle === "tiroma" || cle === "varelo") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
+    if (cle === "daliro" || cle === "lorani" || cle === "tamila" || cle === "tavaro" || cle === "tiroma" || cle === "varelo") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact, aussi: o.aussi }));
     return [{ libelle: "Tableau de bord", href: `${RACINE}/${cle}`, exact: true }];
   };
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par
@@ -598,7 +597,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   /* 02/11/2026 — le Réseau Omega : les clients d'Omega entre eux (Fil, Membres, Messages, Opportunités), un groupe du rail sous les fiches */
   const reseau: Section = { cle: "reseau", titre: "Réseau", sousTitre: "Entre clients Omega", icone: <Network {...R} />, href: `${RACINE}/reseau`, racines: [`${RACINE}/reseau`], groupes: [{ titre: "Réseau Omega", liens: ONGLETS_RESEAU }] };
   const toutes = [...sections, reseau, ...autres, formation, reglages];
-  const ouvre = (l: Lien) => (l.exact ? chemin === l.href : chemin === (l.racine ?? l.href) || chemin.startsWith(`${l.racine ?? l.href}/`));
+  const sous = (r: string) => chemin === r || chemin.startsWith(`${r}/`);
+  const ouvre = (l: Lien) => (l.exact ? chemin === l.href : sous(l.racine ?? l.href)) || !!l.aussi?.some(sous);
   const courante =
     toutes.find((s) => s.racines.some((r) => chemin === r || chemin.startsWith(`${r}/`))) ??
     toutes.find((s) => s.groupes.some((g) => g.liens.some(ouvre))) ??
@@ -871,7 +871,8 @@ const FONCTIONS: Record<string, Lien[]> = {
 
 function LienLateral({ lien, chemin }: { lien: Lien; chemin: string }) {
   const base = lien.racine ?? lien.href;
-  const dedans = lien.exact ? chemin === lien.href : chemin === base || chemin.startsWith(`${base}/`);
+  /* 04/11 — une fiche sans entrée à elle (Tavaro contrat, Tamila dossier) allume celle d'où elle s'ouvre (lien.aussi) */
+  const dedans = (lien.exact ? chemin === lien.href : chemin === base || chemin.startsWith(`${base}/`)) || !!lien.aussi?.some((r) => chemin === r || chemin.startsWith(`${r}/`));
   const [ouvert, setOuvert] = useState(dedans);
   /* les icônes (lien.icone) ne sont plus rendues ici : le volet de Supabase
      n'en a pas devant ses entrées (21/10) ; la palette les garde */
