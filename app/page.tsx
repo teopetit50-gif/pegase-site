@@ -80,12 +80,13 @@ export const metadata: Metadata = {
     "Agents IA, logiciels par métier et sur-mesure : on automatise les processus répétitifs des PME et des groupes, sur vos outils. Audit de 30 minutes offert.",
 };
 
-const COULEURS = {
-  green: { texte: "text-green-400", pastille: "bg-green-500/10 border-green-500/20" },
-  purple: { texte: "text-purple-400", pastille: "bg-purple-500/10 border-purple-500/20" },
-  orange: { texte: "text-orange-400", pastille: "bg-orange-500/10 border-orange-500/20" },
-  blue: { texte: "text-blue-400", pastille: "bg-blue-500/10 border-blue-500/20" },
-};
+/* 05/11 (Teo, « en plus pro, j'aime pas les couleurs ») — les pastilles,
+   icônes d'onglet et carrés d'étape de la référence étaient teintés vert /
+   violet / orange / bleu. Ils passent tous au même gris neutre : la page
+   ne garde qu'une couleur, le blanc, en différentes opacités. La clé de
+   couleur reste dans textes.ts pour pouvoir revenir en arrière. */
+const NEUTRE = { texte: "text-white/75", pastille: "bg-white/[0.04] border-white/[0.10]" };
+const COULEURS = { green: NEUTRE, purple: NEUTRE, orange: NEUTRE, blue: NEUTRE };
 
 const ICONES_AGENTS = {
   agents: Bot,
