@@ -79,7 +79,9 @@ export const DEMO = {
   titre: "Omega, en neuf secondes",
   texte:
     "Ce que vos agents préparent pendant la nuit, et la seule chose qui vous reste à faire le matin : valider.",
-  video: "/accueil/demo.mp4",
+  /* 05/11 — refaite en blanc avec la page (noms neufs : aucun cache ne
+     resservira la version sombre) */
+  video: "/accueil/demo-clair.mp4",
   duree: "0:09",
 };
 

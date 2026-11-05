@@ -136,7 +136,8 @@
    app/page.tsx pose `aa-clair` sur la racine ; chaque utilitaire « blanc
    sur noir » de la référence est réécrit ici en « encre sur blanc ».
    Les captures de public/accueil/ sont celles du thème clair de l'espace
-   client (outils/accueil-captures.mjs). La vidéo reste sombre.
+   client (outils/accueil-captures.mjs). La vidéo est rendue en blanc
+   elle aussi (PEGASE/stories/reels/video-accueil).
 
    Les menus de l'en-tête n'ont plus de règle ici : sur fond blanc,
    l'en-tête du site se règle tout seul (il prélève la couleur de la page).
