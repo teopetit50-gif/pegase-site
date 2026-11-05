@@ -29,10 +29,10 @@ export const CONTACT = {
 };
 
 export const HERO = {
-  pastille: "Le logiciel des hôtels indépendants et des groupes",
-  titre: "Plus une seule réservation ne vous échappe, même à 2 h du matin",
+  pastille: "Pour les hôtels déjà équipés, du boutique-hôtel au groupe",
+  titre: "L'argent qui se perd entre vos logiciels, Ostelo le récupère",
   texte:
-    "Ostelo répond à chaque client dans la minute, dans sa langue. Il remet en vente chaque chambre annulée, propose le surclassement avant l'arrivée et rattrape chaque extra oublié sur la note. Votre réception garde la main ; votre chiffre ne s'échappe plus.",
+    "Ostelo relie votre logiciel de réservation, vos restaurants et votre spa. Il repère les commissions facturées à tort, les cartes virtuelles jamais débitées, les extras absents de la note et les demandes restées sans réponse. Vos outils restent en place.",
   audit: "Réserver un audit",
   demo: "Voir la démo",
   signature: "Conçu par",
@@ -144,7 +144,7 @@ export const LU = {
 export type Valeur = boolean | string;
 export const FORMULES = {
   titre: "Un prix à la taille de votre hôtel, fixé après l'audit",
-  sous: "Les trois formules se distinguent par le nombre de chambres, de canaux et de fonctions ouvertes. Le prix est fixé pendant l'audit, une fois vos réservations et vos outils examinés.",
+  sous: "Les trois formules se distinguent par le nombre de chambres, de points de vente et de fonctions ouvertes. Le prix est fixé pendant l'audit, une fois vos réservations et vos outils examinés.",
   comparer: ["Comparer", "les formules"],
   prix: "Prix fixé à l'audit,",
   prixSous: "selon vos chambres et vos canaux",
@@ -155,6 +155,19 @@ export const FORMULES = {
     { id: "entreprise", name: "Groupe", cta: "Réserver un audit" },
   ],
   groupes: [
+    { title: "Argent récupéré", description: "Ce que vos logiciels ne vérifient pas, parce que chacun ne voit que sa part.", features: [
+      { name: "Commissions des plateformes vérifiées", description: "Chaque facture de Booking ou d'Expedia est rapprochée des séjours réels : une commission facturée sur une annulation, un no-show ou un séjour écourté remonte avec sa contestation prête.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Cartes virtuelles jamais débitées", description: "Les cartes virtuelles des plateformes restées sans débit sont signalées avant leur expiration. Le séjour est payé : il reste à encaisser.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Contestations de paiement défendues", description: "Quand un client conteste auprès de sa banque, le dossier se monte seul : réservation, conditions acceptées, échanges, extras signés.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Factures fournisseurs contrôlées", description: "Cuisine, bar, spa : prix facturé contre prix convenu, quantités contre bon de livraison, fret et octroi de mer vérifiés.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Parité des prix surveillée", description: "Chaque matin, le prix de votre site est comparé à celui des plateformes sur 90 jours. Vous êtes prévenu quand une plateforme vend moins cher que vous.", values: { demarrage: false, chantiers: true, entreprise: true } },
+    ] },
+    { title: "Restaurants et spa", description: "L'hôtel, les tables et le spa travaillent enfin ensemble.", features: [
+      { name: "Créneaux du spa proposés aux clients présents", description: "Un soin libre à 15 h est proposé aux clients qui séjournent ce jour-là, sur WhatsApp, aux prix de votre carte.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Tables proposées les soirs creux", description: "Un soir où vos restaurants ont de la place, le dîner est proposé aux clients qui n'ont rien réservé.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Additions rapprochées de la note", description: "Ce qui est pris dans vos restaurants, au bar ou au spa et mis sur la chambre est vérifié sur la note avant le départ.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Une page pour l'hôtel, les restaurants et le spa", description: "Chaque matin, le remplissage, les couverts, les soins et les encaissements de la veille, même quand chaque activité a sa propre société.", values: { demarrage: false, chantiers: true, entreprise: true } },
+    ] },
     { title: "Demandes des clients", description: "Une réponse à toute heure, dans la langue du client.", features: [
       { name: "Réponse à toute heure", description: "Les mails et les WhatsApp reçoivent leur réponse sur leur canal, de jour comme de nuit.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Dans la langue du client", description: "Le client écrit en allemand, en anglais ou en espagnol : il reçoit sa réponse dans sa langue.", values: { demarrage: true, chantiers: true, entreprise: true } },
@@ -188,7 +201,9 @@ export const FORMULES = {
     ] },
     { title: "Équipe et accès", description: "La direction et la réception voient les mêmes informations.", features: [
       { name: "Comptes", description: "Accès pour la direction, la réception et le service commercial.", values: { demarrage: "2", chantiers: "5", entreprise: "Sur mesure" } },
-      { name: "Le point du matin", description: "Chaque matin : arrivées, chambres libérées, demandes de la nuit, extras à vérifier.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Le point du matin", description: "Chaque matin : arrivées, chambres libérées, demandes de la nuit, extras à vérifier.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Questions posées sur WhatsApp", description: "« Combien a rapporté le spa en octobre ? » La direction pose sa question et reçoit le chiffre, avec sa source.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Signalements par message vocal", description: "« La climatisation de la 14 fuit » : le vocal d'une femme de chambre devient une demande d'intervention, et la chambre est bloquée si besoin.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Rien ne part sans votre accord", description: "Vous décidez ce qui part seul et ce qui attend votre validation.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Plusieurs établissements", description: "Un seul tableau pour tous vos hôtels, une page par établissement.", values: { demarrage: false, chantiers: false, entreprise: true } },
       { name: "Données dans l'Union européenne", description: "Vos données sont hébergées dans l'Union européenne.", values: { demarrage: true, chantiers: true, entreprise: true } },
@@ -211,7 +226,7 @@ export const FAQ = {
     { id: "general", label: "Général", items: [
       { question: "Qu'est-ce qu'Ostelo ?", answer: "Ostelo est un logiciel pour les hôtels qui lit vos réservations, vos annulations et les messages de vos clients, puis agit à votre place là où une réception débordée laisse filer du chiffre : demandes sans réponse, chambres annulées jamais revendues, extras oubliés sur la note, avis jamais demandés." },
       { question: "Faut-il changer de logiciel de réservation ?", answer: "Non. Ostelo lit votre logiciel de réservation en lecture seule, ou ses exports, et travaille à côté. Il ne remplace ni votre logiciel, ni votre gestionnaire de canaux, ni votre caisse." },
-      { question: "J'ai déjà des outils d'IA et des automatisations. Est-ce utile ?", answer: "Ostelo ne vient pas en ajouter une couche : il relie ce que vous avez déjà et prend en charge ce qu'aucun de vos outils ne fait. L'audit commence par la liste de ce qui tourne chez vous, et dit aussi ce qu'il ne faut pas toucher." },
+      { question: "J'ai déjà des outils d'IA et des automatisations. Est-ce utile ?", answer: "C'est le cas de la plupart des hôtels que nous rencontrons. Votre moteur de réservation, votre logiciel de restaurant et votre appli client font bien leur travail, chacun de son côté. Ostelo travaille entre eux : il vérifie ce qu'aucun ne vérifie, comme une commission facturée sur une annulation ou un soin absent de la note. L'audit commence par la liste de ce qui tourne chez vous, et dit aussi ce qu'il ne faut pas toucher." },
       { question: "Qu'est-ce qu'Ostelo ne fait pas ?", answer: "Ostelo n'invente aucun prix et n'accorde aucune exception : il applique votre grille et vos règles, et passe le reste à la réception. Il ne modifie jamais une réservation sans validation." },
     ] },
     { id: "hotel", label: "Hôtel", items: [
@@ -219,11 +234,13 @@ export const FAQ = {
       { question: "Comment une chambre annulée est-elle revendue ?", answer: "Chaque demande refusée faute de place entre dans une liste d'attente. Quand une chambre se libère pour ces dates, Ostelo la propose aux clients en attente ; le premier qui confirme la prend, et la réception valide." },
       { question: "Que propose-t-il avant l'arrivée ?", answer: "Deux jours avant, chaque client donne son heure d'arrivée et ses demandes particulières. Ostelo lui propose ce qui reste à vendre ce jour-là (surclassement, petit-déjeuner, parking, départ tardif), aux prix que vous avez fixés." },
       { question: "Comment les extras oubliés sont-ils repérés ?", answer: "Avant chaque départ, Ostelo compare ce qui a été demandé et consommé pendant le séjour (parking, petit-déjeuner, minibar, départ tardif) avec la note. Un écart remonte à la réception avant que le client ne règle." },
-      { question: "Et si un client ne veut plus recevoir de message ?", answer: "Chaque message permet de ne plus en recevoir. La demande d'arrêt est définitive et vaut sur tous les canaux." },
+      { question: "Comment les commissions des plateformes sont-elles vérifiées ?", answer: "Chaque mois, Ostelo rapproche les factures de Booking et d'Expedia de vos séjours réels. Une commission facturée sur une annulation, un no-show ou un séjour plus court que prévu remonte avec le motif et la contestation prête. Vous la relisez, puis vous l'envoyez." },
+      { question: "Ostelo travaille-t-il aussi avec mes restaurants et mon spa ?", answer: "Oui. Il lit vos réservations de tables et de soins, rapproche ce qui est mis sur la chambre de la note, et propose les créneaux libres aux clients présents à l'hôtel. Si vos restaurants ou votre spa sont portés par une autre société, vous les retrouvez quand même sur la même page." },
+      { question: "Et si un client ne veut plus recevoir de message ?", answer: "Chaque message permet de ne plus en recevoir. La demande d'arrêt est définitive et vaut sur tous les canaux." },
     ] },
     { id: "formules", label: "Formules", items: [
       { question: "Quel est le prix ?", answer: "Le prix dépend du nombre de chambres, des canaux suivis et des fonctions retenues. Il est fixé pendant l'audit, sur vos réservations réelles, avant tout engagement." },
-      { question: "Comment se passe l'audit ?", answer: "Nous examinons un mois de vos demandes, de vos annulations et de vos notes. Vous repartez avec ce que nous y avons relevé : demandes restées sans réponse, chambres non revendues, extras absents des notes, que vous poursuiviez ou non." },
+      { question: "Comment se passe l'audit ?", answer: "Nous examinons un mois de vos demandes, de vos annulations, de vos notes et de vos factures de plateformes. Vous repartez avec ce que nous y avons relevé : commissions facturées à tort, demandes restées sans réponse, chambres non revendues, extras absents des notes, que vous poursuiviez ou non." },
       { question: "Où sont hébergées les données ?", answer: "Vos données sont hébergées dans l'Union européenne. Ostelo lit votre logiciel de réservation sans jamais rien y modifier sans validation." },
       { question: "Qui édite Ostelo ?", answer: "Ostelo est conçu et développé en France par Omega, qui déploie des systèmes d'automatisation dans les entreprises et les groupes." },
     ] },

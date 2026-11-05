@@ -146,8 +146,8 @@ export const SECTEURS: Secteur[] = [
     slug: "hotellerie",
     metier: "Hôtels",
     saas: "Ostelo",
-    texte: "Chaque demande a sa réponse, chaque chambre annulée est reprise.",
-    ligne: "Plus une réservation ne vous échappe",
+    texte: "Commissions vérifiées, extras sur la note, chaque demande traitée.",
+    ligne: "L'argent qui se perd entre vos logiciels",
     detail:
       "Ostelo répond à vos clients à toute heure et dans leur langue, en lisant vos disponibilités, et repropose chaque chambre annulée aux clients en liste d'attente. Avant l'arrivée il propose le surclassement, avant le départ il rattrape chaque extra oublié sur la note.",
     apercu:

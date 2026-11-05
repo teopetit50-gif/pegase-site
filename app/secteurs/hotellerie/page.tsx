@@ -39,9 +39,9 @@ import SeCombine from "@/components/secteurs/SeCombine";
    sa capture dans public/apercus-secteurs/hotellerie.png.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Ostelo · plus une seule réservation ne vous échappe";
+const TITRE = "Ostelo · l'argent qui se perd entre vos logiciels, récupéré";
 const DESCRIPTION =
-  "Ostelo répond à vos clients à toute heure et dans leur langue, repropose chaque chambre annulée à la liste d'attente, propose surclassement et petit-déjeuner avant l'arrivée et vérifie chaque extra sur la note. Conçu par Omega pour les hôtels.";
+  "Ostelo relie votre logiciel de réservation, vos restaurants et votre spa : commissions des plateformes vérifiées, cartes virtuelles jamais débitées, extras rapprochés de la note, demandes traitées à toute heure. Conçu par Omega pour les hôtels.";
 
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,
