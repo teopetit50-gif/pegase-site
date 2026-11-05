@@ -12,7 +12,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Plus, X } from "lucide-react";
+import { Menu, Pause, Play, Plus, X } from "lucide-react";
 import { AUDIT, CITATIONS, FAQ, FAQ_CATEGORIES, NAV } from "./textes";
 
 export function MenuTelephone() {
@@ -245,5 +245,70 @@ function Reponse({
         </div>
       </div>
     </div>
+  );
+}
+
+/* La vidéo de démo (9 s, muette, en boucle — source dans
+   PEGASE/stories/reels/video-accueil). Elle ne joue que lorsqu'elle est à
+   l'écran, jamais en mouvement réduit, et porte un bouton pause : un
+   mouvement automatique de plus de 5 s doit pouvoir s'arrêter (WCAG 2.2.2). */
+export function VideoDemo({ src, affiche, duree }: { src: string; affiche: string; duree: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [lecture, setLecture] = useState(false);
+  const arretVoulu = useRef(false);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      arretVoulu.current = true;
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !arretVoulu.current) v.play().catch(() => {});
+        else if (!e.isIntersecting) v.pause();
+      },
+      { threshold: 0.35 },
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  const basculer = () => {
+    const v = ref.current;
+    if (!v) return;
+    if (v.paused) {
+      arretVoulu.current = false;
+      v.play().catch(() => {});
+    } else {
+      arretVoulu.current = true;
+      v.pause();
+    }
+  };
+  return (
+    <>
+      <video
+        ref={ref}
+        src={src}
+        poster={affiche}
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        onPlay={() => setLecture(true)}
+        onPause={() => setLecture(false)}
+        aria-label="Démonstration d'Omega : vos agents préparent le travail, vous validez d'un clic"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <button
+        onClick={basculer}
+        aria-label={lecture ? "Mettre la vidéo en pause" : "Lire la vidéo"}
+        className="absolute bottom-4 left-4 flex h-8 w-8 items-center justify-center rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08] text-white/80 hover:text-white transition-colors"
+      >
+        {lecture ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
+      </button>
+      <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08]">
+        <span className="text-xs font-mono text-white/80">{duree}</span>
+      </div>
+    </>
   );
 }

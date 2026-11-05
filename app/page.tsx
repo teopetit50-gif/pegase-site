@@ -14,7 +14,6 @@ import {
   MessagesSquare,
   Phone,
   Plug,
-  Play,
   Search,
   UserRoundSearch,
 } from "lucide-react";
@@ -51,6 +50,7 @@ import {
   Compteur,
   Faq,
   MenuTelephone,
+  VideoDemo,
 } from "@/components/accueil-v3/interactifs";
 import { COURRIEL, LIEN_TELEPHONE } from "@/lib/reservation";
 import Apparition, {
@@ -292,8 +292,8 @@ export default function Home() {
               style={{ "--o-mot-d": "850ms" } as React.CSSProperties}
             >
               <Cadre
-                src="/accueil/hero-btp.webp"
-                alt="Daliro, le logiciel du BTP : les avenants à chiffrer, à valider et à signer"
+                src="/accueil/cashd.webp"
+                alt="CASHD, le tableau de bord des relances : encours, paliers et relances prêtes à valider"
                 ratio="1240/724"
                 className="object-cover object-top grayscale-75"
                 priority
@@ -323,27 +323,8 @@ export default function Home() {
                 </Apparition>
               </GroupeApparition>
               <Apparition delai={150} className="px-6 md:px-12 pb-16 md:pb-24">
-                <Cadre
-                  src="/accueil/apercu.webp"
-                  alt="Les validations du matin dans l'espace client"
-                  ratio="16/9"
-                  className="object-cover object-center grayscale"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/60 via-transparent to-neutral-950/20" />
-                  <Link
-                    href="/espace2"
-                    aria-label="Ouvrir l'espace client de démonstration"
-                    className="group absolute inset-0 flex items-center justify-center"
-                  >
-                    <span className="absolute w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 backdrop-blur-md group-hover:scale-110 transition-transform" />
-                    <span className="absolute w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 animate-ping opacity-50" />
-                    <span className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center shadow-2xl group-hover:scale-105 transition-transform">
-                      <Play className="w-5 h-5 md:w-6 md:h-6 text-neutral-950 fill-neutral-950 ml-1" />
-                    </span>
-                  </Link>
-                  <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08]">
-                    <span className="text-xs font-mono text-white/80">{DEMO.pastille}</span>
-                  </div>
+                <Cadre src="/accueil/demo-affiche.webp" alt="" ratio="16/9" className="object-cover object-center">
+                  <VideoDemo src={DEMO.video} affiche="/accueil/demo-affiche.webp" duree={DEMO.duree} />
                 </Cadre>
               </Apparition>
             </div>

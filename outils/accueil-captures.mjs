@@ -11,16 +11,17 @@ const base = process.argv[2] || 'https://omegaai.fr';
 const seuls = process.argv.slice(3);
 const CADRES = [
   /* hero et quatre articles : 1240 / 724 */
-  /* 05/11 (Teo) — le hero montre le logiciel BTP, pas la vue d'ensemble.
-     Trois écrans Daliro essayés (chantiers, avenants, à faire) : le
-     tableau des avenants est retenu, c'est la promesse même du logiciel. */
-  ['hero-btp', '/espace2/daliro/avenants', 1440, 841],
+  /* 05/11 (Teo) — le hero montre la vue d'ensemble de CASHD (après un
+     essai sur les avenants de Daliro, écarté). L'article CASHD prend donc
+     la page « Débiteurs et relances », pour ne pas montrer deux fois le
+     même écran. */
   ['cashd', '/espace2/cashd', 1440, 841],
+  ['cashd-suivi', '/espace2/cashd/suivi', 1440, 841],
   ['reput', '/espace2/reput', 1440, 841],
   ['offload', '/espace2/offload', 1440, 841],
   ['filed', '/espace2/filed', 1440, 841],
-  /* la vidéo : 16 / 9 */
-  ['apercu', '/espace2/validations', 1440, 810],
+  /* (la section vidéo porte désormais demo.mp4, faite avec Remotion :
+     PEGASE/stories/reels/video-accueil) */
   /* les trois étapes : 4 / 3 */
   ['etape-1', '/espace2/point', 1200, 900],
   ['etape-2', '/espace2/automatisations', 1200, 900],

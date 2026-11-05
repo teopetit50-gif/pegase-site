@@ -32,8 +32,8 @@
        « sur devis » pour le reste — tout tarif est arrêté à l'audit ;
      · SOC 2 / SSO → les formules données validées (espace dédié, hébergé
        dans l'Union européenne, export et suppression sur demande) ;
-     · sa vidéo de démo → l'espace client de démonstration, en direct
-       (/espace2 est public et sert des données d'exemple).
+     · sa vidéo de démo → notre propre vidéo de motion design, 9 s, faite
+       sur nos écrans (Remotion, PEGASE/stories/reels/video-accueil).
    Les captures sont nos vrais écrans, thème sombre, relevées par
    outils/accueil-captures.mjs.
    ══════════════════════════════════════════════════════════════════════ */
@@ -71,12 +71,15 @@ export const OUTILS = [
   "Airtable",
 ];
 
+/* 05/11 (Teo) — « essayez l'espace client en direct » remplacé par une
+   vidéo de motion design de 9 s (source : PEGASE/stories/reels/video-accueil) */
 export const DEMO = {
   surtitre: "Voir la démo",
-  titre: "Essayez l'espace client, en direct",
+  titre: "Omega, en neuf secondes",
   texte:
-    "Pas de vidéo montée : l'espace de démonstration est ouvert. Parcourez ce que nos agents ont préparé ce matin, comme le fera votre équipe.",
-  pastille: "Données d'exemple",
+    "Ce que vos agents préparent pendant la nuit, et la seule chose qui vous reste à faire le matin : valider.",
+  video: "/accueil/demo.mp4",
+  duree: "0:09",
 };
 
 export type Agent = {
@@ -108,8 +111,8 @@ export const AGENTS: Agent[] = [
       "L'agent suit chaque facture échue, écrit la relance adaptée au client et à l'ancienneté de la dette, et vous la présente chaque matin. Vous validez, elle part. La relation reste la vôtre.",
     lien: "/offres/relances-impayes",
     bouton: "Découvrir CASHD",
-    image: "/accueil/cashd.webp",
-    alt: "CASHD — le tableau de bord des relances",
+    image: "/accueil/cashd-suivi.webp",
+    alt: "CASHD — les débiteurs et l'état de leurs relances",
   },
   {
     id: "demandes",
