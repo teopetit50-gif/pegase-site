@@ -218,6 +218,14 @@ export default function Home() {
         {/* ════════ hero ════════ */}
         <section className="relative isolate bg-neutral-950 px-1 pb-12 md:pb-16" data-section="hero">
           <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-b-[20px] pt-12 md:pt-20 bg-neutral-950 aa-bg-gradient">
+            {/* 05/11 (Teo, « on voit le trait entre la barre et la première
+                section ») — la lueur de la référence culmine au bord haut ;
+                sous l'en-tête uni du site, ce bord se lisait comme un filet.
+                Un fondu depuis le fond de page la fait naître sous la barre. */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-neutral-950 to-transparent"
+            />
             <div className="relative z-10 flex flex-col gap-8 px-6 md:px-10 lg:flex-row lg:items-end lg:gap-16 xl:gap-24">
               <h1 className="flex-1 text-balance text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.05] tracking-tight text-white">
                 <MotsReveles lignes={HERO.titre} pas={45} />
