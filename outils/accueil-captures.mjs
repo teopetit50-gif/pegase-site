@@ -1,9 +1,14 @@
-/* Captures de l'espace client (thème sombre, son défaut) pour l'accueil
+/* Captures de l'espace client (thème CLAIR) pour l'accueil
    décalqué d'agent-ai-v1.21st.app (05/11/2026).
    Chaque cadre de la référence a son rapport d'aspect ; on capture la page
    réelle à ce rapport, en densité 2, et on l'enregistre en WebP dans
    public/accueil/.
-   usage : node outils/accueil-captures.mjs [base] [nom…] */
+   usage : node outils/accueil-captures.mjs [base] [nom…]
+   05/11 — l'accueil est blanc : on pose le thème clair de l'espace client
+   (localStorage espace2.theme) avant de capturer, et les fichiers sont
+   suffixés « -clair » — un nom neuf, pour qu'aucun cache d'images ne
+   resserve l'ancienne capture sombre du même nom. SOMBRE=1 rend le thème
+   sombre d'origine, sans suffixe. */
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { ouvrirSession } from './chrome.mjs';
 
@@ -34,17 +39,22 @@ const CADRES = [
 ].filter(([n]) => !seuls.length || seuls.includes(n));
 
 mkdirSync('public/accueil', { recursive: true });
+const CLAIR = process.env.SOMBRE !== '1';
 const s = await ouvrirSession({ largeur: 1440, hauteur: 841, marque: 'accueil', densite: 1.5 });
 try {
+  if (CLAIR) {
+    await s.aller(base + '/espace2');
+    await s.evaluer('localStorage.setItem("espace2.theme", "clair"), 1');
+  }
   for (const [nom, chemin, l, h] of CADRES) {
     await s.envoyer('Emulation.setDeviceMetricsOverride',
       { width: l, height: h, deviceScaleFactor: 1.5, mobile: false });
     const ok = await s.aller(base + chemin);
     await s.dormir(2500);
-    const titre = await s.evaluer('location.pathname + " · " + (document.querySelector("h1")?.textContent || "").slice(0, 50)');
+    const titre = await s.evaluer('location.pathname + " · " + document.documentElement.dataset.v2Theme + " · " + (document.querySelector("h1")?.textContent || "").slice(0, 40)');
     const c = await s.envoyer('Page.captureScreenshot', { format: 'webp', quality: 82 });
     if (c.result?.data) {
-      writeFileSync(`public/accueil/${nom}.webp`, Buffer.from(c.result.data, 'base64'));
+      writeFileSync(`public/accueil/${nom}${CLAIR ? '-clair' : ''}.webp`, Buffer.from(c.result.data, 'base64'));
       console.log(ok ? '✓' : '⚠', nom, titre);
     } else console.log('✗', nom);
   }

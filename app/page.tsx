@@ -213,7 +213,12 @@ function Sceau({ haut, bas }: { haut: string; bas: string }) {
 
 export default function Home() {
   return (
-    <div className={`aa ${geistAccueil.variable} ${geistMonoAccueil.variable}`}>
+    /* 05/11 (Teo) — l'accueil passe en BLANC : `aa-clair` réécrit chaque
+       utilitaire « blanc sur noir » de la référence en « encre sur blanc »
+       (components/accueil-v3/accueil.css). Retirer la classe rend la page
+       noire d'origine — mais les captures de public/accueil/ sont celles
+       du thème clair de l'espace client. */
+    <div className={`aa aa-clair ${geistAccueil.variable} ${geistMonoAccueil.variable}`}>
       {/* 05/11 (Teo) — la barre copiée sur la référence est retirée :
           l'accueil garde l'en-tête du site (components/Header.tsx), le
           même que sur toutes les autres pages. */}
@@ -275,7 +280,7 @@ export default function Home() {
               style={{ "--o-mot-d": "850ms" } as React.CSSProperties}
             >
               <Cadre
-                src="/accueil/cashd.webp"
+                src="/accueil/cashd-clair.webp"
                 alt="CASHD, le tableau de bord des relances : encours, paliers et relances prêtes à valider"
                 ratio="1240/724"
                 className="object-cover object-top grayscale-75"

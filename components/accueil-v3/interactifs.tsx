@@ -10,8 +10,28 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play, Plus } from "lucide-react";
 import { CITATIONS, FAQ, FAQ_CATEGORIES } from "./textes";
+
+/* 05/11 (Teo) — deux flèches pour faire défiler les phrases à la main ;
+   la flèche seule, sans rond ni fond autour (Teo : « juste les flèches »).
+   À partir de lg elles encadrent la phrase, dans les marges ; en dessous
+   elles encadrent les points, pour ne jamais couvrir le texte. Le défilement
+   automatique continue, et repart de zéro à chaque clic (l'effet dépend de
+   `i`). Les flèches du clavier marchent aussi quand le bloc a le focus. */
+function Fleche({ sens, onClick, className = "" }: { sens: "avant" | "apres"; onClick: () => void; className?: string }) {
+  const Icone = sens === "avant" ? ChevronLeft : ChevronRight;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={sens === "avant" ? "Phrase précédente" : "Phrase suivante"}
+      className={`flex h-11 w-11 shrink-0 items-center justify-center text-white/55 transition-colors hover:text-white ${className}`}
+    >
+      <Icone className="w-7 h-7" strokeWidth={1.5} />
+    </button>
+  );
+}
 
 export function Citations() {
   const [i, setI] = useState(0);
@@ -19,37 +39,55 @@ export function Citations() {
     const t = setInterval(() => setI((n) => (n + 1) % CITATIONS.length), 6000);
     return () => clearInterval(t);
   }, [i]);
+  const n = CITATIONS.length;
+  const avant = () => setI((k) => (k - 1 + n) % n);
+  const apres = () => setI((k) => (k + 1) % n);
   const c = CITATIONS[i];
   return (
-    <div className="max-w-4xl mx-auto text-center ">
-      <div key={i} className="aa-fade-in">
-        <blockquote className="text-2xl md:text-4xl lg:text-5xl font-normal text-white leading-[1.2] tracking-tight mb-12 md:mb-16">
-          «&nbsp;{c.texte}&nbsp;»
-        </blockquote>
-        <div className="flex items-center justify-center mb-6">
-          <Image src="/logo-pegase-blanc.png" alt="" width={32} height={32} className="w-8 h-8 opacity-90" />
+    <div
+      className="relative"
+      role="group"
+      aria-roledescription="carrousel"
+      aria-label="Nos convictions"
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft") avant();
+        if (e.key === "ArrowRight") apres();
+      }}
+    >
+      <Fleche sens="avant" onClick={avant} className="absolute left-0 top-[18%] hidden lg:flex" />
+      <Fleche sens="apres" onClick={apres} className="absolute right-0 top-[18%] hidden lg:flex" />
+      <div className="max-w-4xl mx-auto text-center ">
+        <div key={i} className="aa-fade-in" aria-live="polite">
+          <blockquote className="text-2xl md:text-4xl lg:text-5xl font-normal text-white leading-[1.2] tracking-tight mb-12 md:mb-16">
+            «&nbsp;{c.texte}&nbsp;»
+          </blockquote>
+          <div className="flex items-center justify-center mb-6">
+            <Image src="/logo-pegase-blanc.png" alt="" width={32} height={32} className="w-8 h-8 opacity-90" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-base md:text-lg font-medium text-white">{c.signe}</p>
+            <p className="text-sm md:text-base text-white/50">{c.role}</p>
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-base md:text-lg font-medium text-white">{c.signe}</p>
-          <p className="text-sm md:text-base text-white/50">{c.role}</p>
+        <div className="flex items-center justify-center gap-2 mt-12 md:mt-16">
+          <Fleche sens="avant" onClick={avant} className="mr-3 lg:hidden" />
+          {CITATIONS.map((_, k) => (
+            <button
+              key={k}
+              aria-label={`Afficher la phrase ${k + 1}`}
+              aria-current={k === i}
+              onClick={() => setI(k)}
+              className="group relative p-2"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all duration-500 ${
+                  k === i ? "w-8 bg-white" : "w-1.5 bg-white/25 group-hover:bg-white/50"
+                }`}
+              />
+            </button>
+          ))}
+          <Fleche sens="apres" onClick={apres} className="ml-3 lg:hidden" />
         </div>
-      </div>
-      <div className="flex items-center justify-center gap-2 mt-12 md:mt-16">
-        {CITATIONS.map((_, k) => (
-          <button
-            key={k}
-            aria-label={`Afficher la phrase ${k + 1}`}
-            aria-current={k === i}
-            onClick={() => setI(k)}
-            className="group relative p-2"
-          >
-            <span
-              className={`block h-1.5 rounded-full transition-all duration-500 ${
-                k === i ? "w-8 bg-white" : "w-1.5 bg-white/25 group-hover:bg-white/50"
-              }`}
-            />
-          </button>
-        ))}
       </div>
     </div>
   );
@@ -261,11 +299,11 @@ export function VideoDemo({ src, affiche, duree }: { src: string; affiche: strin
       <button
         onClick={basculer}
         aria-label={lecture ? "Mettre la vidéo en pause" : "Lire la vidéo"}
-        className="absolute bottom-4 left-4 flex h-8 w-8 items-center justify-center rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08] text-white/80 hover:text-white transition-colors"
+        className="aa-sombre absolute bottom-4 left-4 flex h-8 w-8 items-center justify-center rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08] text-white/80 hover:text-white transition-colors"
       >
         {lecture ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
       </button>
-      <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08]">
+      <div className="aa-sombre absolute bottom-4 right-4 px-2.5 py-1 rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08]">
         <span className="text-xs font-mono tabular-nums text-white/80" aria-hidden="true">
           {reste}
         </span>

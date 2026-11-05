@@ -129,138 +129,95 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   L'EN-TÊTE DU SITE, EN SOMBRE SUR L'ACCUEIL (05/11/2026)
+   LA VERSION BLANCHE — celle qui est en ligne (05/11/2026)
 
-   Teo : « la section du haut de la barre est restée blanche — règle ça,
-   et s'il y a d'autres problèmes comme ça ». L'en-tête commun impose des
-   surfaces BLANCHES (doctrine du 06/08, quand le site était clair) : le
-   panneau des menus déroulants, le menu plein écran du téléphone — et
-   l'en-tête lui-même passe au blanc quand ce menu est ouvert. Sur cet
-   accueil noir, chacun s'ouvrait comme une feuille blanche.
+   Teo, après avoir vu les deux en local : l'accueil passe en blanc, la
+   barre du haut et ses menus restent blancs comme sur le reste du site.
+   app/page.tsx pose `aa-clair` sur la racine ; chaque utilitaire « blanc
+   sur noir » de la référence est réécrit ici en « encre sur blanc ».
+   Les captures de public/accueil/ sont celles du thème clair de l'espace
+   client (outils/accueil-captures.mjs). La vidéo reste sombre.
 
-   Tout est réglé ICI, sous `html:has(.aa)`, sans toucher à Header.tsx ni
-   à MenuPrincipal.tsx : les autres pages, claires, gardent leurs menus
-   blancs. Les sélecteurs reprennent les classes réelles de ces deux
-   fichiers ; si l'une d'elles change là-bas, la règle correspondante
-   ici cesse simplement de s'appliquer.
+   Les menus de l'en-tête n'ont plus de règle ici : sur fond blanc,
+   l'en-tête du site se règle tout seul (il prélève la couleur de la page).
    ══════════════════════════════════════════════════════════════════════ */
-
-/* 1 — le panneau des menus déroulants (Nos offres, Votre site, Ressources) */
-html:has(.aa) .omenu {
-  --omenu-panneau: #141414;
-  --omenu-panneau-encre: #fafafa;
-  --omenu-panneau-douce: #a1a1a1;
-  --omenu-panneau-filet: rgba(255, 255, 255, 0.1);
-  --omenu-panneau-survol: rgba(255, 255, 255, 0.06);
+.aa-clair, .aa-clair .text-white { color: rgb(10,10,10) }
+.aa-clair .text-white\/90 { color: rgba(10,10,10,0.98) }
+.aa-clair .text-white\/85 { color: rgba(10,10,10,0.93) }
+.aa-clair .text-white\/80 { color: rgba(10,10,10,0.88) }
+.aa-clair .text-white\/75 { color: rgba(10,10,10,0.83) }
+.aa-clair .text-white\/70 { color: rgba(10,10,10,0.78) }
+.aa-clair .text-white\/60 { color: rgba(10,10,10,0.68) }
+.aa-clair .text-white\/55 { color: rgba(10,10,10,0.63) }
+.aa-clair .text-white\/50 { color: rgba(10,10,10,0.58) }
+.aa-clair .text-white\/45 { color: rgba(10,10,10,0.53) }
+.aa-clair .text-white\/\[0\.04\] { color: rgba(10,10,10,0.05) }
+.aa-clair .hover\:text-white:hover { color: rgb(10,10,10) }
+.aa-clair .hover\:text-white\/70:hover { color: rgb(10,10,10) }
+.aa-clair .border-white\/\[0\.06\] { border-color: rgba(10,10,10,0.08) }
+.aa-clair .divide-white\/\[0\.06\] > :not(:last-child) { border-color: rgba(10,10,10,0.08) }
+.aa-clair .border-white\/\[0\.08\] { border-color: rgba(10,10,10,0.10) }
+.aa-clair .divide-white\/\[0\.08\] > :not(:last-child) { border-color: rgba(10,10,10,0.10) }
+.aa-clair .border-white\/\[0\.10\] { border-color: rgba(10,10,10,0.12) }
+.aa-clair .divide-white\/\[0\.10\] > :not(:last-child) { border-color: rgba(10,10,10,0.12) }
+.aa-clair .border-white\/\[0\.12\] { border-color: rgba(10,10,10,0.14) }
+.aa-clair .divide-white\/\[0\.12\] > :not(:last-child) { border-color: rgba(10,10,10,0.14) }
+.aa-clair .border-white\/\[0\.14\] { border-color: rgba(10,10,10,0.16) }
+.aa-clair .divide-white\/\[0\.14\] > :not(:last-child) { border-color: rgba(10,10,10,0.16) }
+.aa-clair .border-white\/\[0\.18\] { border-color: rgba(10,10,10,0.20) }
+.aa-clair .divide-white\/\[0\.18\] > :not(:last-child) { border-color: rgba(10,10,10,0.20) }
+.aa-clair .hover\:border-white\/\[0\.14\]:hover { border-color: rgba(10,10,10,0.18) }
+.aa-clair .bg-white\/\[0\.02\] { background-color: rgba(10,10,10,0.018) }
+.aa-clair .bg-white\/\[0\.04\] { background-color: rgba(10,10,10,0.036) }
+.aa-clair .bg-white\/\[0\.06\] { background-color: rgba(10,10,10,0.054) }
+.aa-clair .bg-white\/\[0\.08\] { background-color: rgba(10,10,10,0.072) }
+.aa-clair .bg-white\/10 { background-color: rgba(10,10,10,0.06) }
+.aa-clair .bg-white\/15 { background-color: rgba(10,10,10,0.09) }
+.aa-clair .bg-white\/25 { background-color: rgba(10,10,10,0.18) }
+.aa-clair .bg-white\/50 { background-color: rgba(10,10,10,0.35) }
+.aa-clair .group:hover .group-hover\:bg-white\/50 { background-color: rgba(10,10,10,0.35) }
+.aa-clair .hover\:bg-white\/\[0\.04\]:hover { background-color: rgba(10,10,10,0.06) }
+.aa-clair .hover\:bg-white\/\[0\.06\]:hover { background-color: rgba(10,10,10,0.08) }
+.aa-clair .from-white\/\[0\.06\] { --tw-gradient-from: rgba(10,10,10,0.05) }
+.aa-clair .to-white\/\[0\.02\] { --tw-gradient-to: rgba(10,10,10,0.015) }
+.aa-clair { background: #ffffff }
+.aa-clair .bg-neutral-950 { background-color: #ffffff }
+.aa-clair .bg-\[\#0B0C0E\] { background-color: #ffffff }
+.aa-clair .bg-neutral-950\/50 { background-color: #ffffff }
+.aa-clair .bg-neutral-800\/40 { background-color: rgba(10,10,10,0.05) }
+.aa-clair .from-neutral-950 { --tw-gradient-from: #ffffff }
+.aa-clair .bg-white { background-color: rgb(10,10,10) }
+.aa-clair .text-neutral-950 { color: #ffffff }
+.aa-clair .hover\:bg-neutral-200:hover { background-color: #262626 }
+.aa-clair .fill-neutral-950 { fill: #ffffff }
+.aa-clair .aa-bg-gradient {
+  background-image: radial-gradient(120% 80% at 50% 0, rgba(255, 170, 110, 0.07), transparent 60%);
 }
-html:has(.aa) .omenu .bg-\[\#f3f3f1\] {
-  background-color: #1c1c1c;
+.aa-clair .aa-marquee-fade-left {
+  background: linear-gradient(90deg, #fff 0%, #fffffff2 30%, #fff0 100%);
 }
-html:has(.aa) .omenu [class*="bg-[linear-gradient(180deg,rgba(250,250,250"] {
-  background-image: linear-gradient(
-    180deg,
-    rgba(28, 28, 28, 0.15) 0%,
-    rgba(24, 24, 24, 0.6) 45%,
-    rgba(20, 20, 20, 0.96) 100%
-  );
+.aa-clair .aa-marquee-fade-right {
+  background: linear-gradient(270deg, #fff 0%, #fffffff2 30%, #fff0 100%);
 }
-html:has(.aa) .omenu img[src*="plis-menu"] {
-  filter: invert(1) brightness(0.55);
+.aa-clair .invert {
+  --tw-invert: invert(0%);
 }
-html:has(.aa) .omenu img[src*="logo-pegase.png"] {
+.aa-clair img[src*="logo-pegase-blanc"] {
   filter: invert(1);
 }
-
-/* 2 — le menu plein écran du téléphone, et l'en-tête quand il est ouvert */
-html:has(.aa)[data-menu-open] body > header {
-  background-color: #0a0a0a !important;
+.aa-clair svg circle {
+  stroke: rgba(10, 10, 10, 0.14);
+  fill: rgba(10, 10, 10, 0.02);
 }
-html:has(.aa) body > header .bg-white {
-  background-color: #0a0a0a;
+.aa-clair .aa-sombre,
+.aa-clair .aa-sombre * {
+  color: rgba(255, 255, 255, 0.85);
 }
-html:has(.aa) body > header img[src*="logo-pegase.png"] {
-  filter: invert(1);
+.aa-clair .aa-sombre {
+  background-color: rgba(10, 10, 10, 0.7);
+  border-color: rgba(255, 255, 255, 0.08);
 }
-html:has(.aa) body > header .text-\[\#0f1013\],
-html:has(.aa) body > header .text-\[\#09090b\] {
-  color: #fafafa;
-}
-html:has(.aa) body > header .text-\[\#0f1013\]\/65 {
-  color: rgba(250, 250, 250, 0.7);
-}
-html:has(.aa) body > header .text-\[\#0f1013\]\/45 {
-  color: rgba(250, 250, 250, 0.5);
-}
-html:has(.aa) body > header .text-\[\#0f1013\]\/40 {
-  color: rgba(250, 250, 250, 0.45);
-}
-html:has(.aa) body > header .hover\:text-\[\#0f1013\]\/55:hover {
-  color: rgba(250, 250, 250, 0.6);
-}
-html:has(.aa) body > header .hover\:text-\[\#0f1013\]:hover {
-  color: #ffffff;
-}
-/* les traits du burger */
-html:has(.aa) body > header .bg-\[\#0f1013\]:not(.hover\:bg-\[\#26272b\]) {
-  background-color: #fafafa;
-}
-/* le bouton plein du panneau : noir sur blanc → blanc sur noir */
-html:has(.aa) body > header .bg-\[\#0f1013\].hover\:bg-\[\#26272b\] {
-  background-color: #fafafa;
-  color: #0a0a0a;
-}
-html:has(.aa) body > header .bg-\[\#0f1013\].hover\:bg-\[\#26272b\]:hover {
-  background-color: #e5e5e5;
-}
-/* le bouton secondaire du panneau */
-html:has(.aa) body > header .bg-\[\#f5f5f4\] {
-  background-color: #1a1a1a;
-}
-html:has(.aa) body > header .hover\:bg-\[\#ebebe9\]:hover {
-  background-color: #262626;
-}
-/* filets et contours pensés pour le blanc */
-html:has(.aa) body > header .border-black\/\[0\.08\],
-html:has(.aa) body > header .border-black\/\[0\.07\] {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-html:has(.aa) body > header .border-black\/15 {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-html:has(.aa) body > header .border-\[\#09090b\]\/25 {
-  border-color: rgba(255, 255, 255, 0.35);
-}
-html:has(.aa) body > header .hover\:border-\[\#09090b\]\/60:hover {
-  border-color: rgba(255, 255, 255, 0.7);
-}
-html:has(.aa) body > header .hover\:bg-black\/\[0\.04\]:hover,
-html:has(.aa) body > header .hover\:bg-black\/\[0\.05\]:hover,
-html:has(.aa) body > header .hover\:bg-black\/\[0\.06\]:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-/* 3 — le bandeau de consentement (components/pub/pub.css), s'il s'affiche */
-html:has(.aa) .pub-consent {
-  background: #141414;
-  border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-}
-html:has(.aa) .pub-consent-texte {
-  color: rgba(250, 250, 250, 0.75);
-}
-html:has(.aa) .pub-consent-btn {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #fafafa;
-}
-html:has(.aa) .pub-consent-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-html:has(.aa) .pub-consent-btn--noir {
-  background: #fafafa;
-  border-color: #fafafa;
-  color: #0a0a0a;
-}
-html:has(.aa) .pub-consent-btn--noir:hover {
-  background: #e5e5e5;
+/* les captures claires portent leur propre ombre de cadre */
+.aa-clair .aa-cadre-lisere {
+  background: linear-gradient(rgba(10, 10, 10, 0.1), rgba(10, 10, 10, 0.1));
 }

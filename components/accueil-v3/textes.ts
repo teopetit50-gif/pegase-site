@@ -116,7 +116,7 @@ export const AGENTS: Agent[] = [
       "Relancer les impayés, répondre aux demandes, traiter les factures fournisseurs, reprendre contact avec les clients qui s'éteignent. Chaque agent travaille sur vos outils et prépare tout : il ne vous reste qu'à valider.",
     lien: "/offres",
     bouton: "Voir les quatre agents",
-    image: "/accueil/agents.webp",
+    image: "/accueil/agents-clair.webp",
     alt: "La vue d'ensemble des agents dans l'espace client",
   },
   {
@@ -129,7 +129,7 @@ export const AGENTS: Agent[] = [
       "Avenants de chantier, pièces d'un dossier d'avocat, plans d'un permis de construire, états des lieux d'un loueur, plannings d'un cabinet dentaire, reporting d'un groupe : chaque secteur a ses contraintes, et son logiciel est construit pour elles.",
     lien: "/secteurs",
     bouton: "Trouver votre secteur",
-    image: "/accueil/metiers.webp",
+    image: "/accueil/metiers-clair.webp",
     alt: "Daliro, le logiciel du BTP : les avenants à chiffrer, valider et signer",
   },
   {
@@ -142,7 +142,7 @@ export const AGENTS: Agent[] = [
       "Validation des achats, planning des équipes, tableaux à consolider, échanges entre services : on cartographie le processus avec vous, on le construit et on le branche sur vos logiciels. Son périmètre et son prix sont écrits avant de commencer.",
     lien: "/offres/sur-mesure",
     bouton: "Découvrir le sur-mesure",
-    image: "/accueil/sur-mesure.webp",
+    image: "/accueil/sur-mesure-clair.webp",
     alt: "Les automatisations d'une entreprise dans l'espace client",
   },
   {
@@ -155,7 +155,7 @@ export const AGENTS: Agent[] = [
       "Agents, logiciels et automatisations remontent dans le même espace client : ce qui est prêt, ce qui attend votre accord, ce qui a été fait. Rien ne part sans validation, et chaque action laisse une trace.",
     lien: "/espace2",
     bouton: "Voir l'espace client",
-    image: "/accueil/pilotage.webp",
+    image: "/accueil/pilotage-clair.webp",
     alt: "La file des validations du matin dans l'espace client",
   },
 ];
@@ -174,7 +174,7 @@ export const ETAPES = [
     titre: "Un audit de 30 minutes",
     texte:
       "On relève sur vos exports ce qui prend du temps chaque mois. Vous repartez avec le périmètre et le tarif, écrits. C'est offert.",
-    image: "/accueil/etape-1.webp",
+    image: "/accueil/etape-1-clair.webp",
   },
   {
     n: "02",
@@ -182,7 +182,7 @@ export const ETAPES = [
     titre: "L'installation, par notre équipe",
     texte:
       "Nous raccordons vos messageries, vos tableurs et votre comptabilité. Aucun débit avant la fin de l'installation.",
-    image: "/accueil/etape-2.webp",
+    image: "/accueil/etape-2-clair.webp",
   },
   {
     n: "03",
@@ -190,7 +190,7 @@ export const ETAPES = [
     titre: "Vous validez, ils exécutent",
     texte:
       "Chaque matin, ce qui est prêt vous attend. Un clic pour valider, un pour corriger. Rien ne part sans vous.",
-    image: "/accueil/etape-3.webp",
+    image: "/accueil/etape-3-clair.webp",
   },
 ];
 
@@ -232,7 +232,7 @@ export const METIERS = [
     metier: "BTP",
     texte: "Les travaux supplémentaires sont chiffrés et signés avant exécution.",
     href: "/secteurs/btp",
-    image: "/accueil/daliro.webp",
+    image: "/accueil/daliro-clair.webp",
     pastille: null as string | null,
   },
   {
@@ -240,7 +240,7 @@ export const METIERS = [
     metier: "Cabinets d'avocats",
     texte: "Chaque fait renvoie à la pièce et à la page qui le fondent.",
     href: "/secteurs/avocats",
-    image: "/accueil/tamila.webp",
+    image: "/accueil/tamila-clair.webp",
     pastille: null,
   },
   {
@@ -248,7 +248,7 @@ export const METIERS = [
     metier: "Architectes",
     texte: "Les plans, le CCTP et la DPGF sont croisés avant le permis.",
     href: "/secteurs/architectes",
-    image: "/accueil/lorani.webp",
+    image: "/accueil/lorani-clair.webp",
     pastille: null,
   },
   {
@@ -256,7 +256,7 @@ export const METIERS = [
     metier: "Grands groupes",
     texte: "Toutes les sociétés du groupe travaillent avec la même IA, sur un seul référentiel.",
     href: "/secteurs/groupes",
-    image: "/accueil/varelo.webp",
+    image: "/accueil/varelo-clair.webp",
     pastille: "Lecture seule",
   },
 ];
