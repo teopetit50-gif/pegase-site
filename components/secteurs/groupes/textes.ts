@@ -58,7 +58,7 @@ const E = (nom: string, l: number, h: number, alt: string): Ecran => ({
 export const HEROS = {
   titre: "Une seule IA pour tout le groupe.",
   chapo:
-    "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule. Chaque matin, elle dit à chaque direction ce qu'elle doit décider.",
+    "Varelo branche la même IA sur les logiciels, les tableurs et les dossiers de chaque société, sur chaque territoire, en lecture seule. Chaque matin, elle dit à chaque direction ce qu'elle doit décider.",
   bouton: "Réserver un audit",
   legende:
     "Le point du matin d'une direction financière, sur des données d'exemple.",
@@ -100,8 +100,8 @@ export const ENONCE_1 = {
   /* 26/09 — la réponse au constat, avant le collage : le socle commun,
      les règles écrites une fois, puis ce que chacun reçoit. */
   paragraphes: [
-    "Varelo réunit ces usages sur un seul socle. La même IA lit les logiciels et les tableurs de toutes les sociétés, en lecture seule, et range leurs données sous un seul référentiel.",
-    "Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale, qu'il s'agisse d'un délai de réserve, d'un préavis de contrat ou d'un seuil d'encours.",
+    "Varelo réunit ces usages sur un seul socle. La même IA lit les logiciels, les tableurs et les dossiers de toutes les sociétés, d'un territoire à l'autre, en lecture seule, et range leurs données sous un seul référentiel.",
+    "Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale, qu'il s'agisse d'un délai de réserve, d'un préavis de contrat, d'une pièce à réclamer ou d'un seuil d'encours.",
     "Chaque matin, la présidence lit le groupe sur une page, et chaque direction reçoit ses décisions avec le calcul et la pièce qui les justifient.",
   ],
   /* leur 3.0-collage-3.webp (2880 × 1940), posé en pleine largeur */
@@ -178,7 +178,7 @@ export const SURVOL = {
 
 /* ── 4. carrousel (leur slider de témoignages) ─────────────────────── */
 export const CARROUSEL = {
-  titre: "Cinq situations types",
+  titre: "Huit situations types",
   etiquette: "Situation type",
   lien: "En parler",
   /* chaque carte : la situation, qui la vit (leur « author ») et, en gris,
@@ -216,6 +216,24 @@ export const CARROUSEL = {
       role: "Direction financière",
       liste: "Un seul référentiel",
     },
+    {
+      citation:
+        "Chaque territoire suit ses dossiers à sa façon, et le siège ne voit pas lesquels attendent encore une pièce.",
+      role: "Direction générale",
+      liste: "Les dossiers en attente",
+    },
+    {
+      citation:
+        "Les pièces d'un dossier arrivent par mail, par WhatsApp et sur papier, et il en manque toujours une au moment de le boucler.",
+      role: "Direction des opérations",
+      liste: "Les pièces à réclamer",
+    },
+    {
+      citation:
+        "Chaque printemps, des centaines d'attestations fiscales partent une par une, et chaque montant se vérifie à la main.",
+      role: "Direction administrative",
+      liste: "Les attestations à produire",
+    },
   ],
 };
 
@@ -234,7 +252,7 @@ export const ACCORDEON = {
     {
       titre: "Lecture seule",
       texte:
-        "Varelo lit vos logiciels de gestion, vos caisses et vos tableurs sans jamais rien y écrire. Chaque source se branche avec l'accord de la DSI et se débranche de la même façon.",
+        "Varelo lit vos logiciels de gestion, vos caisses, vos tableurs et vos dossiers sans jamais rien y écrire. Chaque source se branche avec l'accord de la DSI et se débranche de la même façon.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-lecture-seule",
@@ -286,7 +304,7 @@ export const ACCORDEON = {
 export const ENONCE_2 = {
   titre: "Un pôle, puis le groupe.",
   paragraphes: [
-    "Nous commençons par un pôle, une société et une direction. Le pilote se juge sur un trimestre complet, avec ses clôtures, ses échéances et ses chiffres réels.",
+    "Nous commençons par un pôle ou un territoire, une société et une direction. Le pilote se juge sur un trimestre complet, avec ses clôtures, ses échéances et ses chiffres réels.",
     "Chaque société suivante se branche ensuite sur le même socle : elle reprend le référentiel, les règles et l'IA déjà validés, d'un territoire à l'autre.",
     "Le groupe garde ainsi une seule IA à gouverner, quel que soit le nombre de sociétés qui la rejoignent.",
   ],
