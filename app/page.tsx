@@ -307,8 +307,8 @@ export default function Home() {
                 </Apparition>
               </GroupeApparition>
               <Apparition delai={150} className="px-6 md:px-12 pb-16 md:pb-24">
-                <Cadre src="/accueil/demo-affiche-clair.webp" alt="" ratio="16/9" className="object-cover object-center">
-                  <VideoDemo src={DEMO.video} affiche="/accueil/demo-affiche-clair.webp" duree={DEMO.duree} />
+                <Cadre src="/accueil/demo-affiche-clair-15s.webp" alt="" ratio="16/9" className="object-cover object-center">
+                  <VideoDemo src={DEMO.video} affiche="/accueil/demo-affiche-clair-15s.webp" duree={DEMO.duree} />
                 </Cadre>
               </Apparition>
             </div>

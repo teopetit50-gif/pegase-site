@@ -73,16 +73,17 @@ export const OUTILS = [
 ];
 
 /* 05/11 (Teo) — « essayez l'espace client en direct » remplacé par une
-   vidéo de motion design de 9 s (source : PEGASE/stories/reels/video-accueil) */
+   vidéo de motion design (source : PEGASE/stories/reels/video-accueil),
+   ralentie de 9 à 15 s le même jour (« on n'a pas trop le temps de lire »). */
 export const DEMO = {
   surtitre: "Voir la démo",
-  titre: "Omega, en neuf secondes",
+  titre: "Omega, en quinze secondes",
   texte:
     "Ce que vos agents préparent pendant la nuit, et la seule chose qui vous reste à faire le matin : valider.",
   /* 05/11 — refaite en blanc avec la page (noms neufs : aucun cache ne
      resservira la version sombre) */
-  video: "/accueil/demo-clair.mp4",
-  duree: "0:09",
+  video: "/accueil/demo-clair-15s.mp4",
+  duree: "0:15",
 };
 
 export type Agent = {
