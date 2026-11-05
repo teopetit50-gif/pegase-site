@@ -42,13 +42,6 @@
 
 export const AUDIT = "/reserver-un-audit";
 
-export const NAV = [
-  { label: "Offres", href: "/offres" },
-  { label: "Métiers", href: "/secteurs" },
-  { label: "Tarifs", href: "/tarifs" },
-  { label: "Blog", href: "/blog" },
-  { label: "Contact", href: "/contact" },
-];
 
 /* 05/11 (Teo, 2ᵉ passe) — « tu lis les premières lignes, tu sais exactement
    ce qu'on fait, comment, pourquoi, et pour qui ». La première version ne

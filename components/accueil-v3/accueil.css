@@ -17,12 +17,6 @@
    Supprimer ce fichier et components/accueil-v3/ supprime la page.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* L'accueil porte sa propre barre (celle de la référence) : l'en-tête du
-   site s'efface sur cette page seulement — même mécanisme que /espace2. */
-html:has(.aa) body > header {
-  display: none;
-}
-
 .aa {
   font-family: var(--font-geist-aa), ui-sans-serif, system-ui, sans-serif;
   background: #0a0a0a;

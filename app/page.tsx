@@ -37,7 +37,6 @@ import {
   LOGICIELS_INTRO,
   METIERS,
   METIERS_INTRO,
-  NAV,
   OUTILS,
   PIED,
   PRIX,
@@ -49,7 +48,6 @@ import {
   Citations,
   Compteur,
   Faq,
-  MenuTelephone,
   VideoDemo,
 } from "@/components/accueil-v3/interactifs";
 import { COURRIEL, LIEN_TELEPHONE } from "@/lib/reservation";
@@ -212,38 +210,9 @@ function Sceau({ haut, bas }: { haut: string; bas: string }) {
 export default function Home() {
   return (
     <div className={`aa ${geistAccueil.variable} ${geistMonoAccueil.variable}`}>
-      {/* ════════ barre ════════ */}
-      <nav className="sticky top-0 z-50 w-full bg-neutral-950 border-b border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <Link className="flex items-center gap-2 text-white z-50" href="/">
-              <Logo />
-            </Link>
-            <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
-              {NAV.map((l) => (
-                <Link key={l.href} className="text-sm text-white/55 hover:text-white transition-colors" href={l.href}>
-                  {l.label}
-                </Link>
-              ))}
-            </div>
-            <div className="hidden md:flex items-center gap-4">
-              {/* à 768 il chevauchait « Contact » : nos libellés sont plus
-                  longs que ceux de la référence (Login / Signup) */}
-              <Link className="hidden lg:inline text-sm text-white/55 hover:text-white transition-colors" href="/espace2">
-                Espace client
-              </Link>
-              <Link
-                className="bg-white text-neutral-950 text-sm font-medium px-4 py-2 rounded-md hover:bg-neutral-200 transition-colors"
-                href={AUDIT}
-              >
-                Réserver un audit
-              </Link>
-            </div>
-            <MenuTelephone />
-          </div>
-        </div>
-      </nav>
-
+      {/* 05/11 (Teo) — la barre copiée sur la référence est retirée :
+          l'accueil garde l'en-tête du site (components/Header.tsx), le
+          même que sur toutes les autres pages. */}
       <main className="min-h-screen bg-[#0B0C0E]">
         {/* ════════ hero ════════ */}
         <section className="relative isolate bg-neutral-950 px-1 pb-12 md:pb-16" data-section="hero">

@@ -2,7 +2,6 @@
 
 /* Les morceaux de l'accueil qui bougent — recopiés du comportement de la
    référence (agent-ai-v1.21st.app) :
-     · le menu du téléphone (bouton « Toggle menu », sous md) ;
      · la grande citation, qui change toutes les 6 s, points cliquables ;
      · les chiffres, qui comptent depuis 0 à leur entrée à l'écran ;
      · la FAQ : filtres en pastilles, accordéon en hauteur 300 ms.
@@ -10,60 +9,9 @@
    filtres ; ici chaque filtre porte aria-pressed. */
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Menu, Pause, Play, Plus, X } from "lucide-react";
-import { AUDIT, CITATIONS, FAQ, FAQ_CATEGORIES, NAV } from "./textes";
-
-export function MenuTelephone() {
-  const [ouvert, setOuvert] = useState(false);
-  useEffect(() => {
-    document.documentElement.style.overflow = ouvert ? "hidden" : "";
-    return () => {
-      document.documentElement.style.overflow = "";
-    };
-  }, [ouvert]);
-  return (
-    <>
-      <button
-        className="md:hidden text-white z-50"
-        aria-label={ouvert ? "Fermer le menu" : "Ouvrir le menu"}
-        aria-expanded={ouvert}
-        onClick={() => setOuvert((o) => !o)}
-      >
-        {ouvert ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
-      {ouvert && (
-        <div className="aa-fade-in md:hidden fixed inset-x-0 top-16 bottom-0 z-40 bg-neutral-950 border-t border-white/[0.06] px-6 py-8 flex flex-col gap-1">
-          {NAV.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              onClick={() => setOuvert(false)}
-              className="py-3 text-lg text-white/70 hover:text-white transition-colors border-b border-white/[0.06]"
-            >
-              {l.label}
-            </Link>
-          ))}
-          <Link
-            href="/espace2"
-            onClick={() => setOuvert(false)}
-            className="py-3 text-lg text-white/70 hover:text-white transition-colors"
-          >
-            Espace client
-          </Link>
-          <Link
-            href={AUDIT}
-            onClick={() => setOuvert(false)}
-            className="mt-6 bg-white text-neutral-950 text-sm font-medium px-4 py-3 rounded-md text-center hover:bg-neutral-200 transition-colors"
-          >
-            Réserver un audit
-          </Link>
-        </div>
-      )}
-    </>
-  );
-}
+import { Pause, Play, Plus } from "lucide-react";
+import { CITATIONS, FAQ, FAQ_CATEGORIES } from "./textes";
 
 export function Citations() {
   const [i, setI] = useState(0);
