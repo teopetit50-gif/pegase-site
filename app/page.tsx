@@ -216,16 +216,18 @@ export default function Home() {
           même que sur toutes les autres pages. */}
       <main className="min-h-screen bg-[#0B0C0E]">
         {/* ════════ hero ════════ */}
-        <section className="relative isolate bg-neutral-950 px-1 pb-12 md:pb-16" data-section="hero">
-          <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-b-[20px] pt-12 md:pt-20 bg-neutral-950 aa-bg-gradient">
-            {/* 05/11 (Teo, « on voit le trait entre la barre et la première
-                section ») — la lueur de la référence culmine au bord haut ;
-                sous l'en-tête uni du site, ce bord se lisait comme un filet.
-                Un fondu depuis le fond de page la fait naître sous la barre. */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-neutral-950 to-transparent"
-            />
+        <section className="relative isolate bg-neutral-950 aa-bg-gradient px-1 pb-12 md:pb-16" data-section="hero">
+          {/* 05/11 (Teo, « on voit la démarcation entre la barre et la
+              première section », trois fois) — la référence pose sa lueur
+              sur une boîte de 1400 px plus claire que la page : sous
+              l'en-tête uni du site, son bord haut ET ses deux bords latéraux
+              se lisaient comme des filets. La lueur passe sur toute la
+              largeur de la section, et naît en fondu sous la barre. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40 bg-gradient-to-b from-neutral-950 to-transparent"
+          />
+          <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-b-[20px] pt-12 md:pt-20">
             <div className="relative z-10 flex flex-col gap-8 px-6 md:px-10 lg:flex-row lg:items-end lg:gap-16 xl:gap-24">
               <h1 className="flex-1 text-balance text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.05] tracking-tight text-white">
                 <MotsReveles lignes={HERO.titre} pas={45} />
@@ -277,10 +279,6 @@ export default function Home() {
                 priority
               />
             </div>
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-y-0 right-0 z-0 w-[140px] hidden lg:block bg-gradient-to-l from-neutral-950 to-transparent"
-            />
           </div>
         </section>
 
