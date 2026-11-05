@@ -1,0 +1,135 @@
+/* ══════════════════════════════════════════════════════════════════════
+   L'ACCUEIL — décalque d'agent-ai-v1.21st.app (05/11/2026)
+
+   Relevé par outils/relever.sh (HTML rendu + CSS compilé de la référence).
+   Tout le reste de la page est en utilitaires Tailwind recopiés tels quels
+   depuis le balisage de la référence : ce fichier ne porte que ses
+   utilitaires MAISON, préfixés `aa-` pour ne rien toucher ailleurs.
+
+     fond de page          #0a0a0a (neutral-950), main #0B0C0E
+     lueur des sections    radial-gradient(120% 80% at 50% 0, #ffc8960e, #0000 60%)
+     filets                rgba(255,255,255,.08) ; cartes .02 ; bordures fortes .12
+     défilement            30 s linéaire, écart 3rem → 5rem dès 768 px,
+                           fondus de 80 px (gauche) et 80 → 128 px (droite)
+     cadre des captures    rayon 20, verre neutral-800/40, liseré conique
+     police                Geist 400/500 (app/_polices/geist-accueil.ts)
+
+   Supprimer ce fichier et components/accueil-v3/ supprime la page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* L'accueil porte sa propre barre (celle de la référence) : l'en-tête du
+   site s'efface sur cette page seulement — même mécanisme que /espace2. */
+html:has(.aa) body > header {
+  display: none;
+}
+
+.aa {
+  font-family: var(--font-geist-aa), ui-sans-serif, system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #fafafa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.aa .font-mono {
+  font-family: var(--font-geist-mono-aa), ui-monospace, monospace;
+}
+
+.aa-bg-gradient {
+  background-image: radial-gradient(120% 80% at 50% 0, #ffc8960e, #0000 60%);
+}
+
+/* ── le défilement ── */
+.aa-marquee {
+  -webkit-user-select: none;
+  user-select: none;
+  width: 100%;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+.aa-marquee-fade-left,
+.aa-marquee-fade-right {
+  z-index: 10;
+  pointer-events: none;
+  width: 80px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.aa-marquee-fade-left {
+  left: 0;
+  background: linear-gradient(90deg, #0a0a0a 0%, #0a0a0af2 30%, #ffc89608 60%, #0000 100%);
+}
+.aa-marquee-fade-right {
+  right: 0;
+  background: linear-gradient(270deg, #0a0a0a 0%, #0a0a0af2 30%, #ffc89608 60%, #0000 100%);
+}
+.aa-marquee-track {
+  flex-shrink: 0;
+  align-items: center;
+  gap: 3rem;
+  min-width: 100%;
+  padding-right: 3rem;
+  animation: 30s linear infinite aa-marquee;
+  display: flex;
+}
+.aa-marquee-item {
+  opacity: 0.6;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s;
+  display: flex;
+}
+.aa-marquee-item:hover {
+  opacity: 1;
+}
+@media (min-width: 768px) {
+  .aa-marquee-track {
+    gap: 5rem;
+    padding-right: 5rem;
+  }
+  .aa-marquee-fade-right {
+    width: 128px;
+  }
+}
+@keyframes aa-marquee {
+  0% { transform: translate(0); }
+  /* la piste porte deux fois la liste ; le padding égal à l'écart rend la
+     boucle exacte (la référence saute d'un demi-écart à chaque tour) */
+  to { transform: translate(-50%); }
+}
+
+/* ── le cadre de verre des captures : liseré conique de la référence ── */
+.aa-cadre-lisere {
+  background: conic-gradient(
+    from 315deg at 50% 50%,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.03) 12%,
+    rgba(255, 255, 255, 0.03) 38%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.03) 62%,
+    rgba(255, 255, 255, 0.03) 88%,
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  padding: 1px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* la citation qui change : fadeIn .2s de la référence */
+.aa-fade-in {
+  animation: 0.2s ease-out aa-fade-in;
+}
+@keyframes aa-fade-in {
+  0% { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aa-marquee-track,
+  .aa-fade-in {
+    animation: none;
+  }
+}

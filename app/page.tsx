@@ -1,1533 +1,896 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { Fragment } from "react";
 import {
-  Cpu,
-  FileDown,
-  Layers,
-  Lock,
-  MapPin,
+  ArrowRight,
+  ArrowUpRight,
+  Banknote,
+  Check,
+  CheckCheck,
+  FileText,
+  Mail,
+  MessageSquare,
+  MessagesSquare,
+  Phone,
+  Plug,
+  Play,
+  Search,
+  UserRoundSearch,
 } from "lucide-react";
-import PageShell from "@/components/PageShell";
-import { MODELES } from "@/components/modeles/donnees";
-import PageMotion from "@/components/PageMotion";
+import { geistAccueil, geistMonoAccueil } from "./_polices/geist-accueil";
+import "@/components/accueil-v3/accueil.css";
 import {
-  BandeauOutils,
-  Chevron,
-  EmblemeEurope,
-  MaqPrixConnu,
-  MaqJournal,
-  MaqLocal,
-  MaqValidation,
-} from "@/components/offres/MediaMoteurs";
-import PortesHover from "@/components/offres/PortesHover";
-import FondSilk from "@/components/accueil/FondSilk";
-import FriseDeroule from "@/components/accueil/FriseDeroule";
-import TableauEntrees from "@/components/accueil/TableauEntrees";
-import { SecteursCartes } from "@/components/accueil/SecteursCartes";
-import { CARTES_SECTEURS } from "@/lib/secteurs-accueil";
-import TexteRevele from "@/components/accueil/TexteRevele";
+  AGENTS,
+  AGENTS_INTRO,
+  APPEL,
+  AUDIT,
+  CHIFFRES,
+  CHIFFRES_INTRO,
+  DEMO,
+  DONNEES,
+  ETAPES,
+  ETAPES_INTRO,
+  ETAPES_PIED,
+  FAQ_INTRO,
+  HERO,
+  LOGICIELS,
+  LOGICIELS_INTRO,
+  METIERS,
+  METIERS_INTRO,
+  NAV,
+  OUTILS,
+  PIED,
+  PRIX,
+  PRIX_INTRO,
+  SITUATIONS,
+  type Agent,
+} from "@/components/accueil-v3/textes";
+import {
+  Citations,
+  Compteur,
+  Faq,
+  MenuTelephone,
+} from "@/components/accueil-v3/interactifs";
+import { COURRIEL, LIEN_TELEPHONE } from "@/lib/reservation";
 import Apparition, {
   GroupeApparition,
   MotsApparition,
 } from "@/components/accueil/Apparition";
-import BentoChange, { type CarteBento } from "@/components/accueil/BentoChange";
-import CartesPreuve, {
-  type CartePreuve,
-} from "@/components/accueil/CartesPreuve";
-import CartesLueur, {
-  type CarteLueur,
-} from "@/components/accueil/CartesLueur";
-import { TuilesCatalogue } from "@/components/accueil/TuilesCatalogue";
-import { FlowButton } from "@/components/ui/flow-button";
-import { DecorHero, MotsReveles } from "@/components/ui/hero-section";
-import TeamShowcase from "@/components/ui/team-showcase";
-import { Drapeau } from "@/components/ui/drapeau";
-import {
-  MEMBRES,
-  EQUIPE_SURTITRE,
-  EQUIPE_CHAPO,
-  EQUIPE_PIED,
-} from "@/lib/equipe";
-import { FAMILLES, nomPaquet } from "@/lib/content";
+import { MotsReveles } from "@/components/ui/hero-section";
 
 /* ══════════════════════════════════════════════════════════════════════
-   / — la page d'accueil (30/07/2026)
+   / — LA PAGE D'ACCUEIL (05/11/2026)
 
-   4ᵉ page de référence : ocoya.com/affiliates. Teo voulait une home qui ne
-   ressemble à aucune autre page du site — or les trois références déjà
-   prises (la home, features/create, features/publish, integrations/[marque])
-   sont intégralement blanches, et la fiche /offres/payd rendait exactement
-   les dix mêmes sections que la version précédente de ce fichier.
+   Décalque 1:1 d'agent-ai-v1.21st.app (Teo : « reproduis-la exactement,
+   le design tu le copies ; le contenu, tu le refais »). Les classes de
+   chaque bloc sont celles du HTML rendu de la référence, dans l'ordre du
+   DOM, relevées par outils/relever.sh. Ses utilitaires maison sont dans
+   components/accueil-v3/accueil.css (préfixe `aa-`), ses textes réécrits
+   dans components/accueil-v3/textes.ts, avec la liste de ce qui remplace
+   ce qu'elle invente (faux clients, logos, prix, certifications).
 
-   /affiliates est la seule des références restantes à ALTERNER un monde
-   noir et un monde clair. C'est ce contraste qu'on reprend, et lui seul
-   rend la home reconnaissable au premier coup d'œil.
-
-   Relevé au pixel sur viewport 1440 :
-     hero noir #09090b, tout centré — pastille, H1 60/72 ls −1,8 sur 700 de
-     large, chapô 18/28,8, deux boutons r8 en 9/15, puis une rangée de faits
-     en 24 semibold qui défile ; halo circulaire de 1306 px à 5 % et filets
-     de vitesse horizontaux derrière le texte.
-     Sections claires : pastille 12/14,4 → H2 48/67,2 centré sur 600 →
-     chapô 18/28,8 sur 650 → contenu.
-
-   Écart assumé, demandé par Teo : « en plus développé ». La référence tient
-   en 7 sections, celle-ci en compte 11 — le bandeau d'outils, le catalogue
-   des douze moteurs, les articles et l'hébergement n'existent pas chez elle.
-
-   30/07 — les deux boutons « Audit gratuit » pointaient sur /audit, hérité
-   du code restauré. Or /audit est le DÉROULÉ du protocole, pas la page de
-   réservation : le header, lui, envoie sur /tarifs (entrée neutre « Commencer », 28/08). Deux boutons
-   du même nom menaient donc à deux endroits différents (Teo). Repointés.
-
-   Aucun chiffre inventé : la rangée du hero ne porte que des faits
-   vérifiables (le catalogue, l'échéance légale, le taux du Chèque TIC,
-   l'hébergement). Omega ne publie ni nombre de clients ni euros récupérés
-   tant qu'ils ne sont pas sourcés.
+   L'accueil précédent (fond clair, onze sections, 30/07 → 21/10) est dans
+   l'historique git de ce fichier ; ses composants components/accueil/*
+   restent en place, d'autres pages en importent une partie.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* 05/08 (Teo) — hero réécrit sur deux reproches précis.
-   1. « TPE », « Guadeloupe », « Antilles » : le hero enfermait l'offre dans un
-      département alors qu'elle vaut partout en France. Plus aucune mention
-      géographique ici, et plus de sigle de segment.
-   2. « Pas assez pro, que du générique, des phrases pour vendre » : l'ancien
-      titre — « ce qui se répète n'a plus à passer par vous » — sonnait bien et
-      ne disait rien. Un visiteur qui le lisait ne savait toujours pas ce que
-      fait le produit. Le nouveau nomme les deux tâches les plus reconnaissables
-      et le chapô décrit le mécanisme dans l'ordre où il se déroule : ça se
-      branche, ça rédige, ça attend votre accord. Chaque affirmation est
-      vérifiable ailleurs sur le site, aucune n'est une promesse de vente. */
-/* 3ᵉ correction (Teo) : la version précédente ne parlait que de CASHD et de
-   FRONTD — « tu parles de PAYD uniquement, je veux un texte qui parle des
-   paquets ». Le hero couvre désormais les quatre qui s'installent, dans le
-   même ordre que le catalogue plus bas : impayés (CASHD), clients sans
-   nouvelles (RELOAD), demandes reçues (FRONTD), factures fournisseurs (FILED).
-   La phrase de validation reste : c'est ce qui distingue l'offre d'un envoi
-   automatique, et elle vaut pour les quatre. */
-/* 07/08 (Teo) — nouveau titre et nouveau chapô, fournis tels quels. Le hero
-   n'énumère plus les quatre paquets : il ouvre sur la promesse (continuité,
-   rigueur, contrôle) et laisse le détail des quatre tâches à la section
-   catalogue plus bas. La 3ᵉ correction ci-dessus ne décrit donc plus le texte
-   en place ; elle reste là pour la raison qui l'avait motivée — ne pas
-   réduire l'offre à un seul paquet — qui vaut toujours si le hero réénumère
-   un jour. La pastille, elle, cite encore les trois familles. */
-/* 10/09/2026 — la pastille et le chapô changent de registre, le TITRE reste
-   celui de Teo (07/08).
-
-   Pourquoi. Chacun des quatre paquets a désormais sa propre vitrine, qui
-   argumente mieux que cette page ne le fera jamais : elle est entière sur un
-   seul métier. Répéter ici « relances, réponses et classement » mettait deux
-   pages en concurrence sur la même requête — et laissait sans réponse la
-   question que pose vraiment un visiteur arrivé du pied de page d'une
-   vitrine : « qui est derrière, et que faites-vous d'autre ? »
-
-   L'ancien chapô ne répondait ni à l'une ni à l'autre : « systèmes
-   intelligents », « rigueur, continuité et contrôle », « libérer du temps à
-   forte valeur ajoutée » auraient tenu sur le site de n'importe quelle
-   agence. Le nouveau nomme l'objet fabriqué et sur quoi il se branche —
-   193 signes ramenés à 145, sous le budget d'un texte d'appel.
-
-   Ce qui n'y figure PAS, volontairement : l'argument « les quatre systèmes
-   se parlent ». Personne n'achète un écosystème ; il se joue dans l'espace
-   client, une fois le premier module installé. */
-/* 14/09 (Teo) — nouvelles phrases choisies pour le hero. Le titre tient sur
-   deux lignes voulues (une par phrase), d'où le tableau. */
-/* ══════════════════════════════════════════════════════════════════════
-   16/09/2026 (l'associé) — « le texte de la page d'accueil ne rend pas
-   bien sur tel, améliore-le ou change-le sur la version tel ».
-
-   Relevé à 390 px avant de toucher : le titre tombait sur CINQ lignes
-   (165 px à lui seul), avec deux coupes malheureuses — « ce qui les
-   fait / travailler ensemble » —, le chapô sur trois lignes de vingt
-   mots, et la sous-ligne laissait « 30 minutes. » orpheline sur la
-   deuxième. Près de mille pixels de texte avant la première image.
-
-   Les trois phrases ont donc une version courte, et LES DEUX VERSIONS
-   SONT DANS LE DOM — c'est la règle déjà posée pour le chapô le 15/09 :
-   du texte pèse trois cents signes, alors qu'un rendu conditionnel en
-   JavaScript ferait clignoter la phrase au premier rendu, sur la
-   première chose que le visiteur lit.
-
-   CE QUI EST GARDÉ MOT POUR MOT : la première phrase du titre, qui est
-   de Teo (07/08). Seule la seconde raccourcit — « nous construisons ce
-   qui les fait travailler ensemble » devient « nous les faisons
-   travailler ensemble » : même promesse, trois mots de moins, une ligne
-   de gagnée. Et les trois réponses que Teo exige sur mobile (quoi, pour
-   qui, combien) restent toutes les trois : « quatre tâches » et « vos
-   outils actuels » pour le quoi, « PME et groupes multi-sites » pour le
-   pour qui, « tarif à l'usage, arrêté à l'audit » pour le combien.
-
-   21/10/2026 (Teo, « rends les textes de l'accueil plus faciles, c'est
-   encore trop compliqué à lire ») — passe de simplification sur toute la
-   page. Le vocabulaire de comité (levier, périmètre, poste, à blanc,
-   restituables, juridiction, réversibilité…) cède la place aux mots de
-   tous les jours, en phrases actives. Aucune promesse n'est retirée ni
-   ajoutée : chaque phrase dit la même chose qu'avant, plus simplement, et
-   les formules données validées (espace dédié, hébergé dans l'Union, le
-   strict nécessaire) restent. Le titre du bureau reprend celui du
-   téléphone, plus direct.
-   ══════════════════════════════════════════════════════════════════════ */
-const HERO = {
-  pastille: "Automatisation pour PME et groupes",
-  titre: [
-    "Vos équipes ont les outils.",
-    "Nous les faisons travailler ensemble.",
-  ],
-  titreTel: ["Vos équipes ont les outils.", "Nous les faisons travailler ensemble."],
-  chapoTel:
-    "Quatre tâches automatisées, sur vos outils actuels. Pour les PME et les groupes.",
-  sousTel: "Prix selon votre usage, fixé pendant un audit de 30 minutes.",
-  chapo:
-    "Nous concevons des systèmes sur mesure qui connectent vos directions, vos équipes, vos outils et vos données afin de fluidifier les opérations, automatiser les processus critiques et améliorer le pilotage de votre organisation — sans bouleverser votre environnement existant.",
-  /* 15/09/2026 (Teo, « sur mobile on comprend direct quoi, combien, pour
-     qui ») — le chapô de bureau fait 40 mots, six lignes à 390 px : le
-     bouton tombait sous la ligne de flottaison et le visiteur arrivait sur
-     une page qui ne répond à aucune des trois questions.
-
-     15/09, 2ᵉ passe (Teo : « dans les textes des pages on devrait
-     retrouver ces infos, pas une section spécialement pour ») — la
-     première version posait les trois réponses en TABLEAU sous le bouton,
-     un `<dl>` encadré de trois lignes « Quoi / Pour qui / Combien ». La
-     réponse y était, mais sous une forme que le reste du site n'emploie
-     nulle part : une fiche d'identité collée au hero, qui se lit comme un
-     encadré de notice et non comme la page. Les trois réponses sont donc
-     rentrées dans les DEUX phrases qui étaient déjà là — le chapô prend le
-     quoi et le pour qui, la sous-ligne du bouton prend le combien. Rien
-     n'est perdu, et il n'y a plus de bloc à entretenir.
-
-     Le bureau garde ses phrases : il a les trois réponses ailleurs
-     (colonne de droite, menu), et son chapô a 40 mots pour les moyens. */
-  chapoCourt:
-    "Pour les PME et les groupes : on relance les impayés, on répond aux demandes, on fait revenir les anciens clients et on classe vos documents. Sur les outils que vous avez déjà.",
-  /* 16/09 (associé) — « Découvrir notre approche » devient COMMENCER, et
-     mène à /commencer au lieu de la section plus bas. Deux raisons, la
-     seconde étant la vraie : l'intitulé promettait une lecture quand le
-     visiteur est venu pour agir, et le bouton de la barre dit déjà
-     « Commencer » — deux mots pour un même geste, sur le même écran,
-     faisaient hésiter. Un seul mot, une seule destination. */
-  bouton: "Commencer",
-  sous: "Identifions les leviers à plus fort impact pour votre organisation.",
-  /* le COMBIEN. Pas de montant : depuis le 15/09 le site n'affiche plus de
-     grille, le tarif est arrêté à l'audit sur les volumes réels. Ce qu'on
-     donne est ce qui se vérifie — la base de calcul et le délai. */
-  sousCourt:
-    "Le prix dépend de vos volumes. On le fixe ensemble pendant un audit de 30 minutes.",
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  title: "Omega.AI | Des agents IA pour votre entreprise",
+  description:
+    "Relances, demandes clients, documents, clients inactifs : des agents IA qui travaillent sur vos outils actuels, sous votre validation. Audit de 30 minutes offert.",
 };
 
-/* 14/09 (Teo, soir) — le hero s'installe désormais mot à mot, mouvement
-   repris du composant qu'il a collé (`components/ui/hero-section.tsx`, qui
-   porte le relevé et les écarts). Il a tranché la seule question qui
-   changeait le travail : le hero RESTE clair — même nuancier Silk, même
-   maquette, même plancher de lisibilité —, on ne lui prend que
-   l'animation.
-
-   La cadence est calculée, pas posée à l'œil. La référence étale la
-   sienne sur 6 s ; c'est un écran de démonstration. Ici la pastille part
-   à 0, le titre enchaîne mot à mot, et le chapô entame sa montée quand il
-   reste trois mots au titre — les deux se recouvrent, sinon on regarde un
-   blanc. Tout est en place à 2,1 s.
-
-   Le chapô, le bouton et la sous-ligne arrivent d'un BLOC. Les peindre
-   mot à mot aussi (la référence le fait) portait la cascade à 5 s pour un
-   paragraphe de 40 mots que personne ne lit à cette vitesse. */
-const PAS_MOT = 70;
-const CADENCE = {
-  /* La pastille arrive d'un BLOC, là où la référence peint aussi sa
-     sur-ligne mot à mot. La raison est sa forme : c'est une PILULE, avec
-     un contour, un fond et un flou d'arrière-plan. Mot à mot, on regarde
-     pendant une demi-seconde une gélule vide qui se remplit. La
-     référence, elle, n'a qu'un texte nu à cet endroit. */
-  pastille: 0,
-  titre: 220,
-  chapo: 1000,
-  bouton: 1160,
-  sous: 1280,
+const COULEURS = {
+  green: { texte: "text-green-400", pastille: "bg-green-500/10 border-green-500/20" },
+  purple: { texte: "text-purple-400", pastille: "bg-purple-500/10 border-purple-500/20" },
+  orange: { texte: "text-orange-400", pastille: "bg-orange-500/10 border-orange-500/20" },
+  blue: { texte: "text-blue-400", pastille: "bg-blue-500/10 border-blue-500/20" },
 };
 
-/* 05/08 — la liste FAITS est partie avec la rangée défilante du hero, retirée
-   parce qu'elle faisait doublon avec la bande suivante. Elle est dans
-   l'historique git si le bandeau revient. */
-
-/* Filets de vitesse du hero — positions figées (jamais d'aléatoire au
-   rendu, ça casserait l'hydratation). left/top en %.
-
-   30/07 — les largeurs étaient en PIXELS relevés sur viewport 1440. Sur un
-   téléphone de 390 px, un filet de 420 px traversait donc l'écran de bord à
-   bord : on ne lisait plus des stries mais des barres horizontales en
-   travers du titre (Teo). Elles sont désormais exprimées en vw — même
-   largeur qu'avant à 1440 (1 vw = 14,4 px), et de courtes stries partout
-   ailleurs. L'opacité, elle, est divisée sur petit écran (voir .o-trait). */
-/* 05/08 — le tableau TRAITS (filets de vitesse du hero nuit) et ses règles
-   de placement ont été retirés avec le hero qu'ils habillaient. Ils sont
-   dans l'historique git si le hero sombre revient un jour. */
-
-
-/* 07/08 (Teo) — les deux bénéfices sont réécrits, textes fournis tels quels.
-   Le second change aussi d'étiquette : « Charge » devient « Temps ».
-
-   Ces textes décrivent le résultat plutôt que le mécanisme. La cadence de
-   relance (J+3 / J+7 / J+21), l'arrêt sur règlement et le garde-fou des sept
-   jours ne sont donc plus énoncés ici — ils restent exposés sur la fiche
-   moteur correspondante, ce qui préserve la règle maison : toute affirmation
-   de cette page est vérifiable ailleurs sur le site. La note du 05/08 sur le
-   chiffre d'encours guadeloupéen tombe d'elle-même, le texte n'avançant plus
-   aucun chiffre.
-   11/09/2026 (Teo, sur une capture de son téléphone) — « réduis la longueur
-   des textes sur cette section, c'est trop long à lire spécialement sur
-   mobile ». Il avait le chiffre contre lui : mesurée à 390 px, la section
-   pesait 64 lignes vues, dont CINQ blocs de 5 à 7 lignes là où la méthode
-   vise trois. Les textes fournis le 07/08 sont donc raccourcis — de 213 et
-   218 signes à 110 et 120.
-
-   Ce qui a été coupé est l'ILLUSTRATION, jamais l'affirmation : la liste
-   d'exemples des verrous (facture déjà réglée, client qui a demandé
-   l'arrêt, horaire, plafond du jour) et les deux phrases de conclusion qui
-   reformulaient le bénéfice déjà énoncé par le titre de la carte. Les
-   douze verrous, eux, restent nommés ici ET détaillés dans la FAQ plus bas.
-   Une redondance est tombée au passage : le texte de la carte « Rien ne part
-   sans que vous l'ayez vu » rappelait la file de validation que son TITRE
-   énonce déjà — une ligne entière pour redire l'intitulé.
-   La règle maison tient toujours : toute affirmation de cette page est
-   vérifiable ailleurs sur le site. */
-const BENEFICES = [
-  {
-    label: "Trésorerie",
-    titre: "L'argent qu'on vous doit ne reste plus en attente.",
-    texte:
-      "Les relances partent au bon moment et s'arrêtent dès que le client paie.",
-    maquette: <MaqValidation />,
-  },
-  {
-    label: "Temps",
-    titre: "Vous retrouvez du temps dans vos journées.",
-    texte:
-      "Suivi, classement, réponses : tout se fait en coulisses. Vos équipes gardent la décision.",
-    maquette: <MaqJournal />,
-  },
-];
-
-/* 11/09/2026 (Teo) — la section passe au bento à cartes pointillées, qui
-   demande CINQ cartes là où `BENEFICES` n'en portait que deux. Les trois
-   ajoutées ne sont pas des arguments neufs : ce sont les résumés de trois
-   réponses de la FAQ, plus bas sur cette même page (le contrôle avant
-   envoi, les outils qu'on ne change pas, le poste unique mené jusqu'au
-   bout). Le détail reste dans la FAQ ; ici c'est l'annonce.
-
-   Les deux premières gardent leur texte d'origine ET leur maquette : ce
-   sont les deux seules cartes assez hautes pour la porter, et sans elles
-   la zone devenait cinq blocs de texte d'affilée.
-
-   L'ordre des `span` suit la grille de la source : 3+2 (la 6ᵉ colonne
-   reste libre pour le titre qui remonte), puis 4, puis 2+2. */
-const CARTES_CHANGE: CarteBento[] = [
-  {
-    titre: BENEFICES[0].titre,
-    texte: BENEFICES[0].texte,
-    maquette: BENEFICES[0].maquette,
-    span: "lg:col-span-3 lg:row-span-2",
-  },
-  {
-    titre: BENEFICES[1].titre,
-    texte: BENEFICES[1].texte,
-    maquette: BENEFICES[1].maquette,
-    span: "lg:col-span-2 lg:row-span-2",
-  },
-  {
-    titre: "Rien ne part sans que vous l'ayez vu.",
-    texte:
-      "Douze vérifications avant chaque envoi. Si une seule bloque, rien ne part.",
-    span: "lg:col-span-4",
-  },
-  {
-    titre: "Vous ne changez pas de logiciel.",
-    texte:
-      "Messagerie, tableur, agenda : tout se passe dans les outils que vous utilisez déjà.",
-    span: "lg:col-span-2",
-  },
-  {
-    titre: "Une tâche à la fois, menée jusqu'au bout.",
-    texte:
-      "On commence par celle qui vous coûte le plus cher. Les autres suivent.",
-    span: "lg:col-span-2",
-  },
-];
-
-/* ══════════════════════════════════════════════════════════════════════
-   À L'ÉCHELLE D'UN GROUPE (12/09/2026)
-
-   Teo : le lien va être envoyé à des directions de grands groupes du
-   département. La page, elle, était écrite pour l'autre bout du marché —
-   « un garage qui rate des appels », les prix publics à 59 € en clair,
-   « pour les dirigeants de TPE » dans le pied du blog. Rien n'y est faux ;
-   c'est le registre qui disqualifie avant qu'on ait lu l'offre.
-
-   POURQUOI UNE SECTION, PAS UNE REFONTE. Les deux publics doivent tenir sur
-   la même page : le prix public est ce qui fait vendre sans rendez-vous, et
-   il ne bouge pas d'ici. Ce qui manquait, c'est la réponse aux quatre
-   questions qu'une direction pose AVANT de parler du produit — comment on
-   démarre sans risquer la production, ce qui empêche une automatisation
-   d'écrire une bêtise à un client, où vivent les données et comment on en
-   sort, et ce que ça impose au système d'information. Une par carte.
-
-   AUCUN ARGUMENT NEUF. Les quatre existaient déjà, dispersés : le rodage à
-   blanc et la bascule hebdomadaire dans la fiche VAULT, les douze verrous
-   dans la FAQ, le cloisonnement et l'export dans la section hébergement,
-   les outils inchangés dans le bento juste au-dessus. Ils sont ici REMONTÉS
-   et dits dans la langue d'un comité de direction — un périmètre, un
-   journal opposable, une sortie prévue dès le départ.
-
-   CHAQUE CARTE MÈNE À SA PREUVE, et les quatre destinations sont
-   distinctes : c'est la seule façon de tenir le registre. Une direction qui
-   lit « journal que personne ne modifie » clique pour vérifier ; si le lien
-   la ramène là d'où elle vient, l'argument tombe.
-
-   CE QUI N'Y EST PAS, faute d'être vrai aujourd'hui : l'entité qui signe, le
-   contrat de sous-traitance RGPD, l'engagement de niveau de service. Ce sont
-   les trois premières questions d'un juriste de groupe et aucune n'a de
-   réponse écrite. Elles ne s'inventent pas ici.
-   ══════════════════════════════════════════════════════════════════════ */
-const GROUPES: CarteLueur[] = [
-  {
-    label: "Déploiement",
-    titre: "On commence petit, jamais par tout le groupe.",
-    texte:
-      "D'abord une filiale ou un service. Deux semaines d'essai sans rien envoyer, puis une tâche de plus chaque semaine.",
-    lien: { label: "Demander un audit", href: "/reserver" },
-  },
-  {
-    label: "Contrôle",
-    titre: "Ce qui est interdit ne peut pas partir.",
-    texte:
-      "Douze contrôles intégrés au système : un message interdit n'est jamais écrit, donc jamais envoyé.",
-    /* 15/09/2026 — la carte menait à « Ce que le système refuse »
-       (/offres/securite, la fiche VAULT). Les deux paquets compris ne
-       s'affichent plus nulle part sur le site et aucune autre page ne
-       détaille les douze contrôles : la carte reste SANS lien plutôt que
-       d'envoyer vers une page qu'on ne montre plus, ou de renvoyer le
-       visiteur là d'où il vient. `lien` est facultatif dans CartesLueur. */
-  },
-  {
-    label: "Données",
-    titre: "Séparées, en Europe, et toujours à vous.",
-    texte:
-      "Chaque entreprise a son espace, hébergé dans l'Union européenne. Si vous partez, on vous rend tout, puis on efface.",
-    lien: { label: "Où vont vos données", href: "/vos-donnees" },
-  },
-  {
-    label: "Intégration",
-    titre: "Vous gardez vos logiciels.",
-    texte:
-      "On travaille directement dans les outils que vous avez déjà. Rien à transférer.",
-    lien: { label: "Les outils compatibles", href: "/integrations" },
-  },
-];
-
-/* 05/08 (Teo, « réduis cette section ») — la frise passe de cinq colonnes à
-   quatre, et chaque texte de trois lignes à deux.
-
-   Deux étapes ont fusionné plutôt que d'être supprimées : « vous gardez la
-   main » (les douze verrous) et « on mesure, on ajuste » (le journal) ne sont
-   pas deux moments successifs du déroulé, ce sont les deux faces d'une même
-   étape — ce qui est vérifié avant l'envoi, et ce qui en est consigné après.
-   Aucune information ne se perd : les verrous restent détaillés dans la FAQ
-   et sur les fiches moteur, le journal dans la section « garanties ».
-
-   Le gain n'est pas que vertical. À cinq colonnes, la grille tombait sur
-   trois rangées en tablette avec un « 05 » seul sur la dernière, sans rien à
-   sa droite ; à quatre, elle se referme sur deux rangées pleines. */
-/* 07/08 (Teo) — le déroulé est réécrit, textes fournis tels quels. Il reste à
-   quatre étapes, donc la mise en grille décrite ci-dessus ne bouge pas ; en
-   revanche la fusion « verrous + journal » qu'elle justifiait n'a plus d'objet,
-   la 04 étant devenue « Pilotage ». Les douze verrous restent documentés dans
-   la FAQ et sur les fiches moteur, le journal dans la section « garanties » :
-   rien ne se perd, mais plus rien n'y renvoie depuis ici.
-
-   Chaque étape gagne un `sousTitre` : la source distingue le nom de l'étape
-   (« Diagnostic opérationnel ») de ce qu'elle produit (« Identifier les
-   processus à fort impact »), là où l'ancienne version fondait les deux en un
-   seul titre. */
-const ETAPES = [
-  {
-    n: "01",
-    titre: "Audit",
-    texte:
-      "On repère les tâches répétitives qui vous font perdre le plus de temps.",
-  },
-  {
-    n: "02",
-    titre: "Conception",
-    texte:
-      "On règle le système sur vos façons de faire. Rien de générique.",
-  },
-  {
-    n: "03",
-    titre: "Mise en route",
-    texte:
-      "On le branche sur vos outils, petit à petit.",
-  },
-  {
-    n: "04",
-    titre: "Suivi",
-    texte:
-      "Au début, vous contrôlez tout. On ajuste les règles avec vous.",
-  },
-];
-
-/* 07/08 → 15/09 — l'histoire du bloc financement, qui n'est plus là.
-   Il portait le Chèque TIC, avec l'incise « porté par la Région
-   Guadeloupe » remise par Teo le 07/08 : sans elle, un visiteur hexagonal
-   lisait une aide qui le concernait. Le 15/09, Teo a tranché plus court —
-   le dispositif sort de l'accueil (voir la première carte de GARANTIES).
-   Il reste dans la FAQ de /tarifs et dans son article de blog — la
-   section de /tarifs qui le portait a été supprimée le 15/09 au soir. */
-/* 11/09/2026 — les deux corps de 5 et 6 lignes sont ramenés à 3, et
-   l'encadré « accompagnement » disparaît : le type est désormais celui de
-   `CartesLueur`, qui n'a pas de fente pour lui. Ce qui a été retiré de la
-   carte « Données » (chiffrement, hébergement dans l'Union, cloisonnement en
-   base) est dit juste au-dessus, dans les six cartes de `PREUVES` — c'était
-   le même fait écrit deux fois à 300 px d'intervalle. */
-const GARANTIES: CarteLueur[] = [
-  {
-    /* 15/09/2026 — cette carte portait le CHÈQUE TIC (« jusqu'à 10 000 € »).
-       Décision de Teo : il sort de l'accueil. C'est une aide de la Région
-       Guadeloupe posée sur un accueil national — pour la quasi-totalité des
-       visiteurs, une promesse qui ne les concerne pas, et qui brouille le
-       « produit français » ([[produit-francais-jamais-guadeloupeen]]).
-       Il n'est pas retiré du site : il est dit dans la FAQ de /tarifs, sur
-       la ligne d'engagement de l'installation et dans son article de blog,
-       avec l'incise « Région Guadeloupe » qui reste obligatoire là où il
-       est cité. (La bande qui lui était consacrée sur /tarifs a elle aussi
-       été supprimée, le 15/09 au soir.) À la place, un argument qui vaut pour
-       tout le monde et tient le même rôle dans le titre de section
-       (« un investissement maîtrisé ») : le prix est connu avant qu'on
-       commence. Pour revenir en arrière, le texte et la maquette MaqCheque
-       sont intacts dans components/offres/MediaMoteurs.tsx. */
-    label: "Engagement",
-    titre: "Le prix est connu avant qu'on commence",
-    texte:
-      /* 15/09/2026 — la phrase disait « pour les indépendants, TPE et PME, les prix sont publics ». Le site n'affiche plus de barème : il estime sur les volumes saisis, et l'audit fixe le prix. Promettre un prix public sur l'accueil, c'est promettre un montant que plus aucune page ne porte. */
-      "L'audit mesure vos volumes. Le prix en découle, et il est écrit dans votre devis.",
-    lien: {
-      label: "Comment le prix se calcule",
-      href: "/tarifs",
-    },
-    maquette: <MaqPrixConnu />,
-  },
-  {
-    label: "Données",
-    titre: "Vos données restent les vôtres",
-    texte:
-      "Vous gardez vos outils. Le jour où vous arrêtez, tout vous est remis et effacé.",
-    lien: { label: "Pourquoi ce choix", href: "/blog/rgpd-donnees-locales" },
-    maquette: <MaqLocal />,
-  },
-];
-
-/* Les trois faits de la section « hébergement ». Aucun n'est une promesse :
-   le cloisonnement est une contrainte posée en base et prouvée par un jeu
-   d'invariants, le chiffrement et le coffre à secrets sont l'état réel de
-   l'installation, la réversibilité est déjà écrite dans les mentions
-   légales. Si l'un des trois cesse d'être vrai, il sort d'ici avant de
-   devenir un argument. */
-/* 07/08 (Teo) — les trois blocs sont réécrits, textes fournis tels quels, et
-   réordonnés : le lieu passe en premier, le cloisonnement et le chiffrement
-   fusionnent en deuxième, la réversibilité reste en troisième.
-
-   La règle ci-dessus tient toujours — rien ici n'est faux — mais les trois
-   textes sont désormais plus généraux que les précédents : « environnement
-   logique distinct » à la place de la contrainte d'unicité posée en base,
-   « exportées ou supprimées selon les conditions prévues contractuellement »
-   à la place de l'export en format ouvert et de l'effacement sans reste. Le
-   détail technique n'est pas perdu : il reste dans les mentions légales et
-   dans l'article « Pourquoi ce choix ». C'est le registre de cette section
-   qui change, pas les faits. */
-/* 11/09/2026 (Teo, « il y a un peu trop de texte sur la page d'accueil ») —
-   les trois paragraphes deviennent SIX faits d'une ligne, portés par
-   `CartesPreuve`. Rien n'est retiré : le lieu, la juridiction, le
-   chiffrement, le cloisonnement et la réversibilité disaient déjà ça, en
-   quatre à cinq lignes chacun. La sixième carte est nouvelle à l'écran mais
-   pas au fond — c'est la réserve sur l'IA, qui était en petit sous la carte.
-   Le détail contractuel (« selon les conditions prévues ») reste dans les
-   mentions légales ; une carte de fait n'est pas un contrat. */
-const PREUVES: CartePreuve[] = [
-  {
-    icone: <MapPin size={19} strokeWidth={1.6} />,
-    intitule: "Hébergement",
-    fait: "Francfort, Allemagne",
-  },
-  {
-    /* l'emblème de la section précédente : il vivait à 104 px en tête de
-       colonne, il tient le rôle d'icône à 22. */
-    icone: <EmblemeEurope taille={22} />,
-    intitule: "Droit applicable",
-    fait: "Union européenne",
-  },
-  {
-    icone: <Lock size={19} strokeWidth={1.6} />,
-    intitule: "Chiffrement",
-    fait: "Stockage et transferts",
-  },
-  {
-    icone: <Layers size={19} strokeWidth={1.6} />,
-    intitule: "Séparation",
-    fait: "Un espace par entreprise",
-  },
-  {
-    icone: <FileDown size={19} strokeWidth={1.6} />,
-    intitule: "Si vous partez",
-    fait: "Export ou effacement",
-  },
-  {
-    icone: <Cpu size={19} strokeWidth={1.6} />,
-    intitule: "Modèles d'IA",
-    fait: "Situés hors d'Europe",
-  },
-];
-
-const FAQ = [
-  {
-    q: "Il faut changer de logiciel ?",
-    a: "Non. On travaille dans ce que vous utilisez déjà : messagerie, tableur, WhatsApp, agenda, logiciel de facturation. Pas de compte à créer, pas de données à transférer : vos fichiers restent comme ils sont.",
-  },
-  {
-    q: "Qu'est-ce qui part sans que je le voie ?",
-    a: "Rien, sauf si vous le décidez. Chaque message attend votre accord, et douze vérifications sont faites juste avant l'envoi : facture déjà payée, client qui a demandé l'arrêt, message déjà envoyé récemment, horaire, nombre maximum par jour. Si une seule bloque, le message ne part pas.",
-  },
-  {
-    q: "On commence par combien de choses à la fois ?",
-    a: "Une seule, le plus souvent. Il y a quatre tâches possibles, mais on commence par celle qui vous coûte le plus cher (vous la choisissez, ou l'audit la désigne quand plusieurs services sont concernés), et on la mène jusqu'au bout. Les autres suivent si les résultats de la première le justifient.",
-  },
-  {
-    /* 28/08 — la réponse v3 (« un prix affiché ici ne voudrait pas dire
-       grand-chose ») niait la grille publique vers laquelle le CTA de
-       cette même page envoie désormais. Réécrite pour les deux mondes. */
-    q: "Combien cela coûte-t-il ?",
-    a: "Le prix dépend de ce qu'on traite pour vous chaque mois (factures lues, demandes reçues, relances envoyées) et du nombre de tâches en service. Vos volumes donnent votre palier sur la page Tarifs. L'installation est facturée à part, une seule fois. Quand plusieurs services valident, on mesure les volumes pendant l'audit et le devis en découle. Dans tous les cas, vous connaissez le prix avant que quoi que ce soit commence.",
-  },
-  {
-    q: "Où sont hébergées mes données ?",
-    a: "Dans un espace dédié à votre entreprise, chiffré et hébergé dans l'Union européenne, séparé de celui des autres clients. Les modèles d'IA ne reçoivent que le strict nécessaire à chaque tâche, jamais un fichier entier. Vous pouvez demander l'export complet ou la suppression à tout moment.",
-  },
-  {
-    q: "Je suis concerné par la facture électronique ?",
-    a: "Depuis le 1ᵉʳ septembre 2026, toutes les entreprises établies en France doivent pouvoir recevoir des factures électroniques. Pour l'envoi, c'est le 1ᵉʳ septembre 2027 pour les TPE et PME. Nous ne vendons pas de mise en conformité, mais l'audit vérifie votre fichier client (SIREN, adresses, mentions obligatoires) : c'est de là que viennent presque toutes les factures rejetées.",
-  },
-];
-
-/* 05/08/2026 — les cartes de la vitrine sont désormais les PAQUETS, pas les
-   moteurs. Les quatre qui s'installent tiennent exactement dans la grille de
-   quatre colonnes qui existait déjà (auparavant les quatre moteurs vedettes
-   sur douze) : aucune maille ne bouge.
-
-   15/09/2026 — les deux paquets compris, PULSE et VAULT, ne sont plus
-   affichés du tout : ni carte, ni lien, ni mention nommée. Ce qu'ils font
-   reste dit (l'état chaque matin, la validation avant envoi), mais comme une
-   garantie comprise, jamais comme un système de plus à découvrir. */
-const VEDETTES = ["CASHD", "OFFLOAD", "REPUT", "FILED"];
-
-const MOTEURS = FAMILLES.flatMap((f) => f.moteurs)
-  .filter((m) => VEDETTES.includes(m.system))
-  .sort((a, b) => VEDETTES.indexOf(a.system) - VEDETTES.indexOf(b.system));
-
-/* 07/08 (Teo) — nouvelles accroches des quatre cartes du catalogue, fournies
-   telles quelles, avec un sous-titre qui nomme l'objectif du système.
-
-   Elles sont définies ICI et pas dans `lib/content.ts` à dessein. Le champ
-   `benefit` des moteurs est lu à huit endroits — MotorCard, PepitesSection,
-   les trois gabarits d'offre, Publics, et la fiche /offres/[system] qui s'en
-   sert de pitch de repli. Le réécrire aurait changé six pages qu'on ne m'a
-   pas demandé de toucher. Cette table ne vaut donc que pour la vitrine ; le
-   reste du site continue de lire `benefit`.
-
-   Corollaire à connaître : une accroche modifiée ici ne suit pas ailleurs.
-   Le jour où le nouveau registre doit valoir partout, c'est `benefit` qu'il
-   faut réécrire, et cette table disparaît.
-
-   15/09/2026 (Teo) — « faut qu'on trouve des phrases plus pro et
-   crocheuses ; ils lisent ça, ils se disent : wtf, ils peuvent faire ça ».
-
-   Les huit textes précédents avaient le défaut exact que la doctrine
-   (OMEGA/DOCTRINE-TEXTES-SAAS.md) décrit : voix passive et produit absent
-   — « les échéances sont suivies », « les clients inactifs sont
-   identifiés ». Personne n'agit dans ces phrases, donc rien n'y étonne.
-   Chaque carte porte désormais un FAIT daté en intitulé, puis une phrase
-   qui dit comment, puis ce qui reste au lecteur.
-
-   AUCUN de ces faits n'est inventé pour la carte : les quatre sont repris
-   mot pour mot des pages produit, où ils ont déjà passé la relecture.
-     • CASHD  — lib/produits/relances.ts, PRINCIPE.titre (« À 7 h… ») et la
-       carte `relit` (« relit votre facturier chaque matin »).
-     • RELOAD — lib/produits/reprise.ts, HERO.chapo (le compte qui s'éteint,
-       vu « à la clôture ») et carteCarte.suite (lecture de nuit, silence
-       au-delà du délai).
-     • FRONTD — lib/produits/accueil.ts, HERO.titre (le meilleur titre du
-       parc, gardé intact) et APPORT (« répond dans la minute »).
-     • FILED  — lib/produits/factures.ts, HERO : « vous connectez une
-       messagerie », et le classement au bon dossier.
-
-   ⚠ FILED N'EST PAS LA CARTE DES FACTURES (Teo, 15/09, après une première
-   version qui disait « plus une seule facture ») : « on parle pas que des
-   factures, c'est tous les documents, peu importe le doc que l'entreprise
-   reçoit ; il sait lire et rédiger pour tout type de document ». Le paquet
-   s'appelle d'ailleurs « FILED · flux documentaires » dans lib/content.ts.
-   La facture fournisseur est un CAS, le plus démontrable — c'est celui que
-   tient toute la page /offres/factures-fournisseurs, qui reste, elle,
-   écrite au périmètre étroit (HT/TVA/TTC recoupés, journal d'achats). La
-   carte et la page ne disent donc pas la même largeur : à reprendre le jour
-   où la page s'élargit.
-
-   Deux garde-fous tenus : aucune promesse de résultat (on dit ce que la
-   machine FAIT, jamais ce que ça rapporte), et la validation humaine reste
-   écrite dans deux cartes sur quatre — c'est elle qui rend le reste
-   crédible. Les heures portent une espace fine insécable (U+202F), comme
-   partout dans le parc : un « 7 h » avec une espace ordinaire casse en
-   fin de ligne. */
-/* 15/09/2026 — chaque accroche porte DEUX longueurs. `texte` est celle de
-   bureau, inchangée ; `court` est servie sous 640 px, où la grille 2 × 2 se
-   referme en une colonne et où les 150 signes de la première prennent cinq
-   lignes. Ce n'est pas un résumé : on garde le VERBE (relit, écrit, classe)
-   et on laisse tomber la circonstance. La promesse est la même aux deux
-   longueurs — c'est la règle de la doctrine. */
-const ACCROCHES_VITRINE: Record<
-  string,
-  { objectif: string; texte: string }
-> = {
-  CASHD: {
-    objectif: "À 7 h, vos relances sont déjà écrites.",
-    texte:
-      "Il vérifie vos factures chaque matin. Vous choisissez les relances à envoyer.",
-  },
-  OFFLOAD: {
-    objectif: "Un client qui ne revient plus, vous le voyez avant la clôture.",
-    texte:
-      "Chaque nuit, il repère les clients qui ne donnent plus de nouvelles.",
-  },
-  REPUT: {
-    objectif: "Une demande reçue à 21 h obtient sa réponse à 21 h.",
-    texte:
-      "Il lit le message dès qu'il arrive et répond dans la minute.",
-  },
-  FILED: {
-    objectif: "Vos équipes ne recopient plus aucun document.",
-    texte:
-      "Il lit chaque document, le range et prépare la réponse.",
-  },
+const ICONES_AGENTS = {
+  encaissements: Banknote,
+  demandes: MessageSquare,
+  clients: UserRoundSearch,
+  documents: FileText,
 };
+const ICONES_ETAPES = [Search, Plug, CheckCheck];
 
-/* ——— en-tête de section, commun à toutes les sections claires ——— */
-/* ══════════════════════════════════════════════════════════════════════
-   LES TROIS PORTES (10/09/2026)
+function IconeAgent({ id, className }: { id: string; className?: string }) {
+  const I = ICONES_AGENTS[id as keyof typeof ICONES_AGENTS];
+  return <I className={className ?? "w-4 h-4"} />;
+}
 
-   La section qui manquait. La vitrine présentait quatre paquets et rien
-   d'autre — or Omega vend aussi le sur-mesure et les sites, qui sont
-   aujourd'hui ce qui paie. `/offres/sur-mesure` n'était atteignable que par
-   un lien en bas de /offres (et n'est même pas dans le sitemap) ; les vingt
-   et un modèles de sites vivaient derrière un onglet « Tarifs ». Un visiteur
-   pouvait donc parcourir l'accueil entière sans apprendre que ces deux
-   choses existent.
-
-   Elles ne sont pas un lot de consolation : ce sont les deux offres qui
-   EXIGENT l'audit et l'écriture des règles. Les paquets, eux, ont désormais
-   leur propre vitrine et n'ont plus besoin qu'on plaide pour eux ici.
-
-   Aucun chiffre inventé : le compte vient de MODELES.length, compte réel de
-   components/modeles, et « nom de domaine compris » est ce qu'annonce déjà
-   /tarifs/site. */
-/* ══════════════════════════════════════════════════════════════════════
-   LA CITATION DU TEMPS D'ARRÊT (11/09/2026)
-
-   Elle n'est pas écrite pour l'accueil : c'est `FAMILLES.installes.proof`,
-   déjà publiée sur /offres. Lue ici plutôt que recopiée, pour qu'une
-   réécriture côté `lib/content.ts` ne laisse pas deux versions de la même
-   phrase en ligne. Le `type === "quote"` n'est pas décoratif : `Proof` est
-   une union, une famille peut porter des chiffres à la place.
-
-   Si la famille venait à passer aux chiffres, la section disparaît d'elle
-   même plutôt que d'afficher un trou — c'est voulu : la règle maison
-   interdit d'inventer une phrase pour meubler l'emplacement. */
-const PREUVE_INSTALLES = FAMILLES.find((f) => f.id === "installes")?.proof;
-const CITATION =
-  PREUVE_INSTALLES?.type === "quote" ? PREUVE_INSTALLES : null;
-
-const PORTES = [
-  {
-    nom: "Les systèmes prêts",
-    objectif: "Quatre tâches prêtes à l'emploi",
-    texte:
-      "Relances, demandes clients, documents fournisseurs, anciens clients. Réglées selon vos règles.",
-    lien: { label: "Voir les quatre", href: "/offres" },
-  },
-  {
-    nom: "Le sur-mesure",
-    objectif: "Ce qui n'existe pas encore",
-    texte:
-      "Un logiciel pour votre métier, ou un lien entre deux outils. Tout est défini avant de commencer.",
-    lien: { label: "Comment se fait le cadrage", href: "/offres/sur-mesure" },
-  },
-  {
-    nom: "Votre site",
-    objectif: "Un site qui présente bien votre entreprise",
-    texte:
-      `${MODELES.length} modèles à visiter. On écrit les textes pour votre métier, nom de domaine compris.`,
-    lien: { label: "Voir les modèles", href: "/modeles" },
-  },
-];
-
-function EnTete({
-  pastille,
-  titre,
-  chapo,
+/* le cadre de verre des captures : rayon 20, liseré conique, écran à 10/12 */
+function Cadre({
+  src,
+  alt,
+  ratio,
+  className = "object-cover object-top",
+  priority = false,
+  children,
 }: {
-  /* 12/09/2026 — un noeud et plus une chaine : le sourcil de la section
-     equipe porte le drapeau avant son intitule. Les onze autres appels
-     passent une chaine, qui reste un noeud valide. */
-  pastille: React.ReactNode;
-  titre: string;
-  /* 16/09/2026 — une seule longueur, servie à toutes les largeurs. La page
-     portait DEUX chapôs par section (bureau + téléphone) : relevée sur
-     scale.com, la référence donnée par Teo, un chapô de section tient en
-     17 à 38 signes, ou en UNE phrase de 145 au maximum. C'est la version
-     courte qui reste, celle qui avait déjà été écrite pour 375 px. */
-  chapo: string;
+  src: string;
+  alt: string;
+  ratio: string;
+  className?: string;
+  priority?: boolean;
+  children?: React.ReactNode;
 }) {
-  /* 16/09/2026 — le chapeau de section se peint comme le hero (Teo :
-     « fais en sorte que chaque section apparaisse, comme le texte de
-     notre première section »). Les trois `data-reveal` sont retirés : le
-     fondu GSAP de PageMotion et cette cascade jouaient sur les mêmes
-     nœuds, et deux animations d'entrée sur un même bloc se contrarient —
-     la leçon est déjà écrite en tête du hero et du texte révélé.
-
-     LES DÉLAIS. Le sourcil ouvre à zéro, le titre part 90 ms plus tard et
-     avance de 55 ms par mot — le hero est à 75, mais ses titres font
-     quatre mots quand ceux des sections en font jusqu'à dix : au même pas,
-     le dernier mot arriverait une demi-seconde après que l'œil l'a lu. Le
-     chapô ferme 140 ms après le dernier mot du titre, donc toujours APRÈS
-     lui, quelle que soit sa longueur — un chapô qui double son propre
-     titre se lit comme une erreur de cascade. */
-  const motsTitre = titre.split(/\s+/).filter(Boolean).length;
-  const DEPART_TITRE = 90;
-  const PAS_TITRE = 55;
-  const delaiChapo = DEPART_TITRE + PAS_TITRE * Math.max(motsTitre - 1, 0) + 140;
-
   return (
-    <GroupeApparition className="flex flex-col items-center text-center">
-      <Apparition>
-        <span className="o-pill o-pill--xs">{pastille}</span>
-      </Apparition>
-      <h2 className="o-h2 mt-4 max-w-[600px]">
-        <MotsApparition texte={titre} depart={DEPART_TITRE} pas={PAS_TITRE} />
-      </h2>
-      <Apparition
-        as="p"
-        className="o-lead mt-3 max-w-[650px] md:mt-4"
-        delai={delaiChapo}
-      >
-        {/* les deux longueurs vivent dans le DOM et s'arbitrent en CSS :
-            un rendu conditionnel en JavaScript ferait clignoter la phrase
-            entre le rendu serveur et l'hydratation. */}
-        {chapo}
-      </Apparition>
-    </GroupeApparition>
+    <div className="relative w-full overflow-hidden rounded-2xl">
+      <div className="relative w-full" style={{ aspectRatio: ratio }}>
+        <div className="absolute inset-0 rounded-[20px] p-1 md:p-1.5 bg-neutral-800/40 backdrop-blur-md overflow-hidden">
+          <div className="aa-cadre-lisere pointer-events-none absolute inset-0 z-50 rounded-[20px]" />
+          <div className="relative flex h-full w-full overflow-hidden rounded-[10px] md:rounded-[12px] bg-neutral-950">
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              priority={priority}
+              sizes="(min-width: 1280px) 1240px, 100vw"
+              className={className}
+            />
+            {children}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
-/* 15/09 — l'accueil prenait tout son metadata du layout, canonique
-   comprise : il n'en avait donc aucune, comme 26 autres pages. Elle est
-   posée ICI et pas dans le layout à dessein — une canonique posée en
-   haut se propagerait telle quelle à toutes les pages qui n'en
-   redéfinissent pas, et le site entier se déclarerait doublon de
-   l'accueil. Le titre et la description, eux, restent hérités. */
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-};
+function Defilement({ children }: { children: React.ReactNode }) {
+  return (
+    <section className="w-full bg-inherit overflow-hidden py-6 md:py-8">
+      <div className="aa-marquee">
+        <div className="aa-marquee-fade-left" />
+        <div className="aa-marquee-fade-right" />
+        <div className="aa-marquee-track">
+          <Fragment key="a">{children}</Fragment>
+          <Fragment key="b">{children}</Fragment>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Logo() {
+  return (
+    <>
+      <Image src="/logo-pegase-blanc.png" alt="" width={22} height={22} />
+      <span className="text-lg font-medium">Omega</span>
+    </>
+  );
+}
+
+function Article({ a }: { a: Agent }) {
+  const c = COULEURS[a.couleur];
+  return (
+    <article
+      id={a.id}
+      className="relative rounded-2xl border border-white/[0.06] bg-neutral-950/50 p-6 md:p-10 overflow-hidden scroll-mt-24"
+    >
+      <div className={`inline-flex items-center gap-1.5 mb-6 px-2.5 py-1 rounded-md border ${c.pastille}`}>
+        <div className={c.texte}>
+          <IconeAgent id={a.id} className="w-3.5 h-3.5" />
+        </div>
+        <span className={`text-xs font-medium ${c.texte}`}>{a.onglet}</span>
+      </div>
+      <h3 className="text-2xl md:text-4xl font-normal text-white mb-4 tracking-tight leading-tight max-w-2xl">
+        {a.titre}
+      </h3>
+      <p className="text-base md:text-lg text-white/55 mb-6 leading-relaxed max-w-2xl">{a.texte}</p>
+      <Link
+        className="inline-flex items-center gap-1.5 mb-8 px-4 py-2 rounded-lg bg-white text-neutral-950 text-sm font-medium hover:bg-neutral-200 transition-colors"
+        href={a.lien}
+      >
+        {a.bouton}
+        <ArrowRight className="w-4 h-4" />
+      </Link>
+      <Cadre src={a.image} alt={a.alt} ratio="1240/724" />
+    </article>
+  );
+}
+
+/* deux sceaux de même poids que les badges de conformité de la référence */
+function Sceau({ haut, bas }: { haut: string; bas: string }) {
+  return (
+    <div className="relative shrink-0 w-[148px] h-[148px]">
+      <svg viewBox="0 0 148 148" className="absolute inset-0 w-full h-full" aria-hidden>
+        <circle cx="74" cy="74" r="72" fill="rgba(255,255,255,0.02)" stroke="rgba(255,255,255,0.14)" />
+        <circle cx="74" cy="74" r="60" fill="none" stroke="rgba(255,255,255,0.08)" strokeDasharray="2 4" />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-center">
+        <span className="text-[26px] font-medium tracking-tight text-white/90 leading-none">{haut}</span>
+        <span className="text-[11px] text-white/50 leading-tight max-w-[90px]">{bas}</span>
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
   return (
-    <PageShell>
-      <PageMotion />
-      {/* 16/09 — la barre d'action flottante du téléphone est retirée
-          (Teo). Le composant `accueil/BarreAction.tsx` et ses règles
-          `.o-barre*` de globals.css, orphelins depuis, sont supprimés le
-          27/09. */}
-
-      <div className="offres">
-        {/* ════════ 1 · HERO CLAIR — clone du template Flux ════════
-            05/08/2026 (Teo, « exactement comme le screen de l'autre site,
-            avec exactement le même fond, tout pareil, juste tu changes les
-            textes — je veux le 1:1 »).
-
-            Référence : flux-nextjs-template.vercel.app — la démo officielle
-            de Cruip, et l'un des modèles présentés sur /modeles. Relevé au
-            style calculé sur viewport 1280, valeurs converties de lab() en
-            hexadécimal — voir le bloc `.o-flux-*` de globals.css, qui porte le
-            détail de chaque mesure.
-
-            Le hero nuit précédent (halo WebGL + filets de vitesse `.o-deco`)
-            disparaît d'ici ; TRAITS n'est plus lu par cette page. Le header
-            n'a rien demandé : il PRÉLÈVE la couleur du fond sous lui et bascule
-            seul en verre clair.
-
-            Deux écarts au 1:1 :
-            · un seul bouton, comme la référence : le second CTA (« Ce qu'il
-              fait chez vous ») n'a pas d'équivalent chez Flux ;
-            · la bande de faits est conservée sous la maquette, réencrée en
-              clair — Flux y met des logos de partenaires, qu'Omega n'a pas. */}
-        <section className="o-flux o-hero-anim relative overflow-hidden pb-0 pt-[48px] md:pt-[64px] lg:pt-[256px]">
-          {/* 11/09/2026 (Teo) — le fond n'est plus la photo de plis du
-              template Flux (`/fonds/plis-blancs.webp`) mais un nuancier
-              « Silk » peint en WebGL, recette fournie telle quelle (voir
-              `components/accueil/FondSilk.tsx`). Le CADRE ne bouge pas :
-              même `.o-flux-fond`, donc même masque radial à deux ellipses
-              — c'est lui qui fait naître la lumière au centre, et il est
-              relevé sur la référence, pas inventé. Seule la source change. */}
-          <div aria-hidden className="o-flux-fond">
-            <FondSilk className="o-flux-toile" />
-            {/* le plancher de luminosité sous le texte — voir le bloc
-                `.o-flux-voile` de globals.css, qui porte le relevé de
-                contraste et dit pourquoi il ne se retire pas */}
-            <div className="o-flux-voile" />
-          </div>
-
-          {/* trame, filets, points flottants et lueur au
-              pointeur — la couche vit ENTRE le nuancier et le texte, d'où
-              son z-index 1 face au z-10 de la colonne */}
-          <DecorHero />
-
-          {/* Les `data-reveal` du hero sont retirés : c'est la cadence
-              ci-dessus qui fait l'entrée maintenant.
-
-              Ils ne servaient déjà à rien sur grand écran — PageMotion ne
-              prend QUE ce qui est sous la ligne de flottaison — mais sur
-              un téléphone de 390 × 700 le bouton et sa sous-ligne tombent
-              dessous, et GSAP serait venu les rejouer par-dessus
-              l'animation CSS, chacun avec sa propre opacité. */}
-          <div className="o-wrap relative z-10 flex flex-col items-center text-center">
-            <div className="o-bloc-apparait" style={{ "--o-mot-d": `${CADENCE.pastille}ms` } as React.CSSProperties}>
-              {/* 05/08 (Teo) — le point de veille qui bat, repris de la
-                  référence, est retiré : « enlève le point orange ». */}
-              <span className="o-flux-pastille">{HERO.pastille}</span>
-            </div>
-            {/* Chaque ligne du titre reprend la cascade là où la
-                précédente l'a laissée : sans ça les deux phrases
-                partiraient ensemble et on lirait deux vagues parallèles au
-                lieu d'une seule qui traverse. */}
-            <h1 className="o-flux-h1 mt-5 max-w-[900px] md:mt-6">
-              {/* un seul <h1>, deux jeux de mots : la bascule est en CSS
-                  (`o-seul-tel` / `o-seul-bureau`), pas en JavaScript. */}
-              <span className="o-seul-tel">
-                <MotsReveles lignes={HERO.titreTel} depart={CADENCE.titre} pas={PAS_MOT} />
-              </span>
-              <span className="o-seul-bureau">
-                <MotsReveles lignes={HERO.titre} depart={CADENCE.titre} pas={PAS_MOT} />
-              </span>
-            </h1>
-            <p
-              className="o-bloc-apparait o-flux-lead my-2 max-w-[760px] md:my-4 lg:my-6"
-              style={{ "--o-mot-d": `${CADENCE.chapo}ms` } as React.CSSProperties}
-            >
-              {/* Les deux versions sont dans le DOM : c'est du texte, il
-                  pèse 300 signes, et un rendu conditionnel en JavaScript
-                  ferait clignoter la phrase au premier rendu. */}
-              <span className="o-seul-tel">{HERO.chapoTel}</span>
-              <span className="o-seul-bureau">{HERO.chapoCourt}</span>
-            </p>
-            <div className="mt-4 flex flex-col items-center md:mt-6 lg:mt-8">
-              {/* 14/09 : « Découvrir notre approche » menait à /commencer
-                  (l'aiguillage), puis à la section « le déroulé » de cette
-                  page. 16/09 : retour à /commencer, sur demande de
-                  l'associé — le visiteur qui appuie ici veut entrer, pas
-                  descendre d'un écran.
-
-                  `data-cta-hero` n'est pas décoratif : l'entête (components/
-                  Header.tsx) l'observe pour ne montrer SON bouton
-                  « Commencer » qu'une fois celui-ci sorti de l'écran. Deux
-                  boutons identiques visibles en même temps, c'est une
-                  hésitation offerte au visiteur. Retirer cet attribut ne
-                  casse rien — l'entête retombe simplement sur « toujours
-                  visible » — mais on perd l'effet. */}
-              {/* 22/09 (Teo) : la pastille noire du gabarit Flux cède la
-                  place au « Flow button » collé depuis 21st.dev
-                  (components/ui/flow-button.tsx) — trait fin au repos, le
-                  disque noir gonfle et les flèches se relaient au survol.
-                  Il reste un LIEN vers /commencer, garde `data-cta-hero` et
-                  la cascade d'apparition. Sa taille est calée sur l'ancien
-                  bouton (52 px de haut, 16 px de corps). */}
-              <FlowButton
-                href="/commencer"
-                data-cta-hero
-                text={HERO.bouton}
-                className="o-bloc-apparait h-[52px] px-9 text-[16px] tracking-[-0.01em]"
-                style={{ "--o-mot-d": `${CADENCE.bouton}ms` } as React.CSSProperties}
-              />
-              <span
-                className="o-bloc-apparait o-flux-sous"
-                style={{ "--o-mot-d": `${CADENCE.sous}ms` } as React.CSSProperties}
-              >
-                {/* même procédé que le chapô : les deux versions dans le
-                    DOM, la largeur choisit. */}
-                <span className="o-seul-tel">{HERO.sousTel}</span>
-                <span className="o-seul-bureau">{HERO.sousCourt}</span>
-              </span>
-            </div>
-          </div>
-
-          {/* la maquette, posée en bas de cadre et coupée par le bord comme
-              chez la référence — d'où `pb-0` sur la section.
-
-              15/09/2026 — c'est enfin NOTRE écran. Jusqu'ici la page ouvrait
-              sur `dashboard-hero.webp`, la capture 1:1 du gabarit Flux : un
-              tableau de bord d'hôtel en anglais, en dollars, avec des
-              réservations Booking.com. Teo l'avait assumée le 05/08 (« le
-              1:1 ») ; il a tranché l'inverse le 15/09 — la première image
-              d'un site qui vend du sur-mesure français ne peut pas être le
-              produit de quelqu'un d'autre.
-
-              La photo est prise sur l'espace client réel (pegase-dashboard,
-              écran /espace/debiteurs) alimenté par le jeu de démonstration
-              écrit en dur dans ce dépôt-là : aucune donnée client, que de la
-              fiction. La route de prise de vue est temporaire et n'est pas
-              restée dans le dépôt ; pour la refaire, voir
-              [[capture-reference-contenu-substitue]] et la même méthode que
-              `public/produits/relances/*`.
-
-              Nom de fichier neuf plutôt qu'écrasé : le CDN sert l'ancienne
-              image pendant des heures quand on réécrit un chemin existant.
-
-              27/09/2026 — `-v2` : la capture portait encore l'ancien signe
-              CASHD à côté du titre. Seul ce signe est redessiné dans l'image
-              (outils/logos-modules/signes.py), le reste de l'écran ne bouge pas. */}
-          <div data-reveal className="o-flux-maquette relative z-10">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/fonds/tableau-de-bord-v2.webp"
-              alt="L'espace client Omega : qui doit de l'argent, où en est la relance, et l'encours échu au total."
-              width={2160}
-              height={1350}
-            />
-          </div>
-
-          {/* 05/08 (Teo, « enlève ça vu qu'il y a déjà le même juste en bas »)
-              — la rangée de faits défilante qui fermait le hero est retirée :
-              elle faisait doublon avec ce qui suit. Le hero se termine donc sur
-              la maquette, dont le bas se fond — d'où `pb-0` sur la section. */}
-        </section>
-
-        {/* ════════ 2 · LES OUTILS ════════ */}
-        <section data-monde="clair" className="pb-[50px] pt-[70px]">
-          <div className="o-wrap">
-            <Apparition as="p" className="o-small text-center">
-              Fonctionne avec les outils que vous utilisez déjà
-            </Apparition>
-          </div>
-          <Apparition className="mt-8" delai={120}>
-            <BandeauOutils />
-          </Apparition>
-        </section>
-
-        {/* ════════ 3 · LE CATALOGUE — quatre cartes douces en 2 × 2 ════════
-            11/09/2026 (Teo) — le catalogue et les trois portes échangent
-            leur place. Il arrive donc juste après le bandeau d'outils, là
-            où se tenaient les trois façons de commencer (section 6
-            désormais). Ce qui change de lecture : le visiteur voit ce qui
-            s'installe avant qu'on lui demande par quelle porte entrer — le
-            choix de l'entrée ne se pose qu'une fois qu'on sait ce qu'il y a
-            à installer. */}
-        {/* Pas de `pb` : sur cette page chaque section porte SON écart, et
-            celle qui suit ouvre déjà sur `py-[110px]`. Le `pb-[110px]` que
-            cette section portait à sa place précédente cumulerait ici 220 px
-            de blanc sous les cartes — défaut relevé à la recette du 10/09,
-            très visible à 390 où il faisait une page vide entre les deux
-            sections. D'où le `pt-[40px]` seul, repris tel quel de la place
-            qu'occupaient les trois portes. */}
-        <section
-          id="catalogue"
-          data-monde="clair"
-          className="scroll-mt-24 pt-[40px]"
-        >
-          <div className="o-wrap">
-            <EnTete
-              pastille="CE QU'ON AUTOMATISE"
-              titre="Quatre tâches que vous n'avez plus à faire à la main"
-              chapo="Elles suivent vos règles, et rien ne part sans votre accord."
-            />
-            {/* 11/09/2026 — les quatre systèmes prennent la grille de
-                cartes douces du bloc `integrations-three` (cnblocks, via
-                21st.dev) : tuile du paquet et nom sur une ligne, l'objectif
-                en intitulé, l'accroche dessous, le lien calé en bas de carte.
-
-                Elle remplace la pile de cartes collantes posée le matin même
-                (`CarteCollante` / `ContainerScroll` — le fichier
-                components/accueil/PileCartes reste, il n'est simplement plus
-                appelé ici). Les deux corrigeaient le même défaut : la grille
-                de QUATRE colonnes ne laissait à chaque carte que 285 px, de
-                quoi tenir un intitulé et deux lignes. Mais la pile prenait
-                quatre écrans de haut pour quatre produits, or le catalogue
-                est un carrefour, pas un argumentaire — chacun a désormais sa
-                propre vitrine pour ça. En 2 × 2, les quatre se voient d'un
-                seul regard, avec ~490 px chacune.
-
-                SECONDE PASSE DU 11/09, LE SOIR (Teo) : « c'est le même
-                design, juste les cartes sont faites avec ce composant ». Les
-                quatre cartes passent aux TUILES de `bento-grid-01`
-                (@avanishverma4, 21st.dev) — chacune porte désormais une
-                animation en boucle au-dessus de son intitulé, ce qui manquait
-                à la grille de cartes douces : elle était juste, mais immobile,
-                et la section se lisait comme un sommaire.
-
-                Ce qui n'a PAS bougé : la grille 2 × 2 (le chapô annonce quatre
-                leviers — deux tuiles hautes contre deux petites, comme sur
-                /offres, diraient que deux produits comptent plus), le filet
-                doré, les textes de `ACCROCHES_VITRINE`, et les quatre portes.
-                `components/ui/integrations-three.tsx` reste au dépôt, plus
-                personne ne l'appelle.
-
-                Les écarts au composant d'origine — dont le passage du blanc
-                sur noir à l'encre sur papier — sont documentés en tête de
-                components/accueil/TuilesCatalogue.tsx. */}
-            <Apparition className="mt-8 md:mt-16" delai={120}>
-            <TuilesCatalogue
-              tuiles={MOTEURS.map((m) => ({
-                system: m.system,
-                nom: nomPaquet(m.system),
-                /* Le sigle seul ne dit rien à un visiteur qui arrive :
-                   l'intitulé nomme l'objectif avant le détail. Repli sur
-                   `title` / `benefit` si un système entrait dans VEDETTES
-                   sans avoir d'accroche vitrine. */
-                objectif: ACCROCHES_VITRINE[m.system]?.objectif ?? m.title,
-                texte: ACCROCHES_VITRINE[m.system]?.texte ?? m.benefit,
-                href: `/offres/${m.slug}`,
-              }))}
-            />
-            </Apparition>
-            {/* 07/08 (Teo) — deux libellés étaient proposés : « Découvrir les
-                autres systèmes » et « Voir l'ensemble de nos solutions ». Le
-                premier disait vrai tant que /offres montrait DEUX paquets de
-                plus que l'accueil.
-
-                15/09/2026 (Teo) — PULSE et VAULT ne s'affichent plus : /offres
-                porte les mêmes quatre systèmes, plus le sur-mesure et la mise
-                en place. « Les autres systèmes » promettrait donc un catalogue
-                qui n'existe pas ; le bouton nomme la destination. */}
-            <Apparition className="mt-10 flex justify-center" delai={180}>
-              <Link href="/offres" className="o-btn o-btn--ghost">
-                Voir toutes les offres
-                <Chevron taille={13} />
-              </Link>
-            </Apparition>
-          </div>
-        </section>
-
-        {/* ════════ 3 bis · À L'ÉCHELLE D'UN GROUPE — quatre cartes ════════
-            12/09/2026. Le détail du pourquoi est sur la constante `GROUPES`.
-
-            LA PLACE — remontée ici le 15/09/2026. Elle a d'abord fermé le
-            bloc de confiance (après les garanties, 13/09) ; elle ouvre
-            désormais l'argumentaire, juste après le catalogue. Arbitrage de
-            Teo : l'accueil parle d'ABORD aux organisations — celles où
-            plusieurs services valident, qui achètent l'audit et le
-            sur-mesure — et les prix publics comme les sites viennent
-            ensuite. Un visiteur voit donc ce qui s'installe, puis
-            immédiatement que ça tient à l'échelle d'un groupe : périmètre
-            d'essai, interdits en base, données cloisonnées, système
-            d'information qui ne bouge pas.
-
-            L'ÉCART : `pt-[110px]` et pas de `pb`. Le catalogue qui précède
-            ne porte aucun écart bas, et la section suivante ouvre déjà sur
-            `py-[110px]` — un `pb` ici cumulerait 220 px de blanc, défaut
-            déjà relevé à cette place à la recette du 10/09.
-
-            LE COMPOSANT est celui des garanties (`CartesLueur`), pris à
-            quatre cartes au lieu de deux : sa grille est en deux colonnes,
-            elle se referme donc en 2 × 2 sans un réglage. Aucune maquette
-            n'est passée — ces cartes-là portent des faits contractuels, pas
-            des captures d'interface. À cette place, elles ne voisinent plus
-            avec une autre rangée à lueur : les garanties sont loin en bas. */}
-        {/* RYTHME MOBILE (15/09) — les onze sections de cette page portent
-            leur écart en `110px`, une valeur relevée pour la colonne 1200.
-            À 390 px elle fait onze fois 110 px de blanc, soit 1 200 px de
-            page vide sur 19 300 : la page paraît deux fois plus longue
-            qu'elle n'est, et chaque section arrive après un trou. D'où le
-            `62px md:110px` posé sur les onze : l'écart de bureau est
-            conservé au pixel au-dessus de `md`, là où il a été recetté. */}
-        <section data-monde="clair" className="pt-[62px] md:pt-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="POUR LES GROUPES"
-              titre="Plusieurs services ? On avance pas à pas."
-              chapo="Un essai sur une partie de l'entreprise, des règles écrites, une sortie prévue dès le début."
-            />
-            <Apparition className="mt-8 md:mt-16" delai={120}>
-              <CartesLueur cartes={GROUPES} />
-            </Apparition>
-          </div>
-        </section>
-
-        {/* ════════ 4 · PAR SECTEUR — six cartes à photo ════════
-            25/09/2026 (Teo : « un composant qui présente avec photo les
-            secteurs et leurs problèmes qu'on résout »). Remplace les neuf
-            situations de `CasColonnes` : elles disaient déjà « chez qui ça
-            arrive », mais en cas généraux écrits avant que chaque métier ait
-            son logiciel. Chaque carte mène maintenant à sa page /secteurs.
-            Composant : components/accueil/SecteursCartes (21st.dev,
-            `project-card`) ; données : lib/secteurs-accueil. Le même jour,
-            une première version à photos repliées qui s'ouvraient au survol
-            (`expanding-cards`) a été refusée : « un composant où on peut voir
-            toutes les photos, et comme ces visuels on comprend direct ».
-
-            La règle des neuf cas ne change pas : aucun client, aucun avis,
-            aucun chiffre de résultat — un métier, son problème, ce que le
-            logiciel en fait. `CasColonnes` et lib/cas-accueil restent au dépôt
-            (le premier sert aussi /offres/sur-mesure).
-
-            LA PLACE : remontée le 25/09/2026 (Teo : « place cette section à
-            la place d'une section du haut qui est moins importante »),
-            échangée avec le bento « ce que ça change ». Elle suit
-            désormais « Organisations » : ce qui s'installe partout, que ça
-            tient à l'échelle d'un groupe, puis le logiciel de chaque
-            métier — avant l'argumentaire. « Organisations » n'a pas bougé :
-            sa place derrière le catalogue est un arbitrage de Teo (15/09).
-            L'ÉCART : `py` et non plus `pb` seul — la section qui précède
-            (« Organisations ») n'a pas d'écart bas, c'est celle-ci qui le
-            porte, comme le bento avant elle. */}
-        <section data-monde="clair" className="py-[62px] md:py-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="PAR MÉTIER"
-              titre="Un logiciel pour chaque métier."
-              chapo="Six métiers, six logiciels. Chacun règle un problème précis."
-            />
-            <Apparition className="mt-8 md:mt-16" delai={120}>
-              <SecteursCartes cartes={CARTES_SECTEURS} />
-            </Apparition>
-            <Apparition className="mt-10 flex justify-center" delai={180}>
-              <Link href="/secteurs" className="o-btn o-btn--ghost">
-                Voir tous les secteurs
-                <Chevron taille={13} />
-              </Link>
-            </Apparition>
-          </div>
-        </section>
-
-        {/* ════════ 4 bis · L'ÉQUIPE — la mosaïque de portraits ════════
-            12/09/2026 (Teo) : « il faut qu'on crée une partie pour décrire
-            l'équipe derrière Omega, et mets un drapeau bien français à
-            côté. »
-
-            LA PLACE — échangée le 16/09/2026 à la demande de Teo avec
-            « les situations », qui la suivait et qui passe donc dessous.
-            Elle arrive maintenant DIRECTEMENT après le bento « ce que ça
-            change » : le produit vient d'être montré, on dit qui le pose,
-            puis les neuf situations montrent chez qui ça arrive. Avant cet
-            échange, les situations s'intercalaient entre le produit et
-            l'équipe. Rappel de son histoire : posée d'abord en bas du bloc
-            de confiance, remontée le 13/09 en échange d'« À l'échelle d'un
-            groupe » (elle-même remontée en 3 bis le 15/09). Ce qu'on perd
-            depuis ce premier déplacement, et qu'il faut savoir : elle ne
-            ferme plus le bloc de confiance (données, financement,
-            garanties), où elle répondait à la dernière objection, celle
-            qu'on ne pose pas à voix haute — à qui je parle quand ça coince.
-
-            25/09/2026 : elle suit maintenant « Par secteur », remontée à la
-            place du bento, qui passe juste sous elle.
-
-            L'ÉCART DU HAUT : la section qui précède (« Par secteur »,
-            avant le 25/09 le bento) porte son `py-[110px]`, celle-ci n'a
-            donc que son écart bas — inchangé,
-            les deux sections échangées portent exactement les mêmes
-            classes, l'échange ne déplace aucun blanc.
-
-            LE DRAPEAU est dans le sourcil (components/ui/drapeau.tsx), aux
-            teintes officielles #000091 / #E1000F. Agrandi le 14/09 (Teo :
-            « un drapeau un peu plus gros, qu'on voit qu'on est bien
-            français ») : 24 × 16 px au lieu de 15 × 10, dans un sourcil de
-            28 px — il y est donc plus haut que les capitales du texte, à
-            dessein. Il dit ce que la famille
-            des sites produits s'autorise — conception française, assistance
-            en français, droit français — et surtout PAS « hébergé en
-            France » : les données vivent à Francfort.
-
-            LE CONTENU est dans lib/equipe.ts, avec les deux points qui y
-            restent à confirmer (le rôle de Teo, la quatrième fiche) et les
-            trois portraits à déposer dans /public/equipe/. Sans eux la
-            mosaïque rend les initiales : la page ne se troue pas. */}
-        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille={
-                <>
-                  <Drapeau className="h-[16px] w-[24px] shrink-0 rounded-[3px]" />
-                  {EQUIPE_SURTITRE}
-                </>
-              }
-              titre="Un seul interlocuteur, de l'audit au suivi."
-              chapo={EQUIPE_CHAPO}
-            />
-            <Apparition className="mt-8 md:mt-14 lg:mt-16" delai={120}>
-              <TeamShowcase membres={MEMBRES} pied={EQUIPE_PIED} />
-            </Apparition>
-          </div>
-        </section>
-
-        {/* ════════ 4 ter · CE QUE ÇA CHANGE — le bento à cartes ════════
-            11/09/2026 (Teo) : « la section sur le screen doit être
-            remplacée par ce composant ». Les deux colonnes symétriques
-            (maquette au-dessus, label, titre, texte — deux fois) laissent
-            la place au bento pointillé repris de 21st.dev. L'origine, ce
-            qui en a été retiré (dont cinq liens sortants publicitaires) et
-            les écarts sont dans l'en-tête de `BentoChange`.
-
-            Pas d'`EnTete` ici : ce composant porte son titre LUI-MÊME, et
-            en bas à droite. C'est le seul endroit de la page où l'ordre
-            s'inverse, et c'est précisément ce qu'on est venu chercher. 
-            LA PLACE — descendue le 25/09/2026 après l'équipe, en échange de
-            « Par secteur » (Teo : remonter les secteurs à la place d'une
-            section du haut moins importante). Écart bas seul désormais :
-            l'équipe qui précède porte déjà le sien. */}
-        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          {/* 16/09 — enveloppé et non repris de l'intérieur : ce bloc porte
-              son titre LUI-MÊME, en bas à droite, et c'est justement ce qui
-              en fait le seul endroit de la page où l'ordre s'inverse. Le
-              peindre mot à mot depuis ce coin-là se lirait comme une
-              cascade à l'envers ; il arrive donc d'un seul mouvement. */}
-          <Apparition>
-            <BentoChange
-              cartes={CARTES_CHANGE}
-              pastille="CE QUE ÇA CHANGE"
-              titre="Moins de tâches. Plus de temps. Plus de marge."
-              chapo="Ce qu'on fait pour vous, et ce que vous gardez en main."
-            />
-          </Apparition>
-        </section>
-
-        {/* ════════ 5 · COMMENT ÇA MARCHE — frise de quatre étapes ════════ */}
-        <section id="approche" data-monde="clair" className="scroll-mt-24 pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="LE DÉROULÉ"
-              titre="Comment ça se passe."
-              chapo="Quatre étapes, sans arrêter votre activité."
-            />
-            {/* 11/09/2026 — les quatre étapes passent de la grille plate à une
-                frise dont le rail se remplit au défilement (`FriseDeroule`,
-                repris de 21st.dev — l'origine et les écarts sont dans
-                l'en-tête du composant).
-
-                Ce que la grille ratait : à 1440 ses quatre colonnes se
-                lisaient d'un coup, donc comme quatre options simultanées,
-                alors que le déroulé est une SUITE — on ne déploie pas avant
-                d'avoir conçu. La frise remet l'ordre dans la lecture.
-
-                Le filet qui coiffait chaque colonne (05/08, en remplacement
-                des pastilles rondes jugées « trop amateur ») n'est pas
-                perdu : c'est devenu le rail lui-même, qui court d'un bout à
-                l'autre au lieu d'être coupé en quatre. Le numéro reste en
-                petit et en gris, en `tabular-nums`, comme avant. */}
-            <FriseDeroule etapes={ETAPES} />
-          </div>
-        </section>
-
-        {/* ════════ 6 · CE QU'ON FAIT — les trois portes ════════
-            10/09/2026. Posée d'abord juste après le bandeau d'outils, avant
-            tout argumentaire : c'est la première question d'un visiteur qui
-            arrive du pied de page d'une vitrine produit, et elle n'avait
-            aucune réponse sur cette page.
-
-            11/09/2026 (Teo) — échangée avec le catalogue, qui prend la 3e
-            place. Elle ferme désormais l'argumentaire : ce qui s'installe,
-            ce que ça change, comment ça se déroule, PUIS par où commencer.
-            La question reste posée avant les réserves (hébergement,
-            garanties), donc toujours dans le mouvement de la décision.
-
-            Le rendu est dans `PortesHover` — cartes `.o-card-soft` du
-            catalogue, plus une surbrillance qui GLISSE d'une porte à l'autre
-            au survol (reprise de la bibliothèque, voir l'en-tête du
-            composant). C'est ce glissement qui distingue cette rangée de
-            celle du catalogue plus haut : trois cartes qui s'allument chacune
-            dans leur coin se lisent comme trois produits, un pavé qui se
-            déplace se lit comme trois portes d'une même maison.
-
-            Aucun logo système : deux des trois portes n'en ont pas, et une
-            rangée où seule la première serait ornée se lit comme un défaut
-            d'alignement. */}
-        {/* À cette place le rythme s'inverse : la frise qui précède porte
-            déjà son `pb-[110px]`, et l'hébergement qui suit n'ouvre que sur
-            un `pb`. C'est donc à cette section de porter l'écart du bas —
-            `pb-[110px]`, comme le catalogue le faisait ici avant l'échange,
-            et pas de `pt` sous peine de cumuler 220 px sous la frise. */}
-        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="CE QU'ON FAIT"
-              /* Le titre a d'abord été « Un système prêt, un système à écrire,
-                 ou votre site. » : à 1440 il tombait sur trois lignes dont la
-                 dernière ne portait que « site. ». Les autres titres de la
-                 page tiennent en deux lignes ; celui-ci dit moins et laisse
-                 les trois cartes énumérer. */
-              titre="Trois façons de commencer."
-              chapo="Des tâches prêtes à l'emploi, du sur-mesure ou votre site. Les mêmes garanties pour les trois."
-            />
-            {/* 11/09/2026 (Teo) — la rangée de portes ne paraît qu'à partir
-                de `lg`. Sous ce seuil, elle et le tableau se rendaient tous
-                les deux en cartes empilées : six cartes pour trois offres,
-                mêmes noms, mêmes liens, 2 808 px de section à 390 px. Le
-                tableau, lui, devient ces cartes-là — c'est donc la rangée
-                qui s'efface, et sa phrase descend dans les cartes par
-                `textes`. Le détail est en tête de `TableauEntrees`.
-
-                Masqué ICI et pas dans `PortesHover` : le composant n'a pas à
-                connaître la page qui l'emploie, et il ne sert qu'ici. */}
-            <Apparition className="hidden lg:block" delai={120}>
-              <PortesHover portes={PORTES} />
-            </Apparition>
-
-            {/* 11/09/2026 — le tableau « laquelle pour moi ? ». Les trois
-                portes se posaient côte à côte et s'arrêtaient là ; un
-                visiteur venu du pied de page d'une vitrine produit a une
-                question de plus, et une seule. Le détail de la reprise et
-                l'origine de chaque valeur sont dans l'en-tête du composant.
-                Pas de nouvel `EnTete` : le titre de la section (« Trois
-                façons de commencer. ») coiffe déjà le tableau, et un
-                deuxième intertitre à trois lignes d'intervalle aurait coûté
-                plus de hauteur qu'il n'en aurait éclairci. */}
-            <TableauEntrees
-                textes={Object.fromEntries(PORTES.map((p) => [p.nom, p.texte]))}
-              />
-          </div>
-        </section>
-
-        {/* ════════ 7 · L'HÉBERGEMENT — où vivent physiquement les données ═══
-            05/08/2026 (Teo). Demandée d'abord « en bas », puis déplacée le
-            même jour au-dessus du catalogue. 16/08/2026 (Teo) — repassée
-            en dessous : « met la partie des systèmes avant la partie vos
-            données ».
-
-            Ce qui change de lecture. Le visiteur voit désormais ce qui
-            s'installe avant d'entendre où vivent les données : l'objection
-            du lieu ne se pose vraiment qu'une fois qu'il sait quelles
-            données il y aurait à héberger. Elle reste avant les garanties,
-            donc toujours dans le mouvement des réserves, pas reléguée en
-            fin de page.
-
-            Elle ne fait pas doublon avec la carte « Données » de la section 7,
-            qui répond à la question de la PROPRIÉTÉ — à qui appartiennent ces
-            données, ce qu'on en fait, ce qu'il en reste le jour où le client
-            part. Celle-ci répond à la question du LIEU : sur quel territoire,
-            sous quel droit, et à quelle distance d'une législation étrangère.
-            Ce sont deux objections différentes, elles arrivent d'ailleurs à
-            deux moments différents d'un rendez-vous.
-
-            Chaque affirmation est vérifiable et rien n'est arrondi. Francfort
-            n'est pas une formule : c'est la région eu-central-1 du projet
-            `omega-core-eu`, déjà déclarée telle quelle dans les mentions
-            légales. Le paragraphe de réserve en pied de section n'est pas une
-            précaution juridique posée à contrecœur — c'est la seule manière
-            d'écrire cette section qui survive à la question suivante, celle
-            que pose tout client sérieux : « et l'IA, elle tourne où ? » */}
-        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            {/* 11/09/2026 — le chapô ne répète plus les cartes. Il disait
-                « hébergées en Allemagne, au sein de l'Union européenne, dans
-                un environnement conforme au RGPD » : trois des six faits qui
-                suivent, annoncés avant d'être énoncés. */}
-            <EnTete
-              pastille="HÉBERGEMENT"
-              titre="Vos données restent sous droit européen."
-              chapo="Six faits que vous pouvez vérifier."
-            />
-
-            <Apparition className="mt-8 md:mt-14" delai={120}>
-              <CartesPreuve cartes={PREUVES} />
-            </Apparition>
-
-            {/* La réserve reste, et elle reste en petit — mais la SIXIÈME
-                carte l'annonce désormais à la même hauteur de caractères que
-                les cinq autres. Ce paragraphe n'est plus l'endroit où on
-                apprend que l'IA sort d'Europe : c'est celui où on lit à
-                quelles conditions. */}
-            <Apparition
-              as="p"
-              className="o-small mx-auto mt-7 max-w-[720px] text-center !text-[15px] !leading-[24px]"
-            >
-              On ne leur envoie que le strict nécessaire : un montant, une
-              date, un nom. Rien ne sert à entraîner une IA.
-            </Apparition>
-          </div>
-        </section>
-
-        {/* ════════ 8 · CE QUI RESTE CHEZ VOUS — deux cartes larges ════════ */}
-        <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="LES GARANTIES"
-              titre="Un prix connu. Des données protégées."
-              chapo="Ce que vous payez, et ce que deviennent vos données."
-            />
-            {/* 11/09/2026 — les deux cartes larges passent à `CartesLueur` :
-                même maquette, même destination, mais le liseré s'encre sous
-                le pointeur et la carte entière est cliquable. L'origine, le
-                dégradé remis en graphite et les quatre écarts à la source
-                sont en tête de `components/accueil/CartesLueur.tsx`. */}
-            <Apparition className="mt-8 md:mt-16" delai={120}>
-              <CartesLueur cartes={GARANTIES} />
-            </Apparition>
-          </div>
-        </section>
-
-        {/* ════════ 8 bis · LE TEMPS D'ARRÊT — la phrase qui se peint ═══
-            11/09/2026. La page enchaînait douze sections bâties à
-            l'identique — pastille, titre, chapô, contenu — sans un seul
-            temps de respiration. Les gabarits de vitrine mettent à cet
-            endroit une citation client en grand format ; la règle maison
-            l'interdit (aucune preuve sociale inventée) et propose l'échange
-            exact : même forme typographique, mais le PROBLÈME que le
-            produit règle. C'est ce qui est posé ici.
-
-            Le rendu est dans `TexteRevele` (repris de 21st.dev) : la phrase
-            reste collée au centre de l'écran et se peint mot à mot pendant
-            qu'on descend. Volontairement HORS de `.o-wrap` — le bloc est
-            collant, il lui faut la hauteur de la fenêtre, pas la colonne de
-            1 200. Et volontairement sans `data-reveal` : deux animations
-            d'apparition sur le même bloc se contrarient. */}
-        {CITATION ? (
-          <section data-monde="clair" className="pb-[62px] md:pb-[110px]">
-            <TexteRevele texte={CITATION.text} signature={CITATION.sub} />
-          </section>
-        ) : null}
-
-        {/* ════════ 10 · FAQ ════════ */}
-        <section data-monde="clair" className="py-[62px] md:py-[110px]">
-          <div className="o-wrap">
-            <EnTete
-              pastille="QUESTIONS"
-              titre="Vos questions avant de commencer."
-              chapo="Les six questions qu'on nous pose à chaque premier rendez-vous."
-            />
-            <Apparition className="mx-auto mt-7 max-w-[800px] md:mt-12" delai={120}>
-              {FAQ.map((f) => (
-                <details key={f.q} className="o-faq-item">
-                  <summary>
-                    {f.q}
-                    <span className="o-faq-croix" aria-hidden>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.8}
-                        strokeLinecap="round"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                    </span>
-                  </summary>
-                  <p className="o-body pb-6 pr-10">{f.a}</p>
-                </details>
+    <div className={`aa ${geistAccueil.variable} ${geistMonoAccueil.variable}`}>
+      {/* ════════ barre ════════ */}
+      <nav className="sticky top-0 z-50 w-full bg-neutral-950 border-b border-white/[0.06]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            <Link className="flex items-center gap-2 text-white z-50" href="/">
+              <Logo />
+            </Link>
+            <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+              {NAV.map((l) => (
+                <Link key={l.href} className="text-sm text-white/55 hover:text-white transition-colors" href={l.href}>
+                  {l.label}
+                </Link>
               ))}
+            </div>
+            <div className="hidden md:flex items-center gap-4">
+              {/* à 768 il chevauchait « Contact » : nos libellés sont plus
+                  longs que ceux de la référence (Login / Signup) */}
+              <Link className="hidden lg:inline text-sm text-white/55 hover:text-white transition-colors" href="/espace2">
+                Espace client
+              </Link>
+              <Link
+                className="bg-white text-neutral-950 text-sm font-medium px-4 py-2 rounded-md hover:bg-neutral-200 transition-colors"
+                href={AUDIT}
+              >
+                Réserver un audit
+              </Link>
+            </div>
+            <MenuTelephone />
+          </div>
+        </div>
+      </nav>
+
+      <main className="min-h-screen bg-[#0B0C0E]">
+        {/* ════════ hero ════════ */}
+        <section className="relative isolate bg-neutral-950 px-1 pb-12 md:pb-16" data-section="hero">
+          <div className="relative mx-auto max-w-[1400px] overflow-hidden rounded-b-[20px] pt-12 md:pt-20 bg-neutral-950 aa-bg-gradient">
+            <div className="relative z-10 flex flex-col gap-8 px-6 md:px-10 lg:flex-row lg:items-end lg:gap-16 xl:gap-24">
+              <h1 className="flex-1 text-balance text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal leading-[1.05] tracking-tight text-white">
+                <MotsReveles lignes={HERO.titre} pas={45} />
+              </h1>
+              <div className="flex w-full shrink-0 flex-col gap-5 lg:max-w-[360px]">
+                <p
+                  className="o-bloc-apparait max-w-[360px] text-base md:text-lg text-white/55 leading-relaxed"
+                  style={{ "--o-mot-d": "450ms" } as React.CSSProperties}
+                >
+                  {HERO.chapo}
+                </p>
+                <div
+                  className="o-bloc-apparait flex items-center gap-2"
+                  style={{ "--o-mot-d": "600ms" } as React.CSSProperties}
+                >
+                  <Link
+                    className="whitespace-nowrap rounded-[10px] bg-white px-5 py-2 font-medium text-[13px] leading-[18px] text-neutral-950 hover:bg-neutral-200 transition-colors"
+                    href={AUDIT}
+                    data-cta-hero
+                  >
+                    {HERO.bouton}
+                  </Link>
+                </div>
+              </div>
+            </div>
+            <div
+              className="o-bloc-apparait relative z-10 w-full pt-10 md:pt-14 px-6 md:px-10"
+              style={{ "--o-mot-d": "750ms" } as React.CSSProperties}
+            >
+              <Defilement>
+                {OUTILS.map((o) => (
+                  <div key={o} className="aa-marquee-item">
+                    <span className="text-xl md:text-2xl font-semibold tracking-tight text-white/45 whitespace-nowrap">
+                      {o}
+                    </span>
+                  </div>
+                ))}
+              </Defilement>
+            </div>
+            <div
+              className="o-bloc-apparait relative w-full mt-4 md:mt-8 px-6 md:px-10 pb-6 md:pb-10"
+              style={{ "--o-mot-d": "850ms" } as React.CSSProperties}
+            >
+              <Cadre
+                src="/accueil/hero-btp.webp"
+                alt="Daliro, le logiciel du BTP : les avenants à chiffrer, à valider et à signer"
+                ratio="1240/724"
+                className="object-cover object-top grayscale-75"
+                priority
+              />
+            </div>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 z-0 w-[140px] hidden lg:block bg-gradient-to-l from-neutral-950 to-transparent"
+            />
+          </div>
+        </section>
+
+        {/* ════════ démo ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="video">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 aa-bg-gradient border-l border-r border-white/[0.08]">
+              <GroupeApparition
+                retard={700}
+                className="flex flex-col items-center text-center gap-6 px-6 md:px-12 pt-16 md:pt-24 pb-12 md:pb-16 max-w-3xl mx-auto"
+              >
+                <Apparition as="p" className="text-sm font-medium text-white/55">{DEMO.surtitre}</Apparition>
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05] text-balance">
+                  <MotsApparition texte={DEMO.titre} depart={80} />
+                </h2>
+                <Apparition as="p" delai={450} className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl text-balance">
+                  {DEMO.texte}
+                </Apparition>
+              </GroupeApparition>
+              <Apparition delai={150} className="px-6 md:px-12 pb-16 md:pb-24">
+                <Cadre
+                  src="/accueil/apercu.webp"
+                  alt="Les validations du matin dans l'espace client"
+                  ratio="16/9"
+                  className="object-cover object-center grayscale"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/60 via-transparent to-neutral-950/20" />
+                  <Link
+                    href="/espace2"
+                    aria-label="Ouvrir l'espace client de démonstration"
+                    className="group absolute inset-0 flex items-center justify-center"
+                  >
+                    <span className="absolute w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 backdrop-blur-md group-hover:scale-110 transition-transform" />
+                    <span className="absolute w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 animate-ping opacity-50" />
+                    <span className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-white flex items-center justify-center shadow-2xl group-hover:scale-105 transition-transform">
+                      <Play className="w-5 h-5 md:w-6 md:h-6 text-neutral-950 fill-neutral-950 ml-1" />
+                    </span>
+                  </Link>
+                  <div className="absolute bottom-4 right-4 px-2.5 py-1 rounded-md bg-neutral-950/70 backdrop-blur-md border border-white/[0.08]">
+                    <span className="text-xs font-mono text-white/80">{DEMO.pastille}</span>
+                  </div>
+                </Cadre>
+              </Apparition>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ les quatre agents ════════ */}
+        <section className="relative w-full bg-neutral-950  py-16 md:py-24" data-section="infrastructure">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 bg-[radial-gradient(120%_80%_at_50%_0%,rgba(255,200,150,0.055),transparent_60%)] border-l border-r border-white/[0.08]">
+              <GroupeApparition retard={900} className="max-w-3xl pb-12 px-6 pt-12 md:px-10 md:pt-16 ">
+                <Apparition as="p" className="text-sm font-medium text-white/55 mb-3">{AGENTS_INTRO.surtitre}</Apparition>
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05]">
+                  {/* le saut de la référence, réservé aux écrans larges : sur
+                      téléphone il laissait « que » seul sur sa ligne */}
+                  <MotsApparition texte={AGENTS_INTRO.titre[0]} depart={80} />{" "}
+                  <br className="hidden md:inline" />
+                  <MotsApparition texte={AGENTS_INTRO.titre[1]} depart={400} />
+                </h2>
+              </GroupeApparition>
+              <div className="border-t border-white/[0.08]">
+                <div className="grid grid-cols-1 lg:grid-cols-12 lg:divide-x lg:divide-white/[0.08] items-start">
+                  <aside className="lg:col-span-3 lg:sticky lg:top-20 h-fit lg:px-8">
+                    <Apparition delai={100}>
+                    <nav className="flex flex-col divide-y divide-white/[0.08]">
+                      {AGENTS.map((a) => (
+                        <a key={a.id} href={`#${a.id}`} className="group block py-6 first:pt-8 last:pb-0 p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className={COULEURS[a.couleur].texte}>
+                              <IconeAgent id={a.id} />
+                            </div>
+                            <span className="font-medium text-white text-sm">{a.onglet}</span>
+                          </div>
+                          <p className="text-sm text-white/50 leading-relaxed group-hover:text-white/70 transition-colors">
+                            {a.resume}
+                          </p>
+                        </a>
+                      ))}
+                    </nav>
+                    </Apparition>
+                  </aside>
+                  <div className="lg:col-span-9 lg:px-10 pt-8 pb-8 flex flex-col gap-6">
+                    {AGENTS.map((a) => (
+                      <Apparition key={a.id}>
+                        <Article a={a} />
+                      </Apparition>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ comment ça marche ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="how-it-works">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 aa-bg-gradient sm:px-6 lg:px-12 border-l border-r border-white/[0.08]">
+              <GroupeApparition
+                retard={900}
+                className="flex flex-col gap-4 px-6 md:px-12 pt-16 md:pt-24 pb-12 md:pb-16 max-w-3xl"
+              >
+                <Apparition as="p" className="text-sm font-medium text-white/55">{ETAPES_INTRO.surtitre}</Apparition>
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05] text-balance">
+                  <MotsApparition texte={ETAPES_INTRO.titre} depart={80} />
+                </h2>
+                <Apparition as="p" delai={600} className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl mt-2">
+                  {ETAPES_INTRO.texte}
+                </Apparition>
+              </GroupeApparition>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-[6px]">
+                {ETAPES.map((e, k) => {
+                  const c = COULEURS[e.couleur];
+                  const I = ICONES_ETAPES[k];
+                  return (
+                    <Apparition
+                      key={e.n}
+                      delai={k * 120}
+                      className="relative flex flex-col gap-6 rounded-xl border border-white/[0.08] bg-white/[0.02] overflow-hidden"
+                    >
+                      <div
+                        aria-hidden="true"
+                        className="absolute top-4 right-5 z-10 text-6xl md:text-7xl font-normal text-white/[0.04] tracking-tighter leading-none select-none"
+                      >
+                        {e.n}
+                      </div>
+                      <div className="relative w-full aspect-[4/3] overflow-hidden border-b border-white/[0.06]">
+                        <Image
+                          src={e.image}
+                          alt={e.titre}
+                          fill
+                          sizes="(min-width: 768px) 33vw, 100vw"
+                          className="object-cover object-top "
+                        />
+                      </div>
+                      <div className="relative flex flex-col gap-3 px-6 pb-6">
+                        <div className="flex items-center gap-3 mb-1">
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center border ${c.pastille}`}>
+                            <I className={`w-4 h-4 ${c.texte}`} />
+                          </div>
+                          <span className={`text-xs font-medium ${c.texte}`}>Étape {e.n}</span>
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-normal text-white leading-tight">{e.titre}</h3>
+                        <p className="text-sm md:text-base text-white/55 leading-relaxed">{e.texte}</p>
+                      </div>
+                    </Apparition>
+                  );
+                })}
+              </div>
+              <Apparition className="px-6 md:px-12 py-12 md:py-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-t border-white/[0.08]">
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium text-white">{ETAPES_PIED.libelle}</p>
+                  <p className="text-3xl md:text-4xl font-normal text-white tracking-tight">{ETAPES_PIED.valeur}</p>
+                </div>
+                <Link
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-[10px] border border-white/[0.12] bg-white/[0.02] text-sm font-medium text-white hover:bg-white/[0.06] transition-colors"
+                  href={AUDIT}
+                >
+                  {ETAPES_PIED.bouton}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Apparition>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ la grande phrase ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="testimonial">
+          <div className="w-full border-b border-white/[0.08] ">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12  border-l border-r border-white/[0.08] bg-[radial-gradient(120%_80%_at_50%_0%,rgba(255,200,150,0.055),transparent_60%)]">
+              <div className="py-20 md:py-32 px-6 md:px-10">
+                <Apparition>
+                  <Citations />
+                </Apparition>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ les logiciels métiers ════════ */}
+        <section
+          className="relative isolate w-full overflow-hidden bg-neutral-950 border-t border-white/[0.08]"
+          data-section="capabilities"
+        >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+            <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+              <span className="absolute inset-y-0 left-0 w-px bg-white/[0.08]" />
+              <span className="absolute inset-y-0 right-0 w-px bg-white/[0.08]" />
+            </div>
+          </div>
+          <div className="relative max-w-7xl mx-auto bg-[radial-gradient(120%_80%_at_50%_0%,rgba(255,200,150,0.055),transparent_60%)]">
+            <GroupeApparition retard={600} className="flex flex-col gap-4 px-6 md:px-12 pt-16 md:pt-24">
+              <Apparition as="span" className="text-sm font-medium text-white/55">{METIERS_INTRO.surtitre}</Apparition>
+              <h2 className="text-3xl md:text-5xl lg:text-6xl font-normal tracking-tight text-white leading-[1.05] max-w-2xl text-balance">
+                <MotsApparition texte={METIERS_INTRO.titre} depart={80} />
+              </h2>
+            </GroupeApparition>
+            <div className="mt-16 md:mt-20">
+              <div aria-hidden="true" className="mx-px h-px bg-white/[0.08]" />
+              <ul className="grid grid-cols-1 gap-[6px] p-[6px] md:grid-cols-2">
+                {METIERS.map((m, k) => (
+                  <Apparition
+                    as="li"
+                    key={m.nom}
+                    delai={(k % 2) * 120}
+                    className="relative isolate flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.02] transition-colors hover:border-white/[0.14]"
+                  >
+                    <Link href={m.href} className="flex flex-col">
+                      <div className="relative w-full overflow-hidden" style={{ aspectRatio: "567 / 278" }}>
+                        <Image
+                          src={m.image}
+                          alt={`${m.nom}, le logiciel des ${m.metier.toLowerCase()}`}
+                          fill
+                          sizes="(min-width: 768px) 50vw, 100vw"
+                          className="absolute inset-0 object-cover object-top"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-2 p-[18px] md:p-[28px]">
+                        <span className="inline-flex flex-wrap items-center gap-2">
+                          <span className="font-medium text-[15px] text-white leading-[22px]">
+                            {m.nom} · {m.metier}
+                          </span>
+                          {m.pastille && (
+                            <span className="inline-flex items-center rounded-md bg-white/10 px-2.5 py-0.5 font-medium text-xs text-white/60 leading-[1.4]">
+                              {m.pastille}
+                            </span>
+                          )}
+                        </span>
+                        <p className="max-w-[426px] text-[15px] text-white/55 leading-[22px]">{m.texte}</p>
+                      </div>
+                    </Link>
+                  </Apparition>
+                ))}
+              </ul>
+            </div>
+            <Apparition className="mt-px flex flex-col items-start gap-10 px-6 md:flex-row md:items-center md:gap-6 md:px-12 py-16 md:py-20">
+              <div className="flex w-full max-w-2xl flex-col items-start justify-center gap-6">
+                <span className="text-sm font-medium text-white/55">{DONNEES.surtitre}</span>
+                <div className="flex flex-col gap-3">
+                  <h3
+                    className="text-white/90"
+                    style={{ fontSize: 32, fontWeight: 500, letterSpacing: "-0.8px", lineHeight: 1 }}
+                  >
+                    {DONNEES.titre}
+                  </h3>
+                  <p className="text-white/70 text-base leading-[22px]">{DONNEES.texte}</p>
+                </div>
+              </div>
+              <div
+                role="img"
+                aria-label="Hébergé dans l'Union européenne, conforme au RGPD"
+                className="flex shrink-0 items-center gap-7"
+              >
+                <Sceau haut="UE" bas="Hébergé dans l'Union" />
+                <Sceau haut="RGPD" bas="Export et suppression sur demande" />
+              </div>
             </Apparition>
           </div>
         </section>
-      </div>
-    </PageShell>
+
+        {/* ════════ en chiffres ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="stats">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 aa-bg-gradient border-l border-r border-white/[0.08]">
+              <GroupeApparition
+                retard={600}
+                className="flex flex-col items-center text-center gap-4 px-6 md:px-12 pt-16 md:pt-24 pb-12 md:pb-16 max-w-3xl mx-auto"
+              >
+                <Apparition as="p" className="text-sm font-medium text-white/55">{CHIFFRES_INTRO.surtitre}</Apparition>
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05] text-balance">
+                  <MotsApparition texte={CHIFFRES_INTRO.titre} depart={80} />
+                </h2>
+              </GroupeApparition>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-white/[0.08]">
+                {CHIFFRES.map((c, k) => (
+                  <Apparition
+                    key={c.titre}
+                    delai={k * 100}
+                    className={
+                      [
+                        "lg:border-r border-white/[0.08] border-b sm:border-b sm:border-r  lg:border-b-0 border-white/[0.08]",
+                        "lg:border-r border-white/[0.08] border-b sm:border-b sm:border-r-0  lg:border-b-0 border-white/[0.08]",
+                        "lg:border-r border-white/[0.08] border-b sm:border-b sm:border-r sm:border-b-0 lg:border-b-0 border-white/[0.08]",
+                        "  sm:border-r-0 sm:border-b-0 lg:border-b-0 border-white/[0.08]",
+                      ][k]
+                    }
+                  >
+                    <div className="flex flex-col gap-3 p-6 md:p-8">
+                      <Compteur valeur={c.valeur} suffixe={c.suffixe} />
+                      <div className="flex flex-col gap-1.5">
+                        <p className="text-sm md:text-base font-medium text-white">{c.titre}</p>
+                        <p className="text-xs md:text-sm text-white/45 leading-relaxed">{c.sous}</p>
+                      </div>
+                    </div>
+                  </Apparition>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ nos logiciels ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="customers">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 aa-bg-gradient border-l border-r border-white/[0.08]">
+              <GroupeApparition
+                retard={700}
+                className="flex flex-col items-center text-center gap-6 px-6 md:px-12 pt-16 md:pt-24 pb-12 md:pb-16"
+              >
+                <Apparition as="p" className="text-sm font-medium text-white/55">{LOGICIELS_INTRO.surtitre}</Apparition>
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05] max-w-4xl text-balance">
+                  <MotsApparition texte={LOGICIELS_INTRO.titre} depart={80} />
+                </h2>
+              </GroupeApparition>
+              <Apparition delai={150} className="pb-12 md:pb-16">
+                <Defilement>
+                  {LOGICIELS.map((l) => (
+                    <div key={l.nom} className="aa-marquee-item">
+                      <Image
+                        src={l.src}
+                        alt={l.nom}
+                        width={120}
+                        height={33}
+                        className="h-6 md:h-7 w-auto object-contain grayscale invert opacity-45"
+                      />
+                    </div>
+                  ))}
+                </Defilement>
+              </Apparition>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ six situations ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="testimonial-grid">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto p-2 border-l border-r border-white/[0.08]">
+              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[6px]">
+                {SITUATIONS.map((s, k) => (
+                  <Apparition
+                    as="li"
+                    key={s.nom}
+                    delai={(k % 3) * 100}
+                    className="flex flex-col justify-between rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 md:p-8 min-h-[280px]"
+                  >
+                    <blockquote className="text-[15px] md:text-base text-white/85 leading-[1.55] mb-8">
+                      «&nbsp;{s.texte}&nbsp;»
+                    </blockquote>
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 shrink-0 flex items-center justify-center">
+                        <Image src={s.logo} alt="" width={20} height={20} className="w-5 h-5 invert" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-white leading-tight">{s.nom}</span>
+                        <span className="text-xs text-white/50 leading-tight mt-0.5">{s.role}</span>
+                      </div>
+                    </div>
+                  </Apparition>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ tarifs ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="pricing-preview">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 aa-bg-gradient border-l border-r border-white/[0.08]">
+              <GroupeApparition
+                retard={750}
+                className="flex flex-col items-center text-center gap-6 px-6 md:px-12 pt-16 md:pt-24 pb-12 md:pb-16 max-w-3xl mx-auto"
+              >
+                <Apparition as="p" className="text-sm font-medium text-white/55">{PRIX_INTRO.surtitre}</Apparition>
+                <h2 className="text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05] text-balance">
+                  <MotsApparition texte={PRIX_INTRO.titre} depart={80} />
+                </h2>
+                <Apparition as="p" delai={450} className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl text-balance">
+                  {PRIX_INTRO.texte}
+                </Apparition>
+              </GroupeApparition>
+              <div className="px-6 md:px-12 pb-12 md:pb-16">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-[6px]">
+                  {PRIX.map((p, k) => (
+                    <Apparition
+                      key={p.nom}
+                      delai={k * 120}
+                      className={`relative flex flex-col rounded-2xl border overflow-hidden ${
+                        p.fort
+                          ? "border-white/[0.18] bg-gradient-to-b from-white/[0.06] to-white/[0.02]"
+                          : "border-white/[0.08] bg-white/[0.02]"
+                      }`}
+                    >
+                      <div className="flex flex-col gap-6 p-8 md:p-10 h-full">
+                        <div className="flex flex-col gap-2">
+                          <h3 className={`text-xl font-medium ${p.fort ? "text-white" : "text-white/85"}`}>{p.nom}</h3>
+                          <p className="text-sm text-white/55 leading-relaxed min-h-[40px]">{p.texte}</p>
+                        </div>
+                        <div className="flex flex-col gap-1 pb-6 border-b border-white/[0.06]">
+                          <div className="flex items-baseline gap-2">
+                            <span
+                              className={`text-4xl md:text-5xl font-normal tracking-tight ${
+                                p.fort ? "text-white" : "text-white/85"
+                              }`}
+                            >
+                              {p.prix}
+                            </span>
+                          </div>
+                          <p className="text-xs text-white/45">{p.sous}</p>
+                        </div>
+                        <ul className="flex flex-col gap-3 flex-1">
+                          {p.points.map((pt) => (
+                            <li key={pt} className="flex items-start gap-2.5">
+                              <div
+                                className={`shrink-0 w-4 h-4 rounded-full flex items-center justify-center mt-0.5 ${
+                                  p.fort ? "bg-white/15" : "bg-white/[0.06]"
+                                }`}
+                              >
+                                <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
+                              </div>
+                              <span className="text-sm text-white/70 leading-relaxed">{pt}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <Link
+                          className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-5 py-2.5 font-medium text-sm transition-colors mt-2 ${
+                            p.fort
+                              ? "bg-white text-neutral-950 hover:bg-neutral-200"
+                              : "border border-white/[0.12] bg-white/[0.02] text-white hover:bg-white/[0.06]"
+                          }`}
+                          href={p.href}
+                        >
+                          {p.bouton}
+                          <ArrowRight className="w-4 h-4" />
+                        </Link>
+                      </div>
+                    </Apparition>
+                  ))}
+                </div>
+              </div>
+              <div className="px-6 md:px-12 pb-16 md:pb-20 flex items-center justify-center">
+                <Link
+                  className="group inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
+                  href="/tarifs"
+                >
+                  Voir le détail de la tarification et le calculateur
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ FAQ ════════ */}
+        <section className="relative w-full bg-neutral-950" data-section="faq">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="max-w-7xl mx-auto px-4 aa-bg-gradient border-l border-r border-white/[0.08]">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 px-6 md:px-12 py-16 md:py-24">
+                <div className="lg:col-span-4">
+                  <Apparition className="lg:sticky lg:top-24 flex flex-col gap-6">
+                    <p className="text-sm font-medium text-white/55">{FAQ_INTRO.surtitre}</p>
+                    <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.05] text-balance">
+                      {FAQ_INTRO.titre}
+                    </h2>
+                    <p className="text-base text-white/55 leading-relaxed max-w-md">{FAQ_INTRO.texte}</p>
+                    <Link
+                      className="group inline-flex items-center gap-3 mt-4 p-5 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.14] transition-all w-fit"
+                      href="/contact"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center shrink-0">
+                        <MessagesSquare className="w-4 h-4 text-white/80" />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <p className="text-sm font-medium text-white">{FAQ_INTRO.carte}</p>
+                        <p className="text-xs text-white/55">{FAQ_INTRO.carteSous}</p>
+                      </div>
+                      <ArrowUpRight className="w-4 h-4 text-white/55 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </Link>
+                  </Apparition>
+                </div>
+                <Apparition delai={120} className="lg:col-span-8">
+                  <Faq />
+                </Apparition>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ════════ appel final ════════ */}
+        <section className="relative w-full bg-neutral-950 overflow-hidden" data-section="cta">
+          <div className="w-full border-t border-b border-white/[0.08]">
+            <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 border-l border-r border-white/[0.08]">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 aa-bg-gradient" />
+              <GroupeApparition
+                retard={900}
+                className="relative flex flex-col items-center text-center gap-8 px-6 md:px-12 py-24 md:py-32"
+              >
+                <Apparition as="p" className="text-sm font-medium text-white/55">{APPEL.surtitre}</Apparition>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white leading-[1.02] max-w-4xl text-balance">
+                  <MotsApparition texte={APPEL.titre} depart={80} />
+                </h2>
+                <Apparition as="p" delai={600} className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl text-balance">
+                  {APPEL.texte}
+                </Apparition>
+                <Apparition delai={750} className="flex flex-col sm:flex-row items-center gap-3 mt-2">
+                  <Link
+                    className="inline-flex items-center justify-center gap-1.5 rounded-[10px] bg-white px-5 py-2.5 font-medium text-sm text-neutral-950 hover:bg-neutral-200 transition-colors"
+                    href={AUDIT}
+                  >
+                    {APPEL.principal}
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link
+                    className="inline-flex items-center justify-center rounded-[10px] border border-white/[0.12] bg-white/[0.02] px-5 py-2.5 font-medium text-sm text-white hover:bg-white/[0.06] transition-colors"
+                    href="/espace2"
+                  >
+                    {APPEL.second}
+                  </Link>
+                </Apparition>
+              </GroupeApparition>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ════════ pied ════════ */}
+      <footer className="relative w-full bg-neutral-950" data-section="footer">
+        <div className="w-full border-t border-white/[0.08]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 border-l border-r border-white/[0.08]">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-8 md:gap-12 px-6 md:px-12 pt-16 md:pt-20 pb-12 md:pb-16">
+              <div className="col-span-2 flex flex-col gap-6">
+                <Link className="flex items-center gap-2 text-white w-fit" href="/">
+                  <Logo />
+                </Link>
+                <p className="text-sm text-white/55 leading-relaxed max-w-xs">{PIED.phrase}</p>
+                <div className="flex items-center gap-1">
+                  <a
+                    href={`mailto:${COURRIEL}`}
+                    aria-label="Nous écrire"
+                    className="flex items-center justify-center w-9 h-9 rounded-md text-white/55 hover:text-white hover:bg-white/[0.06] transition-colors"
+                  >
+                    <Mail className="w-4 h-4" />
+                  </a>
+                  <a
+                    href={LIEN_TELEPHONE}
+                    aria-label="Nous appeler"
+                    className="flex items-center justify-center w-9 h-9 rounded-md text-white/55 hover:text-white hover:bg-white/[0.06] transition-colors"
+                  >
+                    <Phone className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+              {PIED.colonnes.map((col) => (
+                <div key={col.titre} className="flex flex-col gap-4">
+                  <h3 className="text-sm font-medium text-white">{col.titre}</h3>
+                  <ul className="flex flex-col gap-3">
+                    {col.liens.map((l) => (
+                      <li key={l.href}>
+                        <Link className="text-sm text-white/55 hover:text-white transition-colors" href={l.href}>
+                          {l.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+            <div className="border-t border-white/[0.06] px-6 md:px-12 py-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <p className="text-xs text-white/45">© 2026 Omega.AI. Tous droits réservés.</p>
+              <div className="flex items-center gap-6">
+                <Link
+                  className="flex items-center gap-2 text-xs text-white/45 hover:text-white/70 transition-colors"
+                  href="/vos-donnees"
+                >
+                  <span className="relative flex w-2 h-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-green-500 opacity-75 animate-ping" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  Hébergé dans l&apos;Union européenne
+                </Link>
+                <Link className="text-xs text-white/45 hover:text-white/70 transition-colors" href="/contact">
+                  Service client
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 }
