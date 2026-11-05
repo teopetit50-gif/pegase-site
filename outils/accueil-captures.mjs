@@ -10,16 +10,16 @@ import { ouvrirSession } from './chrome.mjs';
 const base = process.argv[2] || 'https://omegaai.fr';
 const seuls = process.argv.slice(3);
 const CADRES = [
-  /* hero et quatre articles : 1240 / 724 */
+  /* hero et les quatre onglets de « Ce que fait Omega » : 1240 / 724 */
   /* 05/11 (Teo) — le hero montre la vue d'ensemble de CASHD (après un
-     essai sur les avenants de Daliro, écarté). L'article CASHD prend donc
-     la page « Débiteurs et relances », pour ne pas montrer deux fois le
-     même écran. */
+     essai sur les avenants de Daliro, écarté). */
   ['cashd', '/espace2/cashd', 1440, 841],
-  ['cashd-suivi', '/espace2/cashd/suivi', 1440, 841],
-  ['reput', '/espace2/reput', 1440, 841],
-  ['offload', '/espace2/offload', 1440, 841],
-  ['filed', '/espace2/filed', 1440, 841],
+  /* 05/11 (Teo) — la section « Ce que fait Omega » : les trois façons
+     d'automatiser (agents, logiciels métiers, sur mesure) et le pilotage */
+  ['agents', '/espace2', 1440, 841],
+  ['metiers', '/espace2/daliro/avenants', 1440, 841],
+  ['sur-mesure', '/espace2/automatisations', 1440, 841],
+  ['pilotage', '/espace2/validations', 1440, 841],
   /* (la section vidéo porte désormais demo.mp4, faite avec Remotion :
      PEGASE/stories/reels/video-accueil) */
   /* les trois étapes : 4 / 3 */

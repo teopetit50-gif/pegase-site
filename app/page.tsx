@@ -5,17 +5,17 @@ import { Fragment } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
-  Banknote,
+  Bot,
+  BriefcaseBusiness,
   Check,
   CheckCheck,
-  FileText,
   Mail,
-  MessageSquare,
   MessagesSquare,
   Phone,
   Plug,
   Search,
-  UserRoundSearch,
+  ShieldCheck,
+  Wrench,
 } from "lucide-react";
 import { geistAccueil, geistMonoAccueil } from "./_polices/geist-accueil";
 import "@/components/accueil-v3/accueil.css";
@@ -77,9 +77,9 @@ import { MotsReveles } from "@/components/ui/hero-section";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-  title: "Omega.AI | Des agents IA pour votre entreprise",
+  title: "Omega.AI | L'automatisation des processus par l'IA",
   description:
-    "Relances, demandes clients, documents, clients inactifs : des agents IA qui travaillent sur vos outils actuels, sous votre validation. Audit de 30 minutes offert.",
+    "Agents IA, logiciels par métier et sur-mesure : on automatise les processus répétitifs des PME et des groupes, sur vos outils. Audit de 30 minutes offert.",
 };
 
 const COULEURS = {
@@ -90,10 +90,10 @@ const COULEURS = {
 };
 
 const ICONES_AGENTS = {
-  encaissements: Banknote,
-  demandes: MessageSquare,
-  clients: UserRoundSearch,
-  documents: FileText,
+  agents: Bot,
+  metiers: BriefcaseBusiness,
+  "sur-mesure": Wrench,
+  pilotage: ShieldCheck,
 };
 const ICONES_ETAPES = [Search, Plug, CheckCheck];
 
@@ -331,7 +331,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ════════ les quatre agents ════════ */}
+        {/* ════════ ce que fait Omega : trois façons d'automatiser + le pilotage ════════ */}
         <section className="relative w-full bg-neutral-950  py-16 md:py-24" data-section="infrastructure">
           <div className="w-full border-t border-b border-white/[0.08]">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 bg-[radial-gradient(120%_80%_at_50%_0%,rgba(255,200,150,0.055),transparent_60%)] border-l border-r border-white/[0.08]">

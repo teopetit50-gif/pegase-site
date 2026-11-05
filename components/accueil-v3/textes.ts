@@ -10,7 +10,9 @@
    d'Hormozi (résultat rêvé × probabilité perçue ÷ délai × effort) :
      · hero ............ le résultat rêvé et l'effort ramené à rien
                          (« confiez », « rien ne part sans votre accord ») ;
-     · quatre agents ... chaque titre est un RÉSULTAT, jamais un outil ;
+     · ce que fait Omega  les trois façons d'automatiser (agents, logiciels
+                         métiers, sur mesure) et le pilotage ; chaque titre
+                         est un RÉSULTAT, jamais un outil ;
      · trois étapes .... le délai et l'effort : un audit, une installation
                          faite par nous, un clic pour valider ;
      · la grande phrase  le coût de l'inaction (Voss / Hormozi) ;
@@ -48,10 +50,16 @@ export const NAV = [
   { label: "Contact", href: "/contact" },
 ];
 
+/* 05/11 (Teo, 2ᵉ passe) — « tu lis les premières lignes, tu sais exactement
+   ce qu'on fait, comment, pourquoi, et pour qui ». La première version ne
+   parlait que des quatre agents : le hero dit désormais le métier d'Omega
+   (automatiser les processus pénibles), ses trois formes (agents, logiciels
+   par métier, sur mesure), à qui il s'adresse (PME et groupes) et ce qui
+   rassure (vos outils restent, rien ne part sans vous). */
 export const HERO = {
-  titre: "Confiez à des agents IA tout ce qui ralentit votre entreprise",
+  titre: "Automatisez les processus qui ralentissent votre entreprise",
   chapo:
-    "Ils relancent, répondent, trient et préparent sur vos outils actuels. Rien ne part sans votre accord.",
+    "Agents IA prêts à l'emploi, logiciels pensés pour votre métier ou développement sur mesure, branchés sur vos outils actuels. Pour les PME comme pour les groupes.",
   bouton: "Réserver un audit offert",
 };
 
@@ -83,7 +91,7 @@ export const DEMO = {
 };
 
 export type Agent = {
-  id: string;
+  id: "agents" | "metiers" | "sur-mesure" | "pilotage";
   onglet: string;
   resume: string;
   couleur: "green" | "purple" | "orange" | "blue";
@@ -95,63 +103,67 @@ export type Agent = {
   alt: string;
 };
 
+/* 05/11 (Teo, 2ᵉ passe) — la section présentait les quatre SaaS un à un ;
+   elle présente maintenant les TROIS façons d'automatiser et l'espace qui
+   les pilote. Les quatre agents tiennent dans le premier onglet, les sept
+   logiciels métiers dans le deuxième, le sur-mesure a enfin sa place. */
 export const AGENTS_INTRO = {
-  surtitre: "Présentation d'Omega",
-  titre: ["Quatre agents pour tout ce que", "personne n'a le temps de faire"],
+  surtitre: "Ce que fait Omega",
+  titre: ["Trois façons d'automatiser,", "un seul espace pour tout piloter"],
 };
 
 export const AGENTS: Agent[] = [
   {
-    id: "encaissements",
-    onglet: "Encaissements",
-    resume: "Les factures échues relancées chaque matin, dans votre ton.",
+    id: "agents",
+    onglet: "Agents IA",
+    resume: "Relances, demandes clients, documents, clients inactifs.",
     couleur: "green",
-    titre: "L'argent qu'on vous doit rentre, sans avoir à le réclamer",
+    titre: "Quatre agents pour les tâches que toutes les entreprises partagent",
     texte:
-      "L'agent suit chaque facture échue, écrit la relance adaptée au client et à l'ancienneté de la dette, et vous la présente chaque matin. Vous validez, elle part. La relation reste la vôtre.",
-    lien: "/offres/relances-impayes",
-    bouton: "Découvrir CASHD",
-    image: "/accueil/cashd-suivi.webp",
-    alt: "CASHD — les débiteurs et l'état de leurs relances",
+      "Relancer les impayés, répondre aux demandes, traiter les factures fournisseurs, reprendre contact avec les clients qui s'éteignent. Chaque agent travaille sur vos outils et prépare tout : il ne vous reste qu'à valider.",
+    lien: "/offres",
+    bouton: "Voir les quatre agents",
+    image: "/accueil/agents.webp",
+    alt: "La vue d'ensemble des agents dans l'espace client",
   },
   {
-    id: "demandes",
-    onglet: "Demandes",
-    resume: "Chaque demande reçue obtient sa réponse, même à 21 h.",
+    id: "metiers",
+    onglet: "Logiciels métiers",
+    resume: "Sept secteurs ont leur logiciel, construit sur leurs règles.",
     couleur: "purple",
-    titre: "Plus une seule demande client sans réponse",
+    titre: "Un logiciel qui connaît déjà les règles de votre métier",
     texte:
-      "Courriel, formulaire ou message : chaque demande est lue, qualifiée et reçoit une réponse préparée dans la minute. Le client servi, un avis lui est demandé. Celui qui attendait votre devis ne part plus chez celui qui a décroché.",
-    lien: "/offres/demandes-clients",
-    bouton: "Découvrir REPUT",
-    image: "/accueil/reput.webp",
-    alt: "REPUT — les demandes clients",
+      "Avenants de chantier, pièces d'un dossier d'avocat, plans d'un permis de construire, états des lieux d'un loueur, plannings d'un cabinet dentaire, reporting d'un groupe : chaque secteur a ses contraintes, et son logiciel est construit pour elles.",
+    lien: "/secteurs",
+    bouton: "Trouver votre secteur",
+    image: "/accueil/metiers.webp",
+    alt: "Daliro, le logiciel du BTP : les avenants à chiffrer, valider et signer",
   },
   {
-    id: "clients",
-    onglet: "Clients",
-    resume: "Les clients qui s'éteignent repérés avant qu'ils partent.",
+    id: "sur-mesure",
+    onglet: "Sur mesure",
+    resume: "Votre processus n'est dans aucune liste ? On le construit.",
     couleur: "orange",
-    titre: "Vos anciens clients redeviennent des clients",
+    titre: "Le processus qui n'existe que chez vous, automatisé lui aussi",
     texte:
-      "Un client qui ne commande plus ne prévient pas. L'agent repère ceux qui s'éteignent dans votre historique et prépare la reprise de contact au bon moment. Vous décidez qui l'on rappelle.",
-    lien: "/offres/nouvelles-affaires",
-    bouton: "Découvrir OFFLOAD",
-    image: "/accueil/offload.webp",
-    alt: "OFFLOAD — les comptes à risque",
+      "Validation des achats, planning des équipes, tableaux à consolider, échanges entre services : on cartographie le processus avec vous, on le construit et on le branche sur vos logiciels. Son périmètre et son prix sont écrits avant de commencer.",
+    lien: "/offres/sur-mesure",
+    bouton: "Découvrir le sur-mesure",
+    image: "/accueil/sur-mesure.webp",
+    alt: "Les automatisations d'une entreprise dans l'espace client",
   },
   {
-    id: "documents",
-    onglet: "Documents",
-    resume: "Chaque pièce reçue lue, contrôlée et rangée.",
+    id: "pilotage",
+    onglet: "Pilotage",
+    resume: "Tout passe par votre validation, dans un seul espace.",
     couleur: "blue",
-    titre: "Chaque document reçu, lu et classé à votre place",
+    titre: "Vous gardez la main sur tout ce que fait l'IA",
     texte:
-      "Factures fournisseurs, bons de livraison, attestations : l'agent lit chaque pièce, la rapproche de la commande, signale l'écart et transmet un dossier complet à la comptabilité.",
-    lien: "/offres/factures-fournisseurs",
-    bouton: "Découvrir FILED",
-    image: "/accueil/filed.webp",
-    alt: "FILED — les documents reçus",
+      "Agents, logiciels et automatisations remontent dans le même espace client : ce qui est prêt, ce qui attend votre accord, ce qui a été fait. Rien ne part sans validation, et chaque action laisse une trace.",
+    lien: "/espace2",
+    bouton: "Voir l'espace client",
+    image: "/accueil/pilotage.webp",
+    alt: "La file des validations du matin dans l'espace client",
   },
 ];
 
@@ -292,49 +304,50 @@ export const LOGICIELS = [
   { nom: "FILED", src: "/logos/filed-lockup.png" },
 ];
 
-/* six situations, signées par ce qui les règle — aucun client nommé */
+/* six processus pénibles, de la PME au groupe, jusqu'au sur-mesure —
+   signés par ce qui les règle, aucun client nommé */
 export const SITUATIONS = [
   {
     texte:
       "Les factures échues s'accumulent parce que relancer gêne tout le monde. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent.",
     nom: "CASHD",
-    role: "Relances et encaissements",
+    role: "Agent · relances et encaissements",
     logo: "/logos/cashd-mark.png",
   },
   {
     texte:
       "Une demande reçue à 21 h obtient sa réponse à 21 h. Le client qui attendait un devis ne part plus chez le concurrent qui a décroché le premier.",
     nom: "REPUT",
-    role: "Demandes clients",
+    role: "Agent · demandes clients",
     logo: "/logos/reput-mark.png",
-  },
-  {
-    texte:
-      "Un client qui ne commande plus ne prévient pas. L'agent repère ceux qui s'éteignent et prépare la reprise de contact avant qu'ils aient signé ailleurs.",
-    nom: "OFFLOAD",
-    role: "Clients inactifs",
-    logo: "/logos/offload-mark.png",
   },
   {
     texte:
       "Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée et rangée. La comptabilité reçoit un dossier complet, pas une boîte mail.",
     nom: "FILED",
-    role: "Documents reçus",
+    role: "Agent · documents reçus",
     logo: "/logos/filed-mark.png",
   },
   {
     texte:
       "Les travaux supplémentaires repérés dans les photos et les vocaux du chantier sont chiffrés sur vos prix et signés avant que l'ouvrage soit refermé.",
     nom: "Daliro",
-    role: "Entreprises du BTP",
+    role: "Logiciel métier · BTP",
     logo: "/logos/daliro-mark.png",
   },
   {
     texte:
       "Toutes les sociétés du groupe lues par la même IA, en lecture seule. La direction reçoit chaque matin une page qui dit ce qui demande une décision.",
     nom: "Varelo",
-    role: "Grands groupes",
+    role: "Logiciel métier · grands groupes",
     logo: "/logos/varelo-mark.png",
+  },
+  {
+    texte:
+      "Votre processus n'est dans aucune liste : validation des achats, planning des équipes, tableaux à consolider. On le dessine avec vous, puis on l'automatise sur vos logiciels.",
+    nom: "Sur mesure",
+    role: "Processus propres à votre entreprise",
+    logo: "/logos/surmesure-mark.svg",
   },
 ];
 
@@ -403,7 +416,13 @@ export const FAQ: Question[] = [
     id: "omega",
     cat: "Général",
     q: "Qu'est-ce qu'Omega ?",
-    r: "Omega est une startup d'intelligence artificielle née aux Antilles françaises. Nous installons des agents IA qui prennent en charge le travail répétitif d'une entreprise — relances, demandes clients, documents, suivi des clients — et des logiciels construits pour sept métiers.",
+    r: "Omega est une startup d'intelligence artificielle née aux Antilles françaises. Nous automatisons les processus répétitifs des entreprises de trois façons : des agents prêts à l'emploi (relances, demandes clients, documents, clients inactifs), des logiciels construits pour sept métiers, et des automatisations sur mesure.",
+  },
+  {
+    id: "sur-mesure",
+    cat: "Général",
+    q: "Pouvez-vous automatiser un processus propre à notre entreprise ?",
+    r: "Oui, c'est l'offre sur mesure. Pendant l'audit, on cartographie le processus avec vous : qui intervient, sur quels logiciels, avec quelles règles de validation. Vous repartez avec le périmètre et le prix, écrits avant tout engagement.",
   },
   {
     id: "difference",
@@ -492,7 +511,7 @@ export const APPEL = {
 };
 
 export const PIED = {
-  phrase: "Des agents IA qui font tourner votre entreprise, sous votre validation.",
+  phrase: "On automatise les processus qui ralentissent les entreprises : agents IA, logiciels métiers et sur-mesure, sous votre validation.",
   colonnes: [
     {
       titre: "Agents",
