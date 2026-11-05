@@ -106,7 +106,10 @@ function Cadre({
   src,
   alt,
   ratio,
-  className = "object-cover object-top",
+  /* 05/11 (Teo) — le filtre du hero de la référence (grayscale-75) vaut
+     désormais pour TOUTES les captures : elles se lisent comme une seule
+     famille, sans les couleurs vives de l'interface. */
+  className = "object-cover object-top grayscale-75",
   priority = false,
   children,
 }: {
@@ -393,7 +396,7 @@ export default function Home() {
                           alt={e.titre}
                           fill
                           sizes="(min-width: 768px) 33vw, 100vw"
-                          className="object-cover object-top "
+                          className="object-cover object-top grayscale-75"
                         />
                       </div>
                       <div className="relative flex flex-col gap-3 px-6 pb-6">
@@ -475,7 +478,7 @@ export default function Home() {
                           alt={`${m.nom}, le logiciel des ${m.metier.toLowerCase()}`}
                           fill
                           sizes="(min-width: 768px) 50vw, 100vw"
-                          className="absolute inset-0 object-cover object-top"
+                          className="absolute inset-0 object-cover object-top grayscale-75"
                         />
                       </div>
                       <div className="flex flex-col gap-2 p-[18px] md:p-[28px]">
