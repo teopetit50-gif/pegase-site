@@ -94,6 +94,14 @@ const NOMS: Record<string, string> = {
   ...Object.fromEntries(NOUVEAUX.map((t) => [t.id, t.nom])),
 };
 const EQUIPES = new Set([POSE_A, POSE_B, ATELIER]);
+/* le conducteur de travaux : ses rendez-vous (réunions de chantier, réception, signatures) sont des passages sans lot */
+const CONDUCTEUR = e(9);
+const NOM_CONDUCTEUR = "Yanis Dupré, conducteur de travaux";
+/* dans combien de jours tombe le prochain jour de la semaine j (0 = dimanche ; aujourd'hui exclu) */
+function prochain(j: number): number {
+  const auj = new Date().getDay();
+  return ((j - auj + 7) % 7) || 7;
+}
 
 /* ——— ce qu'on ajoute à un chantier ——— */
 type Rep = { quand: number; texte: string; canal?: string };
@@ -103,6 +111,7 @@ type LotDef = {
   engage: number; facture: number; avenants?: number; passages: PassDef[]; point?: { gravite: "attention" | "bloquant"; message: string };
 };
 type DebDef = { engage: number; facture: number; avenants?: number };
+type Rdv = { tache: string; du: number; h: [string, string]; fait?: boolean };
 type Etoffe = {
   adresse: string; cp: string; commune: string; description: string;
   /* le déboursé des lots d'avant, par identifiant de lot */
@@ -110,6 +119,7 @@ type Etoffe = {
   /* l'avancement des lots d'avant, quand aucune situation ne le donne */
   pctAvant?: Record<string, number>;
   lots: LotDef[];
+  rdv?: Rdv[];
 };
 
 let n = 100;
@@ -161,6 +171,17 @@ function etoffer(t: Tableau, o: Etoffe): Tableau {
     }
   });
 
+  for (const r of o.rdv ?? []) {
+    const pid = e(++n);
+    passages.push({
+      id: pid, chantier_id: cid, lot_id: null, lot_code: null, lot_libelle: null,
+      equipe_id: CONDUCTEUR, tiers_id: null, intervenant_type: "equipe", intervenant_lu: NOM_CONDUCTEUR, intervenant_nom: NOM_CONDUCTEUR,
+      rapprochement: "identique", tache: `Rendez-vous : ${r.tache}`, debut: aujourdHui(r.du), fin: aujourdHui(r.du),
+      heure_debut: `${r.h[0]}:00`, heure_fin: `${r.h[1]}:00`, exterieur: false, statut: r.fait ? "fait" : "prevu",
+      confirmation: "confirmee", confirmation_le: ilYa(Math.max(0, -r.du + 3), 9), source: "saisie", source_ref: null, version: 1, confirmations: [],
+    });
+  }
+
   /* le déboursé des lots d'avant (les chantiers ajoutés le 30/10 n'en avaient pas) */
   const avant = t.lots.map((l): DebourseLot | null => {
     const deja = t.debourse.find((x) => x.lot_id === l.id);
@@ -187,11 +208,16 @@ function etoffer(t: Tableau, o: Etoffe): Tableau {
     passages: [...t.passages, ...passages],
     controles: [...t.controles.filter((k) => k.code !== "chantier_sans_coordonnees"), ...controles],
     debourse: [...avant, ...debourse],
+    equipes: [...t.equipes.filter((x) => x.id !== CONDUCTEUR), { id: CONDUCTEUR, nom: NOM_CONDUCTEUR }],
   };
 }
 
 const ETOFFES: Record<string, Etoffe> = {
   [TIL]: {
+    rdv: [
+      { tache: "réunion de chantier hebdomadaire", du: prochain(2) - 7, h: ["08:00", "09:00"], fait: true },
+      { tache: "réunion de chantier hebdomadaire", du: prochain(2), h: ["08:00", "09:00"] },
+    ],
     adresse: "14 rue Frébault", cp: "97110", commune: "Pointe-à-Pitre",
     description:
       "Résidence de 12 logements en R+3 pour la SCI Lefèvre Patrimoine, en plein centre de Pointe-à-Pitre. Nous tenons les menuiseries extérieures et la coordination des lots de second œuvre ; le gros œuvre et la charpente sont livrés. Marché à forfait de 90 625 € HT signé il y a un mois, retenue de garantie de 5 %, maître d'œuvre : Cabinet Archipel Architectes.\n\n" +
@@ -218,6 +244,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [ROL]: {
+    rdv: [{ tache: "réunion de lancement avec M. et Mme Rolland", du: 18, h: ["09:00", "10:00"] }],
     adresse: "Section Bellevue, chemin de Montauban", cp: "97190", commune: "Le Gosier",
     description:
       "Extension de 42 m² d'une maison individuelle pour M. et Mme Rolland : une suite parentale avec salle d'eau et une terrasse couverte côté mer. Ossature et bardage bois, couverture tôle anticyclonique, raccordement aux réseaux de la maison existante. Démarrage prévu dans trois semaines, réception visée début janvier.\n\n" +
@@ -245,6 +272,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [SCL]: {
+    rdv: [{ tache: "coordination des lots avec la SCM Saint-Clair", du: prochain(5), h: ["09:00", "10:00"] }],
     adresse: "Immeuble Saint-Clair, ZAC de Houelbourg", cp: "97122", commune: "Baie-Mahault",
     description:
       "Aménagement d'un cabinet médical de 180 m² au premier étage, pour la SCM Saint-Clair (trois médecins généralistes et une kinésithérapeute). Quatre cabinets de consultation, une salle de kiné, l'accueil, la salle d'attente et deux sanitaires dont un PMR.\n\n" +
@@ -272,6 +300,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [MAM]: {
+    rdv: [{ tache: "point sur la réouverture avec M. et Mme Lacroix", du: 1, h: ["17:00", "17:30"] }],
     adresse: "48 rue Saint-John-Perse", cp: "97110", commune: "Pointe-à-Pitre",
     description:
       "Agencement complet de la boulangerie-pâtisserie Ma Mie : magasin de 65 m² et laboratoire de 40 m². Comptoirs et vitrines réfrigérées fabriqués dans notre atelier, laboratoire aux normes HACCP, nouvelle devanture avec rideau métallique anticyclonique.\n\n" +
@@ -294,6 +323,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [DUR]: {
+    rdv: [{ tache: "signature de l'avenant des marches avec M. Duret", du: 1, h: ["07:30", "08:00"] }],
     adresse: "Lotissement Les Hauts de Saint-Félix, 21 allée des Flamboyants", cp: "97190", commune: "Le Gosier",
     description:
       "Terrasse bois de 64 m² en surplomb de la piscine pour M. et Mme Duret, avec garde-corps verre, pergola bioclimatique, carbet et douche extérieure, et un local technique fermé pour la pompe de piscine.\n\n" +
@@ -316,6 +346,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [VEN]: {
+    rdv: [{ tache: "signature du plan de prévention à l'école", du: prochain(2), h: ["10:00", "11:00"] }],
     adresse: "Groupe scolaire Jean-Moulin, rue Jean-Moulin", cp: "97139", commune: "Les Abymes",
     description:
       "Remplacement des deux préaux du groupe scolaire Jean-Moulin pour la Ville des Abymes : démolition des anciens préaux amiantés (désamiantage déjà réalisé), charpente métallique et couverture bac acier anticyclonique, éclairage LED, récupération des eaux de pluie.\n\n" +
@@ -339,6 +370,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [GAR]: {
+    rdv: [{ tache: "visite de levée des réserves avec Mme Garnier", du: prochain(4), h: ["14:00", "15:00"] }],
     adresse: "Morne Bourg, 6 lotissement Bois-Jolan", cp: "97180", commune: "Sainte-Anne",
     description:
       "Extension de 30 m² (séjour agrandi et chambre d'amis) pour Mme Garnier, livrée il y a six jours. Réception prononcée avec deux réserves, dont une hors devis : l'habillage de la descente d'eaux pluviales, demandé par la cliente à la visite.\n\n" +
