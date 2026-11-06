@@ -75,10 +75,14 @@ const EN_TETES_SECURITE = [
      fenêtre croisée. Aucune fenêtre surgissante ne parle au site. */
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
+  /* 06/11 — microphone=(self) : « Dicter un devis » (Daliro) écoute la voix
+     dans la page. Avec microphone=() le navigateur refusait le micro sans
+     même demander. (self) : nos pages seulement, jamais un cadre d'ailleurs ;
+     le navigateur demande toujours l'accord de la personne. */
   {
     key: "Permissions-Policy",
     value:
-      "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), hid=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), browsing-topics=()",
+      "camera=(), microphone=(self), geolocation=(), payment=(), usb=(), bluetooth=(), serial=(), hid=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), display-capture=(), browsing-topics=()",
   },
 ];
 
