@@ -125,7 +125,9 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
   const zParam = params.get("zoom");
   /* 05/11/2026 (Teo, capture de l'onglet Lots : « c'est mal fait de ouf ») : dans la fiche d'un chantier, les
      passages durent quelques jours ; à l'échelle Année ils n'étaient que des losanges entassés. Mois par défaut. */
-  const zoomDefaut: Zoom = lotsDe ? "mois" : "annee";
+  /* puis, même soir : la vue de tous les chantiers porte 10 à 15 passages par chantier ; à l'Année ils
+     s'écrasaient en grappes de losanges (capture de Teo, « gros bug ») : Trimestre par défaut */
+  const zoomDefaut: Zoom = lotsDe ? "mois" : "trimestre";
   const zoom = ZOOMS.find((z) => z.cle === zParam) ?? ZOOMS.find((z) => z.cle === zoomDefaut)!;
   const apercuId = params.get("apercu");
   const passageId = params.get("passage");
