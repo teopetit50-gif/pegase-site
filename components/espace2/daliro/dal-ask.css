@@ -1,0 +1,350 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO — « Demander à Daliro » = Attio, panneau « Ask Attio » (05/11/2026).
+   Relevé au getComputedStyle dans le compte Attio de Teo (app.attio.com,
+   conversation « Create professional home dashboard », fenêtre 843 × 909,
+   thème sombre), préfixe dal-ask-.
+
+   Mesures (px CSS) :
+     bouton      « Ask Attio » 28 de haut, r 8, p 4 8 4 6, écart 6, fond
+                 rgb(27 28 31), ombre inset 1 rgb(33 34 36) + 0 0 2 / .04 +
+                 0 1 3 / .12 ; texte 14/500/20 rgb(241 242 243), icône 16
+     panneau     360 de large, fond rgb(16 17 18), filet gauche 1 rgb(27 28 31)
+     en-tête     48 ; titre (bouton) 14/500/20, ls −0.07, r 6, p 2 5, à 11 du
+                 bord ; ronds 28, r 8, p 6, couleur blanc .55 ; 10 du bord droit
+     fil         contenu à 16 des bords ; paragraphes 14/500/20 rgb(241 242
+                 243), ls −0.07, écart 10 ; listes : pastille, retrait 16,
+                 puces 20 + marges 4
+     question    à droite, bulle fond blanc .05, r 10, p 5 8 ; texte 14/500/22
+                 (p 0 2) ; dessous ses actions, écart 6
+     source      carte fond rgb(16 17 18), r 12, ombre comme le bouton ; titre
+                 14/500/20 à 12 et 8, sous-titre 12/500/16 blanc .6 ; bouton
+                 « Visit » 28, r 8, p 4 8, même fond et ombre
+     suites      boutons r 8, p 6 12 6 9, flèche 16, écart 8, texte 14/500/20
+                 blanc .6
+     saisie      à 10 des bords, fond rgb(16 17 18), r 14, ombre inset 1 ;
+                 focus : rgba(38 109 240 / .32) ; zone p 9 12 0, 14/500/22 ;
+                 boutons 28 (r 8) à 8 du bas et de la droite ; envoyer : fond
+                 rgb(38 109 240), blanc, ombre inset 1 blanc .07
+   Écarts, écrits : le thème clair d'Attio n'a pas été relevé (on garde les
+   jetons clairs de Daliro) ; la saisie au repos a été lue avec le focus,
+   son ombre au repos reprend celle des cartes ; chez Attio le panneau pousse
+   la page, ici il se pose par-dessus la carte de Daliro.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal {
+  --dal-ask-fond: rgb(16 17 18);
+  --dal-ask-bouton: rgb(27 28 31);
+  --dal-ask-bord: rgb(27 28 31);
+  --dal-ask-anneau: rgb(33 34 36);
+  --dal-ask-texte: rgb(241 242 243);
+  --dal-ask-gris: rgb(255 255 255 / 0.6);
+  --dal-ask-icone: rgb(255 255 255 / 0.55);
+  --dal-ask-bulle: rgb(255 255 255 / 0.05);
+  --dal-ask-lien: rgb(158 158 255);
+}
+html[data-v2-theme="light"] .v2 .dal {
+  --dal-ask-fond: var(--dal-carte);
+  --dal-ask-bouton: var(--dal-carte);
+  --dal-ask-bord: var(--dal-carte-bord);
+  --dal-ask-anneau: var(--dal-carte-bord);
+  --dal-ask-texte: var(--dal-t1);
+  --dal-ask-gris: var(--dal-t3);
+  --dal-ask-icone: var(--dal-t3);
+  --dal-ask-bulle: var(--dal-survol);
+  --dal-ask-lien: var(--dal-violet);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal {
+    --dal-ask-fond: var(--dal-carte);
+    --dal-ask-bouton: var(--dal-carte);
+    --dal-ask-bord: var(--dal-carte-bord);
+    --dal-ask-anneau: var(--dal-carte-bord);
+    --dal-ask-texte: var(--dal-t1);
+    --dal-ask-gris: var(--dal-t3);
+    --dal-ask-icone: var(--dal-t3);
+    --dal-ask-bulle: var(--dal-survol);
+    --dal-ask-lien: var(--dal-violet);
+  }
+}
+
+.v2 .dal .dal-ask-ouvrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 4px 8px 4px 6px;
+  border-radius: 8px;
+  background: var(--dal-ask-bouton);
+  box-shadow: var(--dal-ask-anneau) 0 0 0 1px inset, rgb(0 0 0 / 0.04) 0 0 2px 0, rgb(0 0 0 / 0.12) 0 1px 3px 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--dal-ask-texte);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.v2 .dal .dal-carte {
+  position: relative;
+}
+.v2 .dal .dal-ask {
+  position: absolute;
+  z-index: 30;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--dal-ask-fond);
+  border-left: 1px solid var(--dal-ask-bord);
+  font-family: Inter, var(--font-v2-inter), sans-serif;
+  color: var(--dal-ask-texte);
+}
+.v2 .dal .dal-ask-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 48px;
+  padding: 0 10px 0 11px;
+}
+.v2 .dal .dal-ask-titre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 2px 5px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  text-align: left;
+  color: var(--dal-ask-texte);
+}
+.v2 .dal .dal-ask-rond {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--dal-ask-icone);
+  cursor: pointer;
+}
+.v2 .dal .dal-ask-rond:hover,
+.v2 .dal .dal-ask-suite:hover {
+  background: var(--dal-ask-bulle);
+}
+.v2 .dal .dal-ask-historique {
+  position: absolute;
+  top: 44px;
+  right: 10px;
+  z-index: 2;
+  width: 280px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--dal-ask-fond);
+  box-shadow: var(--dal-ask-anneau) 0 0 0 1px inset, rgb(0 0 0 / 0.12) 0 1px 3px 0;
+}
+.v2 .dal .dal-ask-historique button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--dal-ask-texte);
+  text-align: left;
+}
+.v2 .dal .dal-ask-historique button:hover,
+.v2 .dal .dal-ask-historique button[aria-current="true"] {
+  background: var(--dal-ask-bulle);
+}
+.v2 .dal .dal-ask-fil {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 16px 16px;
+}
+.v2 .dal .dal-ask-question {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 8px 0 16px;
+}
+.v2 .dal .dal-ask-bulle {
+  max-width: 245px;
+  padding: 5px 8px;
+  border-radius: 10px;
+  background: var(--dal-ask-bulle);
+}
+.v2 .dal .dal-ask-bulle span {
+  padding: 0 2px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  letter-spacing: -0.07px;
+  color: var(--dal-ask-texte);
+}
+.v2 .dal .dal-ask-reponse {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: -0.07px;
+  color: var(--dal-ask-texte);
+}
+.v2 .dal .dal-ask-reponse ul {
+  padding-left: 16px;
+  list-style: disc;
+}
+.v2 .dal .dal-ask-reponse li {
+  margin: 4px 0;
+}
+.v2 .dal .dal-ask-source {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--dal-ask-fond);
+  box-shadow: var(--dal-ask-anneau) 0 0 0 1px inset, rgb(0 0 0 / 0.04) 0 0 2px 0, rgb(0 0 0 / 0.12) 0 1px 3px 0;
+}
+.v2 .dal .dal-ask-source-texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal .dal-ask-source-titre {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--dal-ask-texte);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ask-source-sous {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-ask-gris);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ask-source-lien {
+  flex: none;
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--dal-ask-fond);
+  box-shadow: var(--dal-ask-anneau) 0 0 0 1px inset, rgb(0 0 0 / 0.04) 0 0 2px 0, rgb(0 0 0 / 0.12) 0 1px 3px 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--dal-ask-texte);
+}
+.v2 .dal .dal-ask-actions {
+  display: flex;
+  gap: 0;
+  margin-left: -6px;
+}
+.v2 .dal .dal-ask-suites {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+.v2 .dal .dal-ask-suite {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 12px 6px 9px;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .dal .dal-ask-suite svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--dal-ask-gris);
+}
+.v2 .dal .dal-ask-suite span {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--dal-ask-gris);
+}
+.v2 .dal .dal-ask-saisie {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  margin: 0 10px 10px;
+  border-radius: 14px;
+  background: var(--dal-ask-fond);
+  box-shadow: var(--dal-ask-anneau) 0 0 0 1px inset;
+}
+.v2 .dal .dal-ask-saisie:focus-within {
+  box-shadow: rgb(38 109 240 / 0.32) 0 0 0 1px inset;
+}
+.v2 .dal .dal-ask-saisie textarea {
+  height: 72px;
+  padding: 9px 12px 0;
+  resize: none;
+  background: transparent;
+  border: 0;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  color: var(--dal-ask-texte);
+}
+.v2 .dal .dal-ask-saisie textarea::placeholder {
+  color: var(--dal-ask-gris);
+}
+.v2 .dal .dal-ask-boutons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+}
+.v2 .dal .dal-ask-auto {
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--dal-ask-icone);
+}
+.v2 .dal .dal-ask-envoyer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgb(38 109 240);
+  color: #fff;
+  box-shadow: rgb(255 255 255 / 0.07) 0 0 0 1px inset, rgb(38 109 240 / 0.12) 0 2px 4px -2px, rgb(38 109 240 / 0.08) 0 3px 6px -2px;
+  cursor: pointer;
+}
+.v2 .dal .dal-ask-envoyer:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

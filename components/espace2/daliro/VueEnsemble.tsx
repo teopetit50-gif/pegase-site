@@ -45,6 +45,7 @@ import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import { jourLocal, resume, type TeinteClair } from "./enClair";
 import { DalCarte, DalMenu } from "./DalCadre";
+import DemanderDaliro from "./DemanderDaliro";
 import { EtoilePleine } from "./IconesProjet";
 import { useFavoris } from "./navigateur";
 import MeteoSemaine from "./MeteoSemaine";
@@ -202,6 +203,8 @@ export default function VueEnsemble() {
             ]}
           />
           <span className="dal-pousse" />
+          {/* 05/11/2026 : « Interrogez vos chantiers » pour toute l'entreprise, sur le panneau Ask Attio (./DemanderDaliro) */}
+          <DemanderDaliro />
           <button type="button" className="dal-rond" aria-label="Copier le lien de la page" title="Copier le lien de la page" onClick={copierLien}>
             <DalIcone nom="LienUrl" />
           </button>
