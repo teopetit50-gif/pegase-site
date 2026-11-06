@@ -436,7 +436,7 @@ export default function Approvisionnement() {
     const corps = (
       <>
         <span className="dalp-vignette">
-          <PlainIcone nom="Batiment" taille={12} />
+          <DalIcone nom="Crane" taille={14} />
         </span>
         {nomChantier(id)}
       </>
@@ -465,6 +465,11 @@ export default function Approvisionnement() {
           <div className="dalp-tliste">
             <header className="dalp-ttete">
               <h1 className="dalp-titre">Approvisionnement</h1>
+              {/* 06/11 — la finition des autres pages de DALIRO : « Nouvelle commande » en haut à droite, comme « Nouvelle tâche » d'À faire */}
+              <button type="button" className="dalp-ajout" onClick={() => ouvrir({ type: "nouvelle" }, { chantier: filtre ?? "", delai: "5" })} aria-keyshortcuts="T" title="Nouvelle commande (T)">
+                <DalIcone nom="Plus" taille={14} />
+                <span>Nouvelle commande</span>
+              </button>
               {ouverte ? (
                 <button type="button" className="dalp-icone" aria-label="Masquer le volet" title="Masquer le volet" onClick={() => aller(onglet)}>
                   <PlainIcone nom="Ecran" />
@@ -537,12 +542,6 @@ export default function Approvisionnement() {
                   ) : null}
                 </div>
               </div>
-              <button type="button" className="dalp-ajout" onClick={() => ouvrir({ type: "nouvelle" }, { chantier: filtre ?? "", delai: "5" })} aria-keyshortcuts="T">
-                <PlainIcone nom="Plus" />
-                <span>
-                  Nouvelle commande <span className="dalp-kbd">T</span>
-                </span>
-              </button>
               <ul>
                 {enLecture ? <li className="dalp-tvide">Lecture de l&apos;approvisionnement des chantiers…</li> : null}
                 {liste.map(({ k, e }) => {
