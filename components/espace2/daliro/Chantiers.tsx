@@ -261,6 +261,11 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
      les lots lus ; sans ce second passage elle restait calée sur son début (janvier de l'an passé) */
   const aDesLignes = nbLignes > 0;
   useLayoutEffect(allerAujourdhui, [zoom.cle, aDesLignes]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* et une image plus tard, quand la zone a sa largeur (sinon la frise restait parfois calée sur son début) */
+  useEffect(() => {
+    const r = requestAnimationFrame(allerAujourdhui);
+    return () => cancelAnimationFrame(r);
+  }, [zoom.cle, nbLignes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* le défilement de la frise : un chantier fini avant la partie visible montre « ← date »
      au bord gauche de la frise (capture 390-sombre-timeline de Linear : flèche à 19 du bord
