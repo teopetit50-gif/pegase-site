@@ -674,3 +674,37 @@ html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
     padding: 0;
   }
 }
+
+/* ——— 06/11 : la carte d'une tâche, au milieu de l'écran (../lin/CarteCentrale, celle de Cashd).
+   Elle vit hors de la carte de Daliro (portail) : jetons v2 de detail-demande.css. ——— */
+.dal-mi-carte-aide {
+  gap: 4px;
+}
+.dal-mi-carte-titre {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--v2-gray-900);
+}
+.dal-mi-carte-aide p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--v2-gray-1000);
+}
+.dal-mi-carte-champ {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--v2-gray-900);
+}
+.dal-mi-carte-champ input {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--v2-a-400);
+  border-radius: 8px;
+  background: var(--v2-bg-100);
+  font: inherit;
+  font-size: 13px;
+  color: var(--v2-gray-1000);
+}

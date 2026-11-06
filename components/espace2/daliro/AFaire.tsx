@@ -36,13 +36,16 @@
        un lien vers la fiche du chantier au bon onglet (les fenêtres de ces
        gestes vivent dans la fiche).
    06/11/2026, demande de Teo (« ça me paraît bizarre que les boutons me
-   renvoient ailleurs ») : le geste se fait DANS le volet — Noter fait,
+   renvoient ailleurs », puis « une carte qui s'affiche au milieu de
+   l'écran, comme quand on valide une facture dans Cashd ») : le clic sur
+   une tâche ouvre la carte centrale de Cashd (../lin/CarteCentrale) à la
+   place du volet de droite, et le geste se fait DEDANS — Noter fait,
    Confirmé / Décliné, Signer, Valider, Noter commandée (avec la date
    promise), Noter reçue, Noter rendu — mêmes portes que la fiche en base
    réelle, données d'exemple modifiées sur place sinon ; la tâche suivante
-   s'ouvre ensuite. Restent des liens : soumettre une situation (saisir
-   l'avancement ligne à ligne), changer une date promise, et ce qui attend
-   quelqu'un d'autre. La pastille d'avatar (prise pour « assigné à ») devient
+   s'ouvre ensuite. Soumettre une situation et changer une date promise se
+   font aussi dans la carte ; ce qui attend quelqu'un d'autre le dit. Plus
+   aucun lien n'emmène ailleurs. La pastille d'avatar (prise pour « assigné à ») devient
    la puce « avec … » : l'entreprise concernée, pas celle qui fait.
    ↑/↓ changent de tâche, Échap referme.
    ══════════════════════════════════════════════════════════════════════ */
@@ -53,7 +56,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dateCourte, dateHeure, montant } from "@/components/espace/format";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { CONFIRMATIONS, libelleEnvoi } from "@/components/espace/daliro/etats";
-import { chargerAppro, noterCommande, noterLivraison, noterRetour, ouvrirSituation, repondreConfirmation, signerAvenant, terminerPassage, validerSituation } from "@/components/espace/daliro/portes";
+import { chargerAppro, ecrireCommande, noterCommande, noterLivraison, noterRetour, ouvrirSituation, repondreConfirmation, signerAvenant, soumettreSituation, terminerPassage, validerSituation } from "@/components/espace/daliro/portes";
+import { CarteCentrale, Feuille, type NavCarte } from "../lin/CarteCentrale";
 import { echeancesCommande, exempleAppro } from "@/components/espace/daliro/ApproCarte";
 import { TILLEULS } from "@/components/espace/daliro/exemples";
 import { ouvrirLocale } from "@/components/espace/daliro/situations";
@@ -486,59 +490,140 @@ function MenuMi({ libelle, icone, options }: { libelle: string; icone: NomDalIco
   );
 }
 
-/* ——— les gestes d'une tâche, faits sur place dans le volet ——— */
-type Geste = "fait" | "confirmee" | "declinee" | "signer" | "valider" | "commandee" | "recue" | "rendu";
-function GestesTache({ tache: x, jour, occupe, erreur, onGeste }: { tache: Tache; jour: string | null; occupe: boolean; erreur: string | null; onGeste: (g: Geste, date?: string) => void }) {
-  /* la date limite de livraison si elle est encore devant, sinon dans une semaine */
-  const [livraison, setLivraison] = useState(() => (jour && x.objet?.livrerAvant && x.objet.livrerAvant > jour ? x.objet.livrerAvant : jour ? decaler(jour, 7) : ""));
-  const bouton = (g: Geste, libelle: string, icone: NomDalIcone, plein = true) => (
-    <button key={g} type="button" className="dal-mi-geste" data-plein={plein ? "" : undefined} disabled={occupe} onClick={() => onGeste(g, g === "commandee" ? livraison : undefined)}>
-      <DalIcone nom={icone} taille={14} />
-      <span>{libelle}</span>
+/* ——— la carte d'une tâche, au milieu de l'écran (la carte d'« À valider » de Cashd) : ce qu'il faut
+   faire, puis le geste, fait sur place ——— */
+type Geste = "fait" | "confirmee" | "declinee" | "signer" | "valider" | "soumettre" | "commandee" | "recue" | "rendu" | "date";
+const FEUILLE: Record<Genre, string> = {
+  confirmer: "CONFIRMATION J-2",
+  fait: "PASSAGE",
+  passage: "PASSAGE",
+  signer: "AVENANT",
+  avenant_attente: "AVENANT",
+  soumettre: "SITUATION",
+  valider: "SITUATION",
+  situation_attente: "SITUATION",
+  commander: "COMMANDE",
+  livraison: "LIVRAISON",
+  rendre: "MATÉRIEL À RENDRE",
+};
+function CarteTache({
+  tache: x,
+  jour,
+  nav,
+  occupe,
+  erreur,
+  onGeste,
+  reporter,
+  fermer,
+}: {
+  tache: Tache;
+  jour: string | null;
+  nav: NavCarte | null;
+  occupe: boolean;
+  erreur: string | null;
+  onGeste: (g: Geste, date?: string) => void;
+  reporter: () => void;
+  fermer: () => void;
+}) {
+  /* la date de livraison : la limite si elle est encore devant, sinon dans une semaine */
+  const [date, setDate] = useState(() => (jour && x.objet?.livrerAvant && x.objet.livrerAvant > jour ? x.objet.livrerAvant : jour ? decaler(jour, 7) : ""));
+  const et = etatDe(x);
+  const avecDate = x.genre === "commander" || x.geste === "Changer la date promise";
+  const bouton = (g: Geste, libelle: string, principal = true) => (
+    <button key={g} type="button" className={principal ? "v2-btn v2-btn--primaire" : "v2-btn v2-btn--fantome"} disabled={occupe || (g === "commandee" || g === "date" ? !date : false)} onClick={() => onGeste(g, g === "commandee" || g === "date" ? date : undefined)}>
+      {libelle}
     </button>
   );
-  const boutons: React.ReactNode[] =
+  const gestes: React.ReactNode[] =
     x.genre === "fait" && x.passageId
-      ? [bouton("fait", "Noter fait", "IssueStatusDone")]
+      ? [bouton("fait", "Noter fait")]
       : x.genre === "confirmer" && x.passageId
-        ? [bouton("confirmee", "Il a confirmé", "IssueStatusDone"), bouton("declinee", "Il a décliné", "StatusCanceled", false)]
+        ? [bouton("confirmee", "Il a confirmé"), bouton("declinee", "Il a décliné", false)]
         : x.genre === "signer"
-          ? [bouton("signer", "Signer l'avenant", "Signature")]
+          ? [bouton("signer", "Signer l'avenant")]
           : x.genre === "valider"
-            ? [bouton("valider", "Valider la situation", "IssueStatusDone")]
-            : x.genre === "commander"
-              ? [bouton("commandee", "Noter commandée", "Cart")]
-              : x.genre === "rendre"
-                ? [bouton("rendu", "Noter rendu", "IssueStatusDone")]
-                : x.genre === "livraison" && x.geste === "Noter reçue"
-                  ? [bouton("recue", "Noter reçue", "Box")]
-                  : [];
-  if (!boutons.length) {
-    return (
-      <Link className="dal-mi-geste" href={x.lien}>
-        <DalIcone nom={x.genre === "soumettre" ? "Write" : x.genre === "passage" ? "Calendar" : "Send"} taille={14} />
-        <span>{x.geste}</span>
-      </Link>
-    );
-  }
+            ? [bouton("valider", "Valider la situation")]
+            : x.genre === "soumettre"
+              ? [bouton("soumettre", "Soumettre la situation")]
+              : x.genre === "commander"
+                ? [bouton("commandee", "Noter commandée")]
+                : x.genre === "rendre"
+                  ? [bouton("rendu", "Noter rendu")]
+                  : x.genre === "livraison"
+                    ? x.geste === "Noter reçue"
+                      ? [bouton("recue", "Noter reçue")]
+                      : [bouton("date", "Enregistrer la nouvelle date")]
+                    : [];
+  const autres = x.proprietes.filter((p) => p.libelle !== "Chantier");
   return (
-    <>
-      {x.genre === "commander" ? (
-        <label className="dal-mi-vchamp">
-          <span>Livraison promise le</span>
-          <input type="date" value={livraison} onChange={(e) => setLivraison(e.target.value)} disabled={occupe} />
+    <CarteCentrale
+      ouverte
+      fermer={fermer}
+      libelle={x.titre}
+      sur={`DALIRO · ${NATURE[x.genre].libelle}`}
+      statut={
+        <>
+          <DalIcone nom={et.icone} taille={14} />
+          {x.aFaire ? "À faire" : x.genre === "passage" ? "Rien à faire" : "En attente"}
+        </>
+      }
+      nav={nav}
+      gauche={<Feuille titre={FEUILLE[x.genre]} sous={x.ref} nom={x.qui ?? x.chantier.nom} sousNom={x.qui ? [x.chantier.nom] : []} lignes={autres.map((p): [string, string] => [p.libelle, p.valeur])} />}
+      piedGauche={
+        <div className="v2-det-document-ligne">
+          <span className="v2-det-mono">{x.ref}</span>
+          <span className="v2-det-sous">{x.chantier.nom}</span>
+        </div>
+      }
+      titre={x.titre}
+      echeance={{ texte: x.dateLigne, urgence: x.enRetard ? "retard" : undefined }}
+      notes={
+        erreur ? (
+          <Note teinte="rouge" role="alert">
+            {erreur}
+          </Note>
+        ) : !gestes.length ? (
+          <Note teinte="gris">Rien à faire pour vous : cette tâche attend quelqu&apos;un d&apos;autre. Elle quittera la liste toute seule.</Note>
+        ) : undefined
+      }
+      actions={
+        <>
+          {gestes}
+          {gestes.length ? (
+            <button type="button" className="v2-btn v2-btn--fantome" disabled={occupe} onClick={reporter}>
+              Plus tard (demain)
+            </button>
+          ) : (
+            <button type="button" className="v2-btn v2-btn--fantome" onClick={fermer}>
+              Fermer
+            </button>
+          )}
+        </>
+      }
+    >
+      <div className="v2-det-bloc dal-mi-carte-aide">
+        <span className="dal-mi-carte-titre">Ce qu&apos;il faut faire</span>
+        <p>{x.description}</p>
+      </div>
+      {avecDate ? (
+        <label className="dal-mi-carte-champ">
+          <span>{x.genre === "commander" ? "Livraison promise le" : "Nouvelle date promise"}</span>
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={occupe} />
         </label>
       ) : null}
-      <div className="dal-mi-gestes">{boutons}</div>
-      {erreur ? (
-        <p className="dal-mi-verreur" role="alert">
-          {erreur}
-        </p>
-      ) : null}
-      <Link className="dal-mi-voir" href={x.lien}>
-        Voir dans le chantier ›
-      </Link>
-    </>
+      <dl className="v2-det-fiche">
+        <dt>Chantier</dt>
+        <dd>{x.chantier.nom}</dd>
+        {x.qui ? (
+          <>
+            <dt>Avec</dt>
+            <dd>{x.qui}</dd>
+          </>
+        ) : null}
+        <dt>Priorité</dt>
+        <dd>{prioriteDe(x).libelle}</dd>
+      </dl>
+    </CarteCentrale>
   );
 }
 
@@ -580,7 +665,6 @@ export default function AFaire() {
   const filtreChantier = params.get("chantier");
   const cleParam = params.get("tache");
   const passageParam = params.get("passage");
-  const voletDemande = params.get("details") !== "0";
   const semaineFiltre = params.get("semaine");
   const voirReportees = params.get("reportees") === "1";
 
@@ -673,9 +757,7 @@ export default function AFaire() {
     }
     return null;
   })();
-  /* un repère dont le chantier n'est pas encore lu : le volet attend la lecture */
-  const repereEnAttente = !ouverte && !!(cleParam || passageParam) && (enLecture || !jour);
-  const volet = voletDemande && (!!ouverte || repereEnAttente);
+  const rangOuverte = ouverte ? ordre.findIndex((o) => o.cle === ouverte.cle) : -1;
 
   const adresse = useCallback(
     (modifier: (p: URLSearchParams) => void) => {
@@ -763,7 +845,7 @@ export default function AFaire() {
         message = `« ${nomTache(p)} » est noté fait au ${dateCourte(fin)}.`;
       } else if ((geste === "confirmee" || geste === "declinee") && p) {
         if (reelle) {
-          await repondreConfirmation(p.id, geste, `bureau:${p.id}:${Date.now()}`, { canal: "telephone", texte: null });
+          await repondreConfirmation(p.id, geste, `bureau:${p.id}:${nid()}`, { canal: "telephone", texte: null });
           await relireChantier(t.chantier.id);
         } else
           onLocal({
@@ -789,6 +871,21 @@ export default function AFaire() {
           await relireChantier(t.chantier.id);
         } else onLocal({ ...t, situations: (t.situations ?? []).map((v) => (v.id === id ? { ...v, statut: "validee", validee_le: maintenant, validee_libelle: "Vous", demande_statut: "executee" } : v)) });
         message = "La situation est validée.";
+      } else if (geste === "soumettre" && x.objet?.type === "situation") {
+        const id = x.objet.id;
+        if (reelle) {
+          await soumettreSituation(id);
+          await relireChantier(t.chantier.id);
+        } else onLocal({ ...t, situations: (t.situations ?? []).map((v) => (v.id === id ? { ...v, statut: "soumise", demande_id: nid(), demande_statut: "en_attente", soumise_le: maintenant } : v)) });
+        message = "La situation est soumise : elle attend sa validation dans « À valider ».";
+      } else if (geste === "date" && x.objet?.type === "commande" && dateLivraison) {
+        const id = x.objet.id;
+        if (reelle) {
+          await ecrireCommande(id, t.chantier.id, { livraison_prevue: dateLivraison });
+          const a = await chargerAppro(t.chantier.id);
+          setApproReel((r) => ({ ...r, [t.chantier.id]: a?.commandes ?? [] }));
+        } else setFaitesLocales((f) => new Set(f).add(x.cle));
+        message = `Nouvelle date promise : le ${dateCourte(dateLivraison)}.`;
       } else if ((geste === "commandee" || geste === "recue" || geste === "rendu") && x.objet?.type === "commande") {
         const id = x.objet.id;
         if (reelle) {
@@ -850,24 +947,13 @@ export default function AFaire() {
       setEnvoi(false);
     }
   };
-  /* le bouton « Open details » de Linear (⌘ I) : rien d'ouvert, il ouvre la première tâche */
-  const lienVolet = !ouverte && !repereEnAttente ? (ordre.length ? lienTache(ordre[0].cle) : null) : adresse((p) => (volet ? p.set("details", "0") : p.delete("details")));
-  const basculerVolet = () => {
-    if (lienVolet) routeur.replace(lienVolet, { scroll: false });
-  };
-
-  /* ↑/↓ changent de tâche, Échap referme, ⌘ I ouvre ou ferme le volet */
+  /* ↑/↓ changent de tâche, Échap referme */
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.altKey) return;
       const c = e.target as HTMLElement | null;
       if (c && (c.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(c.tagName))) return;
       if (document.querySelector(".dal-mi .dal-menu")) return;
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "i") {
-        e.preventDefault();
-        if (lienVolet) routeur.replace(lienVolet, { scroll: false });
-        return;
-      }
       if (e.metaKey || e.ctrlKey) return;
       if (e.key === "Escape" && choisies.size) {
         e.preventDefault();
@@ -884,7 +970,7 @@ export default function AFaire() {
     };
     window.addEventListener("keydown", touche);
     return () => window.removeEventListener("keydown", touche);
-  }, [cleParam, passageParam, ouverte, ordre, routeur, lienTache, lienVolet, choisies.size]);
+  }, [cleParam, passageParam, ouverte, ordre, routeur, lienTache, choisies.size]);
   useEffect(() => {
     listeRef.current?.querySelector("[aria-current]")?.scrollIntoView({ block: "nearest" });
   }, [ouverte?.cle]);
@@ -937,17 +1023,14 @@ export default function AFaire() {
                 { cle: "reportees", libelle: `Afficher les reportées (${nbReportees})`, icone: "Clock", coche: voirReportees, href: lienReportees },
               ]}
             />
-            <button type="button" className="dal-rond dal-rond--plein" aria-label={volet ? "Fermer les détails" : "Ouvrir les détails"} title={volet ? "Fermer les détails (⌘ I)" : "Ouvrir les détails (⌘ I)"} aria-expanded={volet} onClick={basculerVolet}>
-              <DalIcone nom="Volet" />
-            </button>
           </div>
         </div>
       </header>
 
       <p className="dal-mi-intro">
-        Ce que Daliro vous laisse à faire. Il envoie déjà les demandes de confirmation à J-2 et suit les commandes ; ici, il ne reste que vos gestes. Cliquez une tâche : le geste se fait dans son volet, sans quitter la page.
+        Ce que Daliro vous laisse à faire. Il envoie déjà les demandes de confirmation à J-2 et suit les commandes ; ici, il ne reste que vos gestes. Cliquez une tâche : sa carte s&apos;ouvre au milieu de l&apos;écran, et le geste se fait dedans.
       </p>
-      <div className="dal-mi" data-volet={volet ? "" : undefined}>
+      <div className="dal-mi">
         <div className="dal-mi-liste" ref={listeRef}>
           {!jour || chargement ? (
             <div className="dal-mi-groupe" aria-busy="true">
@@ -1149,8 +1232,35 @@ export default function AFaire() {
           </div>
         ) : null}
 
-        {volet ? (ouverte ? voletDe(ouverte) : voletAttente()) : null}
       </div>
+      {ouverte ? (
+        <CarteTache
+          key={ouverte.cle}
+          tache={ouverte}
+          jour={jour}
+          nav={
+            rangOuverte < 0
+              ? null
+              : {
+                  position: rangOuverte + 1,
+                  total: ordre.length,
+                  precedente: rangOuverte > 0 ? () => routeur.replace(lienTache(ordre[rangOuverte - 1].cle), { scroll: false }) : undefined,
+                  suivante: rangOuverte < ordre.length - 1 ? () => routeur.replace(lienTache(ordre[rangOuverte + 1].cle), { scroll: false }) : undefined,
+                }
+          }
+          occupe={gesteEnCours}
+          erreur={erreurGeste?.cle === ouverte.cle ? erreurGeste.message : null}
+          onGeste={(g, date) => void faireGeste(ouverte, g, date)}
+          reporter={() => {
+            if (!jour) return;
+            const suivante = ordre[rangOuverte + 1] ?? null;
+            reportes.reporter("tache", ouverte.cle, decaler(jour, 1));
+            toast("Tâche reportée à demain : elle revient demain matin.", "vert");
+            routeur.replace(lienTache(suivante?.cle ?? null), { scroll: false });
+          }}
+          fermer={() => routeur.replace(lienTache(null), { scroll: false })}
+        />
+      ) : null}
       {/* Noter faits (G24) : la confirmation, passage par passage */}
       <ModalOverlay isOpen={confirmerFaits} onOpenChange={(o) => !o && !envoi && setConfirmerFaits(false)} isDismissable={!envoi} className="v2-jetons v2-voile">
         <Modal className="v2-modale">
@@ -1240,90 +1350,4 @@ export default function AFaire() {
       </ModalOverlay>
     </DalCarte>
   );
-
-  /* ——— le volet de détails (400, les cartes de la page d'une Initiative) ——— */
-  function voletDe(x: Tache) {
-    return (
-      <aside className="dal-mi-volet" aria-label={`Tâche : ${x.titre}`}>
-        <section className="dal-mi-vcarte">
-          <div className="dal-mi-vtete">
-            <span className="dal-mi-vtitre">{x.ref}</span>
-            <span className="dal-pousse" />
-            <Link className="dal-rond dal-mi-vfermer" href={lienTache(null)} scroll={false} aria-label="Fermer la tâche" title="Fermer (Échap)">
-              <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M4.03 3.97a.75.75 0 0 0-1.06 1.06L6.94 9l-3.97 3.97a.75.75 0 1 0 1.06 1.06L8 10.06l3.97 3.97a.75.75 0 1 0 1.06-1.06L9.06 9l3.97-3.97a.75.75 0 0 0-1.06-1.06L8 7.94z" transform="translate(0 -1)" />
-              </svg>
-            </Link>
-          </div>
-          <h3 className="dal-mi-vnom">{x.titre}</h3>
-          <p className="dal-mi-vdate" data-retard={x.enRetard ? "" : undefined}>
-            {x.dateLigne}
-          </p>
-          <p className="dal-mi-vdesc">{x.description}</p>
-          <GestesTache key={x.cle} tache={x} jour={jour} occupe={gesteEnCours} erreur={erreurGeste?.cle === x.cle ? erreurGeste.message : null} onGeste={(g, date) => void faireGeste(x, g, date)} />
-        </section>
-        <section className="dal-mi-vcarte">
-          <div className="dal-mi-vtete">
-            <span className="dal-mi-vtitre">Propriétés</span>
-          </div>
-          <dl className="dal-mi-props">
-            <div className="dal-mi-prop">
-              <dt>État</dt>
-              <dd>
-                <span className="dal-mi-valeur">
-                  <span className={`dal-mi-etat ${etatDe(x).classe}`}>
-                    <DalIcone nom={etatDe(x).icone} taille={14} />
-                  </span>
-                  <span>{x.aFaire ? "À faire" : x.genre === "passage" ? "Rien à faire" : "En attente"}</span>
-                </span>
-              </dd>
-            </div>
-            <div className="dal-mi-prop">
-              <dt>Priorité</dt>
-              <dd>
-                <span className="dal-mi-valeur">
-                  <span className="dal-mi-prio" data-urgente={prioriteDe(x).urgente ? "" : undefined}>
-                    <DalIcone nom={prioriteDe(x).icone} taille={14} />
-                  </span>
-                  <span>{prioriteDe(x).libelle}</span>
-                </span>
-              </dd>
-            </div>
-            {x.proprietes.map((p) => (
-              <div key={p.libelle} className="dal-mi-prop">
-                <dt>{p.libelle}</dt>
-                <dd>
-                  {p.lien ? (
-                    <Link className="dal-mi-valeur" href={p.lien}>
-                      <DalIcone nom={p.icone} taille={14} />
-                      <span>{p.valeur}</span>
-                    </Link>
-                  ) : (
-                    <span className="dal-mi-valeur">
-                      <DalIcone nom={p.icone} taille={14} />
-                      <span>{p.valeur}</span>
-                    </span>
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      </aside>
-    );
-  }
-
-  function voletAttente() {
-    return (
-      <aside className="dal-mi-volet" aria-label="Tâche en lecture" aria-busy="true">
-        <section className="dal-mi-vcarte">
-          <div className="dal-mi-vtete">
-            <span className="dal-mi-vtitre">Lecture des chantiers…</span>
-          </div>
-          <span className="dal-mi-squelette" style={{ width: "80%", height: 20 }} />
-          <span className="dal-mi-squelette" style={{ width: "50%" }} />
-        </section>
-      </aside>
-    );
-  }
 }
