@@ -51,6 +51,11 @@ function classeReconnaissance(): ClasseReconnaissance | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 const rien = () => () => {};
+/* Brave expose la reconnaissance vocale mais n'a pas le service derrière :
+   chaque essai finit en erreur « network » */
+function estBrave(): boolean {
+  return typeof navigator !== "undefined" && "brave" in navigator;
+}
 
 type Phase = "pret" | "ecoute" | "exemple" | "calcul" | "fait";
 type ReponseApi = { titre: string; client: string; adresse: string; telephone: string | null; lignes: LigneDevis[] };
@@ -64,6 +69,7 @@ function dureeVocal(s: number): string {
 
 export function DicterDevis({ retour }: { retour?: { libelle: string; href: string } }) {
   const compatible = useSyncExternalStore(rien, () => classeReconnaissance() !== null, () => true);
+  const brave = useSyncExternalStore(rien, estBrave, () => false);
   const [phase, setPhase] = useState<Phase>("pret");
   const [texte, setTexte] = useState("");
   const [provisoire, setProvisoire] = useState("");
@@ -175,7 +181,28 @@ export function DicterDevis({ retour }: { retour?: { libelle: string; href: stri
     r.lang = "fr-FR";
     r.continuous = true;
     r.interimResults = true;
+    /* 06/11 — Teo : « La dictée s'est coupée » juste après avoir autorisé le
+       micro. Le micro marchait ; c'est le service qui transcrit qui lâchait
+       (erreur « network » : Chrome envoie la voix aux serveurs de Google, et
+       Brave, Opera, Arc ou un réseau qui hoquette ne répondent pas). Une
+       coupure réseau est souvent passagère : on relance seul, trois fois,
+       avant de rendre la main. Et le message dit enfin ce qui se passe. */
+    let relances = 0;
+    let aRelancer = false;
+    const arretVrai = (message: string) => {
+      ecoute.current = false;
+      couperChrono();
+      const p = provisoireRef.current;
+      if (p) {
+        const avant = texteRef.current.trimEnd();
+        poserTexte(`${avant}${avant ? " " : ""}${p}`);
+      }
+      poserProvisoire("");
+      setPhase("pret");
+      setErreur(message);
+    };
     r.onresult = (e) => {
+      relances = 0;
       let fin = "";
       let prov = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -191,27 +218,44 @@ export function DicterDevis({ retour }: { retour?: { libelle: string; href: stri
     };
     r.onerror = (e) => {
       if (e.error === "no-speech" || e.error === "aborted") return;
-      ecoute.current = false;
-      couperChrono();
-      poserProvisoire("");
-      setPhase("pret");
-      setErreur(
+      if (e.error === "network" && ecoute.current && relances < 3) {
+        relances += 1;
+        aRelancer = true;
+        return;
+      }
+      const dejaEcrit = texteRef.current.trim().length > 0;
+      arretVrai(
         e.error === "not-allowed" || e.error === "service-not-allowed"
-          ? "Le micro est refusé : autorisez-le pour cette page (icône à gauche de l'adresse), ou essayez l'exemple."
+          ? dejaEcrit
+            ? "La dictée s'est arrêtée : le texte est gardé. Appuyez sur « Reprendre la dictée » pour continuer."
+            : "Le micro est refusé : autorisez-le pour cette page (icône à gauche de l'adresse), ou essayez l'exemple."
           : e.error === "audio-capture"
             ? "Aucun micro n'est branché : essayez l'exemple, ou écrivez la dictée."
-            : "La dictée s'est coupée. Recommencez, ou écrivez la suite.",
+            : e.error === "network"
+              ? estBrave()
+                ? "Brave ne fournit pas la dictée vocale. Ouvrez la page dans Chrome, Edge ou Safari, écrivez la dictée, ou essayez l'exemple."
+                : "Le service de dictée du navigateur ne répond pas (connexion coupée, ou navigateur sans dictée comme Brave, Opera ou Arc). Ouvrez la page dans Chrome, Edge ou Safari, écrivez la suite, ou essayez l'exemple."
+              : e.error === "language-not-supported"
+                ? "Ce navigateur ne dicte pas en français. Ouvrez la page dans Chrome, Edge ou Safari, ou écrivez la dictée."
+                : `La dictée s'est coupée (${e.error}). Recommencez, ou écrivez la suite.`,
       );
     };
-    /* Chrome s'arrête seul après un silence : on relance tant qu'on écoute */
+    /* Chrome s'arrête seul après un silence ou une coupure : on relance tant
+       qu'on écoute (après une coupure réseau, on laisse souffler le service) */
     r.onend = () => {
-      if (ecoute.current) {
+      if (!ecoute.current) return;
+      const relancer = () => {
+        if (!ecoute.current) return;
         try {
           r.start();
         } catch {
-          ecoute.current = false;
+          arretVrai("La dictée s'est arrêtée : le texte est gardé. Appuyez sur « Reprendre la dictée » pour continuer.");
         }
-      }
+      };
+      if (aRelancer) {
+        aRelancer = false;
+        window.setTimeout(relancer, 400 * relances);
+      } else relancer();
     };
     reco.current = r;
     ecoute.current = true;
@@ -409,6 +453,7 @@ export function DicterDevis({ retour }: { retour?: { libelle: string; href: stri
             )}
           </div>
           {!compatible ? <p className="dal-dic-note">Ce navigateur ne sait pas dicter (Firefox) : écrivez la dictée dans la feuille, ou essayez l&apos;exemple.</p> : null}
+          {compatible && brave ? <p className="dal-dic-note">Brave ne fournit pas la dictée vocale : ouvrez la page dans Chrome, Edge ou Safari, écrivez la dictée dans la feuille, ou essayez l&apos;exemple.</p> : null}
 
           <ol className="dal-dic-etapes">
             <li>
