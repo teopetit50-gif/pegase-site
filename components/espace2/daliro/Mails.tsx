@@ -55,6 +55,7 @@ import { Note } from "../ui";
 import { useToast } from "../Toasts";
 import { RACINE } from "../modules";
 import { BOITE, CATEGORIES, CHANTIERS_MAIL, mailVide, mailsExemple, nomChantier, type CategorieMail, type Mail, type PrioriteMail, type StatutMail } from "./exemplesMails";
+import { adresseValide, lireMailDevis, oublierMailDevis, type MailDevis } from "./mailDevis";
 import "./dal-mails.css";
 
 const CHEMIN = `${RACINE}/daliro/mails`;
@@ -131,12 +132,26 @@ export default function Mails() {
   const [brouillon, setBrouillon] = useState<Mail | null>(null);
   const [nouveau, setNouveau] = useState(false);
   const [reponse, setReponse] = useState<{ id: string; texte: string }>({ id: "", texte: "" });
+  /* le mail à écrire (?ecrire=devis) : le devis l'a préparé (./mailDevis), il manque l'adresse */
+  const [envoi, setEnvoi] = useState<Envoi | null>(null);
+  const aEcrire = params.get("ecrire") === "devis";
 
   /* les mails sont datés à l'heure du visiteur : lus après le montage */
   useEffect(() => {
     const t = window.setTimeout(() => setMails(lire()), 0);
     return () => window.clearTimeout(t);
   }, []);
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      if (!aEcrire) return setEnvoi(null);
+      setEnvoi((e) => {
+        if (e) return e;
+        const m = lireMailDevis();
+        return { a: "", cc: "", objet: m?.objet ?? "", corps: m?.corps ?? "", devis: m, essai: false };
+      });
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [aEcrire]);
   const changer = (f: (m: Mail[]) => Mail[]) =>
     setMails((v) => {
       const suivant = f(v ?? []);
@@ -254,6 +269,46 @@ export default function Mails() {
     toast("Mails d'exemple remis", "vert");
     aller(CHEMIN);
   };
+
+  /* ——— le mail du devis ——— */
+  const majEnvoi = (c: Partial<Envoi>) => setEnvoi((e) => (e ? { ...e, ...c } : e));
+  const fermerEnvoi = () => {
+    oublierMailDevis();
+    setEnvoi(null);
+    aller(adresse((p) => p.delete("ecrire")));
+  };
+  const envoyer = () => {
+    if (!envoi) return;
+    if (!adresseValide(envoi.a)) return majEnvoi({ essai: true });
+    const parti: Mail = {
+      ...mailVide(prochainId()),
+      de_nom: "Vous",
+      de_adresse: BOITE,
+      a: envoi.a.trim(),
+      cc: envoi.cc.trim(),
+      objet: envoi.objet.trim(),
+      corps: envoi.corps,
+      statut: "traite",
+      categorie: "client",
+      pieces: envoi.devis ? [envoi.devis.piece] : [],
+    };
+    changer((v) => [parti, ...v]);
+    oublierMailDevis();
+    setEnvoi(null);
+    toast(envoi.devis ? `Devis envoyé à ${parti.a}` : `Mail envoyé à ${parti.a}`, "vert");
+    aller(adresse((p) => {
+      p.delete("ecrire");
+      p.set("onglet", "tous");
+      p.set("id", parti.id);
+    }));
+  };
+  /* la vraie messagerie : la pièce ne suit pas un lien mailto, le détail du devis va dans le texte */
+  const lienMessagerie = (e: Envoi) => {
+    const recap = e.devis ? `\n\n— Détail du devis ${e.devis.numero} —\n${e.devis.lignes.map(([l, v]) => `· ${l} : ${v}`).join("\n")}\nTotal : ${e.devis.ht} HT, ${e.devis.ttc} TTC` : "";
+    const q = [...(e.cc.trim() ? [`cc=${encodeURIComponent(e.cc.trim())}`] : []), `subject=${encodeURIComponent(e.objet)}`, `body=${encodeURIComponent(e.corps + recap)}`];
+    return `mailto:${encodeURIComponent(e.a.trim())}?${q.join("&")}`;
+  };
+  const adresseFausse = envoi ? envoi.essai && !adresseValide(envoi.a) : false;
 
   /* ——— les lignes ——— */
   const fil = (m: Mail): Fil => {
@@ -466,7 +521,7 @@ export default function Mails() {
           aller(lienId(null));
         }}
         libelle={choisi ? `Mail ${choisi.objet || "(sans objet)"}` : "Mail introuvable"}
-        sur={enCours ? (nouveau ? "DALIRO · Nouveau mail" : "DALIRO · Mail en modification") : "DALIRO · Mail reçu"}
+        sur={enCours ? (nouveau ? "DALIRO · Nouveau mail" : "DALIRO · Mail en modification") : choisi && envoyeParVous(choisi) ? "DALIRO · Mail envoyé" : "DALIRO · Mail reçu"}
         statut={choisi ? <>{LIB_STATUT[choisi.statut]}</> : undefined}
         nav={
           choisi && rang >= 0
@@ -503,7 +558,7 @@ export default function Mails() {
           ) : undefined
         }
         titre={choisi ? (enCours ? (nouveau ? "Nouveau mail" : "Modifier le mail") : choisi.objet || "(sans objet)") : "Mail introuvable"}
-        echeance={choisi && !enCours ? { texte: `Reçu le ${dateHeure(choisi.recu_le)}`, urgence: choisi.priorite === 4 && choisi.statut === "nouveau" ? "aujourdhui" : undefined } : null}
+        echeance={choisi && !enCours ? { texte: `${envoyeParVous(choisi) ? "Envoyé" : "Reçu"} le ${dateHeure(choisi.recu_le)}`, urgence: choisi.priorite === 4 && choisi.statut === "nouveau" ? "aujourdhui" : undefined } : null}
         notes={
           enCours ? (
             <Note teinte="gris">Mails d&apos;exemple : vos modifications restent dans ce navigateur, rien n&apos;est envoyé.</Note>
@@ -603,7 +658,7 @@ export default function Mails() {
                   </dd>
                 </>
               ) : null}
-              <dt>Expéditeur</dt>
+              <dt>{envoyeParVous(choisi) ? "Destinataire" : "Expéditeur"}</dt>
               <dd>{CATEGORIES[choisi.categorie]}</dd>
               <dt>Chantier</dt>
               <dd>{choisi.chantier_id ? <Link href={`${BASE}/chantiers/${choisi.chantier_id}`}>{nomChantier(choisi.chantier_id)}</Link> : <span className="v2-det-sous">Aucun chantier</span>}</dd>
@@ -662,7 +717,7 @@ export default function Mails() {
               ) : null}
               <div className="dal-ml-repondre">
                 <span className="v2-champ dal-ml-zone">
-                  <textarea rows={3} aria-label="Votre réponse" placeholder={`Répondre à ${choisi.de_nom || choisi.de_adresse || "l'expéditeur"}…`} value={texteReponse} onChange={(e) => setReponse({ id: choisi.id, texte: e.target.value })} />
+                  <textarea rows={3} aria-label="Votre réponse" placeholder={envoyeParVous(choisi) ? "Noter la suite : relance, réponse du client…" : `Répondre à ${choisi.de_nom || choisi.de_adresse || "l'expéditeur"}…`} value={texteReponse} onChange={(e) => setReponse({ id: choisi.id, texte: e.target.value })} />
                 </span>
                 <button type="button" className="v2-btn v2-btn--petit" disabled={!texteReponse.trim()} onClick={() => repondre(choisi)}>
                   <Send width={14} height={14} aria-hidden="true" /> Ajouter la réponse
@@ -674,9 +729,136 @@ export default function Mails() {
           <p className="v2-det-vide">Le mail que désigne ce lien n&apos;existe pas (ou plus) dans cette boîte.</p>
         )}
       </CarteCentrale>
+
+      <CarteCentrale
+        ouverte={aEcrire && envoi !== null && mails !== null}
+        fermer={fermerEnvoi}
+        libelle={envoi?.devis ? `Envoyer le devis ${envoi.devis.numero}` : "Nouveau mail"}
+        sur="DALIRO · Nouveau mail"
+        statut={<>Brouillon</>}
+        gauche={
+          envoi?.devis ? (
+            <Feuille
+              titre="DEVIS"
+              sous={envoi.devis.numero}
+              nom={envoi.devis.client}
+              sousNom={[...(envoi.devis.adresse ? [envoi.devis.adresse] : []), envoi.devis.titre]}
+              lignes={feuilleDevis(envoi.devis)}
+              total={["Total TTC", envoi.devis.ttc]}
+            />
+          ) : (
+            <Feuille titre="MAIL" sous="Nouveau mail" texte={envoi?.corps.trim() || "Le texte du mail."} />
+          )
+        }
+        piedGauche={
+          envoi?.devis ? (
+            <div className="v2-det-document-ligne">
+              <span className="v2-det-mono">{envoi.devis.piece.nom}</span>
+              <span className="v2-det-sous">
+                Pièce jointe · {taille(envoi.devis.piece.taille)} · {envoi.devis.ht} HT
+              </span>
+            </div>
+          ) : undefined
+        }
+        titre={envoi?.devis ? `Envoyer le devis ${envoi.devis.numero}` : "Nouveau mail"}
+        echeance={envoi?.devis ? { texte: `${envoi.devis.client} · ${envoi.devis.ttc} TTC` } : null}
+        notes={
+          <Note teinte="gris">
+            Exemple : rien ne part vraiment. « Ouvrir dans votre messagerie » l&apos;envoie pour de vrai.
+          </Note>
+        }
+        actions={
+          envoi ? (
+            <>
+              <button type="button" className="v2-btn v2-btn--primaire" onClick={envoyer}>
+                <Send width={14} height={14} aria-hidden="true" /> {envoi.devis ? "Envoyer le devis" : "Envoyer"}
+              </button>
+              {adresseValide(envoi.a) ? (
+                <a className="v2-btn v2-btn--fantome" href={lienMessagerie(envoi)}>
+                  <ExternalLink width={14} height={14} aria-hidden="true" /> Ouvrir dans votre messagerie
+                </a>
+              ) : null}
+              <button type="button" className="v2-btn v2-btn--fantome" onClick={fermerEnvoi}>
+                <X width={14} height={14} aria-hidden="true" /> Annuler
+              </button>
+            </>
+          ) : undefined
+        }
+      >
+        {envoi ? (
+          <div className="dal-ml-form">
+            <label className="v2-libelle">
+              À
+              <span className="v2-champ">
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  autoFocus
+                  value={envoi.a}
+                  onChange={(e) => majEnvoi({ a: e.target.value })}
+                  onKeyDown={(e) => e.key === "Enter" && envoyer()}
+                  placeholder={envoi.devis && envoi.devis.client !== "Client" ? `L'adresse mail de ${envoi.devis.client}` : "client@exemple.fr"}
+                  aria-invalid={adresseFausse || undefined}
+                  aria-describedby="dal-ml-a-aide"
+                />
+              </span>
+              <span id="dal-ml-a-aide" className={adresseFausse ? "v2-aide v2-aide--erreur" : "v2-aide"}>
+                {adresseFausse ? "Cette adresse ne ressemble pas à une adresse mail : vérifiez-la (nom@domaine.fr)." : "Le seul champ à remplir : tout le reste est prêt."}
+              </span>
+            </label>
+            <label className="v2-libelle">
+              Copie
+              <span className="v2-champ">
+                <input type="email" value={envoi.cc} onChange={(e) => majEnvoi({ cc: e.target.value })} placeholder="Aucune" />
+              </span>
+            </label>
+            <label className="v2-libelle">
+              Objet
+              <span className="v2-champ">
+                <input value={envoi.objet} onChange={(e) => majEnvoi({ objet: e.target.value })} />
+              </span>
+            </label>
+            <label className="v2-libelle">
+              Message
+              <span className="v2-champ dal-ml-zone">
+                <textarea rows={12} value={envoi.corps} onChange={(e) => majEnvoi({ corps: e.target.value })} />
+              </span>
+            </label>
+            {envoi.devis ? (
+              <div className="v2-libelle">
+                <span>Pièce jointe</span>
+                <ul className="dal-ml-pieces">
+                  <li>
+                    <Paperclip width={14} height={14} aria-hidden="true" />
+                    <span>{envoi.devis.piece.nom}</span>
+                    <span className="v2-aide">
+                      {taille(envoi.devis.piece.taille)} · {envoi.devis.lignes.length} ligne{envoi.devis.lignes.length > 1 ? "s" : ""}
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </CarteCentrale>
     </ListeFils>
   );
 }
+
+/* la feuille de gauche a le format d'une page : au-delà de cinq lignes, les suivantes se résument */
+function feuilleDevis(d: MailDevis): [string, string][] {
+  const court = (l: string) => l.replace(/ · [^·]+$/, "");
+  const lignes = d.lignes.map(([l, v], i) => [`${i + 1}. ${court(l)}`, v] as [string, string]);
+  if (lignes.length <= 5) return lignes;
+  const reste = lignes.length - 4;
+  return [...lignes.slice(0, 4), [`+ ${reste} autres lignes, détaillées dans le PDF`, ""]];
+}
+
+/* un mail parti de la boîte (le devis envoyé depuis « Nouveau mail ») */
+const envoyeParVous = (m: Mail) => m.de_adresse === BOITE;
+
+type Envoi = { a: string; cc: string; objet: string; corps: string; devis: MailDevis | null; essai: boolean };
 
 /* ——— le formulaire : tous les champs du mail ——— */
 function FormulaireMail({ mail: m, maj }: { mail: Mail; maj: (c: Partial<Mail>) => void }) {

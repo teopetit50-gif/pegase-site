@@ -17,6 +17,7 @@ import { RACINE } from "../modules";
 import { copierEtDire } from "../Toasts";
 import { DalMenu } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
+import { EnvoyerDevis } from "./EnvoyerDevis";
 import { ETATS_DEVIS, TVA_GUADELOUPE, totalHt, type Devis, type EtatDevis } from "./exemplesDevis";
 import "./dal-ticket.css";
 
@@ -201,6 +202,8 @@ export function FicheDevis({ devis: d, volet = false, retour, sansLien = false }
                 </li>
               ))}
             </ul>
+
+            <EnvoyerDevis devis={d} />
           </div>
           <aside className="dal-tk-proprietes" aria-label="Propriétés du devis">
             <h3 className="dal-tk-prop-titre">Propriétés</h3>

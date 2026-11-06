@@ -1,0 +1,194 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO — l'encart « Envoyer le devis au client » (06/11/2026,
+   ./EnvoyerDevis.tsx), en bas de la page d'un devis (./dal-ticket.css)
+
+   Une carte à filet 0,5 px comme la feuille de dictée (./dal-dictee.css),
+   un léger halo violet en haut pour la distinguer des blocs d'information :
+   c'est le prochain geste. Dedans, l'aperçu du mail (À, Objet, extrait,
+   pièce jointe), puis le bouton plein violet. Jetons de ./dal.css.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal .dal-env {
+  position: relative;
+  margin: 28px 0 40px 14px;
+  padding: 18px 18px 16px;
+  border: 0.5px solid var(--dal-carte-bord);
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in lch, var(--dal-violet) 14%, transparent), transparent 60%),
+    var(--dal-carte);
+  box-shadow: var(--dal-carte-ombre);
+  overflow: hidden;
+}
+.v2 .dal .dal-env-tete {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.v2 .dal .dal-env-pastille {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: color-mix(in lch, var(--dal-violet) 22%, transparent);
+  color: var(--dal-violet);
+  box-shadow: inset 0 0 0 0.5px color-mix(in lch, var(--dal-violet) 45%, transparent);
+}
+.v2 .dal .dal-env-entete h3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-env-entete p {
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--dal-t3);
+}
+
+/* ——— l'aperçu du mail ——— */
+.v2 .dal .dal-env-mail {
+  margin-top: 14px;
+  border: 0.5px solid var(--dal-carte-bord);
+  border-radius: 10px;
+  background: var(--dal-inactif);
+  overflow: hidden;
+}
+.v2 .dal .dal-env-ligne {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+  font-size: 13px;
+  line-height: 20px;
+  min-width: 0;
+}
+.v2 .dal .dal-env-cle {
+  flex: none;
+  width: 40px;
+  color: var(--dal-t4);
+  font-weight: 500;
+}
+.v2 .dal .dal-env-valeur {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dal-t1);
+  font-weight: 500;
+}
+.v2 .dal .dal-env-vide {
+  padding: 0 8px;
+  border: 1px dashed color-mix(in lch, var(--dal-violet) 55%, transparent);
+  border-radius: 6px;
+  color: var(--dal-t3);
+  font-style: italic;
+}
+.v2 .dal .dal-env-extrait {
+  padding: 10px 12px 4px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--dal-t2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.v2 .dal .dal-env-piece {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 12px 12px;
+  padding: 6px 10px 6px 6px;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+  border: 0.5px solid var(--dal-puce-bord);
+  border-radius: 8px;
+  background: var(--dal-bouton);
+  font-size: 12px;
+  line-height: 16px;
+}
+.v2 .dal .dal-env-piece-icone {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: color-mix(in lch, var(--dal-rouge) 18%, transparent);
+  color: var(--dal-rouge);
+}
+.v2 .dal .dal-env-piece-nom {
+  font-weight: 500;
+  color: var(--dal-t1);
+  white-space: nowrap;
+}
+.v2 .dal .dal-env-piece-meta {
+  color: var(--dal-t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ——— le geste ——— */
+.v2 .dal .dal-env-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 14px;
+}
+.v2 .dal .dal-env-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--dal-violet);
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.15s;
+}
+.v2 .dal .dal-env-bouton:hover:not(:disabled) {
+  background: color-mix(in lch, var(--dal-violet), #fff 12%);
+}
+.v2 .dal .dal-env-bouton:active:not(:disabled) {
+  transform: translateY(0.5px);
+}
+.v2 .dal .dal-env-bouton:focus-visible {
+  outline: 2px solid color-mix(in lch, var(--dal-violet) 60%, transparent);
+  outline-offset: 2px;
+}
+.v2 .dal .dal-env-bouton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .dal .dal-env-note {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dal-t4);
+}
+
+@media (max-width: 768px) {
+  .v2 .dal .dal-env {
+    margin: 24px 0 32px;
+    padding: 16px 14px 14px;
+  }
+  .v2 .dal .dal-env-bouton {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
