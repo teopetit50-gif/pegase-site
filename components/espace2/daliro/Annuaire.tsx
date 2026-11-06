@@ -339,7 +339,9 @@ export default function Annuaire() {
   const locales = useMemo<EntrepriseLocale[]>(() => {
     try {
       const v = JSON.parse(brutLocales ?? "[]") as unknown;
-      return Array.isArray(v) ? (v as EntrepriseLocale[]) : [];
+      /* 05/11/2026 : les prospects du CRM (type « Prospect … ») restent dans Entreprises ; l'annuaire de Daliro
+         ne montre que les intervenants, fournisseurs et maîtres d'ouvrage des chantiers */
+      return Array.isArray(v) ? (v as EntrepriseLocale[]).filter((e) => !/prospect/i.test(e.type ?? "")) : [];
     } catch {
       return [];
     }
@@ -360,13 +362,19 @@ export default function Annuaire() {
     for (const c of liste) {
       const tb = tableau(c.id);
       if (!tb) continue;
-      for (const p of tb.passages) {
-        if (!p.tiers_id || p.statut === "annule") continue;
-        const e = m.get(p.tiers_id) ?? { prochain: null, dernier: null, tous: [] };
+      const ajouter = (cle: string, p: Passage) => {
+        const e = m.get(cle) ?? { prochain: null, dernier: null, tous: [] };
         e.tous.push({ p, c });
         if (p.statut === "prevu" && jj(p.fin) >= auj && (!e.prochain || p.debut < e.prochain.p.debut)) e.prochain = { p, c };
         if (jj(p.debut) <= auj && (!e.dernier || p.debut > e.dernier.p.debut)) e.dernier = { p, c };
-        m.set(p.tiers_id, e);
+        m.set(cle, e);
+      };
+      /* 05/11/2026 : le maître d'ouvrage voit les passages de son chantier (il n'en a aucun à son nom) */
+      const mo = tb.chantier.maitre_ouvrage_id;
+      for (const p of tb.passages) {
+        if (p.statut === "annule") continue;
+        if (p.tiers_id) ajouter(p.tiers_id, p);
+        if (mo && mo !== p.tiers_id) ajouter(mo, p);
       }
     }
     return m;

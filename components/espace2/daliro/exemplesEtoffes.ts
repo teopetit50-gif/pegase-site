@@ -87,7 +87,9 @@ const NOUVEAUX: Tiers[] = [
   st(VRD, "Terrassement VRD Grande-Terre", "Morne-à-l'Eau", "terrassement", "whatsapp", "+590690412216"),
   st(ALIZES, "Alizés Froid Climatisation", "Baie-Mahault", "climatisation", "whatsapp", "+590690412217"),
 ];
+const MRA = d("024");
 const NOMS: Record<string, string> = {
+  [MRA]: "Menuiseries Rhône-Alpes",
   [POSE_A]: "Pose A", [POSE_B]: "Pose B", [ATELIER]: "Atelier",
   [DUMONT]: "Serrurerie Dumont", [ROCHAT]: "Métallerie Rochat", [MOREL]: "Plâtrerie Morel", [FERRAND]: "Électricité Ferrand",
   [BENALI]: "Plomberie Benali", [RIVIERE]: "Charpentes Rivière",
@@ -112,6 +114,8 @@ type LotDef = {
 };
 type DebDef = { engage: number; facture: number; avenants?: number };
 type Rdv = { tache: string; du: number; h: [string, string]; fait?: boolean };
+/* un passage de plus sur un lot d'avant (sous-traitant ou fournisseur qui n'en avait aucun de passé) */
+type Extra = { lot: string; par: string; tache: string; du: number; au: number; fait?: boolean; texte?: string };
 type Etoffe = {
   adresse: string; cp: string; commune: string; description: string;
   /* le déboursé des lots d'avant, par identifiant de lot */
@@ -120,6 +124,7 @@ type Etoffe = {
   pctAvant?: Record<string, number>;
   lots: LotDef[];
   rdv?: Rdv[];
+  extras?: Extra[];
 };
 
 let n = 100;
@@ -171,6 +176,19 @@ function etoffer(t: Tableau, o: Etoffe): Tableau {
     }
   });
 
+  for (const x of o.extras ?? []) {
+    const lot = t.lots.find((l) => l.id === x.lot);
+    if (!lot) continue;
+    const pid = e(++n);
+    const quand = ilYa(Math.max(0, -x.du + 2), 17);
+    passages.push({
+      id: pid, chantier_id: cid, lot_id: lot.id, lot_code: lot.code, lot_libelle: lot.libelle,
+      equipe_id: null, tiers_id: x.par, intervenant_type: "tiers", intervenant_lu: NOMS[x.par] ?? x.par, intervenant_nom: NOMS[x.par] ?? x.par,
+      rapprochement: "identique", tache: x.tache, debut: aujourdHui(x.du), fin: aujourdHui(x.au), exterieur: true, statut: x.fait ? "fait" : "prevu",
+      confirmation: "confirmee", confirmation_le: quand, source: "saisie", source_ref: null, version: 1,
+      confirmations: x.texte ? [{ id: e(++n), passage_id: pid, evenement: "confirmee", canal: "whatsapp", cle: `rep:${pid}`, detail: { texte: x.texte }, survenu_le: quand }] : [],
+    });
+  }
   for (const r of o.rdv ?? []) {
     const pid = e(++n);
     passages.push({
@@ -214,6 +232,11 @@ function etoffer(t: Tableau, o: Etoffe): Tableau {
 
 const ETOFFES: Record<string, Etoffe> = {
   [TIL]: {
+    extras: [
+      { lot: d("042"), par: DUMONT, tache: "Prise de cotes des garde-corps", du: -9, au: -9, fait: true, texte: "On passe jeudi 8 h pour les cotes" },
+      { lot: d("041"), par: MRA, tache: "Livraison des fenêtres du bâtiment B", du: -4, au: -4, fait: true, texte: "Livraison confirmée, camion à 7 h" },
+      { lot: d("041"), par: MRA, tache: "Livraison des portes palières", du: 9, au: 9 },
+    ],
     rdv: [
       { tache: "réunion de chantier hebdomadaire", du: prochain(2) - 7, h: ["08:00", "09:00"], fait: true },
       { tache: "réunion de chantier hebdomadaire", du: prochain(2), h: ["08:00", "09:00"] },
@@ -323,6 +346,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [DUR]: {
+    extras: [{ lot: d("742"), par: ROCHAT, tache: "Relevé des cotes de la terrasse", du: -11, au: -11, fait: true, texte: "Ok pour lundi matin" }],
     rdv: [{ tache: "signature de l'avenant des marches avec M. Duret", du: 1, h: ["07:30", "08:00"] }],
     adresse: "Lotissement Les Hauts de Saint-Félix, 21 allée des Flamboyants", cp: "97190", commune: "Le Gosier",
     description:
@@ -340,12 +364,16 @@ const ETOFFES: Record<string, Etoffe> = {
       { code: "06", libelle: "Éclairage extérieur", corps: "électricité", par: FERRAND, statut: "a_venir", engage: 3900, facture: 0,
         passages: [{ tache: "Spots encastrés et éclairage de la pergola", du: 17, au: 18, conf: "non_demandee" }] },
       { code: "07", libelle: "Pergola bioclimatique", corps: "menuiserie", par: ALU, statut: "a_venir", engage: 14600, facture: 0,
-        passages: [{ tache: "Pose de la pergola à lames orientables", du: 19, au: 20, conf: "confirmee", rep: { quand: 2, texte: "Ok, livraison de la pergola le 22 au matin" } }] },
+        passages: [
+          { tache: "Prise de cotes de la pergola", du: -8, au: -8, conf: "confirmee", fait: true, rep: { quand: 10, texte: "On passe prendre les cotes mardi" } },
+          { tache: "Pose de la pergola à lames orientables", du: 19, au: 20, conf: "confirmee", rep: { quand: 2, texte: "Ok, livraison de la pergola le 22 au matin" } },
+        ] },
       { code: "08", libelle: "Carbet et douche extérieure", corps: "plomberie", par: BENALI, statut: "a_venir", engage: 5200, facture: 0,
         passages: [{ tache: "Alimentation et évacuation de la douche", du: 10, au: 10, conf: "non_demandee" }] },
     ],
   },
   [VEN]: {
+    extras: [{ lot: d("751"), par: RIVIERE, tache: "Visite des préaux existants", du: -7, au: -7, fait: true, texte: "Je passe mercredi avec le plan" }],
     rdv: [{ tache: "signature du plan de prévention à l'école", du: prochain(2), h: ["10:00", "11:00"] }],
     adresse: "Groupe scolaire Jean-Moulin, rue Jean-Moulin", cp: "97139", commune: "Les Abymes",
     description:
