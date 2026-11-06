@@ -64,6 +64,19 @@ export const teinte = (t: string | undefined | null): TeinteLin => (t === "ambre
 
 /* ——— une partie : le titre 18/500 de la section « Projects », ses gestes à droite ——— */
 export function Partie({ id, titre, compte, gestes, avis, children }: { id?: string; titre: string; compte?: string | null; gestes?: ReactNode; avis?: ReactNode; children: ReactNode }) {
+  const boite = useContext(BoiteContexte);
+  if (boite)
+    return (
+      <section id={id} className="lvp-boite-partie" aria-label={titre}>
+        <div className="lvp-boite-tete">
+          <h3 className="lvp-boite-titre">{titre}</h3>
+          {compte ? <span className="lvp-boite-compte">{compte}</span> : null}
+          {gestes ? <div className="lvp-gestes lvp-boite-gestes">{gestes}</div> : null}
+        </div>
+        {avis ? <div className="lvp-avis">{avis}</div> : null}
+        {children}
+      </section>
+    );
   return (
     <section id={id} className="lvp-partie" aria-label={titre}>
       <div className="lit-lots-tete">
@@ -84,9 +97,16 @@ export function Partie({ id, titre, compte, gestes, avis, children }: { id?: str
    élément, précision, état, date). Ailleurs, rien ne change. */
 export const GrilleContexte = createContext<string[] | null>(null);
 
+/* 05/11/2026 — posées dans une boîte (l'onglet Terrain d'un chantier DALIRO, gabarit de CASHD ›
+   Débiteurs, ../lin/lin.css lin-boite-) : chaque ligne devient une ligne de boîte de 55 (avatar de 32,
+   référence et titre, précision dessous, date et état à droite) ; le détail se pose à droite. */
+export const BoiteContexte = createContext(false);
+
 /* ——— la liste et ses groupes : en-tête de 36 en retrait de 8, replier 20, nom 13/500, compte ——— */
 export function Liste({ children }: { children: ReactNode }) {
   const entetes = useContext(GrilleContexte);
+  const boite = useContext(BoiteContexte);
+  if (boite) return <ul className="lvp-boite-liste">{children}</ul>;
   if (entetes)
     return (
       <div className="lvp-g" role="table">
@@ -106,6 +126,18 @@ export function Liste({ children }: { children: ReactNode }) {
 export function Groupe({ nom, compte, precision, icone, children }: { nom: string; compte?: number; precision?: string | null; icone?: ReactNode; children: ReactNode }) {
   const [replie, setReplie] = useState(false);
   const grille = useContext(GrilleContexte) !== null;
+  const boite = useContext(BoiteContexte);
+  if (boite)
+    return (
+      <li className="lvp-boite-groupe">
+        <button type="button" className="lvp-boite-groupe-tete" aria-expanded={!replie} onClick={() => setReplie(!replie)}>
+          <ChevronDown aria-hidden="true" />
+          <span>{nom}</span>
+          {compte !== undefined ? <span className="lvp-boite-groupe-compte">{compte}</span> : null}
+        </button>
+        {replie ? null : <ul className="lin-boite-lignes">{children}</ul>}
+      </li>
+    );
   if (grille)
     return (
       <li className="lvp-g-groupe">
@@ -151,6 +183,28 @@ export function Ligne({ cle, libelle, icone, id, titre, second, droite, date, da
   const v = useVolet();
   const choisie = v?.choisie === cle;
   const grille = useContext(GrilleContexte) !== null;
+  const boite = useContext(BoiteContexte);
+  if (boite)
+    return (
+      <li>
+        <button type="button" className="lin-boite-ligne lvp-boite-ligne" data-actif={choisie ? "" : undefined} aria-pressed={choisie} aria-label={libelle} onClick={() => v?.choisir(choisie ? null : cle)}>
+          <span className="lin-boite-avatar lvp-boite-avatar" aria-hidden="true">
+            {icone}
+          </span>
+          <span className="lin-boite-texte">
+            <span className="lin-boite-l1">
+              {id ? <b>{id}</b> : null}
+              <span>{titre}</span>
+            </span>
+            {second ? <span className="lin-boite-l2">{second}</span> : null}
+          </span>
+          <span className="lin-boite-droite">
+            {date ? <span className="lin-boite-heure" title={dateTitre}>{date}</span> : null}
+            {droite ? <span className="lvp-boite-etat">{droite}</span> : null}
+          </span>
+        </button>
+      </li>
+    );
   if (grille)
     return (
       <li className="lvp-g-rang lvp-g-ligne" data-choisie={choisie ? "" : undefined} role="row">

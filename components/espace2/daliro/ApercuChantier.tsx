@@ -63,7 +63,7 @@ const jourLocal = () => {
   return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
 };
 /* « Mar 31st, 2027 » de Linear, en français : « 31 mars 2027 » */
-const dateLinear = (iso: string) => {
+export const dateLinear = (iso: string) => {
   const [a, m, j] = iso.slice(0, 10).split("-").map(Number);
   return `${j} ${MOIS[m - 1]} ${a}`;
 };

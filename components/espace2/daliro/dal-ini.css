@@ -1002,3 +1002,150 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
   line-height: 20px;
   color: var(--dal-t3);
 }
+
+/* ——— l'onglet Lots : l'onglet « Projects » d'une Initiative, en tableau (05/11, LotsProjets.tsx) ———
+   Relevé sombre 05/11 : grille 8 · 1fr · 50 · 68 · 48 · 100 · 49 · 120 · 8, écart 6 ; titres 32
+   (12/450 tertiaire, bouton 24 r 9999 p 0 6) ; ligne 48 r 8, survol plein ; nom 13/500 (icône 16
+   à 20 du bord, texte à 48) ; date et pourcentage 12/450 lch(90.45) ; compte 12/450 calé à droite. */
+.v2 .dal .dal-lp-zone {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 0 48px;
+}
+.v2 .dal .dal-lp {
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) 50px 68px 48px 100px 49px 120px 8px;
+  column-gap: 6px;
+  min-width: 600px;
+}
+.v2 .dal .dal-lp-rang {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+.v2 .dal .dal-lp-entete {
+  height: 32px;
+}
+.v2 .dal .dal-lp-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  justify-self: start;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+}
+.v2 .dal button.dal-lp-titre:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-lp-titre--simple {
+  padding: 0 12px 0 0;
+}
+.v2 .dal .dal-lp-titre[data-col="compte"] {
+  justify-self: end;
+}
+.v2 .dal .dal-lp-ligne {
+  position: relative;
+  height: 48px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-lp-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  pointer-events: none;
+  transition: background-color 0.1s;
+}
+.v2 .dal .dal-lp-ligne:hover::before {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-lp-ligne:focus-visible {
+  outline: none;
+}
+.v2 .dal .dal-lp-ligne:focus-visible::before {
+  box-shadow: inset 0 0 0 1.5px lch(48 59.31 288.43);
+}
+.v2 .dal .dal-lp-ligne > * {
+  position: relative;
+}
+.v2 .dal .dal-lp-nom {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding-left: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.v2 .dal .dal-lp-nom-icone {
+  display: inline-flex;
+  flex: none;
+}
+.v2 .dal .dal-lp-nom-texte {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-lp-cellule {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding-left: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  white-space: nowrap;
+}
+.v2 .dal .dal-lp-cellule svg {
+  flex: none;
+}
+.v2 .dal .dal-lp-texte {
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-lp-compte {
+  justify-content: flex-end;
+  padding: 0 8px 0 0;
+  color: var(--dal-t1);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .dal .dal-lp-statut {
+  gap: 8px;
+}
+.v2 .dal .dal-lp-courbe-fait {
+  stroke: lch(48 59.31 288.43);
+}
+.v2 .dal .dal-lp-courbe-attendu {
+  stroke: var(--dal-t3);
+  opacity: 0.35;
+}
+.v2 .dal .dal-lp-vide {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 16px 14px;
+  font-size: 13px;
+  color: var(--dal-t3);
+}
+@media (max-width: 767px) {
+  .v2 .dal .dal-lp {
+    grid-template-columns: 8px minmax(0, 1fr) 28px 28px 28px 0 0 64px 8px;
+    min-width: 0;
+  }
+  .v2 .dal .dal-lp [data-col="date"],
+  .v2 .dal .dal-lp [data-col="compte"],
+  .v2 .dal .dal-lp-courbe {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .v2 .dal .dal-lp-entete > :nth-child(n + 3):nth-child(-n + 5) {
+    visibility: hidden;
+  }
+}

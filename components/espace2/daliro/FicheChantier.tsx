@@ -28,6 +28,12 @@
      Volet      B11 (l'en-tête et ses gestes : ouvrir, suspendre, reprendre,
                 ouvrir un avenant, rattacher une facture, relevé du
                 chantier) — ChantierVue habillé, restylé en rangées
+   05/11/2026 (Teo : « super moches ») : Terrain, Argent et Réception
+   quittent le gabarit d'outil de Lorani (onglets soulignés, tableaux) pour
+   une seule page par onglet (pas de sous-pages) : chaque partie l'une sous
+   l'autre, son titre et ses gestes, puis son tableau au dessin de Lots.
+   Lots devient l'onglet « Projects » de l'Initiative tel que Linear le
+   montre, un tableau (LotsProjets.tsx) ; la frise reste en option.
    30/10/2026 : dans ces onglets, chaque partie est une liste groupée (« My
    issues » de Linear) et l'élément choisi s'ouvre dans le volet, à la place
    des propriétés (../lin/Volet.tsx, PartiesChantier.tsx et chaque carte).
@@ -37,19 +43,16 @@
    l'arrivée, une fois le tableau lu.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ChantierVue, { type FormChantier, type SectionChantier } from "@/components/espace/daliro/ChantierVue";
-import type { StatutChantier, Tableau } from "@/components/espace/daliro/types";
-import { STATUTS_AVENANT, familleControle } from "@/components/espace/daliro/etats";
-import { Etat, OngletOutil, type Liste } from "../lorani/OngletOutil";
+import type { StatutChantier } from "@/components/espace/daliro/types";
 import Habille from "@/components/espace2/Habille";
 import { RACINE } from "@/components/espace2/modules";
-import { GrilleContexte, VoletContexte } from "../lin/Volet";
+import { BoiteContexte, VoletContexte } from "../lin/Volet";
 import { useToast } from "../Toasts";
 import { useDaliro } from "./donnees";
-import Essentiel from "./Essentiel";
 import "../lin/lin.css";
 import "../lin/linear-initiative.css";
 import { DalCarte, DalMenu } from "./DalCadre";
@@ -58,15 +61,16 @@ import "./dal-initiative.css";
 import { ApercuChantier, VoletChantier } from "./ApercuChantier";
 import { ActiviteChantier } from "./ActiviteChantier";
 import Chantiers from "./Chantiers";
+import { LotsProjets } from "./LotsProjets";
+import { ArgentChantier } from "./ArgentChantier";
 import { EtoilePleine } from "./IconesProjet";
 import { useFavoris, useSuivis } from "./navigateur";
 
 const BASE = `${RACINE}/daliro`;
 
 type CleOnglet = "apercu" | "fil" | "projets" | "terrain" | "argent" | "reception";
-/* 30/10/2026 : Terrain et Argent montrent une partie à la fois (?partie=, pastilles sous les onglets),
-   la plus utile d'abord ; « Tout » rend l'ancienne pile. Les ancres des repères (#planning, #avenants,
-   #situations) choisissent leur partie. */
+/* 05/11/2026 : Terrain et Argent montrent toutes leurs parties sur une page, la plus utile d'abord ;
+   ?partie= et les ancres des repères (#planning, #avenants, #situations) y font défiler. */
 /* l'ordre de Linear : Overview, Activity, puis les vues ajoutées (« Add new view ») — Terrain,
    Argent, Réception sont des vues du chantier en listes ; « Fil » garde sa clé d'adresse */
 const ONGLETS: { cle: CleOnglet; libelle: string; sections?: SectionChantier[] }[] = [
@@ -74,32 +78,14 @@ const ONGLETS: { cle: CleOnglet; libelle: string; sections?: SectionChantier[] }
   { cle: "fil", libelle: "Activité", sections: ["fil"] },
   /* l'onglet « Projects » de l'Initiative : les lots du chantier sur la frise de Chantiers */
   { cle: "projets", libelle: "Lots" },
-  { cle: "terrain", libelle: "Terrain", sections: ["planning", "controles", "questions", "appro", "meteo"] },
-  { cle: "argent", libelle: "Argent", sections: ["avenants", "situations", "marche", "lots", "factures", "heures"] },
+  { cle: "terrain", libelle: "Terrain", sections: ["controles", "planning", "appro", "meteo", "questions"] },
+  { cle: "argent", libelle: "Argent", sections: ["avenants", "situations", "factures", "lots", "marche", "heures"] },
   { cle: "reception", libelle: "Réception", sections: ["reception"] },
 ];
 const estOnglet = (v: string | null): v is CleOnglet => ONGLETS.some((o) => o.cle === v);
-const PARTIES: Partial<Record<SectionChantier, string>> = {
-  planning: "Planning",
-  controles: "Points à régler",
-  questions: "Questions",
-  appro: "Approvisionnement",
-  meteo: "Météo",
-  avenants: "Avenants",
-  situations: "Situations",
-  marche: "Marché",
-  lots: "Lots et déboursé",
-  factures: "Factures",
-  heures: "Heures",
-};
 
 /* l'icône du fil d'Ariane, couleur du statut (couleurs d'icônes relevées chez Linear) */
 const COULEUR_FIL: Record<StatutChantier, string> = { preparation: "#f0bf00", ouvert: "#26b5ce", suspendu: "#e78f41", receptionne: "#5e6ad2", clos: "#a2a6ac", annule: "#a2a6ac" };
-
-const jourLocal = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${`${d.getMonth() + 1}`.padStart(2, "0")}-${`${d.getDate()}`.padStart(2, "0")}`;
-};
 
 /* au-dessous de 1 200 px, le volet passe au-dessus du contenu */
 const LARGE = "(min-width: 1200px)";
@@ -131,9 +117,6 @@ export default function FicheChantier({ id }: { id: string }) {
   /* les gestes de l'en-tête (ouvrir, suspendre, avenant, facture, relevé) : les fenêtres de ChantierVue */
   const [demande, setDemande] = useState<{ n: number; form: FormChantier } | null>(null);
   const geste = (form: FormChantier) => setDemande((d) => ({ n: (d?.n ?? 0) + 1, form }));
-  /* 04/11 — Terrain, Argent et Réception en pages d'outil (../lorani/OngletOutil) : les parties montées
-     cachées (`cache`) et la carte affichée gardent leurs gestes, qu'un bouton de la barre déclenche */
-  const cache = useRef<HTMLDivElement>(null);
 
   const o = params.get("onglet");
   const onglet: CleOnglet = estOnglet(o) ? o : "apercu";
@@ -178,267 +161,39 @@ export default function FicheChantier({ id }: { id: string }) {
   };
 
   const courant = ONGLETS.find((x) => x.cle === onglet);
-  const declencher = (libelle: string) => {
-    const boutons = [...(cache.current?.querySelectorAll("button") ?? []), ...document.querySelectorAll(".lor-at-contenu button")] as HTMLButtonElement[];
-    const b = boutons.find((x) => (x.textContent ?? "").trim().startsWith(libelle));
-    if (!b) return toast(`« ${libelle} » n'est pas possible pour l'instant.`);
-    if (b.disabled) return toast(`« ${libelle} » n'est pas possible pour l'instant.`);
-    b.click();
-  };
-  const auj = useMemo(() => jourLocal(), []);
-  /* la partie montrée : ?partie=, sinon l'ancre d'un repère, sinon la première ; « tout » rend la pile */
-  const [ancre, setAncre] = useState("");
+  /* l'onglet Lots : le tableau « Projects » de Linear, ou la frise (« Options d'affichage », ?vue=frise) */
+  const frise = params.get("vue") === "frise";
+  const fl = params.get("lots");
+  const filtreLots = fl === "en_cours" || fl === "a_venir" || fl === "termine" ? fl : null;
+  /* la phrase du volet de droite de la boîte, quand rien n'est choisi */
+  const resumeBoite = (() => {
+    if (!t) return "";
+    if (onglet === "reception") {
+      const r = t.reception;
+      if (!r) return "Réception pas encore prononcée";
+      const n = r.reserves.filter((x) => x.statut !== "levee").length;
+      return r.avec_reserves ? `${n} réserve${n > 1 ? "s" : ""} à lever sur ${r.reserves.length}` : "Réception prononcée sans réserve";
+    }
+    const auj = new Date().toISOString().slice(0, 10);
+    const bloquants = [...t.controles, ...t.controles_organisation].filter((k) => k.gravite === "bloquant").length;
+    const prevus = t.passages.filter((x) => x.statut === "prevu");
+    const retard = prevus.filter((x) => x.fin < auj).length;
+    const avenir = prevus.length - retard;
+    const pl = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
+    return `${bloquants ? pl(bloquants, "point bloquant") : "Aucun point bloquant"} · ${pl(avenir, "passage")} à venir${retard ? `, ${retard} en retard` : ""}`;
+  })();
+  /* ?partie= (ou ?liste=, l'adresse du 04/11) : la page de l'onglet défile jusqu'à cette partie */
+  const partie = params.get("partie") ?? params.get("liste");
   useEffect(() => {
-    const lire = () => setAncre(decodeURIComponent(window.location.hash.slice(1)));
-    lire();
-    window.addEventListener("hashchange", lire);
-    return () => window.removeEventListener("hashchange", lire);
-  }, []);
-  const pParam = params.get("partie");
-  const parties = courant?.sections && courant.sections.length > 1 ? courant.sections : null;
-  const partie: SectionChantier | "tout" | null = !parties
-    ? null
-    : pParam === "tout"
-      ? "tout"
-      : parties.find((x) => x === pParam) ?? parties.find((x) => x === ancre) ?? parties[0];
-  const lienPartie = (x: SectionChantier | "tout") => `${chemin}?onglet=${onglet}&partie=${x}`;
-  const sectionsMontrees = partie === null || partie === "tout" ? courant?.sections : [partie];
-  const listeDal = params.get("liste") ?? (pParam && pParam !== "tout" ? pParam : null);
-  const lienListeDal = (l: string) => `${chemin}?onglet=${onglet}&liste=${l}`;
-  const outilDal = ((tb: Tableau | null): { listes: Liste[]; resume: string; avis: string | null; cachees: SectionChantier[] } | null => {
-    if (!tb || (onglet !== "terrain" && onglet !== "argent" && onglet !== "reception")) return null;
-    const vide = (x: string) => <span className="lor-at-discret">{x}</span>;
-    const jour = (d: string | null | undefined) => (d ? new Date(`${d.slice(0, 10)}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : null);
-    const euros = (n: number | null | undefined) => (n === null || n === undefined ? vide("—") : `${Math.round(n).toLocaleString("fr-FR")} €`);
-    /* la carte posée dans sa liste : ses lignes en grille, sous les titres de colonnes de la carte */
-    const ENTETES: Partial<Record<SectionChantier, string[]>> = {
-      appro: ["Lot", "Commande", "Fournisseur", "État", "Date"],
-      meteo: ["", "Passage", "Motif", "Conseil", "Jour"],
-      situations: ["N°", "Situation", "Précision", "État", "Montant"],
-      heures: ["Lot", "Élément", "Précision", "", "Marge"],
-      reception: ["", "Réserve", "Précision", "État", "Date"],
-    };
-    const carte = (sec: SectionChantier) => (
-      <GrilleContexte.Provider value={ENTETES[sec] ?? null}>
-        <Habille>
-          <ChantierVue key={`${sec}-${source}-${id}`} tableau={tb} source={source} onLocal={onLocal} relire={relire} sections={[sec]} />
-        </Habille>
-      </GrilleContexte.Provider>
-    );
-    if (onglet === "terrain") {
-      const points = [...tb.controles.map((k) => ({ k, p: "controle" })), ...tb.controles_organisation.map((k) => ({ k, p: "orga" }))].sort((a, b) => ["bloquant", "attention", "info"].indexOf(a.k.gravite) - ["bloquant", "attention", "info"].indexOf(b.k.gravite));
-      const passages = tb.passages.filter((x) => x.statut !== "annule").sort((a, b) => a.debut.localeCompare(b.debut));
-      const bloquants = points.filter((x) => x.k.gravite === "bloquant").length;
-      const aVenir = passages.filter((x) => x.statut === "prevu" && x.fin >= auj).length;
-      const enRetard = passages.filter((x) => x.statut === "prevu" && x.fin < auj).length;
-      return {
-        resume: `${bloquants ? `${bloquants} point${bloquants > 1 ? "s" : ""} bloquant${bloquants > 1 ? "s" : ""}` : "Aucun point bloquant"} · ${aVenir} passage${aVenir > 1 ? "s" : ""} à venir${enRetard ? `, ${enRetard} en retard` : ""}`,
-        avis: null,
-        cachees: ["controles", "planning"],
-        listes: [
-          {
-            cle: "controles",
-            libelle: "Points à régler",
-            tri: "gravité",
-            vide: "Rien à régler : les contrôles du chantier et de l'organisation ne relèvent aucun point.",
-            pied: points.length ? `${points.length} point${points.length > 1 ? "s" : ""} · ${bloquants} bloquant${bloquants > 1 ? "s" : ""}` : undefined,
-            colonnes: [
-              { libelle: "Point", largeur: "minmax(260px, 1fr)" },
-              { libelle: "Famille", largeur: "minmax(140px, 200px)" },
-              { libelle: "Gravité", largeur: "150px" },
-            ],
-            rangs: points.map(({ k, p }) => ({
-              id: `${p}:${k.code}:${k.objet_id}`,
-              cle: `${p}:${k.code}:${k.objet_id}`,
-              cellules: [
-                <span key="m" className="lor-at-cell-texte">{k.message}</span>,
-                p === "orga" ? "Organisation" : familleControle(k.code),
-                k.gravite === "bloquant" ? <Etat key="g" teinte="rouge">Bloquant</Etat> : k.gravite === "attention" ? <Etat key="g" teinte="bleu">À voir</Etat> : <Etat key="g" teinte="gris">Pour information</Etat>,
-              ],
-            })),
-            gestes: [],
-          },
-          {
-            cle: "planning",
-            libelle: "Planning",
-            tri: "date de début",
-            vide: "Aucun passage prévu : importez le planning (tableur, Alobees) ou saisissez les passages des équipes et des entreprises.",
-            pied: passages.length ? `${passages.length} passage${passages.length > 1 ? "s" : ""} · ${aVenir} à venir` : undefined,
-            colonnes: [
-              { libelle: "Tâche", largeur: "minmax(220px, 1fr)" },
-              { libelle: "Lot", largeur: "minmax(140px, 200px)" },
-              { libelle: "Intervenant", largeur: "minmax(140px, 200px)" },
-              { libelle: "Du", largeur: "90px" },
-              { libelle: "Au", largeur: "90px" },
-              { libelle: "État", largeur: "150px" },
-            ],
-            rangs: passages.map((x) => ({
-              id: x.id,
-              cle: `passage:${x.id}`,
-              cellules: [
-                <span key="t" className="lor-at-cell-texte">{x.tache ?? "Passage"}</span>,
-                x.lot_code ? <span key="l" className="lor-at-cell-texte">{`Lot ${x.lot_code}${x.lot_libelle ? ` · ${x.lot_libelle}` : ""}`}</span> : vide("—"),
-                x.intervenant_nom ?? x.intervenant_lu ? <span key="i" className="lor-at-cell-texte">{x.intervenant_nom ?? x.intervenant_lu}</span> : vide("—"),
-                jour(x.debut),
-                jour(x.fin),
-                x.statut === "fait" ? <Etat key="e" teinte="vert">Fait</Etat> : x.fin < auj ? <Etat key="e" teinte="rouge">En retard</Etat> : x.confirmation === "confirmee" ? <Etat key="e" teinte="vert">Confirmé</Etat> : x.confirmation === "declinee" ? <Etat key="e" teinte="rouge">Décliné</Etat> : x.confirmation === "demandee" ? <Etat key="e" teinte="bleu">Demandée</Etat> : <Etat key="e" teinte="gris">Prévu</Etat>,
-              ],
-            })),
-            gestes: [{ libelle: "Proposer les dépendances" }],
-          },
-          { cle: "appro", libelle: "Approvisionnement", colonnes: [], rangs: [], vide: "", gestes: [{ libelle: "Préparer la liste depuis le devis" }, { libelle: "Nouvelle commande", principal: true }], contenu: carte("appro") },
-          { cle: "meteo", libelle: "Météo", colonnes: [], rangs: [], vide: "", gestes: [], contenu: carte("meteo") },
-          { cle: "questions", libelle: "Questions", colonnes: [], rangs: [], vide: "", gestes: [], contenu: carte("questions") },
-        ],
-      };
-    }
-    if (onglet === "argent") {
-      const marche = tb.marches[0] ?? null;
-      const avenants = tb.avenants.slice().sort((a, b) => b.numero - a.numero);
-      const lignes = marche ? marche.lignes.slice().sort((a, b) => a.ordre - b.ordre) : [];
-      const factures = tb.factures.filter((f) => f.statut === "rattachee");
-      const signes = avenants.filter((a) => a.statut === "signe").reduce((x, a) => x + (a.montant_ht ?? 0), 0);
-      return {
-        resume: `${marche ? `Marché${marche.reference ? ` ${marche.reference}` : ""} ${marche.statut === "verifie" ? "vérifié" : "à vérifier"}${tb.voit_prix && marche.total_ht_lignes !== null ? ` · ${Math.round(marche.total_ht_lignes).toLocaleString("fr-FR")} € HT` : ""}` : "Pas encore de marché"} · ${avenants.length} avenant${avenants.length > 1 ? "s" : ""}${tb.voit_prix && signes ? ` (${Math.round(signes).toLocaleString("fr-FR")} € HT signés)` : ""} · ${factures.length ? `${factures.length} facture${factures.length > 1 ? "s" : ""} rattachée${factures.length > 1 ? "s" : ""}` : "aucune facture rattachée"}`,
-        avis: null,
-        cachees: ["avenants", "marche", "lots", "factures"],
-        listes: [
-          {
-            cle: "avenants",
-            libelle: "Avenants",
-            tri: "numéro",
-            vide: "Aucun avenant : un travail en plus, demandé sur le chantier, devient ici un avenant à chiffrer puis à faire signer.",
-            pied: avenants.length ? `${avenants.length} avenant${avenants.length > 1 ? "s" : ""}` : undefined,
-            colonnes: [
-              { libelle: "N°", largeur: "64px" },
-              { libelle: "Objet", largeur: "minmax(240px, 1fr)" },
-              { libelle: "Montant HT", largeur: "130px", droite: true },
-              { libelle: "Soumis le", largeur: "110px" },
-              { libelle: "État", largeur: "150px" },
-            ],
-            rangs: avenants.map((a) => ({
-              id: a.id,
-              cle: `avenant:${a.id}`,
-              cellules: [
-                <span key="n" className="lor-at-mono">n° {a.numero}</span>,
-                <span key="o" className="lor-at-cell-texte">{a.objet}</span>,
-                euros(a.montant_ht),
-                jour(a.soumis_le) ?? vide("—"),
-                <Etat key="e" teinte={a.statut === "signe" ? "vert" : a.statut === "refuse" ? "rouge" : a.statut === "abandonne" ? "gris" : "bleu"}>{STATUTS_AVENANT[a.statut].libelle}</Etat>,
-              ],
-            })),
-            gestes: [{ libelle: "Ouvrir un avenant", principal: true }],
-          },
-          {
-            cle: "marche",
-            libelle: "Marché",
-            tri: "ordre du devis",
-            vide: "Aucun marché : les avenants et les situations ne se chiffrent pas tant que le marché signé n'est pas saisi puis vérifié ligne à ligne.",
-            pied: lignes.length ? `${lignes.length} ligne${lignes.length > 1 ? "s" : ""}${lignes.filter((l) => l.controle !== "ok" && !l.ecart_accepte).length ? ` · ${lignes.filter((l) => l.controle !== "ok" && !l.ecart_accepte).length} à revoir` : ""}` : undefined,
-            colonnes: [
-              { libelle: "N°", largeur: "72px" },
-              { libelle: "Désignation", largeur: "minmax(240px, 1fr)" },
-              { libelle: "Unité", largeur: "70px" },
-              { libelle: "Quantité", largeur: "100px", droite: true },
-              { libelle: "PU HT", largeur: "110px", droite: true },
-              { libelle: "Montant HT", largeur: "120px", droite: true },
-              { libelle: "Contrôle", largeur: "150px" },
-            ],
-            rangs: lignes.map((l) => ({
-              id: l.id,
-              cle: `ligne:${l.id}`,
-              cellules: [
-                <span key="n" className="lor-at-mono">{l.numero ?? l.ordre}</span>,
-                <span key="d" className="lor-at-cell-texte">{l.designation}</span>,
-                l.unite ?? vide("—"),
-                l.quantite === null ? vide("—") : l.quantite.toLocaleString("fr-FR"),
-                euros(l.prix_unitaire_ht),
-                euros(l.montant_ht),
-                l.controle === "ok" || l.ecart_accepte ? <Etat key="c" teinte="vert">{l.ecart_accepte ? "Écart accepté" : "Juste"}</Etat> : <Etat key="c" teinte="rouge">{l.controle === "montant_faux" ? "Montant faux" : "Incomplète"}</Etat>,
-              ],
-            })),
-            gestes: marche ? [{ libelle: "Ajouter une ligne" }, { libelle: "Importer le devis" }, { libelle: "Vérifier le marché", principal: true }] : [{ libelle: "Saisir le marché", principal: true }],
-          },
-          {
-            cle: "lots",
-            libelle: "Lots et déboursé",
-            tri: "lot",
-            vide: "Aucun lot.",
-            pied: tb.lots.length ? `${tb.lots.length} lot${tb.lots.length > 1 ? "s" : ""}` : undefined,
-            colonnes: [
-              { libelle: "Lot", largeur: "minmax(220px, 1fr)" },
-              { libelle: "Engagé HT", largeur: "130px", droite: true },
-              { libelle: "Facturé HT", largeur: "130px", droite: true },
-              { libelle: "Reste HT", largeur: "130px", droite: true },
-              { libelle: "État", largeur: "130px" },
-            ],
-            rangs: tb.lots
-              .slice()
-              .sort((a, b) => a.rang - b.rang)
-              .map((l) => {
-                const d = tb.debourse.find((x) => x.lot_id === l.id);
-                return {
-                  id: l.id,
-                  cle: `lot:${l.id}`,
-                  cellules: [
-                    <span key="l" className="lor-at-cell-texte">{`${l.code} · ${l.libelle}`}</span>,
-                    euros(d && d.engage_marche_ht !== null ? d.engage_marche_ht + (d.engage_avenants_ht ?? 0) : null),
-                    euros(d?.facture_ht),
-                    euros(d?.reste_ht),
-                    l.statut === "termine" ? <Etat key="e" teinte="vert">Terminé</Etat> : l.statut === "en_cours" ? <Etat key="e" teinte="bleu">En cours</Etat> : <Etat key="e" teinte="gris">À venir</Etat>,
-                  ],
-                };
-              }),
-            gestes: [],
-          },
-          {
-            cle: "factures",
-            libelle: "Factures",
-            tri: "date",
-            vide: "Aucune facture fournisseur rattachée à ce chantier.",
-            pied: factures.length ? `${factures.length} facture${factures.length > 1 ? "s" : ""}` : undefined,
-            colonnes: [
-              { libelle: "Fournisseur", largeur: "minmax(200px, 1fr)" },
-              { libelle: "N°", largeur: "130px" },
-              { libelle: "Lot", largeur: "minmax(130px, 200px)" },
-              { libelle: "Émise le", largeur: "110px" },
-              { libelle: "Montant HT", largeur: "130px", droite: true },
-            ],
-            rangs: factures
-              .slice()
-              .sort((a, b) => (b.date_emission ?? "").localeCompare(a.date_emission ?? ""))
-              .map((f) => ({
-                id: f.id,
-                cle: `facture:${f.id}`,
-                cellules: [
-                  <span key="f" className="lor-at-cell-texte">{f.fournisseur_nom ?? "Fournisseur inconnu"}</span>,
-                  f.facture_numero ? <span key="n" className="lor-at-mono">{f.facture_numero}</span> : vide("—"),
-                  f.lot_code ? <span key="l" className="lor-at-cell-texte">{`Lot ${f.lot_code}${f.lot_libelle ? ` · ${f.lot_libelle}` : ""}`}</span> : vide("—"),
-                  jour(f.date_emission) ?? vide("—"),
-                  euros(f.montant_ht),
-                ],
-              })),
-            gestes: [{ libelle: "Rattacher une facture", principal: true }],
-          },
-          { cle: "situations", libelle: "Situations", colonnes: [], rangs: [], vide: "", gestes: [{ libelle: "Nouvelle situation", principal: true }], contenu: carte("situations") },
-          { cle: "heures", libelle: "Heures", colonnes: [], rangs: [], vide: "", gestes: [{ libelle: "Coût horaire" }, { libelle: "Pointer une équipe", principal: true }], contenu: carte("heures") },
-        ],
-      };
-    }
-    const r = tb.reception ?? null;
-    const nonLevees = r ? r.reserves.filter((x) => x.statut !== "levee").length : 0;
-    return {
-      resume: r ? `Réception prononcée le ${jour(r.date_reception)}${r.avec_reserves ? ` avec ${r.reserves.length} réserve${r.reserves.length > 1 ? "s" : ""}, ${nonLevees} à lever` : " sans réserve"}` : "Réception pas encore prononcée",
-      avis: null,
-      cachees: [],
-      listes: [{ cle: "reception", libelle: "Réception des travaux", colonnes: [], rangs: [], vide: "", gestes: r ? [] : [{ libelle: "Prononcer la réception", principal: true }], contenu: carte("reception") }],
-    };
-  })(t);
+    if (!lu || !partie) return;
+    const minuterie = window.setTimeout(() => document.getElementById(`partie-${partie}`)?.scrollIntoView({ block: "start" }), 120);
+    return () => window.clearTimeout(minuterie);
+  }, [onglet, partie, lu]);
 
   /* changer d'onglet ou de partie referme l'élément choisi ; Échap aussi */
-  const [vue, setVue] = useState(`${onglet}/${partie}`);
-  if (vue !== `${onglet}/${partie}`) {
-    setVue(`${onglet}/${partie}`);
+  const [vue, setVue] = useState(onglet);
+  if (vue !== onglet) {
+    setVue(onglet);
     setChoisie(null);
   }
   useEffect(() => {
@@ -574,9 +329,16 @@ export default function FicheChantier({ id }: { id: string }) {
                 plein
                 alignement="droite"
                 options={[
-                  { libelle: "Échelle : mois", icone: "Calendar", href: lienParam("zoom", null) },
-                  { libelle: "Échelle : trimestre", icone: "Calendar", href: lienParam("zoom", "trimestre") },
-                  { libelle: "Échelle : année", icone: "Calendar", href: lienParam("zoom", "annee") },
+                  { libelle: "Affichage : tableau", icone: "Project", href: lienParam("vue", null) },
+                  { libelle: "Affichage : frise", icone: "Calendar", href: lienParam("vue", "frise") },
+                  ...(frise
+                    ? [
+                        "sep" as const,
+                        { libelle: "Échelle : mois", icone: "Calendar" as const, href: lienParam("zoom", null) },
+                        { libelle: "Échelle : trimestre", icone: "Calendar" as const, href: lienParam("zoom", "trimestre") },
+                        { libelle: "Échelle : année", icone: "Calendar" as const, href: lienParam("zoom", "annee") },
+                      ]
+                    : []),
                 ]}
               />
             </span>
@@ -623,7 +385,13 @@ export default function FicheChantier({ id }: { id: string }) {
             </Habille>
           </div>
           {onglet === "projets" ? (
-            <Chantiers lotsDe={id} />
+            frise ? (
+              <Chantiers lotsDe={id} />
+            ) : (
+              <div className="dal-lp-zone">
+                <LotsProjets t={t} ici={chemin} filtre={filtreLots} />
+              </div>
+            )
           ) : onglet === "apercu" || onglet === "fil" ? (
             <div className="dal-ini-corps">
               <div className="dal-ini-zone">
@@ -648,60 +416,52 @@ export default function FicheChantier({ id }: { id: string }) {
               </div>
               {volet ? <VoletChantier t={t} c={chantierListe ?? t.chantier} ici={chemin} /> : null}
             </div>
+          ) : onglet === "argent" ? (
+            <div className="lit-corps dal-ag-corps">
+              <ArgentChantier t={t} source={source} onLocal={onLocal} relire={relire} geste={geste} cible={setCible} choisie={choisie} choisir={setChoisie} />
+            </div>
           ) : (
-            <div className="lit-corps" data-volet={volet ? "" : undefined}>
-              <div className="lit-zone">
-                {outilDal ? (
-                  <>
-                    {onglet === "reception" && !t.reception && !["ouvert", "suspendu", "receptionne", "clos"].includes(t.chantier.statut) ? (
-                      <p className="lit-vide">La réception se prononce sur un chantier ouvert ou suspendu. Ouvrez d&apos;abord le chantier, depuis le menu « … ».</p>
-                    ) : null}
-                    <OngletOutil
-                      listes={outilDal.listes}
-                      courante={listeDal ?? outilDal.listes[0].cle}
-                      lienListe={lienListeDal}
-                      resume={outilDal.resume}
-                      avis={outilDal.avis}
-                      declencher={declencher}
-                      choisir={(c) => setChoisie(c)}
-                      choisie={choisie}
-                    />
-                    <div ref={cache} hidden>
-                      <Habille>
-                        <ChantierVue key={`cache-${onglet}-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={outilDal.cachees} />
-                      </Habille>
-                    </div>
-                  </>
-                ) : (
-                <div className="lit-gestes">
+            /* 05/11 (choix de Teo) : Terrain et Réception sur la boîte de CASHD › Débiteurs — à gauche une
+               seule liste de ce qui demande une action, à droite le détail de l'élément choisi (ses gestes),
+               sinon les questions au chantier. Pas de sous-pages. */
+            <div className="lit-corps dal-boite-corps">
+              <div className="lin-boite dal-boite">
+                <div className="lin-boite-liste dal-boite-liste">
+                  <header className="lin-tete">
+                    <span className="lin-boite-titre">{onglet === "reception" ? "Réception des travaux" : "Terrain"}</span>
+                  </header>
                   {onglet === "reception" && !t.reception && !["ouvert", "suspendu", "receptionne", "clos"].includes(t.chantier.statut) ? (
                     <p className="lit-vide">La réception se prononce sur un chantier ouvert ou suspendu. Ouvrez d&apos;abord le chantier, depuis le menu « … ».</p>
                   ) : null}
-                  {onglet === "argent" ? <Essentiel t={t} onglet={onglet} auj={auj} phrases={false} /> : null}
-                  {parties ? (
-                    <nav className="lit-parties" aria-label={`Parties de l'onglet ${courant?.libelle ?? ""}`}>
-                      {parties.map((x) => (
-                        <Link key={x} href={lienPartie(x)} scroll={false} className="lit-partie" aria-current={partie === x ? "page" : undefined}>
-                          {PARTIES[x] ?? x}
-                        </Link>
-                      ))}
-                      <Link href={lienPartie("tout")} scroll={false} className="lit-partie lit-partie--tout" aria-current={partie === "tout" ? "page" : undefined}>
-                        Tout voir
-                      </Link>
-                    </nav>
-                  ) : null}
-                  <Habille>
-                    <ChantierVue key={`${onglet}-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={sectionsMontrees} />
-                  </Habille>
+                  <BoiteContexte.Provider value={true}>
+                    {(courant?.sections ?? []).filter((sec) => sec !== "questions").map((sec) => (
+                      <div key={sec} id={`partie-${sec}`} className="lit-gestes dal-boite-partie">
+                        <Habille>
+                          <ChantierVue key={`${sec}-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={[sec]} />
+                        </Habille>
+                      </div>
+                    ))}
+                  </BoiteContexte.Provider>
                 </div>
-                )}
+                <div className="lin-boite-detail dal-boite-detail">
+                  <div ref={setCible} className="lvp-cible dal-boite-cible" />
+                  {choisie === null ? (
+                    <div className="dal-boite-repos">
+                      <div className="lin-boite-vide dal-boite-vide">
+                        <DalIcone nom="Inbox" taille={48} />
+                        <span>{resumeBoite}</span>
+                      </div>
+                      {onglet === "terrain" ? (
+                        <div id="partie-questions" className="lit-gestes dal-boite-questions">
+                          <Habille>
+                            <ChantierVue key={`questions-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={["questions"]} />
+                          </Habille>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
               </div>
-              {volet ? (
-                <aside className="lit-volet" aria-label="Élément choisi">
-                  <div ref={setCible} className="lvp-cible" />
-                  {choisie === null ? <VoletChantier t={t} c={chantierListe ?? t.chantier} ici={chemin} /> : null}
-                </aside>
-              ) : null}
             </div>
           )}
         </>

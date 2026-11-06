@@ -128,3 +128,333 @@
 .v2 .dal .dal-fc-onglets > * {
   flex: none;
 }
+
+/* ——— Terrain et Réception : la boîte de CASHD › Débiteurs (05/11/2026, choix de Teo) ———
+   Gabarit lin-boite- de ../lin/lin.css (Inbox de Linear) : colonne de liste de 400, trait à droite,
+   tête de 44 ; lignes de 55 (avatar 32, deux lignes 13/500 et 12/450, date et état à droite) ;
+   le reste de la largeur pour le détail de l'élément choisi. Les parties du chantier s'y suivent,
+   chacune sous un titre 12/500 et ses gestes en ronds de 24 ; leurs groupes en intitulés repliables. */
+.v2 .dal.dal-fc .lit-corps.dal-boite-corps {
+  overflow: hidden;
+}
+.v2 .dal .dal-boite {
+  height: 100%;
+  min-height: 0;
+}
+.v2 .dal .dal-boite-liste {
+  min-height: 0;
+  overflow-y: auto;
+}
+.v2 .dal .dal-boite-liste > .lin-tete {
+  z-index: 3;
+  background: var(--lin-fond);
+}
+.v2 .dal .dal-boite-liste > .lit-vide {
+  padding: 16px 17px;
+  text-align: left;
+}
+.v2 .dal .lit-gestes.dal-boite-partie {
+  max-width: none;
+  margin: 0;
+  padding: 4px 0 8px;
+}
+.v2 .dal .dal-boite-partie .resa.esp .esp-dossier {
+  gap: 0;
+}
+.v2 .dal .dal-boite-partie + .dal-boite-partie {
+  border-top: 0.5px solid var(--lin-trait);
+}
+.v2 .dal .lvp-boite-partie + .lvp-boite-partie {
+  margin-top: 4px;
+}
+.v2 .dal .lvp-boite-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 4px 12px 0 17px;
+}
+.v2 .dal .lvp-boite-titre {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  white-space: nowrap;
+}
+.v2 .dal .lvp-boite-compte {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .dal .lvp-boite-gestes {
+  margin-left: auto;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+/* les gestes d'une partie, dans une colonne de 400 : des ronds de 24, le libellé en infobulle */
+.v2 .dal .lvp-boite-gestes :is(button, a) {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+  font-size: 0;
+  border-radius: 9999px;
+}
+.v2 .dal .lvp-boite-gestes :is(button, a) svg {
+  width: 14px;
+  height: 14px;
+}
+.v2 .dal .lvp-boite-partie > :is(.lvp-vide, .lvp-avis, .lvp-resume, p) {
+  margin: 4px 17px 8px;
+}
+.v2 .dal .lvp-boite-liste,
+.v2 .dal .lvp-boite-liste ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.v2 .dal .lvp-boite-groupe-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  height: 28px;
+  padding: 0 17px 0 13px;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .dal .lvp-boite-groupe-tete:hover {
+  color: var(--lin-texte);
+}
+.v2 .dal .lvp-boite-groupe-tete svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.15s;
+}
+.v2 .dal .lvp-boite-groupe-tete[aria-expanded="false"] svg {
+  transform: rotate(-90deg);
+}
+.v2 .dal .lvp-boite-groupe-compte {
+  font-variant-numeric: tabular-nums;
+}
+.v2 .dal .lvp-boite-ligne {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .dal .lvp-boite-ligne[data-actif] .lin-boite-l1 {
+  color: var(--lin-texte);
+}
+.v2 .dal .lin-boite-ligne.lvp-boite-ligne .lin-boite-l1 {
+  color: var(--lin-texte);
+}
+.v2 .dal .lin-boite-ligne.lvp-boite-ligne .lin-boite-l1 b {
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .dal .lvp-boite-avatar {
+  color: var(--lin-second);
+}
+.v2 .dal .lvp-boite-avatar svg {
+  width: 16px;
+  height: 16px;
+}
+.v2 .dal .lvp-boite-avatar .lvp-icone-teinte {
+  display: inline-flex;
+}
+/* l'état, sous la date : la pastille ramenée à son point et son mot, 11/450 */
+.v2 .dal .lvp-boite-etat {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  max-width: 150px;
+  overflow: hidden;
+}
+.v2 .dal .lvp-boite-etat .lmi-pilule {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 11px;
+  font-weight: 450;
+  color: var(--lin-second);
+  white-space: nowrap;
+}
+.v2 .dal .dal-boite-detail {
+  min-height: 0;
+  overflow-y: auto;
+}
+.v2 .dal .dal-boite-cible:not(:empty) {
+  padding: 16px;
+}
+.v2 .dal .dal-boite-cible .lvp-detail {
+  width: auto;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.v2 .dal .dal-boite-repos {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.v2 .dal .dal-boite-vide {
+  flex: 0 0 auto;
+  padding: 64px 24px 32px;
+  text-align: center;
+}
+.v2 .dal .dal-boite-vide svg {
+  width: 48px;
+  height: 48px;
+}
+.v2 .dal .lit-gestes.dal-boite-questions {
+  width: min(640px, 100%);
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+/* ——— Argent : le tableau de bord de CASHD (05/11/2026, choix de Teo) ———
+   Gabarit lin-projet- (texte 805 à 71 du bord, tuile 36, titre 24/600, phrase 15/450, propriétés
+   en pastilles, carte « À faire » lin-maj, barres lin-tranche, listes de 36) et cartes de droite
+   de 388 (Propriétés, Parcours, courbe). Le détail de l'élément choisi se pose en tête de droite. */
+.v2 .dal.dal-fc .lit-corps.dal-ag-corps {
+  overflow-y: auto;
+}
+.v2 .dal .dal-ag {
+  min-height: 100%;
+}
+.v2 .dal .dal-ag .lin-projet-h2 {
+  margin: 32px 0 8px;
+}
+.v2 .dal .dal-ag .lin-tranche-nom {
+  flex: 0 0 220px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ag-droite {
+  position: sticky;
+  top: 8px;
+  margin-top: 8px;
+}
+.v2 .dal .dal-ag-cible:empty {
+  display: none;
+}
+.v2 .dal .dal-ag-cible .lvp-detail {
+  width: auto;
+}
+.v2 .dal .dal-ag-lien {
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lin-texte);
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .dal .dal-ag-lien[data-actif] {
+  background: var(--lin-survol);
+}
+.v2 .dal .dal-ag-lien-titre {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ag-icone {
+  flex: none;
+  color: var(--lin-second);
+}
+.v2 .dal .dal-ag-etat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ag-etat .dal-ag-point {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.v2 .dal .dal-ag-citation dt button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.v2 .dal .dal-ag-citation dt button:hover {
+  color: var(--lin-texte);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.v2 .dal .lin-maj-pied-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .dal .lit-gestes.dal-ag-heures {
+  max-width: 805px;
+  margin: 40px 0 0;
+  padding: 0;
+}
+@media (max-width: 767px) {
+  .v2 .dal .dal-ag-droite {
+    position: static;
+  }
+}
+.v2 .dal .dal-ag .lin-projet-texte > .lin-maj-texte.lin-maj-gris {
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+/* étroit : le tableau de bord passe en une colonne, les cartes sous le texte (comme CASHD) */
+.v2 .dal.dal-fc .lit-corps.dal-ag-corps {
+  display: block;
+}
+.v2 .dal .dal-ag {
+  width: 100%;
+  min-width: 0;
+}
+@media (max-width: 1100px) {
+  .v2 .dal .dal-ag {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v2 .dal .dal-ag .lin-projet-texte {
+    padding: 32px 16px 24px;
+  }
+  .v2 .dal .dal-ag .lin-projet-texte > * {
+    max-width: 100%;
+  }
+  .v2 .dal .dal-ag-droite {
+    position: static;
+    width: auto;
+    margin: 0 8px 32px;
+  }
+  .v2 .dal .dal-ag .lin-tranche-nom {
+    flex-basis: 130px !important;
+  }
+}
