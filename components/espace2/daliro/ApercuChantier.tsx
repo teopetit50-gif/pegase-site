@@ -459,7 +459,7 @@ function LotsChantier({ t, ici }: { t: Tableau; ici: string }) {
 
 /* ═════════ le volet de détails (⌘ I) ═════════ */
 type Vue = "sante" | "statut" | "executants";
-export function VoletChantier({ t, c, ici }: { t: Tableau; c: Chantier; ici: string }) {
+export function VoletChantier({ t, c, ici, entete }: { t: Tableau; c: Chantier; ici: string; entete?: { fiche: string; fermer: () => void } }) {
   const [ouvertes, setOuvertes] = useState({ proprietes: true, progres: true, activite: true });
   const [vue, setVue] = useState<Vue>("sante");
   const auj = useMemo(() => jourLocal(), []);
@@ -495,7 +495,28 @@ export function VoletChantier({ t, c, ici }: { t: Tableau; c: Chantier; ici: str
   );
 
   return (
-    <aside id="dal-ini-volet" className="dal-ini-volet" aria-label="Détails du chantier">
+    <aside id="dal-ini-volet" className="dal-ini-volet" data-peek={entete ? "" : undefined} aria-label="Détails du chantier">
+      {/* 05/11/2026 : ouvert depuis la Timeline, le volet porte en tête la carte du projet, comme le « peek » de Linear
+         (relu sur linear.app/omegaaii/projects/all : icône, nom et chevron vers la page, étoile, « … », description) */}
+      {entete ? (
+        <section className="dal-ini-carte dal-ini-peek" aria-label="Chantier">
+          <div className="dal-ini-peek-tete">
+            <DalIcone nom="Crane" taille={16} />
+            <Link href={entete.fiche} className="dal-ini-peek-nom">
+              {ch.nom}
+              <svg width="12" height="12" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 3.5 10.5 8 6 12.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
+            <button type="button" className="dal-ini-peek-fermer" aria-label="Fermer" title="Fermer" onClick={entete.fermer}>
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+          <p className="dal-ini-peek-description">{(ch.description ?? "").split("\n\n")[0] || [ch.adresse, `${ch.code_postal} ${ch.commune}`].filter(Boolean).join(", ")}</p>
+        </section>
+      ) : null}
       <section className="dal-ini-carte" aria-label="Propriétés">
         {tete("proprietes", "Propriétés")}
         {ouvertes.proprietes ? (

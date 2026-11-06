@@ -960,3 +960,45 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
     max-width: 344px;
   }
 }
+
+/* 05/11/2026 — le volet ouvert depuis la Timeline (peek de Linear) : la carte du projet en tête */
+.v2 .dal .dal-ini-volet[data-peek] {
+  padding-top: 8px;
+}
+.v2 .dal .dal-ini-peek-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-ini-peek-nom {
+  flex: 1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dal-t1);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-ini-peek-fermer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ini-peek-fermer:hover {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-ini-peek-description {
+  margin-top: 8px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dal-t3);
+}

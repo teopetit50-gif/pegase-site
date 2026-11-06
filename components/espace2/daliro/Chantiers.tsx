@@ -48,7 +48,7 @@ import { jourLocal, qui, quand, resume, type TeinteClair } from "./enClair";
 import { DalCarte } from "./DalCadre";
 import { DalIcone } from "./DalIcone";
 import { IconePriorite, IconeSante, IconeStatut, NOM_PRIORITE } from "./IconesProjet";
-import { COULEUR_LOT, STATUT_LOT, lignesLots, type LigneLot } from "./ApercuChantier";
+import { COULEUR_LOT, STATUT_LOT, VoletChantier, lignesLots, type LigneLot } from "./ApercuChantier";
 import "../lin/lin.css";
 import "./dal-timeline.css";
 
@@ -664,7 +664,13 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
           </div>
         ) : null}
         </div>
-        {chantierOuvert ? (
+        {chantierOuvert && !passageOuvert && tableau(chantierOuvert.id) ? (
+          /* 05/11/2026 (Teo : « quand on clique sur une bande, ça doit ouvrir à droite ce qu'on a déjà fait ailleurs ») :
+             le volet de détails de la fiche (copie de celui de Linear), avec la carte du chantier en tête */
+          <div className="dal-tl-volet dal-tl-volet--peek">
+            <VoletChantier t={tableau(chantierOuvert.id)!} c={chantierOuvert} ici={`${RACINE}/daliro/chantiers/${chantierOuvert.id}`} entete={{ fiche: `${RACINE}/daliro/chantiers/${chantierOuvert.id}`, fermer }} />
+          </div>
+        ) : chantierOuvert ? (
           <div className="lin dal-tl-volet">
             <ApercuFrise
               key={passageOuvert?.id ?? chantierOuvert.id}
