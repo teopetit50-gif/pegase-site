@@ -25,6 +25,9 @@ import { copierEtDire } from "../Toasts";
 import { DalCarte, DalMenu, type OptionMenu } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { APPELS_EXEMPLE, ETATS, ISSUES, PRIORITES, type Appel, type EtatAppel, type EtatSuite, type IssueAppel } from "./exemplesAppels";
+import { FicheDevis } from "./FicheDevis";
+import { DEVIS_EXEMPLE, ETATS_DEVIS, totalHt, type Devis } from "./exemplesDevis";
+import { montant } from "@/components/espace/format";
 import "./dal-inbox.css";
 import "./dal-ticket.css";
 
@@ -33,9 +36,10 @@ const BASE = `${RACINE}/daliro`;
 const ICONE_ETAT: Record<EtatAppel | EtatSuite, NomDalIcone> = { tri: "IssueStatusTriage", cours: "IssueStatusStarted", fait: "IssueStatusDone", afaire: "IssueStatusTodo" };
 const ICONE_ISSUE: Record<IssueAppel, NomDalIcone> = { agent: "Agent", bureau: "Phone", rappele: "Refresh", messagerie: "Mic", filtre: "Shield" };
 const ICONE_PRIORITE: NomDalIcone[] = ["Priority0", "Priority1", "Priority2", "Priority3"];
-const FILTRES = ["tous", "agent", "a-traiter"] as const;
+const FILTRES = ["tous", "agent", "a-traiter", "devis"] as const;
 type Filtre = (typeof FILTRES)[number];
-const LIB_FILTRE: Record<Filtre, string> = { tous: "Tous les appels", agent: "Pris par l'agent", "a-traiter": "À traiter" };
+const LIB_FILTRE: Record<Filtre, string> = { tous: "Tous les appels", agent: "Pris par l'agent", "a-traiter": "À traiter", devis: "Devis dictés" };
+const ETAT_DEVIS_LIGNE: Record<Devis["etat"], EtatAppel> = { a_chiffrer: "tri", a_valider: "tri", envoye: "cours", signe: "fait" };
 
 /* l'âge court de Linear, comme Tavaro (Retours.tsx) */
 function age(iso: string, maintenant: number): string {
@@ -260,18 +264,20 @@ export default function Appels() {
     () => APPELS_EXEMPLE.filter((a) => (filtre === "agent" ? a.issue === "agent" || a.issue === "rappele" || a.issue === "filtre" : filtre === "a-traiter" ? a.etat !== "fait" : true)),
     [filtre],
   );
-  const appel = visibles.find((a) => a.id === choix) ?? null;
+  const modeDevis = filtre === "devis";
+  const appel = modeDevis ? null : (visibles.find((a) => a.id === choix) ?? null);
+  const devis = modeDevis ? (DEVIS_EXEMPLE.find((x) => x.id === params.get("devis")) ?? null) : null;
   const adresse = useCallback((f: Filtre, id: string | null) => {
     const q = new URLSearchParams();
     if (f !== "tous") q.set("filtre", f);
-    if (id) q.set("appel", id);
+    if (id) q.set(f === "devis" ? "devis" : "appel", id);
     const s = q.toString();
     return `${BASE}/appels${s ? `?${s}` : ""}`;
   }, []);
   const ouvrir = useCallback(
-    (a: Appel | null) => {
+    (a: Appel | Devis | null) => {
       if (a && window.matchMedia("(max-width: 768px)").matches) {
-        routeur.push(`${BASE}/appels/${a.id}`);
+        routeur.push(`${BASE}/${a.id.startsWith("dev-") ? "devis" : "appels"}/${a.id}`);
         return;
       }
       routeur.replace(adresse(filtre, a?.id ?? null), { scroll: false });
@@ -284,15 +290,17 @@ export default function Appels() {
     const touche = (e: KeyboardEvent) => {
       const cible = e.target as HTMLElement | null;
       if (cible && (cible.closest("input, textarea, select, [role=dialog], [role=menu]") || cible.isContentEditable)) return;
-      if (e.key === "Escape" && appel) {
+      const items: (Appel | Devis)[] = modeDevis ? DEVIS_EXEMPLE : visibles;
+      const courant = modeDevis ? devis : appel;
+      if (e.key === "Escape" && courant) {
         ouvrir(null);
         return;
       }
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
       e.preventDefault();
-      const i = appel ? visibles.indexOf(appel) : -1;
-      const j = e.key === "ArrowDown" ? Math.min(visibles.length - 1, i + 1) : Math.max(0, i - 1);
-      const a = visibles[j];
+      const i = courant ? items.indexOf(courant) : -1;
+      const j = e.key === "ArrowDown" ? Math.min(items.length - 1, i + 1) : Math.max(0, i - 1);
+      const a = items[j];
       if (a) {
         ouvrir(a);
         liste.current?.querySelector<HTMLElement>(`[data-appel="${a.id}"]`)?.scrollIntoView({ block: "nearest" });
@@ -300,13 +308,13 @@ export default function Appels() {
     };
     document.addEventListener("keydown", touche);
     return () => document.removeEventListener("keydown", touche);
-  }, [appel, visibles, ouvrir]);
+  }, [appel, devis, modeDevis, visibles, ouvrir]);
 
   const aTraiter = APPELS_EXEMPLE.filter((a) => a.etat !== "fait").length;
   const parAgent = APPELS_EXEMPLE.filter((a) => a.issue === "agent" || a.issue === "rappele" || a.issue === "filtre").length;
   const optionsFiltre: OptionMenu[] = FILTRES.map((f) => ({
-    libelle: `${LIB_FILTRE[f]} · ${f === "tous" ? APPELS_EXEMPLE.length : f === "agent" ? parAgent : aTraiter}`,
-    icone: (filtre === f ? "IssueStatusDone" : f === "agent" ? "Agent" : f === "a-traiter" ? "IssueStatusTriage" : "Inbox") as NomDalIcone,
+    libelle: `${LIB_FILTRE[f]} · ${f === "tous" ? APPELS_EXEMPLE.length : f === "agent" ? parAgent : f === "devis" ? DEVIS_EXEMPLE.length : aTraiter}`,
+    icone: (filtre === f ? "IssueStatusDone" : f === "agent" ? "Agent" : f === "a-traiter" ? "IssueStatusTriage" : f === "devis" ? "Mic" : "Inbox") as NomDalIcone,
     href: adresse(f, null),
   }));
 
@@ -314,7 +322,7 @@ export default function Appels() {
     <DalCarte>
       <h1 className="v2-sr">Appels</h1>
       <div className="dal-ap">
-        <section className="dal-ap-liste" aria-label="Appels reçus" data-ouvert={appel ? "" : undefined}>
+        <section className="dal-ap-liste" aria-label={modeDevis ? "Devis dictés" : "Appels reçus"} data-ouvert={appel || devis ? "" : undefined}>
           <header className="dal-ap-tete">
             <h2 className="dal-ap-titre">{filtre === "tous" ? "Appels" : LIB_FILTRE[filtre]}</h2>
             <DalMenu
@@ -330,6 +338,53 @@ export default function Appels() {
             <DalMenu libelle="Filtrer les appels" icone="Filtre" alignement="droite" options={optionsFiltre} actif={filtre !== "tous"} />
           </header>
           <div className="dal-ap-defile">
+            {modeDevis ? (
+              <>
+                <p className="dal-ap-avis">Les vocaux dictés sur place, transcrits et chiffrés sur votre bibliothèque de prix. Un devis part au client après votre relecture.</p>
+                <ul ref={liste} className="dal-ap-lignes">
+                  {DEVIS_EXEMPLE.map((x) => (
+                    <li key={x.id}>
+                      <Link
+                        href={adresse("devis", x.id)}
+                        replace
+                        scroll={false}
+                        data-appel={x.id}
+                        className="dal-ap-ligne"
+                        data-lu={x.etat === "signe" || x.etat === "envoye" ? "" : undefined}
+                        aria-current={devis?.id === x.id ? "true" : undefined}
+                        onClick={(e) => {
+                          if (window.matchMedia("(max-width: 768px)").matches) {
+                            e.preventDefault();
+                            ouvrir(x);
+                          }
+                        }}
+                      >
+                        <span className="dal-ap-avatar" aria-hidden="true">
+                          <DalIcone nom="Mic" taille={20} />
+                        </span>
+                        <span className="dal-ap-texte">
+                          <span className="dal-ap-l1">
+                            {x.etat === "a_chiffrer" || x.etat === "a_valider" ? <span className="dal-ap-point" aria-label="à relire" /> : null}
+                            <span className="dal-ap-id">{x.numero}</span>
+                            <span className="dal-ap-sujet">
+                              {x.client} — {x.titre}
+                            </span>
+                            <span className="dal-ap-statut" data-etat={ETAT_DEVIS_LIGNE[x.etat]}>
+                              <DalIcone nom={ICONE_ETAT[ETAT_DEVIS_LIGNE[x.etat]]} taille={14} />
+                            </span>
+                          </span>
+                          <span className="dal-ap-l2">
+                            <span className="dal-ap-sous">{[ETATS_DEVIS[x.etat], `${montant(totalHt(x))} HT`, `dicté par ${x.dicte_par}`].join(" · ")}</span>
+                            <span className="dal-ap-age">{age(x.quand, maintenant)}</span>
+                          </span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+            <>
             <p className="dal-ap-avis">
               {APPELS_EXEMPLE.length} appels cette semaine · {parAgent} pris par l&apos;agent quand personne ne pouvait décrocher · {aTraiter} à traiter.
             </p>
@@ -383,10 +438,19 @@ export default function Appels() {
                 ))}
               </ul>
             )}
+            </>
+            )}
           </div>
         </section>
-        <section className="dal-ap-droite" aria-label="Appel ouvert">
-          {appel ? (
+        <section className="dal-ap-droite" aria-label={modeDevis ? "Devis ouvert" : "Appel ouvert"}>
+          {devis ? (
+            <FicheDevis key={devis.id} devis={devis} volet retour={{ libelle: "Devis dictés", href: adresse("devis", null) }} />
+          ) : modeDevis ? (
+            <div className="dal-ap-vide">
+              <DalIcone nom="Mic" taille={96} className="dal-ap-illustration" />
+              <p>{DEVIS_EXEMPLE.filter((x) => x.etat === "a_chiffrer" || x.etat === "a_valider").length} devis à relire</p>
+            </div>
+          ) : appel ? (
             <FicheAppel key={appel.id} appel={appel} volet retour={{ libelle: filtre === "tous" ? "Appels" : LIB_FILTRE[filtre], href: adresse(filtre, null) }} />
           ) : (
             <div className="dal-ap-vide">
