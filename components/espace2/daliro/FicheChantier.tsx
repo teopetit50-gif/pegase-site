@@ -574,9 +574,9 @@ export default function FicheChantier({ id }: { id: string }) {
                 plein
                 alignement="droite"
                 options={[
-                  { libelle: "Échelle : mois", icone: "Calendar", href: lienParam("zoom", "mois") },
+                  { libelle: "Échelle : mois", icone: "Calendar", href: lienParam("zoom", null) },
                   { libelle: "Échelle : trimestre", icone: "Calendar", href: lienParam("zoom", "trimestre") },
-                  { libelle: "Échelle : année", icone: "Calendar", href: lienParam("zoom", null) },
+                  { libelle: "Échelle : année", icone: "Calendar", href: lienParam("zoom", "annee") },
                 ]}
               />
             </span>

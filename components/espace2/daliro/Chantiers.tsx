@@ -123,7 +123,10 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
 
   const filtre = estFamille(params.get("famille")) ? (params.get("famille") as Famille) : null;
   const zParam = params.get("zoom");
-  const zoom = ZOOMS.find((z) => z.cle === zParam) ?? ZOOMS[2];
+  /* 05/11/2026 (Teo, capture de l'onglet Lots : « c'est mal fait de ouf ») : dans la fiche d'un chantier, les
+     passages durent quelques jours ; à l'échelle Année ils n'étaient que des losanges entassés. Mois par défaut. */
+  const zoomDefaut: Zoom = lotsDe ? "mois" : "annee";
+  const zoom = ZOOMS.find((z) => z.cle === zParam) ?? ZOOMS.find((z) => z.cle === zoomDefaut)!;
   const apercuId = params.get("apercu");
   const passageId = params.get("passage");
   const lien = (modif: Record<string, string | null>) => {
@@ -518,7 +521,7 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
                 <div className="dal-menu dal-tl-menu" role="menu" aria-label="Options d'affichage">
                   <p className="dal-tl-menu-titre">Échelle de la frise</p>
                   {ZOOMS.map((z) => (
-                    <button key={z.cle} type="button" role="menuitemradio" aria-checked={zoom.cle === z.cle} className="dal-menu-option" onClick={() => (setMenu(null), ouvrir({ zoom: z.cle === "annee" ? null : z.cle }))}>
+                    <button key={z.cle} type="button" role="menuitemradio" aria-checked={zoom.cle === z.cle} className="dal-menu-option" onClick={() => (setMenu(null), ouvrir({ zoom: z.cle === zoomDefaut ? null : z.cle }))}>
                       <DalIcone nom="Calendar" />
                       <span className="dal-pousse">{z.libelle}</span>
                       {zoom.cle === z.cle ? <DalIcone nom="IssueStatusDone" /> : null}
@@ -612,7 +615,7 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
               {menu === "zoom" ? (
                 <div className="dal-menu dal-tl-menu" role="menu" aria-label="Échelle" style={{ right: 0, left: "auto", minWidth: 140 }}>
                   {ZOOMS.map((z) => (
-                    <button key={z.cle} type="button" role="menuitemradio" aria-checked={zoom.cle === z.cle} className="dal-menu-option" onClick={() => (setMenu(null), ouvrir({ zoom: z.cle === "annee" ? null : z.cle }))}>
+                    <button key={z.cle} type="button" role="menuitemradio" aria-checked={zoom.cle === z.cle} className="dal-menu-option" onClick={() => (setMenu(null), ouvrir({ zoom: z.cle === zoomDefaut ? null : z.cle }))}>
                       <span className="dal-pousse">{z.libelle}</span>
                       {zoom.cle === z.cle ? <DalIcone nom="IssueStatusDone" /> : null}
                     </button>
