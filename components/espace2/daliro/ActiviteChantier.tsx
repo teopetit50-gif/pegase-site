@@ -20,7 +20,7 @@
    restent ceux de FilCarte (prop rendu).
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import FilCarte, { type FilRendu } from "@/components/espace/daliro/FilCarte";
 import type { Source } from "@/components/espace/source";
@@ -67,33 +67,64 @@ export function ActiviteChantier({ t, source, relire, ici, actions }: { t: Table
   );
 }
 
-/* le composeur : segmenté « Question | Avenant », champ, trombone et bouton d'envoi */
+/* le composeur, façon champ de commentaire de Linear (05/11, « plus propre et compréhensible ») :
+   le champ d'abord (une ligne, il grandit avec le texte), puis un pied avec les deux usages à
+   gauche (icône + mot), une ligne qui dit ce qui va se passer, le trombone et l'envoi rond à
+   droite, bleu dès que le texte suffit. */
+const MODES = {
+  question: {
+    icone: "Chat",
+    libelle: "Question",
+    placeholder: "Posez une question sur ce chantier…",
+    aide: "La réponse arrivera dans Terrain › Questions",
+    envoi: "Poser la question",
+  },
+  avenant: {
+    icone: "Signature",
+    libelle: "Avenant",
+    placeholder: "Décrivez ce qui est demandé en plus du marché…",
+    aide: "Prépare un avenant à partir de ce texte",
+    envoi: "Préparer l'avenant",
+  },
+} as const;
+
 function Composeur({ actions }: { actions: Actions }) {
   const [mode, setMode] = useState<"question" | "avenant">("question");
   const [texte, setTexte] = useState("");
-  const pret = texte.trim().length >= 3 && (mode === "question" || actions.avenantPossible);
+  const champ = useRef<HTMLTextAreaElement>(null);
+  const m = MODES[mode];
+  const bloque = mode === "avenant" && !actions.avenantPossible;
+  const pret = texte.trim().length >= 3 && !bloque;
+  const ajuster = () => {
+    const el = champ.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  };
   const envoyer = () => {
     if (!pret) return;
     if (mode === "question") actions.question(texte.trim());
     else actions.avenant(texte.trim());
     setTexte("");
+    requestAnimationFrame(ajuster);
+  };
+  const choisir = (suivant: "question" | "avenant") => {
+    setMode(suivant);
+    champ.current?.focus();
   };
   return (
-    <div className="dal-ini-composeur">
-      <div className="dal-ini-composeur-segments" role="group" aria-label="Ce que vous écrivez">
-        <button type="button" className="dal-ini-composeur-segment" aria-pressed={mode === "question"} onClick={() => setMode("question")}>
-          Question
-        </button>
-        <button type="button" className="dal-ini-composeur-segment" aria-pressed={mode === "avenant"} onClick={() => setMode("avenant")} title={actions.avenantPossible ? undefined : "Un avenant se prépare sur un chantier ouvert"}>
-          Avenant
-        </button>
-      </div>
+    <div className="dal-ini-composeur" onClick={(e) => e.target === e.currentTarget && champ.current?.focus()}>
       <textarea
+        ref={champ}
+        rows={1}
         className="dal-ini-composeur-champ"
         aria-label={mode === "question" ? "Votre question sur le chantier" : "Ce qui est demandé en plus du marché"}
-        placeholder={mode === "question" ? "Posez une question sur ce chantier…" : "Ce qui est demandé en plus du marché…"}
+        placeholder={m.placeholder}
         value={texte}
-        onChange={(e) => setTexte(e.target.value)}
+        onChange={(e) => {
+          setTexte(e.target.value);
+          ajuster();
+        }}
         onKeyDown={(e) => {
           if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
             e.preventDefault();
@@ -102,11 +133,22 @@ function Composeur({ actions }: { actions: Actions }) {
         }}
       />
       <div className="dal-ini-composeur-pied">
-        <button type="button" className="dal-ini-reaction" aria-label="Rattacher une facture" title="Rattacher une facture" onClick={actions.facture}>
+        <div className="dal-ini-composeur-modes" role="radiogroup" aria-label="Ce que vous écrivez">
+          {(["question", "avenant"] as const).map((cle) => (
+            <button key={cle} type="button" role="radio" aria-checked={mode === cle} className="dal-ini-composeur-mode" onClick={() => choisir(cle)}>
+              <DalIcone nom={MODES[cle].icone} taille={14} />
+              {MODES[cle].libelle}
+            </button>
+          ))}
+        </div>
+        <span className="dal-ini-composeur-aide">{bloque ? "Un avenant se prépare sur un chantier ouvert" : m.aide}</span>
+        <button type="button" className="dal-ini-composeur-icone" aria-label="Rattacher une facture" title="Rattacher une facture" onClick={actions.facture}>
           <DalIcone nom="Attachment" taille={16} />
         </button>
-        <button type="button" className="dal-ini-composeur-envoi" disabled={!pret} onClick={envoyer} title={mode === "question" ? "Poser la question (⌘ Entrée) — la réponse arrive dans Terrain › Questions" : "Ouvrir la fenêtre « Ouvrir un avenant » (⌘ Entrée)"}>
-          {mode === "question" ? "Poser" : "Ouvrir l'avenant…"}
+        <button type="button" className="dal-ini-composeur-envoi" disabled={!pret} onClick={envoyer} aria-label={m.envoi} title={`${m.envoi} (⌘ Entrée)`}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M8 13V3.5M3.75 7.5 8 3.25l4.25 4.25" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
     </div>

@@ -549,57 +549,41 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
   margin: 0 auto;
   padding: 44px 0 40px;
 }
-/* composeur (relevé : 813×172, r 10, bord 0.5 ; segmenté 130×25 en haut à gauche, segment actif
-   72×24 r 9999 p 0 8, 12/500/18 ; champ p 4 16, min 70, 15/450/24 ; pied 52 p 12 14 12 12, bouton
-   24 r 9999 p 0 8 12/500). Sombre : fond 26/255 = lch(9.232), segmenté lch(13.861), actif lch(20.032)
-   (capture 1440-sombre-onglet-activity-volet). */
+/* composeur, façon champ de commentaire de Linear (05/11) : carte r 8, bord 0.5, champ d'une ligne
+   qui grandit (14/450/22, p 14 16 4), pied 44 : usages à gauche (pilule 24, icône 14 + 12/500),
+   aide 12 en t4, trombone 28 puis envoi rond 28, bleu Linear lch(48 59.31 288.43) quand prêt. */
 .v2 .dal .dal-ini-composeur {
+  --dal-ini-envoi: lch(48 59.31 288.43);
   display: flex;
   flex-direction: column;
-  min-height: 172px;
   margin-bottom: 48px;
   border: 0.5px solid var(--dal-ini-volet-bord);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--dal-ini-volet);
-}
-.v2 .dal .dal-ini-composeur-segments {
-  display: inline-flex;
-  align-self: flex-start;
-  height: 25px;
-  margin: 12px 0 0 12px;
-  border: 0.5px solid var(--dal-ini-volet-bord);
-  border-radius: 9999px;
-  background: var(--dal-ini-segment-piste);
   box-shadow: var(--dal-carte-ombre);
+  cursor: text;
+  transition: border-color 0.15s ease;
 }
-.v2 .dal .dal-ini-composeur-segment {
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
-  color: var(--dal-ini-volet-t3);
-}
-.v2 .dal .dal-ini-composeur-segment[aria-pressed="true"] {
-  background: var(--dal-ini-segment-actif);
-  box-shadow: var(--dal-ini-volet-bord) 0 0 0 0.5px, var(--dal-carte-ombre);
-  color: var(--dal-t2);
+.v2 .dal .dal-ini-composeur:focus-within {
+  border-color: var(--dal-ini-bord);
 }
 .v2 .dal .dal-ini-composeur-champ {
-  flex: 1;
-  min-height: 70px;
-  padding: 4px 16px;
+  display: block;
+  width: 100%;
+  min-height: 40px;
+  max-height: 320px;
+  padding: 14px 16px 4px;
   border: 0;
   background: transparent;
   font: inherit;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 450;
-  line-height: 24px;
+  line-height: 22px;
   letter-spacing: -0.1px;
-  color: var(--dal-t2);
+  color: var(--dal-t1);
   resize: none;
   outline: none;
+  overflow-y: auto;
 }
 .v2 .dal .dal-ini-composeur-champ::placeholder {
   color: var(--dal-t4);
@@ -607,23 +591,85 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
 .v2 .dal .dal-ini-composeur-pied {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  height: 52px;
-  padding: 12px 14px 12px 12px;
+  gap: 4px;
+  min-height: 44px;
+  padding: 6px 8px 8px 10px;
+  cursor: default;
 }
-.v2 .dal .dal-ini-composeur-envoi {
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 9999px;
-  background: var(--dal-ini-segment-piste);
+.v2 .dal .dal-ini-composeur-modes {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.v2 .dal .dal-ini-composeur-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px 0 7px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
+  color: var(--dal-ini-volet-t3);
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+.v2 .dal .dal-ini-composeur-mode:hover {
+  background: var(--dal-survol-onglet);
   color: var(--dal-t2);
 }
+.v2 .dal .dal-ini-composeur-mode[aria-checked="true"] {
+  background: var(--dal-ini-segment-actif);
+  box-shadow: var(--dal-ini-volet-bord) 0 0 0 0.5px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-ini-composeur-aide {
+  flex: 1;
+  min-width: 0;
+  margin-left: 8px;
+  overflow: hidden;
+  font-size: 12px;
+  color: var(--dal-t4);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-ini-composeur-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ini-composeur-icone:hover {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-ini-composeur-envoi {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: var(--dal-ini-envoi);
+  color: #fff;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+.v2 .dal .dal-ini-composeur-envoi:active:not(:disabled) {
+  transform: scale(0.94);
+}
 .v2 .dal .dal-ini-composeur-envoi:disabled {
-  opacity: 0.5;
+  background: var(--dal-ini-segment-actif);
+  color: var(--dal-t4);
   cursor: default;
+}
+@media (max-width: 560px) {
+  .v2 .dal .dal-ini-composeur-aide {
+    visibility: hidden;
+  }
 }
 .v2 .dal .dal-ini-mois {
   display: flex;
