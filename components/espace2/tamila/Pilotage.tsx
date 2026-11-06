@@ -32,6 +32,9 @@ import { dateCourte } from "./echeances";
 import { copierEtDire } from "./navigateur";
 import "./tamp-pilotage.css";
 
+/* 06/11/2026 — Barres, Courbe, Repartition, Section et Carte sont exportées : l'onglet Argent de la
+   fiche chantier DALIRO (components/espace2/daliro/ArgentPilotage.tsx) reprend ce même gabarit. */
+
 const JOUR = 86_400_000;
 const CLE_COUT = "omega.tamila.cout_horaire";
 const euros = (cents: number) => (cents / 100).toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
@@ -58,7 +61,7 @@ const graduer = (max: number) => {
   return [0, pas, pas * 2, pas * 3];
 };
 
-function Barres({ valeurs, etiquettes, moyenne, couleurs }: { valeurs: number[]; etiquettes: [string, string]; moyenne?: string; couleurs?: (string | null)[] }) {
+export function Barres({ valeurs, etiquettes, moyenne, couleurs }: { valeurs: number[]; etiquettes: [string, string]; moyenne?: string; couleurs?: (string | null)[] }) {
   const { ref, l } = useLargeur();
   const H = 155;
   const axe = 30;
@@ -118,7 +121,7 @@ function Barres({ valeurs, etiquettes, moyenne, couleurs }: { valeurs: number[];
   );
 }
 
-function Courbe({ valeurs, etiquettes }: { valeurs: number[]; etiquettes: [string, string] }) {
+export function Courbe({ valeurs, etiquettes }: { valeurs: number[]; etiquettes: [string, string] }) {
   const { ref, l } = useLargeur();
   const H = 155;
   const axe = 30;
@@ -156,8 +159,8 @@ function Courbe({ valeurs, etiquettes }: { valeurs: number[]; etiquettes: [strin
   );
 }
 
-type LigneRep = { cle: string; nom: string; valeur: number; libelle: string; href?: string; icone?: NomTamIcone; couleur?: string; badge?: { texte: string; ton: "rouge" | "ambre" } };
-function Repartition({ lignes, vide }: { lignes: LigneRep[]; vide: [string, string] }) {
+export type LigneRep = { cle: string; nom: string; valeur: number; libelle: string; href?: string; icone?: NomTamIcone; couleur?: string; badge?: { texte: string; ton: "rouge" | "ambre" } };
+export function Repartition({ lignes, vide }: { lignes: LigneRep[]; vide: [string, string] }) {
   if (!lignes.length)
     return (
       <div className="tamp-encadre">
@@ -202,7 +205,7 @@ function Repartition({ lignes, vide }: { lignes: LigneRep[]; vide: [string, stri
   );
 }
 
-function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
+export function Section({ titre, children }: { titre: string; children: React.ReactNode }) {
   const [ouverte, setOuverte] = useState(true);
   return (
     <section className="tamp-rsection" aria-label={titre}>
@@ -217,7 +220,7 @@ function Section({ titre, children }: { titre: string; children: React.ReactNode
   );
 }
 
-function Carte({ titre, aide, valeur, suffixe, signal, children }: { titre: string; aide: string; valeur: string; suffixe: string; signal?: React.ReactNode; children: React.ReactNode }) {
+export function Carte({ titre, aide, valeur, suffixe, signal, children }: { titre: string; aide: string; valeur: string; suffixe: string; signal?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="tamp-rcarte">
       <div className="tamp-rcarte-tete">

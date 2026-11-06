@@ -32,7 +32,7 @@ const HORS_LOT = "hors";
 type Props = { tableau: Tableau; source: Source };
 
 /* 06/11/2026 — la logique du pointage, partagée par cette carte et par l'onglet
-   Argent de la fiche chantier (components/espace2/daliro/HeuresArgent.tsx) */
+   Argent de la fiche chantier (components/espace2/daliro/ArgentPilotage.tsx) */
 export function useHeuresChantier(tableau: Tableau, source: Source) {
   const c = tableau.chantier;
   const lotsClient = tableau.lots.filter((l) => l.execution === "client");

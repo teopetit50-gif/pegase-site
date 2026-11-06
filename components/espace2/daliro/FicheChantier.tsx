@@ -62,7 +62,7 @@ import { ApercuChantier, VoletChantier } from "./ApercuChantier";
 import { ActiviteChantier } from "./ActiviteChantier";
 import Chantiers from "./Chantiers";
 import { LotsProjets } from "./LotsProjets";
-import { ArgentChantier } from "./ArgentChantier";
+import { ArgentPilotage } from "./ArgentPilotage";
 import { ConversationDaliro } from "./QuestionsDaliro";
 import { EtoilePleine } from "./IconesProjet";
 import { useFavoris, useSuivis } from "./navigateur";
@@ -419,7 +419,8 @@ export default function FicheChantier({ id }: { id: string }) {
             </div>
           ) : onglet === "argent" ? (
             <div className="lit-corps dal-ag-corps">
-              <ArgentChantier t={t} source={source} onLocal={onLocal} relire={relire} geste={geste} cible={setCible} choisie={choisie} choisir={setChoisie} />
+              {/* 06/11/2026 — décision de Teo : l'onglet Argent reprend le Pilotage de Tamila (Plain › Insights) */}
+              <ArgentPilotage t={t} source={source} ici={chemin} />
             </div>
           ) : (
             /* 05/11 (choix de Teo) : Terrain et Réception sur la boîte de CASHD › Débiteurs — à gauche une
