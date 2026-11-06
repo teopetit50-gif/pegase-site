@@ -255,7 +255,10 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
     const z = zone.current;
     if (z) z.scrollLeft = xJour(auj) + zoom.px / 2 - (z.clientWidth / 2 + AUJ_DECALAGE);
   };
-  useLayoutEffect(allerAujourdhui, [zoom.cle]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* 05/11/2026 : aussi quand les lignes arrivent — dans la fiche d'un chantier, la frise n'est montée qu'une fois
+     les lots lus ; sans ce second passage elle restait calée sur son début (janvier de l'an passé) */
+  const aDesLignes = nbLignes > 0;
+  useLayoutEffect(allerAujourdhui, [zoom.cle, aDesLignes]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* le défilement de la frise : un chantier fini avant la partie visible montre « ← date »
      au bord gauche de la frise (capture 390-sombre-timeline de Linear : flèche à 19 du bord
