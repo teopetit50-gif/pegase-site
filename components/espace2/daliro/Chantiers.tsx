@@ -301,8 +301,32 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
     };
   }, [menu]);
 
+  /* 05/11/2026 (Teo : « ça se superpose, on voit rien, pas assez de séparation ») : une ligne porte au plus
+     6 losanges, choisis par importance (décliné ou sans réponse, en cours, le prochain, les autres à venir,
+     les faits), et chacun garde 24 px libres autour de lui ; les autres passages restent dans la fiche. */
+  const espaces = (passages: Passage[]): Passage[] => {
+    const rang = (p: Passage) => {
+      const d = versJour(p.debut);
+      const f = versJour(p.fin);
+      if (p.statut === "prevu" && f >= auj && (p.confirmation === "declinee" || p.confirmation === "sans_reponse")) return 0;
+      if (p.statut === "prevu" && d <= auj && f >= auj) return 1;
+      if (p.statut === "prevu" && d > auj) return 2 + (d - auj) / 1000;
+      return 4 + (auj - d) / 1000;
+    };
+    const gardes: { p: Passage; x: number }[] = [];
+    for (const p of [...passages].sort((a, b) => rang(a) - rang(b))) {
+      if (gardes.length >= 6) break;
+      if (glisse?.id === p.id) {
+        gardes.push({ p, x: xJour(versJour(p.debut)) });
+        continue;
+      }
+      const x = xJour(versJour(p.debut));
+      if (gardes.every((g) => Math.abs(g.x - x) >= 24)) gardes.push({ p, x });
+    }
+    return gardes.map((g) => g.p);
+  };
   const jalons = (passages: Passage[]) =>
-    passages.map((p) => {
+    espaces(passages).map((p) => {
               const g = glisse?.id === p.id ? glisse : null;
               const x = xJour(versJour(p.debut)) + zoom.px / 2 + (g && !g.etirer ? g.dx : 0);
               const etat = p.statut === "fait" ? "MilestoneStatusDone" : versJour(p.debut) <= auj && versJour(p.fin) >= auj ? "MilestoneStatusStarted" : "MilestoneStatusPlanned";

@@ -228,6 +228,8 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   left: 0;
   right: 0;
   height: 72px;
+  /* 05/11/2026, demande de Teo : un filet discret sépare les lignes */
+  border-bottom: 0.5px solid var(--dal-carte-bord);
 }
 .v2 .dal .dal-tl-avant {
   position: absolute;
