@@ -18,8 +18,8 @@
      Santé        vert : attestation de vigilance à jour et rien en souffrance ;
                   rouge : attestation à renouveler, passage décliné ou sans réponse
      Passages     combien de passages, faits et à venir
-   Un clic ouvre ses passages (l'ancienne vue, onglet « Passages » :
-   absences, remplaçants, calendrier, export), filtrés sur lui.
+   Un clic ouvre sa fiche (./FicheIntervenant, page d'un ticket Linear) ;
+   absences, remplaçants et calendrier restent sous « Passages et absences ».
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
@@ -223,7 +223,7 @@ export default function EquipesListe() {
                   })
                 }
               />
-              <button type="button" className="dal-in-ligne" onClick={() => routeur.push(`${BASE}/equipes?vue=passages&intervenant=${encodeURIComponent(l.cle)}`)}>
+              <button type="button" className="dal-in-ligne" onClick={() => routeur.push(`${BASE}/equipes/${encodeURIComponent(l.cle)}`)}>
                 <span className="dal-in-case" aria-hidden="true" />
                 <span className="dal-in-titre">
                   <span className="dal-in-icone">
