@@ -30,3 +30,18 @@
   line-height: 18px;
   color: var(--feuille-encre);
 }
+
+/* 06/11 : la carte sans pièce à gauche (CarteCentrale sans `gauche`) — une colonne, plus étroite */
+.v2-modale.v2-val-carte.v2-val-carte--seule {
+  max-width: 560px;
+}
+.v2-val-carte--seule .v2-det-carte-corps {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+}
+@media (max-width: 900px) {
+  .v2-modale.v2-val-carte.v2-val-carte--seule {
+    height: auto;
+    max-height: calc(100dvh - 32px);
+  }
+}
