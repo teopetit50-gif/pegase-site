@@ -12,6 +12,9 @@
                fiche (dl), les blocs, les notes contre les boutons
      pied      les boutons : le geste principal en bleu, les autres à côté
    Les tableaux des troisièmes pages l'ouvrent au clic sur une carte.
+   06/11 : sans `gauche` (Teo : « pas obligé de mettre une image à gauche,
+   sauf s'il y a besoin, une facture par exemple »), la carte n'a que sa
+   colonne de droite et rétrécit (.v2-val-carte--seule) — Daliro › À faire.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect } from "react";
@@ -48,8 +51,8 @@ export function CarteCentrale({
   /* l'icône et le libellé de l'état */
   statut?: React.ReactNode;
   nav?: NavCarte | null;
-  /* la colonne de gauche : en général une <Feuille> */
-  gauche: React.ReactNode;
+  /* la colonne de gauche : en général une <Feuille> ; sans elle, une carte étroite d'une colonne */
+  gauche?: React.ReactNode;
   /* sous la feuille : des <div className="v2-det-document-ligne"> */
   piedGauche?: React.ReactNode;
   titre: React.ReactNode;
@@ -82,7 +85,7 @@ export function CarteCentrale({
 
   return (
     <ModalOverlay isOpen={ouverte} onOpenChange={(o) => !o && fermer()} isDismissable className={`v2-jetons v2-voile v2-voile--carte${classe ? ` ${classe}` : ""}`}>
-      <Modal className="v2-modale v2-val-carte">
+      <Modal className={`v2-modale v2-val-carte${gauche ? "" : " v2-val-carte--seule"}`}>
         <Dialog className="v2-modale-dialogue" aria-label={libelle}>
           <div className="v2-det">
             <header className="v2-det-carte-tete">
@@ -111,12 +114,14 @@ export function CarteCentrale({
             </header>
 
             <div className="v2-det-carte-corps">
-              <aside className="v2-det-document" aria-label="La pièce">
-                <div className="v2-det-document-pages">
-                  <div className="v2-det-liasse">{gauche}</div>
-                </div>
-                {piedGauche ? <footer className="v2-det-document-pied">{piedGauche}</footer> : null}
-              </aside>
+              {gauche ? (
+                <aside className="v2-det-document" aria-label="La pièce">
+                  <div className="v2-det-document-pages">
+                    <div className="v2-det-liasse">{gauche}</div>
+                  </div>
+                  {piedGauche ? <footer className="v2-det-document-pied">{piedGauche}</footer> : null}
+                </aside>
+              ) : null}
 
               <section className="v2-det-decision" aria-label="Le détail">
                 <div className="v2-det-decision-corps">

@@ -52,12 +52,12 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dateCourte, dateHeure, montant } from "@/components/espace/format";
 import { Button, Dialog, Heading, Modal, ModalOverlay } from "react-aria-components";
 import { CONFIRMATIONS, libelleEnvoi } from "@/components/espace/daliro/etats";
 import { chargerAppro, ecrireCommande, noterCommande, noterLivraison, noterRetour, ouvrirSituation, repondreConfirmation, signerAvenant, soumettreSituation, terminerPassage, validerSituation } from "@/components/espace/daliro/portes";
-import { CarteCentrale, Feuille, type NavCarte } from "../lin/CarteCentrale";
+import { CarteCentrale, type NavCarte } from "../lin/CarteCentrale";
 import { echeancesCommande, exempleAppro } from "@/components/espace/daliro/ApproCarte";
 import { TILLEULS } from "@/components/espace/daliro/exemples";
 import { ouvrirLocale } from "@/components/espace/daliro/situations";
@@ -490,22 +490,10 @@ function MenuMi({ libelle, icone, options }: { libelle: string; icone: NomDalIco
   );
 }
 
-/* ——— la carte d'une tâche, au milieu de l'écran (la carte d'« À valider » de Cashd) : ce qu'il faut
-   faire, puis le geste, fait sur place ——— */
+/* ——— la carte d'une tâche, au milieu de l'écran (la carte d'« À valider » de Cashd, sans pièce à
+   gauche : rien à montrer qu'une facture justifierait — Teo, 06/11) : ce qu'il faut faire, les
+   repères, puis le geste, fait sur place ——— */
 type Geste = "fait" | "confirmee" | "declinee" | "signer" | "valider" | "soumettre" | "commandee" | "recue" | "rendu" | "date";
-const FEUILLE: Record<Genre, string> = {
-  confirmer: "CONFIRMATION J-2",
-  fait: "PASSAGE",
-  passage: "PASSAGE",
-  signer: "AVENANT",
-  avenant_attente: "AVENANT",
-  soumettre: "SITUATION",
-  valider: "SITUATION",
-  situation_attente: "SITUATION",
-  commander: "COMMANDE",
-  livraison: "LIVRAISON",
-  rendre: "MATÉRIEL À RENDRE",
-};
 function CarteTache({
   tache: x,
   jour,
@@ -560,7 +548,7 @@ function CarteTache({
       ouverte
       fermer={fermer}
       libelle={x.titre}
-      sur={`DALIRO · ${NATURE[x.genre].libelle}`}
+      sur={`DALIRO · ${NATURE[x.genre].libelle} · ${x.ref}`}
       statut={
         <>
           <DalIcone nom={et.icone} taille={14} />
@@ -568,13 +556,6 @@ function CarteTache({
         </>
       }
       nav={nav}
-      gauche={<Feuille titre={FEUILLE[x.genre]} sous={x.ref} nom={x.qui ?? x.chantier.nom} sousNom={x.qui ? [x.chantier.nom] : []} lignes={autres.map((p): [string, string] => [p.libelle, p.valeur])} />}
-      piedGauche={
-        <div className="v2-det-document-ligne">
-          <span className="v2-det-mono">{x.ref}</span>
-          <span className="v2-det-sous">{x.chantier.nom}</span>
-        </div>
-      }
       titre={x.titre}
       echeance={{ texte: x.dateLigne, urgence: x.enRetard ? "retard" : undefined }}
       notes={
@@ -620,6 +601,14 @@ function CarteTache({
             <dd>{x.qui}</dd>
           </>
         ) : null}
+        {autres
+          .filter((p) => !(x.qui && p.valeur === x.qui))
+          .map((p) => (
+            <Fragment key={p.libelle}>
+              <dt>{p.libelle}</dt>
+              <dd>{p.valeur}</dd>
+            </Fragment>
+          ))}
         <dt>Priorité</dt>
         <dd>{prioriteDe(x).libelle}</dd>
       </dl>
