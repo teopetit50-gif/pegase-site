@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Suspense } from "react";
-import Equipes from "@/components/espace2/daliro/Equipes";
+import EquipesVues from "@/components/espace2/daliro/EquipesVues";
 
 /* /espace2/daliro/equipes — copie 1:1 de « Bookings » de Cal.com
    (03/11/2026, à la place d'Availability) : les passages des intervenants
@@ -26,7 +26,7 @@ export default function PageEquipes() {
   return (
     <div className={calSans.variable}>
       <Suspense>
-        <Equipes />
+        <EquipesVues />
       </Suspense>
     </div>
   );

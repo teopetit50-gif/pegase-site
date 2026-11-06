@@ -1,0 +1,390 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO, équipes (05/11/2026, recopié de tav-initiatives.css) — Linear, liste des Initiatives, au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/
+   linear-initiatives-liste.md (1440×900 sombre et clair, paliers 1024,
+   768, 390). Préfixe dal-in-.
+
+   Repères : ligne 1 (44) titre 13/500 à 18 du bord, « New initiative » 28
+   (p 0 10 0 8, icône 14, 12/500 tertiaire) ; ligne 2 (44) onglets 28 au
+   pas de 6 à 8 du bord, ronds 28 à droite ; en-tête de colonnes 32
+   (12/450 tertiaire) ; lignes de 57 (r 8, survol en ::before inset 0 8),
+   grille 8 · 20 · titre · 100 · 56 · 50 · 100 · 59 · 52 · 98 · 12, écart 6 ;
+   titre : icône 28 (r 8, p 6, 16) puis nom 13/500 secondaire et résumé
+   13/450 tertiaire (15.5 chacun, à 18 l'un de l'autre) ; statut pilule 28
+   (r 9999, p 3 6, icône 16, libellé 12/450 primaire à 8) ; santé 28
+   (icône 14) ; date 12/450 primaire ; projets icône 16 + 12/450.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal {
+  --dal-in-grille: 8px 20px minmax(0, 1fr) 100px 56px 50px 100px 59px 52px 98px 12px;
+  --dal-in-projets: #5e6ad2;
+  --dal-in-jaune: #f0bf00;
+  --dal-in-vert: #26a644;
+}
+
+.v2 .dal .dal-in-ligne1 {
+  align-items: center;
+  padding: 0 8px 0 18px;
+}
+.v2 .dal .dal-in-page {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-in-nouveau {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-in-nouveau:hover:not(:disabled) {
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-in-nouveau:disabled {
+  opacity: 0.5;
+}
+.v2 .dal .dal-in-ligne2 {
+  align-items: center;
+  padding-top: 0;
+  gap: 6px;
+}
+.v2 .dal .dal-in-onglets {
+  display: flex;
+  gap: 6px;
+}
+
+/* ——— en-tête de colonnes et lignes ——— */
+.v2 .dal .dal-in-entete,
+.v2 .dal .dal-in-ligne {
+  display: grid;
+  grid-template-columns: var(--dal-in-grille);
+  column-gap: 6px;
+  align-items: center;
+}
+.v2 .dal .dal-in-entete {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 32px;
+  background: var(--dal-carte);
+}
+.v2 .dal .dal-in-col {
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.v2 .dal .dal-in-entete > .dal-in-col:nth-child(3) {
+  padding-left: 6px;
+}
+.v2 .dal .dal-in-avis {
+  padding: 8px 18px 12px 53px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 18px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-in-lignes {
+  padding-bottom: 8px;
+}
+.v2 .dal .dal-in-ligne {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 57px;
+  border-radius: 8px;
+  text-align: left;
+  color: var(--dal-t1);
+  transition: color 0.15s;
+}
+.v2 .dal .dal-in-ligne::before {
+  content: "";
+  position: absolute;
+  inset: 0 8px;
+  z-index: -1;
+  border-radius: 8px;
+}
+.v2 .dal button.dal-in-ligne:hover::before {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-in-case {
+  grid-column: 2;
+}
+.v2 .dal .dal-in-titre {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.v2 .dal .dal-in-icone {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-in-textes {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5px;
+  min-width: 0;
+}
+.v2 .dal .dal-in-nom,
+.v2 .dal .dal-in-resume {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 15.5px;
+}
+.v2 .dal .dal-in-nom {
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-in-resume {
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-in-statut {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 3px 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t1);
+  white-space: nowrap;
+  overflow: hidden;
+  /* 03/11/2026 — « à valider par la direction » était coupé net : le statut
+     tient dans sa colonne et finit par « … » */
+  max-width: 100%;
+  min-width: 0;
+}
+.v2 .dal .dal-in-statut > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-in-statut svg {
+  flex: none;
+  margin-right: 8px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-in-statut[data-teinte="jaune"] svg {
+  color: var(--dal-in-jaune);
+}
+.v2 .dal .dal-in-statut[data-teinte="violet"] svg {
+  color: var(--dal-tk-fait);
+}
+.v2 .dal .dal-in-statut[data-teinte="rouge"] svg {
+  color: var(--dal-tk-rouge);
+}
+.v2 .dal .dal-in-prio {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-in-prio[data-prio="urgent"] {
+  color: var(--dal-tk-triage);
+}
+.v2 .dal .dal-in-cible {
+  padding: 0 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-in-projets {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 2px 4px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+}
+.v2 .dal .dal-in-projets svg {
+  flex: none;
+  color: var(--dal-in-projets);
+}
+.v2 .dal .dal-in-projets span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-in-sante {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+.v2 .dal .dal-in-sante > span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px dotted var(--dal-t4);
+}
+.v2 .dal .dal-in-sante[data-sante="vert"] > span {
+  border: 0;
+  background: color-mix(in srgb, #28a744 25%, transparent);
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, #28a744 25%, transparent), inset 0 0 0 14px transparent;
+  background-image: radial-gradient(circle, var(--dal-in-vert) 0 2.5px, transparent 3px);
+}
+.v2 .dal .dal-in-sante[data-sante="rouge"] > span {
+  border: 0;
+  background: color-mix(in srgb, #eb5757 25%, transparent);
+  background-image: radial-gradient(circle, #eb5757 0 2.5px, transparent 3px);
+}
+.v2 .dal .dal-in-actifs {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+
+@media (max-width: 1024px) {
+  .v2 .dal {
+    --dal-in-grille: 8px 0 minmax(300px, 1fr) 100px 56px 50px 100px 59px 52px 98px 12px;
+  }
+  .v2 .dal .dal-defile {
+    overflow-x: auto;
+  }
+  .v2 .dal .dal-in-entete,
+  .v2 .dal .dal-in-lignes {
+    min-width: 969px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .dal {
+    --dal-in-grille: 8px 0 minmax(0, 1fr) 0 0 0 0 0 28px 0 12px;
+  }
+  .v2 .dal .dal-in-entete {
+    display: none;
+  }
+  .v2 .dal .dal-in-entete,
+  .v2 .dal .dal-in-lignes {
+    min-width: 0;
+  }
+  .v2 .dal :is(.dal-in-statut, .dal-in-prio, .dal-in-owner, .dal-in-cible, .dal-in-projets, .dal-in-actifs) {
+    display: none;
+  }
+  .v2 .dal .dal-in-ligne {
+    column-gap: 6px;
+  }
+  .v2 .dal .dal-in-nouveau span {
+    display: none;
+  }
+}
+
+/* 768 et moins : les quatre onglets défilent dans leur rangée, les ronds restent à droite (pas de défilement de la page) */
+@media (max-width: 768px) {
+  .v2 .dal .dal-in-ligne2 {
+    min-width: 0;
+  }
+  .v2 .dal .dal-in-onglets {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .v2 .dal .dal-in-onglets::-webkit-scrollbar {
+    display: none;
+  }
+  .v2 .dal .dal-in-ligne2 > .dal-pousse {
+    display: none;
+  }
+}
+
+/* ——— la case « Select initiative » (14×14, bord 1 lch(52.04 0 282), r 3, visible au survol) et la barre d'actions groupées ——— */
+.v2 .dal .dal-in-li {
+  position: relative;
+}
+.v2 .dal .dal-in-coche {
+  position: absolute;
+  left: 17px;
+  top: 21.5px;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  border-radius: 3px;
+  accent-color: var(--dal-g-primaire, lch(53 52.26 286.91));
+  opacity: 0;
+  cursor: pointer;
+}
+.v2 .dal .dal-in-li:hover .dal-in-coche,
+.v2 .dal .dal-in-li[data-coche] .dal-in-coche,
+.v2 .dal .dal-in-coche:focus-visible {
+  opacity: 1;
+}
+.v2 .dal .dal-in-tri {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  border-radius: 9999px;
+}
+.v2 .dal .dal-in-tri:hover,
+.v2 .dal .dal-in-tri[aria-current="true"] {
+  background: var(--dal-survol-onglet);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-in-barre {
+  position: sticky;
+  bottom: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 16px auto;
+  padding: 6px 6px 6px 14px;
+  border: 0.5px solid var(--dal-menu-bord);
+  border-radius: 12px;
+  background: var(--dal-menu);
+  box-shadow: var(--dal-menu-ombre);
+  font-size: 13px;
+  font-weight: 450;
+  color: var(--dal-menu-texte);
+}
+.v2 .dal .dal-in-barre-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.v2 .dal .dal-in-barre-bouton:hover {
+  background: var(--dal-menu-survol);
+}
+@media (max-width: 768px) {
+  .v2 .dal .dal-in-coche {
+    display: none;
+  }
+}
