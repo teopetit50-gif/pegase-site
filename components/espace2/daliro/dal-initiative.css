@@ -458,3 +458,121 @@
     flex-basis: 130px !important;
   }
 }
+
+/* 06/11/2026 — Argent : les heures pointées et la marge par lot (HeuresArgent.tsx),
+   dans les briques du haut de la page : lignes à pastilles, lignes de 36 de la
+   liste des lots (colonne de 220), cases au dessin du champ lin-select
+   (24 de haut, rayon 8, fond --lin-champ, 12 px) */
+.v2 .dal .dal-hg-avis {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 0;
+}
+.v2 .dal .dal-hg-avis p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--lin-second);
+}
+.v2 .dal .dal-hg-avis p[data-teinte="vert"] { color: var(--lin-vert); }
+.v2 .dal .dal-hg-avis p[data-teinte="jaune"] { color: var(--lin-jaune); }
+.v2 .dal .dal-hg-avis p[data-teinte="rouge"] { color: var(--lin-rouge); }
+.v2 .dal .dal-hg-feuille {
+  margin-top: 16px;
+}
+.v2 .dal .dal-hg-feuille li {
+  gap: 12px;
+}
+.v2 .dal .dal-hg-feuille .lin-tranche-nom {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.v2 .dal .dal-hg-equipe {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .dal .dal-hg-cases {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+.v2 .dal .dal-hg-feuille li.dal-hg-tete {
+  height: 28px;
+}
+.v2 .dal .dal-hg-tete,
+.v2 .dal .dal-hg-tete .lin-tranche-nom,
+.v2 .dal .dal-hg-pied .lin-tranche-nom,
+.v2 .dal .dal-hg-pied .dal-hg-cases {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-second);
+}
+.v2 .dal .dal-hg-tete .dal-hg-cases span,
+.v2 .dal .dal-hg-pied .dal-hg-cases span {
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.v2 .dal .dal-hg-total {
+  flex: 0 0 44px;
+  text-align: right;
+}
+.v2 .dal .dal-hg-feuille li:not(.dal-hg-tete) .dal-hg-total {
+  color: var(--lin-texte);
+}
+.v2 .dal .dal-hg-case {
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 8px;
+  background: var(--lin-champ);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--lin-texte);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+.v2 .dal .dal-hg-case::placeholder {
+  color: var(--lin-second);
+}
+.v2 .dal .dal-hg-case:hover:not(:disabled) {
+  background: var(--lin-survol);
+}
+.v2 .dal .dal-hg-case:focus-visible {
+  border-color: var(--lin-second);
+}
+.v2 .dal .dal-hg-case:disabled {
+  background: transparent;
+  color: var(--lin-second);
+  cursor: default;
+}
+.v2 .dal .dal-hg-case[data-autres] {
+  color: var(--lin-jaune);
+}
+.v2 .dal .dal-hg-lot .lin-tranche-barre span[data-depasse] {
+  background: var(--lin-rouge);
+}
+.v2 .dal .dal-hg-lot .lin-meta[data-teinte="rouge"] {
+  color: var(--lin-rouge);
+}
+.v2 .dal .dal-hg-place:empty {
+  display: none;
+}
+.v2 .dal .dal-hg-props {
+  margin-top: 18px;
+}
+/* étroit : la feuille garde ses sept cases lisibles et défile de côté */
+@media (max-width: 767px) {
+  .v2 .dal .dal-hg-feuille {
+    overflow-x: auto;
+  }
+  .v2 .dal .dal-hg-feuille li {
+    min-width: 560px;
+  }
+}

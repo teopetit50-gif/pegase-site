@@ -31,8 +31,9 @@ const HORS_LOT = "hors";
 
 type Props = { tableau: Tableau; source: Source };
 
-export default function HeuresCarte({ tableau, source }: Props) {
-  const volet = useVolet();
+/* 06/11/2026 — la logique du pointage, partagée par cette carte et par l'onglet
+   Argent de la fiche chantier (components/espace2/daliro/HeuresArgent.tsx) */
+export function useHeuresChantier(tableau: Tableau, source: Source) {
   const c = tableau.chantier;
   const lotsClient = tableau.lots.filter((l) => l.execution === "client");
   const [lundi, setLundi] = useState(() => lundiDe(aujourdHui()));
@@ -161,38 +162,22 @@ export default function HeuresCarte({ tableau, source }: Props) {
     if (ok) setCoutForm(false);
   };
 
-  if (chargement && !h) {
-    if (volet)
-      return (
-        <Partie titre="Heures">
-          <Loader variant="spin" />
-        </Partie>
-      );
-    return (
-      <section className="esp-carte" aria-label="Heures et rentabilité">
-        <div className="esp-section-titre">Heures et rentabilité</div>
-        <Loader variant="spin" />
-      </section>
-    );
-  }
-  if (!h) {
-    if (volet)
-      return (
-        <Partie titre="Heures">
-          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : <Vide>Les heures de ce chantier ne vous sont pas ouvertes.</Vide>}
-        </Partie>
-      );
-    return (
-      <section className="esp-carte" aria-label="Heures et rentabilité">
-        <div className="esp-section-titre">Heures et rentabilité</div>
-        {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : <p className="esp-kpi-sous">Les heures de ce chantier ne vous sont pas ouvertes.</p>}
-      </section>
-    );
-  }
-
-  const r = h.rentabilite;
-  const totalJour = (j: string) => (h.pointages ?? []).filter((p) => p.jour === j).reduce((t, p) => t + p.heures, 0);
+  const totalJour = (j: string) => (h?.pointages ?? []).filter((p) => p.jour === j).reduce((t, p) => t + p.heures, 0);
   const semaineCourante = lundi >= lundiDe(auj);
+  const ouvrirEquipe = (id?: string) => {
+    setEquipe(id ?? h?.equipes[0]?.id ?? "");
+    setJourEquipe(auj);
+    setHeuresEquipe("8");
+    setErreur(null);
+    setEquipeForm(true);
+  };
+  const ouvrirCout = () => {
+    setCoutQui("");
+    setCoutValeur(h?.cout_defaut != null ? String(h.cout_defaut).replace(".", ",") : "");
+    setCoutDepuis(auj);
+    setErreur(null);
+    setCoutForm(true);
+  };
 
   const fenetres = (
     <>
@@ -207,7 +192,7 @@ export default function HeuresCarte({ tableau, source }: Props) {
             <div className="esp-form">
               <label className="rv-libelle">Équipe
                 <select className="rv-champ" value={equipe} onChange={(e) => setEquipe(e.target.value)}>
-                  {h.equipes.map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                  {(h?.equipes ?? []).map((e) => <option key={e.id} value={e.id}>{e.nom}</option>)}
                 </select>
               </label>
               <div className="esp-form-ligne">
@@ -239,7 +224,7 @@ export default function HeuresCarte({ tableau, source }: Props) {
               <label className="rv-libelle">Pour
                 <select className="rv-champ" value={coutQui} onChange={(e) => setCoutQui(e.target.value)}>
                   <option value="">Toute l&apos;entreprise (par défaut)</option>
-                  {h.intervenants.map((i) => <option key={i.id} value={i.id}>{i.nom}</option>)}
+                  {(h?.intervenants ?? []).map((i) => <option key={i.id} value={i.id}>{i.nom}</option>)}
                 </select>
               </label>
               <div className="esp-form-ligne">
@@ -261,6 +246,43 @@ export default function HeuresCarte({ tableau, source }: Props) {
     </>
   );
 
+  return { h, chargement, erreur, fait, alertes, envoi, lundi, setLundi, lot, setLot, saisies, setSaisies, enregistrer, cle, heuresDe, ouvert, auj, lotLibelle, totalJour, semaineCourante, ouvrirEquipe, ouvrirCout, equipeForm, coutForm, fenetres };
+}
+
+export default function HeuresCarte({ tableau, source }: Props) {
+  const volet = useVolet();
+  const { h, chargement, erreur, fait, alertes, envoi, lundi, setLundi, lot, setLot, saisies, setSaisies, enregistrer, cle, heuresDe, ouvert, auj, lotLibelle, totalJour, semaineCourante, ouvrirEquipe, ouvrirCout, equipeForm, coutForm, fenetres } = useHeuresChantier(tableau, source);
+
+  if (chargement && !h) {
+    if (volet)
+      return (
+        <Partie titre="Heures">
+          <Loader variant="spin" />
+        </Partie>
+      );
+    return (
+      <section className="esp-carte" aria-label="Heures et rentabilité">
+        <div className="esp-section-titre">Heures et rentabilité</div>
+        <Loader variant="spin" />
+      </section>
+    );
+  }
+  if (!h) {
+    if (volet)
+      return (
+        <Partie titre="Heures">
+          {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : <Vide>Les heures de ce chantier ne vous sont pas ouvertes.</Vide>}
+        </Partie>
+      );
+    return (
+      <section className="esp-carte" aria-label="Heures et rentabilité">
+        <div className="esp-section-titre">Heures et rentabilité</div>
+        {erreur ? <Avis teinte="rouge" role="alert">{erreur}</Avis> : <p className="esp-kpi-sous">Les heures de ce chantier ne vous sont pas ouvertes.</p>}
+      </section>
+    );
+  }
+
+  const r = h.rentabilite;
 
   /* 30/10/2026 — dans la fiche de l'espace 2 : la grille de la semaine seule, à la mesure des listes
      (en-tête 32, lignes 36, cases de 48) ; la rentabilité en quatre chiffres puis un lot par ligne,
@@ -273,11 +295,11 @@ export default function HeuresCarte({ tableau, source }: Props) {
           compte={`${heuresFr(h.total_heures)} pointées`}
           gestes={
             <>
-              <Bouton icone={<Users aria-hidden="true" />} disabled={envoi || !ouvert || !h.equipes.length} onClick={() => { setEquipe(h.equipes[0]?.id ?? ""); setJourEquipe(auj); setHeuresEquipe("8"); setErreur(null); setEquipeForm(true); }}>
+              <Bouton icone={<Users aria-hidden="true" />} disabled={envoi || !ouvert || !h.equipes.length} onClick={() => ouvrirEquipe()}>
                 Pointer une équipe
               </Bouton>
               {h.voit_prix ? (
-                <Bouton icone={<Euro aria-hidden="true" />} disabled={envoi} onClick={() => { setCoutQui(""); setCoutValeur(h.cout_defaut !== null ? String(h.cout_defaut).replace(".", ",") : ""); setCoutDepuis(auj); setErreur(null); setCoutForm(true); }}>
+                <Bouton icone={<Euro aria-hidden="true" />} disabled={envoi} onClick={() => ouvrirCout()}>
                   Coût horaire
                 </Bouton>
               ) : null}
@@ -425,12 +447,12 @@ export default function HeuresCarte({ tableau, source }: Props) {
         </div>
         <div className="esp-actions" style={{ marginTop: 0 }}>
           <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi || !ouvert || !h.equipes.length}
-                  onClick={() => { setEquipe(h.equipes[0]?.id ?? ""); setJourEquipe(auj); setHeuresEquipe("8"); setErreur(null); setEquipeForm(true); }}>
+                  onClick={() => ouvrirEquipe()}>
             <Users width={14} height={14} aria-hidden="true" /> Pointer une équipe
           </button>
           {h.voit_prix ? (
             <button type="button" className="r-btn r-btn--fil r-btn--petit" disabled={envoi}
-                    onClick={() => { setCoutQui(""); setCoutValeur(h.cout_defaut !== null ? String(h.cout_defaut).replace(".", ",") : ""); setCoutDepuis(auj); setErreur(null); setCoutForm(true); }}>
+                    onClick={() => ouvrirCout()}>
               <Euro width={14} height={14} aria-hidden="true" /> Coût horaire
             </button>
           ) : null}

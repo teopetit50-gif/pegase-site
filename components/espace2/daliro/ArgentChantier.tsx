@@ -11,9 +11,10 @@
    propriétés en pastilles (marché, avenants à signer, situations,
    factures), la carte « À faire » (ce qui attend un geste), l'avancement
    facturé par lot en barres, puis les avenants, les situations et les
-   factures en listes, et la feuille des heures. À droite : le détail de
+   factures en listes, puis les heures pointées et la marge par lot
+   (./HeuresArgent.tsx, mêmes briques). À droite : le détail de
    l'élément choisi (posé par les cartes du chantier), Propriétés,
-   Parcours des avenants et la courbe Vendu / Facturé.
+   Parcours des avenants, la courbe Vendu / Facturé et la Rentabilité.
 
    Aucun geste n'est réécrit : les cartes du chantier (ChantierVue) sont
    montées cachées ; leurs détails se posent à droite (Detail → cible) et
@@ -21,7 +22,7 @@
    s'ouvrent en surcouche.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useMemo, useRef, type Dispatch, type SetStateAction } from "react";
+import { useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCheck, FileText, Receipt, Signature } from "lucide-react";
 import ChantierVue, { type FormChantier } from "@/components/espace/daliro/ChantierVue";
@@ -34,6 +35,7 @@ import { CarteDroite, GraphiqueProgres, MenuOptions, type Option } from "../lin/
 import { useToast } from "../Toasts";
 import { lignesLots } from "./ApercuChantier";
 import { DalIcone } from "./DalIcone";
+import { HeuresArgent } from "./HeuresArgent";
 
 const RACINE_DAL = "/espace2/daliro";
 const SITUATION: Record<Situation["statut"], { libelle: string; teinte: string }> = {
@@ -77,6 +79,8 @@ type Props = {
 export function ArgentChantier({ t, source, onLocal, relire, geste, cible, choisie, choisir }: Props) {
   const toast = useToast();
   const cache = useRef<HTMLDivElement>(null);
+  /* la place de la carte « Rentabilité », posée par HeuresArgent */
+  const [placeRentabilite, setPlaceRentabilite] = useState<HTMLDivElement | null>(null);
   const prix = t.voit_prix;
   const marche = t.marches[0] ?? null;
   const avenants = useMemo(() => t.avenants.slice().sort((a, b) => b.numero - a.numero), [t.avenants]);
@@ -291,11 +295,8 @@ export function ArgentChantier({ t, source, onLocal, relire, geste, cible, chois
           <p className="lin-maj-texte lin-maj-gris">Aucune facture fournisseur rattachée à ce chantier.</p>
         )}
 
-        <div className="dal-ag-heures lit-gestes">
-          <Habille>
-            <ChantierVue key={`heures-${source}-${t.chantier.id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={["heures"]} />
-          </Habille>
-        </div>
+        {/* 06/11/2026 — les heures et la rentabilité dans les briques du haut (HeuresArgent), plus l'ancienne carte montée telle quelle */}
+        <HeuresArgent key={`heures-${source}-${t.chantier.id}`} t={t} source={source} droite={placeRentabilite} choisie={choisie} choisir={choisir} />
       </article>
 
       <aside className="lin-cartes-droite dal-ag-droite" aria-label="Les chiffres et l'élément choisi">
@@ -382,6 +383,7 @@ export function ArgentChantier({ t, source, onLocal, relire, geste, cible, chois
             />
           </CarteDroite>
         ) : null}
+        <div ref={setPlaceRentabilite} className="dal-hg-place" />
       </aside>
 
       {/* les cartes du chantier, cachées : leurs détails se posent à droite, leurs boutons sont déclenchés ici */}
