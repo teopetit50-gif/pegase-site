@@ -43,7 +43,7 @@
    l'arrivée, une fois le tableau lu.
    ══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ChantierVue, { type FormChantier, type SectionChantier } from "@/components/espace/daliro/ChantierVue";
@@ -63,7 +63,7 @@ import { ActiviteChantier } from "./ActiviteChantier";
 import Chantiers from "./Chantiers";
 import { LotsProjets } from "./LotsProjets";
 import { ArgentPilotage } from "./ArgentPilotage";
-import { ConversationDaliro } from "./QuestionsDaliro";
+import { ConversationDaliro, preQuestion } from "./QuestionsDaliro";
 import { EtoilePleine } from "./IconesProjet";
 import { useFavoris, useSuivis } from "./navigateur";
 
@@ -211,7 +211,18 @@ export default function FicheChantier({ id }: { id: string }) {
     if (choisie === null || large || !cible) return;
     cible.parentElement?.scrollIntoView({ block: "start", behavior: "smooth" });
   }, [choisie, large, cible]);
-  const contexte = useMemo(() => ({ cible, choisie, choisir: setChoisie }), [cible, choisie]);
+  /* 06/11/2026 — Teo, sur Terrain : « la partie question se retire quand on clique […] je veux que ça reste ».
+     Choisir un élément de Terrain (un passage, une commande comme « Garde-corps acier balcon » ou « Nacelle
+     12 m », un point à régler) ne remplace plus la conversation par son détail : la ligne reste marquée et la
+     question à son sujet est prête dans le champ de Daliro, à envoyer telle quelle ou à reprendre. La question
+     venue de l'onglet Activité (?question=) s'y pose de même. */
+  const questionAdresse = params.get("question");
+  const [amorce, setAmorce] = useState<{ texte: string; n: number } | null>(() => (questionAdresse ? { texte: questionAdresse, n: 0 } : null));
+  const poser = useCallback((cle: string, libelle: string) => setAmorce((a) => ({ texte: preQuestion(cle, libelle), n: (a?.n ?? 0) + 1 })), []);
+  const contexte = useMemo(
+    () => ({ cible: onglet === "terrain" ? null : cible, choisie, choisir: setChoisie, poser: onglet === "terrain" ? poser : undefined }),
+    [cible, choisie, onglet, poser],
+  );
   /* ⌘ I ouvre ou ferme le volet de détails (raccourci de Linear) */
   useEffect(() => {
     const touche = (e: KeyboardEvent) => {
@@ -448,10 +459,10 @@ export default function FicheChantier({ id }: { id: string }) {
                 <div className="lin-boite-detail dal-boite-detail">
                   <div ref={setCible} className="lvp-cible dal-boite-cible" />
                   {/* 06/11/2026 — Terrain : la conversation avec Daliro, façon Claude (./QuestionsDaliro), à la place
-                      de l'ancienne carte « Questions sur le chantier » ; gardée montée quand un élément est choisi */}
+                      de l'ancienne carte « Questions sur le chantier » ; toujours affichée, même un élément choisi */}
                   {onglet === "terrain" ? (
-                    <div id="partie-questions" className="dal-boite-repos dal-boite-conversation" hidden={choisie !== null}>
-                      <ConversationDaliro key={`daliro-${source}-${id}`} t={t} resume={resumeBoite} />
+                    <div id="partie-questions" className="dal-boite-repos dal-boite-conversation">
+                      <ConversationDaliro key={`daliro-${source}-${id}`} t={t} resume={resumeBoite} amorce={amorce} />
                     </div>
                   ) : choisie === null ? (
                     <div className="dal-boite-repos">

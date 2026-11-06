@@ -86,12 +86,51 @@ function Copier({ texte }: { texte: string }) {
   );
 }
 
-export function ConversationDaliro({ t, resume }: { t: Tableau; resume?: string }) {
+/* 06/11/2026 — la question préparée quand on choisit un élément de Terrain : la clé dit ce qu'il est
+   (« passage:… », « commande:… », « risque:… »…), le libellé de sa ligne dit lequel. */
+export function preQuestion(cle: string, libelle: string): string {
+  const quoi = libelle.trim().replace(/\s+/g, " ").replace(/[.\s]+$/, "");
+  const genre = cle.split(":")[0];
+  /* « Pose des fenêtres, Pose A, 10 → 17 nov. » : le nom, puis ses précisions entre parenthèses */
+  const [tete, ...reste] = quoi.split(", ");
+  const precision = reste.length ? ` (${reste.join(", ").replace(/^./, (c) => c.toLowerCase())})` : "";
+  if (genre === "passage") return `Où en est « ${tete} »${precision} ? Est-ce confirmé, et qu'est-ce qui pourrait le retarder ?`;
+  if (genre === "commande") {
+    const etat = reste.length ? reste[reste.length - 1].toLowerCase() : "";
+    const objet = reste.length ? [tete, ...reste.slice(0, -1)].join(", ") : tete;
+    return `Fais-moi le point sur la commande « ${objet} »${etat ? ` (${etat})` : ""} : pour quelle intervention, et y a-t-il quelque chose à prévoir ?`;
+  }
+  if (genre === "dependance") return `Que faire pour cet enchaînement : ${quoi} ?`;
+  if (genre === "risque" || genre === "echange") return `La météo menace ce passage : ${quoi}. Que proposes-tu ?`;
+  if (genre === "question") return quoi;
+  /* un point à régler : « À voir : … » ou « Bloquant : … » — le message seul */
+  const point = quoi.replace(/^[^:«]{1,20} : /, "");
+  return `Comment régler ce point : ${point} ? Qui doit faire quoi, et pour quand ?`;
+}
+
+export function ConversationDaliro({ t, resume, amorce }: { t: Tableau; resume?: string; amorce?: { texte: string; n: number } | null }) {
   const { echanges, demander, vider, enCours } = useDaliro(t);
-  const [texte, setTexte] = useState("");
+  const [texte, setTexte] = useState(amorce?.texte ?? "");
   const champ = useRef<HTMLTextAreaElement>(null);
   const fin = useRef<HTMLDivElement>(null);
   const dernier = echanges[echanges.length - 1];
+
+  /* une question préparée (un élément de Terrain choisi) remplace ce qui était tapé ; on l'envoie ou on la reprend */
+  const [amorceVue, setAmorceVue] = useState(amorce?.n ?? null);
+  if (amorce && amorce.n !== amorceVue) {
+    setAmorceVue(amorce.n);
+    setTexte(amorce.texte);
+  }
+  useEffect(() => {
+    if (!amorce) return;
+    const el = champ.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+    el.focus({ preventScroll: true });
+    el.setSelectionRange(el.value.length, el.value.length);
+    el.closest(".dal-cv-bas")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [amorce]);
 
   /* la conversation suit la réponse qui s'écrit */
   useEffect(() => {

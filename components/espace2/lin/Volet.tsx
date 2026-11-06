@@ -30,6 +30,8 @@ export type Volet = {
   /* la clé de l'élément choisi (« passage:<id> », « commande:<id> »…) */
   choisie: string | null;
   choisir: (cle: string | null) => void;
+  /* 06/11/2026 — Terrain de DALIRO : choisir un élément d'une boîte prépare aussi une question à son sujet */
+  poser?: (cle: string, libelle: string) => void;
 };
 
 export const VoletContexte = createContext<Volet | null>(null);
@@ -187,7 +189,17 @@ export function Ligne({ cle, libelle, icone, id, titre, second, droite, date, da
   if (boite)
     return (
       <li>
-        <button type="button" className="lin-boite-ligne lvp-boite-ligne" data-actif={choisie ? "" : undefined} aria-pressed={choisie} aria-label={libelle} onClick={() => v?.choisir(choisie ? null : cle)}>
+        <button
+          type="button"
+          className="lin-boite-ligne lvp-boite-ligne"
+          data-actif={choisie ? "" : undefined}
+          aria-pressed={choisie}
+          aria-label={libelle}
+          onClick={() => {
+            v?.choisir(choisie ? null : cle);
+            if (!choisie) v?.poser?.(cle, libelle);
+          }}
+        >
           <span className="lin-boite-avatar lvp-boite-avatar" aria-hidden="true">
             {icone}
           </span>
