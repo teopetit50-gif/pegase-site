@@ -1149,3 +1149,38 @@ html[data-v2-theme="light"] .v2 .dal.dal-fc {
     visibility: hidden;
   }
 }
+
+/* 06/11/2026 — les questions à Daliro (l'IA) : la carte de mise à jour du fil, la
+   question de « Vous » puis la réponse écrite en direct */
+.v2 .dal .dal-ini-echange-tete {
+  margin-top: 14px;
+}
+.v2 .dal .dal-ini-reponse {
+  white-space: pre-wrap;
+}
+.v2 .dal .dal-ini-reponse[data-attente] {
+  color: var(--dal-t3);
+  animation: dal-ini-attente 1.2s ease-in-out infinite;
+}
+@keyframes dal-ini-attente {
+  50% {
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .dal .dal-ini-reponse[data-attente] {
+    animation: none;
+  }
+}
+.v2 .dal .dal-ini-echange .dal-ini-actions {
+  align-items: center;
+  gap: 12px;
+}
+.v2 .dal .dal-ini-echange .dal-ini-lien {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}

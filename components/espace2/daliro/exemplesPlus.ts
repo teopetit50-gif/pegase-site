@@ -29,6 +29,8 @@ const MO_MAMIE = id(6);
 const MO_DURET = id(7);
 const MO_VENISSIEUX = id(8);
 const MO_GARNIER = id(12);
+const MO_MARINA = id(13);
+const MO_FLAMBOYANTS = id(14);
 const ROCHAT = "00000000-0000-4000-8000-00000000d023";
 const EQUIPE_A = "00000000-0000-4000-8000-00000000d031";
 const EQUIPE_B = id(10);
@@ -53,6 +55,8 @@ const TIERS_PLUS: Tiers[] = [
   mo(MO_DURET, "M. et Mme Duret", "Écully"),
   mo(MO_VENISSIEUX, "Ville de Vénissieux", "Vénissieux"),
   mo(MO_GARNIER, "Mme Garnier", "Tassin-la-Demi-Lune"),
+  mo(MO_MARINA, "SELARL Pharmacie de la Marina", "Le Gosier"),
+  mo(MO_FLAMBOYANTS, "Syndicat des copropriétaires Les Flamboyants", "Baie-Mahault"),
 ];
 const TIERS = [...TABLEAUX_EXEMPLE[TILLEULS].tiers, ...TIERS_PLUS];
 const EQUIPES = [
@@ -213,5 +217,75 @@ GARNIER.reception = {
   ],
 };
 LISTE.push(GARNIER);
+
+/* 06/11/2026 — Teo : « dans la page Réception, il n'y a pas assez de choses, mets des exemples pour que je
+   puisse montrer aux gars ». Deux chantiers réceptionnés de plus, chacun dans un autre moment d'après la
+   réception (Garnier, lui, a ses douze réserves dans ./exemplesReception) :
+   · la Pharmacie de la Marina, réceptionnée il y a treize mois : réserves toutes levées, décompte accepté,
+     la retenue est due depuis un mois et attend d'être réclamée ;
+   · la Résidence Les Flamboyants, réceptionnée il y a deux mois : le syndic a fait opposition à la retenue
+     (réserves non levées), le décompte est envoyé et attend sa réponse. */
+const MARINA = chantier({
+  n: 70, nom: "Pharmacie de la Marina — rénovation", ref: "PHA-2025", adresse: "Port de plaisance, bâtiment C", cp: "97190", commune: "Le Gosier", mo: MO_MARINA, moType: "professionnel",
+  statut: "receptionne", du: -470, au: -398,
+  lots: [
+    { n: 71, code: "01", libelle: "Démolition et cloisons", corps: "plâtrerie", par: EQUIPE_A, equipe: true, statut: "termine" },
+    { n: 72, code: "02", libelle: "Électricité et éclairage", corps: "électricité", par: FERRAND, statut: "termine" },
+    { n: 73, code: "03", libelle: "Agencement de l'officine", corps: "agencement", par: ATELIER, equipe: true, statut: "termine" },
+  ],
+  passages: [
+    { n: 74, lot: 71, tache: "Dépose et nouvelles cloisons", du: -470, au: -455, conf: "confirmee", fait: true },
+    { n: 75, lot: 72, tache: "Tableau, réseaux et plafonniers", du: -450, au: -440, conf: "confirmee", fait: true },
+    { n: 76, lot: 73, tache: "Pose des linéaires et du comptoir", du: -420, au: -400, conf: "confirmee", fait: true },
+  ],
+});
+const RECEPTION_MARINA = id(77);
+MARINA.chantier = { ...MARINA.chantier, date_reception: aujourdHui(-395), description: "Rénovation complète de l'officine (120 m²) : cloisons, éclairage LED, linéaires et comptoir fabriqués à l'atelier. Réception prononcée il y a treize mois avec trois réserves, toutes levées dans le mois. Décompte général définitif accepté par la pharmacie.\n\nLa retenue de garantie de 3 860 € est due depuis un mois : à réclamer au maître d'ouvrage." };
+MARINA.reception = {
+  id: RECEPTION_MARINA, chantier_id: MARINA.chantier.id, date_reception: aujourdHui(-395), avec_reserves: true,
+  retenue_montant: 3860, retenue_caution: false, retenue_due_le: aujourdHui(-30), retenue_statut: "bloquee", retenue_etat: "liberable",
+  opposition_le: null, opposition_motif: null, liberee_le: null, liberee_avant_terme: false,
+  decompte_statut: "accepte", decompte_marche_ht: 77200, decompte_facture_ht: 77200, decompte_reste_ht: 0, decompte_retenue: 3860,
+  decompte_envoye_le: aujourdHui(-372), decompte_repondu_le: aujourdHui(-360), decompte_motif: null, decompte_echeance: aujourdHui(-350),
+  reserves: [
+    { id: id(78), reception_id: RECEPTION_MARINA, lot_id: id(71), ordre: 1, description: "Bande de cloison fissurée derrière le comptoir", statut: "levee", levee_le: aujourdHui(-380) },
+    { id: id(79), reception_id: RECEPTION_MARINA, lot_id: id(72), ordre: 2, description: "Deux spots LED de la vitrine ne s'allument pas", statut: "levee", levee_le: aujourdHui(-388) },
+    { id: id(80), reception_id: RECEPTION_MARINA, lot_id: id(73), ordre: 3, description: "Tiroir du comptoir qui frotte", statut: "levee", levee_le: aujourdHui(-385) },
+  ],
+};
+LISTE.push(MARINA);
+
+const FLAMBOYANTS = chantier({
+  n: 81, nom: "Résidence Les Flamboyants — ravalement", ref: "FLA-2026", adresse: "Rue des Flamboyants", cp: "97122", commune: "Baie-Mahault", mo: MO_FLAMBOYANTS, moType: "professionnel",
+  statut: "receptionne", du: -150, au: -62,
+  lots: [
+    { n: 82, code: "01", libelle: "Échafaudage et nettoyage haute pression", corps: "façade", par: EQUIPE_B, equipe: true, statut: "termine" },
+    { n: 83, code: "02", libelle: "Traitement des fissures", corps: "maçonnerie", par: EQUIPE_B, equipe: true, statut: "termine" },
+    { n: 84, code: "03", libelle: "Peinture des façades et garde-corps", corps: "peinture", par: EQUIPE_A, equipe: true, statut: "termine" },
+  ],
+  passages: [
+    { n: 92, lot: 82, tache: "Montage de l'échafaudage, bâtiments A et B", du: -150, au: -140, conf: "confirmee", fait: true },
+    { n: 93, lot: 83, tache: "Ouverture et rebouchage des fissures", du: -135, au: -110, conf: "confirmee", fait: true },
+    { n: 94, lot: 84, tache: "Deux couches de peinture pliolite", du: -105, au: -65, conf: "confirmee", fait: true },
+  ],
+});
+const RECEPTION_FLAMBOYANTS = id(85);
+FLAMBOYANTS.chantier = { ...FLAMBOYANTS.chantier, date_reception: aujourdHui(-60), description: "Ravalement des deux bâtiments de la résidence (36 logements) : nettoyage, traitement des fissures et peinture des façades et des garde-corps. Réception prononcée il y a deux mois avec six réserves ; trois sont levées.\n\nLe syndic a fait opposition à la retenue de garantie (4 420 €) par lettre recommandée : coulures sur les garde-corps du bâtiment B et fissure réapparue en pignon nord. Le décompte final est envoyé, sans réponse à ce jour." };
+FLAMBOYANTS.reception = {
+  id: RECEPTION_FLAMBOYANTS, chantier_id: FLAMBOYANTS.chantier.id, date_reception: aujourdHui(-60), avec_reserves: true,
+  retenue_montant: 4420, retenue_caution: false, retenue_due_le: aujourdHui(305), retenue_statut: "opposee", retenue_etat: "opposee",
+  opposition_le: aujourdHui(-20), opposition_motif: "Coulures de peinture sur les garde-corps du bâtiment B et fissure réapparue en pignon nord : réserves non levées à ce jour.", liberee_le: null, liberee_avant_terme: false,
+  decompte_statut: "envoye", decompte_marche_ht: 88400, decompte_facture_ht: 84000, decompte_reste_ht: 4400, decompte_retenue: 4420,
+  decompte_envoye_le: aujourdHui(-25), decompte_repondu_le: null, decompte_motif: null, decompte_echeance: aujourdHui(-15),
+  reserves: [
+    { id: id(86), reception_id: RECEPTION_FLAMBOYANTS, lot_id: id(84), ordre: 1, description: "Coulures de peinture sur les garde-corps du bâtiment B", statut: "ouverte", levee_le: null },
+    { id: id(87), reception_id: RECEPTION_FLAMBOYANTS, lot_id: id(83), ordre: 2, description: "Fissure réapparue en pignon nord, sur 80 cm", statut: "ouverte", levee_le: null },
+    { id: id(88), reception_id: RECEPTION_FLAMBOYANTS, lot_id: id(84), ordre: 3, description: "Teinte différente sur le soubassement du hall A", statut: "ouverte", levee_le: null },
+    { id: id(89), reception_id: RECEPTION_FLAMBOYANTS, lot_id: id(82), ordre: 4, description: "Traces d'ancrage d'échafaudage non rebouchées, façade est", statut: "levee", levee_le: aujourdHui(-41) },
+    { id: id(90), reception_id: RECEPTION_FLAMBOYANTS, lot_id: id(84), ordre: 5, description: "Peinture sur les vitrages de deux logements du 2e étage", statut: "levee", levee_le: aujourdHui(-48) },
+    { id: id(91), reception_id: RECEPTION_FLAMBOYANTS, lot_id: id(83), ordre: 6, description: "Joint de dilatation non refait entre les bâtiments A et B", statut: "levee", levee_le: aujourdHui(-35) },
+  ],
+};
+LISTE.push(FLAMBOYANTS);
 
 export const TABLEAUX_PLUS: Record<string, Tableau> = Object.fromEntries(LISTE.map((t) => [t.chantier.id, t]));

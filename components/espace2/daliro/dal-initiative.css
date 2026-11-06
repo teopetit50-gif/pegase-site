@@ -93,12 +93,18 @@
   position: relative;
   z-index: 6;
   height: 0;
+  /* 06/11/2026 — son contenu (le cadre de Habille) débordait au-dessus de la page et
+     prenait les clics : on ne pouvait plus écrire dans le composeur de l'onglet
+     Activité. Transparent aux clics, sauf l'avis qu'il affiche ; ses fenêtres
+     s'ouvrent ailleurs, en surcouche. */
+  pointer-events: none;
 }
 .v2 .dal .dal-fc-gestes .esp-dossier:empty {
   display: none;
 }
 .v2 .dal .dal-fc-gestes .esp-dossier:not(:empty) {
   padding: 8px 16px 0;
+  pointer-events: auto;
 }
 
 /* onglet Lots (Projects) : « Add filter » et « Display options » à gauche du bouton du volet,

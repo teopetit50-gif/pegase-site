@@ -411,9 +411,9 @@ const ETOFFES: Record<string, Etoffe> = {
     rdv: [{ tache: "visite de levée des réserves avec Mme Garnier", du: prochain(4), h: ["14:00", "15:00"] }],
     adresse: "Morne Bourg, 6 lotissement Bois-Jolan", cp: "97180", commune: "Sainte-Anne",
     description:
-      "Extension de 30 m² (séjour agrandi et chambre d'amis) pour Mme Garnier, livrée il y a six jours. Réception prononcée avec deux réserves, dont une hors devis : l'habillage de la descente d'eaux pluviales, demandé par la cliente à la visite.\n\n" +
+      "Extension de 30 m² (séjour agrandi et chambre d'amis) pour Mme Garnier, livrée il y a six jours. Réception prononcée avec douze réserves, cinq déjà levées, dont une hors devis : l'habillage de la descente d'eaux pluviales, demandé par la cliente à la visite.\n\n" +
       "Tous les lots sont terminés et facturés, sauf la retenue de garantie de 2 140 €, bloquée jusqu'à la levée des réserves. Le décompte général définitif est à préparer sous quarante jours.\n\n" +
-      "Prochaines étapes : reprendre le joint de la baie coulissante côté jardin (Pose B, une demi-journée), faire signer l'avenant de l'habillage, puis demander la libération de la retenue. Contact : Mme Garnier, 0690 64 02 77.",
+      "Prochaines étapes : reprendre le joint de la baie coulissante et les deux carreaux creux devant la baie, refixer la tôle de rive, faire signer l'avenant de l'habillage, puis demander la libération de la retenue. Contact : Mme Garnier, 0690 64 02 77.",
     debourseAvant: { [d("761")]: { engage: 31800, facture: 31800 }, [d("762")]: { engage: 11000, facture: 11000 } },
     lots: [
       { code: "03", libelle: "Charpente et couverture", corps: "couverture", par: CARAIBES, statut: "termine", engage: 12700, facture: 12700,

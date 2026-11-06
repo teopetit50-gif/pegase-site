@@ -22,6 +22,7 @@ import { useSource, type Source } from "@/components/espace/source";
 import { useTempsReel } from "@/components/espace/tempsReel";
 import { TABLEAUX_EXEMPLE } from "@/components/espace/daliro/exemples";
 import { TABLEAUX_PLUS } from "./exemplesPlus";
+import { etofferReceptions } from "./exemplesReception";
 import { AVENANTS_PLUS, SITUATIONS_PLUS } from "./exemplesAvenants";
 import { completerExemple } from "./exemplesAFaire";
 import { etofferExemple } from "./exemplesEtoffes";
@@ -88,7 +89,8 @@ function exempleComplet(): Record<string, Tableau> {
   }
   for (const t of completerExemple(Object.values(base))) base[t.chantier.id] = t;
   /* 05/11/2026 : les chantiers en Guadeloupe, décrits et étoffés (./exemplesEtoffes) */
-  return etofferExemple(base);
+  /* 06/11/2026 : la réception de Garnier, douze réserves (./exemplesReception) */
+  return etofferReceptions(etofferExemple(base));
 }
 
 export default function DonneesDaliro({ children }: { children: React.ReactNode }) {

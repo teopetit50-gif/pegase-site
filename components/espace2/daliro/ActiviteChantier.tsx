@@ -12,7 +12,10 @@
    lignes d'événement (icône 16, 12/450/16.8, auteur en 500, « · date »).
 
    Le composeur « Comment | Update » de Linear (02/11, décision de Teo : une
-   utilité à chaque bouton) : « Question » pose la question au chantier
+   utilité à chaque bouton) : « Question » pose la question à Daliro, l'IA
+   branchée sur l'API Claude (06/11, /api/daliro/question) : la réponse
+   s'écrit en direct sous le composeur, à partir des données du chantier
+   (./contexteChantier.ts) ; elle peut ensuite être envoyée au chef d'équipe
    (poserQuestion, réponse dans Terrain › Questions) ; « Avenant » ouvre la
    fenêtre « Ouvrir un avenant » de ChantierVue, l'objet pré-rempli ; le
    trombone rattache une facture. Le fil, lui, se remplit par WhatsApp et
@@ -29,6 +32,7 @@ import { dateHeure } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
 import { DalIcone } from "./DalIcone";
 import { chronique, initiales, type Nouvelle } from "./ApercuChantier";
+import { contexteChantier } from "./contexteChantier";
 import "./dal-ini.css";
 
 const MOIS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
@@ -50,8 +54,43 @@ type Element = { cle: string; quand: string } & ({ genre: "message"; m: MessageC
 
 type Actions = { question: (texte: string) => void; avenant: (objet: string) => void; facture: () => void; avenantPossible: boolean };
 
+/* une question posée à Daliro et sa réponse, écrite en direct */
+type Echange = { id: number; question: string; reponse: string; enCours: boolean; quand: string };
+
 export function ActiviteChantier({ t, source, relire, ici, actions }: { t: Tableau; source: Source; relire: () => Promise<void>; ici: string; actions: Actions }) {
   const faits = useMemo(() => chronique(t, ici), [t, ici]);
+  const [echanges, setEchanges] = useState<Echange[]>([]);
+  const majEchange = (id: number, f: (e: Echange) => Echange) => setEchanges((xs) => xs.map((e) => (e.id === id ? f(e) : e)));
+
+  const demander = async (question: string, messages: MessageChantier[]) => {
+    const id = Date.now();
+    const historique = echanges.filter((e) => !e.enCours).slice(0, 6).reverse().map((e) => ({ question: e.question, reponse: e.reponse }));
+    setEchanges((xs) => [{ id, question, reponse: "", enCours: true, quand: new Date().toISOString() }, ...xs]);
+    try {
+      const r = await fetch("/api/daliro/question", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, contexte: contexteChantier(t, messages), historique }),
+      });
+      if (!r.ok || !r.body) {
+        const corps = (await r.json().catch(() => null)) as { erreur?: string } | null;
+        throw new Error(corps?.erreur ?? "Daliro n'a pas pu répondre. Réessayez.");
+      }
+      const lecteur = r.body.getReader();
+      const decodeur = new TextDecoder();
+      for (;;) {
+        const { done, value } = await lecteur.read();
+        if (done) break;
+        const morceau = decodeur.decode(value, { stream: true });
+        majEchange(id, (e) => ({ ...e, reponse: e.reponse + morceau }));
+      }
+    } catch (e) {
+      majEchange(id, (x) => ({ ...x, reponse: x.reponse || (e instanceof Error ? e.message : "Daliro n'a pas pu répondre. Réessayez.") }));
+    } finally {
+      majEchange(id, (x) => ({ ...x, enCours: false }));
+    }
+  };
+
   return (
     <FilCarte
       tableau={t}
@@ -59,11 +98,69 @@ export function ActiviteChantier({ t, source, relire, ici, actions }: { t: Table
       relire={relire}
       rendu={(f) => (
         <div className="dal-ini-activite">
-          <Composeur actions={actions} />
+          <Composeur actions={actions} demander={(q) => void demander(q, f.messages)} />
+          {echanges.length ? (
+            <section className="dal-ini-mois dal-ini-questions" aria-label="Vos questions à Daliro" aria-live="polite">
+              <h3 className="dal-ini-mois-titre">Vos questions</h3>
+              {echanges.map((e) => (
+                <CarteEchange key={e.id} e={e} envoyer={() => actions.question(e.question)} />
+              ))}
+            </section>
+          ) : null}
           <Activite f={f} faits={faits} ici={ici} />
         </div>
       )}
     />
+  );
+}
+
+/* la question (« Vous ») puis la réponse de Daliro, dans la carte de mise à jour du fil */
+function CarteEchange({ e, envoyer }: { e: Echange; envoyer: () => void }) {
+  const [copie, setCopie] = useState(false);
+  return (
+    <article className="dal-ini-maj dal-ini-maj--fil dal-ini-echange" aria-label={`Question : ${e.question}`}>
+      <div className="dal-ini-meta">
+        <span className="dal-ini-canal">
+          <DalIcone nom="Chat" />
+          Question
+        </span>
+        <span className="dal-ini-avatar">V</span>
+        <span className="dal-ini-auteur">Vous</span>
+        <span className="dal-ini-quand" title={dateHeure(e.quand)}>
+          {jourMois(e.quand)}
+        </span>
+      </div>
+      <p className="dal-ini-texte">{e.question}</p>
+      <div className="dal-ini-meta dal-ini-echange-tete">
+        <span className="dal-ini-canal" data-teinte="on">
+          <DalIcone nom="Crane" />
+          Daliro
+        </span>
+        <span className="dal-ini-quand">{e.enCours ? (e.reponse ? "écrit…" : "lit le chantier…") : "réponse"}</span>
+      </div>
+      <p className="dal-ini-texte dal-ini-reponse" data-attente={e.enCours && !e.reponse ? "" : undefined}>
+        {e.reponse || "…"}
+      </p>
+      {!e.enCours ? (
+        <div className="dal-ini-actions">
+          <button
+            type="button"
+            className="dal-ini-reaction"
+            aria-label="Copier la réponse"
+            title={copie ? "Copiée" : "Copier la réponse"}
+            onClick={() => {
+              void navigator.clipboard?.writeText(e.reponse);
+              setCopie(true);
+            }}
+          >
+            <DalIcone nom={copie ? "IssueStatusDone" : "Page"} taille={14} />
+          </button>
+          <button type="button" className="dal-ini-lien" onClick={envoyer}>
+            Poser aussi au chef d&apos;équipe
+          </button>
+        </div>
+      ) : null}
+    </article>
   );
 }
 
@@ -75,9 +172,9 @@ const MODES = {
   question: {
     icone: "Chat",
     libelle: "Question",
-    placeholder: "Posez une question sur ce chantier…",
-    aide: "La réponse arrivera dans Terrain › Questions",
-    envoi: "Poser la question",
+    placeholder: "Posez une question sur ce chantier… (qui vient lundi ? qu'est-ce qui bloque ?)",
+    aide: "Daliro répond à partir des données du chantier",
+    envoi: "Demander à Daliro",
   },
   avenant: {
     icone: "Signature",
@@ -88,7 +185,7 @@ const MODES = {
   },
 } as const;
 
-function Composeur({ actions }: { actions: Actions }) {
+function Composeur({ actions, demander }: { actions: Actions; demander: (question: string) => void }) {
   const [mode, setMode] = useState<"question" | "avenant">("question");
   const [texte, setTexte] = useState("");
   const champ = useRef<HTMLTextAreaElement>(null);
@@ -103,7 +200,7 @@ function Composeur({ actions }: { actions: Actions }) {
   };
   const envoyer = () => {
     if (!pret) return;
-    if (mode === "question") actions.question(texte.trim());
+    if (mode === "question") demander(texte.trim());
     else actions.avenant(texte.trim());
     setTexte("");
     requestAnimationFrame(ajuster);
