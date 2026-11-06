@@ -149,7 +149,7 @@ export function lignesLots(t: Tableau): LigneLot[] {
     const prioTexte = k.length ? k.map((x) => x.message).join(" · ") : "Aucun point à régler sur ce lot";
     const fins = t.passages.filter((p) => p.lot_id === l.id && p.statut !== "annule").map((p) => p.fin);
     const fin = fins.length ? fins.sort().at(-1)! : null;
-    const pct = l.statut === "termine" ? 100 : (avance.get(l.id) ?? (l.statut === "a_venir" ? 0 : null));
+    const pct = l.statut === "termine" ? 100 : (avance.get(l.id) ?? l.avancement_pct ?? (l.statut === "a_venir" ? 0 : null));
     return { lot: l, sante, santeTexte, prio, prioTexte, qui: l.tiers_nom ?? l.equipe_nom ?? null, fin, pct };
   });
 }
@@ -303,6 +303,9 @@ export function ApercuChantier({ t, c, ici, ouvrirVolet, demander }: { t: Tablea
       {/* « Description » */}
       <section className="dal-ini-description" aria-labelledby="dal-ini-description">
         <h3 id="dal-ini-description">Description</h3>
+        {(ch.description ?? "").split("\n\n").filter(Boolean).map((para, i) => (
+          <p key={i}>{para}</p>
+        ))}
         <p>
           {marche ? `${marche.objet ?? "Marché"}${marche.reference ? `, marché ${marche.reference}` : ""}${marche.date_signature ? ` signé le ${dateCourte(marche.date_signature)}` : ""}${marcheVerifie ? ", vérifié ligne à ligne" : ", à vérifier"}. ` : "Aucun marché saisi. "}
           {controles.length ? (

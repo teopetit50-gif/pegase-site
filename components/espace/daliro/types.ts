@@ -52,6 +52,8 @@ export type Chantier = {
   prochain_passage?: { id: string; debut: string; fin: string; tache: string | null; confirmation: Confirmation; intervenant_type: string; intervenant_nom: string | null } | null;
   nb_avenants_en_cours?: number;
   nb_avenants_signes?: number;
+  /* exemple seulement (05/11/2026) : la présentation du chantier en paragraphes, au-dessus de la phrase calculée */
+  description?: string | null;
 };
 
 export type Lot = {
@@ -70,6 +72,8 @@ export type Lot = {
   exterieur: boolean;
   statut: "a_venir" | "en_cours" | "termine";
   acceptation?: "a_demander" | "demandee" | "acceptee" | "refusee" | "caduque" | null;
+  /* exemple seulement (05/11/2026) : l'avancement du lot quand aucune situation ne le donne */
+  avancement_pct?: number | null;
 };
 
 export type ControleLigne = "ok" | "incomplet" | "montant_faux";

@@ -24,6 +24,7 @@ import { TABLEAUX_EXEMPLE } from "@/components/espace/daliro/exemples";
 import { TABLEAUX_PLUS } from "./exemplesPlus";
 import { AVENANTS_PLUS, SITUATIONS_PLUS } from "./exemplesAvenants";
 import { completerExemple } from "./exemplesAFaire";
+import { etofferExemple } from "./exemplesEtoffes";
 import { listeDepuis } from "@/components/espace/daliro/liste";
 import { chargerListe, chargerTableau, monClient } from "@/components/espace/daliro/portes";
 import type { Chantier, Tableau, Tiers } from "@/components/espace/daliro/types";
@@ -86,7 +87,8 @@ function exempleComplet(): Record<string, Tableau> {
     if (avs.length || sits.length) base[id] = { ...t, avenants: [...t.avenants, ...avs], situations: [...(t.situations ?? []), ...sits] };
   }
   for (const t of completerExemple(Object.values(base))) base[t.chantier.id] = t;
-  return base;
+  /* 05/11/2026 : les chantiers en Guadeloupe, décrits et étoffés (./exemplesEtoffes) */
+  return etofferExemple(base);
 }
 
 export default function DonneesDaliro({ children }: { children: React.ReactNode }) {
