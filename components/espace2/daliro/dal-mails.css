@@ -1,0 +1,88 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO, Mails (06/11/2026) — le formulaire de modification et la réponse,
+   dans la carte au milieu (../lin/CarteCentrale.tsx). La carte vit dans un
+   portail (.v2-jetons) : les règles ne dépendent pas de .v2 .dal.
+   Le reste de la page est le gabarit de la Boîte de réception de FILED.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.dal-ml-form {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 8px;
+}
+.dal-ml-deux {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+@media (max-width: 640px) {
+  .dal-ml-deux {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.v2-champ.dal-ml-zone {
+  height: auto;
+  align-items: stretch;
+  padding: 0 12px;
+}
+.v2-champ.dal-ml-zone textarea {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 0;
+  border: 0;
+  outline: 0;
+  resize: vertical;
+  background: transparent;
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+}
+.v2-champ.dal-ml-zone textarea:focus-visible {
+  box-shadow: none;
+}
+.v2-champ.dal-ml-zone textarea::placeholder {
+  color: var(--v2-gray-700);
+}
+.dal-ml-pieces {
+  display: grid;
+  gap: 6px;
+}
+.dal-ml-pieces li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--v2-gray-900);
+}
+.dal-ml-pieces input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--v2-bg-100);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 13px;
+}
+.dal-ml-joindre {
+  justify-self: start;
+  cursor: pointer;
+}
+.dal-ml-joindre:focus-within {
+  box-shadow: var(--v2-anneau);
+}
+.dal-ml-repondre {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.dal-ml-repondre .v2-btn {
+  justify-self: start;
+}
+.dal-ml-texte {
+  white-space: pre-line;
+}
