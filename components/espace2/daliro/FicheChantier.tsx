@@ -63,6 +63,7 @@ import { ActiviteChantier } from "./ActiviteChantier";
 import Chantiers from "./Chantiers";
 import { LotsProjets } from "./LotsProjets";
 import { ArgentChantier } from "./ArgentChantier";
+import { ConversationDaliro } from "./QuestionsDaliro";
 import { EtoilePleine } from "./IconesProjet";
 import { useFavoris, useSuivis } from "./navigateur";
 
@@ -445,19 +446,18 @@ export default function FicheChantier({ id }: { id: string }) {
                 </div>
                 <div className="lin-boite-detail dal-boite-detail">
                   <div ref={setCible} className="lvp-cible dal-boite-cible" />
-                  {choisie === null ? (
+                  {/* 06/11/2026 — Terrain : la conversation avec Daliro, façon Claude (./QuestionsDaliro), à la place
+                      de l'ancienne carte « Questions sur le chantier » ; gardée montée quand un élément est choisi */}
+                  {onglet === "terrain" ? (
+                    <div id="partie-questions" className="dal-boite-repos dal-boite-conversation" hidden={choisie !== null}>
+                      <ConversationDaliro key={`daliro-${source}-${id}`} t={t} resume={resumeBoite} />
+                    </div>
+                  ) : choisie === null ? (
                     <div className="dal-boite-repos">
                       <div className="lin-boite-vide dal-boite-vide">
                         <DalIcone nom="Inbox" taille={48} />
                         <span>{resumeBoite}</span>
                       </div>
-                      {onglet === "terrain" ? (
-                        <div id="partie-questions" className="lit-gestes dal-boite-questions">
-                          <Habille>
-                            <ChantierVue key={`questions-${source}-${id}`} tableau={t} source={source} onLocal={onLocal} relire={relire} sections={["questions"]} />
-                          </Habille>
-                        </div>
-                      ) : null}
                     </div>
                   ) : null}
                 </div>

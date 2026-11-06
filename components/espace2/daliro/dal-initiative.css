@@ -582,3 +582,282 @@
     min-width: 560px;
   }
 }
+
+/* 06/11/2026 — Terrain : la conversation avec Daliro, façon Claude (QuestionsDaliro.tsx).
+   Colonne de 680 centrée ; la question en bulle à droite, la réponse en texte libre
+   à gauche ; le champ arrondi collé en bas du volet. */
+.v2 .dal .dal-boite-conversation[hidden] {
+  display: none;
+}
+.v2 .dal .dal-cv {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 100%;
+}
+.v2 .dal .dal-cv-tete {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 44px;
+  padding: 0 16px;
+  border-bottom: 0.5px solid var(--lin-trait);
+  background: var(--lin-fond);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-cv-tete > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-cv-outil {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  cursor: pointer;
+}
+.v2 .dal .dal-cv-outil:hover:not(:disabled) {
+  background: var(--dal-survol);
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-cv-outil:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.v2 .dal .dal-cv-fil {
+  flex: 1;
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: 32px 24px 16px;
+}
+.v2 .dal .dal-cv-echange + .dal-cv-echange {
+  margin-top: 32px;
+}
+.v2 .dal .dal-cv-question {
+  width: fit-content;
+  max-width: 85%;
+  margin: 0 0 20px auto;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--dal-survol);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--dal-t1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.v2 .dal .dal-cv-reponse {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.v2 .dal .dal-cv-marque {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-top: -2px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--dal-violet) 18%, transparent);
+  color: var(--dal-violet);
+}
+.v2 .dal .dal-cv-marque[data-actif] {
+  animation: dal-cv-pouls 1.4s ease-in-out infinite;
+}
+@keyframes dal-cv-pouls {
+  50% {
+    opacity: 0.45;
+  }
+}
+.v2 .dal .dal-cv-reponse-corps {
+  flex: 1;
+  min-width: 0;
+}
+.v2 .dal .dal-cv-texte {
+  margin: 0;
+  font-size: 14px;
+  line-height: 23px;
+  color: var(--dal-t1);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.v2 .dal .dal-cv-curseur {
+  display: inline-block;
+  width: 7px;
+  height: 15px;
+  margin-left: 2px;
+  vertical-align: -2px;
+  border-radius: 2px;
+  background: var(--dal-t2);
+  animation: dal-cv-pouls 1s steps(2, start) infinite;
+}
+.v2 .dal .dal-cv-attente {
+  margin: 0;
+  font-size: 14px;
+  line-height: 23px;
+  color: var(--dal-t3);
+  animation: dal-cv-pouls 1.4s ease-in-out infinite;
+}
+.v2 .dal .dal-cv-outils {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0 0 -8px;
+}
+.v2 .dal .dal-cv-accueil {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 48px 0 24px;
+  text-align: center;
+}
+.v2 .dal .dal-cv-logo {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--dal-violet) 18%, transparent);
+  color: var(--dal-violet);
+}
+.v2 .dal .dal-cv-titre {
+  margin: 6px 0 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: -0.2px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-cv-sous {
+  max-width: 480px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-cv-suggestions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  margin-top: 18px;
+}
+.v2 .dal .dal-cv-suggestion {
+  padding: 12px 14px;
+  border: 0.5px solid var(--dal-carte-bord);
+  border-radius: 12px;
+  background: var(--dal-carte);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 19px;
+  color: var(--dal-t2);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.v2 .dal .dal-cv-suggestion:hover {
+  background: var(--dal-survol);
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-cv-bas {
+  position: sticky;
+  bottom: 0;
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: 12px 24px 16px;
+  background: linear-gradient(to bottom, transparent, var(--lin-fond) 14px);
+}
+.v2 .dal .dal-cv-saisie {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 8px 8px 16px;
+  border: 0.5px solid var(--dal-carte-bord);
+  border-radius: 20px;
+  background: var(--dal-carte);
+  box-shadow: var(--dal-carte-ombre);
+  cursor: text;
+  transition: border-color 0.15s ease;
+}
+.v2 .dal .dal-cv-saisie:focus-within {
+  border-color: var(--dal-t4);
+}
+.v2 .dal .dal-cv-champ {
+  flex: 1;
+  min-width: 0;
+  min-height: 30px;
+  max-height: 200px;
+  padding: 5px 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--dal-t1);
+  resize: none;
+  outline: none;
+}
+.v2 .dal .dal-cv-champ::placeholder {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-cv-envoi {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--dal-violet);
+  color: #fff;
+  cursor: pointer;
+}
+.v2 .dal .dal-cv-envoi:disabled {
+  background: var(--dal-survol);
+  color: var(--dal-t4);
+  cursor: default;
+}
+.v2 .dal .dal-cv-mention {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 16px;
+  color: var(--dal-t4);
+  text-align: center;
+}
+@media (max-width: 767px) {
+  .v2 .dal .dal-cv-suggestions {
+    grid-template-columns: 1fr;
+  }
+  .v2 .dal .dal-cv-fil,
+  .v2 .dal .dal-cv-bas {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .dal .dal-cv-marque[data-actif],
+  .v2 .dal .dal-cv-curseur,
+  .v2 .dal .dal-cv-attente {
+    animation: none;
+  }
+}
