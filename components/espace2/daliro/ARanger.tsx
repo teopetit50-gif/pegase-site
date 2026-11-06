@@ -58,7 +58,8 @@ const MOTIF_MAX = 300;
 
 
 /* la photo dessinée de l'exemple (la même que le fil, FilCarte.tsx) : rien n'est lu dans un vrai dépôt */
-const PHOTO_EXEMPLE = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200"><rect width="320" height="200" fill="#e9e6df"/><rect x="40" y="50" width="110" height="120" fill="#c9c3b6"/><rect x="58" y="68" width="74" height="84" fill="#9fb4c7"/><rect x="180" y="40" width="100" height="130" fill="#d8d2c4"/><text x="160" y="190" font-family="sans-serif" font-size="12" text-anchor="middle" fill="#555">Photo d\'exemple</text></svg>')}`;
+/* 05/11/2026 : une vraie photo de chantier (libre, public/exemples/daliro) à la place du dessin « Photo d'exemple » */
+const PHOTO_EXEMPLE = "/exemples/daliro/til-a2-maconnerie.jpg";
 
 const auteurDe = (m: MessageChantier) => m.de_nom ?? m.de_adresse ?? "Expéditeur inconnu";
 const aUnVocal = (m: MessageChantier) => m.pieces.some((p) => p.vocal);
