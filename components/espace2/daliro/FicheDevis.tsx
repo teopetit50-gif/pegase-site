@@ -53,7 +53,8 @@ export function texteDevis(d: Devis): string {
   ].join("\n");
 }
 
-export function FicheDevis({ devis: d, volet = false, retour }: { devis: Devis; volet?: boolean; retour?: { libelle: string; href: string } }) {
+/* sansLien : le devis tout juste dicté (./DicterDevis) n'a pas encore d'adresse à lui */
+export function FicheDevis({ devis: d, volet = false, retour, sansLien = false }: { devis: Devis; volet?: boolean; retour?: { libelle: string; href: string }; sansLien?: boolean }) {
   const [ouvert, setOuvert] = useState(true);
   const ht = totalHt(d);
   const manque = d.lignes.filter((l) => l.prix === null).length;
@@ -72,12 +73,21 @@ export function FicheDevis({ devis: d, volet = false, retour }: { devis: Devis; 
               </span>
             </>
           ) : null}
-          <Link href={lien} className="dal-tk-fil-ticket" aria-current={volet ? undefined : "page"}>
-            <h2>
-              <span className="dal-tk-fil-id">{d.numero}</span>
-              {d.titre}
-            </h2>
-          </Link>
+          {sansLien ? (
+            <span className="dal-tk-fil-ticket">
+              <h2>
+                <span className="dal-tk-fil-id">{d.numero}</span>
+                {d.titre}
+              </h2>
+            </span>
+          ) : (
+            <Link href={lien} className="dal-tk-fil-ticket" aria-current={volet ? undefined : "page"}>
+              <h2>
+                <span className="dal-tk-fil-id">{d.numero}</span>
+                {d.titre}
+              </h2>
+            </Link>
+          )}
         </nav>
         <DalMenu
           libelle="Actions sur le devis"
@@ -89,19 +99,23 @@ export function FicheDevis({ devis: d, volet = false, retour }: { devis: Devis; 
           ]}
         />
         <span className="dal-pousse" />
-        <div className="dal-tk-actions">
-          <a className="dal-tk-action" href={`tel:${d.telephone.replace(/\s/g, "")}`}>
-            <DalIcone nom="Phone" taille={14} />
-            <span>Appeler le client</span>
-          </a>
-        </div>
+        {d.telephone ? (
+          <div className="dal-tk-actions">
+            <a className="dal-tk-action" href={`tel:${d.telephone.replace(/\s/g, "")}`}>
+              <DalIcone nom="Phone" taille={14} />
+              <span>Appeler le client</span>
+            </a>
+          </div>
+        ) : null}
       </header>
 
       <div className="dal-tk-defile">
         <div className="dal-tk-outils">
-          <button type="button" className="dal-rond dal-rond--plein" aria-label="Copier le lien du devis" title="Copier le lien du devis" onClick={() => copierEtDire(`${window.location.origin}${lien}`, "Lien copié.")}>
-            <DalIcone nom="LienUrl" />
-          </button>
+          {sansLien ? null : (
+            <button type="button" className="dal-rond dal-rond--plein" aria-label="Copier le lien du devis" title="Copier le lien du devis" onClick={() => copierEtDire(`${window.location.origin}${lien}`, "Lien copié.")}>
+              <DalIcone nom="LienUrl" />
+            </button>
+          )}
           <button type="button" className="dal-rond dal-rond--plein" aria-label="Copier le devis" title="Copier le devis (lignes et total)" onClick={() => copierEtDire(texteDevis(d), "Devis copié.")}>
             <DalIcone nom="Page" />
           </button>
@@ -199,7 +213,7 @@ export function FicheDevis({ devis: d, volet = false, retour }: { devis: Devis; 
             <h3 className="dal-tk-prop-titre">Client</h3>
             <div className="dal-tk-prop-liste">
               <Pilule icone="Users">{d.client}</Pilule>
-              <Pilule icone="Phone">{d.telephone}</Pilule>
+              {d.telephone ? <Pilule icone="Phone">{d.telephone}</Pilule> : null}
               <Pilule icone="Home">{d.adresse}</Pilule>
             </div>
           </aside>

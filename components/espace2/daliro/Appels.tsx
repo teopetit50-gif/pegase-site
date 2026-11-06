@@ -26,6 +26,7 @@ import { DalCarte, DalMenu, type OptionMenu } from "./DalCadre";
 import { DalIcone, type NomDalIcone } from "./DalIcone";
 import { APPELS_EXEMPLE, ETATS, ISSUES, PRIORITES, type Appel, type EtatAppel, type EtatSuite, type IssueAppel } from "./exemplesAppels";
 import { FicheDevis } from "./FicheDevis";
+import { DicterDevis } from "./DicterDevis";
 import { DEVIS_EXEMPLE, ETATS_DEVIS, totalHt, type Devis } from "./exemplesDevis";
 import { montant } from "@/components/espace/format";
 import "./dal-inbox.css";
@@ -341,6 +342,24 @@ export default function Appels() {
             {modeDevis ? (
               <>
                 <p className="dal-ap-avis">Les vocaux dictés sur place, transcrits et chiffrés sur votre bibliothèque de prix. Un devis part au client après votre relecture.</p>
+                <div className="dal-dic-entree">
+                  <Link
+                    href={adresse("devis", null)}
+                    replace
+                    scroll={false}
+                    className="dal-dic-bouton dal-dic-bouton--plein"
+                    aria-current={devis ? undefined : "page"}
+                    onClick={(e) => {
+                      if (window.matchMedia("(max-width: 768px)").matches) {
+                        e.preventDefault();
+                        routeur.push(`${BASE}/devis/nouveau`);
+                      }
+                    }}
+                  >
+                    <DalIcone nom="Mic" taille={14} />
+                    <span>Dicter un devis</span>
+                  </Link>
+                </div>
                 <ul ref={liste} className="dal-ap-lignes">
                   {DEVIS_EXEMPLE.map((x) => (
                     <li key={x.id}>
@@ -446,10 +465,7 @@ export default function Appels() {
           {devis ? (
             <FicheDevis key={devis.id} devis={devis} volet retour={{ libelle: "Devis dictés", href: adresse("devis", null) }} />
           ) : modeDevis ? (
-            <div className="dal-ap-vide">
-              <DalIcone nom="Mic" taille={96} className="dal-ap-illustration" />
-              <p>{DEVIS_EXEMPLE.filter((x) => x.etat === "a_chiffrer" || x.etat === "a_valider").length} devis à relire</p>
-            </div>
+            <DicterDevis />
           ) : appel ? (
             <FicheAppel key={appel.id} appel={appel} volet retour={{ libelle: filtre === "tous" ? "Appels" : LIB_FILTRE[filtre], href: adresse(filtre, null) }} />
           ) : (
