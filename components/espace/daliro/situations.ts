@@ -55,6 +55,11 @@ export function ouvrirLocale(t: Tableau, periodeFin: string, tauxChoisi: number 
       id: nid(), situation_id: id, origine: "avenant" as const, ligne_marche_id: null, ligne_avenant_id: l.id, avenant_numero: a.numero, lot_id: l.lot_id, ordre: 100000 + a.numero * 1000 + l.ordre,
       designation: l.designation, base_ht: l.montant_ht ?? 0, avancement: avant("ligne_avenant_id", l.id), precedent_avancement: avant("ligne_avenant_id", l.id), cumule_ht: 0, precedent_ht: 0,
     }))),
+    /* 06/11/2026 — les lignes de l'exemple qui ne viennent ni du marché ni d'un avenant (les lots ajoutés,
+       components/espace2/daliro/exemplesArgent) suivent dans la situation d'après, sans quoi le cumul y baisserait */
+    ...(prec?.lignes ?? []).filter((l) => !l.ligne_marche_id && !l.ligne_avenant_id).map((l) => ({
+      ...l, id: nid(), situation_id: id, precedent_avancement: l.avancement, cumule_ht: 0, precedent_ht: 0,
+    })),
   ];
   return recalculer({
     id, chantier_id: c.id, marche_id: marche.id, numero: Math.max(0, ...situations.map((x) => x.numero)) + 1, periode_fin: periodeFin, statut: "brouillon",

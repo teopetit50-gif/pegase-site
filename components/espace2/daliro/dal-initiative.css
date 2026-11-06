@@ -467,6 +467,45 @@
 
 /* 06/11/2026 — Argent : le Pilotage de Tamila (ArgentPilotage.tsx, tamp-pilotage.css) ;
    seuls les avis du pointage sont à nous */
+
+/* 06/11/2026 — Teo : « la couleur est encore trop grisâtre, pas comme toutes les pages de Daliro ».
+   Les jetons de Plain (gris violacé #1a191b, cartes blanches en clair) cèdent la place à ceux de
+   Daliro (dal.css) : le fond de la fiche (--dal-carte, celui de l'Aperçu), ses textes, ses bords,
+   ses boutons et ses menus. Les graphiques gardent leurs couleurs ; leur bleu prend le violet de Daliro. */
+.v2 .dal .tamp.dal-ap {
+  --p-carte: var(--dal-carte);
+  --p-fond-1: var(--dal-bouton);
+  --p-fond-2: var(--dal-carte);
+  --p-texte-1: var(--dal-t1);
+  --p-texte-2: var(--dal-t3);
+  --p-icone-1: var(--dal-t3);
+  --p-icone-2: var(--dal-t4);
+  --p-remplir-1: var(--dal-inactif);
+  --p-remplir-2: var(--dal-bouton);
+  --p-remplir-3: var(--dal-actif);
+  --p-bord-1: var(--dal-carte-bord);
+  --p-bord-2: var(--dal-carte-bord);
+  --p-bord-3: var(--dal-puce-bord);
+  --p-moyenne: var(--dal-menu-bord);
+  --p-vide: var(--dal-t4);
+  --p-non: var(--dal-t4);
+  --p-pastille-fond: var(--dal-bouton);
+  --p-pastille-bord: var(--dal-puce-bord);
+  --p-menu-ombre: var(--dal-menu-ombre);
+  --p-bouton-ombre: var(--dal-carte-ombre);
+  --p-barre-pic: var(--dal-violet);
+  --p-bleu-plein: var(--dal-violet);
+  background: var(--dal-carte);
+  color: var(--dal-t1);
+}
+.v2 .dal .tamp.dal-ap .tamp-menu {
+  background: var(--dal-menu);
+  border: 0.5px solid var(--dal-menu-bord);
+  color: var(--dal-menu-texte);
+}
+.v2 .dal .tamp.dal-ap .tamp-menu-option:hover {
+  background: var(--dal-menu-survol);
+}
 .v2 .dal .dal-ap-avis {
   display: grid;
   gap: 4px;

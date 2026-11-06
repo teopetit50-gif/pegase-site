@@ -45,34 +45,149 @@ export type MondeHeures = {
   equipes: { id: string; nom: string }[];
   pointages: Pointage[];
   cout_defaut: number | null;
-  couts: Record<string, number>;
+  /* null : aucun coût posé pour lui, même pas celui par défaut (ses heures vont dans « Heures sans coût ») */
+  couts: Record<string, number | null>;
 };
 
 const idx = (n: string) => `00000000-0000-4000-8000-00000000e${n.padStart(3, "0")}`;
 
-/* Les Tilleuls : l'équipe Pose A (trois compagnons) pointe 8 h par jour ouvré sur le lot 01 depuis deux semaines. */
+/* L'exemple des heures (06/11/2026, Teo : « plus de données d'exemple » dans l'onglet Argent).
+   Chaque équipe qui tient un lot du chantier pointe sur ses lots commencés, depuis l'ouverture
+   (huit semaines au plus : le menu « Semaine » en montre huit), autant de jours que le budget du
+   lot en demande (40 % du vendu en main-d'œuvre, au prorata de l'avancement) ; une équipe sans
+   lot vient en renfort trois jours sur le lot principal les quinze derniers jours ;
+   le chef d'équipe fait 10 h 30 le dernier mardi (réunion de chantier) ; un samedi de rattrapage ; un
+   intérimaire sans coût horaire (« Heures sans coût »). Les heures varient d'un jour à l'autre
+   (7 à 9 h, le vendredi plus court, une absence de temps en temps) sans jamais passer 12 h. */
+const POSE_A = "00000000-0000-4000-8000-00000000d031";
+const MEMBRES: Record<string, [string, string, string]> = {
+  /* Pose A : les trois compagnons d'avant, mêmes identifiants */
+  [POSE_A]: ["Karim Haddad", "Lucas Morel", "Inès Carvalho"],
+  "00000000-0000-4000-8000-00000000d710": ["Jordan Bellance", "Steeve Nicolas", "Maëva Lurel"],
+  "00000000-0000-4000-8000-00000000d711": ["Thierry Gaspard", "Kévin Rinaldo", "Sandra Jean-Louis"],
+};
+const NOMS_AUTRES: [string, string, string] = ["Patrice Lacour", "Ludovic Hubert", "Mélanie Bordelais"];
+const COUTS_CHEF = [44, 46, 42];
+
+/* un tirage stable : le même jour donne toujours les mêmes heures */
+function tirage(cle: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < cle.length; i++) h = Math.imul(h ^ cle.charCodeAt(i), 16777619);
+  return (h >>> 0) % 1000;
+}
+function heuresDuJour(qui: string, jour: string, dow: number): number {
+  const t = tirage(`${qui}|${jour}`);
+  if (t % 17 === 0) return 0;
+  const options = dow === 4 ? [7, 7, 7.5, 6.5] : [8, 8, 8, 7.5, 8.5, 9, 7, 8.5];
+  return options[t % options.length];
+}
+
 export function mondeExemple(tableau: Tableau): MondeHeures {
-  const equipe = tableau.equipes[0] ?? { id: idx("001"), nom: "Pose A" };
-  const intervenants: IntervenantHeures[] = [
-    { id: idx("011"), nom: "Karim Haddad", role_terrain: "chef_equipe", actif: true, equipe_id: equipe.id, equipe_nom: equipe.nom },
-    { id: idx("012"), nom: "Lucas Morel", role_terrain: "compagnon", actif: true, equipe_id: equipe.id, equipe_nom: equipe.nom },
-    { id: idx("013"), nom: "Inès Carvalho", role_terrain: "compagnon", actif: true, equipe_id: equipe.id, equipe_nom: equipe.nom },
-  ];
-  const lot = tableau.lots.find((l) => l.execution === "client")?.id ?? null;
+  const c = tableau.chantier;
+  const lotsClient = [...tableau.lots].filter((l) => l.execution === "client").sort((a, b) => a.rang - b.rang);
+  /* les équipes du chantier : celles de ses lots, puis une en renfort (jamais le conducteur, qui n'est pas une équipe de pose) */
+  const deLots = [...new Set(lotsClient.map((l) => l.equipe_id).filter((x): x is string => !!x))];
+  const connues = tableau.equipes.filter((e) => !/conducteur/i.test(e.nom));
+  const renfort = connues.find((e) => !deLots.includes(e.id));
+  const ids = deLots.length ? [...deLots, ...(renfort && deLots.length < 2 ? [renfort.id] : [])] : connues.slice(0, 1).map((e) => e.id);
+  const equipes = ids.map((id) => tableau.equipes.find((e) => e.id === id) ?? { id, nom: lotsClient.find((l) => l.equipe_id === id)?.equipe_nom ?? "Équipe" });
+  if (!equipes.length) equipes.push(tableau.equipes[0] ?? { id: idx("001"), nom: "Pose A" });
+
+  const intervenants: IntervenantHeures[] = [];
+  const couts: Record<string, number | null> = {};
+  equipes.forEach((eq, k) => {
+    const noms = MEMBRES[eq.id] ?? NOMS_AUTRES;
+    noms.forEach((nom, r) => {
+      const id = eq.id === POSE_A ? idx(String(11 + r)) : idx(String(100 + k * 10 + r));
+      intervenants.push({ id, nom, role_terrain: r === 0 ? "chef_equipe" : "compagnon", actif: true, equipe_id: eq.id, equipe_nom: eq.nom });
+      if (r === 0) couts[id] = COUTS_CHEF[k % COUTS_CHEF.length];
+    });
+  });
+  const interim = idx("190");
+  intervenants.push({ id: interim, nom: "Dylan Cocks (intérim)", role_terrain: "compagnon", actif: true, equipe_id: equipes[0].id, equipe_nom: equipes[0].nom });
+  couts[interim] = null;
+
   const pointages: Pointage[] = [];
-  if (tableau.chantier.statut === "ouvert") {
+  const commence = (l: Tableau["lots"][number]) => l.statut === "en_cours" || l.statut === "termine";
+  /* le lot principal : le premier lot commencé que tient l'entreprise (renfort, intérim et samedi n'y vont que s'il existe) */
+  const principal = lotsClient.find((l) => l.statut === "en_cours") ?? lotsClient.find(commence) ?? null;
+  if (c.statut === "ouvert" && lotsClient.length) {
     const auj = aujourdHui();
-    for (let j = ajouterJours(lundiDe(auj), -7); j < auj; j = ajouterJours(j, 1)) {
-      const dow = (versDate(j).getDay() + 6) % 7;
-      if (dow > 4) continue;
-      for (const i of intervenants) pointages.push({ id: `${i.id}-${j}`, intervenant_id: i.id, jour: j, lot_id: lot, heures: 8, note: null, source: "equipe" });
+    const hier = ajouterJours(auj, -1);
+    const debutMin = ajouterJours(lundiDe(auj), -49);
+    const debut = c.date_debut && c.date_debut > debutMin ? c.date_debut : debutMin;
+    const jours: string[] = [];
+    for (let j = debut; j <= hier; j = ajouterJours(j, 1)) jours.push(j);
+    const ouvres = jours.filter((j) => (versDate(j).getDay() + 6) % 7 < 5);
+    const dowDe = (j: string) => (versDate(j).getDay() + 6) % 7;
+    const poser = (qui: string, jour: string, lot: string | null, heures: number, source: Pointage["source"] = "equipe") => {
+      if (heures <= 0) return;
+      const deja = pointages.filter((p) => p.intervenant_id === qui && p.jour === jour).reduce((t, p) => t + p.heures, 0);
+      const h = Math.min(heures, 12 - deja);
+      if (h > 0) pointages.push({ id: `${qui}-${jour}-${lot ?? "hors"}`, intervenant_id: qui, jour, lot_id: lot, heures: h, note: null, source });
+    };
+    /* n jours parmi les jours ouvrés : les six dixièmes d'affilée en fin de période (l'équipe enchaîne
+       sur le lot), le reste réparti sur ce qui précède */
+    const choisir = (parmi: string[], nb: number, finFenetre = true) => {
+      const n = Math.max(0, Math.min(parmi.length, nb));
+      const suite = Math.ceil(n * 0.6);
+      const bloc = finFenetre ? parmi.slice(parmi.length - suite) : parmi.slice(0, suite);
+      const reste = finFenetre ? parmi.slice(0, parmi.length - suite) : parmi.slice(suite);
+      const m = Math.min(reste.length, n - suite);
+      const epars = m <= 0 ? [] : m === 1 ? [reste[Math.floor(reste.length / 2)]] : Array.from({ length: m }, (_, i) => reste[Math.round((i * (reste.length - 1)) / (m - 1))]);
+      return [...new Set([...epars, ...bloc])];
+    };
+    /* les heures d'un lot suivent son budget : 40 % du vendu en main-d'œuvre, au prorata de l'avancement réel */
+    const avancement = (l: Tableau["lots"][number]) =>
+      l.statut === "termine" ? 100 : (l.avancement_pct ?? (c.etape?.lot_id === l.id ? c.etape.avancement_pct : null) ?? 35);
+    const vendu = (id: string) => {
+      const d = tableau.debourse.find((x) => x.lot_id === id);
+      return d ? (d.engage_marche_ht ?? 0) + (d.engage_avenants_ht ?? 0) : 0;
+    };
+    /* le dernier mardi passé : la réunion de chantier allonge la journée du chef (au-delà de 10 h) */
+    const mardi = [...ouvres].reverse().find((j) => dowDe(j) === 1);
+    equipes.forEach((eq, k) => {
+      const membres = intervenants.filter((i) => i.equipe_id === eq.id && i.id !== interim);
+      const siens = lotsClient.filter((l) => l.equipe_id === eq.id);
+      const commences = siens.filter(commence).sort((a, b) => (a.statut === b.statut ? a.rang - b.rang : a.statut === "termine" ? -1 : 1));
+      const parJour = membres.length * 8;
+      if (commences.length) {
+        /* chaque lot commencé a sa part de la fenêtre, les lots finis d'abord */
+        commences.forEach((l, r) => {
+          const tranche = ouvres.slice(Math.floor((r * ouvres.length) / commences.length), Math.floor(((r + 1) * ouvres.length) / commences.length));
+          const cible = (vendu(l.id) * 0.4 * avancement(l)) / 100 / 38;
+          for (const jour of choisir(tranche, Math.max(4, Math.round(cible / parJour)), l.statut !== "termine")) for (const m of membres) poser(m.id, jour, l.id, heuresDuJour(m.id, jour, dowDe(jour)));
+        });
+      } else if (siens.length) {
+        /* un lot à venir : deux demi-journées de préparation */
+        for (const jour of choisir(ouvres.slice(-6), 2)) for (const m of membres) poser(m.id, jour, siens[0].id, 4);
+      } else if (principal) {
+        /* le renfort : trois jours sur le lot principal, les quinze derniers jours */
+        for (const jour of choisir(ouvres.slice(-10), 3)) for (const m of membres) poser(m.id, jour, principal.id, heuresDuJour(m.id, jour, dowDe(jour)));
+      }
+      if (k === 0 && mardi && membres[0]) {
+        const lot = commences[commences.length - 1]?.id ?? principal?.id ?? null;
+        if (lot) {
+          for (const m of membres) poser(m.id, mardi, lot, heuresDuJour(m.id, mardi, 1) || 8);
+          const deja = pointages.filter((p) => p.intervenant_id === membres[0].id && p.jour === mardi).reduce((t, p) => t + p.heures, 0);
+          poser(membres[0].id, mardi, lot, 10.5 - deja, "saisie");
+        }
+      }
+    });
+    if (principal) {
+      /* l'intérimaire : les jours de l'équipe principale des trois dernières semaines */
+      const recents = new Set(ouvres.slice(-15));
+      for (const jour of [...new Set(pointages.filter((p) => p.lot_id === principal.id && recents.has(p.jour)).map((p) => p.jour))]) poser(interim, jour, principal.id, heuresDuJour(interim, jour, dowDe(jour)));
+      /* un samedi de rattrapage, la matinée, pour deux compagnons de l'équipe principale */
+      const samedi = [...jours].reverse().find((j) => versDate(j).getDay() === 6);
+      if (samedi) for (const m of intervenants.filter((i) => i.equipe_id === equipes[0].id && i.role_terrain === "compagnon").slice(0, 2)) poser(m.id, samedi, principal.id, 4, "saisie");
     }
   }
-  return { intervenants, equipes: tableau.equipes, pointages, cout_defaut: 38, couts: { [idx("011")]: 44 } };
+  return { intervenants, equipes: tableau.equipes, pointages, cout_defaut: 38, couts };
 }
 
 export function coutDe(monde: MondeHeures, intervenant: string): number | null {
-  return monde.couts[intervenant] ?? monde.cout_defaut;
+  return intervenant in monde.couts ? monde.couts[intervenant] : monde.cout_defaut;
 }
 
 /* Le pointage local : les mêmes refus et les mêmes alertes que btp_pointer. */

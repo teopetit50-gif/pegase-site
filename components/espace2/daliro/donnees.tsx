@@ -26,6 +26,7 @@ import { etofferReceptions } from "./exemplesReception";
 import { AVENANTS_PLUS, SITUATIONS_PLUS } from "./exemplesAvenants";
 import { completerExemple } from "./exemplesAFaire";
 import { etofferExemple } from "./exemplesEtoffes";
+import { etofferArgent } from "./exemplesArgent";
 import { listeDepuis } from "@/components/espace/daliro/liste";
 import { chargerListe, chargerTableau, monClient } from "@/components/espace/daliro/portes";
 import type { Chantier, Tableau, Tiers } from "@/components/espace/daliro/types";
@@ -90,7 +91,8 @@ function exempleComplet(): Record<string, Tableau> {
   for (const t of completerExemple(Object.values(base))) base[t.chantier.id] = t;
   /* 05/11/2026 : les chantiers en Guadeloupe, décrits et étoffés (./exemplesEtoffes) */
   /* 06/11/2026 : la réception de Garnier, douze réserves (./exemplesReception) */
-  return etofferReceptions(etofferExemple(base));
+  /* 06/11/2026 : l'argent des chantiers ouverts, situations et factures fournisseurs (./exemplesArgent) */
+  return etofferArgent(etofferReceptions(etofferExemple(base)));
 }
 
 export default function DonneesDaliro({ children }: { children: React.ReactNode }) {
