@@ -10,7 +10,7 @@
    Une ligne par intervenant (nos équipes, sous-traitants, fournisseurs, le
    conducteur de travaux), tous chantiers confondus :
      Nom          le nom ; dessous le corps d'état et les chantiers
-     Statut       sur chantier aujourd'hui · prochain passage · rien de prévu
+     Statut       En cours (sur chantier aujourd'hui) · Planifié · Terminé
      Priorité     urgent si un passage à venir est décliné ou sans réponse,
                   haute s'il attend encore sa réponse
      Prochain     la date du prochain passage
@@ -102,10 +102,10 @@ function lignesDe(tableaux: Tableau[], auj: string): Ligne[] {
       resume: [corps ? corps.charAt(0).toUpperCase() + corps.slice(1) : null, noms.slice(0, 2).join(", ") + (noms.length > 2 ? ` et ${noms.length - 2} autre${noms.length > 3 ? "s" : ""}` : "")].filter(Boolean).join(" · "),
       icone: e.genre === "fournisseur" ? "Box" : e.genre === "conducteur" ? "Calendar" : e.genre === "equipe" ? "Team" : "Wrench",
       statut: enCours.length
-        ? { libelle: "Sur chantier", icone: "IssueStatusStarted", teinte: "jaune" }
+        ? { libelle: "En cours", icone: "IssueStatusStarted", teinte: "jaune" }
         : prochain
-          ? { libelle: "Prochain passage", icone: "IssueStatusTodo", teinte: "gris" }
-          : { libelle: "Rien de prévu", icone: "IssueStatusDone", teinte: "violet" },
+          ? { libelle: "Planifié", icone: "IssueStatusTodo", teinte: "gris" }
+          : { libelle: "Terminé", icone: "IssueStatusDone", teinte: "violet" },
       priorite: souffrance ? "urgent" : attend ? "haute" : "aucune",
       prochain,
       chantiers: noms.length,
