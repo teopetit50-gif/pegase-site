@@ -85,6 +85,8 @@ const versJour = (iso: string) => Math.floor(Date.UTC(+iso.slice(0, 4), +iso.sli
 /* la colonne gauche (relevé : 320) ; la ligne d'aujourd'hui au milieu de la carte, à 1,5 px près
    (captures de Linear : 595 sur une carte de 1187, 387,7 sur 772, 386,4 sur 768, 197 sur 390) */
 const GAUCHE = 320;
+/* les losanges de passages sur les barres : Linear n'en pose pas (05/11/2026, comparaison avec la Timeline d'origine) */
+const MONTRER_JALONS = false as boolean;
 const AUJ_DECALAGE = 1.5;
 const LIGNE = 72;
 
@@ -127,7 +129,7 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
      passages durent quelques jours ; à l'échelle Année ils n'étaient que des losanges entassés. Mois par défaut. */
   /* puis, même soir : la vue de tous les chantiers porte 10 à 15 passages par chantier ; à l'Année ils
      s'écrasaient en grappes de losanges (capture de Teo, « gros bug ») : Trimestre par défaut */
-  const zoomDefaut: Zoom = lotsDe ? "mois" : "trimestre";
+  const zoomDefaut: Zoom = lotsDe ? "mois" : "annee";
   const zoom = ZOOMS.find((z) => z.cle === zParam) ?? ZOOMS.find((z) => z.cle === zoomDefaut)!;
   const apercuId = params.get("apercu");
   const passageId = params.get("passage");
@@ -412,7 +414,8 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
               </span>
             </span>
             <button type="button" className="dal-tl-barre" style={{ left: xa, width: Math.max(8, xb - xa) }} title={`${nom} : passages du ${jourCourt(d0)} au ${jourCourt(d1)}`} aria-label={`${nom} : ouvrir le volet`} onClick={() => ouvrir({ apercu: lotsDe ?? null, passage: null })} />
-            {jalons(passages)}
+            {/* 05/11/2026 : comme la Timeline de Linear (relue sur linear.app/omegaaii/projects/all), une barre par ligne, sans losange ; les passages sont dans le planning du chantier */}
+            {MONTRER_JALONS ? jalons(passages) : null}
           </>
         ) : null}
       </div>
@@ -489,7 +492,8 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
               aria-label={`${c.nom} : ouvrir le volet`}
               onClick={() => ouvrir({ apercu: c.id, passage: null })}
             />
-            {jalons(passages)}
+            {/* 05/11/2026 : comme la Timeline de Linear (relue sur linear.app/omegaaii/projects/all), une barre par ligne, sans losange ; les passages sont dans le planning du chantier */}
+            {MONTRER_JALONS ? jalons(passages) : null}
           </>
         ) : null}
       </div>

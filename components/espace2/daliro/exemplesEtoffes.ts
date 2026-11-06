@@ -118,6 +118,8 @@ type Rdv = { tache: string; du: number; h: [string, string]; fait?: boolean };
 type Extra = { lot: string; par: string; tache: string; du: number; au: number; fait?: boolean; texte?: string };
 type Etoffe = {
   adresse: string; cp: string; commune: string; description: string;
+  /* la durée réelle du chantier (jours depuis aujourd'hui) : la barre de la Timeline couvre ses mois */
+  du: number; au: number;
   /* le déboursé des lots d'avant, par identifiant de lot */
   debourseAvant?: Record<string, DebDef>;
   /* l'avancement des lots d'avant, quand aucune situation ne le donne */
@@ -218,6 +220,7 @@ function etoffer(t: Tableau, o: Etoffe): Tableau {
     ...t,
     chantier: {
       ...t.chantier, adresse: o.adresse, code_postal: o.cp, commune: o.commune, departement: "971", territoire: "guadeloupe", zone_tva: "guadeloupe",
+      date_debut: aujourdHui(o.du), date_fin_prevue: aujourdHui(o.au),
       description: o.description, maitre_ouvrage_nom: NOMS_MO[t.chantier.maitre_ouvrage_id ?? ""] ?? t.chantier.maitre_ouvrage_nom,
       nb_lots: lotsAvant.length + lots.length,
       etape: t.chantier.etape ? { ...t.chantier.etape, etapes: lotsAvant.length + lots.length } : t.chantier.etape,
@@ -232,6 +235,7 @@ function etoffer(t: Tableau, o: Etoffe): Tableau {
 
 const ETOFFES: Record<string, Etoffe> = {
   [TIL]: {
+    du: -95, au: 150,
     extras: [
       { lot: d("042"), par: DUMONT, tache: "Prise de cotes des garde-corps", du: -9, au: -9, fait: true, texte: "On passe jeudi 8 h pour les cotes" },
       { lot: d("041"), par: MRA, tache: "Livraison des fenêtres du bâtiment B", du: -4, au: -4, fait: true, texte: "Livraison confirmée, camion à 7 h" },
@@ -267,6 +271,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [ROL]: {
+    du: 21, au: 62,
     rdv: [{ tache: "réunion de lancement avec M. et Mme Rolland", du: 18, h: ["09:00", "10:00"] }],
     adresse: "Section Bellevue, chemin de Montauban", cp: "97190", commune: "Le Gosier",
     description:
@@ -295,6 +300,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [SCL]: {
+    du: -45, au: 58,
     rdv: [{ tache: "coordination des lots avec la SCM Saint-Clair", du: prochain(5), h: ["09:00", "10:00"] }],
     adresse: "Immeuble Saint-Clair, ZAC de Houelbourg", cp: "97122", commune: "Baie-Mahault",
     description:
@@ -323,6 +329,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [MAM]: {
+    du: -35, au: 24,
     rdv: [{ tache: "point sur la réouverture avec M. et Mme Lacroix", du: 1, h: ["17:00", "17:30"] }],
     adresse: "48 rue Saint-John-Perse", cp: "97110", commune: "Pointe-à-Pitre",
     description:
@@ -346,6 +353,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [DUR]: {
+    du: -40, au: 30,
     extras: [{ lot: d("742"), par: ROCHAT, tache: "Relevé des cotes de la terrasse", du: -11, au: -11, fait: true, texte: "Ok pour lundi matin" }],
     rdv: [{ tache: "signature de l'avenant des marches avec M. Duret", du: 1, h: ["07:30", "08:00"] }],
     adresse: "Lotissement Les Hauts de Saint-Félix, 21 allée des Flamboyants", cp: "97190", commune: "Le Gosier",
@@ -373,6 +381,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [VEN]: {
+    du: 8, au: 75,
     extras: [{ lot: d("751"), par: RIVIERE, tache: "Visite des préaux existants", du: -7, au: -7, fait: true, texte: "Je passe mercredi avec le plan" }],
     rdv: [{ tache: "signature du plan de prévention à l'école", du: prochain(2), h: ["10:00", "11:00"] }],
     adresse: "Groupe scolaire Jean-Moulin, rue Jean-Moulin", cp: "97139", commune: "Les Abymes",
@@ -398,6 +407,7 @@ const ETOFFES: Record<string, Etoffe> = {
     ],
   },
   [GAR]: {
+    du: -160, au: -6,
     rdv: [{ tache: "visite de levée des réserves avec Mme Garnier", du: prochain(4), h: ["14:00", "15:00"] }],
     adresse: "Morne Bourg, 6 lotissement Bois-Jolan", cp: "97180", commune: "Sainte-Anne",
     description:
