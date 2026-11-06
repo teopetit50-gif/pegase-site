@@ -1,0 +1,285 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO — « Dicter un devis » (06/11/2026, ./DicterDevis.tsx)
+
+   Dans le volet d'un devis dicté (./dal-ticket.css) : même titre 24/600,
+   même texte 15/450 que la description d'un ticket ; la feuille est un
+   bloc à filet 0,5 px comme les sous-tickets. Bouton plein : le violet de
+   Linear (--dal-violet). Rien de mesuré à neuf : les jetons de ./dal.css.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal .dal-dic {
+  max-width: 667.5px;
+  padding: 40px 48px 48px 47px;
+}
+.v2 .dal .dal-dic-titre {
+  padding: 0 14px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-dic-intro {
+  margin-top: 10px;
+  padding: 0 14px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t2);
+}
+
+/* ——— la feuille où s'écrit la dictée ——— */
+.v2 .dal .dal-dic-feuille {
+  margin: 20px 0 0;
+  border: 0.5px solid var(--dal-carte-bord);
+  border-radius: 10px;
+  background: var(--dal-inactif);
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.v2 .dal .dal-dic-feuille[data-etat="ecoute"],
+.v2 .dal .dal-dic-feuille[data-etat="exemple"] {
+  box-shadow: 0 0 0 1px var(--dal-violet);
+}
+.v2 .dal .dal-dic-feuille-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+  font-variant-numeric: tabular-nums;
+}
+.v2 .dal .dal-dic-texte {
+  display: block;
+  width: 100%;
+  min-height: 150px;
+  max-height: 320px;
+  overflow: auto;
+  margin: 0;
+  padding: 12px 14px 14px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t1);
+  resize: vertical;
+  outline: none;
+  white-space: pre-wrap;
+}
+.v2 .dal .dal-dic-texte::placeholder,
+.v2 .dal .dal-dic-provisoire {
+  color: var(--dal-t4);
+}
+
+/* le point rouge qui bat pendant l'écoute */
+.v2 .dal .dal-dic-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dal-rouge);
+  animation: dal-dic-bat 1.2s ease-in-out infinite;
+}
+@keyframes dal-dic-bat {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.8);
+  }
+}
+.v2 .dal .dal-dic-rouage {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--dal-t4);
+  border-top-color: var(--dal-violet);
+  border-radius: 50%;
+  animation: dal-dic-tourne 0.8s linear infinite;
+}
+@keyframes dal-dic-tourne {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2 .dal :is(.dal-dic-point, .dal-dic-rouage) {
+    animation: none;
+  }
+}
+
+.v2 .dal .dal-dic-erreur {
+  margin-top: 12px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--dal-rouge);
+}
+.v2 .dal .dal-dic-note {
+  margin-top: 10px;
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dal-t3);
+}
+
+/* ——— boutons ——— */
+.v2 .dal .dal-dic-boutons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.v2 .dal .dal-dic-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px 0 10px;
+  border: 0.5px solid var(--dal-puce-bord);
+  border-radius: 8px;
+  background: var(--dal-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+.v2 .dal .dal-dic-bouton svg {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-dic-bouton:hover:not(:disabled) {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-dic-bouton--plein {
+  border-color: transparent;
+  background: var(--dal-violet);
+  color: #fff;
+}
+.v2 .dal .dal-dic-bouton--plein svg {
+  color: #fff;
+}
+.v2 .dal .dal-dic-bouton--plein:hover:not(:disabled) {
+  background: color-mix(in lch, var(--dal-violet), #fff 12%);
+}
+.v2 .dal .dal-dic-bouton--discret {
+  border-color: transparent;
+  background: transparent;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-dic-bouton:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.v2 .dal .dal-dic-carre {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+/* ——— les trois étapes ——— */
+.v2 .dal .dal-dic-etapes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 32px;
+  padding: 16px 14px 0;
+  border-top: 0.5px solid var(--dal-carte-bord);
+  list-style: none;
+}
+.v2 .dal .dal-dic-etapes li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 450;
+  line-height: 20px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-dic-etapes svg {
+  flex: none;
+  margin-top: 3px;
+}
+.v2 .dal .dal-dic-etapes strong {
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+
+/* ——— le devis fait : un bandeau au-dessus de la page du devis ——— */
+.v2 .dal .dal-dic-resultat {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+.v2 .dal .dal-dic-bandeau {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 6px 8px 6px 14px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-dic-bandeau > svg {
+  flex: none;
+  color: var(--dal-violet);
+}
+
+/* ——— l'entrée en tête de la liste des devis dictés (./Appels.tsx) ——— */
+.v2 .dal .dal-dic-entree {
+  padding: 4px 18px 10px;
+}
+.v2 .dal .dal-dic-entree .dal-dic-bouton {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .v2 .dal .dal-dic {
+    padding: 28px 24px 40px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .dal .dal-dic {
+    padding: 20px 14px 32px;
+  }
+  .v2 .dal :is(.dal-dic-titre, .dal-dic-intro, .dal-dic-erreur, .dal-dic-note) {
+    padding: 0;
+  }
+  .v2 .dal .dal-dic-etapes {
+    padding: 16px 0 0;
+  }
+  .v2 .dal .dal-dic-boutons .dal-dic-bouton {
+    flex: 1 1 auto;
+    justify-content: center;
+    height: 40px;
+  }
+  .v2 .dal .dal-dic-bandeau {
+    flex-wrap: wrap;
+  }
+}
+.v2 .dal .dal-dic-bandeau > span:not(.dal-pousse) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.v2 .dal .dal-dic-bandeau > .dal-pousse {
+  display: none;
+}
