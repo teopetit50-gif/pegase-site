@@ -450,8 +450,80 @@ html[data-v2-theme="light"] .v2 .dal.dal-mi-page {
   font-weight: 500;
   color: var(--dal-t2);
 }
-.v2 .dal .dal-mi-geste:hover {
+.v2 .dal .dal-mi-geste:hover:not(:disabled) {
   background: var(--dal-survol-onglet);
+}
+
+/* ——— 06/11 : les gestes faits sur place dans le volet (./AFaire.tsx, GestesTache) ——— */
+.v2 .dal .dal-mi-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.v2 .dal button.dal-mi-geste {
+  border: 0;
+  cursor: pointer;
+}
+.v2 .dal .dal-mi-geste[data-plein] {
+  background: var(--dal-violet);
+  color: #fff;
+}
+.v2 .dal .dal-mi-geste[data-plein]:hover:not(:disabled) {
+  background: color-mix(in lch, var(--dal-violet), #fff 12%);
+}
+.v2 .dal .dal-mi-geste:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.v2 .dal .dal-mi-vchamp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-mi-vlibelle);
+}
+.v2 .dal .dal-mi-vchamp input {
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid var(--dal-mi-puce-bord);
+  border-radius: 8px;
+  background: var(--dal-bouton);
+  font: inherit;
+  font-size: 13px;
+  color: var(--dal-t1);
+  color-scheme: inherit;
+}
+.v2 .dal .dal-mi-verreur {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--dal-rouge);
+}
+.v2 .dal .dal-mi-voir {
+  align-self: flex-start;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-mi-voir:hover {
+  color: var(--dal-t1);
+}
+/* volet ouvert : la semaine et la date dépassée (déjà dites par le groupe et la date à droite)
+   laissent la place à « avec … » et au chantier */
+.v2 .dal .dal-mi[data-volet] :is(.dal-mi-puce--lien, .dal-mi-puce--retard) {
+  display: none;
+}
+/* la phrase sous l'en-tête : qui fait quoi */
+.v2 .dal .dal-mi-intro {
+  flex: none;
+  padding: 10px 18px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--dal-t3);
 }
 .v2 .dal .dal-mi-props {
   display: flex;
