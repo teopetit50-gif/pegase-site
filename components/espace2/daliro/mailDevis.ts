@@ -15,6 +15,8 @@ import { montant } from "@/components/espace/format";
 import { TVA_GUADELOUPE, totalHt, type Devis } from "./exemplesDevis";
 
 export type MailDevis = {
+  /* l'adresse du client, si on l'a tapée dans l'encart du devis */
+  a?: string;
   numero: string;
   titre: string;
   client: string;

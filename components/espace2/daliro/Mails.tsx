@@ -147,7 +147,7 @@ export default function Mails() {
       setEnvoi((e) => {
         if (e) return e;
         const m = lireMailDevis();
-        return { a: "", cc: "", objet: m?.objet ?? "", corps: m?.corps ?? "", devis: m, essai: false };
+        return { a: m?.a ?? "", cc: "", objet: m?.objet ?? "", corps: m?.corps ?? "", devis: m, essai: false };
       });
     }, 0);
     return () => window.clearTimeout(t);

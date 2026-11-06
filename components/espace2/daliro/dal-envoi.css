@@ -84,12 +84,53 @@
   color: var(--dal-t1);
   font-weight: 500;
 }
-.v2 .dal .dal-env-vide {
-  padding: 0 8px;
+/* le champ « À » : un vrai champ, pointillé violet tant qu'il est vide */
+.v2 .dal .dal-env-ligne--champ {
+  align-items: center;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.v2 .dal .dal-env-ligne--champ .dal-env-cle {
+  cursor: text;
+}
+.v2 .dal .dal-env-champ {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  padding: 0 9px;
   border: 1px dashed color-mix(in lch, var(--dal-violet) 55%, transparent);
   border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+.v2 .dal .dal-env-champ::placeholder {
   color: var(--dal-t3);
+  font-weight: 450;
   font-style: italic;
+}
+.v2 .dal .dal-env-champ:hover {
+  background: color-mix(in lch, var(--dal-violet) 6%, transparent);
+}
+.v2 .dal .dal-env-champ:focus {
+  border-style: solid;
+  border-color: var(--dal-violet);
+  background: var(--dal-carte);
+  box-shadow: 0 0 0 3px color-mix(in lch, var(--dal-violet) 22%, transparent);
+}
+.v2 .dal .dal-env-champ[data-ok] {
+  border-style: solid;
+  border-color: color-mix(in lch, var(--dal-violet) 45%, transparent);
+}
+.v2 .dal .dal-env-ok {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--dal-violet);
 }
 .v2 .dal .dal-env-extrait {
   padding: 10px 12px 4px;
@@ -190,5 +231,10 @@
   .v2 .dal .dal-env-bouton {
     flex: 1 1 100%;
     justify-content: center;
+  }
+  /* sous 16 px, Safari sur iPhone zoome dans la page au toucher du champ */
+  .v2 .dal .dal-env-champ {
+    height: 32px;
+    font-size: 16px;
   }
 }

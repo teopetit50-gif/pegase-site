@@ -6,27 +6,32 @@
    pour renvoyer à la page mail, avec un mail prérempli avec le devis ; il
    n'y a plus qu'à mettre l'adresse email du mec »)
 
-   L'encart montre le mail déjà écrit (destinataire à compléter, objet, la
-   pièce jointe) ; le bouton dépose le brouillon (./mailDevis) et ouvre la
-   page Mails sur la carte « Nouveau mail », curseur dans le champ « À ».
+   L'encart montre le mail déjà écrit (objet, extrait, la pièce jointe) et
+   un vrai champ « À » (Teo, 06/11 : « je ne peux pas marquer l'adresse ») :
+   on y tape l'adresse du client, Entrée ou le bouton déposent le brouillon
+   (./mailDevis) et ouvrent la page Mails sur la carte « Nouveau mail »,
+   l'adresse déjà posée. Laissé vide, le curseur attend dans « À » là-bas.
    Un devis dont une ligne attend son prix ne part pas : l'encart le dit et
    le bouton attend.
    ══════════════════════════════════════════════════════════════════════ */
 
+import { useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RACINE } from "../modules";
 import { DalIcone } from "./DalIcone";
-import { mailDuDevis, poserMailDevis } from "./mailDevis";
+import { adresseValide, mailDuDevis, poserMailDevis } from "./mailDevis";
 import type { Devis } from "./exemplesDevis";
 import "./dal-envoi.css";
 
 export function EnvoyerDevis({ devis: d }: { devis: Devis }) {
   const routeur = useRouter();
+  const champ = useId();
+  const [a, setA] = useState("");
   const m = mailDuDevis(d);
   const manque = d.lignes.some((l) => l.prix === null);
   const dejaParti = d.etat === "envoye" || d.etat === "signe";
   const ouvrir = () => {
-    poserMailDevis(m);
+    poserMailDevis({ ...m, a: a.trim() });
     routeur.push(`${RACINE}/daliro/mails?ecrire=devis`);
   };
   return (
@@ -40,15 +45,39 @@ export function EnvoyerDevis({ devis: d }: { devis: Devis }) {
           <p>
             {manque
               ? "Le mail est écrit, mais une ligne attend encore son prix : chiffrez-la, puis envoyez."
-              : `Le mail est prêt, devis joint. Il ne reste qu'à mettre l'adresse mail ${m.client === "Client" ? "du client" : `de ${m.client}`}.`}
+              : `Le mail est prêt, devis joint. Il ne reste qu'à taper l'adresse mail ${m.client === "Client" ? "du client" : `de ${m.client}`}.`}
           </p>
         </div>
       </div>
 
       <div className="dal-env-mail" aria-label="Aperçu du mail">
-        <div className="dal-env-ligne">
-          <span className="dal-env-cle">À</span>
-          <span className="dal-env-vide">Adresse du client, à saisir</span>
+        <div className="dal-env-ligne dal-env-ligne--champ">
+          <label className="dal-env-cle" htmlFor={champ}>
+            À
+          </label>
+          <input
+            id={champ}
+            className="dal-env-champ"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            spellCheck={false}
+            value={a}
+            onChange={(e) => setA(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !manque) {
+                e.preventDefault();
+                ouvrir();
+              }
+            }}
+            placeholder={m.client === "Client" ? "L'adresse mail du client" : `L'adresse mail de ${m.client}`}
+            data-ok={adresseValide(a) || undefined}
+          />
+          {adresseValide(a) ? (
+            <span className="dal-env-ok" aria-hidden="true">
+              <DalIcone nom="IssueStatusDone" taille={14} />
+            </span>
+          ) : null}
         </div>
         <div className="dal-env-ligne">
           <span className="dal-env-cle">Objet</span>
@@ -69,9 +98,9 @@ export function EnvoyerDevis({ devis: d }: { devis: Devis }) {
       <div className="dal-env-pied">
         <button type="button" className="dal-env-bouton" onClick={ouvrir} disabled={manque}>
           <DalIcone nom="Send" taille={14} />
-          <span>Ouvrir le mail prêt</span>
+          <span>{adresseValide(a) ? "Ouvrir le mail, prêt à partir" : "Ouvrir le mail prêt"}</span>
         </button>
-        <span className="dal-env-note">S&apos;ouvre dans Mails : relisez, ajoutez l&apos;adresse, envoyez.</span>
+        <span className="dal-env-note">S&apos;ouvre dans Mails : relisez, puis envoyez.</span>
       </div>
     </section>
   );
