@@ -86,7 +86,13 @@ function repondre(q: string, tableaux: Tableau[]): Reponse {
     return {
       paragraphes: [`${jourFr(jour).replace(/^./, (c) => c.toUpperCase())}, sur ${t.chantier.nom} (${t.chantier.commune}) :`],
       puces: la.map((p) => `${p.intervenant_nom ?? p.intervenant_lu ?? "Intervenant"} — ${p.tache ?? "passage"}${p.lot_libelle ? ` (lot ${p.lot_code} ${p.lot_libelle})` : ""}${p.heure_debut ? `, à partir de ${p.heure_debut.slice(0, 5).replace(":", " h ")}` : ""} : ${conf[p.confirmation] ?? p.confirmation}.`),
-      fin: la.some((p) => p.confirmation === "sans_reponse" || p.confirmation === "declinee") ? "Un intervenant n'a pas confirmé : des remplaçants de votre annuaire sont proposés dans le planning." : "Tout le monde a reçu sa demande de confirmation à J-2.",
+      fin: la.some((p) => p.confirmation === "sans_reponse" || p.confirmation === "declinee")
+        ? "Un intervenant n'a pas confirmé : des remplaçants de votre annuaire sont proposés dans le planning."
+        : la.some((p) => p.confirmation === "demandee")
+          ? "La demande de confirmation est partie à J-2 ; sans réponse ce soir, la relance apparaît dans À faire."
+          : la.every((p) => p.confirmation === "confirmee")
+            ? "Tout le monde a confirmé son passage."
+            : "Les demandes de confirmation partent à J-2.",
       sources: [{ titre: t.chantier.nom, sous: "Planning du chantier", href: lien(t, "?onglet=terrain#planning") }],
     };
   }
