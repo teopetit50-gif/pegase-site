@@ -12,11 +12,14 @@ import { ArrowRight, CornerDownLeft, Link2, Search } from "lucide-react";
 import { Autocomplete, Dialog, Input, Menu, Modal, ModalOverlay, TextField, useFilter } from "react-aria-components";
 import { ItemMenu, Kbd, SectionMenu } from "./ui";
 import { MODULES, ONGLETS_ORGANISATION, ONGLETS_RESEAU } from "./modules";
+import { dansLePortail } from "./portail";
+import { usePortail } from "./portail-contexte";
 import { useToast } from "./Toasts";
 
 export default function Palette({ ouverte, changer }: { ouverte: boolean; changer: (v: boolean) => void }) {
   const router = useRouter();
   const toast = useToast();
+  const portail = usePortail();
   const { contains } = useFilter({ sensitivity: "base" });
 
   const agir = (cle: React.Key) => {
@@ -43,14 +46,17 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
             </TextField>
             <Menu className="v2-menu" onAction={agir} aria-label="Résultats" renderEmptyState={() => <div className="v2-palette-vide">Aucun résultat.</div>}>
               <SectionMenu titre="Pages">
-                {ONGLETS_ORGANISATION.map((o) => (
+                {/* l'espace DALIRO seul : ses pages et son module seulement (portail.ts) */}
+                {(portail ? ONGLETS_ORGANISATION.filter((o) => dansLePortail(o.href)) : ONGLETS_ORGANISATION).map((o) => (
                   <ItemMenu key={o.href} id={`aller:${o.href}`} icone={<ArrowRight width={16} height={16} aria-hidden="true" />}>
                     {o.libelle}
                   </ItemMenu>
                 ))}
-                <ItemMenu id="aller:/espace2/filed/a-payer" textValue="À payer FILED factures" icone={<ArrowRight width={16} height={16} aria-hidden="true" />}>
-                  À payer (FILED)
-                </ItemMenu>
+                {portail ? null : (
+                  <ItemMenu id="aller:/espace2/filed/a-payer" textValue="À payer FILED factures" icone={<ArrowRight width={16} height={16} aria-hidden="true" />}>
+                    À payer (FILED)
+                  </ItemMenu>
+                )}
               </SectionMenu>
               <SectionMenu titre="Réseau Omega">
                 {ONGLETS_RESEAU.map((o) => (
@@ -60,7 +66,7 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
                 ))}
               </SectionMenu>
               <SectionMenu titre="Modules">
-                {MODULES.map((m) => (
+                {(portail ? MODULES.filter((m) => m.cle === portail) : MODULES).map((m) => (
                   <ItemMenu key={m.cle} id={`aller:/espace2/${m.cle}`} textValue={`${m.nom} ${m.libelle}`} icone={<m.icone width={16} height={16} aria-hidden="true" />} suffixe={<span>{m.libelle}</span>}>
                     {m.nom}
                   </ItemMenu>

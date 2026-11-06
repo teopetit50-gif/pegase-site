@@ -23,7 +23,7 @@
 import { Suspense, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Network, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, HardHat, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Network, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -44,6 +44,8 @@ import { useCalme } from "./mouvement";
 import { useDonnees } from "./donnees";
 import { A_PAYER, groupeDe } from "./filed/calculs";
 import { useAujourdhui } from "./horloge";
+import type { Portail } from "./portail";
+import { PortailContexte, usePortail } from "./portail-contexte";
 import "./espace2.css";
 import "./client.css";
 /* 03/11/2026 — les fenêtres reprises de /espace (Nouveau chantier, Nouvelle
@@ -58,7 +60,7 @@ export const versV2 = (href: string) => (/^\/espace(\/|\?|$)/.test(href) && !hre
 const coche = (oui: boolean) => (oui ? <Check width={16} height={16} aria-label="choisi" /> : null);
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 
-export default function Coquille({ utilisateur, police, children }: { utilisateur: Utilisateur | null; police: string; children: React.ReactNode }) {
+export default function Coquille({ utilisateur, police, portail = null, children }: { utilisateur: Utilisateur | null; police: string; portail?: Portail | null; children: React.ReactNode }) {
   const router = useRouter();
   /* les menus et fenêtres sont rendus dans <body>, hors de cet arbre : la
      variable de la police Geist doit vivre sur <html> pendant la visite */
@@ -112,7 +114,9 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
         <RouterProvider navigate={(href, options) => router.push(versV2(href) ?? href, options)}>
           <FournisseurToasts>
             <OrganisationContexte.Provider value={{ nom: utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin"), connecte: !!utilisateur, prenom: utilisateur?.prenom ?? null }}>
-              <Cadre utilisateur={utilisateur}>{children}</Cadre>
+              <PortailContexte.Provider value={portail}>
+                <Cadre utilisateur={utilisateur}>{children}</Cadre>
+              </PortailContexte.Provider>
             </OrganisationContexte.Provider>
           </FournisseurToasts>
         </RouterProvider>
@@ -124,9 +128,11 @@ export default function Coquille({ utilisateur, police, children }: { utilisateu
 /* les alertes de la cloche : ce qui est en retard, tiré des mêmes données que la vue d'ensemble */
 function useAlertes() {
   const { donnees } = useDonnees();
+  /* l'espace DALIRO seul n'a ni FILED ni les validations : leurs alertes mèneraient hors de l'espace */
+  const portail = usePortail();
   /* 21/10 — l'horloge du navigateur (horloge.ts) : un retard ne se juge qu'une fois la page montée */
   const aujourdhui = useAujourdhui();
-  if (!donnees) return { alertes: [], enAttente: 0 };
+  if (!donnees || portail) return { alertes: [], enAttente: 0 };
   const enAttente = donnees.demandes.filter((d) => d.statut === "en_attente");
   const alertes: { id: string; texte: string; quand: string | null; lien: string }[] = [];
   if (aujourdhui !== null) {
@@ -167,6 +173,11 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
     };
   }, []);
   const portee = porteeDe(chemin);
+  /* l'espace DALIRO seul ne montre que son module dans les menus du haut */
+  const portail = usePortail();
+  const modulesVus = portail ? MODULES.filter((m) => m.cle === portail) : MODULES;
+  /* hors de son module (Notes, Réseau…), le sélecteur garde le nom DALIRO : « Tous les modules » n'existe pas ici */
+  const porteeVue = portee ?? (portail ? (moduleDe(portail) ?? null) : null);
 
   /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
   useEffect(() => {
@@ -211,24 +222,26 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
               /
             </span>
             <MenuDeroulant
-              etiquette={`Portée : ${portee ? portee.nom : "tous les modules"}. Changer de module`}
+              etiquette={`Portée : ${porteeVue ? porteeVue.nom : "tous les modules"}. Changer de module`}
               classe="v2-portee"
               placement="bottom start"
               largeur={300}
               declencheur={
                 <>
-                  {portee ? <portee.icone {...I} /> : <LayoutGrid {...I} />}
-                  <span className="v2-portee-nom">{portee ? portee.nom : "Tous les modules"}</span>
+                  {porteeVue ? <porteeVue.icone {...I} /> : <LayoutGrid {...I} />}
+                  <span className="v2-portee-nom">{porteeVue ? porteeVue.nom : "Tous les modules"}</span>
                   <ChevronsUpDown width={14} height={14} aria-hidden="true" />
                 </>
               }
             >
-              <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
-                Tous les modules
-              </ItemMenu>
-              <SeparateurMenu />
+              {portail ? null : (
+                <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
+                  Tous les modules
+                </ItemMenu>
+              )}
+              {portail ? null : <SeparateurMenu />}
               <SectionMenu titre="Modules">
-                {MODULES.map((m) => (
+                {modulesVus.map((m) => (
                   <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
                     {m.nom} <span className="v2-gris">· {m.libelle}</span>
                   </ItemMenu>
@@ -253,15 +266,31 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 </>
               }
             >
-              <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote {...I} />}>
-                Noter un paiement
-              </ItemMenu>
-              <ItemMenu id="document" href={`${RACINE}/filed`} icone={<FileText {...I} />}>
-                Déposer un document
-              </ItemMenu>
-              <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck {...I} />}>
-                Décider d&apos;une validation
-              </ItemMenu>
+              {portail ? (
+                <>
+                  <ItemMenu id="chantier" href={`${RACINE}/daliro/chantiers`} icone={<HardHat {...I} />}>
+                    Ouvrir les chantiers
+                  </ItemMenu>
+                  <ItemMenu id="tache" href={`${RACINE}/taches`} icone={<CheckSquare {...I} />}>
+                    Ajouter une tâche
+                  </ItemMenu>
+                  <ItemMenu id="note" href={`${RACINE}/notes`} icone={<FileText {...I} />}>
+                    Écrire une note
+                  </ItemMenu>
+                </>
+              ) : (
+                <>
+                  <ItemMenu id="paiement" href={`${RACINE}/filed/a-payer`} icone={<Banknote {...I} />}>
+                    Noter un paiement
+                  </ItemMenu>
+                  <ItemMenu id="document" href={`${RACINE}/filed`} icone={<FileText {...I} />}>
+                    Déposer un document
+                  </ItemMenu>
+                  <ItemMenu id="valider" href={`${RACINE}/validations`} icone={<CheckCheck {...I} />}>
+                    Décider d&apos;une validation
+                  </ItemMenu>
+                </>
+              )}
             </MenuDeroulant>
             <button type="button" className="v2-haut-lien v2-masque-mobile v2-masque-etroit" onClick={() => ecrire("idee")}>
               Feedback
@@ -284,7 +313,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             {/* eslint-disable-next-line @next/next/no-img-element -- l'icône pilotage, déjà à sa taille */}
             <MenuDeroulant etiquette="Systèmes : raccourcis vers chaque système" classe="v2-btn v2-btn--petit v2-btn--icone v2-btn--fantome v2-masque-mobile" placement="bottom end" largeur={260} declencheur={<><img className="oc-logo-sombre" src="/omega-icone-pilotage.png" alt="" width={16} height={16} /><img className="oc-logo-clair" src="/logo-pegase.png" alt="" width={16} height={16} /></>}>
               <SectionMenu titre="Systèmes">
-                {MODULES.map((m) => (
+                {modulesVus.map((m) => (
                   <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />}>
                     {m.nom} <span className="v2-gris">· {m.libelle}</span>
                   </ItemMenu>
@@ -344,6 +373,7 @@ const R = { width: 20, height: 20, strokeWidth: 1.5, "aria-hidden": true } as co
 function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | null; classe: string }) {
   const { source, changer, connecte } = useSource();
   const toast = useToast();
+  const portail = usePortail();
   const organisation = utilisateur?.entreprise || (utilisateur ? "Mon organisation" : "Atelier Bertin");
   const choisirSource = (s: "exemple" | "reelle") => {
     if (s === "reelle" && !connecte) return;
@@ -372,7 +402,7 @@ function MenuOrganisation({ utilisateur, classe }: { utilisateur: Utilisateur | 
       }
     >
       <SectionMenu titre="Organisations">
-        <ItemMenu id="org" href={RACINE} textValue={organisation} icone={<span className="v2-pastille-ronde">{organisation.charAt(0).toUpperCase()}</span>} suffixe={coche(true)}>
+        <ItemMenu id="org" href={portail ? `${RACINE}/${portail}` : RACINE} textValue={organisation} icone={<span className="v2-pastille-ronde">{organisation.charAt(0).toUpperCase()}</span>} suffixe={coche(true)}>
           {organisation}
         </ItemMenu>
       </SectionMenu>
@@ -395,7 +425,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   const { alertes, enAttente } = useAlertes();
   const compteurs = useCompteurs();
   const tachesOuvertes = useOuvertes("taches");
-  const metier = moduleMetier(utilisateur?.secteur, !!utilisateur);
+  const portail = usePortail();
+  const metier = portail ?? moduleMetier(utilisateur?.secteur, !!utilisateur);
   const nom =utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
   /* /auth/signout n'accepte qu'un POST (une déconnexion ne suit jamais un simple lien) */
@@ -441,7 +472,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par
      groupe de fonctions vendues sur la page produit du module */
   const fonctionsDe = (cle: string): Lien[] => FONCTIONS[cle] ?? [];
-  const modules = MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier)
+  /* l'espace DALIRO seul : son module, sans les quatre communs ni les autres métiers */
+  const modules = MODULES.filter((m) => (portail ? m.cle === portail : MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier))
     /* les quatre communs dans leur ordre, puis le module du métier */
     .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
   const sectionModule = (m: (typeof MODULES)[number]): Section => ({
@@ -461,7 +493,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
      VARELO, TAVARO…) n'étaient atteignables que par « Tous les modules », en
      haut, et leur page ouvrait le volet de l'accueil. Ils sont rangés sous
      les modules du rail, dans un déroulant « Autres modules ». */
-  const autres = MODULES.filter((m) => !modules.includes(m)).map(sectionModule);
+  const autres = portail ? [] : MODULES.filter((m) => !modules.includes(m)).map(sectionModule);
   const sections: Section[] = [
     {
       cle: "accueil",
@@ -587,13 +619,15 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   };
   /* 02/11/2026 — le Réseau Omega : les clients d'Omega entre eux (Fil, Membres, Messages, Opportunités), un groupe du rail sous les fiches */
   const reseau: Section = { cle: "reseau", titre: "Réseau", sousTitre: "Entre clients Omega", icone: <Network {...R} />, href: `${RACINE}/reseau`, racines: [`${RACINE}/reseau`], groupes: [{ titre: "Réseau Omega", liens: ONGLETS_RESEAU }] };
-  const toutes = [...sections, reseau, ...autres, formation, reglages];
+  /* l'espace DALIRO seul : le module en tête, puis le travail et les fiches ; ni l'accueil de l'organisation, ni le Suivi */
+  const vues = portail ? [sections[3], sections[1], sections[2]] : sections;
+  const toutes = [...vues, reseau, ...autres, formation, reglages];
   const sous = (r: string) => chemin === r || chemin.startsWith(`${r}/`);
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : sous(l.racine ?? l.href)) || !!l.aussi?.some(sous);
   const courante =
     toutes.find((s) => s.racines.some((r) => chemin === r || chemin.startsWith(`${r}/`))) ??
     toutes.find((s) => s.groupes.some((g) => g.liens.some(ouvre))) ??
-    sections[0];
+    vues[0];
   /* le déroulant s'ouvre de lui-même quand on arrive sur l'un de ses modules */
   const dansAutres = autres.some((s) => s.cle === courante.cle);
   const idAutres = useId();
@@ -605,7 +639,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   }
   /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
   const railModules = sections.slice(3, 3 + modules.length);
-  const rail: Section[][] = [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)].filter((g) => g.length);
+  const rail: Section[][] = (portail ? [[vues[0]], vues.slice(1, 3), [reseau]] : [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)]).filter((g) => g.length);
   /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
      dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
      et parfois après le survol — le navigateur la pose et l'enlève à sa
