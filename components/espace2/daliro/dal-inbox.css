@@ -1,0 +1,222 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO, appels (05/11/2026, recopié de tav-inbox.css) — Linear, Inbox, au 1:1 (02/11/2026).
+   Relevé : docs/refonte-metiers/releves/linear-inbox.md (1440×900 sombre
+   et clair, paliers 1024, 768, 390). Préfixe dal-ap-.
+
+   Repères : liste 400 (filet droit 0.5) ; en-tête 44 (titre 13/500, ronds
+   28) ; lignes 55 (r 8, marges 8), contenu à 16 : avatar 32 rond (réveil
+   20 sur lch(52.418 61.103 288.421 / .133), bord 1 / .267), texte à 60 sur
+   2 lignes : 17 (pastille 8, identifiant 13/500 −0.26, titre 13/500,
+   statut 14 à droite) puis 16 (12/450 tertiaire, priorité 14, âge) ; lue :
+   titre tertiaire, opacité 0.7. Volet droit : le reste de la carte.
+   1024 : liste 240. 768 et moins : liste pleine largeur, pas de volet.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal {
+  --dal-ap-violet: lch(52.418 61.103 288.421);
+  --dal-ap-point: lch(47.918 59.303 288.421);
+}
+html[data-v2-theme="light"] .v2 .dal {
+  --dal-ap-point: lch(53 52.26 286.91);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal {
+    --dal-ap-point: lch(53 52.26 286.91);
+  }
+}
+
+.v2 .dal .dal-ap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.v2 .dal .dal-ap-liste {
+  flex: 0 0 400px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-ap-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px 0 18px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-ap-titre {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+}
+.v2 .dal .dal-ap-tete .dal-rond[aria-pressed="true"] {
+  background: var(--dal-actif);
+}
+.v2 .dal .dal-ap-defile {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 0;
+}
+.v2 .dal .dal-ap-avis {
+  padding: 8px 18px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ap-lignes {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal .dal-ap-ligne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 55px;
+  margin: 0 8px;
+  padding: 0 8px;
+  border-radius: 8px;
+  transition: color 0.15s;
+}
+.v2 .dal .dal-ap-ligne:hover {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-ap-ligne[aria-current="true"] {
+  background: var(--dal-tk-selection);
+}
+.v2 .dal .dal-ap-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: lch(52.418 61.103 288.421 / 0.133);
+  border: 1px solid lch(52.418 61.103 288.421 / 0.267);
+  color: var(--dal-ap-violet);
+}
+.v2 .dal .dal-ap-texte {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal .dal-ap-l1 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 17px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-ap-point {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--dal-ap-point);
+}
+.v2 .dal .dal-ap-id {
+  flex: none;
+  letter-spacing: -0.26px;
+}
+.v2 .dal .dal-ap-sujet {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ap-ligne[data-lu] .dal-ap-l1 {
+  color: var(--dal-t3);
+  opacity: 0.7;
+}
+.v2 .dal .dal-ap-statut {
+  flex: none;
+  display: inline-flex;
+  margin-left: 4px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ap-statut[data-etat="tri"] {
+  color: var(--dal-tk-triage);
+}
+.v2 .dal .dal-ap-statut[data-etat="cours"] {
+  color: var(--dal-tk-encours);
+}
+.v2 .dal .dal-ap-statut[data-etat="fait"] {
+  color: var(--dal-tk-fait);
+}
+.v2 .dal .dal-ap-l2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 16px;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-ap-sous {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.v2 .dal .dal-ap-priorite {
+  flex: none;
+  display: inline-flex;
+  color: var(--dal-tk-triage);
+}
+.v2 .dal .dal-ap-age {
+  flex: none;
+}
+.v2 .dal .dal-ap-droite {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal .dal-ap-illustration {
+  color: var(--dal-t3);
+  opacity: 0.6;
+}
+
+@media (max-width: 1024px) {
+  .v2 .dal .dal-ap-liste {
+    flex-basis: 240px;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .dal .dal-ap-liste {
+    flex: 1;
+    border-right: 0;
+  }
+  .v2 .dal .dal-ap-droite {
+    display: none;
+  }
+}
+
+/* le volet vide (tav.css, .tav-vide, même règle) */
+.v2 .dal .dal-ap-vide {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  text-align: center;
+}

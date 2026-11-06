@@ -1,0 +1,649 @@
+/* ══════════════════════════════════════════════════════════════════════
+   DALIRO, page d'un appel et d'un devis (05/11/2026, recopié de tav-ticket.css) — Linear, page d'un ticket (OME-19), au 1:1
+   (02/11/2026). Relevé : docs/refonte-metiers/releves/linear-ticket.md
+   (1440×900 sombre et clair, paliers 1024, 768, 390). Préfixe dal-tk-.
+
+   Repères (px CSS, depuis le bord de la carte) :
+     en-tête     44, filet bas 0.5 ; fil : lien 24 (r 8, p 0 5 0 4), « › »
+                 13/500 tertiaire (m −2 8 0), ticket 20 (r 6, p 2 4) 13/500 ;
+                 à droite boutons « Accept » 28 (12/500, r 9999, p 0 10 0 8)
+     outils      44 flottante à droite : ronds pleins de 28
+     principal   à 47 du bord, 667.5 de large, contenu à 14 ; titre 24/600/32
+                 −0.16 ; description 15/450/24 −0.1 (p 10 14 16, m 0 −14) ;
+                 deux ronds 28 ; « Sub-issues » à 8 : en-tête 32 (repli 24,
+                 r 9999, p 0 12 0 6, 12/500 tertiaire ; compte 12/450),
+                 rangées 36 (r 8, statut 14 à 39, titre 13/500 à 62) ;
+                 filet 0.5 ; « Activity » 15/600/23 ; événements 12/450/16.8
+                 tertiaires, avatar 14 ; carte commentaire r 8, bd 0.5
+     propriétés  à 763 du bord, 375.7 de large, collante ; titres 13/500
+                 tertiaires (p 0 8) ; pilules 28 (r 9999, p 0 10 0 6, écart
+                 6, 13/500 secondaire, vide tertiaire), pas de 32 ;
+                 étiquettes 23 (p 0 8, pastille 9)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.v2 .dal {
+  --dal-tk-com: lch(9.232 0.85 272);
+  --dal-tk-com-bord: lch(16.793 1.93 272);
+  --dal-tk-com-ombre: lch(0 0 0 / 0.3) 0 0.5px 1px 1px;
+  --dal-tk-com-texte: lch(90.826 1.425 272);
+  --dal-tk-com-date: lch(63.304 1.425 272);
+  --dal-tk-triage: lch(66 80 48);
+  --dal-tk-encours: lch(80 90 85);
+  --dal-tk-fait: lch(48 59.31 288.43);
+  --dal-tk-rouge: lch(58% 73 29);
+  --dal-tk-selection: lch(12.4 1.2 272);
+}
+html[data-v2-theme="light"] .v2 .dal {
+  --dal-tk-com: lch(100 0 282);
+  --dal-tk-com-bord: lch(91.9 0 282);
+  --dal-tk-com-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+  --dal-tk-com-texte: lch(20 1 282);
+  --dal-tk-com-date: lch(40 1 282);
+  --dal-tk-selection: lch(92.94 0.5 282);
+}
+@media (prefers-color-scheme: light) {
+  html:not([data-v2-theme="dark"]) .v2 .dal {
+    --dal-tk-com: lch(100 0 282);
+    --dal-tk-com-bord: lch(91.9 0 282);
+    --dal-tk-com-ombre: lch(0 0 0 / 0.02) 0 3px 6px -2px, lch(0 0 0 / 0.04) 0 1px 1px 0;
+    --dal-tk-com-texte: lch(20 1 282);
+    --dal-tk-com-date: lch(40 1 282);
+    --dal-tk-selection: lch(92.94 0.5 282);
+  }
+}
+
+.v2 .dal .dal-tk {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ——— en-tête ——— */
+.v2 .dal .dal-tk-tete {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 44px;
+  padding: 0 8px 0 10px;
+  border-bottom: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-tk-fil {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.v2 .dal .dal-tk-fil-lien {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 5px 0 4px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tk-fil-lien:hover,
+.v2 .dal .dal-tk-fil-ticket:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tk-fil-sep {
+  margin: -2px 8px 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-fil-ticket {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  height: 20px;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.v2 .dal .dal-tk-fil-ticket h2 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-tk-fil-id {
+  display: inline-flex;
+  margin-right: 5.6px;
+}
+.v2 .dal .dal-tk-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.v2 .dal .dal-tk-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.v2 .dal .dal-tk-action svg {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-action:hover:not(:disabled) {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal :is(.dal-tk-action, .dal-rond, .dal-tk-pilule):disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ——— corps : la barre d'outils flotte en haut à droite ——— */
+.v2 .dal .dal-tk-defile {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.v2 .dal .dal-tk-outils {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+.v2 .dal .dal-rond--plein {
+  background: var(--dal-bouton);
+}
+.v2 .dal .dal-tk-corps {
+  display: flex;
+  align-items: flex-start;
+  gap: 48.5px;
+  padding: 0 48px 48px 47px;
+}
+.v2 .dal .dal-tk-principal {
+  flex: 1 1 667.5px;
+  min-width: 0;
+  max-width: 667.5px;
+  padding-top: 59px;
+}
+.v2 .dal .dal-tk-titre {
+  padding: 0 14px;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.16px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-tk-description {
+  margin-top: 14px;
+  padding: 10px 14px 16px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tk-description p + p {
+  margin-top: 8px;
+}
+.v2 .dal .dal-tk-attention {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-petits {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 0 0;
+  margin: 8px 0 0 0;
+}
+.v2 .dal .dal-tk-replis {
+  display: none;
+}
+
+/* ——— blocs « Sub-issues » ——— */
+.v2 .dal .dal-tk-bloc {
+  margin: 0 0 8px 8px;
+}
+.v2 .dal .dal-tk-petits + .dal-tk-bloc {
+  margin-top: 0;
+}
+.v2 .dal .dal-tk-bloc-tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+}
+.v2 .dal .dal-tk-repli {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 12px 0 6px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-repli:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tk-bloc-compte {
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-rangees {
+  display: flex;
+  flex-direction: column;
+}
+.v2 .dal .dal-tk-rangee {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 9px;
+  width: 100%;
+  height: 36px;
+  padding: 0 8px 0 39px;
+  border-radius: 8px;
+  text-align: left;
+  color: var(--dal-t1);
+}
+.v2 .dal button.dal-tk-rangee:hover,
+.v2 .dal .dal-tk-rangee[aria-expanded="true"] {
+  background: var(--dal-survol);
+}
+.v2 .dal .dal-tk-rangee-icone {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-rangee-titre {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-tk-rangee-droite {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 450;
+  color: var(--dal-t3);
+  white-space: nowrap;
+}
+.v2 .dal .dal-tk-gris {
+  font-weight: 450;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-rouge {
+  color: var(--dal-tk-rouge);
+}
+.v2 .dal .dal-tk-statut[data-etat="fait"] {
+  color: var(--dal-tk-fait);
+}
+.v2 .dal .dal-tk-statut[data-etat="cours"] {
+  color: var(--dal-tk-encours);
+}
+.v2 .dal .dal-tk-statut[data-etat="tri"] {
+  color: var(--dal-tk-triage);
+}
+.v2 .dal .dal-tk-statut[data-etat="afaire"],
+.v2 .dal .dal-tk-statut[data-etat="annule"] {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-detail {
+  margin: 4px 0 8px 39px;
+  padding: 12px 14px;
+  border: 0.5px solid var(--dal-tk-com-bord);
+  border-radius: 8px;
+  background: var(--dal-tk-com);
+  box-shadow: var(--dal-tk-com-ombre);
+  font-size: 13px;
+}
+.v2 .dal .dal-tk-detail .dal-tk-rangee {
+  padding-left: 8px;
+}
+.v2 .dal .dal-tk-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.v2 .dal .dal-tk-electronique :where(button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  background: var(--dal-bouton);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+
+/* ——— activité ——— */
+.v2 .dal .dal-tk-filet {
+  height: 0;
+  margin: 20px 0 0 14px;
+  border: 0;
+  border-top: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-tk-activite-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 32px;
+  margin-top: 20px;
+  padding: 0 14px;
+}
+.v2 .dal .dal-tk-activite-tete h3 {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 23px;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-tk-journal {
+  font-size: 12px;
+  font-weight: 500;
+}
+.v2 .dal .dal-tk-evenements {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 14px 0 18px;
+}
+.v2 .dal .dal-tk-evenement {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16.8px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-evenement svg {
+  flex: none;
+  margin-right: 4px;
+}
+.v2 .dal .dal-tk-evenement > span[aria-hidden="true"] {
+  font-weight: 600;
+}
+.v2 .dal .dal-tk-qui {
+  font-weight: 500;
+}
+.v2 .dal .dal-tk-commentaire {
+  margin: 18px 0 0 6px;
+  padding: 12px 16px;
+  border: 0.5px solid var(--dal-tk-com-bord);
+  border-radius: 8px;
+  background: var(--dal-tk-com);
+  box-shadow: var(--dal-tk-com-ombre);
+}
+.v2 .dal .dal-tk-commentaire-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.v2 .dal .dal-tk-commentaire-tete strong {
+  font-weight: 500;
+  color: var(--dal-t1);
+}
+.v2 .dal .dal-tk-commentaire-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--dal-actif);
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tk-commentaire-date {
+  font-weight: 450;
+  color: var(--dal-tk-com-date);
+}
+.v2 .dal .dal-tk-commentaire-corps {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 24px;
+  letter-spacing: -0.1px;
+  color: var(--dal-tk-com-texte);
+}
+.v2 .dal .dal-tk-lien {
+  color: var(--dal-t1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ——— propriétés ——— */
+.v2 .dal .dal-tk-proprietes {
+  position: sticky;
+  top: 0;
+  flex: 0 0 375.7px;
+  display: flex;
+  flex-direction: column;
+  padding: 75px 0 0 6px;
+  min-width: 0;
+}
+.v2 .dal .dal-tk-prop-titre {
+  height: 16px;
+  margin-bottom: 10px;
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-prop-liste,
+.v2 .dal .dal-tk-prop-etiquettes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 33px;
+}
+.v2 .dal .dal-tk-prop-etiquettes {
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding-left: 6px;
+}
+.v2 .dal .dal-tk-pilule {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 10px 0 6px;
+  border: 0.5px solid transparent;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+}
+.v2 .dal .dal-tk-pilule > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.v2 .dal .dal-tk-pilule svg {
+  flex: none;
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-pilule[data-vide] {
+  color: var(--dal-t3);
+}
+.v2 .dal button.dal-tk-pilule:hover:not(:disabled) {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-tk-gestes .dal-tk-pilule {
+  background: var(--dal-bouton);
+}
+.v2 .dal .dal-tk-etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 23px;
+  padding: 0 8px;
+  border: 0.5px solid var(--dal-puce-bord);
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dal-t2);
+}
+.v2 .dal .dal-tk-pastille {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* ——— volet (ticket ouvert à droite de l'Inbox) : mêmes briques, une colonne ——— */
+.v2 .dal .dal-tk[data-volet] .dal-tk-corps {
+  padding: 0 14px 48px 0;
+}
+.v2 .dal .dal-tk[data-volet] .dal-tk-principal {
+  max-width: none;
+  padding: 21.75px 0 0 14px;
+}
+.v2 .dal .dal-tk[data-volet] .dal-tk-proprietes {
+  display: none;
+}
+.v2 .dal .dal-tk[data-volet] .dal-tk-replis {
+  display: flex;
+}
+/* la barre flottante du ticket ouvert dans un volet (Inbox, Triage) : 44 de haut, p 8 12 8 0, ronds à droite */
+.v2 .dal .dal-tk[data-volet] .dal-tk-outils {
+  position: static;
+  justify-content: flex-end;
+  height: 44px;
+  padding: 8px 12px 8px 0;
+}
+.v2 .dal .dal-tk[data-volet] .dal-tk-principal {
+  padding-top: 15px;
+}
+
+/* ——— 1024 et moins : la colonne des propriétés passe sous le titre ——— */
+.v2 .dal .dal-tk-replis {
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px 0;
+}
+.v2 .dal .dal-tk-replis .dal-tk-pilule {
+  height: 24px;
+  padding: 0 8px 0 6px;
+  background: var(--dal-bouton);
+  font-size: 12px;
+}
+.v2 .dal .dal-tk-replis .dal-tk-pilule svg {
+  width: 14px;
+  height: 14px;
+}
+@media (max-width: 1024px) {
+  .v2 .dal .dal-tk-proprietes {
+    display: none;
+  }
+  .v2 .dal .dal-tk-replis {
+    display: flex;
+  }
+  .v2 .dal .dal-tk-corps {
+    padding: 0 14px 48px 0;
+  }
+  .v2 .dal .dal-tk-principal {
+    max-width: none;
+  }
+  .v2 .dal .dal-tk-action span {
+    display: none;
+  }
+  .v2 .dal .dal-tk-action {
+    width: 28px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+@media (max-width: 768px) {
+  .v2 .dal .dal-tk-replis .dal-tk-pilule {
+    height: 28px;
+  }
+  .v2 .dal .dal-tk-rangee {
+    padding-left: 12px;
+  }
+  .v2 .dal .dal-tk-rangee-droite {
+    display: none;
+  }
+  .v2 .dal .dal-tk-detail {
+    margin-left: 0;
+  }
+  .v2 .dal .dal-tk-defile {
+    overflow: visible;
+  }
+}
+.v2 .dal .dal-tk-statut {
+  display: inline-flex;
+}
+
+/* ——— boutons de la référence rendus utiles (02/11/2026) ——— */
+/* « Copy as prompt | Choose coding tool » : le bouton double, r 9999 0 0 9999 / 0 9999 9999 0 */
+.v2 .dal .dal-tk-double {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border-radius: 9999px;
+  background: var(--dal-bouton);
+}
+.v2 .dal .dal-tk-double-g {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 8px 0 8px;
+  border-radius: 9999px 0 0 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dal-t2);
+  white-space: nowrap;
+}
+.v2 .dal .dal-tk-double-g svg {
+  color: var(--dal-t3);
+}
+.v2 .dal .dal-tk-double .dal-rond {
+  border-radius: 0 9999px 9999px 0;
+  border-left: 0.5px solid var(--dal-carte-bord);
+}
+.v2 .dal .dal-tk-double .dal-rond svg {
+  transform: rotate(90deg);
+}
+.v2 .dal .dal-tk-double-g:hover,
+.v2 .dal .dal-tk-double .dal-rond:hover {
+  background: var(--dal-survol-onglet);
+}
+.v2 .dal .dal-rond[aria-pressed="true"] svg {
+  color: var(--dal-t1);
+}
+/* le filtre des sous-blocs : les lignes faites masquées */
+.v2 .dal .dal-tk-bloc[data-masquer] li:has(> .dal-tk-rangee .dal-tk-statut[data-etat="fait"]) {
+  display: none;
+}
+@media (max-width: 1024px) {
+  .v2 .dal .dal-tk-double-g span {
+    display: none;
+  }
+}

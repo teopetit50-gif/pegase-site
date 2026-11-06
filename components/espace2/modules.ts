@@ -154,6 +154,7 @@ export const MODULES: ModuleV2[] = [
     { libelle: "Chantiers", href: `${RACINE}/daliro/chantiers` },
     { libelle: "À ranger", href: `${RACINE}/daliro/a-ranger` },
     { libelle: "À faire", href: `${RACINE}/daliro/a-faire` },
+    { libelle: "Appels", href: `${RACINE}/daliro/appels` },
     { libelle: "Avenants et situations", href: `${RACINE}/daliro/avenants` },
     { libelle: "Approvisionnement", href: `${RACINE}/daliro/approvisionnement` },
     { libelle: "Annuaire", href: `${RACINE}/daliro/annuaire` },
