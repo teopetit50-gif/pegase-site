@@ -39,7 +39,7 @@ import { dateCourte } from "@/components/espace/format";
 import { Avis } from "@/components/espace/ui";
 import { FAMILLES, STATUTS_CHANTIER, type Famille } from "@/components/espace/daliro/etats";
 import { famille } from "@/components/espace/daliro/liste";
-import type { Chantier, Passage, StatutChantier } from "@/components/espace/daliro/types";
+import type { Chantier, Passage, StatutChantier, Tableau } from "@/components/espace/daliro/types";
 import { useToast } from "../Toasts";
 import { useDaliro, type NouveauChantier } from "./donnees";
 import ApercuFrise from "./ApercuFrise";
@@ -85,6 +85,22 @@ const versJour = (iso: string) => Math.floor(Date.UTC(+iso.slice(0, 4), +iso.sli
 /* la colonne gauche (relevé : 320) ; la ligne d'aujourd'hui au milieu de la carte, à 1,5 px près
    (captures de Linear : 595 sur une carte de 1187, 387,7 sur 772, 386,4 sur 768, 197 sur 390) */
 const GAUCHE = 320;
+/* 05/11/2026 (choix de Teo : « avancement rempli ») : l'avancement d'un chantier = celui de ses lots, pondéré par
+   l'engagé de chaque lot ; un chantier réceptionné ou clos vaut 100 */
+function avancementChantier(t: Tableau | null, c: Chantier): number {
+  if (c.statut === "receptionne" || c.statut === "clos") return 100;
+  if (!t) return c.etape?.avancement_pct ?? 0;
+  let poids = 0;
+  let fait = 0;
+  for (const x of lignesLots(t)) {
+    if (x.pct === null) continue;
+    const d = t.debourse.find((y) => y.lot_id === x.lot.id);
+    const w = Math.max(1, (d?.engage_marche_ht ?? 0) + (d?.engage_avenants_ht ?? 0));
+    poids += w;
+    fait += w * x.pct;
+  }
+  return poids ? Math.round(fait / poids) : (c.etape?.avancement_pct ?? 0);
+}
 /* les losanges de passages sur les barres : Linear n'en pose pas (05/11/2026, comparaison avec la Timeline d'origine) */
 const MONTRER_JALONS = false as boolean;
 const AUJ_DECALAGE = 1.5;
@@ -413,7 +429,12 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
                 {nom}
               </span>
             </span>
-            <button type="button" className="dal-tl-barre" style={{ left: xa, width: Math.max(8, xb - xa) }} title={`${nom} : passages du ${jourCourt(d0)} au ${jourCourt(d1)}`} aria-label={`${nom} : ouvrir le volet`} onClick={() => ouvrir({ apercu: lotsDe ?? null, passage: null })} />
+            <button type="button" className="dal-tl-barre" style={{ left: xa, width: Math.max(8, xb - xa) }} title={`${nom} : passages du ${jourCourt(d0)} au ${jourCourt(d1)}`} aria-label={`${nom} : ouvrir le volet`} onClick={() => ouvrir({ apercu: lotsDe ?? null, passage: null })}>
+              <span className="dal-tl-rempli" style={{ width: `${x.pct ?? 0}%` }} />
+            </button>
+            <span className="dal-tl-fin" style={{ left: xb + 8 }}>
+              {x.pct ?? 0} % · {jourCourt(d1)}
+            </span>
             {/* 05/11/2026 : comme la Timeline de Linear (relue sur linear.app/omegaaii/projects/all), une barre par ligne, sans losange ; les passages sont dans le planning du chantier */}
             {MONTRER_JALONS ? jalons(passages) : null}
           </>
@@ -427,6 +448,7 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
     const t = tableau(c.id);
     const r = resume(c, t, aujourdhui);
     const pct = c.etape && c.etape.etapes ? c.etape.avancement_pct : 0;
+    const avance = avancementChantier(t, c);
     const prio = PRIORITE[r.teinte];
     const y = 32 + i * LIGNE;
     const d0 = c.date_debut ? versJour(c.date_debut) : null;
@@ -491,7 +513,12 @@ export default function Chantiers({ lotsDe }: { lotsDe?: string } = {}) {
               title={`${c.nom}, ${c.date_debut ? `du ${dateCourte(c.date_debut)}` : "sans date de début"} ${c.date_fin_prevue ? `au ${dateCourte(c.date_fin_prevue)}` : "sans fin prévue"} — ouvrir le volet`}
               aria-label={`${c.nom} : ouvrir le volet`}
               onClick={() => ouvrir({ apercu: c.id, passage: null })}
-            />
+            >
+              <span className="dal-tl-rempli" style={{ width: `${avance}%` }} />
+            </button>
+            <span className="dal-tl-fin" style={{ left: Math.max(xa, xb) + 8 }}>
+              {avance} %{c.date_fin_prevue ? ` · ${jourCourt(versJour(c.date_fin_prevue))}` : ""}
+            </span>
             {/* 05/11/2026 : comme la Timeline de Linear (relue sur linear.app/omegaaii/projects/all), une barre par ligne, sans losange ; les passages sont dans le planning du chantier */}
             {MONTRER_JALONS ? jalons(passages) : null}
           </>

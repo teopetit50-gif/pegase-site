@@ -437,3 +437,28 @@ html[data-v2-theme="light"] .v2 .dal.dal-tl-page {
   border-left: 0;
   overflow: auto;
 }
+
+/* 05/11/2026 — choix de Teo : la barre se remplit jusqu'à l'avancement, le % et la date de fin à droite */
+.v2 .dal .dal-tl-barre {
+  overflow: hidden;
+}
+.v2 .dal .dal-tl-rempli {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  max-width: 100%;
+  background: var(--dal-violet);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.v2 .dal .dal-tl-fin {
+  position: absolute;
+  top: 28px;
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 16px;
+  color: var(--dal-t3);
+  white-space: nowrap;
+  pointer-events: none;
+}
