@@ -86,3 +86,503 @@
 .dal-ml-texte {
   white-space: pre-line;
 }
+
+/* ——— « Réponse prête » (07/11/2026, ./ReponsePrete.tsx) : la lettre en tête d'un mail reçu.
+   Pas de cadre ni de fond (la carte en est déjà un) : une ligne d'en-tête, le texte le long
+   d'un filet violet, les points à vérifier, les gestes. La carte vit dans le portail, hors de
+   .v2 .dal : jetons v2 et un violet local. ——— */
+.dal-ml-rep {
+  --dal-ml-violet: #6d78d5;
+  display: grid;
+  gap: 12px;
+  margin: 0 0 22px;
+}
+.dal-ml-rep-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  min-width: 0;
+}
+.dal-ml-rep-etoile {
+  align-self: center;
+  display: inline-flex;
+  color: var(--dal-ml-violet);
+}
+.dal-ml-rep-tete h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--v2-gray-1000);
+}
+.dal-ml-rep-tete p {
+  flex: 1 1 200px;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--v2-gray-800);
+}
+.dal-ml-rep-tourne {
+  animation: dal-ml-tourne 0.9s linear infinite;
+}
+@keyframes dal-ml-tourne {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* la lettre : le long d'un filet */
+.dal-ml-rep-lettre {
+  display: grid;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 2px solid color-mix(in lch, var(--dal-ml-violet) 70%, transparent);
+}
+.dal-ml-rep-objet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--v2-gray-1000);
+}
+.dal-ml-rep-objet > span {
+  flex: none;
+  color: var(--v2-gray-700);
+}
+.dal-ml-rep-objet input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--v2-bg-200);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 13px;
+}
+.dal-ml-rep-objet input:focus-visible {
+  outline: 0;
+  box-shadow: var(--v2-anneau);
+}
+.dal-ml-rep-corps {
+  margin: 0;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--v2-gray-1000);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.dal-ml-rep-zone {
+  width: 100%;
+  min-height: 220px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  outline: 0;
+  resize: vertical;
+  background: var(--v2-bg-200);
+  box-shadow: 0 0 0 1px var(--v2-a-400);
+  color: var(--v2-gray-1000);
+  font: inherit;
+  font-size: 14px;
+  line-height: 22px;
+}
+.dal-ml-rep-zone:focus-visible {
+  box-shadow: var(--v2-anneau);
+}
+
+/* ce qu'il faut vérifier avant d'envoyer : en petit, sans boîte */
+.dal-ml-rep-verifier {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0 0 0 16px;
+  list-style: none;
+  font-size: 12.5px;
+  line-height: 18px;
+  color: var(--v2-amber-1000);
+}
+.dal-ml-rep-verifier li {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.dal-ml-rep-verifier svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--v2-amber-900);
+}
+.dal-ml-rep-verifier strong {
+  font-weight: 600;
+}
+
+/* les gestes */
+.dal-ml-rep-pied {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dal-ml-rep-consigne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.dal-ml-rep-consigne .v2-champ {
+  flex: 1 1 240px;
+}
+
+/* en train d'écrire : des lignes qui respirent le long du filet */
+.dal-ml-rep-os {
+  gap: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+.dal-ml-rep-os span {
+  display: block;
+  height: 11px;
+  border-radius: 6px;
+  background: var(--v2-a-300);
+  animation: dal-ml-respire 1.4s ease-in-out infinite;
+}
+.dal-ml-rep-os span:nth-child(2) {
+  width: 92%;
+  animation-delay: 0.1s;
+}
+.dal-ml-rep-os span:nth-child(3) {
+  width: 78%;
+  animation-delay: 0.2s;
+}
+.dal-ml-rep-os span:nth-child(4) {
+  width: 40%;
+  animation-delay: 0.3s;
+}
+@keyframes dal-ml-respire {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dal-ml-rep-tourne,
+  .dal-ml-rep-os span {
+    animation: none;
+  }
+}
+
+/* ——— le reste de la colonne, calme : la fiche en une ligne de pastilles, les pièces en puces,
+   le champ « écrire vous-même » replié (07/11/2026, Teo : « un truc plus propre ») ——— */
+.dal-ml-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.dal-ml-meta a {
+  color: inherit;
+  text-decoration: none;
+}
+.dal-ml-meta a:hover {
+  text-decoration: underline;
+}
+.dal-ml-pj {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dal-ml-pj li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 26px;
+  padding: 0 9px 0 7px;
+  border-radius: 6px;
+  background: var(--v2-a-200);
+  font-size: 12.5px;
+  color: var(--v2-gray-1000);
+}
+.dal-ml-pj li svg {
+  flex: none;
+  color: var(--v2-gray-800);
+}
+.dal-ml-pj li span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dal-ml-pj li small {
+  flex: none;
+  font-size: 12px;
+  color: var(--v2-gray-800);
+}
+.dal-ml-ecrire {
+  justify-self: start;
+}
+@media (max-width: 640px) {
+  .dal-ml-rep-pied .v2-btn--primaire {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+/* ——— la feuille du mail, comme un vrai mail (07/11/2026, ./FeuilleMail.tsx) : le message tel
+   que Gmail le montre, sur le papier blanc de la carte (.v2-det-page). Encres fixes, pas celles
+   du thème, comme la feuille-document (.v2-det-feuille). ——— */
+.v2-det-page.dal-fm {
+  --fm-encre: #1f1f1f;
+  --fm-gris: #5e5e5e;
+  --fm-gris-clair: #80868b;
+  --fm-trait: #e3e3e3;
+  --fm-fond: #f2f2f2;
+  display: flex;
+  flex-direction: column;
+  padding: 22px 24px 20px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--fm-encre);
+}
+.dal-fm-objet {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-bottom: 18px;
+}
+.dal-fm-objet h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 450;
+  line-height: 26px;
+  letter-spacing: -0.2px;
+  color: var(--fm-encre);
+  overflow-wrap: anywhere;
+}
+.dal-fm-etiquette {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 4px;
+  background: var(--fm-fond);
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--fm-gris);
+  white-space: nowrap;
+}
+.dal-fm-expediteur {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.dal-fm-avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 0.2px;
+}
+.dal-fm-qui {
+  flex: 1;
+  min-width: 0;
+}
+.dal-fm-qui-ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 6px;
+  min-width: 0;
+}
+.dal-fm-qui-ligne strong {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fm-encre);
+}
+.dal-fm-adresse {
+  font-size: 12px;
+  color: var(--fm-gris);
+  overflow-wrap: anywhere;
+}
+.dal-fm-date {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--fm-gris);
+  white-space: nowrap;
+}
+.dal-fm-a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 1px;
+  max-width: 100%;
+  font-size: 12px;
+  color: var(--fm-gris);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dal-fm-a svg {
+  flex: none;
+}
+.dal-fm-corps {
+  margin: 18px 0 0 52px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+  color: var(--fm-encre);
+}
+
+/* les pièces jointes, en vignettes sous le message */
+.dal-fm-pieces {
+  margin: 20px 0 0 52px;
+  padding-top: 14px;
+  border-top: 1px solid var(--fm-trait);
+}
+.dal-fm-pieces-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fm-gris);
+}
+.dal-fm-pieces-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.dal-fm-piece {
+  display: flex;
+  flex-direction: column;
+  width: 172px;
+  max-width: 100%;
+  border: 1px solid var(--fm-trait);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.dal-fm-piece-apercu {
+  display: grid;
+  place-items: center;
+  height: 92px;
+  color: #fff;
+  background: linear-gradient(135deg, #b9a58f, #7f6b5a);
+}
+.dal-fm-piece-apercu[data-teinte="1"] {
+  background: linear-gradient(135deg, #9fb3a2, #5f7a68);
+}
+.dal-fm-piece-apercu[data-teinte="2"] {
+  background: linear-gradient(135deg, #a9b4c6, #67748c);
+}
+.dal-fm-piece[data-genre="pdf"] .dal-fm-piece-apercu,
+.dal-fm-piece[data-genre="autre"] .dal-fm-piece-apercu {
+  background: var(--fm-fond);
+  color: var(--fm-gris-clair);
+}
+.dal-fm-piece[data-genre="pdf"] .dal-fm-piece-apercu {
+  color: #d93025;
+}
+.dal-fm-piece-pied {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px 0 8px;
+  min-width: 0;
+  font-size: 12px;
+}
+.dal-fm-piece-icone {
+  flex: none;
+  display: inline-flex;
+  color: #1a73e8;
+}
+.dal-fm-piece[data-genre="pdf"] .dal-fm-piece-icone {
+  color: #d93025;
+}
+.dal-fm-piece[data-genre="autre"] .dal-fm-piece-icone {
+  color: var(--fm-gris);
+}
+.dal-fm-piece-nom {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--fm-encre);
+}
+.dal-fm-piece-taille {
+  flex: none;
+  margin-left: auto;
+  color: var(--fm-gris);
+}
+
+/* en bas : Répondre, Transférer, les pilules de Gmail */
+.dal-fm-gestes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 22px 0 0 52px;
+}
+.dal-fm-gestes button,
+.dal-fm-gestes a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px 0 14px;
+  border: 1px solid #c4c7c5;
+  border-radius: 18px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #444746;
+  text-decoration: none;
+  cursor: pointer;
+}
+.dal-fm-gestes button:hover,
+.dal-fm-gestes a:hover {
+  background: #f6f6f6;
+}
+.dal-fm-gestes button:focus-visible,
+.dal-fm-gestes a:focus-visible {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+@media (max-width: 640px) {
+  .v2-det-page.dal-fm {
+    padding: 18px 16px 16px;
+  }
+  .dal-fm-corps,
+  .dal-fm-pieces,
+  .dal-fm-gestes {
+    margin-left: 0;
+  }
+  .dal-fm-piece {
+    width: calc(50% - 5px);
+  }
+}

@@ -22,12 +22,25 @@
    « … ». Les mails sont des exemples (./exemplesMails) : rien n'est écrit
    en base ni envoyé ; les modifications restent dans ce navigateur
    (localStorage), « Remettre les mails d'exemple » les efface.
+
+   07/11/2026 (Teo : « il doit juste avoir un truc genre valider l'envoi ou
+   modifier, pour tous les mails ») : un mail reçu s'ouvre avec sa réponse
+   déjà écrite par Daliro (./ReponsePrete.tsx, /api/daliro/reponse-mail,
+   le chantier rattaché joint par ./contexteChantier). « Valider et
+   envoyer » range la réponse dans le mail et le marque traité. La colonne
+   de droite s'est calmée pour la laisser respirer (Teo : « un truc plus
+   propre ») : la fiche en six lignes devient une ligne de pastilles (type,
+   chantier, priorité, statut), les pièces jointes une ligne de puces, et
+   le composeur « Écrire une réponse vous-même » reste replié. À gauche,
+   le mail est dessiné comme dans Gmail (./FeuilleMail.tsx : objet, avatar,
+   expéditeur, date, texte, pièces en vignettes) et non plus comme un
+   document.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Archive, Check, Copy, CopyPlus, ExternalLink, ListFilter, Mail as IconeMail, Paperclip, Pencil, Reply, RotateCcw, Send, Trash2, X } from "lucide-react";
+import { Archive, Check, Copy, CopyPlus, ExternalLink, ListFilter, Mail as IconeMail, Paperclip, Pencil, PencilLine, Reply, RotateCcw, Send, Trash2, X } from "lucide-react";
 import { dateHeure, relatif } from "@/components/espace/format";
 import { MenuActions, type Option } from "../lin/Lin";
 import { CarteCentrale, Feuille } from "../lin/CarteCentrale";
@@ -51,11 +64,16 @@ import {
   type FiltrePose,
   type SectionFils,
 } from "../lin/ListeFils";
-import { Note } from "../ui";
+import { Badge, Note } from "../ui";
 import { useToast } from "../Toasts";
 import { RACINE } from "../modules";
 import { BOITE, CATEGORIES, CHANTIERS_MAIL, mailVide, mailsExemple, nomChantier, type CategorieMail, type Mail, type PrioriteMail, type StatutMail } from "./exemplesMails";
 import { adresseValide, lireMailDevis, oublierMailDevis, type MailDevis } from "./mailDevis";
+import { ReponsePrete } from "./ReponsePrete";
+import { FeuilleMail } from "./FeuilleMail";
+import { oublierReponses } from "./reponseMail";
+import { contexteChantier } from "./contexteChantier";
+import { useDaliro } from "./donnees";
 import "./dal-mails.css";
 
 const CHEMIN = `${RACINE}/daliro/mails`;
@@ -126,12 +144,15 @@ export default function Mails() {
   const params = useSearchParams();
   const toast = useToast();
   const adresse = useAdresse(CHEMIN, params);
+  const { tableau } = useDaliro();
   const [mails, setMails] = useState<Mail[] | null>(null);
   const [recherche, setRecherche] = useState("");
   /* le mail en cours de modification (une copie, enregistrée d'un coup) */
   const [brouillon, setBrouillon] = useState<Mail | null>(null);
   const [nouveau, setNouveau] = useState(false);
   const [reponse, setReponse] = useState<{ id: string; texte: string }>({ id: "", texte: "" });
+  /* 07/11 : « Écrire une réponse vous-même » déplie le composeur, pour ce mail seulement */
+  const [ecrirePour, setEcrirePour] = useState<string | null>(null);
   /* le mail à écrire (?ecrire=devis) : le devis l'a préparé (./mailDevis), il manque l'adresse */
   const [envoi, setEnvoi] = useState<Envoi | null>(null);
   const aEcrire = params.get("ecrire") === "devis";
@@ -258,11 +279,21 @@ export default function Mails() {
     if (!texte) return;
     changer((v) => v.map((x) => (x.id === m.id ? { ...x, statut: "traite", reponses: [...x.reponses, { quand: new Date().toISOString(), texte }] } : x)));
     setReponse({ id: "", texte: "" });
+    setEcrirePour(null);
     toast("Réponse ajoutée au mail", "vert");
+  };
+  /* « Valider et envoyer » de l'encart Réponse prête : la réponse de Daliro, rangée comme une réponse à vous */
+  const envoyerReponse = (m: Mail, objet: string, texte: string) => {
+    /* l'objet n'est gardé que s'il a été changé : « Re: … » va de soi */
+    const entete = objet.trim() && objet.trim() !== `Re: ${m.objet}` ? `Objet : ${objet.trim()}\n\n` : "";
+    changer((v) => v.map((x) => (x.id === m.id ? { ...x, statut: "traite", reponses: [...x.reponses, { quand: new Date().toISOString(), texte: `${entete}${texte}` }] } : x)));
+    setReponse({ id: "", texte: "" });
+    toast(`Réponse envoyée à ${m.de_nom || m.de_adresse || "l'expéditeur"}`, "vert");
   };
   const remettre = () => {
     if (!window.confirm("Remettre les mails d'exemple ? Vos modifications, ajouts et suppressions seront effacés.")) return;
     ecrire(null);
+    oublierReponses();
     setMails(mailsExemple());
     setBrouillon(null);
     setNouveau(false);
@@ -365,6 +396,13 @@ export default function Mails() {
   const rang = choisi && !enCours ? tries.findIndex((m) => m.id === choisi.id) : -1;
   const maj = (champ: Partial<Mail>) => setBrouillon((b) => (b ? { ...b, ...champ } : b));
   const texteReponse = choisi && reponse.id === choisi.id ? reponse.texte : "";
+  /* le chantier rattaché au mail ouvert, mis en texte pour Daliro (plafonné dans l'API) */
+  const chantierOuvert = choisi?.chantier_id ?? null;
+  const contexte = useMemo(() => {
+    if (!chantierOuvert) return null;
+    const t = tableau(chantierOuvert);
+    return t ? contexteChantier(t) : null;
+  }, [chantierOuvert, tableau]);
 
   return (
     <ListeFils
@@ -535,12 +573,11 @@ export default function Mails() {
         }
         gauche={
           choisi ? (
-            <Feuille
-              titre="MAIL"
-              sous={dateHeure(choisi.recu_le)}
-              nom={choisi.de_nom || choisi.de_adresse || "Expéditeur inconnu"}
-              sousNom={[...(choisi.de_nom && choisi.de_adresse ? [choisi.de_adresse] : []), `à ${choisi.a || BOITE}`, ...(choisi.cc ? [`cc ${choisi.cc}`] : []), ...(choisi.objet ? [`Objet : ${choisi.objet}`] : [])]}
-              texte={choisi.corps.trim() || "Message sans texte."}
+            <FeuilleMail
+              key={choisi.id}
+              mail={choisi}
+              envoye={envoyeParVous(choisi)}
+              repondre={!envoyeParVous(choisi) && !enCours ? () => document.getElementById(`rep-titre-${choisi.id}`)?.scrollIntoView({ block: "start", behavior: "smooth" }) : undefined}
             />
           ) : (
             <Feuille titre="MAIL" sous={null} texte="Aucun mail." />
@@ -562,6 +599,8 @@ export default function Mails() {
         notes={
           enCours ? (
             <Note teinte="gris">Mails d&apos;exemple : vos modifications restent dans ce navigateur, rien n&apos;est envoyé.</Note>
+          ) : choisi && !envoyeParVous(choisi) ? (
+            <Note teinte="gris">Exemple : une réponse validée se range dans le mail, rien ne part vraiment. Pour l&apos;envoyer pour de vrai : « … » › Répondre depuis votre messagerie.</Note>
           ) : undefined
         }
         actions={
@@ -640,67 +679,39 @@ export default function Mails() {
           <FormulaireMail mail={enCours} maj={maj} />
         ) : choisi ? (
           <>
-            <dl className="v2-det-fiche">
-              <dt>De</dt>
-              <dd>
-                {choisi.de_nom ? <>{choisi.de_nom} · </> : null}
-                <span className="v2-det-mono">{choisi.de_adresse || "—"}</span>
-              </dd>
-              <dt>À</dt>
-              <dd>
-                <span className="v2-det-mono">{choisi.a || BOITE}</span>
-              </dd>
-              {choisi.cc ? (
-                <>
-                  <dt>Copie</dt>
-                  <dd>
-                    <span className="v2-det-mono">{choisi.cc}</span>
-                  </dd>
-                </>
-              ) : null}
-              <dt>{envoyeParVous(choisi) ? "Destinataire" : "Expéditeur"}</dt>
-              <dd>{CATEGORIES[choisi.categorie]}</dd>
-              <dt>Chantier</dt>
-              <dd>{choisi.chantier_id ? <Link href={`${BASE}/chantiers/${choisi.chantier_id}`}>{nomChantier(choisi.chantier_id)}</Link> : <span className="v2-det-sous">Aucun chantier</span>}</dd>
-              <dt>Priorité</dt>
-              <dd>{PRIORITES[choisi.priorite]}</dd>
-              <dt>Statut</dt>
-              <dd>
-                {LIB_STATUT[choisi.statut]} <span className="v2-det-sous">· {infoStatut(choisi.statut).sous}</span>
-              </dd>
-            </dl>
-            <div className="v2-det-bloc">
-              <h3 className="v2-det-section-titre">
-                Pièces jointes
-                <small>{choisi.pieces.length}</small>
-              </h3>
-              {choisi.pieces.length ? (
-                <ol className="v2-det-fil">
-                  {choisi.pieces.map((p, i) => (
-                    <li key={`${p.nom}-${i}`}>
-                      <span className="v2-det-fil-avatar" aria-hidden="true">
-                        <Paperclip width={14} height={14} />
-                      </span>
-                      <div className="v2-det-fil-texte">
-                        <strong>
-                          {p.nom}
-                          <span className="v2-det-sous"> · {taille(p.taille)}</span>
-                        </strong>
-                        <span>Pièce d&apos;exemple : le fichier n&apos;existe pas.</span>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
+            {!envoyeParVous(choisi) ? <ReponsePrete key={choisi.id} mail={choisi} chantier={contexte} envoyer={(objet, texte) => envoyerReponse(choisi, objet, texte)} /> : null}
+            <div className="dal-ml-meta" aria-label="Le mail en bref">
+              <Badge>{CATEGORIES[choisi.categorie]}</Badge>
+              {choisi.chantier_id ? (
+                <Badge title="Ouvrir le chantier">
+                  <Link href={`${BASE}/chantiers/${choisi.chantier_id}`}>{nomChantier(choisi.chantier_id)}</Link>
+                </Badge>
               ) : (
-                <p className="v2-det-vide">Aucune pièce jointe.</p>
+                <Badge>Sans chantier</Badge>
               )}
+              {choisi.priorite === 4 ? <Badge teinte="ambre">Urgent</Badge> : choisi.priorite ? <Badge>{PRIORITES[choisi.priorite]}</Badge> : null}
+              <Badge teinte={choisi.statut === "nouveau" ? "bleu" : "gris"} title={infoStatut(choisi.statut).sous}>
+                {LIB_STATUT[choisi.statut]}
+              </Badge>
+              {choisi.cc ? <Badge title={`En copie : ${choisi.cc}`}>cc {choisi.cc}</Badge> : null}
             </div>
-            <div className="v2-det-bloc">
-              <h3 className="v2-det-section-titre">
-                Réponses
-                <small>{choisi.reponses.length}</small>
-              </h3>
-              {choisi.reponses.length ? (
+            {choisi.pieces.length ? (
+              <ul className="dal-ml-pj" aria-label="Pièces jointes">
+                {choisi.pieces.map((p, i) => (
+                  <li key={`${p.nom}-${i}`} title="Pièce d'exemple : le fichier n'existe pas.">
+                    <Paperclip width={13} height={13} aria-hidden="true" />
+                    <span>{p.nom}</span>
+                    <small>{taille(p.taille)}</small>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {choisi.reponses.length ? (
+              <div className="v2-det-bloc">
+                <h3 className="v2-det-section-titre">
+                  {envoyeParVous(choisi) ? "La suite" : "Réponses envoyées"}
+                  <small>{choisi.reponses.length}</small>
+                </h3>
                 <ol className="v2-det-fil">
                   {choisi.reponses.map((r, i) => (
                     <li key={i}>
@@ -714,16 +725,22 @@ export default function Mails() {
                     </li>
                   ))}
                 </ol>
-              ) : null}
+              </div>
+            ) : null}
+            {envoyeParVous(choisi) || ecrirePour === choisi.id ? (
               <div className="dal-ml-repondre">
                 <span className="v2-champ dal-ml-zone">
-                  <textarea rows={3} aria-label="Votre réponse" placeholder={envoyeParVous(choisi) ? "Noter la suite : relance, réponse du client…" : `Répondre à ${choisi.de_nom || choisi.de_adresse || "l'expéditeur"}…`} value={texteReponse} onChange={(e) => setReponse({ id: choisi.id, texte: e.target.value })} />
+                  <textarea rows={3} autoFocus={ecrirePour === choisi.id} aria-label="Votre réponse" placeholder={envoyeParVous(choisi) ? "Noter la suite : relance, réponse du client…" : `Répondre à ${choisi.de_nom || choisi.de_adresse || "l'expéditeur"}…`} value={texteReponse} onChange={(e) => setReponse({ id: choisi.id, texte: e.target.value })} />
                 </span>
                 <button type="button" className="v2-btn v2-btn--petit" disabled={!texteReponse.trim()} onClick={() => repondre(choisi)}>
-                  <Send width={14} height={14} aria-hidden="true" /> Ajouter la réponse
+                  <Send width={14} height={14} aria-hidden="true" /> {envoyeParVous(choisi) ? "Noter" : "Ajouter la réponse"}
                 </button>
               </div>
-            </div>
+            ) : (
+              <button type="button" className="v2-btn v2-btn--fantome v2-btn--petit dal-ml-ecrire" onClick={() => setEcrirePour(choisi.id)}>
+                <PencilLine width={14} height={14} aria-hidden="true" /> Écrire une réponse vous-même
+              </button>
+            )}
           </>
         ) : (
           <p className="v2-det-vide">Le mail que désigne ce lien n&apos;existe pas (ou plus) dans cette boîte.</p>
