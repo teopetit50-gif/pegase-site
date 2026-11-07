@@ -1,0 +1,67 @@
+/* ══════════════════════════════════════════════════════════════════════
+   La vue d'ensemble, composition du 07/11/2026 — ./Accueil.tsx
+
+   Demande de Teo : garder les polices, les textes et les couleurs, et
+   mettre l'intérieur de la page au niveau des autres pages d'Espace 2
+   (À valider, Point du matin, Relances). Tout est repris de ces pages :
+     · la barre de filtres en tête (.v2-val-filtres, bouton-menu
+       .v2-val-bouton, pastille « En direct / Exemple » à droite) ;
+     · des cartes à en-tête de 14 px, titre qui mène à la page, filet
+       dessous, corps à 16 px de marge, pas de grand titre à 18 px ;
+     · des listes denses : 44 px par ligne, filet entre les lignes, la
+       mention à droite en 12 px, la flèche au survol ;
+     · le tableau « à payer » avec des en-têtes de colonne en capitales
+       11 px, comme le tableau des agents au-dessus.
+   Portée .v2 .va2 : rien ne fuit vers les autres pages.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* — les cartes : en-tête filet + corps — */
+.v2 .va2 .v2-pm-tete { padding: 10px 16px; border-bottom: 1px solid var(--v2-a-400); min-height: 44px; }
+.v2 .va2 .v2-pm-tete h2 { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: -0.1px; }
+.v2 .va2 .v2-pm-tete h2 a { display: inline-flex; align-items: center; gap: 4px; color: inherit; }
+.v2 .va2 .v2-pm-tete h2 a svg { color: var(--v2-gray-900); transition: transform 0.15s; }
+.v2 .va2 .v2-pm-tete h2 a:hover svg { transform: translateX(2px); color: var(--v2-gray-1000); }
+.v2 .va2 .va2-meta { margin-left: auto; font-size: 12px; color: var(--v2-gray-900); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.v2 .va2 .v2-pm-corps { padding: 0 16px; }
+.v2 .va2 .va2-rien { margin: 0; padding: 14px 0 16px; font-size: 13px; color: var(--v2-gray-900); }
+.v2 .va2 .va2-pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 12px; border-top: 1px solid var(--v2-a-400); font-size: 12px; color: var(--v2-gray-900); }
+
+/* — le tableau des agents (./carte/MiniCarte.tsx) prend le même en-tête que les autres cartes, sans toucher au composant — */
+.v2 .va2 .mc.v2-carte-corps { padding: 0 16px 4px; }
+.v2 .va2 .mc .v2-va-titre { align-items: center; min-height: 44px; margin: 0 -16px 10px; padding: 10px 16px; border-bottom: 1px solid var(--v2-a-400); }
+.v2 .va2 .mc .v2-h2 { font-family: var(--v2-sans); font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: -0.1px; }
+.v2 .va2 .mc .v2-va-titre .v2-va-lien { font-size: 12px; }
+.v2 .va2 .mc-pied { margin: 0 -16px; padding: 10px 16px 8px; border-top: 1px solid var(--v2-a-400); font-size: 12px; }
+.v2 .va2 .mc-pied .v2-va-lien { font-size: 12px; }
+
+/* — la courbe — */
+.v2 .va2 .va2-courbe { padding: 20px 0 12px; }
+.v2 .va2 .va2-courbe .v2-va-axe-y { font-size: 11px; }
+
+/* — les listes (Aujourd'hui, Activité récente) — */
+.v2 .va2 .va2-liste { list-style: none; margin: 0; padding: 0; }
+.v2 .va2 .va2-liste li { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 0; }
+.v2 .va2 .va2-liste li + li { border-top: 1px solid var(--v2-a-400); }
+.v2 .va2 .va2-liste input { width: 16px; height: 16px; flex-shrink: 0; margin: 0; }
+.v2 .va2 .va2-liste .v2-va-texte > span { font-size: 13px; font-weight: 500; color: var(--v2-gray-1000); }
+.v2 .va2 .va2-liste .oc-meta { font-size: 12px; }
+.v2 .va2 .va2-liste li > a { display: grid; place-items: center; width: 20px; color: var(--v2-gray-900); opacity: 0; transition: opacity 0.15s; }
+.v2 .va2 .va2-liste li:hover > a, .v2 .va2 .va2-liste li > a:focus-visible { opacity: 1; }
+@media (hover: none) { .v2 .va2 .va2-liste li > a { opacity: 1; } }
+
+/* — le tableau « À payer en priorité » — */
+.v2 .va2 .va2-table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 18px; }
+.v2 .va2 .va2-table th { padding: 10px 0 8px; text-align: left; font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--v2-gray-800); border-bottom: 1px solid var(--v2-a-400); white-space: nowrap; }
+.v2 .va2 .va2-table td { height: 44px; padding: 0 12px 0 0; font-weight: 450; color: var(--v2-gray-1000); white-space: nowrap; }
+.v2 .va2 .va2-table tr + tr td { border-top: 1px solid var(--v2-a-400); }
+.v2 .va2 .va2-table td:first-child { overflow: hidden; text-overflow: ellipsis; max-width: 0; width: 100%; }
+.v2 .va2 .va2-table th:last-child, .v2 .va2 .va2-table td:last-child { text-align: right; padding-right: 0; font-variant-numeric: tabular-nums; }
+.v2 .va2 .va2-table td.va2-date { color: var(--v2-gray-900); font-variant-numeric: tabular-nums; }
+.v2 .va2 .va2-table td.va2-date[data-retard] { color: var(--v2-red-900, var(--v2-red-700)); }
+.v2 .va2 .va2-table td a { color: inherit; }
+.v2 .va2 .va2-table td a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* — téléphone : la barre de filtres passe sur deux lignes, le tableau garde ses trois colonnes — */
+@container principale (max-width: 639px) {
+  .v2 .va2 .va2-meta { display: none; }
+}

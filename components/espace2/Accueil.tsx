@@ -17,23 +17,37 @@
    21/10/2026 — l'horloge est celle du navigateur (horloge.ts) : les cartes
    se rendent après le montage, en squelette avant. Le serveur, en UTC,
    n'écrit plus une heure ni un « Hier » que le visiteur en Guadeloupe
-   recalculerait autrement (erreur d'hydratation #418 vue en production). */
+   recalculerait autrement (erreur d'hydratation #418 vue en production).
+   07/11/2026 — même contenu, mêmes polices, mêmes couleurs ; la composition
+   reprend celle des autres pages d'Espace 2 (À valider, Point du matin) :
+   la période se choisit dans la barre de filtres en tête, à côté de la
+   pastille « En direct / Exemple » ; chaque carte a un en-tête de 14 px
+   dont le titre mène à la page, un filet, puis des lignes de 44 px ; le
+   tableau « à payer » prend les en-têtes de colonne en capitales du
+   tableau des agents. Habillage dans ./accueil.css. */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronDown, ChevronRight } from "lucide-react";
 import { dateCourte, montant, relatif } from "@/components/espace/format";
 import { A_PAYER, aPayer, groupeDe, jourDe, totaux } from "./filed/calculs";
 import { useAujourdhui } from "./horloge";
-import { Squelette } from "./ui";
+import { Note, Squelette } from "./ui";
+import { EnDirect } from "./vivant";
 import { RACINE } from "./modules";
 import { useDonnees } from "./donnees";
 import { evenements } from "./evenements";
 import { ecrireStockage, useStockage } from "./Collection";
 import MiniCarte from "./carte/MiniCarte";
 import "./habillage.css";
+import "./accueil.css";
 
 const CLE_TACHES = "espace2-collection-taches";
+const PERIODES = [
+  { jours: 7, libelle: "7 derniers jours" },
+  { jours: 30, libelle: "30 derniers jours" },
+  { jours: 90, libelle: "90 derniers jours" },
+];
 
 export default function Accueil() {
   const aujourdhui = useAujourdhui();
@@ -55,9 +69,12 @@ export default function Accueil() {
        jours (une courbe lisible, pas des marches) */
     const debut = aujourdhui - (periode - 1) * 86_400_000;
     const parJour = Array.from({ length: periode + 6 }, () => 0);
+    let recus = 0, totalRecu = 0;
     for (const d of donnees.docs) {
-      const i = Math.floor((new Date(d.recu_le).setHours(0, 0, 0, 0) - (debut - 6 * 86_400_000)) / 86_400_000);
+      const jour = new Date(d.recu_le).setHours(0, 0, 0, 0);
+      const i = Math.floor((jour - (debut - 6 * 86_400_000)) / 86_400_000);
       if (i >= 0 && i < parJour.length) parJour[i] += d.montant ?? 0;
+      if (jour >= debut) { recus += 1; totalRecu += d.montant ?? 0; }
     }
     const courbe = Array.from({ length: periode }, (_, i) => parJour.slice(i, i + 7).reduce((a, b) => a + b, 0));
     /* aujourd'hui : ce qui demande une action — échéances proches, accords */
@@ -75,6 +92,8 @@ export default function Accueil() {
       priorite,
       courbe,
       debut,
+      recus,
+      totalRecu,
       actions,
       totalARegler: totaux(aRegler, etats),
       totalRetard: totaux(retard, etats),
@@ -96,122 +115,140 @@ export default function Accueil() {
   }, [brut]);
   const duJour = taches.filter((t) => !t.fait).slice(0, 4);
   const cocher = (id: string) => ecrireStockage(CLE_TACHES, JSON.stringify(taches.map((t) => (t.id === id ? { ...t, fait: true } : t))));
-
+  const aFaire = (c?.actions.length ?? 0) + duJour.length;
 
   return (
-    <div className="v2-page v2-arrivee v2-va v2-vivant oc-va-simple">
+    <div className="v2-page v2-arrivee v2-va v2-vivant oc-va-simple va2">
       <h1 className="v2-sr">Vue d&apos;ensemble</h1>
-      {erreur ? <p className="v2-gris">La base n&apos;a pas répondu : {erreur}</p> : null}
+
+      {/* ——— la période en menu, la pastille « En direct / Exemple » à droite, comme À valider et le Point du matin ——— */}
+      <div className="v2-val-filtres">
+        <label className="v2-val-bouton">
+          <CalendarDays width={16} height={16} aria-hidden="true" />
+          <span>{PERIODES.find((p) => p.jours === periode)?.libelle}</span>
+          <ChevronDown width={14} height={14} aria-hidden="true" className="v2-val-bouton-chevron" />
+          <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
+            {PERIODES.map((p) => (
+              <option key={p.jours} value={p.jours}>{p.libelle}</option>
+            ))}
+          </select>
+        </label>
+        <span className="v2-val-droite">
+          <EnDirect />
+        </span>
+      </div>
+
+      {erreur ? <Note teinte="rouge" role="alert">La base n&apos;a pas répondu : {erreur}</Note> : null}
 
       {/* 29/10/2026 — la Carte en miniature : les agents au travail, un clic l'ouvre */}
       <MiniCarte />
 
       <div className="v2-va-grille">
         <div className="v2-va-col">
-        <section className="v2-carte v2-carte-corps">
-          <div className="v2-va-titre" style={{ marginBottom: 16 }}>
-            <h2 className="v2-h2">Factures reçues</h2>
-            <span className="v2-champ v2-va-periode">
-              <select value={periode} onChange={(e) => setPeriode(Number(e.target.value))} aria-label="Période">
-                <option value={7}>7 derniers jours</option>
-                <option value={30}>30 derniers jours</option>
-                <option value={90}>90 derniers jours</option>
-              </select>
-            </span>
-          </div>
-          {c ? <Courbe valeurs={c.courbe} debut={c.debut} /> : <Squelette largeur="100%" hauteur={220} />}
-        </section>
+          <Carte titre="Factures reçues" meta={c ? `${c.recus} ${c.recus > 1 ? "documents" : "document"} · ${montant(c.totalRecu)}` : undefined}>
+            <div className="va2-courbe">
+              {c ? <Courbe valeurs={c.courbe} debut={c.debut} /> : <Squelette largeur="100%" hauteur={220} />}
+            </div>
+          </Carte>
 
-        <section className="v2-carte v2-carte-corps">
-          <div className="v2-va-titre">
-            <h2 className="v2-h2">À payer en priorité</h2>
-            <Link href={`${RACINE}/filed/a-payer`} className="v2-va-lien">Voir tout <ArrowRight width={14} height={14} /></Link>
-          </div>
-          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.priorite.length === 0 ? (
-            <p className="v2-gris" style={{ margin: 0 }}>Aucune facture à payer.</p>
-          ) : (
-            <div className="v2-tableau-cadre">
-              <table className="v2-va-table">
+          <Carte titre="À payer en priorité" lien={`${RACINE}/filed/a-payer`} meta={c ? `${c.aRegler.length} ${c.aRegler.length > 1 ? "factures" : "facture"} · ${c.totalARegler}` : undefined}>
+            {!c ? <div className="va2-courbe"><Squelette largeur="100%" hauteur={160} /></div> : c.priorite.length === 0 ? (
+              <p className="va2-rien">Aucune facture à payer.</p>
+            ) : (
+              <table className="va2-table">
                 <thead>
-                  <tr><th>Fournisseur</th><th>Échéance</th><th style={{ textAlign: "right" }}>Reste à payer</th></tr>
+                  <tr><th>Fournisseur</th><th>Échéance</th><th>Reste à payer</th></tr>
                 </thead>
                 <tbody>
                   {c.priorite.map(({ f, nom, groupe, reste }) => (
                     <tr key={f.id}>
                       <td><Link href={`${RACINE}/filed/a-payer`}>{nom}</Link></td>
-                      <td className="v2-gris" data-retard={groupe === "retard" ? "" : undefined}>
+                      <td className="va2-date" data-retard={groupe === "retard" ? "" : undefined}>
                         {f.echeance_lue ? dateCourte(f.echeance_lue) : "—"}
                         {groupe === "retard" ? <span className="v2-sr"> (en retard)</span> : null}
                       </td>
-                      <td style={{ textAlign: "right", fontVariantNumeric: "tabular-nums" }}>{montant(reste, f.devise)}</td>
+                      <td>{montant(reste, f.devise)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
-        </section>
-
+            )}
+          </Carte>
         </div>
-        <div className="v2-va-col">
-        <section className="v2-carte v2-carte-corps">
-          <div className="v2-va-titre">
-            <h2 className="v2-h2">Aujourd&apos;hui</h2>
-            <span className="v2-gris">{(c?.actions.length ?? 0) + duJour.length} à faire</span>
-          </div>
-          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.actions.length + duJour.length === 0 ? (
-            <p className="v2-gris" style={{ margin: 0 }}>
-              Rien d&apos;urgent aujourd&apos;hui. <Link href={`${RACINE}/taches`} className="v2-va-lien">Ajouter une tâche</Link>
-            </p>
-          ) : (
-            <ul className="v2-va-liste">
-              {duJour.map((t) => (
-                <li key={t.id}>
-                  <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} onChange={() => cocher(t.id)} />
-                  <span className="v2-va-texte">
-                    <span>{t.titre}</span>
-                  </span>
-                  {t.echeance ? <span className="oc-meta" data-retard={aujourdhui !== null && jourDe(t.echeance) < aujourdhui ? "" : undefined}>{dateCourte(t.echeance)}</span> : null}
-                  <Link href={`${RACINE}/taches`} aria-label="Ouvrir les tâches"><ChevronRight width={16} height={16} /></Link>
-                </li>
-              ))}
-              {c.actions.slice(0, Math.max(0, 5 - duJour.length)).map((x) => (
-                <li key={x.id}>
-                  <span className="v2-va-texte">
-                    <span>{x.titre}</span>
-                  </span>
-                  {x.quand ? <span className="oc-meta" data-retard={x.retard ? "" : undefined}>{x.quand}{x.retard ? <span className="v2-sr"> (en retard)</span> : null}</span> : null}
-                  <Link href={x.lien} aria-label={`Ouvrir : ${x.titre}`}><ChevronRight width={16} height={16} /></Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
 
-        <section className="v2-carte v2-carte-corps">
-          <div className="v2-va-titre">
-            <h2 className="v2-h2">Activité récente</h2>
-            <Link href={`${RACINE}/activite`} className="v2-va-lien">Voir tout</Link>
-          </div>
-          {!c ? <Squelette largeur="100%" hauteur={200} /> : c.activite.length === 0 ? (
-            <p className="v2-gris" style={{ margin: 0 }}>Rien pour l&apos;instant.</p>
-          ) : (
-            <ul className="v2-va-liste">
-              {c.activite.map((e) => (
-                <li key={e.id}>
-                  <span className="v2-va-texte">
-                    <span>{e.quoi} : {e.detail}</span>
-                  </span>
-                  <span className="oc-meta" title={relatif(e.quand)}>{heureCourte(e.quand)}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <div className="v2-va-col">
+          <Carte titre="Aujourd'hui" lien={`${RACINE}/taches`} badge={`${aFaire} à faire`}>
+            {!c ? <div className="va2-courbe"><Squelette largeur="100%" hauteur={160} /></div> : aFaire === 0 ? (
+              <p className="va2-rien">
+                Rien d&apos;urgent aujourd&apos;hui. <Link href={`${RACINE}/taches`} className="v2-va-lien">Ajouter une tâche</Link>
+              </p>
+            ) : (
+              <ul className="va2-liste">
+                {duJour.map((t) => (
+                  <li key={t.id}>
+                    <input type="checkbox" aria-label={`Marquer « ${t.titre} » comme faite`} onChange={() => cocher(t.id)} />
+                    <span className="v2-va-texte">
+                      <span>{t.titre}</span>
+                    </span>
+                    {t.echeance ? <span className="oc-meta" data-retard={aujourdhui !== null && jourDe(t.echeance) < aujourdhui ? "" : undefined}>{dateCourte(t.echeance)}</span> : null}
+                    <Link href={`${RACINE}/taches`} aria-label="Ouvrir les tâches"><ChevronRight width={16} height={16} /></Link>
+                  </li>
+                ))}
+                {c.actions.slice(0, Math.max(0, 5 - duJour.length)).map((x) => (
+                  <li key={x.id}>
+                    <span className="v2-va-texte">
+                      <span>{x.titre}</span>
+                    </span>
+                    {x.quand ? <span className="oc-meta" data-retard={x.retard ? "" : undefined}>{x.quand}{x.retard ? <span className="v2-sr"> (en retard)</span> : null}</span> : null}
+                    <Link href={x.lien} aria-label={`Ouvrir : ${x.titre}`}><ChevronRight width={16} height={16} /></Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Carte>
+
+          <Carte titre="Activité récente" lien={`${RACINE}/activite`}>
+            {!c ? <div className="va2-courbe"><Squelette largeur="100%" hauteur={160} /></div> : c.activite.length === 0 ? (
+              <p className="va2-rien">Rien pour l&apos;instant.</p>
+            ) : (
+              <ul className="va2-liste">
+                {c.activite.map((e) => (
+                  <li key={e.id}>
+                    <span className="v2-va-texte">
+                      <span>{e.quoi} : {e.detail}</span>
+                    </span>
+                    <span className="oc-meta" title={relatif(e.quand)}>{heureCourte(e.quand)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Carte>
         </div>
       </div>
-
     </div>
+  );
+}
+
+/* la carte à en-tête des autres pages d'Espace 2 (Point du matin) : le
+   titre mène à la page, une mention ou un badge à droite, un filet, le corps */
+function Carte({ titre, lien, meta, badge, children }: { titre: string; lien?: string; meta?: string; badge?: string; children: React.ReactNode }) {
+  return (
+    <section className="v2-carte v2-pm-carte" aria-label={titre}>
+      <div className="v2-pm-tete">
+        <h2>
+          {lien ? (
+            <Link href={lien} className="oc-pm-titre">
+              {titre} <ChevronRight width={14} height={14} aria-hidden="true" />
+            </Link>
+          ) : (
+            titre
+          )}
+        </h2>
+        {meta ? <span className="va2-meta">{meta}</span> : null}
+        {badge ? <span className="v2-pm-badge">{badge}</span> : null}
+      </div>
+      <div className="v2-pm-corps">{children}</div>
+    </section>
   );
 }
 
