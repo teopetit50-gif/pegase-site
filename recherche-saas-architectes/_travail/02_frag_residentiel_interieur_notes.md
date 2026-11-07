@@ -27,7 +27,7 @@ Source principale : https://www.aia.org/aia-architect/article/latest-insights-20
 - **SoftPlan** n'ayant pas été confirmé ailleurs, il est documenté ici : passage à l'abonnement pur (169 $/mois par poste, 79 $/mois pour les anciens licenciés depuis le 2025-04-01, licences perpétuelles supprimées), « AI Enhanced Render ».
 - **Higharc** est traité par l'agent IA ; non repris.
 - **Lumion / Twinmotion / Enscape / SketchUp + V-Ray** sont traités par l'agent visualisation ; non repris.
-- **Polycam, Matterport, Morpholio Trace, Shapr3D** : la consigne demandait de vérifier s'ils étaient traités ailleurs. Aucun fragment des autres agents n'était présent dans `_travail/` au moment de l'écriture, je les ai donc documentés ici ; le coordinateur dédoublonnera si besoin.
+- **Polycam, Matterport, Morpholio Trace, Shapr3D** : la consigne demandait de vérifier s'ils étaient traités ailleurs. Aucun fragment des autres agents n'était présent dans `_travail/` au moment de l'écriture, je les ai donc documentés ici. Contrôle fait en fin de session (grep sur les fragments arrivés entre-temps) : **Polycam, Matterport, Morpholio et Twindo/Canvas figurent aussi dans `02_frag_visualisation.jsonl`**, Matterport aussi dans `02_frag_chantier.jsonl`, **Arcol et Higharc dans `02_frag_ia_design.jsonl`**. Shapr3D, SoftPlan, Cedreo, Houzz Pro, magicplan et Concepts ne sont documentés qu'ici. Le coordinateur doit dédoublonner Polycam, Matterport, Morpholio Trace, Twindo et Arcol (mes lignes apportent les prix App Store et les plaintes utilisateurs, à fusionner plutôt qu'à jeter).
 
 ## 4. Outils écartés et pourquoi
 
