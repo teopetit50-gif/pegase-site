@@ -100,3 +100,15 @@ payer : les attribuer sans lecture reviendrait à inventer.
 - `old.reddit.com` : WebFetch refusé par l'outil.
 - Moteur de recherche (WebSearch) : quota du tour épuisé avant la première requête de cette
   phase, 0 requête exécutée sur 8 lancées.
+
+## Reprise du 2026-11-07 (orchestrateur, sans sous-agent)
+
+Douze items ajoutés à partir des EXTRAITS de recherche uniquement (reddit.com reste bloqué en lecture
+directe ; aucun miroir n'a été lu pour ne pas contourner le blocage). Onze portent une citation exacte
+visible dans l'extrait ; le douzième (fil « Solo-practices, what's your software stack? », oct. 2024)
+n'a pas de citation exacte et est marqué comme tel. Les requêtes lancées : 24, sur les thèmes stack
+solo, temps et facturation, prix Autodesk, RFIs et submittals, specs, consultants, honoraires, codes et
+permis, IA, partage de fichiers, rendu, bibliothèques Revit, Deltek, BQE, Bluebeam, Procore, Newforma,
+rapports de visite, Archicad vs Revit, heures sup, marketing, retards de permis, dérive de périmètre,
+Revit LT. La plupart ont renvoyé des forums Archinect, AIA Community Hub, 4specs ou des sites d'avis
+plutôt que des fils Reddit : ces sources ont été exploitées par les autres lots de la phase 4.
