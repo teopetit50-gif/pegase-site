@@ -53,3 +53,18 @@ complexité, dépendance plateforme)
 
 Quand tu as fini tes fiches, réponds-moi avec, pour chaque fiche : nom de fichier, nombre de lignes,
 prix relevé (une ligne), et les 2 informations que tu n'as pas pu vérifier.
+
+## Contraintes d'environnement connues (2026-11-07), à respecter pour ne pas gaspiller le budget
+
+- Budget WebSearch : 200 requêtes par tour, PARTAGÉ entre tous les agents. Ton plafond personnel est
+  indiqué dans ton prompt. Privilégie WebFetch sur des URLs connues (page pricing de l'éditeur,
+  page "about", communiqués, Crunchbase, articles AEC Magazine / Archinect / Architosh).
+- reddit.com et old.reddit.com sont bloqués en lecture. g2.com, capterra.com, trustradius.com,
+  softwareadvice.com, getapp.com, autodesk.com, forums.autodesk.com renvoient 403.
+  Pour les avis : utilise les EXTRAITS de recherche (cite seulement ce qui y figure mot pour mot,
+  avec l'URL de l'avis), Trustpilot, les forums éditeurs accessibles (community.bluebeam.com,
+  forum.enscape3d.com, forums.sketchup.com, discourse.mcneel.com, forum.d5render.com,
+  community.graphisoft.com, forum.vectorworks.net), 4specs.com, AIA Community Hub, Archinect forum,
+  eng-tips, LinkedIn public, YouTube (description et commentaires si lisibles), blogs de praticiens.
+- Les données déjà collectées sont dans 02_base_saas.csv et dans les notes _travail/02_frag_*_notes.md
+  (lis la section douleurs de la note de ta catégorie : les URL y sont).
