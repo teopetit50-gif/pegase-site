@@ -10,7 +10,7 @@ Fiche vérifiée le 2026-11-07. Concurrent direct de Tamila : oui (calcul des d�
 
 **Fonctionnalités clés** : base de règles de tribunaux, calcul des délais, Outlook, Teams, SharePoint, mises à jour automatiques en cas de changement de règle ; API partenaires. **IA** : LawToolBox AI lit les documents de procédure pour déclencher les délais (2024-2025).
 
-**Prix et modèle (relevé 2026-11-07)** : par utilisateur et par mois, dégressif : page éditeur 35 à 42 USD pour 2 à 9 utilisateurs, 19 à 22 USD pour 80 utilisateurs et plus ; annuaire LawNext (févr. 2024) : 29, 27, 19 et 16 USD par palier ; + 4 USD par utilisateur pour la connexion NetDocuments ou iManage ; engagement annuel. Sources : https://lawtoolbox.com/pricing/ et https://directory.lawnext.com/products/lawtoolbox-court-rules-calendaring-integration-for-partner-platforms/pricing/
+**Prix et modèle (relevé 2026-11-07)** : par utilisateur et par mois, dégressif : la page pricing affiche ses prix en JavaScript (non lisibles par lecture directe) ; un résumé de recherche de cette page cite 35 à 42 USD pour 2 à 9 utilisateurs et 19 à 22 USD pour 80 utilisateurs et plus [non confirmé] ; annuaire LawNext (févr. 2024) : 29, 27, 19 et 16 USD par palier ; + 4 USD par utilisateur pour la connexion NetDocuments ou iManage ; engagement annuel. Sources : https://lawtoolbox.com/pricing/ et https://directory.lawnext.com/products/lawtoolbox-court-rules-calendaring-integration-for-partner-platforms/pricing/
 
 **Mode de vente** : essai gratuit, self-service, vente directe, partenaires.
 

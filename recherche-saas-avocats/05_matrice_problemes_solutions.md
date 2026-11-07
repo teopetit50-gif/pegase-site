@@ -1,0 +1,60 @@
+# 05. Matrice problèmes x solutions, zones blanches et segments délaissés
+
+Étude pour Omega AI (Tamila). Date : 2026-11-07. Les problèmes sont ceux du classement de `04_problemes_avocats.md` ; les catégories de SaaS sont celles de `02_base_saas.csv`. Légende : **B** bien résolu, **P** partiellement résolu, **M** mal résolu, **N** non résolu, **-** hors périmètre de la catégorie. Chaque case est justifiée dans la colonne de droite.
+
+## 1. Matrice
+
+| Problème (score) | Practice management (Clio, MyCase, Smokeball, PP, Filevine, Litify, CASEpeer) | Analyse de faits et chronologie (CaseFleet, CaseMap+, Opus 2, Everchron) | IA de dossier verticale PI (Supio, EvenUp, Eve) | Assistants IA généralistes (Harvey, CoCounsel, Legora, Lexis+, Clio Work) | E-discovery (Relativity, Everlaw, DISCO, Logikcull) | Docketing et notifications (LawToolBox, CompuLaw, PacerPro, ECFX, Docket Alarm) | Temps et finance (Laurel, BigHand, LawPay, LeanLaw) | Justification |
+|---|---|---|---|---|---|---|---|---|
+| 1. Vérifier faits, citations et renvois au dossier (18) | N | P | P | P | P | - | - | Seul Clearbrief le fait dans Word (vérification pièce par pièce) ; CoCounsel « Deep Research Verify » et Lexis Brief Analysis vérifient la jurisprudence, pas les faits ; Relativity aiR et Everlaw citent la page mais ne contrôlent pas un mémoire ; les logiciels de gestion ne font rien. |
+| 2. Temps non saisi (18) | P | - | - | - | - | - | B (Laurel, Smokeball AutoTime) pour les grands ; M pour les petits | La capture passive existe (Laurel, iTimekeep, Smokeball) mais Laurel vise les grands cabinets ; chez les petits, les timers restent manuels (« I despise billing »). |
+| 3. Délais et notifications des tribunaux (17) | P (règles CalendarRules intégrées, mais « glitches », « does not accurately calculate federal deadlines ») | N | N | N | - | B au fédéral et dans les grands cabinets (CompuLaw, ECFX, PacerPro) ; P chez les petits (LawToolBox, couverture d'État inégale) | - | Le besoin est bien couvert pour qui paie CompuLaw ou ECFX ; les petits cabinets bricolent (tableur de secours, Google Calendar, dossiers papier, fil 1tu5v3u). |
+| 4. Milliers de pages à transformer en chronologie sourcée (17) | N (OCR seulement : MyCase Discovery Assistant) | P (lien fait-pièce manuel ; IA d'extraction récente chez CaseFleet, CaseMap+ jugé défaillant) | B en PI (chronologies médicales vérifiées humainement) ; N hors PI | P (résumés et questions avec citations, pas de chronologie structurée sauf Harvey « create chronologies » sur Vault) | B pour les gros dossiers depuis 2026 (Relativity aiR for Case Strategy, Everlaw AI, DISCO Cecilia Timelines) ; N pour qui n'a pas de plateforme | - | - | Deux marchés bien servis (PI de volume ; e-discovery des grands cabinets) et un trou entre les deux : le cabinet de contentieux moyen, hors PI, sans Relativity. |
+| 5. Rentabilité, réalisation, forfaits dans le logiciel de gestion (16) | M (« The reporting system is broken », « cannot get an accurate report », rapports réservés aux paliers chers) | - | - | - | - | - | B pour les grands (BigHand, Aderant, Intapp) ; M pour les petits (LeanLaw, CosmoLex partiels) | Le reporting est le premier motif de changement de logiciel de gestion ; aucun outil petit cabinet ne compare temps passé et convention d'honoraires par dossier en continu. |
+| 6. Confidentialité des pièces face à l'IA (16) | P (IA embarquées, périmètre flou) | P | B (SOC 2, HIPAA, revue humaine) | B (instances dédiées, pas d'entraînement : Harvey, CoCounsel, Legora) | B (FedRAMP, SOC 2) | - | - | Les éditeurs ont répondu sur le papier ; la défiance persiste dans les cabinets (interdictions Am Law 200, « you can't just feed it medical records »). |
+| 7. Prix opaques, démos obligatoires, contrats longs (16) | P (Clio, MyCase, PP publient ; Smokeball, Filevine, Litify non) | P (CaseFleet publie ; CaseMap+ non) | N (tous sur devis) | N (tous sur devis) | M (au Go, imprévisible) | P (Docket Alarm publie ; CompuLaw, ECFX non) | P | Les avocats de petits cabinets déclarent écarter d'office les outils sans prix public (fil 1rmkrz8, 81 pts). |
+| 8. Forfaits dépassés, write-offs, budgets clients (15) | M (pas d'alerte avant facturation) | - | - | - | - | - | B côté direction juridique (Brightflag, Legal Tracker) ; P côté cabinet (BigHand matter pricing, Intapp Terms) | Le dépassement est détecté après coup (write-off) ; l'alerte « forfait à 104 % » avant facturation n'existe pas chez les petits. |
+| 9. Hausses de prix et paliers (15) | M | P | - | M | M | P | P | Reproche transversal ; pas une fonction à construire mais une politique commerciale. |
+| 10. Support et implémentation (15) | M (Filevine, Actionstep, CARET, Centerbase, Neos) | P | P | P | M (dépendance aux prestataires Relativity) | P | P | La migration des données et la formation payante concentrent les avis à 1 étoile. |
+| 11. Productions adverses en vrac, pièces citées jamais produites (15) | N (« Lack of discovery tracking program », Litify) | P (CaseFleet, CaseMap : suivi manuel) | P (Eve : discovery) | P (revue de masse en tableau : Legora, CoCounsel) | B pour la revue, N pour « ce qui manque » (aucune plateforme ne liste les pièces citées par l'adversaire mais non communiquées) | - | - | Zone blanche nette : le rapprochement « pièces invoquées vs pièces communiquées » n'est fait par aucun outil identifié. |
+| 12. Coût de l'e-discovery au Go (14) | N | - | - | - | P (GoldFynch, Digital WarRoom, Nextpoint par utilisateur) | - | - | Les offres petits cabinets existent mais restent des outils de production, pas d'analyse. |
+| 13. Rendement décevant des IA généralistes et embarquées (14) | M (Duo, MyCase IQ, LEAP Matter AI « makes things up ») | P | B (vérification humaine) | P (lenteur CoCounsel, « 25 % utile ») | P | - | - | Le marché attend des IA bornées à une tâche et vérifiables, pas un chatbot de plus. |
+| 14. Migrations et versions forcées (13) | M | M (CaseMap+) | - | - | P | - | P | Question de conduite de produit plus que de fonction. |
+| 15. Intake (13) | B (Clio Grow, Lawmatics, Lead Docket, Smith.ai) | - | B (Eve) | - | - | - | - | Marché saturé. |
+| 16. Recouvrement et frais de paiement (13) | B (LawPay, Clio Payments) | - | - | - | - | - | B | Marché saturé, reproches sur les frais seulement. |
+| 17. Outils qui ne se parlent pas (12) | M | M | P | P | P | P | P | Reproche structurel du marché US (« Clio Manage and Clio Grow are two separate websites »). |
+| 18. DMS lent (12) | P | - | - | - | - | - | - | NetDocuments et iManage dominent, reproches de lenteur anciens et récents. |
+| 19. Trust accounting (11) | B (CosmoLex, Clio, TrustBooks) | - | - | - | - | - | B | Saturé ; les solos s'en passent avec des tableurs des barreaux. |
+| 20. Surcharge des paralegals (11) | P | P | B (PI) | P | P | B (ECFX) | - | Tout outil qui supprime une ressaisie est adopté par les paralegals, à condition de ne pas casser leur flux (Outlook, DMS). |
+
+## 2. Zones blanches (problèmes forts, peu ou pas de solutions)
+
+1. **Le contrôle du dossier avant l'audience pour le cabinet de contentieux moyen, hors PI, sans plateforme d'e-discovery.** Relativity, Everlaw et DISCO offrent la chronologie citée, mais à qui a déjà ses pièces chez eux et paie au Go. CaseFleet et CaseMap offrent la structure, mais la lecture des pièces reste manuelle ou récente et instable. Harvey et Legora le font sur Vault pour les Am Law. Entre 2 et 50 avocats, en commercial, employment, construction, insurance defense, personne ne lit toutes les pièces pour en sortir faits, contradictions et chronologie à un prix par cabinet.
+2. **Les pièces citées mais jamais communiquées, et les pièces attendues.** Aucun outil identifié ne rapproche les pièces invoquées dans un mémoire adverse des pièces effectivement produites, ni ne tient la liste de « ce que le cabinet attend » (client, expert, confrère) autrement qu'en tâches manuelles. Litify est même critiqué pour l'absence de suivi de discovery.
+3. **Le forfait suivi en temps réel contre la convention.** Les write-offs explosent (BigHand), les avocats avouent « Some I over bid some I underbid », et le logiciel de gestion ne prévient pas avant la facture. BigHand le fait pour les cabinets de 100 avocats et plus ; rien en dessous.
+4. **La vérification des faits (et pas seulement des citations) d'un mémoire contre les pièces.** Clearbrief est seul, cher pour un solo, et vendu comme outil de rédaction. Les géants vérifient la jurisprudence (Quick Check, Brief Analysis, Deep Research Verify), pas les renvois aux pièces.
+5. **La contradiction entre pièces, présentée côte à côte.** Les outils extraient des faits ; aucun n'affiche deux pièces qui divergent pour laisser l'avocat trancher. Relativity aiR classe « helpful or harmful », ce qui s'en approche sans l'être.
+6. **Un point du matin unique** réunissant délais, pièces attendues, forfaits dépassés et dossiers sans diligence : les quatre existent dans des produits séparés (CompuLaw, Case Status, BigHand, rapports Clio), jamais dans un courriel quotidien.
+
+## 3. Marchés saturés
+
+- Practice management des solos et petits cabinets : quatre acteurs (« Clio, mycase, practicepanther, and smokeball. Don't bother with any other company. ») et une dizaine de suiveurs ; différenciation par le prix et le support, pas par les fonctions.
+- Intake, CRM, réception d'appels, paiements, trust accounting, e-signature.
+- IA pour le personal injury côté demandeur : trois acteurs à plus de 90 M USD levés chacun (Supio 93, Eve 150, EvenUp 385), plus Filevine DemandsAI.
+- Assistants IA pour grands cabinets : Harvey, Legora, CoCounsel, Lexis+ Protégé.
+- E-discovery pour les gros dossiers : Relativity, Everlaw, DISCO, Reveal, et les prestataires.
+- CLM et legal spend pour les directions juridiques (consolidation en cours : Lexion dans DocuSign, Evisort dans Workday, Brightflag dans Wolters Kluwer).
+
+## 4. Segments délaissés
+
+| Segment | Pourquoi il est délaissé | Indices |
+|---|---|---|
+| Cabinets de contentieux de 5 à 50 avocats hors PI (commercial, employment, construction, immobilier, assurance) | trop petits pour Relativity, Harvey ou BigHand ; trop « contentieux » pour les logiciels de gestion généralistes ; pas assez de volume répétitif pour les verticaux PI | Litify sans suivi de discovery ; Litera « way too expensive for a firm of our size » (25 avocats) ; aucun outil de chronologie avec lecture automatique à prix public hors CaseFleet |
+| Insurance defense (défense des assurés) | marché sous pression tarifaire (guidelines, panel counsel), facturation LEDES contrainte, forts volumes de pièces médicales et d'expertise | LegalMation côté assureurs ; rien d'équivalent à Supio côté défense ; DigitalOwl vise les assureurs plus que les cabinets |
+| Paralegals et assistants comme utilisateurs premiers | les outils sont vendus aux avocats et facturés par siège, ce qui pénalise les cabinets qui équipent le personnel (« support staff licenses are nearly cost prohibitive ») | fils r/paralegal ; avis Smokeball |
+| Cabinets qui facturent au forfait ou au budget | aucun outil petit cabinet n'alerte avant dépassement | reproches sur les rapports ; BigHand réservé aux grands |
+| Juridictions d'État (hors fédéral) pour les notifications | PacerPro et Docket Alarm couvrent surtout le fédéral ; ECFX couvre les États mais vise les grands cabinets | « More county courts coverage », fil 1te733a |
+
+## 5. Lecture pour Tamila
+
+Sur les six zones blanches, Tamila en couvre déjà cinq en France (contrôle du dossier, pièces citées non communiquées et pièces attendues, forfaits suivis, contradictions côte à côte, point du matin) ; la vérification des faits d'un mémoire contre les pièces est partiellement couverte par le « bordereau contrôlé » et la cohérence dispositif contre motifs. Les segments délaissés correspondent au cœur de cible français de Tamila (cabinets de contentieux de taille petite et moyenne). Ce que le marché US a réglé et que Tamila ne fait pas : e-discovery, docketing multi-juridictions, intake, facturation. Voir `07_tamila_face_au_marche_us.md`.
