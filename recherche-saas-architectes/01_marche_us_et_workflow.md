@@ -11,13 +11,13 @@ un tiers, page primaire non lisible depuis cet environnement.
 
 | Donnée | Valeur | Source | Étiquette |
 |---|---|---|---|
-| Cabinets d'architecture aux États-Unis | plus de 19 000 | AIA Firm Survey Report 2024, résumé AIA Architect, https://www.aia.org/aia-architect/article/latest-insights-2024-firm-survey-report | [vérifié] |
+| Cabinets d'architecture aux États-Unis | environ 19 000 à 20 000 : « plus de 19 000 » relevé par l'agent de collecte dans le résumé AIA Architect, non retrouvé littéralement en revérification ; cohérent avec 14 459 à 14 895 petits cabinets représentant 74 à 75 % du total (FAQ AIA Small Firm Exchange) | https://www.aia.org/aia-architect/article/latest-insights-2024-firm-survey-report ; https://communityhub.aia.org/blogs/kathleen-simpson/2024/06/12/faq-what-is-a-small-firm | [estimé] |
 | Établissements NAICS 541310 (services d'architecture) | 22 805 établissements, 189 468 salariés (Census CBP 2023) | agrégateur https://vantainsights.com/industry/541310-architectural-services | [secondaire] data.census.gov non consulté |
 | Établissements NAICS 541310, CBP 2016 | 21 636 établissements, 170 382 salariés | https://www.naics.com/naics-code-description/?code=541310 | [secondaire] |
 | Petits cabinets (< 10 personnes) | 14 895, dont 5 505 praticiens seuls | FAQ AIA Small Firm Exchange, https://communityhub.aia.org/blogs/kathleen-simpson/2024/06/12/faq-what-is-a-small-firm | [vérifié] |
 
-Lecture : l'écart entre « 19 000 cabinets » (AIA, entreprises) et « 22 800 établissements » (Census,
-sites) tient à la définition. Les deux chiffres disent la même chose : un marché de 20 000 à 23 000
+Lecture : l'écart entre « 19 000 à 20 000 cabinets » (AIA, entreprises) et « 22 800 établissements »
+(Census, sites) tient à la définition. Les deux chiffres disent la même chose : un marché de 20 000 à 23 000
 unités d'achat, très atomisé.
 
 ### 1.2 Répartition par taille (AIA Firm Survey Report 2024, données 2023) [vérifié]
@@ -128,7 +128,7 @@ C'est la racine de la plupart des douleurs de gestion listées en section 4.
 | Taux de réalisation | 96 % (4 cents perdus par dollar facturable) | Monograph 2026 | [déclaratif] |
 | Taux horaires | hausse médiane de 10 % sur trois ans, mais marges concédées en pratique | Zweig 2026 Fee + Billing, https://zweiggroup.com/blogs/the-zweig-letter/aec-firms-need-pricing-that-supports-top-talent | [vérifié] |
 | Rotation du personnel | 13 % médiane (Zweig), 13,8 % (Deltek), > 40 % dans les cabinets déficitaires | https://zweiggroup.com/blogs/the-zweig-letter/zooming-in ; Deltek Clarity | [vérifié] / [déclaratif] |
-| Délai de recrutement | 54 jours, 128 pour les postes critiques | Zweig 2026 Workforce, https://zweiggroup.com/blogs/the-zweig-letter/2026-aec-workforce-benchmarks-recruiting | [vérifié] |
+| Délai de recrutement | 54 jours, 128 pour les postes critiques | Zweig 2026 Workforce, https://zweiggroup.com/blogs/the-zweig-letter/2026-aec-workforce-benchmarks-recruiting-retention | [vérifié] |
 | Rémunération des architectes | + moins de 3 % par an | AIA Compensation & Benefits 2025 (817 cabinets), https://www.aia.org/about-aia/press/aia-compensation-benefits-report-2025-now-available | [vérifié] |
 
 ### 2.3 Enjeux actuels
