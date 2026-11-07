@@ -89,9 +89,9 @@
   gap: 14px;
 }
 .dal-ml-carte .v2-det-titre {
-  font-size: 17px;
-  line-height: 24px;
-  font-weight: 600;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
   letter-spacing: -0.01em;
 }
 
@@ -111,7 +111,9 @@
   text-decoration: underline;
 }
 
-/* ——— le fil : un message, avatar à gauche, en-tête, texte, pièces ——— */
+/* ——— le fil : un message dessiné comme dans Gmail (Teo, 07/11 : « le même design que la page
+   Gmail ») — avatar 40, nom gras + <adresse>, date à droite, « à moi ▾ », texte, pièces en vignettes.
+   Aux jetons du thème (Gmail a aussi son mode sombre), pas en papier blanc. ——— */
 .dal-ml-fil {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -120,23 +122,22 @@
 }
 .dal-ml-msg {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
-  column-gap: 12px;
-  row-gap: 2px;
-  padding: 14px 0 18px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: 14px;
+  padding: 6px 0 20px;
 }
 .dal-ml-msg + .dal-ml-msg {
+  padding-top: 18px;
   border-top: 1px solid var(--v2-a-300);
 }
 .dal-ml-msg-avatar {
-  grid-row: 1 / span 2;
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
   color: #fff;
   letter-spacing: 0.2px;
 }
@@ -145,13 +146,17 @@
   color: #6d78d5;
   box-shadow: inset 0 0 0 1px color-mix(in lch, #6d78d5 40%, transparent);
 }
+.dal-ml-msg-qui {
+  min-width: 0;
+  align-self: center;
+}
 .dal-ml-msg-tete {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px 8px;
+  gap: 2px 6px;
   min-width: 0;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 18px;
 }
 .dal-ml-msg-tete strong {
@@ -167,64 +172,128 @@
   margin-left: auto;
   color: var(--v2-gray-800);
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
 }
 .dal-ml-msg-a {
-  font-size: 12.5px;
-  line-height: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 100%;
+  margin: 1px 0 0 -4px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
   color: var(--v2-gray-800);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  cursor: default;
+}
+.dal-ml-msg-a:hover {
+  background: var(--v2-a-200);
+}
+.dal-ml-msg-a svg {
+  flex: none;
 }
 .dal-ml-msg-corps {
   grid-column: 2;
-  margin-top: 10px;
+  margin-top: 16px;
   font-size: 14px;
   line-height: 22px;
   color: var(--v2-gray-1000);
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
-.dal-ml-msg .dal-ml-pj {
+/* les pièces jointes en vignettes, sous le texte, comme sous un mail Gmail */
+.dal-ml-msg-pieces {
   grid-column: 2;
-  margin-top: 12px;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--v2-a-300);
 }
-.dal-ml-pj {
+.dal-ml-msg-pieces-titre {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--v2-gray-800);
+}
+.dal-ml-vignettes {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 10px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.dal-ml-pj li {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.dal-ml-piece {
+  display: flex;
+  flex-direction: column;
+  width: 176px;
   max-width: 100%;
-  height: 28px;
-  padding: 0 10px 0 8px;
   border: 1px solid var(--v2-a-400);
   border-radius: 8px;
+  overflow: clip;
   background: var(--v2-bg-100);
-  font-size: 12.5px;
-  color: var(--v2-gray-1000);
 }
-.dal-ml-pj li svg {
+.dal-ml-piece-apercu {
+  display: grid;
+  place-items: center;
+  height: 94px;
+  color: #fff;
+  background: linear-gradient(135deg, #b9a58f, #7f6b5a);
+}
+.dal-ml-piece-apercu[data-teinte="1"] {
+  background: linear-gradient(135deg, #9fb3a2, #5f7a68);
+}
+.dal-ml-piece-apercu[data-teinte="2"] {
+  background: linear-gradient(135deg, #a9b4c6, #67748c);
+}
+.dal-ml-piece[data-genre="pdf"] .dal-ml-piece-apercu,
+.dal-ml-piece[data-genre="autre"] .dal-ml-piece-apercu {
+  background: var(--v2-bg-200);
+  color: var(--v2-gray-700);
+}
+.dal-ml-piece[data-genre="pdf"] .dal-ml-piece-apercu {
+  color: #d93025;
+}
+.dal-ml-piece-pied {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 10px 0 8px;
+  min-width: 0;
+  border-top: 1px solid var(--v2-a-300);
+  font-size: 12px;
+}
+.dal-ml-piece-icone {
   flex: none;
+  display: inline-flex;
+  color: #1a73e8;
+}
+.dal-ml-piece[data-genre="pdf"] .dal-ml-piece-icone {
+  color: #d93025;
+}
+.dal-ml-piece[data-genre="autre"] .dal-ml-piece-icone {
   color: var(--v2-gray-800);
 }
-.dal-ml-pj li span {
+.dal-ml-piece-nom {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
+  color: var(--v2-gray-1000);
 }
-.dal-ml-pj li small {
+.dal-ml-piece-taille {
   flex: none;
-  font-size: 12px;
+  margin-left: auto;
   color: var(--v2-gray-800);
 }
 
@@ -463,13 +532,16 @@
 }
 @media (max-width: 640px) {
   .dal-ml-msg {
-    grid-template-columns: 32px minmax(0, 1fr);
+    grid-template-columns: 36px minmax(0, 1fr);
     column-gap: 10px;
   }
   .dal-ml-msg-avatar {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 13px;
+  }
+  .dal-ml-piece {
+    width: calc(50% - 5px);
   }
   .dal-ml-cmp-note {
     display: none;

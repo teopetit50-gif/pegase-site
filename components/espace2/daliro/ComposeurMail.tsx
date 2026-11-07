@@ -24,8 +24,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, Loader2, Paperclip, RefreshCw, Reply, Send, Sparkles, X } from "lucide-react";
-import { dateHeure } from "@/components/espace/format";
+import { AlertTriangle, ChevronDown, File, FileText, Image as IconeImage, Loader2, Paperclip, RefreshCw, Reply, Send, Sparkles, X } from "lucide-react";
 import { couleurDe, initialesDe } from "../lin/ListeFils";
 import { BOITE, type Mail, type PieceMail } from "./exemplesMails";
 import { demanderReponse, empreinteDe, lireReponse, oublierReponse, poserReponse, type ReponsePrete } from "./reponseMail";
@@ -33,30 +32,66 @@ import { demanderReponse, empreinteDe, lireReponse, oublierReponse, poserReponse
 const taille = (o: number) => (o >= 1024 * 1024 ? `${(o / 1024 / 1024).toFixed(1).replace(".", ",")} Mo` : `${Math.max(1, Math.round(o / 1024))} Ko`);
 const QUAND_MEME = "Écris quand même une réponse : un accusé de réception court et poli, qui dit ce qu'on fait du mail.";
 
-/* ——— un message du fil : le mail reçu, ou une réponse partie ——— */
+/* ——— un message du fil, dessiné comme dans Gmail (Teo, 07/11 : « un vrai mail, le même design que
+   la page Gmail, pour qu'il garde un semblant de connaissance ») : l'avatar rond, le nom en gras et
+   l'adresse entre chevrons, la date à droite, « à moi » dessous, le texte, et les pièces jointes en
+   vignettes (une photo pour une image, la page rouge pour un PDF). ——— */
+const genre = (nom: string): "image" | "pdf" | "autre" => (/\.(jpe?g|png|gif|webp|heic)$/i.test(nom) ? "image" : /\.pdf$/i.test(nom) ? "pdf" : "autre");
+/* « 7 nov. 2026, 07:42 », comme Gmail */
+function quandGmail(iso: string): string {
+  const x = new Date(iso);
+  if (Number.isNaN(x.getTime())) return "";
+  return `${x.toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}, ${x.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function Vignette({ piece, i }: { piece: PieceMail; i: number }) {
+  const g = genre(piece.nom);
+  return (
+    <li className="dal-ml-piece" data-genre={g} title="Pièce d'exemple : le fichier n'existe pas.">
+      <span className="dal-ml-piece-apercu" aria-hidden="true" data-teinte={i % 3}>
+        {g === "image" ? <IconeImage width={22} height={22} /> : g === "pdf" ? <FileText width={26} height={26} /> : <File width={24} height={24} />}
+      </span>
+      <span className="dal-ml-piece-pied">
+        <span className="dal-ml-piece-icone" aria-hidden="true">
+          {g === "image" ? <IconeImage width={14} height={14} /> : g === "pdf" ? <FileText width={14} height={14} /> : <Paperclip width={14} height={14} />}
+        </span>
+        <span className="dal-ml-piece-nom">{piece.nom}</span>
+        <span className="dal-ml-piece-taille">{taille(piece.taille)}</span>
+      </span>
+    </li>
+  );
+}
+
 export function MessageFil({ nom, adresse, a, quand, texte, pieces, vous }: { nom: string; adresse: string; a: string; quand: string; texte: string; pieces?: PieceMail[]; vous?: boolean }) {
   return (
     <article className="dal-ml-msg" data-vous={vous || undefined}>
       <span className="dal-ml-msg-avatar" style={vous ? undefined : { background: couleurDe(adresse || nom) }} aria-hidden="true">
         {vous ? "V" : initialesDe(nom)}
       </span>
-      <div className="dal-ml-msg-tete">
-        <strong>{nom}</strong>
-        {adresse ? <span className="dal-ml-msg-adresse">{adresse}</span> : null}
-        <time dateTime={quand}>{dateHeure(quand)}</time>
+      <div className="dal-ml-msg-qui">
+        <div className="dal-ml-msg-tete">
+          <strong>{nom}</strong>
+          {adresse ? <span className="dal-ml-msg-adresse">&lt;{adresse}&gt;</span> : null}
+          <time dateTime={quand}>{quandGmail(quand)}</time>
+        </div>
+        <button type="button" className="dal-ml-msg-a" title={`à ${a}`}>
+          à {a === BOITE ? "moi" : a}
+          <ChevronDown width={12} height={12} aria-hidden="true" />
+        </button>
       </div>
-      <div className="dal-ml-msg-a">à {a}</div>
       <div className="dal-ml-msg-corps">{texte.trim() || "Message sans texte."}</div>
       {pieces?.length ? (
-        <ul className="dal-ml-pj" aria-label="Pièces jointes">
-          {pieces.map((p, i) => (
-            <li key={`${p.nom}-${i}`} title="Pièce d'exemple : le fichier n'existe pas.">
-              <Paperclip width={13} height={13} aria-hidden="true" />
-              <span>{p.nom}</span>
-              <small>{taille(p.taille)}</small>
-            </li>
-          ))}
-        </ul>
+        <div className="dal-ml-msg-pieces">
+          <div className="dal-ml-msg-pieces-titre">
+            <Paperclip width={14} height={14} aria-hidden="true" />
+            {pieces.length} pièce{pieces.length > 1 ? "s" : ""} jointe{pieces.length > 1 ? "s" : ""}
+          </div>
+          <ul className="dal-ml-vignettes" aria-label="Pièces jointes">
+            {pieces.map((p, i) => (
+              <Vignette key={`${p.nom}-${i}`} piece={p} i={i} />
+            ))}
+          </ul>
+        </div>
       ) : null}
     </article>
   );
