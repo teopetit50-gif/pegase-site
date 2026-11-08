@@ -65,8 +65,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight, AtSign, Briefcase, CalendarDays, Download, FileCheck2, FileSearch, FileSpreadsheet, FileStack, Filter,
-  FolderOpen, GitCompare, History, Inbox, Mail, Paperclip, ScanText, ShieldCheck, Stamp, Gavel, TrendingUp,
+  ArrowRight, BookOpen, Briefcase, CalendarDays, Download, FileCheck2, FileSearch, FileSpreadsheet, FileStack, Filter,
+  FolderOpen, GitCompare, History, Inbox, Mail, Paperclip, Scale, ScanText, ScrollText, ShieldCheck, Stamp, Gavel, TrendingUp,
 } from "lucide-react";
 import AnimationContainer from "./apparition";
 import { MagicCard } from "./carte-magique";
@@ -78,7 +78,8 @@ import { APPEL, CONNEXIONS, CONTACT, FONCTIONNALITES, PIECES, POINT } from "./te
 import { cn } from "@/lib/cn";
 
 /* ─── « Trusted by leading brands » → les familles de pièces lues (aucun logo de client inventé) ─── */
-const iconesPieces = [Gavel, FileStack, Paperclip, FileSearch, FileCheck2, Stamp, AtSign, Inbox, ScanText];
+/* 08/11 : contrats, textes cités et arrêts cités remplacent courriels et avis RPVA (textes.ts, PIECES.familles). */
+const iconesPieces = [Gavel, FileStack, Paperclip, FileSearch, ScrollText, Stamp, BookOpen, Scale, ScanText];
 
 export function Pieces() {
   return (

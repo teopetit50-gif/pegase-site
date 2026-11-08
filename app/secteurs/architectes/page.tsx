@@ -78,9 +78,9 @@ import SeCombine from "@/components/secteurs/SeCombine";
    notre périmètre.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Lorani · les incohérences du dossier relevées avant le chantier";
+const TITRE = "Lorani · le dossier de l'architecte vérifié, du permis à la réception";
 const DESCRIPTION =
-  "Lorani croise chaque planche avec le CCTP, la DPGF et les pièces du permis, puis relève chaque incohérence avec la page, l'article et la correction proposée. Conçu par Omega pour les agences d'architecture.";
+  "Lorani lit toutes les pièces d'une opération, planches, CCTP, DPGF, offres, fiches techniques et situations, et relève chaque incohérence avec la page, la valeur lue et la correction proposée, du dépôt du permis à la réception. Conçu par Omega pour les agences d'architecture.";
 
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,
@@ -106,7 +106,8 @@ export const metadata: Metadata = {
    l'ancien libellé du premier bouton, devenu « Permis et DCE » à la
    réécriture des textes : ce bouton n'était plus relié, et les trois
    autres, décalés d'un rang, allumaient et visaient le bloc du dessus. */
-const ONGLETS = ["Permis et DCE", "Analyse des offres", "Situations de travaux", "Visa des documents"];
+/* 08/11 — Lorani élargie : les quatre onglets suivent les phases du brief (docs/briefs-saas/lorani-v2.md). */
+const ONGLETS = ["Permis et délais", "DCE et offres", "Situations et décisions", "Visa des fiches techniques"];
 
 /* LE CADRE DE LA SOURCE EST DÉCOUPÉ. La source enfermait toute la page
    dans `mx-[30px] border-x`, plus deux paires de rails fixes à 22 et 30 px

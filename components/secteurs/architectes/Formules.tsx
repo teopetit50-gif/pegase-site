@@ -5,39 +5,159 @@
    sections/13-pricing.tsx` (GÉNÉRÉ côté source par l'assembleur ; ici une
    copie du résultat, corrigée à la main). Ce qui change :
 
-   · AUCUN PRIX PUBLIC, comme Daliro et Tamila : les quatre formules disent
-     déjà « Sur audit » (la bascule mensuel/annuel de la référence avait été
+   · AUCUN PRIX PUBLIC, comme Daliro et Tamila : les formules disent
+     « Sur audit » (la bascule mensuel/annuel de la référence avait été
      retirée par la source). Les trois `<span>` vides qui suivaient « Sur
      audit » (l'emplacement du « /mois ») sont retirés.
-   · BOUTONS (règle maison) : les trois `<a role="button" href="#">` (liens
-     morts) et le bouton étoilé figé de la formule Cabinet (un <button> sans
-     destination, avec un `clipPath id="clip0_408_119"` en dur, le même que
-     dans Produit.tsx) mènent tous à /reserver-un-audit, en <Link> et en
-     `BoutonEtoile`. « Nous écrire » (Sur mesure) devient « Réserver un
-     audit » : un libellé qui annonce un message ne peut pas ouvrir une
-     réservation.
-   · MONDE BLANC : `dark:` retirés (4), jetons clairs. La formule mise en
-     avant (Cabinet) portait `bg-card` : #171717 sur le fond #0a0a0a, un cran
-     PLUS CLAIR que ses voisines. En clair, `bg-card` vaut #ffffff comme le
-     fond : la colonne ne se détachait plus. Elle prend #fafafa, un cran plus
+   · Les boutons : <a href="#"> → `Link` vers /reserver-un-audit (liens
+     morts) et le bouton étoilé figé de la formule mise en avant (un
+     <button> sans action, copie du bouton du héros) → `BoutonEtoile`.
+   · Jetons clairs : la formule mise en avant portait `bg-card` : #171717
+     sur le fond #0a0a0a, un cran PLUS CLAIR que ses voisines. En clair,
+     `bg-card` vaut #ffffff comme le fond : elle prend #fafafa, un cran plus
      FONCÉ (le sens s'inverse, pas la valeur). Planche du fond passée à
      l'encre (voir Fonctionnement.tsx).
    · Posée dans la marge de 30 px de la page (page.tsx).
-   · REPORT du 24/09, 17 h 00 (seconde copie de la source) : une autre
-     session a ajouté des fonctions au site source entre 16 h 00 et 16 h 32
-     (Teo : « ajoute tout sur les sites »). Ici : quinze lignes de plus dans
-     les quatre formules (PLU lu depuis l'adresse, calendrier du permis,
-     métré, décennales, comptes rendus, réserves, honoraires, dossier de
-     défense décennale…). Toujours aucun prix : chaque formule reste « Sur
-     audit ». Report par fusion à trois voies, vérifié ligne à ligne.
-   · 28/09 — Cabinet : « 6 à 20 personnes » au lieu de « 5 à 20 », qui
-     chevauchait la formule Agence (« 1 à 5 »).
+   · 24/09, 17 h — report des fonctions ajoutées au site source (Teo :
+     « ajoute tout sur les sites »), puis 28/09, « 6 à 20 personnes » au
+     lieu de « 5 à 20 », qui chevauchait la formule Agence (« 1 à 5 »).
+
+   08/11/2026 — LORANI ÉLARGIE (docs/briefs-saas/lorani-v2.md). Quatre
+   formules toujours, mais la première devient « Découverte » : un dossier
+   déjà clos (permis instruit ou DCE attribué), à prix fixe, sans
+   abonnement, remboursé si moins de trois points sont confirmés. « Sur
+   mesure » (grands comptes) fusionne dans « Groupement », qui porte les
+   cinq phases jusqu'à la réception. La formule mise en avant devient
+   Cabinet (6 à 20 personnes), la cible première du brief. Le balisage est
+   celui de la copie (mêmes classes, mêmes cadres, même coche), désormais
+   rendu depuis une liste : 823 lignes de SVG répété tenaient quatre listes
+   de puces. Toujours aucun montant sur la page.
    ══════════════════════════════════════════════════════════════════════ */
 /* eslint-disable @next/next/no-img-element -- planche décorative à 22 % d'opacité, masquée en CSS : pas d'optimiseur. */
 import React from "react";
 import Link from "next/link";
 import StarButton from "./bouton-etoile";
 import { CONTACT } from "./textes";
+
+type Formule = {
+  titre: string;
+  pour: string;
+  prix: string;
+  /** La formule mise en avant : fond #fafafa et bouton étoilé. */
+  avant?: boolean;
+  lignes: string[];
+};
+
+const FORMULES: Formule[] = [
+  {
+    titre: "Découverte",
+    pour: "Pour juger Lorani sur un dossier déjà clos, sans abonnement",
+    prix: "Prix fixe",
+    lignes: [
+      "Un permis instruit ou un DCE attribué, relu en entier",
+      "Planches croisées entre elles, avec le CCTP et la DPGF",
+      "Pièces du permis : complétude et règles chiffrées du PLU",
+      "Fiches techniques confrontées au CCTP, bordereau de visa",
+      "Chaque point avec la page, la valeur lue et la correction",
+      "Rapport PDF annoté et Excel",
+      "Réalisé pendant l'audit, résultat en quelques heures",
+      "Remboursé si moins de trois points confirmés",
+    ],
+  },
+  {
+    titre: "Agence",
+    pour: "Pour les agences de 1 à 5 personnes",
+    prix: "Sur audit",
+    lignes: [
+      "Tout ce que contient Découverte, sur toutes vos opérations",
+      "Plans croisés, rapport PDF annoté",
+      "Permis : pièces du Cerfa et PLU",
+      "Accessibilité, ERP et RE2020",
+      "PLU, servitudes et risques lus depuis l'adresse",
+      "Calendrier du permis jusqu'à la purge des recours",
+      "Surfaces recalculées contre le Cerfa",
+      "RE2020 : attestation comparée aux plans",
+      "Revérification à chaque indice",
+      "Questions posées au dossier",
+    ],
+  },
+  {
+    titre: "Cabinet",
+    pour: "Pour les agences de 6 à 20 personnes",
+    prix: "Sur audit",
+    avant: true,
+    lignes: [
+      "Tout ce que contient Agence",
+      "Analyse des offres sur DPGF",
+      "Métré des plans contre la DPGF",
+      "Décennales contrôlées contre le lot",
+      "Visa des fiches techniques : VSO, VAO, refus",
+      "Visas calés sur les délais de commande",
+      "Situations et décomptes",
+      "Ordres de service : montant et délai",
+      "Questions suivies jusqu'à la réponse",
+      "Journal des décisions de l'opération, exportable",
+      "Checklists de l'agence",
+      "Export Excel par lot",
+      "Utilisateurs sans supplément",
+      "Hébergement dans l'UE",
+    ],
+  },
+  {
+    titre: "Groupement",
+    pour: "Pour les agences de plus de 20 personnes, les groupements et les maîtres d'ouvrage",
+    prix: "Sur audit",
+    lignes: [
+      "Tout ce que contient Cabinet",
+      "Bureaux d'études invités",
+      "Fonds de plan BET croisés",
+      "Comptes rendus de chantier rédigés",
+      "Réserves suivies jusqu'à la fin de la GPA",
+      "Complétude du DOE à la réception",
+      "Dossier de défense décennale",
+      "Registre daté des visas",
+      "Honoraires par phase contre temps passé",
+      "Historique des indices sans limite",
+      "Contrôles définis avec vous",
+      "Import depuis vos plateformes de projet",
+      "Accès sans limite d'équipe",
+      "Règles de votre charte intégrées",
+    ],
+  },
+];
+
+/* Les cadres des quatre cellules, dans l'ordre : filets de la copie
+   (bas puis droite ; haut et bas puis gauche et droite ; idem ; haut puis
+   gauche). La formule mise en avant ajoute son fond. */
+const CADRES = [
+  "flex flex-col gap-8 max-lg:border-b lg:border-r",
+  "flex flex-col gap-8 max-lg:border-y lg:border-x",
+  "flex flex-col gap-8 max-lg:border-y lg:border-x",
+  "flex flex-col gap-8 max-lg:border-t lg:border-l",
+];
+
+const BOUTON =
+  "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full";
+
+function Coche() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-check text-[#737373] size-3"
+      aria-hidden="true"
+    >
+      <path d="M20 6 9 17l-5-5"></path>
+    </svg>
+  );
+}
 
 export default function Formules() {
   return (
@@ -66,754 +186,38 @@ export default function Formules() {
                   06 — Formules
                 </span>
                 <h2 className="text-[#737373] text-balance text-4xl font-medium tracking-tight">
-                  <span className="text-[#0a0a0a]">Le prix dépend</span> de la taille de votre agence
+                  <span className="text-[#0a0a0a]">Un dossier à prix fixe pour juger,</span> puis un prix par taille
+                  d&apos;agence
                 </h2>
               </div>
             </div>
             <div className="mt-12 grid gap-1.5 border *:p-6 max-lg:mx-auto max-lg:max-w-sm lg:mt-20 lg:grid-cols-4">
-              <div className="flex flex-col gap-8 max-lg:border-b lg:border-r">
-                <div>
-                  <p className="text-lg font-medium">Agence</p>
-                  <p className="text-[#737373] text-lg font-medium">Pour les agences de 1 à 5 personnes</p>
-                  <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
-                  <Link
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
-                    href={CONTACT.audit}
-                  >
-                    Réserver un audit
-                  </Link>
+              {FORMULES.map((f, i) => (
+                <div key={f.titre} className={`${f.avant ? "bg-[#fafafa] " : ""}${CADRES[i]}`}>
+                  <div>
+                    <p className="text-lg font-medium">{f.titre}</p>
+                    <p className="text-[#737373] text-lg font-medium">{f.pour}</p>
+                    <div className="my-8 block text-4xl font-medium tracking-tight">{f.prix}</div>
+                    {f.avant ? (
+                      <StarButton href={CONTACT.audit} className="w-full">
+                        Réserver un audit
+                      </StarButton>
+                    ) : (
+                      <Link className={BOUTON} href={CONTACT.audit}>
+                        Réserver un audit
+                      </Link>
+                    )}
+                  </div>
+                  <ul className="text-[#737373] list-outside space-y-3">
+                    {f.lignes.map((l) => (
+                      <li key={l} className="flex items-center gap-3">
+                        <Coche />
+                        {l}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="text-[#737373] list-outside space-y-3">
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Plans croisés, rapport PDF annoté
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Permis : PC1 à PC8 et PLU
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Accessibilité, ERP et RE2020
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    PLU, servitudes et risques lus depuis l&apos;adresse
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Calendrier du permis jusqu&apos;à la purge des recours
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Surfaces recalculées contre le Cerfa
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    RE2020 : attestation comparée aux plans
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Questions posées au dossier
-                  </li>
-                </ul>
-              </div>
-              <div className="bg-[#fafafa] flex flex-col gap-8 max-lg:border-y lg:border-x">
-                <div>
-                  <p className="text-lg font-medium">Cabinet</p>
-                  <p className="text-[#737373] text-lg font-medium">Pour les agences de 6 à 20 personnes</p>
-                  <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
-                  <StarButton href={CONTACT.audit} className="w-full">
-                    Réserver un audit
-                  </StarButton>
-                </div>
-                <ul className="text-[#737373] list-outside space-y-3">
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Tout ce que contient Agence
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Analyse des offres sur DPGF
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Visa des fiches techniques
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Situations et décomptes
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Visas calés sur les délais de commande
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Questions suivies jusqu&apos;à la réponse
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Métré des plans contre la DPGF
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Décennales contrôlées contre le lot
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Ordres de service : montant et délai
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Revérification à chaque indice
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Une question en un clic
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Checklists de l&apos;agence
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Export Excel par lot
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Utilisateurs sans supplément
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Hébergement dans l&apos;UE
-                  </li>
-                </ul>
-              </div>
-              <div className="flex flex-col gap-8 max-lg:border-y lg:border-x">
-                <div>
-                  <p className="text-lg font-medium">Groupement</p>
-                  <p className="text-[#737373] text-lg font-medium">Pour les groupements de maîtrise d&apos;œuvre</p>
-                  <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
-                  <Link
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
-                    href={CONTACT.audit}
-                  >
-                    Réserver un audit
-                  </Link>
-                </div>
-                <ul className="text-[#737373] list-outside space-y-3">
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Tout ce que contient Cabinet
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Bureaux d&apos;études invités
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Fonds de plan BET croisés
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Complétude du DOE à la réception
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Comptes rendus de chantier rédigés
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Réserves suivies jusqu&apos;à la fin de la GPA
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Honoraires par phase contre temps passé
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Dossier de défense décennale
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Registre daté des visas
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Historique des indices sans limite
-                  </li>
-                </ul>
-              </div>
-              <div className="flex flex-col gap-8 max-lg:border-t lg:border-l">
-                <div>
-                  <p className="text-lg font-medium">Sur mesure</p>
-                  <p className="text-[#737373] text-lg font-medium">
-                    Pour les grands comptes et maîtres d&apos;ouvrage
-                  </p>
-                  <div className="my-8 block text-4xl font-medium tracking-tight">Sur audit</div>
-                  <Link
-                    className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 [&_svg]:size-4 [&_svg]:shrink-0 shadow-sm bg-[#0a0a0a]/5 shadow-black/10 ring-1 ring-[#0a0a0a]/10 duration-200 hover:bg-[#f5f5f5]/50 h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 w-full"
-                    href={CONTACT.audit}
-                  >
-                    Réserver un audit
-                  </Link>
-                </div>
-                <ul className="text-[#737373] list-outside space-y-3">
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Tout ce que contient Groupement
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Contrôles définis avec vous
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Import depuis vos plateformes de projet
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Accès sans limite d&apos;équipe
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="lucide lucide-check text-[#737373] size-3"
-                      aria-hidden="true"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
-                    Règles de votre charte intégrées
-                  </li>
-                </ul>
-              </div>
+              ))}
             </div>
           </div>
         </section>

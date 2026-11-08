@@ -30,7 +30,7 @@ const QUESTIONS = [
   {
     id: "pieces",
     q: "Quelles pièces Lorani lit-il ?",
-    a: "Tout le dossier : plans, coupes, façades et nomenclatures en PDF, même scannés, ou en DWG ; CCTP, DPGF et offres des entreprises en Excel ou en PDF ; pièces du permis, fiches techniques, PV d'essais et situations de travaux. Il les rapproche ensuite entre elles.",
+    a: "Tout le dossier, du permis à la réception : plans, coupes, façades et nomenclatures en PDF, même scannés, ou en DWG ; CCTP, DPGF et offres des entreprises en Excel ou en PDF ; pièces du permis, fiches techniques, plans d'exécution, PV d'essais, situations de travaux, comptes rendus et PV de réception. Il les rapproche ensuite entre elles.",
   },
   {
     id: "bim",
@@ -41,6 +41,16 @@ const QUESTIONS = [
     id: "faux",
     q: "Que se passe-t-il en cas d'erreur de lecture ?",
     a: "L'erreur se voit immédiatement, car chaque point porte l'extrait de la planche, les deux valeurs lues et l'article cité. Un point écarté ne revient pas à l'indice suivant.",
+  },
+  {
+    id: "fiabilite",
+    q: "Comment la fiabilité est-elle mesurée ?",
+    a: "Un point est tenu pour valide quand vous confirmez, en le relisant, que la valeur lue figure bien dans la pièce à la page indiquée et que l'écart existe. Nous mesurons ce taux sur les points relus par les agences et nous le publions. Un contrôle à l'unité qui rend moins de trois points confirmés est remboursé.",
+  },
+  {
+    id: "ensemble",
+    q: "Pourquoi un seul outil du permis à la réception ?",
+    a: "Parce qu'une incohérence passe d'une phase à l'autre : une cote fausse au permis devient un poste faux à la DPGF, puis une réserve à la réception. Les outils qui traitent chacun une phase ne la voient pas passer. Lorani garde le même dossier d'un bout à l'autre, avec le référentiel français, et chaque décision y reste datée.",
   },
   {
     id: "decide",
@@ -110,7 +120,7 @@ const QUESTIONS = [
   {
     id: "essai",
     q: "Comment l'essayer ?",
-    a: "L'audit se fait sur un permis déjà instruit que vous connaissez. Vous comparez ce que Lorani relève à ce que l'instruction avait relevé, puis l'audit fixe la formule.",
+    a: "L'audit se fait sur un dossier déjà clos que vous connaissez : un permis instruit ou un DCE attribué. Vous comparez ce que Lorani relève à ce que l'instruction ou le chantier avait révélé, puis l'audit fixe la formule. Le premier dossier est à prix fixe, sans abonnement.",
   },
 ];
 

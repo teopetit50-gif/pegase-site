@@ -94,7 +94,7 @@ export default function Fonctionnement() {
               02 — Fonctionnement
             </span>
             <h2 className="text-[#737373] max-w-4xl text-balance text-4xl font-medium tracking-tight">
-              <span className="text-[#0a0a0a]">Quatre contrôles suivent la mission,</span> <br /> du permis à la
+              <span className="text-[#0a0a0a]">Quatre moments où le dossier est vérifié,</span> <br /> du dépôt du permis à la
               réception.
             </h2>
             <div className="mt-16 grid gap-6 md:mt-32 lg:grid-cols-[auto_1fr]">
@@ -108,7 +108,7 @@ export default function Fonctionnement() {
                     data-state="active"
                     className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:text-[#171717] h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 not-data-[state=active]:text-[#737373] hover:bg-transparent"
                   >
-                    Permis et DCE
+                    Permis et délais
                   </button>
                   <button
                     type="button"
@@ -116,7 +116,7 @@ export default function Fonctionnement() {
                     data-slot="button"
                     className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:text-[#171717] h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 not-data-[state=active]:text-[#737373] hover:bg-transparent"
                   >
-                    Analyse des offres
+                    DCE et offres
                   </button>
                   <button
                     type="button"
@@ -124,7 +124,7 @@ export default function Fonctionnement() {
                     data-slot="button"
                     className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:text-[#171717] h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 not-data-[state=active]:text-[#737373] hover:bg-transparent"
                   >
-                    Situations de travaux
+                    Situations et décisions
                   </button>
                   <button
                     type="button"
@@ -132,7 +132,7 @@ export default function Fonctionnement() {
                     data-slot="button"
                     className="cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[6px] text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#a1a1a1] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none active:scale-98 duration-200 [&_svg]:size-4 [&_svg]:shrink-0 hover:text-[#171717] h-9 px-4 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 not-data-[state=active]:text-[#737373] hover:bg-transparent"
                   >
-                    Visa des documents
+                    Visa des fiches techniques
                   </button>
                 </div>
               </div>
@@ -143,9 +143,9 @@ export default function Fonctionnement() {
                 >
                   <div className="flex flex-col justify-between pb-4 md:col-span-2">
                     <div className="md:pr-6 lg:pr-0">
-                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Permis et DCE</h3>
+                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Permis et délais</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Aucune planche n&apos;est lue seule.</span> Lorani compare chaque planche aux autres et au CCTP, puis signale chaque incohérence avec la page concernée.
+                        <span className="text-[#0a0a0a]">Le permis part complet, et son calendrier est tenu.</span> Lorani vérifie les pièces du Cerfa, la cohérence entre planches et les règles chiffrées du PLU, puis suit la demande de pièces, les délais, l&apos;affichage et la purge des recours, jour après jour.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">
@@ -190,7 +190,7 @@ export default function Fonctionnement() {
                           <path d="m3 17 2 2 4-4"></path>
                           <path d="m3 7 2 2 4-4"></path>
                         </svg>
-                        Plans contre CCTP et DPGF
+                        Pièces du Cerfa : complétude et cohérence entre planches
                       </li>
                       <li>
                         <svg
@@ -208,7 +208,7 @@ export default function Fonctionnement() {
                         >
                           <path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"></path>
                         </svg>
-                        Règles du PLU citées par article
+                        Règles chiffrées du PLU citées par article
                       </li>
                       <li>
                         <svg
@@ -226,7 +226,7 @@ export default function Fonctionnement() {
                         >
                           <path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"></path>
                         </svg>
-                        Délai d&apos;instruction suivi jusqu&apos;à la purge
+                        Demande de pièces, délais, affichage et recours suivis
                       </li>
                     </ul>
                   </div>
@@ -473,9 +473,9 @@ export default function Fonctionnement() {
                 <div id="alerts" className="grid scroll-mt-32 gap-6 sm:grid-cols-2 md:grid-cols-5 lg:gap-12 *:min-w-0">
                   <div className="flex flex-col justify-between pb-4 md:col-span-2">
                     <div className="md:pr-6 lg:pr-0">
-                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Analyse des offres</h3>
+                      <h3 className="text-[#737373] mb-6 text-sm font-medium">DCE et offres</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Chaque offre est alignée sur la DPGF.</span> Lorani compare les offres reçues ligne par ligne, si bien que les postes non chiffrés ressortent avant l&apos;attribution.
+                        <span className="text-[#0a0a0a]">Aucune planche n&apos;est lue seule.</span> Lorani croise les plans avec le CCTP et la DPGF, puis chaque offre reçue avec la DPGF, ligne par ligne : les incohérences et les postes non chiffrés ressortent avant l&apos;attribution.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">
@@ -496,7 +496,7 @@ export default function Fonctionnement() {
                           <path d="M10.268 21a2 2 0 0 0 3.464 0"></path>
                           <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path>
                         </svg>
-                        Postes non chiffrés et réserves
+                        Planches contre CCTP et DPGF, poste par poste
                       </li>
                       <li>
                         <svg
@@ -515,7 +515,7 @@ export default function Fonctionnement() {
                           <circle cx="12" cy="12" r="10"></circle>
                           <path d="M12 6v6l4 2"></path>
                         </svg>
-                        Écarts à l&apos;estimation par ligne
+                        Offres contre DPGF : postes non chiffrés, écarts
                       </li>
                       <li>
                         <svg
@@ -775,9 +775,9 @@ export default function Fonctionnement() {
                 >
                   <div className="flex flex-col justify-between pb-4 md:col-span-2">
                     <div className="md:pr-6 lg:pr-0">
-                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Situations de travaux</h3>
+                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Situations et décisions</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
-                        <span className="text-[#0a0a0a]">Chaque situation est contrôlée.</span> Lorani compare la situation reçue au marché, à la précédente et au compte rendu de chantier, puis chiffre l&apos;écart.
+                        <span className="text-[#0a0a0a]">Chaque situation est contrôlée, chaque décision est datée.</span> Lorani compare la situation reçue au marché, à la précédente et au compte rendu de chantier, chiffre l&apos;écart, puis inscrit ce que vous décidez au journal de l&apos;opération.
                       </p>
                     </div>
                     <ul className="text-[#737373] mt-8 divide-y *:flex *:items-center *:gap-3 *:py-3">
@@ -858,7 +858,7 @@ export default function Fonctionnement() {
                           <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
                           <rect x="2" y="4" width="20" height="16" rx="2"></rect>
                         </svg>
-                        Ordres de service : montant et délai
+                        Ordres de service et décisions, datés et motivés
                       </li>
                     </ul>
                   </div>
@@ -1076,7 +1076,7 @@ export default function Fonctionnement() {
                 >
                   <div className="flex flex-col justify-between pb-4 md:col-span-2">
                     <div className="md:pr-6 lg:pr-0">
-                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Visa des documents</h3>
+                      <h3 className="text-[#737373] mb-6 text-sm font-medium">Visa des fiches techniques</h3>
                       <p className="text-[#737373] text-balance text-lg font-medium">
                         <span className="text-[#0a0a0a]">Chaque fiche technique est confrontée au CCTP.</span> Lorani vérifie le classement au feu, l&apos;Avis Technique et les PV d&apos;essai de chaque document d&apos;exécution, puis prépare le bordereau de visa avec les observations en regard : visa sans observation (VSO), visa avec observations (VAO) ou refus.
                       </p>

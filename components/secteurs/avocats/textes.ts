@@ -14,9 +14,27 @@
      « Soumettre un dossier » compris. Les boutons le rendent en <Link>.
    · CONTACT.mail, LIENS, NAV et PIED servaient l'entête et le pied du site
      source, qui ne viennent pas (ceux d'Omega servent) : retirés.
+
+   08/11/2026 — TAMILA ÉLARGIE (Teo : « reformule les deux pages avec la
+   nouvelle idée »). Le produit ne s'arrête plus au dossier de faits : il
+   vérifie le dossier entier, de la première pièce à l'archivage, selon le
+   brief docs/briefs-saas/tamila-v2.md. Ce que la page dit de plus :
+   · les textes et les arrêts cités sont vérifiés (ils existent, ils sont
+     en vigueur, ils disent ce qu'on leur fait dire) ;
+   · les conclusions adverses et les expertises sont rapprochées des pièces ;
+   · les dossiers répétitifs sont vérifiés contre les modèles du cabinet,
+     par lot — Tamila ne rédige rien ;
+   · tout ce qui est relevé et décidé est daté dans un journal d'audit
+     exportable ;
+   · la formule d'entrée devient « Découverte » : un dossier déjà plaidé,
+     à prix fixe, sans abonnement, remboursé si moins de trois points sont
+     confirmés. Toujours aucun montant sur la page (règle maison).
+   Le site source OMEGA/cabinetos-site n'a pas suivi : la page d'Omega est
+   la version de référence.
    ══════════════════════════════════════════════════════════════════════ */
 
-/* Tous les textes de la page. Source du fond : plans-et-decisions/secteurs/cabinets-avocats-2026-09.md (§4 et §6).
+/* Tous les textes de la page. Source du fond : plans-et-decisions/secteurs/cabinets-avocats-2026-09.md (§4 et §6),
+   puis docs/briefs-saas/tamila-v2.md (08/11).
    Registre (réécriture du 24/09, demande de Teo) : celui d'un cabinet — vouvoiement, vocabulaire du métier
    (pièces, bordereau de communication, diligences, convention d'honoraires), phrases complètes au verbe
    conjugué (OMEGA/DOCTRINE-TEXTES-SAAS.md, partie II : ni fragments, ni ternaires, ni antithèses en série).
@@ -34,11 +52,11 @@ export const CONTACT = {
 
 export const HERO = {
   badge: "NOUVEAU",
-  annonce: "Tamila suit désormais vos délais d'appel",
-  titreAvant: "Une pièce reçue hier peut",
-  titreMot: "contredire",
-  titreApres: "tout votre dossier",
-  texte: "Tamila la rapproche de vos faits dès son arrivée et vous signale ce qu'elle change. Pour chaque dossier, vous disposez d'une chronologie dont chaque fait renvoie à sa pièce, des contradictions relevées entre pièces et d'un bordereau rapproché de vos conclusions.",
+  annonce: "Textes et arrêts cités : désormais vérifiés",
+  titreAvant: "Le dossier entier,",
+  titreMot: "vérifié",
+  titreApres: "de la première pièce à l'audience",
+  texte: "Tamila lit tout ce que contient le dossier : vos conclusions et celles du confrère, les pièces des deux parties, les textes et les arrêts cités, le contrat, le rapport d'expertise. Elle rattache chaque fait à sa pièce et à sa page, vérifie que chaque référence existe, est en vigueur et dit ce qu'on lui fait dire, puis consigne ce qu'elle a relevé et ce que vous en avez décidé dans un journal daté.",
   bouton: "Réserver un audit",
   legende: "Palais de justice de Paris, boulevard du Palais. À l'écran, des conclusions et leur dossier de faits (exemple).",
 };
@@ -47,52 +65,28 @@ export const PIECES = {
   avant: "Chaque pièce est lue, même",
   mot: "manuscrite",
   apres: "",
-  familles: ["Conclusions", "Bordereaux", "Pièces adverses", "Expertises", "Pré-rapports", "Constats", "Courriels", "Avis RPVA", "Scans"],
+  familles: ["Conclusions", "Bordereaux", "Pièces adverses", "Expertises", "Contrats", "Constats", "Textes cités", "Arrêts cités", "Scans"],
 };
 
 export const FONCTIONNALITES = {
   titreL1: "À l'audience, un fait vaut",
   titreL2: "ce que vaut",
   titreMot: "sa pièce",
-  texte: "Tamila reconstitue les faits à partir de chaque pièce, même scannée, et renvoie chacun d'eux à la page qui le fonde. Vous vérifiez chaque fait avant de vous en servir.",
+  texte: "Tamila reconstitue les faits à partir de chaque pièce, vérifie chaque référence citée et renvoie chaque point à la page qui le fonde. Un point sans preuve n'est pas affiché ; vous tranchez sur ce qui reste.",
   cartes: [
-    { titre: "Pièces adverses du jour", texte: "Avant l'audience, vous savez ce que les pièces reçues hier changent à votre dossier de faits." },
-    { titre: "Chronologie sourcée", texte: "Chaque fait est daté, résumé et rattaché à la page de sa pièce." },
-    { titre: "Bordereau contrôlé", texte: "Chaque prétention est rapprochée des pièces invoquées et de leur numérotation." },
-    { titre: "Contradictions relevées", texte: "Quand deux pièces divergent, Tamila les présente côte à côte et vous laisse trancher." },
-    { titre: "Secret professionnel", texte: "L'éditeur est français, et vos pièces sont chiffrées sur votre poste avant d'être conservées dans l'UE." },
+    { titre: "Pièces adverses à l'arrivée", texte: "Chaque pièce reçue est rapprochée de votre dossier de faits le jour même : ce qu'elle confirme, ce qu'elle contredit, et ce qu'elle appelle comme réponse." },
+    { titre: "Chronologie sourcée", texte: "Chaque fait est daté, résumé et rattaché à la page de sa pièce. Les trous de la chronologie et les faits contredits sont signalés." },
+    { titre: "Bordereau et références contrôlés", texte: "Chaque prétention est rapprochée des pièces invoquées (art. 768). Chaque texte et chaque arrêt cités sont vérifiés : ils existent, ils sont en vigueur, ils disent ce qu'on leur fait dire." },
+    { titre: "Contradictions relevées, preuve à l'appui", texte: "Quand deux pièces divergent, ou quand les conclusions adverses contredisent une pièce du dossier, Tamila les présente côte à côte, avec la page, et vous laisse trancher." },
+    { titre: "Journal d'audit et secret professionnel", texte: "Tout ce que Tamila relève et tout ce que vous en décidez est daté, rattaché à sa pièce et exportable en un dossier scellé. Vos pièces sont chiffrées sur votre poste et conservées en France." },
   ],
 };
 
 export const POINT = {
-  titreL1: "Les échéances du cabinet se suivent",
-  titreMot: "dossier par dossier",
-  texte: "Chaque matin à 7 h, avant votre première audience, un courriel réunit les délais de procédure de la semaine, les pièces que le cabinet attend encore, les forfaits dépassés et les dossiers sans diligence, chacun avec l'action à engager.",
+  titreL1: "Chaque matin, l'état de vérification",
+  titreMot: "de tous vos dossiers",
+  texte: "Chaque matin à 7 h, avant votre première audience, un courriel réunit, dossier par dossier, les délais de la semaine, les pièces que le cabinet attend encore, les références à corriger et les points de conformité à lever, chacun avec l'action à engager.",
   cartes: [
-    {
-      titre: "Forfaits dépassés",
-      texte: "Le temps passé est rapporté à la convention d'honoraires.",
-      valeur: "3 dossiers",
-      tendance: "2 factures à émettre",
-      colonnes: ["Dossier", "Mode", "Temps", "Consommé"],
-      lignes: [
-        ["Bail", "Forfait", "14 h", "132 %"],
-        ["Licenciement", "Forfait", "9 h", "104 %"],
-        ["Construction", "Convention", "31 h", "87 %"],
-      ],
-    },
-    {
-      titre: "Sans diligence",
-      texte: "Ces dossiers n'ont connu aucun acte depuis trente jours.",
-      valeur: "7 dossiers",
-      tendance: "2 avec audience en octobre",
-      colonnes: ["Dossier", "Acte", "Jours", "Audience"],
-      lignes: [
-        ["Succession", "Courriel", "46 j", "—"],
-        ["Copropriété", "Conclusions", "38 j", "14 oct."],
-        ["Travail", "RDV", "33 j", "21 oct."],
-      ],
-    },
     {
       titre: "Délais de procédure",
       texte: "Les délais sont lus dans les avis RPVA et classés du plus proche au plus lointain.",
@@ -117,6 +111,30 @@ export const POINT = {
         ["Copropriété", "Confrère", "Pièce n° 12 citée", "18 j"],
       ],
     },
+    {
+      titre: "Références à corriger",
+      texte: "Chaque texte et chaque arrêt cités dans les écritures sont vérifiés : existence, version en vigueur, portée.",
+      valeur: "6 références",
+      tendance: "2 dans des conclusions à déposer",
+      colonnes: ["Dossier", "Référence", "État", "Action"],
+      lignes: [
+        ["Bail", "L. 145-41", "Modifié", "À corriger"],
+        ["Travail", "Soc. 2019", "Dépassé", "À lire"],
+        ["Construction", "1792-4-1", "Valide", "Aucune"],
+      ],
+    },
+    {
+      titre: "Conformité du dossier",
+      texte: "Bordereaux, pièces communiquées, accès aux pièces : les points de conformité de chaque dossier, et la piste d'audit prête à exporter.",
+      valeur: "3 points",
+      tendance: "1 sommation prête",
+      colonnes: ["Dossier", "Contrôle", "Pièces", "Action"],
+      lignes: [
+        ["Copropriété", "Bordereau", "2", "Sommation"],
+        ["Succession", "Pièce citée", "1", "Relancer"],
+        ["Bail", "Accès", "12", "Exporter"],
+      ],
+    },
   ],
   exemple: "Exemple",
 };
@@ -124,7 +142,7 @@ export const POINT = {
 export const CONNEXIONS = {
   titre: "Vos outils restent en place",
   bouton: "Voir les garanties",
-  outils: ["Messagerie", "Agenda", "Dossiers partagés", "Logiciel métier", "Pièces scannées", "Exports"],
+  outils: ["Messagerie", "Agenda", "Dossiers partagés", "Logiciel de cabinet", "Pièces scannées", "Exports"],
 };
 
 /* Section « Secret professionnel ». Chaque engagement est une clause du contrat proposé au cabinet ;
@@ -144,44 +162,44 @@ export const SECRET = {
     ["Statut", "Sous-traitant, art. 28 RGPD"],
   ],
   engagements: [
-    { titre: "Vous choisissez les dossiers lus", texte: "Tamila ne lit que les dossiers que vous lui ouvrez, un par un, et ne parcourt jamais votre messagerie de lui-même." },
+    { titre: "Vous choisissez les dossiers lus", texte: "Tamila ne lit que les dossiers que vous lui ouvrez, un par un, et ne parcourt jamais votre messagerie ni votre base de clients de lui-même." },
     { titre: "Aucun entraînement sur vos pièces", texte: "Vos pièces ne servent à entraîner aucun modèle, ni le nôtre ni celui d'un fournisseur. Cette exclusion est une clause du contrat." },
-    { titre: "Effacement à la clôture", texte: "Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez l'export que vous avez téléchargé." },
+    { titre: "Effacement à la clôture", texte: "Lorsque vous clôturez un dossier, ses pièces et son dossier de faits sont effacés. Vous conservez le dossier de clôture et le journal que vous avez exportés." },
     { titre: "Stockées en France, lues en Europe", texte: "Les pièces sont chiffrées pendant leur transfert et pendant leur conservation. Elles sont conservées en France. Leur lecture se fait dans l'Union européenne, et aucune copie n'y est gardée." },
-    { titre: "Chaque accès est journalisé", texte: "Le journal indique qui a consulté quel dossier, et à quelle date. Vous pouvez l'exporter à tout moment." },
-    { titre: "Aucune écriture dans vos outils", texte: "Tamila dispose d'un accès en lecture seule : il n'envoie aucun message, ne communique aucune pièce et ne modifie rien dans votre logiciel." },
+    { titre: "Chaque accès est journalisé", texte: "Le journal indique qui a consulté quel dossier, ce qui a été relevé et ce que vous en avez décidé, à quelle date. Vous pouvez l'exporter à tout moment." },
+    { titre: "Aucune écriture dans vos outils", texte: "Tamila dispose d'un accès en lecture seule : il n'envoie aucun message, ne communique aucune pièce, ne rédige aucun acte et ne modifie rien dans votre logiciel." },
   ],
   mention: "Loi n° 71-1130 du 31 décembre 1971, art. 66-5 · RIN, art. 2 · RGPD, art. 28",
 };
 
 export const FORMULES = {
-  titreAvant: "Un seul prix pour",
-  titreMot: "tout le cabinet",
-  texte: "Le tarif est fixé à l'issue d'un audit mené sur l'un de vos dossiers, une fois que vous avez jugé le dossier de faits sur pièces.",
+  titreAvant: "Un dossier pour juger,",
+  titreMot: "puis tout le cabinet",
+  texte: "Le premier dossier est vérifié à prix fixe, sans abonnement : vous jugez sur pièces. Le tarif du cabinet est fixé ensuite, à l'issue de cet audit.",
   bascule: ["Contentieux", "Dommage corporel"],
   plans: [
     {
-      id: "pre-lecture",
-      titre: "Pré-lecture",
-      desc: "Pour le cabinet qui veut aborder chaque audience avec un dossier de faits complet, dont chaque fait renvoie à sa pièce.",
-      prix: "Sur audit",
+      id: "decouverte",
+      titre: "Découverte",
+      desc: "Pour le cabinet qui veut juger Tamila sur un dossier déjà plaidé, vérifié de bout en bout : faits, pièces, références, conformité.",
+      prix: "Prix fixe",
       bouton: "Réserver un audit",
-      note: { Contentieux: "Réalisé pendant l'audit, sur un dossier réel", "Dommage corporel": "Réalisé pendant l'audit, sur un dossier réel" },
+      note: { Contentieux: "Un dossier, sans abonnement, réalisé pendant l'audit", "Dommage corporel": "Un dossier, sans abonnement, réalisé pendant l'audit" },
       inclut: {
-        Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces", "Bordereau contrôlé (art. 768)", "Dispositif contre motifs (art. 954)", "Prétentions nouvelles et concentration en appel", "Pièces citées jamais communiquées, sommation prête", "Dires à l'expert préparés sur le pré-rapport", "Trous de la chronologie et faits contredits", "Index des personnes et faits classés par moyen", "Questions posées au dossier", "Premier jet de l'exposé des faits", "Dossier de plaidoirie et renvois cliquables", "Pièces adverses du jour", "Pièces scannées et manuscrites", "Export Word et PDF", "Hébergement en France"],
-        "Dommage corporel": ["Chronologie des soins", "Interruptions de soins repérées", "Nomenclature Dintilhac pré-remplie", "Écarts entre rapports d'expertise", "Dires à l'expert préparés sur le pré-rapport", "Source de chaque poste de préjudice", "Questions posées au dossier médical", "Premier jet de l'exposé des faits", "Pièces médicales scannées", "Export Word et PDF", "Effacement à la clôture"],
+        Contentieux: ["Dossier de faits daté et sourcé", "Contradictions entre pièces, côte à côte", "Bordereau contrôlé (art. 768)", "Dispositif contre motifs (art. 954)", "Textes cités : existence et version en vigueur", "Arrêts cités : existence et portée", "Prétentions nouvelles et concentration en appel", "Pièces citées jamais communiquées, sommation prête", "Conclusions adverses rapprochées des pièces", "Dires à l'expert préparés sur le pré-rapport", "Trous de la chronologie et faits contredits", "Index des personnes et faits classés par moyen", "Rapport de cohérence et tableau des références", "Journal d'audit du dossier, exportable", "Pièces scannées et manuscrites", "Export Word et PDF", "Remboursé si moins de trois points confirmés"],
+        "Dommage corporel": ["Chronologie des soins", "Interruptions de soins repérées", "Nomenclature Dintilhac pré-remplie", "Écarts entre rapports d'expertise", "Rapport d'expertise confronté à la mission", "Dires à l'expert préparés sur le pré-rapport", "Source de chaque poste de préjudice", "Textes et arrêts cités vérifiés", "Questions posées au dossier médical", "Journal d'audit du dossier, exportable", "Pièces médicales scannées", "Export Word et PDF", "Remboursé si moins de trois points confirmés"],
       },
     },
     {
       id: "cabinet",
       titre: "Cabinet",
-      desc: "Pour l'associé qui veut connaître chaque matin l'état des honoraires forfaitaires, des dossiers en sommeil et de la charge de chaque collaborateur.",
+      desc: "Pour le cabinet qui veut chaque dossier vérifié en continu, de la première pièce à l'archivage, et une piste d'audit prête en cas de contrôle.",
       prix: "Sur audit",
       bouton: "Réserver un audit",
       note: { Contentieux: "Tarif par cabinet, fixé à l'audit", "Dommage corporel": "Tarif par cabinet, fixé à l'audit" },
       inclut: {
-        Contentieux: ["L'ensemble de la pré-lecture", "Point du matin à 7 h", "Délais d'appel lus dans l'avis RPVA", "Pièces attendues du client et de l'expert", "Forfaits dépassés", "Marge par dossier", "Contentieux en série comparés", "Dossiers sans diligence", "Charge par avocat", "Temps passé proposé à la saisie", "Lecture seule de vos outils"],
-        "Dommage corporel": ["L'ensemble de la pré-lecture", "Point du matin à 7 h", "Délais d'appel lus dans l'avis RPVA", "Pièces attendues du client et de l'expert", "Conventions et forfaits", "Marge par dossier", "Dossiers en série comparés", "Dossiers sans diligence", "Charge par avocat", "Temps passé proposé à la saisie", "Lecture seule de vos outils"],
+        Contentieux: ["Tout ce que contient Découverte, sur tous vos dossiers", "Pièces adverses rapprochées le jour de leur arrivée", "Références re-vérifiées à chaque nouveau dépôt", "Dossiers répétitifs vérifiés contre vos modèles, par lot", "Point du matin à 7 h", "Délais lus dans les avis RPVA", "Pièces attendues du client, de l'expert et du confrère", "Piste d'audit du cabinet, export scellé", "Dossier de clôture et archivage daté", "Forfaits dépassés et dossiers sans diligence", "Charge par avocat", "Lecture seule de vos outils"],
+        "Dommage corporel": ["Tout ce que contient Découverte, sur tous vos dossiers", "Pièces médicales rapprochées le jour de leur arrivée", "Références re-vérifiées à chaque nouveau dépôt", "Dossiers en série vérifiés contre vos modèles", "Point du matin à 7 h", "Délais lus dans les avis RPVA", "Pièces attendues du client et de l'expert", "Piste d'audit du cabinet, export scellé", "Dossier de clôture et archivage daté", "Conventions et forfaits suivis", "Charge par avocat", "Lecture seule de vos outils"],
       },
     },
   ],
@@ -203,7 +221,7 @@ export const MATIERES = {
 export const APPEL = {
   titreAvant: "Jugez-en sur",
   titreMot: "un dossier déjà plaidé",
-  texte: "Lors de l'audit, vous nous confiez les pièces d'un dossier clos, puis vous comparez le dossier de faits obtenu à celui que vous aviez constitué,",
+  texte: "Lors de l'audit, vous nous confiez les pièces d'un dossier clos. Vous comparez le rapport de cohérence, les références vérifiées et le dossier de faits à ce que le cabinet avait constitué,",
   texteSuite: "sans rien installer.",
   bouton: "Réserver un audit",
   legende: "Palais de justice de Paris, cour du Mai",

@@ -650,10 +650,9 @@ export default function Dossier() {
                     <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
                     <path d="m19 9-5 5-4-4-3 3"></path>
                   </svg>{" "}
-                  Vos règles internes.
+                  Un journal opposable.
                 </span>{" "}
-                Les listes de contrôle et la charte graphique de l&apos;agence s&apos;ajoutent aux contrôles
-                réglementaires.
+                Chaque point, chaque visa et chaque décision sont datés et exportables en un dossier, utilisable des années plus tard en cas de sinistre.
               </p>
             </div>
           </div>

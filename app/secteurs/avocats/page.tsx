@@ -72,11 +72,17 @@ import SeCombine from "@/components/secteurs/SeCombine";
    écran produit qui montre des conclusions annotées. Le détail et le
    relevé : en tête de avocats.css. Le site source OMEGA/cabinetos-site
    n'a pas suivi : la page d'Omega est désormais la version de référence.
+
+   08/11 — TAMILA ÉLARGIE : la page vend le dossier vérifié de bout en bout
+   (références citées vérifiées, conclusions adverses et expertises,
+   dossiers répétitifs contre les modèles du cabinet, journal d'audit,
+   formule Découverte à prix fixe). Textes dans textes.ts ; brief dans
+   docs/briefs-saas/tamila-v2.md. La structure de la page ne bouge pas.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Tamila · chaque fait du dossier, renvoyé à sa pièce";
+const TITRE = "Tamila · le dossier contentieux vérifié, de la première pièce à l'archivage";
 const DESCRIPTION =
-  "Tamila lit toutes les pièces d'un dossier et rend la chronologie, les contradictions et le bordereau contrôlé, chaque fait renvoyé à sa page. Conçu par Omega pour les cabinets d'avocats.";
+  "Tamila lit l'intégralité d'un dossier contentieux, rattache chaque fait et chaque référence à sa pièce et à sa page, signale les incohérences prouvées et tient une piste d'audit exportable. Conçu par Omega pour les cabinets d'avocats.";
 
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,

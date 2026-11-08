@@ -376,7 +376,7 @@ export default function Produit() {
                       <span className="block text-[#737373]">ne se voit qu&apos;en les lisant ensemble.</span>
                     </h2>
                     <p className="mt-6 text-balance text-lg text-[#737373]">
-                      Lorani lit toutes les planches, les unes contre les autres et contre les pièces écrites. Vous arbitrez sur un dossier vérifié avant l&apos;envoi.
+                      Lorani lit toutes les pièces de l&apos;opération, les unes contre les autres : planches, CCTP, DPGF, offres, fiches techniques, situations et PV. Du dépôt du permis à la réception, vous arbitrez sur un dossier vérifié, et chaque décision reste datée.
                     </p>
                     <div className="mt-8">
                       <StarButton href={CONTACT.audit}>Réserver un audit</StarButton>
@@ -413,9 +413,9 @@ export default function Produit() {
                 ></div>
                 <div className="relative z-10">
                   <span className="text-[14px] tabular-nums text-[#0a0a0a]/25">01</span>
-                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Chaque planche est croisée avec les autres</h3>
+                  <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Chaque pièce est croisée avec les autres</h3>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-[#0a0a0a]/45">
-                    Lorani relit ensemble les plans, les coupes, les façades, les nomenclatures et les renvois. Une cote modifiée à un endroit est retrouvée partout où elle apparaît.
+                    Lorani relit ensemble les plans, les coupes, les façades, le CCTP, la DPGF, les offres et les fiches techniques. Une cote modifiée à un endroit est retrouvée partout où elle apparaît.
                   </p>
                 </div>
               </div>
@@ -445,7 +445,7 @@ export default function Produit() {
                   <span className="text-[14px] tabular-nums text-[#0a0a0a]/25">02</span>
                   <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">Les règles opposables sont citées</h3>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-[#0a0a0a]/45">
-                    Chaque point cite l&apos;article qu&apos;il met en défaut : règlement du plan local d&apos;urbanisme (PLU), accessibilité, sécurité incendie des établissements recevant du public (ERP) ou RE2020.
+                    Chaque point cite l&apos;article qu&apos;il met en défaut : règlement du plan local d&apos;urbanisme (PLU), accessibilité, sécurité incendie des établissements recevant du public (ERP), RE2020, DTU ou Avis Technique.
                   </p>
                 </div>
               </div>
@@ -505,11 +505,10 @@ export default function Produit() {
                 <div className="relative z-10">
                   <span className="text-[14px] tabular-nums text-[#0a0a0a]/25">04</span>
                   <h3 className="mt-2 text-[18px] font-medium tracking-tight text-[#0a0a0a]">
-                    L&apos;architecte décide
+                    L&apos;architecte décide, et la décision reste
                   </h3>
                   <p className="mt-1.5 text-[14px] leading-relaxed text-[#0a0a0a]/45">
-                    Lorani ne modifie aucun fichier : il remet une liste de points à arbitrer, chacun avec la pièce et
-                    la page concernées.
+                    Lorani ne modifie aucun fichier : il remet une liste de points à arbitrer, chacun avec la pièce et la page. Ce que vous en décidez est daté et versé au journal de l&apos;opération.
                   </p>
                 </div>
               </div>

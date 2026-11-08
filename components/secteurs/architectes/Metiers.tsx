@@ -21,6 +21,8 @@
      ici) retirées ; le rail tourne par `.architectes-rail` et le bandeau par
      les keyframes `architectes-trusted-marquee` d'architectes.css.
    · Posée dans la marge de 30 px de la page (page.tsx).
+   · 08/11 — Lorani élargie : une cinquième carte, la réception (réserve sans
+     levée datée), dans les deux copies du rail ; le titre dit « Cinq étapes ».
    · Le second titre (« Quatre étapes où une incohérence coûte cher. »)
      était en `sm:whitespace-nowrap` : à 768 il fait 746 px pour 658 de
      colonne, et la source le coupait déjà (« coûte ch… », rogné par le
@@ -42,7 +44,7 @@ export default function Metiers() {
               </span>
               <p className="font-sans text-4xl font-medium tracking-tight text-[#0a0a0a]">Où le dossier se perd-il ?</p>
               <h2 className="mt-1 font-sans text-4xl font-medium tracking-tight text-[#737373] lg:whitespace-nowrap">
-                Quatre étapes où une incohérence coûte cher.
+                Cinq étapes où une incohérence coûte cher.
               </h2>
             </div>
           </div>
@@ -245,6 +247,54 @@ export default function Metiers() {
                   />
                 </div>
                 <p className="flex min-h-48 flex-1 p-6 text-xl leading-snug tracking-tight text-[#0a0a0a] md:p-8 md:text-2xl">
+                  Le PV de réception porte une réserve sans levée datée, et le dossier de clôture la signale avant la fin de la
+                  garantie de parfait achèvement plutôt qu&apos;au premier sinistre.
+                </p>
+                <footer className="flex items-center border-t border-[#e5e5e5]">
+                  <div className="flex min-w-0 flex-1 items-center gap-3 p-4">
+                    <span className="relative size-9 shrink-0 overflow-hidden rounded-full bg-[#0a0a0a]/[0.06]">
+                      <img
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        data-nimg="fill"
+                        className="object-contain p-2"
+                        style={{
+                          position: "absolute",
+                          height: "100%",
+                          width: "100%",
+                          left: "0",
+                          top: "0",
+                          right: "0",
+                          bottom: "0",
+                          color: "transparent",
+                        }}
+                        src="/secteurs-architectes/glyphes/pdf.svg"
+                      />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-[#0a0a0a]">
+                        Agence de 8 personnes
+                      </span>
+                      <span className="block truncate text-sm text-[#737373]">Logement</span>
+                    </span>
+                  </div>
+                  <span className="border-l border-[#e5e5e5] px-4 py-5 text-right text-xs text-[#737373]">
+                    Réception et clôture
+                  </span>
+                </footer>
+              </article>
+              <article className="flex w-[min(86vw,540px)] shrink-0 flex-col overflow-hidden rounded-2xl border border-[#e5e5e5] bg-[#fafafa]">
+                <div className="relative aspect-[16/7] shrink-0 overflow-hidden border-b border-[#e5e5e5]">
+                  <img
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="size-full object-cover grayscale transition duration-700 ease-out hover:grayscale-0"
+                    src="/secteurs-architectes/photos/logement.jpg"
+                  />
+                </div>
+                <p className="flex min-h-48 flex-1 p-6 text-xl leading-snug tracking-tight text-[#0a0a0a] md:p-8 md:text-2xl">
                   Le plan de masse et la coupe donnent deux cotes de recul différentes, et l&apos;incohérence est
                   corrigée avant le dépôt plutôt qu&apos;à la demande du service instructeur.
                 </p>
@@ -417,6 +467,54 @@ export default function Metiers() {
                   </div>
                   <span className="border-l border-[#e5e5e5] px-4 py-5 text-right text-xs text-[#737373]">
                     Visa des documents
+                  </span>
+                </footer>
+              </article>
+              <article className="flex w-[min(86vw,540px)] shrink-0 flex-col overflow-hidden rounded-2xl border border-[#e5e5e5] bg-[#fafafa]">
+                <div className="relative aspect-[16/7] shrink-0 overflow-hidden border-b border-[#e5e5e5]">
+                  <img
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="size-full object-cover grayscale transition duration-700 ease-out hover:grayscale-0"
+                    src="/secteurs-architectes/photos/logement.jpg"
+                  />
+                </div>
+                <p className="flex min-h-48 flex-1 p-6 text-xl leading-snug tracking-tight text-[#0a0a0a] md:p-8 md:text-2xl">
+                  Le PV de réception porte une réserve sans levée datée, et le dossier de clôture la signale avant la fin de la
+                  garantie de parfait achèvement plutôt qu&apos;au premier sinistre.
+                </p>
+                <footer className="flex items-center border-t border-[#e5e5e5]">
+                  <div className="flex min-w-0 flex-1 items-center gap-3 p-4">
+                    <span className="relative size-9 shrink-0 overflow-hidden rounded-full bg-[#0a0a0a]/[0.06]">
+                      <img
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        data-nimg="fill"
+                        className="object-contain p-2"
+                        style={{
+                          position: "absolute",
+                          height: "100%",
+                          width: "100%",
+                          left: "0",
+                          top: "0",
+                          right: "0",
+                          bottom: "0",
+                          color: "transparent",
+                        }}
+                        src="/secteurs-architectes/glyphes/pdf.svg"
+                      />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-[#0a0a0a]">
+                        Agence de 8 personnes
+                      </span>
+                      <span className="block truncate text-sm text-[#737373]">Logement</span>
+                    </span>
+                  </div>
+                  <span className="border-l border-[#e5e5e5] px-4 py-5 text-right text-xs text-[#737373]">
+                    Réception et clôture
                   </span>
                 </footer>
               </article>
