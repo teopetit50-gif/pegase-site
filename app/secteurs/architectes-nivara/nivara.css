@@ -1,0 +1,364 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /secteurs/architectes-nivara — la peau Nivara (09/11/2026)
+
+   Tout ce que la référence déclare en propre, relevé dans sa feuille
+   servie (https://nivara-architecture-template.vercel.app/_next/static/
+   immutable/chunks/42551xvrx7c0r.css, Tailwind v4) et recopié ici tel
+   quel, mais BORNÉ à `.p-nivara` : rien sur `:root`, rien qui déborde sur
+   le reste du site (règle 2 des pages métier, voir
+   app/secteurs/architectes/page.tsx).
+
+   · Les jetons (`@layer theme` de la référence) : couleurs paper / ink /
+     graphite / mute / rule / charcoal, l'échelle de texte caption → hero,
+     les deux courbes et les deux durées.
+   · Les classes nommées de la référence (`.scrim`, `.link`,
+     `.font-display`, `.font-headline`, `.font-statement`, `.prose-long`,
+     `.theme-dark`, `.text-*` de l'échelle, `.bg-*` / `.text-*` de
+     couleur), que Tailwind ne génère pas ici puisqu'elles ne sont pas
+     dans le thème du site.
+   · Les images-clés et classes d'animation du premier écran et du
+     carrousel (frame-grow, hero-name, roll-in…). Les APPARITIONS au
+     défilement, elles, ne viennent pas de Nivara : c'est l'effet de
+     l'accueil d'omegaai.fr (components/accueil/Apparition.tsx, demande
+     de Teo du 09/11), et c'est la seule exception à la copie.
+   · La police : Inter Tight (Google Fonts, licence SIL Open Font 1.1,
+     réutilisable), les deux fichiers latin et latin-ext servis par la
+     référence, copiés dans public/secteurs-architectes-nivara/polices/.
+     Le repli « Inter Tight Fallback » (Arial recalibrée) est celui de
+     next/font chez Nivara.
+
+   Les points de rupture de Nivara sont 810 px (`m:`) et 1200 px (`l:`),
+   pas ceux du site : les composants les écrivent en variantes arbitraires
+   `min-[810px]:` et `min-[1200px]:`, pour que 768 reste en dessin mobile
+   et 1024 en dessin intermédiaire, comme chez la référence.
+   ══════════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/secteurs-architectes-nivara/polices/inter-tight-latin-ext.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Inter Tight";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/secteurs-architectes-nivara/polices/inter-tight-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Inter Tight Fallback";
+  src: local(Arial);
+  ascent-override: 100.51%;
+  descent-override: 25.03%;
+  line-gap-override: 0%;
+  size-adjust: 96.39%;
+}
+
+.p-nivara {
+  /* @layer theme de la référence */
+  --font-sans: "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --color-paper: #fff;
+  --color-paper-light: #f3f3f3;
+  --color-ink: #000;
+  --color-graphite: #6b6b6b;
+  --color-mute: #949494;
+  --color-rule: #e2e2e2;
+  --color-charcoal: #161616;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.35;
+  --text-small: 0.9375rem;
+  --text-small--line-height: 1.45;
+  --text-body: 1.125rem;
+  --text-body--line-height: 1.6;
+  --text-lead: 1.3125rem;
+  --text-lead--line-height: 1.45;
+  --text-h4: 1.75rem;
+  --text-h4--line-height: 1.15;
+  --text-h3: 2.5rem;
+  --text-h3--line-height: 1.05;
+  --text-h2: 3.5rem;
+  --text-h2--line-height: 1;
+  --text-statement: clamp(2.125rem, 1.25rem + 3.6vw, 4.5rem);
+  --text-statement--line-height: 1.1;
+  --text-title: clamp(2.75rem, 1.5rem + 5vw, 6rem);
+  --text-title--line-height: 1;
+  --text-hero: clamp(3.25rem, 1.5rem + 7.5vw, 9rem);
+  --text-hero--line-height: 0.95;
+  --duration-base: 0.9s;
+  --duration-slow: 1.3s;
+
+  /* `body` de la référence */
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "kern", "liga";
+  letter-spacing: normal;
+  /* la peau sort du <main> et va d'un bord à l'autre, comme .p-architectes */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+/* le reset de la référence, pour que les styles de base du site ne s'y
+   glissent pas */
+.p-nivara :is(h1, h2, h3, h4, h5, h6) {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+}
+.p-nivara :is(h1, h2, h3, h4, p, ul, ol, dl, dd, dt, figure, figcaption, address) {
+  margin: 0;
+}
+.p-nivara :is(ul, ol) {
+  list-style: none;
+  padding: 0;
+}
+.p-nivara img,
+.p-nivara svg {
+  display: block;
+  vertical-align: middle;
+}
+.p-nivara button {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+.p-nivara a {
+  color: inherit;
+  text-decoration: inherit;
+}
+.p-nivara ::selection {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.p-nivara :focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--color-paper);
+}
+
+/* ——— thème sombre d'un bloc (la référence l'applique au bloc « life » +
+   « where ») : les mêmes classes, les jetons inversés ——— */
+.p-nivara .theme-dark {
+  --color-paper: var(--color-charcoal);
+  --color-paper-light: #222;
+  --color-ink: #fff;
+  --color-graphite: #a3a3a3;
+  --color-mute: #6b6b6b;
+  --color-rule: #333;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* ——— échelle de texte ——— */
+.p-nivara .text-hero { font-size: var(--text-hero); line-height: var(--text-hero--line-height); }
+.p-nivara .text-title { font-size: var(--text-title); line-height: var(--text-title--line-height); }
+.p-nivara .text-statement { font-size: var(--text-statement); line-height: var(--text-statement--line-height); }
+.p-nivara .text-h2 { font-size: var(--text-h2); line-height: var(--text-h2--line-height); }
+.p-nivara .text-h3 { font-size: var(--text-h3); line-height: var(--text-h3--line-height); }
+.p-nivara .text-h4 { font-size: var(--text-h4); line-height: var(--text-h4--line-height); }
+.p-nivara .text-lead { font-size: var(--text-lead); line-height: var(--text-lead--line-height); }
+.p-nivara .text-body { font-size: var(--text-body); line-height: var(--text-body--line-height); }
+.p-nivara .text-small { font-size: var(--text-small); line-height: var(--text-small--line-height); }
+.p-nivara .text-caption { font-size: var(--text-caption); line-height: var(--text-caption--line-height); }
+@media (min-width: 810px) {
+  .p-nivara .m\:text-h3 { font-size: var(--text-h3); line-height: var(--text-h3--line-height); }
+}
+/* `leading-[…]` de Tailwind est une variable que l'échelle lit chez la
+   référence (`var(--tw-leading, …)`) ; ici il doit battre l'échelle. */
+.p-nivara .leading-\[1\] { line-height: 1; }
+.p-nivara .leading-\[1\.3\] { line-height: 1.3; }
+.p-nivara .leading-\[1\.15\] { line-height: 1.15; }
+.p-nivara .leading-\[1\.08\] { line-height: 1.08; }
+.p-nivara .leading-none { line-height: 1; }
+.p-nivara .leading-\[1\.3em\] { line-height: 1.3em; }
+
+/* ——— familles ——— */
+.p-nivara .font-display { font-family: var(--font-sans); letter-spacing: -0.035em; font-weight: 500; }
+.p-nivara .font-headline { font-family: var(--font-sans); letter-spacing: -0.05em; font-weight: 400; }
+.p-nivara .font-statement { font-family: var(--font-sans); letter-spacing: -0.03em; font-weight: 400; }
+.p-nivara .prose-long {
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+  max-width: 36em;
+}
+
+/* ——— couleurs ——— */
+.p-nivara .bg-paper { background-color: var(--color-paper); }
+.p-nivara .bg-paper-light { background-color: var(--color-paper-light); }
+.p-nivara .bg-ink { background-color: var(--color-ink); }
+.p-nivara .bg-rule { background-color: var(--color-rule); }
+.p-nivara .bg-charcoal { background-color: var(--color-charcoal); }
+.p-nivara .bg-paper\/15 { background-color: color-mix(in oklab, var(--color-paper) 15%, transparent); }
+.p-nivara .bg-paper\/30 { background-color: color-mix(in oklab, var(--color-paper) 30%, transparent); }
+.p-nivara .bg-ink\/35 { background-color: color-mix(in oklab, var(--color-ink) 35%, transparent); }
+.p-nivara .text-paper { color: var(--color-paper); }
+.p-nivara .text-paper\/70 { color: color-mix(in oklab, var(--color-paper) 70%, transparent); }
+.p-nivara .text-ink { color: var(--color-ink); }
+.p-nivara .text-graphite { color: var(--color-graphite); }
+.p-nivara .border-ink { border-color: var(--color-ink); }
+.p-nivara .border-rule { border-color: var(--color-rule); }
+.p-nivara .bg-current { background-color: currentColor; }
+.p-nivara .scrim {
+  background-image: linear-gradient(#00000059, #0000 25% 50%, #0009);
+}
+
+/* ——— le lien souligné d'un pixel, redessiné au survol ——— */
+.p-nivara .link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  padding-bottom: 0.08em;
+  text-decoration: none;
+}
+.p-nivara .link:hover {
+  animation: link-redraw 0.7s var(--ease-in-out);
+}
+@keyframes link-redraw {
+  0% { background-position: right 100%; background-size: 100% 1px; }
+  45% { background-position: right 100%; background-size: 0% 1px; }
+  46% { background-position: 0 100%; background-size: 0% 1px; }
+  to { background-position: 0 100%; background-size: 100% 1px; }
+}
+
+/* ——— les survols de la référence (sous `@media (hover:hover)`) ——— */
+@media (hover: hover) {
+  .p-nivara .hover\:text-paper:hover { color: var(--color-paper); }
+  .p-nivara .group:hover .group-hover\:translate-x-1\.5 { translate: 0.375rem 0; }
+  .p-nivara .group\/button:hover .group-hover\/button\:scale-100,
+  .p-nivara .group\/button:focus-visible .group-hover\/button\:scale-100 { scale: 1; }
+  .p-nivara .group\/button:hover .group-hover\/button\:-translate-y-1\/2,
+  .p-nivara .group\/button:focus-visible .group-hover\/button\:-translate-y-1\/2 { translate: 0 -50%; }
+  .p-nivara .group\/button:hover .group-hover\/button\:translate-x-1,
+  .p-nivara .group\/button:focus-visible .group-hover\/button\:translate-x-1 { translate: 0.25rem 0; }
+  .p-nivara .group\/button:hover .group-hover\/button\:text-paper,
+  .p-nivara .group\/button:focus-visible .group-hover\/button\:text-paper { color: var(--color-paper); }
+  .p-nivara .group\/arrow:hover .group-hover\/arrow\:scale-100,
+  .p-nivara .group\/arrow:focus-visible .group-hover\/arrow\:scale-100 { scale: 1; }
+  .p-nivara .group\/arrow:hover .group-hover\/arrow\:text-ink,
+  .p-nivara .group\/arrow:focus-visible .group-hover\/arrow\:text-ink { color: var(--color-ink); }
+  .p-nivara .group\/arrow:hover .group-hover\/arrow\:-translate-x-1\/2,
+  .p-nivara .group\/arrow:focus-visible .group-hover\/arrow\:-translate-x-1\/2 { translate: -50% 0; }
+  .p-nivara .group\/arrow:hover .group-hover\/arrow\:translate-x-0,
+  .p-nivara .group\/arrow:focus-visible .group-hover\/arrow\:translate-x-0 { translate: 0 0; }
+}
+/* les états de départ que ces survols déplacent (Tailwind les pose avec
+   `translate:`/`scale:`, pas `transform`) */
+.p-nivara .scale-0 { scale: 0; }
+.p-nivara .-translate-x-1\/2 { translate: -50% 0; }
+
+/* ——— le premier écran et le carrousel : les images-clés de la référence ——— */
+.p-nivara .animate-frame-grow { animation: frame-grow 2.1s var(--ease-in-out) both; }
+.p-nivara .animate-frame-grow[data-ouvert] { background-color: var(--color-ink); }
+.p-nivara .animate-frame-settle { animation: frame-settle 2.1s var(--ease-in-out) both; }
+.p-nivara .animate-hero-name { animation: hero-name var(--duration-slow) var(--ease-out) var(--name-delay, 0.15s) both; }
+.p-nivara .animate-hero-fade { animation: hero-fade var(--duration-base) var(--ease-out) var(--fade-delay, 0.7s) both; }
+.p-nivara .animate-roll-in { animation: roll-in 0.9s var(--ease-out) var(--roll-delay, 0s) both; }
+.p-nivara .animate-roll-out { animation: roll-out 0.9s var(--ease-out) var(--roll-delay, 0s) both; }
+.p-nivara .animate-slide-wipe { animation: slide-wipe 1.2s var(--ease-in-out) both; }
+.p-nivara .animate-slide-push-out { animation: slide-push-out 1.2s var(--ease-in-out) both; }
+.p-nivara .animate-slide-progress { animation: slide-progress var(--slide-duration, 6000ms) linear both; }
+@keyframes frame-grow {
+  0% { opacity: 0; clip-path: inset(28.3% 37% 45%); }
+  18% { opacity: 1; clip-path: inset(28.3% 37% 45%); }
+  28% { clip-path: inset(28.3% 37% 45%); }
+  to { opacity: 1; clip-path: inset(0); }
+}
+@keyframes frame-settle {
+  0%, 28% { transform: scale(0.6); }
+  to { transform: scale(1); }
+}
+@keyframes hero-name { 0% { transform: translateY(105%); } }
+@keyframes hero-fade { 0% { opacity: 0; transform: translateY(12px); } }
+@keyframes roll-in { 0% { transform: translateY(110%); } to { transform: translateY(0); } }
+@keyframes roll-out { 0% { transform: translateY(0); } to { transform: translateY(-110%); } }
+@keyframes slide-wipe { 0% { clip-path: inset(0 0 0 100%); } to { clip-path: inset(0); } }
+@keyframes slide-push-out { to { transform: translate(-18%); } }
+@keyframes slide-progress { 0% { transform: scaleX(0); } }
+
+/* ——— le glissement des diapositives (la référence le joue en JavaScript,
+   1,2 s sur sa courbe ease-in-out : relevé à 300 ms, sortante à −47 %,
+   entrante à +53 %, image de l'entrante à −26 %) ——— */
+.p-nivara .n-diapo-entre { animation: diapo-entre 1.2s var(--ease-in-out) both; }
+.p-nivara .n-diapo-sort { animation: diapo-sort 1.2s var(--ease-in-out) both; }
+.p-nivara .n-diapo-image-entre { animation: diapo-image-entre 1.2s var(--ease-in-out) both; }
+.p-nivara .n-diapo-image-sort { animation: diapo-image-sort 1.2s var(--ease-in-out) both; }
+@keyframes diapo-entre { 0% { transform: translateX(100%); } to { transform: translateX(0); } }
+@keyframes diapo-sort { 0% { transform: translateX(0); } to { transform: translateX(-100%); } }
+@keyframes diapo-image-entre { 0% { transform: translateX(-50%); } to { transform: translateX(0); } }
+@keyframes diapo-image-sort { 0% { transform: translateX(0); } to { transform: translateX(50%); } }
+
+/* ——— l'énoncé du bloc « process » : gris à l'arrivée, encre une fois
+   lu (la référence le fait monter au défilement) ——— */
+.p-nivara .n-enonce-gris { color: #cfcfcf; transition: color 0.9s var(--ease-out); }
+.p-nivara .n-enonce-gris[data-vu] { color: var(--color-ink); }
+
+/* ——— le panneau d'accordéon : hauteur animée sur la courbe de la
+   référence (0,5 s ease-out) ——— */
+.p-nivara .n-panneau {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.5s var(--ease-out), opacity 0.5s var(--ease-out);
+}
+.p-nivara .n-panneau[data-ouvert] { grid-template-rows: 1fr; opacity: 1; }
+.p-nivara .n-panneau > div { min-height: 0; overflow: hidden; }
+
+/* ——— le curseur « Voir » / « Contact » de la référence ——— */
+.p-nivara .n-curseur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.p-nivara .n-curseur > span {
+  position: absolute;
+  top: 1.5rem;
+  left: 1rem;
+  display: block;
+  min-width: 6rem;
+  padding: 0.875rem 1.5rem;
+  text-align: center;
+  font-size: var(--text-caption);
+  line-height: var(--text-caption--line-height);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  background-color: rgb(0 0 0 / 0.35);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+.p-nivara .n-curseur[data-visible] > span { opacity: 1; transform: none; }
+
+/* ——— sobriété : la règle de la référence ——— */
+@media (prefers-reduced-motion: reduce) {
+  .p-nivara *,
+  .p-nivara *::before,
+  .p-nivara *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
