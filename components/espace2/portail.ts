@@ -20,6 +20,11 @@
    déploiement, le portail est imposé (PORTAIL_DEPLOIEMENT) : la racine
    ouvre /espace2/<logiciel>, le témoin ne compte plus et ?portail=complet
    n'ouvre rien d'autre. Sans la variable (omegaai.fr), rien ne change.
+   Même jour, suite : sur un tel déploiement le site n'est QUE le logiciel —
+   les pages de la vitrine mènent au module (next.config.ts), l'onglet porte
+   le nom du logiciel (app/espace2/layout.tsx), robots.txt ferme tout et le
+   sitemap est vide ; /daliro et consorts mènent au module du déploiement
+   sans poser de témoin (proxy.ts).
 
    Ce fichier n'importe rien : le proxy et le layout serveur le lisent ; le
    contexte React est dans portail-contexte.ts (composant client).
@@ -31,6 +36,9 @@ export const TEMOIN_PORTAIL = "espace_portail";
 export const PORTAILS = ["daliro", "tamila", "lorani", "tiroma", "tavaro", "varelo"] as const;
 
 export type Portail = (typeof PORTAILS)[number];
+
+/* le nom du logiciel, pour le titre de l'onglet d'un déploiement dédié */
+export const NOMS_PORTAILS: Record<Portail, string> = { daliro: "DALIRO", tamila: "TAMILA", lorani: "LORANI", tiroma: "TIROMA", tavaro: "TAVARO", varelo: "VARELO" };
 
 export const lirePortail = (valeur: string | undefined | null): Portail | null =>
   (PORTAILS as readonly string[]).includes(valeur ?? "") ? (valeur as Portail) : null;

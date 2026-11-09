@@ -86,6 +86,27 @@ const EN_TETES_SECURITE = [
   },
 ];
 
+/* ══════════════════════════════════════════════════════════════════════════
+   09/11/2026 — les déploiements dédiés à un logiciel (components/espace2/
+   portail.ts). Teo : « chaque SaaS va être indépendant, sauf les quatre
+   modules principaux ». Chaque logiciel métier a son projet Vercel, bâti
+   sur ce dépôt avec la variable NEXT_PUBLIC_PORTAIL (daliro, tamila, lorani,
+   tiroma, tavaro, varelo). Là, le site n'est que le logiciel : les pages de
+   la vitrine mènent au module (la racine, c'est proxy.ts). Sans la variable
+   (omegaai.fr), la liste est vide et rien ne change. Redirections 307 :
+   l'adresse reste la leur si un jour la vitrine du métier revient ici.
+   ═══════════════════════════════════════════════════════════════════════ */
+const PORTAILS = ["daliro", "tamila", "lorani", "tiroma", "tavaro", "varelo"];
+const PORTAIL_DEPLOIEMENT = PORTAILS.find((p) => p === process.env.NEXT_PUBLIC_PORTAIL) ?? null;
+/* les pages de premier niveau de la vitrine ; restent : /espace2, /espace (le proxy le renvoie), /auth, /api, /bienvenue, /robots.txt, /sitemap.xml */
+const VITRINE = ["audit", "blog", "commencer", "contact", "espace3", "formation", "installation", "integrations", "modeles", "offres", "omega", "p", "reserver", "reserver-un-audit", "secteurs", "signer", "tarifs", "vos-donnees"];
+const REDIRECTIONS_PORTAIL = PORTAIL_DEPLOIEMENT
+  ? VITRINE.flatMap((p) => [
+      { source: `/${p}`, destination: `/espace2/${PORTAIL_DEPLOIEMENT}`, permanent: false },
+      { source: `/${p}/:chemin*`, destination: `/espace2/${PORTAIL_DEPLOIEMENT}`, permanent: false },
+    ])
+  : [];
+
 const nextConfig: NextConfig = {
   /* 25/09 — ne pas annoncer le cadriciel dans chaque réponse. */
   poweredByHeader: false,
@@ -104,6 +125,7 @@ const nextConfig: NextConfig = {
     // sous /offres ; les deux anciennes familles d'URL y sont redirigées en
     // 308 pour ne casser ni les liens externes ni les favoris.
     return [
+      ...REDIRECTIONS_PORTAIL,
       /* 14/09 : `www.omegaai.fr` renvoie vers l'apex. Le sous-domaine a servi
          le banc d'essai (projet omega-site-v3, robots fermé) pendant que la
          vitrine vivait sur l'apex ; depuis le portage du 14/09 ce dédoublement

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { FAMILLES, POSTS } from "@/lib/content";
 import { SECTEURS } from "@/lib/secteurs";
 import { SITE_URL } from "@/lib/site";
+import { PORTAIL_DEPLOIEMENT } from "@/components/espace2/portail";
 
 /* ══════════════════════════════════════════════════════════════════════
    /sitemap.xml (30/07/2026)
@@ -17,6 +18,8 @@ import { SITE_URL } from "@/lib/site";
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  /* 09/11/2026 — un déploiement dédié à un logiciel (components/espace2/portail.ts) n'a pas de vitrine : sitemap vide */
+  if (PORTAIL_DEPLOIEMENT) return [];
   const maj = new Date();
 
   const fixes: { url: string; priorite: number; frequence: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [

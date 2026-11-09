@@ -83,13 +83,14 @@ export async function proxy(request: NextRequest) {
      /tavaro, /varelo) pose le témoin et ouvre le logiciel ; tant qu'il est
      posé, les pages de /espace2 hors de cet espace renvoient vers lui ;
      /espace2?portail=complet l'efface — sauf sur un déploiement dédié, où
-     le portail est imposé. */
+     le portail est imposé : là, toute entrée mène au logiciel du
+     déploiement et aucun témoin n'est posé. */
   const entree = lirePortail(pathname.replace(/^\//, "").replace(/\/$/, ""));
   if (entree) {
     const cible = request.nextUrl.clone();
-    cible.pathname = `/espace2/${entree}`;
+    cible.pathname = `/espace2/${PORTAIL_DEPLOIEMENT ?? entree}`;
     const redirection = NextResponse.redirect(cible, 307);
-    redirection.cookies.set(TEMOIN_PORTAIL, entree, { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
+    if (!PORTAIL_DEPLOIEMENT) redirection.cookies.set(TEMOIN_PORTAIL, entree, { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
     return redirection;
   }
   if (pathname === "/espace2" || pathname.startsWith("/espace2/")) {

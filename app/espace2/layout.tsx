@@ -4,7 +4,7 @@ import Coquille from "@/components/espace2/Coquille";
 import { AMORCE_THEME } from "@/components/espace2/amorce";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { PORTAIL_DEPLOIEMENT, TEMOIN_PORTAIL, lirePortail } from "@/components/espace2/portail";
+import { NOMS_PORTAILS, PORTAIL_DEPLOIEMENT, TEMOIN_PORTAIL, lirePortail } from "@/components/espace2/portail";
 import { utilisateurCourant } from "@/lib/supabase/server";
 import { bienvenueAFaire } from "@/app/bienvenue/etat";
 
@@ -34,7 +34,10 @@ const code = Source_Code_Pro({ subsets: ["latin"], variable: "--font-v2-code", d
 const polices = [geist.variable, inter.variable, manrope.variable, code.variable].join(" ");
 
 export const metadata: Metadata = {
-  title: { default: "Espace client Omega (nouveau design)", template: "%s | Espace client Omega" },
+  /* 09/11/2026 — un déploiement dédié à un logiciel (portail.ts) porte le nom de ce logiciel dans l'onglet */
+  title: PORTAIL_DEPLOIEMENT
+    ? { default: NOMS_PORTAILS[PORTAIL_DEPLOIEMENT], template: `%s | ${NOMS_PORTAILS[PORTAIL_DEPLOIEMENT]}` }
+    : { default: "Espace client Omega (nouveau design)", template: "%s | Espace client Omega" },
   robots: { index: false, follow: false },
   /* l'onglet du navigateur : le logo blanc sur fond noir (demande de Teo, 09/10 — l'icône noire disparaissait dans la barre sombre) */
   icons: { icon: [{ url: "/omega-icone-pilotage.png", type: "image/png", sizes: "64x64" }], apple: [{ url: "/omega-icone-pilotage-apple.png", sizes: "180x180" }] },
