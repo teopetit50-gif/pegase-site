@@ -39,7 +39,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
-import { TEMOIN_PORTAIL, dansLePortail, lirePortail } from "@/components/espace2/portail";
+import { PORTAIL_DEPLOIEMENT, TEMOIN_PORTAIL, dansLePortail, lirePortail, portailCourant } from "@/components/espace2/portail";
 
 const ANCIEN = "espace_ancien";
 
@@ -68,28 +68,34 @@ export async function proxy(request: NextRequest) {
     if (demande === "1") reponse.cookies.set(ANCIEN, "1", { path: "/espace", maxAge: 7 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
     return reponse;
   }
-  /* 05/11/2026 — l'espace « DALIRO seul » (components/espace2/portail.ts) :
+  /* 05/11/2026 — l'espace d'un seul métier (components/espace2/portail.ts) :
      omegaai.fr/daliro pose le témoin et ouvre DALIRO ; tant qu'il est posé,
      les pages de /espace2 hors de cet espace renvoient vers DALIRO ;
-     /espace2?portail=complet l'efface. */
-  if (pathname === "/daliro" || pathname === "/daliro/") {
+     /espace2?portail=complet l'efface. 09/11 — les six métiers ont leur
+     entrée (/lorani, /tamila, /tavaro, /tiroma, /varelo) ; sur un
+     déploiement métier (la variable NEXT_PUBLIC_PORTAIL_METIER), le portail
+     est figé : pas de témoin à poser, pas de sortie, et toute entrée mène
+     au module du déploiement. */
+  const entree = lirePortail(pathname.replace(/^\/|\/$/g, ""));
+  if (entree) {
     const cible = request.nextUrl.clone();
-    cible.pathname = "/espace2/daliro";
+    cible.pathname = `/espace2/${PORTAIL_DEPLOIEMENT ?? entree}`;
     const redirection = NextResponse.redirect(cible, 307);
-    redirection.cookies.set(TEMOIN_PORTAIL, "daliro", { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
+    if (!PORTAIL_DEPLOIEMENT) redirection.cookies.set(TEMOIN_PORTAIL, entree, { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
     return redirection;
   }
   if (pathname === "/espace2" || pathname.startsWith("/espace2/")) {
-    if (searchParams.get("portail") === "complet") {
+    if (!PORTAIL_DEPLOIEMENT && searchParams.get("portail") === "complet") {
       const cible = request.nextUrl.clone();
       cible.searchParams.delete("portail");
       const redirection = NextResponse.redirect(cible, 307);
       redirection.cookies.delete({ name: TEMOIN_PORTAIL, path: "/" });
       return redirection;
     }
-    if (lirePortail(request.cookies.get(TEMOIN_PORTAIL)?.value) && !dansLePortail(pathname)) {
+    const portail = portailCourant(request.cookies.get(TEMOIN_PORTAIL)?.value);
+    if (portail && !dansLePortail(pathname, portail)) {
       const cible = request.nextUrl.clone();
-      cible.pathname = "/espace2/daliro";
+      cible.pathname = `/espace2/${portail}`;
       cible.search = "";
       return NextResponse.redirect(cible, 307);
     }
@@ -101,6 +107,6 @@ export const config = {
   /* 17/09 — /site/* sort du matcher : le tunnel de commande de site est
      supprimé (plus aucun compte ne se crée depuis omegaai.fr). */
   /* 09/10 — /omega (pilotage interne) : la session y est tenue à jour. */
-  /* 05/11 — /daliro : l'entrée de l'espace « DALIRO seul » */
-  matcher: ["/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/daliro", "/omega", "/omega/:path*"],
+  /* 05/11 — /daliro : l'entrée de l'espace « DALIRO seul » ; 09/11 — une entrée par métier (portail.ts) */
+  matcher: ["/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/daliro", "/lorani", "/tamila", "/tavaro", "/tiroma", "/varelo", "/omega", "/omega/:path*"],
 };

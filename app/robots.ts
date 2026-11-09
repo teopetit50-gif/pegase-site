@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
+import { PORTAIL_DEPLOIEMENT } from "@/components/espace2/portail";
 
 /* /robots.txt (30/07/2026) — le site n'en avait pas. Tout est indexable :
    il n'y a ni espace client, ni page de test, ni contenu privé. La seule
@@ -14,6 +15,8 @@ import { SITE_URL } from "@/lib/site";
    une étape de parcours rattachée à un compte, hors sitemap et fermée. */
 
 export default function robots(): MetadataRoute.Robots {
+  /* 09/11/2026 — un déploiement métier (components/espace2/portail.ts) n'est qu'un logiciel : rien à indexer */
+  if (PORTAIL_DEPLOIEMENT) return { rules: { userAgent: "*", disallow: "/" } };
   return {
     rules: { userAgent: "*", allow: "/", disallow: ["/auth/", "/installation", "/p/"] },
     sitemap: `${SITE_URL}/sitemap.xml`,

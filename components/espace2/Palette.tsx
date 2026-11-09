@@ -46,8 +46,8 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
             </TextField>
             <Menu className="v2-menu" onAction={agir} aria-label="Résultats" renderEmptyState={() => <div className="v2-palette-vide">Aucun résultat.</div>}>
               <SectionMenu titre="Pages">
-                {/* l'espace DALIRO seul : ses pages et son module seulement (portail.ts) */}
-                {(portail ? ONGLETS_ORGANISATION.filter((o) => dansLePortail(o.href)) : ONGLETS_ORGANISATION).map((o) => (
+                {/* l'espace d'un seul métier : ses pages et son module seulement (portail.ts) */}
+                {(portail ? ONGLETS_ORGANISATION.filter((o) => dansLePortail(o.href, portail)) : ONGLETS_ORGANISATION).map((o) => (
                   <ItemMenu key={o.href} id={`aller:${o.href}`} icone={<ArrowRight width={16} height={16} aria-hidden="true" />}>
                     {o.libelle}
                   </ItemMenu>

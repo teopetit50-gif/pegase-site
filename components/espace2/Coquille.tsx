@@ -23,7 +23,7 @@
 import { Suspense, useEffect, useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, HardHat, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Network, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
+import { Activity, Banknote, Building2, CheckSquare, CircleHelp, Home, Bell, Check, CheckCheck, ChevronDown, ChevronRight, ChevronsUpDown, Database, ExternalLink, FileText, GraduationCap, LayoutGrid, LifeBuoy, LogOut, Menu as IconeMenu, Moon, Network, Plus, Search, Settings, Sun, Terminal, User, X } from "lucide-react";
 import { Button, Dialog, DialogTrigger, Modal, ModalOverlay, Popover, RouterProvider } from "react-aria-components";
 import type { Utilisateur } from "@/lib/compte";
 import { createClient } from "@/lib/supabase/client";
@@ -178,6 +178,8 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   const modulesVus = portail ? MODULES.filter((m) => m.cle === portail) : MODULES;
   /* hors de son module (Notes, Réseau…), le sélecteur garde le nom DALIRO : « Tous les modules » n'existe pas ici */
   const porteeVue = portee ?? (portail ? (moduleDe(portail) ?? null) : null);
+  /* 09/11/2026 — dans un espace métier, « Nouveau… » ouvre la page de travail du module (la deuxième entrée de modules.ts : chantiers, projets, retours…), quel que soit le métier */
+  const travail = portail ? (moduleDe(portail)?.onglets[1] ?? moduleDe(portail)?.onglets[0] ?? null) : null;
 
   /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
   useEffect(() => {
@@ -268,9 +270,11 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
             >
               {portail ? (
                 <>
-                  <ItemMenu id="chantier" href={`${RACINE}/daliro/chantiers`} icone={<HardHat {...I} />}>
-                    Ouvrir les chantiers
-                  </ItemMenu>
+                  {porteeVue && travail ? (
+                    <ItemMenu id="module" href={travail.href} textValue={`Ouvrir ${travail.libelle}`} icone={<porteeVue.icone {...I} />}>
+                      Ouvrir « {travail.libelle} »
+                    </ItemMenu>
+                  ) : null}
                   <ItemMenu id="tache" href={`${RACINE}/taches`} icone={<CheckSquare {...I} />}>
                     Ajouter une tâche
                   </ItemMenu>

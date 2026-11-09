@@ -4,7 +4,7 @@ import Coquille from "@/components/espace2/Coquille";
 import { AMORCE_THEME } from "@/components/espace2/amorce";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { TEMOIN_PORTAIL, lirePortail } from "@/components/espace2/portail";
+import { NOMS_METIERS, PORTAIL_DEPLOIEMENT, TEMOIN_PORTAIL, portailCourant } from "@/components/espace2/portail";
 import { utilisateurCourant } from "@/lib/supabase/server";
 import { bienvenueAFaire } from "@/app/bienvenue/etat";
 
@@ -34,7 +34,10 @@ const code = Source_Code_Pro({ subsets: ["latin"], variable: "--font-v2-code", d
 const polices = [geist.variable, inter.variable, manrope.variable, code.variable].join(" ");
 
 export const metadata: Metadata = {
-  title: { default: "Espace client Omega (nouveau design)", template: "%s | Espace client Omega" },
+  /* 09/11/2026 — un déploiement métier (portail.ts) porte le nom de son logiciel dans l'onglet */
+  title: PORTAIL_DEPLOIEMENT
+    ? { default: NOMS_METIERS[PORTAIL_DEPLOIEMENT], template: `%s | ${NOMS_METIERS[PORTAIL_DEPLOIEMENT]}` }
+    : { default: "Espace client Omega (nouveau design)", template: "%s | Espace client Omega" },
   robots: { index: false, follow: false },
   /* l'onglet du navigateur : le logo blanc sur fond noir (demande de Teo, 09/10 — l'icône noire disparaissait dans la barre sombre) */
   icons: { icon: [{ url: "/omega-icone-pilotage.png", type: "image/png", sizes: "64x64" }], apple: [{ url: "/omega-icone-pilotage-apple.png", sizes: "180x180" }] },
@@ -46,8 +49,8 @@ export default async function LayoutEspace2({ children }: { children: React.Reac
      après la signature) remplit d'abord /bienvenue. Sans session : rien ne
      change, l'exemple s'affiche. */
   if (utilisateur && (await bienvenueAFaire())) redirect("/bienvenue");
-  /* 05/11/2026 — l'espace « DALIRO seul », ouvert par omegaai.fr/daliro (components/espace2/portail.ts) */
-  const portail = lirePortail((await cookies()).get(TEMOIN_PORTAIL)?.value);
+  /* 05/11/2026 — l'espace d'un seul métier : celui du déploiement (09/11) ou celui du témoin posé par omegaai.fr/<métier> (components/espace2/portail.ts) */
+  const portail = portailCourant((await cookies()).get(TEMOIN_PORTAIL)?.value);
   return (
     <div className={polices}>
       {/* le thème choisi est posé avant la première peinture : pas d'éclair blanc en sombre */}
