@@ -39,7 +39,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
-import { TEMOIN_PORTAIL, dansLePortail, lirePortail } from "@/components/espace2/portail";
+import { PORTAIL_DEPLOIEMENT, TEMOIN_PORTAIL, dansLePortail, lirePortail } from "@/components/espace2/portail";
 
 const ANCIEN = "espace_ancien";
 
@@ -68,28 +68,42 @@ export async function proxy(request: NextRequest) {
     if (demande === "1") reponse.cookies.set(ANCIEN, "1", { path: "/espace", maxAge: 7 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
     return reponse;
   }
-  /* 05/11/2026 — l'espace « DALIRO seul » (components/espace2/portail.ts) :
-     omegaai.fr/daliro pose le témoin et ouvre DALIRO ; tant qu'il est posé,
-     les pages de /espace2 hors de cet espace renvoient vers DALIRO ;
-     /espace2?portail=complet l'efface. */
-  if (pathname === "/daliro" || pathname === "/daliro/") {
+  /* 09/11/2026 — un déploiement dédié à un logiciel (NEXT_PUBLIC_PORTAIL,
+     components/espace2/portail.ts) : sa racine ouvre directement l'espace
+     de ce logiciel. Sur omegaai.fr la variable n'existe pas : l'accueil
+     reste statique, le proxy n'y touche pas. */
+  if (pathname === "/") {
+    if (!PORTAIL_DEPLOIEMENT) return NextResponse.next();
     const cible = request.nextUrl.clone();
-    cible.pathname = "/espace2/daliro";
+    cible.pathname = `/espace2/${PORTAIL_DEPLOIEMENT}`;
+    return NextResponse.redirect(cible, 307);
+  }
+  /* 05/11/2026 — l'espace « un seul logiciel » (components/espace2/portail.ts) :
+     omegaai.fr/daliro (et, depuis le 09/11, /tamila, /lorani, /tiroma,
+     /tavaro, /varelo) pose le témoin et ouvre le logiciel ; tant qu'il est
+     posé, les pages de /espace2 hors de cet espace renvoient vers lui ;
+     /espace2?portail=complet l'efface — sauf sur un déploiement dédié, où
+     le portail est imposé. */
+  const entree = lirePortail(pathname.replace(/^\//, "").replace(/\/$/, ""));
+  if (entree) {
+    const cible = request.nextUrl.clone();
+    cible.pathname = `/espace2/${entree}`;
     const redirection = NextResponse.redirect(cible, 307);
-    redirection.cookies.set(TEMOIN_PORTAIL, "daliro", { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
+    redirection.cookies.set(TEMOIN_PORTAIL, entree, { path: "/", maxAge: 365 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
     return redirection;
   }
   if (pathname === "/espace2" || pathname.startsWith("/espace2/")) {
-    if (searchParams.get("portail") === "complet") {
+    if (searchParams.get("portail") === "complet" && !PORTAIL_DEPLOIEMENT) {
       const cible = request.nextUrl.clone();
       cible.searchParams.delete("portail");
       const redirection = NextResponse.redirect(cible, 307);
       redirection.cookies.delete({ name: TEMOIN_PORTAIL, path: "/" });
       return redirection;
     }
-    if (lirePortail(request.cookies.get(TEMOIN_PORTAIL)?.value) && !dansLePortail(pathname)) {
+    const portail = PORTAIL_DEPLOIEMENT ?? lirePortail(request.cookies.get(TEMOIN_PORTAIL)?.value);
+    if (portail && !dansLePortail(pathname, portail)) {
       const cible = request.nextUrl.clone();
-      cible.pathname = "/espace2/daliro";
+      cible.pathname = `/espace2/${portail}`;
       cible.search = "";
       return NextResponse.redirect(cible, 307);
     }
@@ -101,6 +115,8 @@ export const config = {
   /* 17/09 — /site/* sort du matcher : le tunnel de commande de site est
      supprimé (plus aucun compte ne se crée depuis omegaai.fr). */
   /* 09/10 — /omega (pilotage interne) : la session y est tenue à jour. */
-  /* 05/11 — /daliro : l'entrée de l'espace « DALIRO seul » */
-  matcher: ["/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/daliro", "/omega", "/omega/:path*"],
+  /* 05/11 — /daliro : l'entrée de l'espace « DALIRO seul » ; 09/11 — les
+     cinq autres logiciels, et "/" pour la racine des déploiements dédiés
+     (sur omegaai.fr elle passe tout droit, NextResponse.next()). */
+  matcher: ["/", "/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/daliro", "/tamila", "/lorani", "/tiroma", "/tavaro", "/varelo", "/omega", "/omega/:path*"],
 };

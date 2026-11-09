@@ -4,7 +4,7 @@ import Coquille from "@/components/espace2/Coquille";
 import { AMORCE_THEME } from "@/components/espace2/amorce";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { TEMOIN_PORTAIL, lirePortail } from "@/components/espace2/portail";
+import { PORTAIL_DEPLOIEMENT, TEMOIN_PORTAIL, lirePortail } from "@/components/espace2/portail";
 import { utilisateurCourant } from "@/lib/supabase/server";
 import { bienvenueAFaire } from "@/app/bienvenue/etat";
 
@@ -46,8 +46,9 @@ export default async function LayoutEspace2({ children }: { children: React.Reac
      après la signature) remplit d'abord /bienvenue. Sans session : rien ne
      change, l'exemple s'affiche. */
   if (utilisateur && (await bienvenueAFaire())) redirect("/bienvenue");
-  /* 05/11/2026 — l'espace « DALIRO seul », ouvert par omegaai.fr/daliro (components/espace2/portail.ts) */
-  const portail = lirePortail((await cookies()).get(TEMOIN_PORTAIL)?.value);
+  /* 05/11/2026 — l'espace « un seul logiciel », ouvert par omegaai.fr/daliro
+     et consorts, ou imposé par un déploiement dédié (components/espace2/portail.ts) */
+  const portail = PORTAIL_DEPLOIEMENT ?? lirePortail((await cookies()).get(TEMOIN_PORTAIL)?.value);
   return (
     <div className={polices}>
       {/* le thème choisi est posé avant la première peinture : pas d'éclair blanc en sombre */}
