@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash",
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "mcp__Vercel__*",
+      "mcp__github__*",
+      "mcp__claude-code-remote__*"
+    ]
+  }
+}
