@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canoniqueSecteur } from "@/components/espace2/portail";
 import PageShell from "@/components/PageShell";
 import Hero from "@/components/secteurs/avocats/Heros";
 import { Appel, Connexions, Fonctionnalites, Pieces, PointDuMatin } from "@/components/secteurs/avocats/Sections";
@@ -87,7 +88,8 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,
   description: DESCRIPTION,
-  alternates: { canonical: "/secteurs/avocats" },
+  /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  alternates: { canonical: canoniqueSecteur("avocats") },
   openGraph: {
     type: "website",
     locale: "fr_FR",

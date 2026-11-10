@@ -68,16 +68,9 @@ export async function proxy(request: NextRequest) {
     if (demande === "1") reponse.cookies.set(ANCIEN, "1", { path: "/espace", maxAge: 7 * 24 * 3600, sameSite: "lax", httpOnly: true, secure: true });
     return reponse;
   }
-  /* 09/11/2026 — un déploiement dédié à un logiciel (NEXT_PUBLIC_PORTAIL,
-     components/espace2/portail.ts) : sa racine ouvre directement l'espace
-     de ce logiciel. Sur omegaai.fr la variable n'existe pas : l'accueil
-     reste statique, le proxy n'y touche pas. */
-  if (pathname === "/") {
-    if (!PORTAIL_DEPLOIEMENT) return NextResponse.next();
-    const cible = request.nextUrl.clone();
-    cible.pathname = `/espace2/${PORTAIL_DEPLOIEMENT}`;
-    return NextResponse.redirect(cible, 307);
-  }
+  /* 09/11/2026 — sur un site dédié à un logiciel (NEXT_PUBLIC_PORTAIL,
+     components/espace2/portail.ts), la racine est la page de vente du
+     métier : c'est next.config.ts qui la sert, le proxy n'y touche pas. */
   /* 05/11/2026 — l'espace « un seul logiciel » (components/espace2/portail.ts) :
      omegaai.fr/daliro (et, depuis le 09/11, /tamila, /lorani, /tiroma,
      /tavaro, /varelo) pose le témoin et ouvre le logiciel ; tant qu'il est
@@ -117,7 +110,6 @@ export const config = {
      supprimé (plus aucun compte ne se crée depuis omegaai.fr). */
   /* 09/10 — /omega (pilotage interne) : la session y est tenue à jour. */
   /* 05/11 — /daliro : l'entrée de l'espace « DALIRO seul » ; 09/11 — les
-     cinq autres logiciels, et "/" pour la racine des déploiements dédiés
-     (sur omegaai.fr elle passe tout droit, NextResponse.next()). */
-  matcher: ["/", "/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/daliro", "/tamila", "/lorani", "/tiroma", "/tavaro", "/varelo", "/omega", "/omega/:path*"],
+     cinq autres logiciels. */
+  matcher: ["/installation", "/auth/:path*", "/espace/:path*", "/espace2/:path*", "/daliro", "/tamila", "/lorani", "/tiroma", "/tavaro", "/varelo", "/omega", "/omega/:path*"],
 };

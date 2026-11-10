@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canoniqueSecteur } from "@/components/espace2/portail";
 import type React from "react";
 import PageShell from "@/components/PageShell";
 import Heros from "@/components/secteurs/architectes/Heros";
@@ -85,7 +86,8 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,
   description: DESCRIPTION,
-  alternates: { canonical: "/secteurs/architectes" },
+  /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  alternates: { canonical: canoniqueSecteur("architectes") },
   openGraph: {
     type: "website",
     locale: "fr_FR",

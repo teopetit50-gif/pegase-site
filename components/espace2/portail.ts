@@ -20,11 +20,18 @@
    déploiement, le portail est imposé (PORTAIL_DEPLOIEMENT) : la racine
    ouvre /espace2/<logiciel>, le témoin ne compte plus et ?portail=complet
    n'ouvre rien d'autre. Sans la variable (omegaai.fr), rien ne change.
-   Même jour, suite : sur un tel déploiement le site n'est QUE le logiciel —
-   les pages de la vitrine mènent au module (next.config.ts), l'onglet porte
-   le nom du logiciel (app/espace2/layout.tsx), robots.txt ferme tout et le
-   sitemap est vide ; /daliro et consorts mènent au module du déploiement
-   sans poser de témoin (proxy.ts).
+   Même jour, suite — Teo : « ça doit être un site, donc un SaaS
+   indépendant : exactement la même chose qu'il y a sur Omega, sauf que
+   c'est indépendant ; un copier-coller ». Un déploiement dédié est donc le
+   SITE du logiciel : sa racine sert la page de vente du métier, celle
+   d'omegaai.fr/secteurs/<secteur>, à l'identique (réécriture dans
+   next.config.ts, /secteurs/<secteur> y renvoie vers la racine, canonique
+   « / »), et tout ce que cette page appelle — réserver un audit, contact,
+   données — vit dans le même site. L'espace client du logiciel reste
+   derrière, à /espace2/<logiciel>, réduit à lui seul (le portail imposé
+   ci-dessus) ; l'onglet y porte le nom du logiciel (app/espace2/layout.tsx)
+   et /daliro et consorts y mènent sans poser de témoin (proxy.ts). Le
+   sitemap du site dédié ne déclare que sa racine.
 
    Ce fichier n'importe rien : le proxy et le layout serveur le lisent ; le
    contexte React est dans portail-contexte.ts (composant client).
@@ -39,6 +46,13 @@ export type Portail = (typeof PORTAILS)[number];
 
 /* le nom du logiciel, pour le titre de l'onglet d'un déploiement dédié */
 export const NOMS_PORTAILS: Record<Portail, string> = { daliro: "DALIRO", tamila: "TAMILA", lorani: "LORANI", tiroma: "TIROMA", tavaro: "TAVARO", varelo: "VARELO" };
+
+/* la page de vente de chaque logiciel sur omegaai.fr : app/secteurs/<secteur> (lib/secteurs.ts) */
+export const SECTEUR_PORTAIL: Record<Portail, string> = { daliro: "btp", tamila: "avocats", lorani: "architectes", tiroma: "dentaire", tavaro: "location-automobile", varelo: "groupes" };
+
+/** l'adresse canonique d'une page secteur : « / » sur le site dédié à ce métier, sinon son chemin sur omegaai.fr */
+export const canoniqueSecteur = (secteur: string): string =>
+  PORTAIL_DEPLOIEMENT && SECTEUR_PORTAIL[PORTAIL_DEPLOIEMENT] === secteur ? "/" : `/secteurs/${secteur}`;
 
 export const lirePortail = (valeur: string | undefined | null): Portail | null =>
   (PORTAILS as readonly string[]).includes(valeur ?? "") ? (valeur as Portail) : null;

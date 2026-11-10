@@ -18,9 +18,9 @@ import { PORTAIL_DEPLOIEMENT } from "@/components/espace2/portail";
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  /* 09/11/2026 — un déploiement dédié à un logiciel (components/espace2/portail.ts) n'a pas de vitrine : sitemap vide */
-  if (PORTAIL_DEPLOIEMENT) return [];
   const maj = new Date();
+  /* 09/11/2026 — un site dédié à un logiciel (components/espace2/portail.ts) ne déclare que sa racine, la page de vente du métier */
+  if (PORTAIL_DEPLOIEMENT) return [{ url: `${SITE_URL}/`, lastModified: maj, changeFrequency: "weekly", priority: 1 }];
 
   const fixes: { url: string; priorite: number; frequence: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
     { url: "/", priorite: 1, frequence: "weekly" },

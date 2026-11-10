@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { PORTAIL_DEPLOIEMENT, SECTEUR_PORTAIL } from "./components/espace2/portail";
 
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -87,25 +88,23 @@ const EN_TETES_SECURITE = [
 ];
 
 /* ══════════════════════════════════════════════════════════════════════════
-   09/11/2026 — les déploiements dédiés à un logiciel (components/espace2/
+   09/11/2026 — les sites dédiés à un logiciel (components/espace2/
    portail.ts). Teo : « chaque SaaS va être indépendant, sauf les quatre
-   modules principaux ». Chaque logiciel métier a son projet Vercel, bâti
-   sur ce dépôt avec la variable NEXT_PUBLIC_PORTAIL (daliro, tamila, lorani,
-   tiroma, tavaro, varelo). Là, le site n'est que le logiciel : les pages de
-   la vitrine mènent au module (la racine, c'est proxy.ts). Sans la variable
-   (omegaai.fr), la liste est vide et rien ne change. Redirections 307 :
-   l'adresse reste la leur si un jour la vitrine du métier revient ici.
+   modules principaux » ; « exactement la même chose qu'il y a sur Omega,
+   sauf que c'est indépendant ; un copier-coller ». Chaque logiciel métier
+   a son projet Vercel, bâti sur ce dépôt avec la variable
+   NEXT_PUBLIC_PORTAIL (daliro, tamila, lorani, tiroma, tavaro, varelo). Là,
+   la racine du site SERT la page de vente du métier — celle d'omegaai.fr/
+   secteurs/<secteur>, à l'identique — par réécriture (l'adresse reste « / »),
+   et /secteurs/<secteur> renvoie vers la racine pour qu'il n'y ait qu'une
+   adresse. Le reste du site (réserver un audit, contact, données…) est
+   servi tel quel. Sans la variable (omegaai.fr), les deux listes sont vides
+   et rien ne change.
    ═══════════════════════════════════════════════════════════════════════ */
-const PORTAILS = ["daliro", "tamila", "lorani", "tiroma", "tavaro", "varelo"];
-const PORTAIL_DEPLOIEMENT = PORTAILS.find((p) => p === process.env.NEXT_PUBLIC_PORTAIL) ?? null;
-/* les pages de premier niveau de la vitrine ; restent : /espace2, /espace (le proxy le renvoie), /auth, /api, /bienvenue, /robots.txt, /sitemap.xml */
-const VITRINE = ["audit", "blog", "commencer", "contact", "espace3", "formation", "installation", "integrations", "modeles", "offres", "omega", "p", "reserver", "reserver-un-audit", "secteurs", "signer", "tarifs", "vos-donnees"];
-const REDIRECTIONS_PORTAIL = PORTAIL_DEPLOIEMENT
-  ? VITRINE.flatMap((p) => [
-      { source: `/${p}`, destination: `/espace2/${PORTAIL_DEPLOIEMENT}`, permanent: false },
-      { source: `/${p}/:chemin*`, destination: `/espace2/${PORTAIL_DEPLOIEMENT}`, permanent: false },
-    ])
-  : [];
+const SECTEUR_DU_SITE = PORTAIL_DEPLOIEMENT ? SECTEUR_PORTAIL[PORTAIL_DEPLOIEMENT] : null;
+/* `beforeFiles` : la réécriture doit passer AVANT les fichiers, sinon app/page.tsx (l'accueil d'Omega) gagne la racine */
+const REECRITURES_SITE_DEDIE = SECTEUR_DU_SITE ? [{ source: "/", destination: `/secteurs/${SECTEUR_DU_SITE}` }] : [];
+const REDIRECTIONS_SITE_DEDIE = SECTEUR_DU_SITE ? [{ source: `/secteurs/${SECTEUR_DU_SITE}`, destination: "/", permanent: false }] : [];
 
 const nextConfig: NextConfig = {
   /* 25/09 — ne pas annoncer le cadriciel dans chaque réponse. */
@@ -119,13 +118,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:chemin*", headers: EN_TETES_SECURITE }];
   },
+  async rewrites() {
+    return { beforeFiles: REECRITURES_SITE_DEDIE, afterFiles: [], fallback: [] };
+  },
   async redirects() {
     // Historique des routes : /moteurs (jusqu'au 20/07) → /solutions
     // (jusqu'au 25/07) → /offres. La liste comme les fiches vivent désormais
     // sous /offres ; les deux anciennes familles d'URL y sont redirigées en
     // 308 pour ne casser ni les liens externes ni les favoris.
     return [
-      ...REDIRECTIONS_PORTAIL,
+      ...REDIRECTIONS_SITE_DEDIE,
       /* 14/09 : `www.omegaai.fr` renvoie vers l'apex. Le sous-domaine a servi
          le banc d'essai (projet omega-site-v3, robots fermé) pendant que la
          vitrine vivait sur l'apex ; depuis le portage du 14/09 ce dédoublement
