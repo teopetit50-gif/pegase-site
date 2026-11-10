@@ -1,69 +1,65 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import Heros from "@/components/secteurs/dentaire/Heros";
-import EnDirect from "@/components/secteurs/dentaire/EnDirect";
-import Matinee from "@/components/secteurs/dentaire/Matinee";
-import Ecrans from "@/components/secteurs/dentaire/Ecrans";
-import Comparatif from "@/components/secteurs/dentaire/Comparatif";
-import PourQui from "@/components/secteurs/dentaire/PourQui";
-import Demo from "@/components/secteurs/dentaire/Demo";
-import Quotidien from "@/components/secteurs/dentaire/Quotidien";
-import Formules from "@/components/secteurs/dentaire/Formules";
-import Questions from "@/components/secteurs/dentaire/Questions";
-import Appel from "@/components/secteurs/dentaire/Appel";
-import "./dentaire.css";
-import "./mobile.css";
 import SeCombine from "@/components/secteurs/SeCombine";
+import Appel from "@/components/secteurs/dentaire/Appel";
+import AvantApres from "@/components/secteurs/dentaire/AvantApres";
+import Bandeau from "@/components/secteurs/dentaire/Bandeau";
+import Etapes from "@/components/secteurs/dentaire/Etapes";
+import Formules from "@/components/secteurs/dentaire/Formules";
+import Heros from "@/components/secteurs/dentaire/Heros";
+import Onglets from "@/components/secteurs/dentaire/Onglets";
+import PourQui from "@/components/secteurs/dentaire/PourQui";
+import Questions from "@/components/secteurs/dentaire/Questions";
+import Situations from "@/components/secteurs/dentaire/Situations";
+import ToutLeCabinet from "@/components/secteurs/dentaire/ToutLeCabinet";
+import "./dentaire.css";
 
 /* ══════════════════════════════════════════════════════════════════════
-   /secteurs/dentaire — TIROMA (nom provisoire, 24/09/2026)
+   /secteurs/dentaire — TIROMA, refaite le 09/11/2026 sur le dessin de
+   https://folio-topaz-delta.vercel.app/ (Teo : « copie 1:1 »).
 
-   C'EST LA PAGE D'ACCUEIL DU SITE SaaS `OMEGA/dentaire-site`, RAPATRIÉE
-   comme Daliro (/secteurs/btp) et Tamila (/secteurs/avocats). Version
-   finale du disque le 24/09/2026 à 17 h 12, heure de la Guadeloupe, celle
-   que sert https://tiroma-site.vercel.app : les fonctions ajoutées par la
-   session « fonctions » (laboratoire, mutuelles, implants, orthodontie,
-   écran « Avant les rendez-vous ») ET le rhabillage « cabinet dentaire »
-   du même après-midi (Teo : « ne fait pas assez site dentaire ») — vraies
-   photos de cabinet avec des cartes d'interface posées dessus, schéma
-   dentaire FDI, vert d'eau clinique à la place du bleu ciel.
+   LA RÉFÉRENCE, relevée au style calculé (Playwright headless, cinq
+   largeurs 390 / 768 / 1024 / 1440 / 1700, captures et relevé dans la
+   session du 09/11) : fond blanc, texte #171717, gris #737373, filets
+   #e6e6e6, surfaces #f5f5f5, rayon 8 px ; corps en Geist, titres h1 et
+   h2 en Tiempos Headline, sourcils en Geist Mono. Huit sections : héros à
+   fenêtre, bandeau de logos, trois cartes, grille de cinq cartes, onglets
+   à fenêtres empilées, mosaïque de témoignages, FAQ à rubriques, appel
+   final sur photo, puis le pied.
 
-   Méthode : app/secteurs/RAPATRIEMENT.md. La source est UN fichier de
-   150 Ko (un bundle compilé repassé en JSX, noms minifiés) : il est
-   découpé ici en composants TypeScript lisibles, un par section, plus les
-   pièces partagées — components/secteurs/dentaire/.
+   CE QUI EST RECOPIÉ : le balisage et toutes les classes Tailwind de la
+   référence, section par section (convertisseur HTML → JSX de la session,
+   icônes SVG comprises), ses jetons de couleur (globals.css, `@theme
+   inline`, préfixe `tir-`), ses polices libres (Geist et Geist Mono, OFL,
+   servies depuis public/secteurs-dentaire/polices), ses animations
+   (liseré tournant, rubans, filet des onglets, empilement). Ses rayons
+   sont ceux de la référence : la page NE porte PAS `.p-dentaire`, donc
+   pas arrondis.css (qui ramène tout à 6 px) — c'est `.p-tiroma`.
 
-   LES SIX RÈGLES, ET CE QU'ELLES DONNENT ICI
-   1. Enveloppée dans `PageShell` : entête, pied et transitions du site.
-      La peau `.p-dentaire` sort du `<main>` plafonné à 1440 (100vw,
-      dentaire.css) ; chaque section garde son cadre de la source
-      (`max-w-[1400px] px-6 lg:px-12`), sans aucun filet vertical — la
-      source n'en avait pas.
-   2. Aucun jeton sur `:root` : tout vit sous `.p-dentaire`.
-   3. Aucun `@theme` : l'échelle « eau » de la source est écrite en
-      hexadécimal dans les composants.
-   4. Pas de bascule clair/sombre (275 `dark:` retirés) ; chaque section
-      porte `data-monde="clair"` pour l'entête du site.
-   5. Les polices sont celles du site : aucune `next/font` ici.
-   6. Appels à l'action : tout mène à /reserver-un-audit — héros,
-      calculateur, quatre formules, bandeau, schéma, démo, appel final. La
-      source visait https://omegaai.fr/reserver et, pour « Nous écrire »,
-      mailto:contact@omegaai.fr. « Voir la démo » reste une ancre vers la
-      démo de la page (#demo), qui se joue dans le navigateur.
-
-   CE QUI NE VIENT PAS : l'entête de la source (fixe, qui passait
-   par-dessus le héros ; marque, cinq ancres, « Nous écrire », « Réserver
-   une démo », volet mobile) et son pied (marque, colonnes de liens,
-   « © 2026 »). Le bloc d'appel qui OUVRAIT ce pied reste, en section
-   (Appel.tsx). La marque provisoire de Tiroma reste dans le corps, au
-   premier nœud du schéma (marque.tsx) : Tiroma n'a pas encore de logo.
-   `<PageMotion />` non plus : la page anime avec ses propres
-   observateurs et framer-motion, comme la source.
-
-   MONDE BLANC : la source était déjà claire ; la section « Écrans », noire
-   dans la référence, l'était déjà devenue. Rien de sombre ne reste, hors
-   le pied de page d'Omega (components/Footer.tsx, partagé par tout le
-   site), noir, hors de notre périmètre.
+   CE QUI DIFFÈRE, et pourquoi :
+   • TOUS LES TEXTES sont ceux de la page du 24/09 (textes.ts et les
+     composants d'alors), jamais reformulés : les sections de la référence
+     en accueillent autant qu'elles ont de places (ses maquettes
+     d'interface portent la démo, le calculateur, le schéma, les cartes
+     des photos et le relevé) ; ce qui n'avait pas de place — les quatre
+     étapes, l'avant / après, les formules — tient dans trois sections
+     supplémentaires faites des mêmes blocs que la référence (mosaïque,
+     cartes de la grille). La page est donc plus longue que la référence ;
+     chaque section, elle, est la sienne.
+   • Tiempos Headline (Klim, licence commerciale) n'est pas servable :
+     Bitter (OFL) à sa place, choisie par mesure contre la vraie Tiempos
+     (largeurs de trois titres à 0,2 %, hauteur d'x à 0,4 %, capitales
+     égales), devant Lora et Source Serif 4.
+   • Les photos de la référence (droits inconnus), ses logos clients et ses
+     avatars ne viennent pas : la photo du praticien (Unsplash, créditée)
+     en fond du héros et de l'appel (la salle de soins), les données lues en bandeau, l'icône
+     de chaque situation en avatar.
+   • L'entête de la référence (fixe) et son pied (colonnes) sont ceux du
+     site (PageShell) ; le héros perd en haut la hauteur de l'entête
+     collante pour tomber au même endroit.
+   • L'APPARITION AU DÉFILEMENT est celle de la page d'accueil, voulue par
+     Teo : components/accueil/Apparition (GroupeApparition, MotsApparition
+     sur chaque titre, Apparition sur chaque corps), rien de la référence.
    ══════════════════════════════════════════════════════════════════════ */
 
 const TITRE = "Tiroma · le point du matin des cabinets dentaires";
@@ -92,20 +88,19 @@ export const metadata: Metadata = {
 export default function PageDentaire() {
   return (
     <PageShell>
-      <div
-        data-monde="clair"
-        className="p-dentaire flex flex-col selection:bg-[#e3f0ed] selection:text-[#23433e]"
-      >
-        <Heros />
-        <EnDirect />
-        <Matinee />
-        <Ecrans />
-        <Comparatif />
-        <PourQui />
-        <Demo />
-        <Quotidien />
-        <Formules />
-        <Questions />
+      <div data-monde="clair" className="p-tiroma flex min-h-screen flex-col">
+        <div className="relative z-10 overflow-hidden border-b border-tir-border">
+          <Heros />
+          <Bandeau />
+          <PourQui />
+          <ToutLeCabinet />
+          <Onglets />
+          <Etapes />
+          <AvantApres />
+          <Formules />
+          <Situations />
+          <Questions />
+        </div>
         <Appel />
       </div>
       <SeCombine slug="dentaire" />

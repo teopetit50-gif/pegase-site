@@ -1,0 +1,14 @@
+Polices de la page /secteurs/dentaire (Tiroma), refaite le 09/11/2026 sur le dessin de folio-topaz-delta.vercel.app.
+
+Geist et Geist Mono (geist-*.woff2)
+    Auteur  : Vercel
+    Licence : SIL Open Font License 1.1 — https://github.com/vercel/geist-font/blob/main/LICENSE.TXT
+    Source  : fichiers woff2 servis par la référence (sous-ensembles latin et latin-ext).
+
+Bitter (bitter-*.woff2, police variable 100 → 900)
+    Auteur  : Sol Matas, Huerta Tipográfica
+    Licence : SIL Open Font License 1.1 — https://fonts.google.com/specimen/Bitter/license
+    Source  : Google Fonts (sous-ensembles latin et latin-ext).
+    Rôle    : tient la place de Tiempos Headline (Klim Type Foundry, licence commerciale, non
+              servable), choisie par mesure contre la vraie Tiempos : largeurs de trois titres à
+              0,2 %, hauteur d'x à 0,4 %, capitales égales (session du 09/11).

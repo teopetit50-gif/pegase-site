@@ -1,178 +1,138 @@
 "use client";
 /* ══════════════════════════════════════════════════════════════════════
-   « Des formules simples » (#pricing) — le calculateur des créneaux
-   perdus, la bascule mensuel / annuel, les quatre formules (Cabinet,
-   Groupe, Centre, Réseau) et le bandeau « Le point du matin arrive là où
-   vous êtes ». AUCUN MONTANT : chaque formule dit « Sur audit », la
-   bascule ne change que la mention de facturation, le prix se fixe à
-   l'audit (règle maison).
-
-   Écarts :
-   • Tous les boutons mènent à /reserver-un-audit (lien) : « Réserver un
-     audit » des trois premières formules (omegaai.fr/reserver), « Nous
-     écrire » de la formule Réseau (un mailto) devenu « Réserver un
-     audit » lui aussi, et le bandeau entier.
-   • Le détail des formules est un bouton qui ouvre la liste, comme la
-     source ; il porte `aria-expanded`.
-   • Rhabillage du 24/09 : le bandeau n'est plus un grand dégradé bleu au
-     texte blanc, mais un aplat vert d'eau très clair, filet et texte
-     foncé ; son bouton passe au vert d'eau soutenu. Bleu ciel → vert
-     d'eau partout ailleurs.
+   « Le prix dépend du nombre de fauteuils » (#pricing) — les quatre
+   formules et le bandeau de la page du 24/09 (textes.ts, FORMULES ;
+   Formules.tsx d'alors), dans la grille de cinq cartes de la référence
+   (deux puis trois, trame de points, titre, texte, scène). La référence
+   n'a pas de formules : chaque carte reprend son bloc tel quel — pastille
+   numérotée, « Sur audit », les points en lignes du fil d'activité, le
+   détail qui s'ouvre (« Voir le détail » / « Réduire »), le bouton. Le
+   bandeau porte la bascule mensuel / annuel (interrupteur de la
+   référence) et « Prix fixé à l'audit ». AUCUN MONTANT, comme avant.
    ══════════════════════════════════════════════════════════════════════ */
 import Link from "next/link";
-import { ArrowRight, Check, ChevronDown, MessageSquare, Sparkles, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useState } from "react";
-import Apparition from "./Apparition";
-import Calculateur from "./Calculateur";
+import Apparition, { GroupeApparition, MotsApparition } from "@/components/accueil/Apparition";
 import { RESERVER } from "./outils";
-import { Surtitre } from "./Surtitre";
-import { FORMULES } from "./textes";
+import { FORMULES, type Formule } from "./textes";
+
+const BOUTON_PLEIN = "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-medium text-sm outline-none transition-all bg-tir-primary text-tir-primary-foreground shadow-xs hover:bg-tir-primary/90 h-8 gap-1.5 rounded-md px-3";
+const BOUTON_CREUX = "inline-flex shrink-0 items-center justify-center whitespace-nowrap font-medium text-sm outline-none transition-all border bg-tir-background shadow-xs hover:bg-tir-accent hover:text-tir-accent-foreground h-8 gap-1.5 rounded-md px-3";
+
+function Carte({ f, rang, annuel, large }: { f: Formule; rang: number; annuel: boolean; large?: boolean }) {
+  const [ouvert, setOuvert] = useState(false);
+  return (
+    <div className={`relative flex min-h-[540px] flex-col overflow-hidden rounded-2xl border border-tir-border bg-tir-background ${large ? "lg:col-span-2" : ""}`}>
+      <div className="pointer-events-none absolute inset-0 text-tir-foreground/[0.06] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:14px_14px]" />
+      <div className="relative p-8">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center rounded-lg border border-[#E0DCFE] bg-[#F1ECFE] px-[5px] py-px font-medium text-[#6B47D8] text-[12px] leading-4">{String(rang + 1).padStart(2, "0")}</span>
+          {f.conseillee && <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-100 px-1.5 py-px font-medium text-[10px] text-emerald-700">Le plus complet</span>}
+        </div>
+        <h3 className="mt-3 font-semibold text-tir-foreground text-lg leading-tight">{f.nom}</h3>
+        <p className="mt-2 text-base text-tir-foreground/75 leading-relaxed">{f.texte}</p>
+      </div>
+      <div className="relative flex-1 px-8 pb-8">
+        <div className="flex items-end gap-x-[5px]">
+          <span className="font-semibold text-[18px] text-tir-foreground leading-6 tracking-[-0.36px]">Sur audit</span>
+        </div>
+        <span className="font-medium text-[11px] text-tir-muted-foreground leading-4 tracking-[-0.22px]">
+          {annuel ? "Facturé à l'année, prix fixé à l'audit" : "Facturé au mois, prix fixé à l'audit"}
+        </span>
+        <div className="relative mt-4 pl-12">
+          <div className="absolute top-0 bottom-0 left-6 border-tir-foreground/15 border-l border-dashed" />
+          {f.points.map((p, i) => (
+            <div key={p} className={i > 0 ? "relative mt-1.5" : "relative"}>
+              <div className="-left-9 absolute top-0 z-10 flex size-6 items-center justify-center rounded-md bg-blue-100 ring-1 ring-blue-200/60">
+                <Check className="size-3.5 text-blue-700" aria-hidden="true" />
+              </div>
+              <div className="ml-1 rounded-md border border-tir-border bg-tir-card px-2.5 py-1.5 shadow-sm">
+                <p className="text-[11px] text-tir-foreground leading-snug">{p}</p>
+              </div>
+            </div>
+          ))}
+          <div className="relative mt-1.5 pt-1">
+            <div className="-left-6 absolute top-0 h-1/2 w-6 rounded-bl-full border-tir-foreground/15 border-b border-l border-dashed" />
+            <button type="button" aria-expanded={ouvert} onClick={() => setOuvert(!ouvert)} className="flex items-center gap-1 text-[10px] text-tir-muted-foreground hover:text-tir-foreground">
+              {ouvert ? "Réduire" : "Voir le détail"}
+            </button>
+          </div>
+          {ouvert && (
+            <div className="mt-2 space-y-1.5">
+              {f.detail.map((d) => (
+                <div key={d.libelle} className="ml-1 flex items-center gap-1.5 text-[11px]">
+                  {d.inclus ? <Check className="size-3.5 shrink-0 text-emerald-500" aria-hidden="true" /> : <X className="size-3.5 shrink-0 text-tir-muted-foreground/40" aria-hidden="true" />}
+                  <span className={d.inclus ? "text-tir-foreground" : "text-tir-muted-foreground"}>{d.libelle}</span>
+                  {d.indice && <span className="inline-flex items-center rounded-full bg-blue-500 px-1.5 py-px font-medium text-[10px] text-white leading-none">{d.indice}</span>}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="mt-6">
+          <Link href={RESERVER} className={f.conseillee ? BOUTON_PLEIN : BOUTON_CREUX}>
+            Réserver un audit
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Formules() {
   const [annuel, setAnnuel] = useState(true);
-  const [ouverte, setOuverte] = useState<string | null>(null);
-
   return (
-    <section id="pricing" data-monde="clair" className="border-t border-slate-100 py-32 lg:py-40">
-      <div className="mx-auto max-w-[1400px] px-6 lg:px-12">
-        <Apparition className="mb-16 max-w-3xl lg:mb-24">
-          <Surtitre mono>Formules</Surtitre>
-          <h2 className="mb-6 font-sans text-4xl text-slate-900 md:text-5xl lg:text-6xl">Le prix dépend du nombre de fauteuils</h2>
-          <p className="max-w-xl text-lg text-slate-600 lg:text-xl">
+    <section id="pricing" data-monde="clair" className="py-20 md:py-28">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <GroupeApparition retard={700} className="grid items-end gap-8 md:grid-cols-2 md:gap-12">
+          <h2 className="text-balance font-bold text-4xl text-tir-foreground tracking-tight md:text-5xl">
+            <MotsApparition texte="Le prix dépend du nombre de fauteuils" depart={80} />
+          </h2>
+          <Apparition as="p" delai={450} className="max-w-md text-base text-tir-muted-foreground leading-relaxed">
             Le prix dépend du nombre de fauteuils : il se fixe à l&apos;audit, pas sur une grille.
-          </p>
-        </Apparition>
-        <Apparition delay={50} className="mb-16 lg:mb-20">
-          <Calculateur />
-        </Apparition>
-        <Apparition delay={100} className="mb-12 flex items-center gap-4">
-          <span className={`text-sm transition-colors ${!annuel ? "text-slate-900" : "text-slate-500"}`}>Mensuel</span>
-          <button
-            type="button"
-            onClick={() => setAnnuel(!annuel)}
-            role="switch"
-            aria-checked={annuel}
-            aria-label="Basculer entre facturation mensuelle et annuelle"
-            className="relative h-7 w-14 rounded-full bg-slate-200 p-1 transition-colors hover:bg-slate-300"
-          >
-            <div
-              className={`h-5 w-5 rounded-full bg-[#3b7a6e] transition-transform duration-300 ${annuel ? "translate-x-7" : "translate-x-0"}`}
-            />
-          </button>
-          <span className={`text-sm transition-colors ${annuel ? "text-slate-900" : "text-slate-500"}`}>Annuel</span>
-          {annuel && (
-            <span className="ml-2 bg-[#3b7a6e] px-2 py-1 font-mono text-xs text-white">Prix fixé à l&apos;audit</span>
-          )}
-        </Apparition>
-        <Apparition delay={150}>
-          <div className="grid gap-px bg-slate-300 md:grid-cols-2 lg:grid-cols-4">
-            {FORMULES.map((f, rang) => {
-              const ouvert = ouverte === f.cle;
-              return (
-                <div
-                  key={f.cle}
-                  className={`relative bg-white p-8 lg:p-10 ${f.conseillee ? "border-2 border-[#3b7a6e] lg:-my-4 lg:py-14" : ""}`}
-                >
-                  {f.conseillee && (
-                    <span className="absolute -top-3 left-8 bg-[#3b7a6e] px-3 py-1 font-mono text-xs uppercase tracking-widest text-white">
-                      Le plus complet
-                    </span>
-                  )}
-                  <div className="mb-8">
-                    <span className="font-mono text-xs text-slate-500">{String(rang + 1).padStart(2, "0")}</span>
-                    <h3 className="mt-2 font-sans text-3xl text-slate-900">{f.nom}</h3>
-                    <p className="mt-2 text-sm text-slate-500">{f.texte}</p>
-                  </div>
-                  <div className="mb-8 border-b border-slate-200 pb-8">
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-sans text-5xl text-slate-900">Sur audit</span>
-                    </div>
-                    <p className="mt-1 text-xs text-slate-400">
-                      {annuel ? "Facturé à l'année, prix fixé à l'audit" : "Facturé au mois, prix fixé à l'audit"}
-                    </p>
-                  </div>
-                  <ul className="mb-4 space-y-3">
-                    {f.points.map((p) => (
-                      <li key={p} className="flex items-start gap-3">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#3b7a6e]" />
-                        <span className="text-sm text-slate-600">{p}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mb-6">
+          </Apparition>
+        </GroupeApparition>
+        <Apparition delai={150} className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <Carte f={FORMULES[0]} rang={0} annuel={annuel} large />
+          <Carte f={FORMULES[1]} rang={1} annuel={annuel} />
+          <Carte f={FORMULES[2]} rang={2} annuel={annuel} />
+          <Carte f={FORMULES[3]} rang={3} annuel={annuel} />
+          <div className="relative flex min-h-[540px] flex-col overflow-hidden rounded-2xl border border-tir-border bg-tir-background">
+            <div className="pointer-events-none absolute inset-0 text-tir-foreground/[0.06] [background-image:radial-gradient(currentColor_1px,transparent_1px)] [background-size:14px_14px]" />
+            <div className="relative p-8">
+              <span className="inline-flex items-center rounded-lg border border-[#C7F4D3] bg-[#DDF9E4] px-[5px] py-px font-medium text-[#075A39] text-[12px] leading-4">Inclus dans chaque formule</span>
+              <h3 className="mt-3 font-semibold text-tir-foreground text-lg leading-tight">Le point du matin arrive là où vous êtes</h3>
+              <p className="mt-2 text-base text-tir-foreground/75 leading-relaxed">
+                Chaque jour ouvré à 7 h, par WhatsApp ou par e-mail, sur le téléphone du titulaire et de l&apos;assistante. Rien à ouvrir, rien à installer.
+              </p>
+            </div>
+            <div className="relative flex-1">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 pb-8">
+                <div className="w-[185px] rounded-xl border border-tir-border/40 bg-white p-3 shadow-md">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-[11px] text-tir-foreground leading-tight">{annuel ? "Annuel" : "Mensuel"}</span>
                     <button
                       type="button"
-                      onClick={() => setOuverte(ouvert ? null : f.cle)}
-                      aria-expanded={ouvert}
-                      className="flex w-full items-center gap-1.5 py-2 text-xs font-medium text-[#3b7a6e] transition-colors hover:text-[#30635a]"
+                      role="switch"
+                      aria-checked={annuel}
+                      aria-label="Basculer entre facturation mensuelle et annuelle"
+                      onClick={() => setAnnuel(!annuel)}
+                      className={`relative inline-flex h-3.5 w-6 shrink-0 items-center rounded-full transition-colors ${annuel ? "bg-blue-500" : "bg-zinc-300"}`}
                     >
-                      <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${ouvert ? "rotate-180" : ""}`} />
-                      {ouvert ? "Réduire" : "Voir le détail"}
+                      <span className={`inline-block size-2.5 rounded-full bg-white shadow-sm transition-transform ${annuel ? "translate-x-3" : "translate-x-0.5"}`} />
                     </button>
-                    {ouvert && (
-                      <ul className="mt-1 space-y-2.5 border-t border-slate-100 pt-2">
-                        {f.detail.map((d) => (
-                          <li key={d.libelle} className="flex items-start gap-2.5">
-                            {d.inclus ? (
-                              <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
-                            ) : (
-                              <X className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-300" />
-                            )}
-                            <span className={`text-xs ${d.inclus ? "text-slate-600" : "text-slate-400"}`}>
-                              {d.libelle}
-                              {d.indice && (
-                                <span className="ml-1.5 rounded bg-[#f3f8f7] px-1.5 py-0.5 text-[10px] font-semibold text-[#4f9587]">
-                                  {d.indice}
-                                </span>
-                              )}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </div>
-                  <Link
-                    href={RESERVER}
-                    className={`group flex w-full items-center justify-center gap-2 rounded-[6px] py-4 text-sm font-medium transition-all ${f.conseillee ? "bg-[#3b7a6e] text-white hover:bg-[#30635a]" : "border border-slate-200 text-slate-700 hover:border-[#3b7a6e] hover:bg-slate-50 hover:text-[#3b7a6e]"}`}
-                  >
-                    Réserver un audit
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
+                  <p className="mt-0.5 text-[9.5px] text-tir-muted-foreground leading-snug">{annuel ? "Facturé à l'année, prix fixé à l'audit" : "Facturé au mois, prix fixé à l'audit"}</p>
+                  <div className="mt-2 flex w-full items-center justify-center gap-1 rounded-md border border-tir-border/60 px-2 py-1 font-medium text-[10px] text-tir-foreground">
+                    {annuel ? "Mensuel" : "Annuel"}
+                  </div>
                 </div>
-              );
-            })}
+                <span className="inline-flex items-center rounded-full bg-blue-500 px-1.5 py-px font-medium text-[10px] text-white leading-none">Prix fixé à l&apos;audit</span>
+              </div>
+            </div>
           </div>
         </Apparition>
-        <Apparition delay={175} className="mt-12">
-          <Link
-            href={RESERVER}
-            className="group relative block w-full overflow-hidden rounded-2xl border border-[#c7e1db] bg-[#f3f8f7] p-6 text-left text-slate-900 transition-all hover:bg-[#e3f0ed] sm:p-8"
-          >
-            <div className="relative flex flex-wrap items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-[#c7e1db] bg-white p-2.5 sm:h-16 sm:w-16">
-                  <MessageSquare className="h-full w-full text-[#3b7a6e]" strokeWidth={1.6} />
-                </div>
-                <div>
-                  <span className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#30635a]">
-                    <Sparkles className="h-3 w-3" /> Inclus dans chaque formule
-                  </span>
-                  <h3 className="mb-1 font-sans text-lg sm:text-xl">Le point du matin arrive là où vous êtes</h3>
-                  <p className="max-w-xl text-sm text-slate-600">
-                    Chaque jour ouvré à 7 h, par WhatsApp ou par e-mail, sur le téléphone du titulaire et de
-                    l&apos;assistante. Rien à ouvrir, rien à installer.
-                  </p>
-                </div>
-              </div>
-              <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-[#3b7a6e] px-4 py-2.5 text-sm font-bold text-white transition-colors group-hover:bg-[#30635a]">
-                Réserver un audit <ArrowRight className="h-4 w-4" />
-              </span>
-            </div>
-          </Link>
-        </Apparition>
-        <p className="mt-12 text-center text-sm text-slate-500">
-          Chaque formule inclut les mises à jour. Le prix se fixe à l&apos;audit, selon la taille du cabinet.
-        </p>
       </div>
     </section>
   );

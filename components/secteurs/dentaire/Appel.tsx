@@ -1,80 +1,33 @@
 /* ══════════════════════════════════════════════════════════════════════
-   L'appel final — « Votre premier point du matin, demain à 7 h ? ».
-
-   Dans la source, ce bloc ouvrait son PIED DE PAGE (<footer>), au-dessus
-   des colonnes de liens, de la marque et du « © 2026 ». Le pied de la
-   source ne vient pas (c'est celui d'Omega qui sert) : seul l'appel reste,
-   en section, avec ses trois fonds recopiés — le bruit WebGL sur 600 px
-   (FondBruit, vert d'eau pâle depuis le 24/09), la trame de glyphes sur
-   256 px (TrameGlyphes, à 12 %), la grille de points qui s'efface vers le
-   bas. La hauteur est celle du bloc d'appel de la source (80 puis 128 px
-   au-dessus, 64 puis 80 px au-dessous) : le calque de 600 px est rogné par
-   la section, comme il l'était par le pied.
-
-   Boutons : « Réserver une démo » (omegaai.fr/reserver) → « Réserver un
-   audit », /reserver-un-audit. « Nous écrire » (mailto:contact@omegaai.fr)
-   devient « Voir la démo », l'ancre de la démo de la page, même habit :
-   tous les boutons d'action mènent à la réservation d'audit (règle
-   maison), et un second bouton vers la même adresse n'aurait rien dit de
-   plus.
+   L'appel final — le haut du pied de page de la référence : une photo en
+   fond voilée de blanc, le titre en serif, le chapô, un bouton en pilule.
+   Recopié classe par classe ; le pied lui-même (colonnes de liens) ne vient
+   pas, c'est celui d'Omega qui sert (PageShell). Textes : Appel.tsx du
+   24/09. La photo : la salle de soins (Unsplash, créditée).
    ══════════════════════════════════════════════════════════════════════ */
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
-import Apparition from "./Apparition";
-import BoutonDegrade from "./BoutonDegrade";
-import FondBruit from "./FondBruit";
-import LienAncre from "./LienAncre";
-import { RESERVER } from "./outils";
-import TrameGlyphes from "./TrameGlyphes";
+import Apparition, { GroupeApparition, MotsApparition } from "@/components/accueil/Apparition";
+import { PHOTO_FOND, RESERVER } from "./outils";
 
 export default function Appel() {
   return (
-    <section data-monde="clair" className="relative overflow-hidden bg-white">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[600px] overflow-hidden">
-        <FondBruit />
+    <section data-monde="clair" className="relative mt-12 overflow-hidden bg-tir-background">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <Image src={PHOTO_FOND} alt="" aria-hidden="true" fill sizes="100vw" className="object-cover" />
+        <div className="absolute inset-0 bg-tir-background/30 dark:bg-tir-background/70" />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-64 overflow-hidden opacity-100">
-        <TrameGlyphes couleur="#A0CCC3" couleurSeconde="#3B7A6E" opacite={0.12} />
-      </div>
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.4]"
-        style={{
-          backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-          color: "rgb(148 163 184)",
-          maskImage: "radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 50% 0%, black, transparent)",
-        }}
-      />
-      <Apparition>
-        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center px-6 pb-16 pt-24 text-center lg:px-12 lg:pb-20 lg:pt-32">
-          <h2 className="mb-8 font-sans text-4xl leading-[0.95] tracking-tight text-black lg:text-7xl">
-            Votre premier
-            <br />
-            point du matin,
-            <br />
-            demain à 7 h ?
-          </h2>
-          <p className="mb-12 max-w-xl text-xl leading-relaxed text-slate-600">
-            Une démonstration sur un agenda d&apos;exemple, puis l&apos;audit qui fixe le prix. Sans engagement.
-          </p>
-          <div className="flex flex-col items-center gap-4 sm:flex-row">
-            <BoutonDegrade asChild className="group min-w-0 gap-2 px-8 py-4">
-              <Link href={RESERVER}>
-                Réserver un audit
-                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-              </Link>
-            </BoutonDegrade>
-            <LienAncre
-              cible="demo"
-              className="inline-flex h-14 items-center gap-2 rounded-[6px] border border-slate-200 bg-white/70 px-8 font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-            >
-              <Play size={18} />
-              Voir la démo
-            </LienAncre>
-          </div>
-        </div>
-      </Apparition>
+      <GroupeApparition retard={700} className="relative px-6 pt-24 pb-32 text-center md:pt-32 md:pb-40 lg:px-8">
+        <h2 className="mx-auto max-w-3xl text-balance font-bold text-5xl text-tir-foreground tracking-tight md:text-6xl lg:text-7xl">
+          <MotsApparition texte="Votre premier point du matin, demain à 7 h ?" depart={80} />
+        </h2>
+        <Apparition as="p" delai={450} className="mx-auto mt-6 max-w-xl text-balance text-base text-tir-muted-foreground md:text-lg">
+          {"Une démonstration sur un agenda d'exemple, puis l'audit qui fixe le prix. Sans engagement."}
+        </Apparition>
+        <Link href={RESERVER} className="inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap outline-none transition-all focus-visible:border-tir-ring focus-visible:ring-[3px] focus-visible:ring-tir-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-tir-destructive aria-invalid:ring-tir-destructive/20 dark:aria-invalid:ring-tir-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-tir-primary text-tir-primary-foreground shadow-xs hover:bg-tir-primary/90 h-10 has-[>svg]:px-4 mt-8 rounded-full px-6 py-5 font-medium text-sm">
+          {"Réserver un audit"}
+        </Link>
+      </GroupeApparition>
     </section>
   );
 }
