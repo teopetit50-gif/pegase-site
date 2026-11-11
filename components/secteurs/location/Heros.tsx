@@ -30,7 +30,7 @@ import { LIEN_AUDIT } from "@/components/espace2/portail";
 import Link from "next/link";
 import { ContainerScroll } from "./DefilementHeros";
 import { FondPapier } from "./FondPapier";
-import Image from "next/image";
+import { MaquetteHero } from "./apercus/MaquetteHeros";
 import { HERO } from "./textes";
 import { Drapeau } from "./drapeau";
 
@@ -82,18 +82,7 @@ export function Hero() {
           </div>
         }
       >
-        {/* 11/11/2026 — Teo : « montre des captures du dashboard client à la place des faux écrans ». La maquette
-            générée (apercus/MaquetteHeros.tsx) est remplacée par la vue d'ensemble de TAVARO (/espace2/tavaro, thème
-            clair, données d'exemple, 2880 × 1800), rendue à la largeur naturelle de la miniature (1040 px). */}
-        <Image
-          src="/secteurs-location/ecrans/dashboard-vue-d-ensemble.png"
-          width={1040}
-          height={650}
-          alt="La vue d'ensemble de Tavaro : les retours du jour, les dommages relevés et les factures à valider par l'agence."
-          sizes="(max-width: 1100px) 100vw, 1040px"
-          priority
-          className="block h-auto w-full"
-        />
+        <MaquetteHero />
       </ContainerScroll>
     </section>
   );
