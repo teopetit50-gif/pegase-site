@@ -41,10 +41,12 @@ function Accueil() {
 export default function BarreDaliro() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[#e6e6e6]/60 bg-white" style={{ viewTransitionName: "site-header" }}>
-      <nav aria-label="Principal" className="hidden w-full md:block">
-        <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+      {/* 11/11, Teo : « tout est décalé trop à droite. Le logo est censé être beaucoup plus à gauche et les sections
+          au milieu » — plus de colonne max-w-6xl : le logo au bord gauche de l'écran, les entrées centrées sur la barre */}
+      <nav aria-label="Principal" className="relative hidden w-full md:block">
+        <div className="flex h-16 w-full items-center px-6">
           <Accueil />
-          <div className="flex flex-1 justify-end">
+          <div className="absolute inset-x-0 top-0 flex h-16 items-center justify-center">
             <ul className="flex list-none items-center gap-1">
               {ENTREES.map((l) => (
                 <li key={l.id}>
