@@ -1,17 +1,35 @@
 "use client";
-/* La barre du site Lorani — port de l'en-tête du site source
-   (dossier-omega/dossieros-site/src/components/nav.tsx, « HeroHeader »
-   Tailark) : une barre flottante à 30 px des bords et 10 px du haut,
-   filets haut et bas, 50 px de haut dès lg, fond flouté dès qu'on défile ;
-   logo à gauche, sept entrées au centre, « Voir la démo » et le bouton
-   étoilé à droite. L'en-tête est de hauteur nulle et collant : la barre
-   flotte sur le héros comme dans la source (`fixed`), et le héros garde
-   sa hauteur « écran moins 72 px » (architectes/Heros.tsx). Jetons de la
-   source : fond #fff, texte #0a0a0a, filet #e5e5e5 (architectes.css). */
-import { useEffect, useState } from "react";
+/* ══════════════════════════════════════════════════════════════════════
+   La barre du site Lorani — la « Resizable Navbar » d'Aceternity (11/11/2026)
+
+   La première barre portait l'en-tête Tailark du site source : flottante
+   à 30 px des bords, filets haut et bas, fond translucide flouté dès qu'on
+   défile. Teo, sur capture (le texte du héros lisible à travers) :
+   « j'aime pas la barre du haut, change-la, trouve-en une autre ». Celle-ci
+   est le port du bloc `aceternity/resizable-navbar` de la bibliothèque
+   (composants/navigation/aceternity__resizable-navbar) : en haut de page,
+   une barre pleine largeur ; passé 100 px de défilement, elle se RESSERRE
+   en une pilule centrée (ressort motion), avec l'ombre à six couches du
+   modèle, un fond blanc flouté et un peu de marge au-dessus. Les entrées
+   sont au centre, une pilule grise suit la souris (layoutId) ; à droite,
+   « Voir la démo » et le bouton étoilé de la page. Sous xl, la barre
+   mobile du modèle : logo, bouton menu, volet blanc à ombre sous la barre.
+
+   Ce qui change : la barre du haut est BLANCHE, pas transparente (plus
+   rien ne se lit à travers) ; les entrées sont les sections de la page
+   (défilement doux de LienSection, communs.tsx) ; la pilule est à 88 % de
+   la largeur (1280 px au plus), pas 40 % : sept entrées, deux boutons et
+   le logo n'entrent pas dans moins, en flex plutôt qu'en absolu centré. L'en-tête reste de hauteur nulle et collant : la barre
+   flotte sur le héros, qui garde sa hauteur « écran moins 72 px »
+   (architectes/Heros.tsx). Jetons : fond #fff, texte #0a0a0a, atténué
+   #737373, filet #e5e5e5 (architectes.css).
+   ══════════════════════════════════════════════════════════════════════ */
+import { useState, type MouseEvent } from "react";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
 import StarButton from "@/components/secteurs/architectes/bouton-etoile";
-import { Lockup, LienSection, Panneau, allerALaSection, type Entree } from "./communs";
+import { LienSection, Lockup, allerALaSection, type Entree } from "./communs";
 
 const ENTREES: Entree[] = [
   { label: "Produit", id: "product" },
@@ -24,65 +42,139 @@ const ENTREES: Entree[] = [
 ];
 const CTA = { label: "Réserver un audit", id: "audit" };
 
+/* l'ombre à six couches du modèle, sur la pilule et sur le volet mobile */
+const OMBRE =
+  "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset";
+const RESSORT = { type: "spring" as const, stiffness: 200, damping: 50 };
+
+const DEMO =
+  "inline-flex h-[34px] items-center justify-center whitespace-nowrap rounded-full bg-white px-3 text-[0.8rem] font-medium text-[#303030] shadow-sm shadow-black/30 ring-1 ring-[#e5e5e5] transition-colors hover:bg-[#f5f5f5]";
+
 function Accueil() {
   return (
-    <Link aria-label="Lorani, accueil" className="flex items-center gap-3 text-[#0a0a0a]" href="/">
+    <Link aria-label="Lorani, accueil" className="relative z-20 flex items-center text-[#0a0a0a]" href="/">
       <Lockup src="/logos/lorani-lockup.png" ratio="1200 / 325" className="h-6" label="Lorani" />
     </Link>
   );
 }
 
 export default function BarreLorani() {
-  const [defile, setDefile] = useState(false);
-  useEffect(() => {
-    const f = () => setDefile(window.scrollY > 0);
-    f();
-    window.addEventListener("scroll", f, { passive: true });
-    return () => window.removeEventListener("scroll", f);
-  }, []);
+  const { scrollY } = useScroll();
+  const [flotte, setFlotte] = useState(false);
+  const [survol, setSurvol] = useState<string | null>(null);
+  const [ouvert, setOuvert] = useState(false);
+  useMotionValueEvent(scrollY, "change", (y) => setFlotte(y > 100));
+
+  const aller = (e: MouseEvent<HTMLAnchorElement>, id: string) => {
+    setOuvert(false);
+    allerALaSection(e, id);
+  };
+
   return (
     <header className="sticky top-0 z-50 h-0 w-full overflow-visible" style={{ viewTransitionName: "site-header" }}>
-      <nav
+      {/* ——— bureau : la barre, puis la pilule ——— */}
+      <motion.nav
         aria-label="Principal"
-        className={`absolute top-[10px] right-[30px] left-[30px] border-y border-[#e5e5e5] px-6 transition-all duration-300 lg:h-[50px] ${
-          defile ? "bg-white/90 backdrop-blur-xl backdrop-saturate-150" : "bg-transparent"
+        animate={{
+          width: flotte ? "88%" : "100%",
+          y: flotte ? 16 : 0,
+          borderRadius: flotte ? 9999 : 0,
+          boxShadow: flotte ? OMBRE : "0 0 0 0 rgba(0,0,0,0)",
+          backdropFilter: flotte ? "blur(10px)" : "none",
+        }}
+        transition={RESSORT}
+        /* la pilule plafonne à 1280 px : sept entrées, deux boutons et le logo y tiennent côte à côte (dès xl) */
+        style={{ maxWidth: flotte ? 1280 : 1600 }}
+        className={`relative z-[60] mx-auto hidden flex-row items-center justify-between px-5 py-2 xl:flex ${
+          flotte ? "bg-white/90" : "border-b border-[#e5e5e5] bg-white"
         }`}
       >
-        <div className="relative flex h-full items-center justify-between py-3 lg:py-0">
-          <Accueil />
-          <div className="absolute inset-0 m-auto size-fit max-lg:hidden">
-            <ul className="flex gap-6 text-sm xl:gap-8">
-              {ENTREES.map((l) => (
-                <li key={l.id}>
-                  <LienSection id={l.id} className="block text-[#737373] transition-colors duration-150 hover:text-[#0a0a0a]">
-                    {l.label}
-                  </LienSection>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="hidden items-center gap-3 lg:flex">
-            <LienSection
-              id="product"
-              className="inline-flex h-[34px] items-center justify-center whitespace-nowrap rounded-full bg-white px-3 text-[0.8rem] font-medium text-[#303030] shadow-sm shadow-black/30 ring-1 ring-[#e5e5e5] transition-colors hover:bg-[#fafafa]"
+        <Accueil />
+        <div
+          onMouseLeave={() => setSurvol(null)}
+          className="flex flex-1 flex-row items-center justify-center space-x-1 text-sm font-medium text-[#737373]"
+        >
+          {ENTREES.map((l) => (
+            <a
+              key={l.id}
+              href={`/#${l.id}`}
+              onMouseEnter={() => setSurvol(l.id)}
+              onClick={(e) => aller(e, l.id)}
+              className="relative px-3 py-2 transition-colors duration-200 hover:text-[#0a0a0a] 2xl:px-4"
             >
-              Voir la démo
-            </LienSection>
-            {/* la lueur du bouton (architectes.css, .architectes-star-btn) est bornée à .p-architectes ; cette peau pose
-                aussi 100vw et un fond, qu'on annule ici en ligne */}
-            <span className="p-architectes inline-flex" style={{ width: "auto", marginInline: 0, background: "transparent" }}>
-              {/* 11/11, Teo : « ça nous fait spawn direct en bas… je veux que ça fasse défiler jusqu'à la section,
-                  comme Voir la démo » — le même défilement doux que LienSection */}
-              <StarButton href={`/#${CTA.id}`} className="h-[34px]" onClick={(e) => allerALaSection(e, CTA.id)}>
-                {CTA.label}
-              </StarButton>
-            </span>
-          </div>
-          <div className="lg:hidden">
-            <Panneau marque={<Accueil />} entrees={ENTREES} cta={CTA} />
-          </div>
+              {survol === l.id ? <motion.span layoutId="lorani-survol" className="absolute inset-0 h-full w-full rounded-full bg-[#f3f3f3]" /> : null}
+              <span className="relative z-20">{l.label}</span>
+            </a>
+          ))}
         </div>
-      </nav>
+        <div className="relative z-20 flex items-center gap-3">
+          <LienSection id="product" onClick={() => setOuvert(false)} className={DEMO}>
+            Voir la démo
+          </LienSection>
+          {/* la lueur du bouton (architectes.css, .architectes-star-btn) est bornée à .p-architectes ; cette peau pose
+              aussi 100vw et un fond, qu'on annule ici en ligne */}
+          <span className="p-architectes inline-flex" style={{ width: "auto", marginInline: 0, background: "transparent" }}>
+            <StarButton href={`/#${CTA.id}`} className="h-[34px]" onClick={(e) => aller(e, CTA.id)}>
+              {CTA.label}
+            </StarButton>
+          </span>
+        </div>
+      </motion.nav>
+
+      {/* ——— mobile et tablette : la barre du modèle, le volet dessous ——— */}
+      <motion.div
+        animate={{
+          width: flotte ? "90%" : "100%",
+          y: flotte ? 16 : 0,
+          borderRadius: flotte ? 12 : 0,
+          boxShadow: flotte ? OMBRE : "0 0 0 0 rgba(0,0,0,0)",
+          backdropFilter: flotte ? "blur(10px)" : "none",
+        }}
+        transition={RESSORT}
+        className={`relative z-50 mx-auto flex w-full flex-col items-center justify-between px-4 py-3 xl:hidden ${
+          flotte ? "bg-white/90" : "border-b border-[#e5e5e5] bg-white"
+        }`}
+      >
+        <div className="flex w-full flex-row items-center justify-between">
+          <Accueil />
+          <button
+            type="button"
+            aria-label={ouvert ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={ouvert}
+            onClick={() => setOuvert((o) => !o)}
+            className="inline-flex size-9 items-center justify-center rounded-md text-[#0a0a0a]"
+          >
+            {ouvert ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
+        <AnimatePresence>
+          {ouvert ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{ boxShadow: OMBRE }}
+              className="absolute inset-x-0 top-16 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-white px-4 py-8"
+            >
+              {ENTREES.map((l) => (
+                <a key={l.id} href={`/#${l.id}`} onClick={(e) => aller(e, l.id)} className="block w-full text-base text-[#0a0a0a]">
+                  {l.label}
+                </a>
+              ))}
+              <div className="flex w-full flex-col gap-3 pt-2">
+                <LienSection id="product" onClick={() => setOuvert(false)} className={`${DEMO} w-full`}>
+                  Voir la démo
+                </LienSection>
+                <span className="p-architectes flex" style={{ width: "auto", marginInline: 0, background: "transparent" }}>
+                  <StarButton href={`/#${CTA.id}`} className="h-[34px] w-full" onClick={(e) => aller(e, CTA.id)}>
+                    {CTA.label}
+                  </StarButton>
+                </span>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.div>
     </header>
   );
 }
