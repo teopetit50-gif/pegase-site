@@ -104,10 +104,11 @@ export const SECTEURS: Secteur[] = [
     slug: "location-automobile",
     metier: "Loueurs automobiles",
     saas: "Tavaro",
-    texte: "Chaque restitution est chiffrée sur votre barème, preuves jointes.",
-    ligne: "Restitutions chiffrées, preuves jointes",
+    /* 11/11/2026 — brief tavaro-v2 : du départ au retour, et jusqu'à la sortie de flotte */
+    texte: "Chaque véhicule suivi du départ au retour, et jusqu'à la sortie de flotte.",
+    ligne: "Du départ au retour, jusqu'à la sortie de flotte",
     detail:
-      "Tavaro rapproche les photos de restitution de l'état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec ses preuves datées, après validation de l'agence.",
+      "Tavaro suit chaque véhicule du départ au retour et jusqu'à la sortie de flotte : l'état des lieux de départ qui fait foi, le retour comparé photo par photo et chiffré sur votre barème, la facture suivie jusqu'au règlement, les amendes désignées dans le délai, l'entretien et la revente décidés sur le dossier du véhicule.",
     apercu:
       "Avant l'ouverture du comptoir, chaque agence reçoit sa page : les restitutions à facturer, les véhicules à remettre en location avant le prochain départ et l'entretien placé hors des réservations.",
     combine: [
@@ -126,10 +127,11 @@ export const SECTEURS: Secteur[] = [
     slug: "dentaire",
     metier: "Cabinets dentaires",
     saas: "Tiroma",
-    texte: "Les créneaux libérés sont repris et les plans signés planifiés.",
-    ligne: "Créneaux libérés proposés aux patients",
+    /* 11/11/2026 — brief tiroma-v2 : le patient suivi de la demande au dernier soin */
+    texte: "Chaque patient suivi de sa demande de rendez-vous au dernier soin de son plan.",
+    ligne: "De la demande de rendez-vous au dernier soin",
     detail:
-      "Tiroma lit l'agenda, les plans de traitement et les devis signés de votre logiciel, en lecture seule. Chaque créneau libéré arrive avec les patients qui peuvent le prendre, et l'assistante appelle dans l'ordre.",
+      "Tiroma lit l'agenda, les plans de traitement et les devis signés de votre logiciel, en lecture seule, et suit chaque patient de sa demande au dernier soin : le rappel, le créneau et son remplaçant, la veille du rendez-vous, le plan signé jusqu'au dernier règlement.",
     apercu:
       "Avant le premier patient, le titulaire reçoit trois listes : les créneaux libérés avec leurs patients, les plans signés sans rendez-vous et les fauteuils qui tournent à vide.",
     combine: [
@@ -170,10 +172,11 @@ export const SECTEURS: Secteur[] = [
     saas: "Varelo",
     /* 26/09 — l'accent passe sur la centralisation de l'IA du groupe
        (voir components/secteurs/groupes/textes.ts). */
-    texte: "Toutes les sociétés du groupe travaillent avec la même IA, sur un seul référentiel.",
+    /* 11/11/2026 — brief varelo-v2 : de la source branchée à la décision */
+    texte: "Le groupe lu, relié et décidé sur une page, de la source branchée à la décision.",
     ligne: "Une seule IA pour tout le groupe",
     detail:
-      "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule, et range leurs chiffres sous un seul référentiel. Chaque direction reçoit ce qu'elle doit décider, et la présidence voit le groupe sur une page.",
+      "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule, range leurs chiffres sous un seul référentiel dont chaque rapprochement est visible, applique des règles écrites une fois pour le groupe, et remet chaque direction devant ses décisions, avec le calcul et la pièce ; la présidence voit le groupe sur une page rapprochée des comptes.",
     apercu:
       "Chaque matin à 7 h, chaque direction reçoit au plus trois décisions, et la présidence une page : les ventes, la trésorerie et les échéances de chaque société.",
     combine: [

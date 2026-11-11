@@ -51,7 +51,7 @@ export default function Heros() {
               </h1>
               <div className="mx-auto max-w-2xl">
                 <p className="mb-6 text-balance text-lg text-tir-muted-foreground lg:text-xl">
-                  {"Tiroma lit votre agenda, vos plans de traitement et vos devis signés. Avant le premier patient, votre secrétariat sait quel créneau proposer et à qui, quel plan planifier et quel fauteuil tourne à vide."}
+                  {"Tiroma suit chaque patient de sa demande de rendez-vous au dernier soin de son plan. Il lit votre agenda, vos plans et vos devis sans y écrire, et avant le premier patient votre secrétariat sait quel créneau proposer et à qui, quel plan planifier et quel fauteuil tourne à vide."}
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <Link href={RESERVER} className="inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium text-sm outline-none transition-all focus-visible:border-tir-ring focus-visible:ring-[3px] focus-visible:ring-tir-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-tir-destructive aria-invalid:ring-tir-destructive/20 dark:aria-invalid:ring-tir-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0 bg-tir-primary text-tir-primary-foreground hover:bg-tir-primary/90 h-9 px-4 py-2 has-[>svg]:px-3 shadow-md">

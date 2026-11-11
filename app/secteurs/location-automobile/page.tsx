@@ -90,9 +90,10 @@ import SeCombine from "@/components/secteurs/SeCombine";
    notre périmètre.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Tavaro · chaque restitution facturée sur votre barème";
+/* 11/11/2026 — brief tavaro-v2 : chaque véhicule suivi du départ au retour, et jusqu'à la sortie de flotte */
+const TITRE = "Tavaro · chaque véhicule suivi du départ au retour, et jusqu'à la sortie de flotte";
 const DESCRIPTION =
-  "Tavaro rapproche les photos de restitution de l'état des lieux de départ, chiffre le carburant, le retard et les dommages selon votre barème de remise en état, puis prépare la facture que l'agence valide. Conçu par Omega pour les loueurs automobiles.";
+  "Tavaro suit chaque véhicule du départ au retour et jusqu'à la sortie de flotte : l'état des lieux de départ qui fait foi, le retour comparé photo par photo et chiffré sur votre barème, la facture suivie jusqu'au règlement, les amendes désignées dans le délai, l'entretien et la revente décidés sur le dossier du véhicule. Conçu par Omega pour les loueurs automobiles.";
 
 export const metadata: Metadata = {
   /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */

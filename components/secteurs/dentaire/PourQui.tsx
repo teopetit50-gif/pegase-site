@@ -20,7 +20,7 @@ export default function PourQui() {
               <MotsApparition texte="Pour quels cabinets ?" depart={80} />
             </h2>
             <Apparition as="p" delai={450} className="max-w-md text-base text-tir-muted-foreground leading-relaxed">
-              {"Tiroma lit ce que votre logiciel de cabinet sait déjà, et en tire trois décisions par matin."}
+              {"Tiroma lit ce que votre logiciel de cabinet sait déjà, et suit chaque patient de sa demande au dernier soin : trois décisions par matin, et rien qui s'arrête en route."}
             </Apparition>
           </div>
         </GroupeApparition>

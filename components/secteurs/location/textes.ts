@@ -54,9 +54,10 @@ export const HERO = {
   ligne1: "Un dommage non relevé",
   ligne2: "au retour se facture",
   accent: "rarement.",
+  /* 11/11/2026 — brief tavaro-v2 : du départ au retour, et jusqu’à la sortie de flotte */
   chapo:
-    "Au retour du véhicule, Tavaro compare les photos de restitution à l’état des lieux de départ, puis chiffre le carburant, le retard et les dommages selon votre barème de remise en état. Chaque facture part avec les photos datées du départ et du retour, après validation de l’agence.",
-  chapoCourt: "Tavaro chiffre chaque restitution sur votre barème et prépare la facture avec ses preuves, que l’agence valide avant envoi.",
+    "Au départ, l’agent photographie le véhicule angle par angle et le client signe. Au retour, Tavaro compare chaque photo à celle du départ, chiffre le carburant, le retard et les dommages selon votre barème, puis suit la facture jusqu’à son règlement ou son recours. Le même dossier suit le véhicule jusqu’à sa sortie de flotte.",
+  chapoCourt: "Tavaro suit chaque véhicule du départ au retour : l’état des lieux qui fait foi, la facture chiffrée sur votre barème et suivie jusqu’au règlement, que l’agence valide avant envoi.",
   boutonPrincipal: "Réserver un audit",
   boutonSecondaire: "Voir les modules",
 };
@@ -93,16 +94,16 @@ export const SOLUTIONS: { etiquette: string; kicker: string; panneaux: Panneau[]
     {
       id: "facturation",
       lien: "Facturation des retours",
-      kicker: "Le premier module",
-      titre: "Facturation des retours",
+      kicker: "Du départ à la facture",
+      titre: "Du départ au retour, puis jusqu’au règlement",
       lienTexte: "Voir le module",
       lienHref: "#moteurs",
       resume:
-        "À chaque restitution, l’agent photographie le véhicule avec son téléphone. Tavaro compare ces photos à l’état des lieux de départ, relève le carburant, le kilométrage, le retard et les dommages nouveaux, puis prépare la facture avec les preuves jointes. Comme le client signe l’état des lieux au départ et au retour, le dossier tient aussi devant sa banque s’il conteste.",
+        "Au départ, l’agent est guidé angle par angle avec son téléphone, la photo floue est refusée et le client signe : cet état des lieux fait foi. Au retour, Tavaro compare chaque photo à celle du départ sur le même angle, relève le carburant, le kilométrage, le retard et les dommages nouveaux, puis prépare la facture avec les preuves jointes. La facture est ensuite suivie jusqu’au bout : franchise, dépôt de garantie, assurance du client, contestation et ses délais, encaissement ou recours.",
       points: [
         "L’audit commence par vingt retours, pour mesurer ce qui a été facturé et ce qui ne l’a pas été.",
-        "Chaque poste de frais est chiffré selon votre barème et la franchise du contrat.",
-        "L’agence valide ou refuse chaque facture, et Tavaro n’en envoie aucune sans cette validation.",
+        "Chaque poste de frais est chiffré selon votre barème et la franchise du contrat, et chaque euro porte sa photo de départ et sa photo de retour.",
+        "L’agence valide ou refuse chaque facture, Tavaro n’en envoie aucune sans cette validation, et un dommage facturé est suivi jusqu’à son règlement.",
       ],
     },
     {
@@ -143,7 +144,7 @@ export const SOLUTIONS: { etiquette: string; kicker: string; panneaux: Panneau[]
       lienTexte: "Voir le module",
       lienHref: "#moteurs",
       resume:
-        "Tavaro tient une fiche économique par véhicule, avec son revenu, son entretien, ses jours d’immobilisation et sa valeur de revente. Il désigne ceux qui coûtent plus qu’ils ne rapportent, puis propose le moment et le canal de revente.",
+        "Tavaro tient le dossier de chaque véhicule du premier jour à la revente : kilométrage réel, entretiens, dommages et réparations, jours d’immobilisation, amendes, revenu et valeur de revente. Il désigne ceux qui coûtent plus qu’ils ne rapportent, puis propose le moment et le canal de revente.",
       points: [
         "Chaque véhicule est comparé à son prix de revente réel plutôt qu’à sa valeur comptable.",
         "La décision de vendre, de garder ou de renouveler se prend véhicule par véhicule, chiffres à l’appui.",
@@ -161,7 +162,7 @@ export type Moteur = { numero: string; nom: string; role: string; detail: string
 export const MOTEURS: { etiquette: string; liste: Moteur[] } = {
   etiquette: "01 / Modules",
   liste: [
-    { numero: "01", nom: "Facturation des retours", role: "Carburant, retard et dommages", detail: "Chaque restitution est comparée à l’état des lieux de départ, puis chiffrée selon votre barème. L’agence valide la facture avant envoi.", chiffre: "302 €", chiffreLegende: "proposés sur un retour d’exemple" },
+    { numero: "01", nom: "Du départ à la facture", role: "État des lieux, retour, règlement", detail: "L’état des lieux de départ fait foi. Au retour, chaque photo est comparée au même angle, puis chiffrée selon votre barème ; l’agence valide la facture, qui est suivie jusqu’à son règlement ou son recours.", chiffre: "302 €", chiffreLegende: "proposés sur un retour d’exemple" },
     { numero: "02", nom: "Remise en location", role: "Inspection, nettoyage, recharge", detail: "La tâche d’inspection, de nettoyage et de recharge est créée dès le retour, et le responsable est alerté si le prochain départ est menacé.", chiffre: "2 h 48", chiffreLegende: "de remise en location, agence d’exemple" },
     { numero: "03", nom: "Entretien", role: "Révisions hors location", detail: "Tavaro place les révisions dans les creux du planning, hors des réservations, et prévient l’atelier à l’avance.", chiffre: "4", chiffreLegende: "entretiens placés cette semaine" },
     { numero: "04", nom: "Assistance", role: "Panne, accident, clé perdue", detail: "L’assistant répond à l’appel, ouvre le dossier, envoie la dépanneuse selon votre grille et prévient l’agence.", chiffre: "35 min", chiffreLegende: "d’arrivée de la dépanneuse, exemple" },
@@ -205,9 +206,9 @@ export const A_PROPOS = {
   ],
   construitTitre: "Ce que Tavaro prend en charge",
   construit:
-    "Tavaro ne remplace pas votre logiciel de réservation et ne s’y branche pas. Il prend en charge ce qui se passe entre deux contrats : les photos de retour, la facturation du carburant et des dommages, la remise en location, l’entretien, le garage et les rappels, les péages et les amendes, la panne du dimanche et la sortie de flotte. Chaque action qui engage de l’argent passe par la validation de vos équipes.",
+    "Tavaro ne remplace pas votre logiciel de réservation et ne s’y branche pas. Il suit chaque véhicule du départ au retour et jusqu’à la sortie de flotte : l’état des lieux de départ qui fait foi, la facturation du carburant et des dommages suivie jusqu’au règlement, la remise en location, l’entretien, le garage et les rappels, les péages et les amendes désignées dans le délai, la panne du dimanche et la revente. Chaque action qui engage de l’argent passe par la validation de vos équipes.",
   liste: [
-    "Les retours sont comparés aux photos de départ, et la facture est proposée avec les preuves.",
+    "Le départ est photographié et signé ; les retours sont comparés aux photos de départ, et la facture est proposée avec les preuves puis suivie jusqu’au règlement.",
     "La remise en location et l’entretien sont placés dans les creux du planning, puis suivis par l’équipe.",
     "Les incidents et la sortie de flotte sont chiffrés, puis vous les validez.",
   ],

@@ -47,9 +47,10 @@ import "./mobile.css";
    c'est un second `statement`, au même dessin, sans écran.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Varelo · une seule IA pour tout le groupe";
+/* 11/11/2026 — brief varelo-v2 : le groupe lu, relié et décidé sur une page, de la source à la décision */
+const TITRE = "Varelo · le groupe lu, relié et décidé sur une page";
 const DESCRIPTION =
-  "Varelo réunit l'IA de toutes les sociétés d'un groupe : un seul référentiel, les mêmes règles, et chaque matin ce que chaque direction doit décider.";
+  "Varelo branche en lecture seule les logiciels, les tableurs et les dossiers de chaque société du groupe, les range sous un seul référentiel dont chaque rapprochement est visible, applique des règles écrites une fois, et remet chaque matin à chaque direction ses décisions avec leur calcul et leur pièce, et à la présidence le groupe sur une page rapprochée des comptes.";
 
 export const metadata: Metadata = {
   /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */

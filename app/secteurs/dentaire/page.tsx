@@ -63,9 +63,10 @@ import "./dentaire.css";
      sur chaque titre, Apparition sur chaque corps), rien de la référence.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Tiroma · le point du matin des cabinets dentaires";
+/* 11/11/2026 — brief tiroma-v2 : le patient suivi de la demande au dernier soin */
+const TITRE = "Tiroma · le patient suivi de la demande de rendez-vous au dernier soin";
 const DESCRIPTION =
-  "Chaque matin, Tiroma lit l'agenda, les plans de traitement et les devis signés du cabinet, et dit quel créneau sauver, quel plan planifier et quel fauteuil tourne à vide. Conçu par Omega pour les cabinets dentaires.";
+  "Tiroma suit chaque patient de sa demande de rendez-vous à la dernière séance de son plan : le rappel, le créneau et son remplaçant, la veille du rendez-vous, le plan signé jusqu'au dernier règlement. Il lit l'agenda, les plans et les devis du cabinet sans y écrire. Conçu par Omega pour les cabinets dentaires.";
 
 export const metadata: Metadata = {
   /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */

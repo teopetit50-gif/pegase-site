@@ -60,7 +60,7 @@ const E = (nom: string, l: number, h: number, alt: string): Ecran => ({
 export const HEROS = {
   titre: "Une seule IA pour tout le groupe.",
   chapo:
-    "Varelo branche la même IA sur les logiciels, les tableurs et les dossiers de chaque société, sur chaque territoire, en lecture seule. Chaque matin, elle dit à chaque direction ce qu'elle doit décider.",
+    "Varelo branche la même IA sur les logiciels, les tableurs et les dossiers de chaque société, sur chaque territoire, en lecture seule, et les range sous un seul référentiel. Chaque matin, elle dit à chaque direction ce qu'elle doit décider, avec le calcul et la pièce, et montre le groupe à la présidence sur une page rapprochée des comptes de chaque société.",
   bouton: "Réserver un audit",
   legende:
     "Le point du matin d'une direction financière, sur des données d'exemple.",
@@ -105,9 +105,9 @@ export const ENONCE_1 = {
   /* 26/09 — la réponse au constat, avant le collage : le socle commun,
      les règles écrites une fois, puis ce que chacun reçoit. */
   paragraphes: [
-    "Varelo réunit ces usages sur un seul socle. La même IA lit les logiciels, les tableurs et les dossiers de toutes les sociétés, d'un territoire à l'autre, en lecture seule, et range leurs données sous un seul référentiel.",
-    "Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale, qu'il s'agisse d'un délai de réserve, d'un préavis de contrat, d'une pièce à réclamer ou d'un seuil d'encours.",
-    "Chaque matin, la présidence lit le groupe sur une page, et chaque direction reçoit ses décisions avec le calcul et la pièce qui les justifient.",
+    "Varelo réunit ces usages sur un seul socle, en quatre étapes que la DSI peut vérifier une à une. La source d'abord : chaque logiciel, tableur ou dossier est branché en lecture seule, avec ce qui est lu, par qui et depuis quand.",
+    "Le référentiel ensuite : chaque client, fournisseur, article ou contrat reçoit un seul nom pour tout le groupe, et chaque rapprochement entre deux codes est proposé, puis validé ou refusé par une personne, à une date. Puis la règle : un délai de réserve, un préavis de contrat, une pièce à réclamer ou un seuil d'encours s'écrit une fois, avec son auteur et son périmètre, et s'applique dans chaque filiale.",
+    "La décision enfin : chaque matin, chaque direction reçoit ce qu'elle doit décider avec le calcul et la pièce, et la présidence lit le groupe sur une page dont chaque chiffre se rapproche des comptes de sa société, intra-groupe signalés.",
   ],
   /* 11/11/2026 — le collage fabriqué est remplacé par la vraie page Référentiel de Varelo (/espace2/varelo/referentiel) */
   ecran: {
@@ -129,12 +129,12 @@ export const SURVOL = {
      1800 × 1500 dessous, 1800 × 1518 dessus ; hh-dam 1800 × 1440. */
   entrees: [
     {
-      texte: "Le groupe sur une page",
+      texte: "Le groupe sur une page, rapproché des comptes",
       bas: E(
         "survol-groupe",
         1800,
         1440,
-        "La page du groupe : ventes, trésorerie et écarts de chaque société, sur une seule page.",
+        "La page du groupe : ventes, trésorerie et écarts de chaque société, sur une seule page, chaque chiffre rapproché des comptes de sa société.",
       ),
       dessus: null,
     },
@@ -235,9 +235,9 @@ export const CARROUSEL = {
     },
     {
       citation:
-        "Chaque printemps, des centaines d'attestations fiscales partent une par une, et chaque montant se vérifie à la main.",
-      role: "Direction administrative",
-      liste: "Les attestations à produire",
+        "Le préavis de contrat se compte à trois mois dans une société et à six dans l'autre, et personne ne sait qui a écrit la règle ni depuis quand.",
+      role: "Direction générale",
+      liste: "Le catalogue des règles",
     },
   ],
 };
@@ -269,7 +269,7 @@ export const ACCORDEON = {
     {
       titre: "Un seul référentiel",
       texte:
-        "Chaque client, fournisseur ou article reçoit un seul nom pour tout le groupe, rattaché aux codes de chaque société. L'IA raisonne donc sur les mêmes données dans toutes les filiales.",
+        "Chaque client, fournisseur ou article reçoit un seul nom pour tout le groupe, rattaché aux codes de chaque société. Chaque rapprochement est proposé, puis validé ou refusé par une personne, à une date, et les doublons comme les écarts entre sociétés restent visibles. L'IA raisonne donc sur les mêmes données dans toutes les filiales.",
       lien: { texte: "En parler", href: AUDIT },
       ecran: E(
         "systemes-referentiel",
@@ -281,7 +281,7 @@ export const ACCORDEON = {
     {
       titre: "Validation humaine",
       texte:
-        "Rien ne part sans l'accord de la direction concernée, décision par décision. Chaque proposition arrive avec son calcul et sa pièce, et le journal garde qui a validé quoi.",
+        "Rien ne part sans l'accord de la direction concernée, décision par décision. Chaque proposition arrive avec son calcul, sa pièce et la règle qui l'a déclenchée, avec son auteur et son périmètre ; le journal garde qui a validé quoi.",
       lien: { texte: "En parler", href: AUDIT },
       ecran: E(
         "systemes-validation",

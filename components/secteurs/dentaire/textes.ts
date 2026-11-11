@@ -46,11 +46,15 @@ import {
 /* ── Héros ─────────────────────────────────────────────────────────── */
 
 /* La deuxième ligne du titre, qui change toutes les 3 s (`mV`). */
+/* 11/11/2026 — brief tiroma-v2 : le fil va de la demande de rendez-vous au dernier règlement */
 export const LIGNES_TOURNANTES = [
+  "une demande de rendez-vous",
   "un créneau annulé",
   "un plan signé",
   "un contrôle dû",
   "un accord de mutuelle",
+  "une séance restante",
+  "un reste à charge",
 ];
 
 /* Les six pastilles sous les boutons : à la place des réseaux sociaux de
@@ -67,6 +71,7 @@ export const PASTILLES_LUES: { nom: string; Icone: LucideIcon }[] = [
 /* Le bandeau qui défile au bas du héros : à la place des logos clients de
    la référence, les données que Tiroma rapproche. */
 export const BANDEAU_LU: { cle: string; Icone: LucideIcon; libelle: string }[] = [
+  { cle: "demandes", Icone: CalendarDays, libelle: "Demandes de rendez-vous" },
   { cle: "agenda", Icone: CalendarDays, libelle: "Agenda du cabinet" },
   { cle: "plans", Icone: ClipboardList, libelle: "Plans de traitement" },
   { cle: "devis", Icone: Receipt, libelle: "Devis signés" },
@@ -78,6 +83,7 @@ export const BANDEAU_LU: { cle: string; Icone: LucideIcon; libelle: string }[] =
   { cle: "labo", Icone: FlaskConical, libelle: "Travaux de laboratoire" },
   { cle: "mutuelles", Icone: ShieldCheck, libelle: "Accords des mutuelles" },
   { cle: "stock", Icone: Package, libelle: "Stock d'implants" },
+  { cle: "reglements", Icone: Receipt, libelle: "Règlements et restes à charge" },
 ];
 
 /* ── Les quatre écrans (captures dessinées pour Tiroma, données d'exemple
@@ -135,7 +141,13 @@ export const ONGLETS_ECRANS: { titre: string; valeur: string; src: string; legen
 
 /* ── « De l'annulation au fauteuil occupé » (`mj`) ──────────────────── */
 
+/* 11/11/2026 — brief tiroma-v2 : les étapes suivent le patient de la demande au dernier soin */
 export const ETAPES = [
+  {
+    titre: "La demande arrive, le rappel part",
+    texte:
+      "Un patient demande un rendez-vous le dimanche soir, un autre n'a pas été revu depuis quatorze mois. Tiroma lit les demandes, l'intervalle de contrôle et la liste d'attente, et chaque patient entre dans l'agenda avec le créneau qui convient à son soin : la durée, le fauteuil, le praticien.",
+  },
   {
     titre: "Tiroma lit l'agenda et les plans",
     texte:
@@ -147,9 +159,9 @@ export const ETAPES = [
       "Quand un patient annule la veille, Tiroma indique qui peut prendre sa place : d'abord un patient dont le plan est accepté, puis la liste d'attente, puis un contrôle dû. L'assistante n'a plus qu'à appeler, et le fauteuil reste occupé.",
   },
   {
-    titre: "Le plan signé trouve son rendez-vous",
+    titre: "Le plan signé va jusqu'à sa dernière séance",
     texte:
-      "Les devis signés sans rendez-vous remontent chaque matin, du plus ancien au plus récent, avec le créneau qui leur convient.",
+      "Les devis signés sans rendez-vous remontent chaque matin, du plus ancien au plus récent, avec le créneau qui leur convient. Puis chaque séance restante, l'accord de la mutuelle et le reste à charge sont suivis jusqu'au dernier règlement : un plan ne s'interrompt plus sans que le cabinet le sache.",
   },
   {
     titre: "Chaque fauteuil reste occupé",
@@ -161,16 +173,20 @@ export const ETAPES = [
 /* ── Avant / après (section Écrans) ─────────────────────────────────── */
 
 export const SANS_TIROMA = [
+  "La demande de rendez-vous du dimanche soir attend le lundi 9 h, et le contrôle dû attend qu'on sorte la liste",
   "L'annulation se découvre en ouvrant l'agenda",
   "Le créneau libre reste vide ou part au premier qui appelle",
   "Le devis signé reste en attente : le patient attendait l'accord de sa mutuelle, puis personne ne l'a rappelé",
   "Une prothèse encore au laboratoire se découvre le jour de la pose",
+  "La troisième séance n'est jamais posée et le reste à charge n'est jamais réglé",
 ];
 export const AVEC_TIROMA = [
+  "Chaque demande et chaque contrôle dû entrent dans l'agenda avec le créneau qui convient au soin",
   "Avant le premier patient, chaque créneau libéré arrive avec les patients qui peuvent le prendre",
   "Le créneau va d'abord à un plan accepté, puis à la liste d'attente, puis à un contrôle dû",
   "Les plans signés sans rendez-vous remontent chaque matin",
   "Deux jours avant la pose, le retour du laboratoire est vérifié",
+  "Chaque plan signé est suivi jusqu'à sa dernière séance et son dernier règlement",
 ];
 
 /* ── « Ni un logiciel, ni une assistante de plus » : la comparaison par
@@ -180,11 +196,13 @@ export const AVEC_TIROMA = [
 export type Case = boolean | string;
 export const COMPARATIF_COLONNES = ["Tiroma", "Logiciel de cabinet", "Agenda en ligne", "Assistante seule"];
 export const COMPARATIF: { critere: string; cases: [Case, Case, Case, Case] }[] = [
+  { critere: "Demande de rendez-vous placée sur un créneau compatible avec le soin", cases: [true, false, "Premier créneau libre", "Au téléphone"] },
   { critere: "Créneau libéré proposé à un patient précis", cases: [true, false, "Premier qui appelle", "De mémoire"] },
   { critere: "Plans signés sans rendez-vous, chaque matin", cases: [true, "Sur requête", false, "Rarement"] },
   { critere: "Contrôles dus rapprochés des trous d'agenda", cases: [true, false, "Rappels en masse", "Manuel"] },
   { critere: "Retour du laboratoire vérifié avant la pose", cases: [true, false, false, "Au téléphone"] },
   { critere: "Accords des mutuelles rapprochés de l'agenda", cases: [true, false, false, "Manuel"] },
+  { critere: "Plan suivi jusqu'à la dernière séance et au dernier règlement", cases: [true, "Sur requête", false, "Rarement"] },
   { critere: "Implants des chirurgies rapprochés du stock", cases: [true, "Stock général", false, "De mémoire"] },
   { critere: "Charge suivie par fauteuil, jamais par personne", cases: [true, "Partiel", false, false] },
   { critere: "Point du matin dans un espace sécurisé", cases: [true, false, false, "À l'oral"] },
@@ -203,9 +221,9 @@ export const CABINETS = [
     texte:
       "Le titulaire soigne toute la journée. Chaque matin, Tiroma prépare ce qu'il n'a pas le temps de regarder : les créneaux vides, les plans signés sans rendez-vous et les contrôles dus.",
     points: [
+      "Demandes et contrôles dus placés sur le bon créneau",
       "Créneaux libérés avec leurs patients",
-      "Plans signés sans rendez-vous",
-      "Contrôles dus rapprochés de l'agenda",
+      "Plans signés suivis jusqu'au dernier soin",
       "Retours du laboratoire vérifiés avant la pose",
       "Point du matin dans votre espace sécurisé",
     ],
@@ -308,7 +326,15 @@ export const SITUATIONS: { quand: string; cabinet: string; sujet: string; Icone:
     sujet: "Traitement interrompu",
     Icone: CalendarX,
     recit:
-      "La deuxième séance du traitement de racine n'a jamais été posée. Le dossier dort jusqu'à la prochaine douleur.",
+      "La deuxième séance du traitement de racine n'a jamais été posée. Le dossier dort jusqu'à la prochaine douleur, et le reste à charge de la première séance n'a pas été réglé.",
+  },
+  {
+    quand: "Le dimanche, 21 h",
+    cabinet: "Cabinet de 2 fauteuils",
+    sujet: "Demande",
+    Icone: CalendarDays,
+    recit:
+      "Un patient demande un rendez-vous pour une douleur. La demande attend le lundi 9 h, et le premier créneau proposé ne convient pas à la durée du soin.",
   },
   {
     quand: "Le mardi, 18 h",
@@ -385,17 +411,21 @@ export const FORMULES: Formule[] = [
     conseillee: false,
     points: [
       "Point du matin chaque jour ouvré",
+      "Demandes, rappels et liste d'attente",
       "Créneaux à sauver",
       "Plans sans rendez-vous",
       "Contrôles dus",
       "Retours du laboratoire avant la pose",
       "Accords des mutuelles sans rendez-vous",
       "Devis qui arrivent à échéance",
+      "Plans suivis jusqu'au dernier soin et au dernier règlement",
       "Famille à planifier dans la foulée",
     ],
     detail: [
       { libelle: "Point du matin à 7 h", inclus: true },
+      { libelle: "Demandes, rappels et liste d'attente", inclus: true },
       { libelle: "Créneaux à sauver", inclus: true },
+      { libelle: "Plans suivis jusqu'au dernier règlement", inclus: true },
       { libelle: "Plans sans rendez-vous", inclus: true },
       { libelle: "Retours du laboratoire", inclus: true },
       { libelle: "Accords des mutuelles", inclus: true },
@@ -504,6 +534,14 @@ export const QUESTIONS = [
   {
     q: "Tiroma suit-il l'orthodontie et les implants ?",
     r: "Tiroma signale l'accord de l'Assurance maladie dont le traitement n'a pas commencé, alors que l'accord ne vaut que six mois, et le semestre suivant qui n'a pas été posé. Pour chaque chirurgie de la semaine, il vérifie que l'implant prévu est en stock, dans la bonne référence.",
+  },
+  {
+    q: "Tiroma remplace-t-il Doctolib ou mon agenda en ligne ?",
+    r: "Non. Tiroma lit les demandes et les rendez-vous là où ils arrivent, et place chaque demande sur un créneau compatible avec le soin : la durée, le fauteuil, le praticien, le matériel. Il ne prend pas le rendez-vous à votre place.",
+  },
+  {
+    q: "Que suit Tiroma après la première séance ?",
+    r: "Tout le plan, jusqu'au bout : les séances restantes, l'accord de la mutuelle, le reste à charge et les règlements reçus et dus. Un plan qui s'interrompt remonte avec sa dernière séance honorée et ce qui manque pour le reprendre.",
   },
   {
     q: "Combien coûte Tiroma ?",

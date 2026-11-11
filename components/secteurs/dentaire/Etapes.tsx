@@ -6,11 +6,12 @@
    cabinets ») : la référence n'a pas de section pour ces quatre étapes,
    elles reprennent donc l'un de ses blocs tel quel.
    ══════════════════════════════════════════════════════════════════════ */
-import { Armchair, CalendarX, ClipboardList, Stethoscope } from "lucide-react";
+import { Armchair, CalendarDays, CalendarX, ClipboardList, Stethoscope } from "lucide-react";
 import Apparition, { GroupeApparition, MotsApparition } from "@/components/accueil/Apparition";
 import { ETAPES } from "./textes";
 
-const ICONES = [Stethoscope, CalendarX, ClipboardList, Armchair];
+/* 11/11/2026 — cinq étapes depuis le brief tiroma-v2 : la demande ouvre le fil */
+const ICONES = [CalendarDays, Stethoscope, CalendarX, ClipboardList, Armchair];
 
 export default function Etapes() {
   return (
