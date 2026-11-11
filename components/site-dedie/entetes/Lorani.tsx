@@ -90,7 +90,7 @@ export default function BarreLorani() {
            84 % de large entre 1130 px (sept entrées, deux boutons et le logo côte à côte, dès xl) et 1240 px */
         style={flotte ? { minWidth: 1130, maxWidth: 1240 } : { maxWidth: 1600 }}
         className={`relative z-[60] mx-auto hidden flex-row items-center justify-between px-5 py-2 xl:flex ${
-          flotte ? "bg-white/90" : "border-b border-[#e5e5e5] bg-white"
+          flotte ? "bg-white/95 ring-1 ring-black/[0.06]" : "border-b border-[#e5e5e5] bg-white"
         }`}
       >
         <Accueil />
@@ -136,7 +136,7 @@ export default function BarreLorani() {
         }}
         transition={RESSORT}
         className={`relative z-50 mx-auto flex w-full flex-col items-center justify-between px-4 py-3 xl:hidden ${
-          flotte ? "bg-white/90" : "border-b border-[#e5e5e5] bg-white"
+          flotte ? "bg-white/95 ring-1 ring-black/[0.06]" : "border-b border-[#e5e5e5] bg-white"
         }`}
       >
         <div className="flex w-full flex-row items-center justify-between">
