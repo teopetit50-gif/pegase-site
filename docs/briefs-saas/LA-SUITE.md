@@ -105,8 +105,13 @@ chaque page vend aujourd'hui :
 | `varelo-v2.md` | Glean (sources et droits), Palantir Foundry (référentiel, actions), OneStream / Workiva (consolidation) | de la source branchée à la décision et à la page présidence |
 
 Daliro (BTP) ne bouge pas, à la demande de Teo. Ostelo (hôtellerie, nom de travail, page
-`/secteurs/hotellerie`) n'a pas de logiciel en ligne : pas de brief tant que le produit n'existe
-pas.
+`/secteurs/hotellerie`) n'a pas de logiciel en ligne ; son brief `ostelo-v2.md` est écrit en plus,
+sur le même modèle (Canary, SiteMinder, Duetto → le séjour suivi de la demande au dernier euro
+encaissé), pour le jour où le produit se construit. Sa page n'a pas été touchée.
+
+Les pages `/secteurs/dentaire`, `/secteurs/location-automobile` et `/secteurs/groupes` vendent le
+produit v2 depuis le 11/11 (commit « Tiroma, Tavaro, Varelo : les pages vendent le produit v2, de
+A à Z »), sans changer de dessin.
 
 Décisions à trancher, en plus des huit ci-dessus : (9) Tiroma lit-il Doctolib, ou seulement la
 liste d'attente du cabinet ? (10) Tavaro impose-t-il l'état des lieux de départ dans l'outil,
