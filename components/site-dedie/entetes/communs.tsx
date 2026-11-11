@@ -69,7 +69,8 @@ export function Panneau({
 }: {
   marque: ReactNode;
   entrees: Entree[];
-  cta: { label: string; id: string };
+  /** le bouton sous les entrées ; absent, « Réserver un audit » est une entrée comme les autres (Daliro, 11/11) */
+  cta?: { label: string; id: string };
   classeBouton?: string;
 }) {
   const [ouvert, setOuvert] = useState(false);
@@ -102,13 +103,15 @@ export function Panneau({
                 {l.label}
               </LienSection>
             ))}
-            <LienSection
-              id={cta.id}
-              className="mt-6 inline-flex h-12 items-center justify-center rounded-md bg-[#171717] px-5 text-base font-medium text-white"
-              onClick={() => setOuvert(false)}
-            >
-              {cta.label}
-            </LienSection>
+            {cta ? (
+              <LienSection
+                id={cta.id}
+                className="mt-6 inline-flex h-12 items-center justify-center rounded-md bg-[#171717] px-5 text-base font-medium text-white"
+                onClick={() => setOuvert(false)}
+              >
+                {cta.label}
+              </LienSection>
+            ) : null}
           </nav>
         </div>
       ) : null}

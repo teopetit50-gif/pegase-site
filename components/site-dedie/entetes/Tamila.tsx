@@ -9,8 +9,8 @@
    pour classe : collante, 64 px, blanche, filet gris-100 ; colonne
    max-w-7xl (px 16 / 24 / 32) ; à gauche le signe (h-6) et le nom en
    18 px semi-gras ; au centre, dès `md`, six entrées en 14 px médium
-   gris-700 ; à droite « Connexion » (le « Log in » du modèle, vers
-   l'espace client du logiciel, comme la barre Daliro) et le bouton noir ;
+   gris-700 ; à droite le bouton noir (le « Log in » du modèle est parti
+   le 11/11 : Teo, « Connexion, ça disparaît aussi ») ;
    sous `md`, le bouton menu et le volet déroulant du modèle (max-h 0 →
    500 px en 500 ms, entrées qui montent une à une, 60 ms d'écart).
    Les entrées sont des ANCRES vers les sections de la page (communs.tsx,
@@ -38,7 +38,6 @@ const ENTREES: (Entree & { large?: boolean })[] = [
   { label: "Point du matin", id: "point-du-matin" },
 ];
 const CTA = { label: "Réserver un audit", id: "audit" };
-const CONNEXION = { label: "Connexion", href: "/espace2/tamila" };
 
 const ENTREE = "text-sm font-medium text-[#364153] transition-colors hover:text-[#101828]";
 const BOUTON = "rounded-lg bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#1e2939]";
@@ -63,9 +62,6 @@ export default function BarreTamila() {
           ))}
         </div>
         <div className="hidden items-center gap-6 md:flex">
-          <Link href={CONNEXION.href} className={ENTREE}>
-            {CONNEXION.label}
-          </Link>
           <LienSection id={CTA.id} className={BOUTON}>
             {CTA.label}
           </LienSection>
@@ -88,9 +84,6 @@ export default function BarreTamila() {
             </LienSection>
           ))}
           <div className="mt-4 space-y-3 border-t border-[#f3f4f6] pt-4">
-            <Link href={CONNEXION.href} onClick={fermer} className={`block rounded-md px-3 py-3 text-base font-medium text-[#364153] transition-all duration-300 hover:bg-[#f9fafb] ${etat}`} style={{ transitionDelay: ouvert ? `${60 * ENTREES.length}ms` : "0ms" }}>
-              {CONNEXION.label}
-            </Link>
             <LienSection id={CTA.id} onClick={fermer} className={`block rounded-lg bg-black px-4 py-3 text-center text-base font-medium text-white transition-all duration-300 hover:bg-[#1e2939] ${etat}`}>
               {CTA.label}
             </LienSection>
