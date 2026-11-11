@@ -63,7 +63,9 @@ export const PORTAIL_DEPLOIEMENT: Portail | null = lirePortail(process.env.NEXT_
 
 /* les pages de premier niveau sous /espace2 que chaque espace réduit garde,
    en plus de la page du logiciel lui-même */
-const PAGES_COMMUNES = ["taches", "notes", "appels", "entreprises", "contacts", "reseau", "reglages", "equipe", "formation"];
+/* 11/11/2026 — « teo » : Mon espace, l'espace personnel du gérant (app/espace2/teo) ; il reste
+   joignable même avec le témoin d'un logiciel posé, et son layout ne l'ouvre qu'au compte gérant */
+const PAGES_COMMUNES = ["taches", "notes", "appels", "entreprises", "contacts", "reseau", "reglages", "equipe", "formation", "teo"];
 
 /* les pages de la formation propres aux quatre modules et aux autres métiers */
 const FORMATION_AUTRES = ["filed", "cashd", "reput", "offload", ...PORTAILS];

@@ -9,7 +9,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { LucideIcon } from "lucide-react";
-import { Building, CarFront, FileText, FolderLock, HandCoins, HardHat, MessageSquareText, Smile, Stamp, UserMinus } from "lucide-react";
+import { Building, CarFront, FileText, FolderLock, HandCoins, HardHat, MessageSquareText, Smile, Stamp, UserMinus, UserRound } from "lucide-react";
 
 export const RACINE = "/espace2";
 
@@ -173,6 +173,29 @@ export const MODULES: ModuleV2[] = [
   ]),
 ];
 
+/* ══════════════════════════════════════════════════════════════════════
+   MON ESPACE — l'espace personnel de Teo dans Espace 2 (11/11/2026)
+
+   Teo : « tu dois me faire mon espace à moi : copier le dashboard d'espace 2
+   en 1:1, la page du BTP, sauf que tout le contenu doit être pour moi — mes
+   clients, mon agenda, mes conversations WhatsApp, mon mail connecté ».
+   Un module hors de MODULES (jamais proposé aux clients : ni dans « Tous
+   les modules », ni dans la formation, ni dans la palette), ouvert sous
+   /espace2/teo au seul compte gérant (omega_est_admin, app/espace2/teo/
+   layout.tsx). Ses pages reprennent celles de DALIRO, référence pour
+   référence (docs/espace-teo/README.md).
+   ══════════════════════════════════════════════════════════════════════ */
+export const TEO = "teo";
+export const MODULE_TEO: ModuleV2 = m(TEO, "MON ESPACE", "Clients, agenda, WhatsApp et mails", "L'espace personnel du gérant : ses clients, son agenda Google, ses conversations WhatsApp et sa boîte Gmail", UserRound, [
+  { libelle: "Vue d'ensemble", href: `${RACINE}/${TEO}`, exact: true },
+  { libelle: "Clients", href: `${RACINE}/${TEO}/clients` },
+  { libelle: "Agenda", href: `${RACINE}/${TEO}/agenda` },
+  { libelle: "WhatsApp", href: `${RACINE}/${TEO}/whatsapp` },
+  { libelle: "Mails", href: `${RACINE}/${TEO}/mails` },
+], true);
+/** le chemin est-il dans Mon espace ? */
+export const dansMonEspace = (chemin: string) => chemin === `${RACINE}/${TEO}` || chemin.startsWith(`${RACINE}/${TEO}/`);
+
 /* 07/10/2026 — demande de Teo : la barre ne montre que les quatre
    modules communs, puis LE module du métier de l'entreprise (un seul).
    Les autres restent atteignables par « Tous les modules », en haut. */
@@ -203,6 +226,8 @@ export const moduleDe = (cle: string | undefined) => MODULES.find((x) => x.cle =
 /* la portée de la route : l'organisation, ou un module */
 export function porteeDe(chemin: string): ModuleV2 | null {
   const seg = chemin.slice(RACINE.length).split("/").filter(Boolean)[0];
+  /* 11/11/2026 — Mon espace (le gérant) : une portée à part, hors de MODULES */
+  if (seg === TEO) return MODULE_TEO;
   return moduleDe(seg) ?? null;
 }
 

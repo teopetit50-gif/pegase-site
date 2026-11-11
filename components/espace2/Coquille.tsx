@@ -35,7 +35,7 @@ import Palette from "./Palette";
 import Assistant from "./Assistant";
 import { PanneauAide, PanneauRetour, type TypeRetour } from "./Retours";
 import { useOuvertes } from "./Collection";
-import { MODULES, MODULES_PRINCIPAUX, ONGLETS_RESEAU, RACINE, moduleDe, moduleMetier, porteeDe, titreDe } from "./modules";
+import { MODULES, MODULES_PRINCIPAUX, MODULE_TEO, ONGLETS_RESEAU, RACINE, dansMonEspace, moduleDe, moduleMetier, porteeDe, titreDe } from "./modules";
 import { useCompteurs } from "./compteurs";
 import { OrganisationContexte } from "./organisation";
 import { useTheme } from "./theme";
@@ -175,11 +175,13 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   const portee = porteeDe(chemin);
   /* l'espace DALIRO seul ne montre que son module dans les menus du haut */
   const portail = usePortail();
-  const modulesVus = portail ? MODULES.filter((m) => m.cle === portail) : MODULES;
+  /* 11/11/2026 — Mon espace (le gérant, /espace2/teo) : les menus du haut ne montrent que lui, comme l'espace d'un logiciel */
+  const moi = dansMonEspace(chemin);
+  const modulesVus = moi ? [MODULE_TEO] : portail ? MODULES.filter((m) => m.cle === portail) : MODULES;
   /* hors de son module (Notes, Réseau…), le sélecteur garde le nom DALIRO : « Tous les modules » n'existe pas ici */
   const porteeVue = portee ?? (portail ? (moduleDe(portail) ?? null) : null);
   /* 09/11/2026 — dans l'espace d'un logiciel, « Nouveau… » ouvre sa page de travail (la deuxième entrée de modules.ts : chantiers, projets, retours…), quel que soit le logiciel */
-  const travail = portail ? (moduleDe(portail)?.onglets[1] ?? moduleDe(portail)?.onglets[0] ?? null) : null;
+  const travail = moi ? MODULE_TEO.onglets[1] : portail ? (moduleDe(portail)?.onglets[1] ?? moduleDe(portail)?.onglets[0] ?? null) : null;
 
   /* ⌘K / Ctrl+K partout ; F hors des champs de saisie */
   useEffect(() => {
@@ -236,12 +238,12 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 </>
               }
             >
-              {portail ? null : (
+              {portail || moi ? null : (
                 <ItemMenu id="tous" href={RACINE} textValue="Tous les modules" icone={<LayoutGrid {...I} />} suffixe={coche(!portee)}>
                   Tous les modules
                 </ItemMenu>
               )}
-              {portail ? null : <SeparateurMenu />}
+              {portail || moi ? null : <SeparateurMenu />}
               <SectionMenu titre="Modules">
                 {modulesVus.map((m) => (
                   <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
@@ -268,7 +270,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
                 </>
               }
             >
-              {portail ? (
+              {portail || moi ? (
                 <>
                   {porteeVue && travail ? (
                     <ItemMenu id="module" href={travail.href} textValue={`Ouvrir ${travail.libelle}`} icone={<porteeVue.icone {...I} />}>
@@ -430,6 +432,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   const compteurs = useCompteurs();
   const tachesOuvertes = useOuvertes("taches");
   const portail = usePortail();
+  /* 11/11/2026 — Mon espace (le gérant) : le rail ne montre que lui, le travail et les fiches, comme l'espace d'un logiciel */
+  const moi = dansMonEspace(chemin);
   const metier = portail ?? moduleMetier(utilisateur?.secteur, !!utilisateur);
   const nom =utilisateur ? [utilisateur.prenom, utilisateur.nom].filter(Boolean).join(" ") || utilisateur.email : null;
 
@@ -471,15 +475,18 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
     /* 29/10/2026 — DALIRO et LORANI redécoupés : leurs sous-pages viennent de modules.ts */
     /* 30/10 et 02/11/2026 — TAMILA, TAVARO, TIROMA et VARELO redécoupés de même (docs/refonte-metiers/cloud/) */
     if (cle === "daliro" || cle === "lorani" || cle === "tamila" || cle === "tavaro" || cle === "tiroma" || cle === "varelo") return (moduleDe(cle)?.onglets ?? []).map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact, aussi: o.aussi }));
+    if (cle === MODULE_TEO.cle) return MODULE_TEO.onglets.map((o) => ({ libelle: o.libelle, href: o.href, exact: o.exact }));
     return [{ libelle: "Tableau de bord", href: `${RACINE}/${cle}`, exact: true }];
   };
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par
      groupe de fonctions vendues sur la page produit du module */
   const fonctionsDe = (cle: string): Lien[] => FONCTIONS[cle] ?? [];
   /* l'espace DALIRO seul : son module, sans les quatre communs ni les autres métiers */
-  const modules = MODULES.filter((m) => (portail ? m.cle === portail : MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier))
-    /* les quatre communs dans leur ordre, puis le module du métier */
-    .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
+  const modules = moi
+    ? [MODULE_TEO]
+    : MODULES.filter((m) => (portail ? m.cle === portail : MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier))
+        /* les quatre communs dans leur ordre, puis le module du métier */
+        .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
   const sectionModule = (m: (typeof MODULES)[number]): Section => ({
     cle: m.cle,
     titre: m.nom,
@@ -497,7 +504,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
      VARELO, TAVARO…) n'étaient atteignables que par « Tous les modules », en
      haut, et leur page ouvrait le volet de l'accueil. Ils sont rangés sous
      les modules du rail, dans un déroulant « Autres modules ». */
-  const autres = portail ? [] : MODULES.filter((m) => !modules.includes(m)).map(sectionModule);
+  const autres = portail || moi ? [] : MODULES.filter((m) => !modules.includes(m)).map(sectionModule);
   const sections: Section[] = [
     {
       cle: "accueil",
@@ -610,7 +617,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
           { libelle: "Votre première semaine", href: `${RACINE}/formation/premiere-semaine` },
         ],
       },
-      { titre: "Les modules", liens: modules.map((m) => ({ libelle: m.nom, href: `${RACINE}/formation/${m.cle}` })) },
+      /* Mon espace n'a pas de page de formation : ses pages de la formation sont celles des modules communs */
+      { titre: "Les modules", liens: (moi ? MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle)) : modules).map((m) => ({ libelle: m.nom, href: `${RACINE}/formation/${m.cle}` })) },
       /* 03/11/2026 — lot 4 de la formation : le reste de l'espace, et le Réseau */
       {
         titre: "Aller plus loin",
@@ -624,7 +632,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   /* 02/11/2026 — le Réseau Omega : les clients d'Omega entre eux (Fil, Membres, Messages, Opportunités), un groupe du rail sous les fiches */
   const reseau: Section = { cle: "reseau", titre: "Réseau", sousTitre: "Entre clients Omega", icone: <Network {...R} />, href: `${RACINE}/reseau`, racines: [`${RACINE}/reseau`], groupes: [{ titre: "Réseau Omega", liens: ONGLETS_RESEAU }] };
   /* l'espace DALIRO seul : le module en tête, puis le travail et les fiches ; ni l'accueil de l'organisation, ni le Suivi */
-  const vues = portail ? [sections[3], sections[1], sections[2]] : sections;
+  const vues = portail || moi ? [sections[3], sections[1], sections[2]] : sections;
   const toutes = [...vues, reseau, ...autres, formation, reglages];
   const sous = (r: string) => chemin === r || chemin.startsWith(`${r}/`);
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : sous(l.racine ?? l.href)) || !!l.aussi?.some(sous);
@@ -643,7 +651,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   }
   /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
   const railModules = sections.slice(3, 3 + modules.length);
-  const rail: Section[][] = (portail ? [[vues[0]], vues.slice(1, 3), [reseau]] : [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)]).filter((g) => g.length);
+  const rail: Section[][] = (portail || moi ? [[vues[0]], vues.slice(1, 3), [reseau]] : [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)]).filter((g) => g.length);
   /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
      dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
      et parfois après le survol — le navigateur la pose et l'enlève à sa
