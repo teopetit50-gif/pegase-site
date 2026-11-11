@@ -19,7 +19,10 @@
    rien ne se lit à travers) ; les entrées sont les sections de la page
    (défilement doux de LienSection, communs.tsx) ; la pilule est à 88 % de
    la largeur (1280 px au plus), pas 40 % : sept entrées, deux boutons et
-   le logo n'entrent pas dans moins, en flex plutôt qu'en absolu centré. L'en-tête reste de hauteur nulle et collant : la barre
+   le logo n'entrent pas dans moins, en flex plutôt qu'en absolu centré.
+   11/11, Teo, sur capture : « quand elle se déplie, elle se colle en
+   haut, faut que ce soit flottant » — la pilule descend à 24 px du haut
+   et se resserre à 84 % (entre 1130 et 1240 px), franchement détachée. L'en-tête reste de hauteur nulle et collant : la barre
    flotte sur le héros, qui garde sa hauteur « écran moins 72 px »
    (architectes/Heros.tsx). Jetons : fond #fff, texte #0a0a0a, atténué
    #737373, filet #e5e5e5 (architectes.css).
@@ -76,15 +79,16 @@ export default function BarreLorani() {
       <motion.nav
         aria-label="Principal"
         animate={{
-          width: flotte ? "88%" : "100%",
-          y: flotte ? 16 : 0,
+          width: flotte ? "84%" : "100%",
+          y: flotte ? 24 : 0,
           borderRadius: flotte ? 9999 : 0,
           boxShadow: flotte ? OMBRE : "0 0 0 0 rgba(0,0,0,0)",
           backdropFilter: flotte ? "blur(10px)" : "none",
         }}
         transition={RESSORT}
-        /* la pilule plafonne à 1280 px : sept entrées, deux boutons et le logo y tiennent côte à côte (dès xl) */
-        style={{ maxWidth: flotte ? 1280 : 1600 }}
+        /* 11/11, Teo : « quand elle se déplie, elle se colle en haut, faut que ce soit flottant » — 24 px du haut,
+           84 % de large entre 1130 px (sept entrées, deux boutons et le logo côte à côte, dès xl) et 1240 px */
+        style={flotte ? { minWidth: 1130, maxWidth: 1240 } : { maxWidth: 1600 }}
         className={`relative z-[60] mx-auto hidden flex-row items-center justify-between px-5 py-2 xl:flex ${
           flotte ? "bg-white/90" : "border-b border-[#e5e5e5] bg-white"
         }`}
@@ -125,7 +129,7 @@ export default function BarreLorani() {
       <motion.div
         animate={{
           width: flotte ? "90%" : "100%",
-          y: flotte ? 16 : 0,
+          y: flotte ? 20 : 0,
           borderRadius: flotte ? 12 : 0,
           boxShadow: flotte ? OMBRE : "0 0 0 0 rgba(0,0,0,0)",
           backdropFilter: flotte ? "blur(10px)" : "none",
