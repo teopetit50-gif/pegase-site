@@ -11,7 +11,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import StarButton from "@/components/secteurs/architectes/bouton-etoile";
-import { Lockup, LienSection, Panneau, type Entree } from "./communs";
+import { Lockup, LienSection, Panneau, allerALaSection, type Entree } from "./communs";
 
 const ENTREES: Entree[] = [
   { label: "Produit", id: "product" },
@@ -71,7 +71,9 @@ export default function BarreLorani() {
             {/* la lueur du bouton (architectes.css, .architectes-star-btn) est bornée à .p-architectes ; cette peau pose
                 aussi 100vw et un fond, qu'on annule ici en ligne */}
             <span className="p-architectes inline-flex" style={{ width: "auto", marginInline: 0, background: "transparent" }}>
-              <StarButton href={`/#${CTA.id}`} className="h-[34px]">
+              {/* 11/11, Teo : « ça nous fait spawn direct en bas… je veux que ça fasse défiler jusqu'à la section,
+                  comme Voir la démo » — le même défilement doux que LienSection */}
+              <StarButton href={`/#${CTA.id}`} className="h-[34px]" onClick={(e) => allerALaSection(e, CTA.id)}>
                 {CTA.label}
               </StarButton>
             </span>
