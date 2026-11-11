@@ -66,19 +66,22 @@ export const HEROS = {
     "Le point du matin d'une direction financière, sur des données d'exemple.",
   /* leur 3.0-homepage-live-preview-hero.png (3200 × 1915) et config.webp
      (3200 × 1973) */
+  /* 11/11/2026 — Teo : « montre des captures du dashboard client à la place des faux écrans ».
+     Deux vraies captures de VARELO (/espace2/varelo et /espace2/varelo/finance, thème clair,
+     données d'exemple, 2880 × 1800) remplacent les écrans fabriqués. */
   ecrans: [
-    E(
-      "heros-point-du-matin",
-      3200,
-      1914,
-      "Le point du matin d'une direction financière : trois décisions à valider, chacune avec son calcul, et la facture de la première rapprochée de son bon de livraison.",
-    ),
-    E(
-      "heros-referentiel",
-      3200,
-      1972,
-      "Le référentiel du groupe : les codes de chaque société rangés sous un seul nom de client, de fournisseur ou d'article.",
-    ),
+    {
+      src: "/secteurs-groupes/ecrans/dashboard-groupe.png",
+      l: 2880,
+      h: 1800,
+      alt: "La vue d'ensemble de Varelo : le groupe sur une page, société par société, avec les décisions du matin de chaque direction.",
+    },
+    {
+      src: "/secteurs-groupes/ecrans/dashboard-finance.png",
+      l: 2880,
+      h: 1800,
+      alt: "La page Finance de Varelo : les encours, les échéances et les pièces à réclamer, pour toutes les sociétés du groupe.",
+    },
   ] as const,
 };
 
@@ -106,13 +109,13 @@ export const ENONCE_1 = {
     "Une règle s'écrit une fois pour le groupe et s'applique dans chaque filiale, qu'il s'agisse d'un délai de réserve, d'un préavis de contrat, d'une pièce à réclamer ou d'un seuil d'encours.",
     "Chaque matin, la présidence lit le groupe sur une page, et chaque direction reçoit ses décisions avec le calcul et la pièce qui les justifient.",
   ],
-  /* leur 3.0-collage-3.webp (2880 × 1940), posé en pleine largeur */
-  ecran: E(
-    "collage",
-    2880,
-    1940,
-    "Un assemblage d'écrans de Varelo : les sociétés d'un pôle, les clients du groupe, une règle de calcul, les pièces, le point du matin d'une direction et ses commentaires.",
-  ),
+  /* 11/11/2026 — le collage fabriqué est remplacé par la vraie page Référentiel de Varelo (/espace2/varelo/referentiel) */
+  ecran: {
+    src: "/secteurs-groupes/ecrans/dashboard-referentiel.png",
+    l: 2880,
+    h: 1800,
+    alt: "Le référentiel de Varelo : les codes de chaque société rangés sous un seul nom de client, de fournisseur ou d'article.",
+  },
 };
 
 /* ── 3. survol (leur hoverHighlights) ──────────────────────────────── */

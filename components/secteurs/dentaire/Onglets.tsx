@@ -13,11 +13,30 @@
    ══════════════════════════════════════════════════════════════════════ */
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Apparition, { GroupeApparition, MotsApparition } from "@/components/accueil/Apparition";
-import { PanneauCalculateur, PanneauComparatif, PanneauParcours, PanneauPointDuMatin } from "./Panneaux";
+import Image from "next/image";
 import { ECRANS, ONGLETS_ECRANS } from "./textes";
 
 const DUREE = 16000;
-const PANNEAUX = [PanneauPointDuMatin, PanneauCalculateur, PanneauParcours, PanneauComparatif];
+/* 11/11/2026 — Teo : « montre des captures du dashboard client à la place des faux écrans ».
+   Les quatre fenêtres fabriquées en HTML (Panneaux.tsx) sont remplacées par quatre vraies
+   captures de TIROMA (/espace2/tiroma, /creneaux, /fauteuils, /plans ; thème clair, données
+   d'exemple, 2880 × 1800), dans le même cadre de fenêtre que la référence. */
+const CAPTURES = [
+  { src: "/secteurs-dentaire/ecrans/dashboard-point-du-matin.png", alt: "Le point du matin de Tiroma : trois décisions, les créneaux à sauver et les plans sans rendez-vous." },
+  { src: "/secteurs-dentaire/ecrans/dashboard-creneaux.png", alt: "Les créneaux et appels de Tiroma : chaque créneau libéré avec les patients à appeler, dans l'ordre." },
+  { src: "/secteurs-dentaire/ecrans/dashboard-fauteuils.png", alt: "La charge des fauteuils de Tiroma, jour par jour." },
+  { src: "/secteurs-dentaire/ecrans/dashboard-plans.png", alt: "Les plans de traitement signés sans rendez-vous, avec leur montant et leur ancienneté." },
+];
+function PanneauCapture({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="overflow-hidden rounded-lg border border-tir-border bg-tir-card shadow-[0px_2px_6px_0px_rgba(28,40,64,0.06),0px_6px_20px_-2px_rgba(28,40,64,0.08)]">
+      <div className="relative h-[340px] w-full sm:h-[420px] md:h-[500px] lg:h-[600px]">
+        <Image src={src} alt={alt} fill sizes="(max-width: 1280px) 100vw, 1280px" className="object-cover object-left-top" />
+      </div>
+    </div>
+  );
+}
+const PANNEAUX = CAPTURES.map((c) => function Panneau() { return <PanneauCapture src={c.src} alt={c.alt} />; });
 
 export default function Onglets() {
   const [actif, setActif] = useState(0);
