@@ -20,7 +20,7 @@ const MONO = { fontFamily: "var(--font-omega-mono), ui-monospace, SFMono-Regular
 function Accueil() {
   return (
     <Link href="/" aria-label="Varelo, accueil" className="flex items-center text-[#0b0b0d]">
-      <Lockup src="/logos/varelo-lockup.png" ratio="1200 / 306" className="h-6" label="Varelo" />
+      <Lockup src="/logos/varelo-lockup.png" ratio="1200 / 262" className="h-6" label="Varelo" />
     </Link>
   );
 }

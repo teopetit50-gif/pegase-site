@@ -52,7 +52,7 @@ function Accueil() {
     >
       <Lockup
         src="/logos/tiroma-lockup.png"
-        ratio="1200 / 299"
+        ratio="1200 / 231"
         className="h-[22px]"
         label="Tiroma"
       />

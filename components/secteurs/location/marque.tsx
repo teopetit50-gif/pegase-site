@@ -48,7 +48,7 @@ export function Marque({ className = "" }: { className?: string }) {
         role="img"
         aria-label="Tavaro"
         className="inline-block h-[1.2em] bg-current text-[color:var(--text)]"
-        style={{ aspectRatio: "1200 / 274", ...masque("/logos/tavaro-lockup.png") }}
+        style={{ aspectRatio: "1200 / 221", ...masque("/logos/tavaro-lockup.png") }}
       />
     </span>
   );

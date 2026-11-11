@@ -33,7 +33,7 @@ const BOUTON_ICONE = "inline-flex size-9 shrink-0 items-center justify-center ro
 function Accueil() {
   return (
     <Link aria-label="Daliro, accueil" className="flex h-10 items-center text-[#171717]" href="/">
-      <Lockup src="/logos/daliro-lockup.png" ratio="1200 / 326" className="h-8" label="Daliro" />
+      <Lockup src="/logos/daliro-lockup.png" ratio="1200 / 291" className="h-8" label="Daliro" />
     </Link>
   );
 }
