@@ -41,7 +41,7 @@ METIERS_COMP="architectes|architectes-nivara|avocats|btp|dentaire|groupes|hotell
 METIERS_APP="architectes|architectes-nivara|avocats|btp|dentaire|groupes|hotellerie|location-automobile"
 METIERS_PUB="architectes|architectes-nivara|avocats|btp|dentaire|groupes|hotellerie|location"
 # la vitrine Omega seule : pages et composants qui n'existent pas sur un site dédié
-OMEGA='^(app/(blog|commencer|contact|espace3|formation|integrations|modeles|offres|omega|reserver|tarifs|vos-donnees)/|components/(offres|accueil|modeles|formation|blog|tarifs)/|docs/|outils/|\.claude/|public/(accueil-secteurs|apercus-secteurs|modeles|formation|blog)/)'
+OMEGA='^(app/(blog|commencer|contact|espace3|formation|integrations|modeles|offres|omega|reserver|tarifs|vos-donnees)/|components/(offres|accueil|modeles|formation|blog|tarifs)/|docs/|outils/|\.claude/|\.github/|public/(accueil-secteurs|apercus-secteurs|modeles|formation|blog)/)'
 
 while IFS= read -r f; do
   [ -z "$f" ] && continue
