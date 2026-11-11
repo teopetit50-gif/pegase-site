@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { canoniqueSecteur } from "@/components/espace2/portail";
+import { NOM_SITE, canoniqueSecteur, sansOmega, titreSite } from "@/components/espace2/portail";
 import PageShell from "@/components/PageShell";
 import SeCombine from "@/components/secteurs/SeCombine";
 import Appel from "@/components/secteurs/dentaire/Appel";
@@ -68,23 +68,24 @@ const DESCRIPTION =
   "Chaque matin, Tiroma lit l'agenda, les plans de traitement et les devis signés du cabinet, et dit quel créneau sauver, quel plan planifier et quel fauteuil tourne à vide. Conçu par Omega pour les cabinets dentaires.";
 
 export const metadata: Metadata = {
-  title: `${TITRE} | Omega.AI`,
-  description: DESCRIPTION,
+  /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  title: titreSite(TITRE),
+  description: sansOmega(DESCRIPTION),
   /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
   alternates: { canonical: canoniqueSecteur("dentaire") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Omega.AI",
+    siteName: NOM_SITE,
     title: TITRE,
-    description: DESCRIPTION,
+    description: sansOmega(DESCRIPTION),
     url: "/secteurs/dentaire",
     /* Déclarer un bloc openGraph remplace celui que Next déduit, image
        comprise : sans cette ligne la page partirait sans visuel (voir
        l'en-tête de app/offres/relances-impayes/page.tsx, 15/09). */
     images: ["/opengraph-image"],
   },
-  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: TITRE, description: sansOmega(DESCRIPTION) },
 };
 
 export default function PageDentaire() {

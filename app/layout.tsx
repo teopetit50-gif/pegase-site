@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { omega, omegaMono } from "./_polices";
 import { Analytics } from "@vercel/analytics/next";
 import Header from "@/components/Header";
+import EnTete from "@/components/site-dedie/EnTete";
 import LenisRoot from "@/components/LenisRoot";
 import PixelMeta from "@/components/pub/PixelMeta";
 import Consentement from "@/components/pub/Consentement";
@@ -9,10 +10,18 @@ import "./globals.css";
 import "./polices.css";
 import "./echelle-mobile.css";
 import { SITE_URL } from "@/lib/site";
+import { MARQUE_SITE, NOM_SITE } from "@/components/espace2/portail";
+import { secteur } from "@/lib/secteurs";
 
 /* 01/08 — ramenée sous ~160 caractères : Google tronquait l'ancienne (278). */
-const DESCRIPTION =
+const DESCRIPTION_OMEGA =
   "Des systèmes qui connectent vos directions, vos outils et vos données, sous validation humaine, sans changer votre environnement. Diagnostic de 30 minutes offert.";
+
+/* 10/11/2026 — sur un site dédié à un logiciel (components/espace2/portail.ts),
+   le site porte le nom et la ligne du logiciel, pas ceux d'Omega. */
+const SECTEUR_SITE = MARQUE_SITE ? secteur(MARQUE_SITE.secteur) : undefined;
+const TITRE = MARQUE_SITE ? `${MARQUE_SITE.nom} | ${SECTEUR_SITE?.ligne ?? ""}`.replace(/ \| $/, "") : "Omega.AI | Systèmes métiers, automatisation et intégration";
+const DESCRIPTION = SECTEUR_SITE?.detail ?? DESCRIPTION_OMEGA;
 
 export const metadata: Metadata = {
   /* 30/07 — `metadataBase` est ce qui transforme les chemins relatifs des
@@ -20,19 +29,19 @@ export const metadata: Metadata = {
      app/opengraph-image.tsx n'est pas résolue et les aperçus de partage
      restent vides — précisément sur WhatsApp, devenu le canal principal. */
   metadataBase: new URL(SITE_URL),
-  title: "Omega.AI | Systèmes métiers, automatisation et intégration",
+  title: TITRE,
   description: DESCRIPTION,
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Omega.AI",
-    title: "Omega.AI | Systèmes métiers, automatisation et intégration",
+    siteName: NOM_SITE,
+    title: TITRE,
     description: DESCRIPTION,
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Omega.AI | Systèmes métiers, automatisation et intégration",
+    title: TITRE,
     description: DESCRIPTION,
   },
 };
@@ -58,7 +67,8 @@ export default function RootLayout({
             du sous-arbre de page, et survivent aux navigations. Avant, chaque
             page les remontait (barre noire d'une image, inertie perdue). */}
         <LenisRoot />
-        <Header />
+        {/* 10/11/2026 — un site dédié à un logiciel porte son propre en-tête, sans menu Omega (components/site-dedie/EnTete.tsx) */}
+        {MARQUE_SITE ? <EnTete /> : <Header />}
         {children}
         <Analytics />
         {/* 21/09/2026 — pixel Meta pour la pub en ligne, derrière le bandeau

@@ -5,6 +5,7 @@ import PageMotion from "@/components/PageMotion";
 import FormulaireContact from "@/components/contact/FormulaireContact";
 import { AttendreContact, BesoinsContact } from "@/components/contact/VoiesContact";
 import { COURRIEL, LIEN_TELEPHONE, TELEPHONE_AFFICHE, lienCourriel } from "@/lib/reservation";
+import { EDITEUR, MARQUE_SITE, titreSite } from "@/components/espace2/portail";
 
 /* ══════════════════════════════════════════════════════════════════════
    /contact — le service client (08/09/2026)
@@ -50,7 +51,8 @@ import { COURRIEL, LIEN_TELEPHONE, TELEPHONE_AFFICHE, lienCourriel } from "@/lib
 
 export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
-  title: "Service client | Omega.AI",
+  /* 10/11/2026 — « | DALIRO » sur un site dédié à un logiciel (components/espace2/portail.ts) */
+  title: titreSite("Service client"),
   description:
     "Une question sur votre installation, votre abonnement ou un poste en service : WhatsApp pour l'urgent, contact@omegaai.fr pour le reste.",
 };
@@ -81,13 +83,14 @@ const BESOINS = [
      « Installer l'application » (/application) sont retirées : plus
      rien du site ne mène à un compte, à une connexion ni à
      l'installation de l'application. */
-  { q: "Réserver ma réunion d'installation", href: "/tarifs", lien: "Les tarifs" },
+  /* 10/11/2026 — pas de page /tarifs sur un site dédié à un logiciel : la réunion d'installation se demande par l'audit (components/espace2/portail.ts) */
+  ...(MARQUE_SITE ? [] : [{ q: "Réserver ma réunion d'installation", href: "/tarifs", lien: "Les tarifs" }]),
   { q: "Demander un audit pour mon entreprise", href: "/reserver-un-audit", lien: "Réserver un audit" },
   { q: "Savoir où vont mes données", href: "/vos-donnees", lien: "Vos données" },
 ];
 
 export default function ContactPage() {
-  const courriel = lienCourriel("Service client Omega");
+  const courriel = lienCourriel(`Service client ${EDITEUR}`);
 
   return (
     <PageShell>
@@ -180,9 +183,15 @@ export default function ContactPage() {
               activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <Link href="/tarifs" className="r-btn r-btn--fil">
-                Voir les tarifs
-              </Link>
+              {MARQUE_SITE ? (
+                <Link href="/reserver-un-audit" className="r-btn r-btn--fil">
+                  Réserver un audit
+                </Link>
+              ) : (
+                <Link href="/tarifs" className="r-btn r-btn--fil">
+                  Voir les tarifs
+                </Link>
+              )}
             </div>
           </div>
         </section>

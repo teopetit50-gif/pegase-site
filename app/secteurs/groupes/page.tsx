@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { canoniqueSecteur } from "@/components/espace2/portail";
+import { NOM_SITE, canoniqueSecteur, sansOmega, titreSite } from "@/components/espace2/portail";
 import PageShell from "@/components/PageShell";
 import SeCombine from "@/components/secteurs/SeCombine";
 import Heros from "@/components/secteurs/groupes/Heros";
@@ -52,20 +52,21 @@ const DESCRIPTION =
   "Varelo réunit l'IA de toutes les sociétés d'un groupe : un seul référentiel, les mêmes règles, et chaque matin ce que chaque direction doit décider.";
 
 export const metadata: Metadata = {
-  title: `${TITRE} | Omega.AI`,
-  description: DESCRIPTION,
+  /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  title: titreSite(TITRE),
+  description: sansOmega(DESCRIPTION),
   /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
   alternates: { canonical: canoniqueSecteur("groupes") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Omega.AI",
+    siteName: NOM_SITE,
     title: TITRE,
-    description: DESCRIPTION,
+    description: sansOmega(DESCRIPTION),
     url: "/secteurs/groupes",
     images: ["/opengraph-image"],
   },
-  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: TITRE, description: sansOmega(DESCRIPTION) },
 };
 
 export default function PageGroupes() {

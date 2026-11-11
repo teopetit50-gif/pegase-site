@@ -104,7 +104,23 @@ const EN_TETES_SECURITE = [
 const SECTEUR_DU_SITE = PORTAIL_DEPLOIEMENT ? SECTEUR_PORTAIL[PORTAIL_DEPLOIEMENT] : null;
 /* `beforeFiles` : la réécriture doit passer AVANT les fichiers, sinon app/page.tsx (l'accueil d'Omega) gagne la racine */
 const REECRITURES_SITE_DEDIE = SECTEUR_DU_SITE ? [{ source: "/", destination: `/secteurs/${SECTEUR_DU_SITE}` }] : [];
-const REDIRECTIONS_SITE_DEDIE = SECTEUR_DU_SITE ? [{ source: `/secteurs/${SECTEUR_DU_SITE}`, destination: "/", permanent: false }] : [];
+/* 10/11/2026 — Teo : « Rien à voir avec Omega. Ce n'est pas censé renvoyer
+   chez Omega. » Sur un site dédié, les pages d'Omega n'existent pas : la
+   vitrine (offres, tarifs, blog, modèles, intégrations, commencer,
+   formation, pilotage interne, autres secteurs) renvoie à l'accueil du
+   logiciel. Restent : la racine, réserver un audit, le service client, les
+   données, et l'espace client (/espace2, /auth, /api, /bienvenue, /p,
+   /signer, /installation, /reserver), qui font partie du logiciel. */
+const PAGES_OMEGA = ["blog", "commencer", "espace3", "formation", "integrations", "modeles", "offres", "omega", "tarifs"];
+const REDIRECTIONS_SITE_DEDIE = SECTEUR_DU_SITE
+  ? [
+      { source: "/secteurs/:chemin*", destination: "/", permanent: false },
+      ...PAGES_OMEGA.flatMap((p) => [
+        { source: `/${p}`, destination: "/", permanent: false },
+        { source: `/${p}/:chemin*`, destination: "/", permanent: false },
+      ]),
+    ]
+  : [];
 
 const nextConfig: NextConfig = {
   /* 25/09 — ne pas annoncer le cadriciel dans chaque réponse. */

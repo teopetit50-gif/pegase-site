@@ -1,5 +1,11 @@
 import { ImageResponse } from "next/og";
 import { SITE_BASELINE, SITE_NOM } from "@/lib/site";
+import { MARQUE_SITE } from "@/components/espace2/portail";
+import { secteur } from "@/lib/secteurs";
+
+/* 10/11/2026 — sur un site dédié à un logiciel, l'image porte le nom et la ligne du logiciel (components/espace2/portail.ts) */
+const NOM = MARQUE_SITE?.nom ?? SITE_NOM;
+const LIGNE = (MARQUE_SITE && secteur(MARQUE_SITE.secteur)?.ligne) || SITE_BASELINE;
 
 /* ══════════════════════════════════════════════════════════════════════
    Image Open Graph (30/07/2026)
@@ -15,7 +21,7 @@ import { SITE_BASELINE, SITE_NOM } from "@/lib/site";
    et l'image est mise en cache.
    ══════════════════════════════════════════════════════════════════════ */
 
-export const alt = `${SITE_NOM} : ${SITE_BASELINE}`;
+export const alt = `${NOM} : ${LIGNE}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -58,7 +64,7 @@ export default async function Image() {
               letterSpacing: "-0.02em",
             }}
           >
-            {SITE_NOM}
+            {NOM}
           </div>
           <div
             style={{
@@ -72,7 +78,7 @@ export default async function Image() {
               letterSpacing: "0.04em",
             }}
           >
-            AUTOMATISATION
+            {MARQUE_SITE ? (secteur(MARQUE_SITE.secteur)?.metier ?? "LOGICIEL").toUpperCase() : "AUTOMATISATION"}
           </div>
         </div>
 
@@ -87,7 +93,7 @@ export default async function Image() {
               maxWidth: 940,
             }}
           >
-            Ce qui se répète n&apos;a plus à passer par vous.
+            {MARQUE_SITE ? LIGNE : "Ce qui se répète n'a plus à passer par vous."}
           </div>
           <div
             style={{
@@ -98,9 +104,9 @@ export default async function Image() {
               maxWidth: 820,
             }}
           >
-            Douze moteurs d&apos;automatisation installés sur les outils que
-            vous avez déjà : relance d&apos;impayés, réponses clients, factures
-            fournisseurs.
+            {MARQUE_SITE
+              ? (secteur(MARQUE_SITE.secteur)?.texte ?? "")
+              : "Douze moteurs d'automatisation installés sur les outils que vous avez déjà : relance d'impayés, réponses clients, factures fournisseurs."}
           </div>
         </div>
       </div>

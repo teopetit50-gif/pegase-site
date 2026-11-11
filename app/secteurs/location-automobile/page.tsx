@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { canoniqueSecteur } from "@/components/espace2/portail";
+import { NOM_SITE, canoniqueSecteur, sansOmega, titreSite } from "@/components/espace2/portail";
 import PageShell from "@/components/PageShell";
 import { Hero } from "@/components/secteurs/location/Heros";
 import { Solutions } from "@/components/secteurs/location/Solutions";
@@ -95,23 +95,24 @@ const DESCRIPTION =
   "Tavaro rapproche les photos de restitution de l'état des lieux de départ, chiffre le carburant, le retard et les dommages selon votre barème de remise en état, puis prépare la facture que l'agence valide. Conçu par Omega pour les loueurs automobiles.";
 
 export const metadata: Metadata = {
-  title: `${TITRE} | Omega.AI`,
-  description: DESCRIPTION,
+  /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  title: titreSite(TITRE),
+  description: sansOmega(DESCRIPTION),
   /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
   alternates: { canonical: canoniqueSecteur("location-automobile") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Omega.AI",
+    siteName: NOM_SITE,
     title: TITRE,
-    description: DESCRIPTION,
+    description: sansOmega(DESCRIPTION),
     url: "/secteurs/location-automobile",
     /* Déclarer un bloc openGraph remplace celui que Next déduit, image
        comprise : sans cette ligne la page partirait sans visuel (voir
        l'en-tête de app/offres/relances-impayes/page.tsx, 15/09). */
     images: ["/opengraph-image"],
   },
-  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: TITRE, description: sansOmega(DESCRIPTION) },
 };
 
 /* Chaque bloc de la source (`<main>` : héros, solutions, modules, méthode,

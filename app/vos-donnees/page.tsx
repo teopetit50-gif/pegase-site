@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Apparition from "@/components/donnees/Apparition";
+import { MARQUE_SITE, NOM_SITE, titreSite } from "@/components/espace2/portail";
 import HeroPlein from "@/components/donnees/HeroPlein";
 import Options, { type Option } from "@/components/donnees/Options";
 import { SchemaTrajet } from "@/components/donnees/Media";
@@ -117,7 +118,8 @@ import {
 
 export const metadata: Metadata = {
   alternates: { canonical: "/vos-donnees" },
-  title: "Où vont vos données | Omega.AI",
+  /* 10/11/2026 — « | DALIRO » sur un site dédié à un logiciel (components/espace2/portail.ts) */
+  title: titreSite("Où vont vos données"),
   description:
     "Hébergement dans l'Union européenne, à Francfort, ou sur vos propres serveurs. Sous-traitants, chiffrement, journalisation et réversibilité.",
 };
@@ -212,7 +214,7 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
     point: "#2fb6a8",
     nom: "Votre messagerie",
     role: "l'outil que vous aviez déjà",
-    jetons: ["Vos e-mails", "Vos pièces jointes", "Déjà chez vous avant Omega.AI"],
+    jetons: ["Vos e-mails", "Vos pièces jointes", `Déjà chez vous avant ${NOM_SITE}`],
   },
   {
     point: "#4ac26b",
@@ -232,7 +234,7 @@ const RECOIT: { point: string; nom: string; role: string; jetons: string[] }[] =
 const OPTIONS: Option[] = [
   {
     cle: "francfort",
-    onglet: "Hébergement Omega.AI · Francfort",
+    onglet: `Hébergement ${NOM_SITE} · Francfort`,
     titre: "Votre base hébergée à Francfort",
     resume:
       "Vous n'administrez aucune machine. Notre base est opérée dans la région eu-central-1 et nos automatisations exécutent les systèmes, tandis que vos équipes conservent la validation de ce qui est produit.",
@@ -277,7 +279,26 @@ const OPTIONS: Option[] = [
 ];
 
 /* ——— pied de page ——— */
-const PIED = [
+/* 10/11/2026 — sur un site dédié à un logiciel, le pied ne cite que ce qui existe sur ce site (components/espace2/portail.ts) */
+const PIED_SITE_DEDIE = [
+  {
+    label: NOM_SITE,
+    liens: [
+      { label: "Réserver un audit", href: "/reserver-un-audit" },
+      { label: "Service client", href: "/contact" },
+    ],
+  },
+  {
+    label: "Vos données",
+    liens: [
+      { label: "Le trajet d'une donnée", href: "#trajet" },
+      { label: "Les six garanties", href: "#garanties" },
+      { label: "Qui reçoit quoi", href: "#recoit" },
+      { label: "Les deux hébergements", href: "#hebergement" },
+    ],
+  },
+];
+const PIED_OMEGA = [
   {
     label: "Omega.AI",
     liens: [
@@ -312,6 +333,9 @@ const PIED = [
     ],
   },
 ];
+const PIED = MARQUE_SITE ? PIED_SITE_DEDIE : PIED_OMEGA;
+/* l'appel à l'action de la page : /commencer n'existe pas sur un site dédié, l'audit le remplace */
+const CTA = MARQUE_SITE ? { href: "/reserver-un-audit", label: "Réserver un audit" } : { href: "/commencer", label: "Commencer" };
 
 /* ══ la page ══════════════════════════════════════════════════════════ */
 
@@ -346,8 +370,8 @@ export default function VosDonnees() {
                 <p className="vd-lead max-w-[42rem]">
                   Vos données sont hébergées dans l&apos;Union européenne, à Francfort, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
                 </p>
-                <Link href="/commencer" className="vd-cta w-fit">
-                  Commencer
+                <Link href={CTA.href} className="vd-cta w-fit">
+                  {CTA.label}
                   <span>
                     <Chevron className="h-3.5 w-3.5" />
                   </span>
@@ -428,7 +452,7 @@ export default function VosDonnees() {
                       Aucune de vos données, ni ce que vous nous confiez ni ce que les systèmes produisent, ne sert à entraîner un modèle d&apos;intelligence artificielle.
                     </blockquote>
                     <p className="mt-8 text-[15px] leading-[1.5] tracking-[-0.01em] text-white/85">
-                      Omega.AI
+                      {NOM_SITE}
                       <br />
                       <span className="text-white/60">
                         Engagement repris dans le contrat de service
@@ -566,8 +590,8 @@ export default function VosDonnees() {
                 <p className="vd-lead max-w-[38rem]">
                   Un entretien de trente minutes suffit pour déterminer lequel des deux dispositifs convient à votre organisation, ce qu&apos;il implique pour votre système d&apos;information et ce qu&apos;il coûte.
                 </p>
-                <Link href="/commencer" className="vd-cta w-fit">
-                  Commencer
+                <Link href={CTA.href} className="vd-cta w-fit">
+                  {CTA.label}
                   <span>
                     <Chevron className="h-3.5 w-3.5" />
                   </span>
@@ -628,7 +652,7 @@ export default function VosDonnees() {
 
             <div className="mt-16 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
               <p className="vd-pied-label sm:text-right">
-                © 2026 Omega.AI, tous droits réservés
+                © 2026 {NOM_SITE}, tous droits réservés
               </p>
             </div>
           </div>

@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PAGE_OFFRE, secteur } from "@/lib/secteurs";
+import { MARQUE_SITE } from "@/components/espace2/portail";
 import "./se-combine.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -23,6 +24,8 @@ import "./se-combine.css";
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function SeCombine({ slug }: { slug: string }) {
+  /* 10/11/2026 — sur un site dédié à un logiciel, pas de bloc qui vend les offres d'Omega (components/espace2/portail.ts) */
+  if (MARQUE_SITE) return null;
   const s = secteur(slug);
   if (!s) return null;
 

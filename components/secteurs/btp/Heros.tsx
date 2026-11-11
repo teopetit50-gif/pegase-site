@@ -28,6 +28,7 @@ import { cn } from "@/lib/cn";
 import Lien from "@/components/Lien";
 import { Button } from "./bouton";
 import { PoweredByOmega, SigneDaliro } from "./marque";
+import { MARQUE_SITE } from "@/components/espace2/portail";
 import { insecable } from "./insecable";
 import { CHANTIERS, CONTACT, HERO, MARQUE, LIBELLES_FICHE as L, ONGLETS, type Chantier, type Activite } from "./textes";
 
@@ -119,12 +120,15 @@ function Entete() {
         <Button size="lg" asChild><Lien href={CONTACT.audit}>{HERO.audit}</Lien></Button>
         <Button size="lg" variant="outline" asChild><Lien href={CONTACT.demo}>{HERO.demo}</Lien></Button>
       </div>
-      <p className="mt-4 inline-flex items-center gap-1 text-[#737373] text-xs">
-        {HERO.signature}{" "}
-        <Lien href="/" className="underline underline-offset-4 transition-colors hover:text-[#171717]">
-          <PoweredByOmega />
-        </Lien>
-      </p>
+      {/* 10/11/2026 — pas de « Conçu par Omega » sur le site dédié à Daliro (components/espace2/portail.ts) */}
+      {MARQUE_SITE ? null : (
+        <p className="mt-4 inline-flex items-center gap-1 text-[#737373] text-xs">
+          {HERO.signature}{" "}
+          <Lien href="/" className="underline underline-offset-4 transition-colors hover:text-[#171717]">
+            <PoweredByOmega />
+          </Lien>
+        </p>
+      )}
     </div>
   );
 }

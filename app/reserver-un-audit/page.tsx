@@ -10,6 +10,7 @@ import {
 import { MODELES } from "@/components/modeles/donnees";
 import { POSTES } from "@/lib/paliers";
 import FormulaireFormat from "./FormulaireFormat";
+import { NOM_SITE, titreSite } from "@/components/espace2/portail";
 import "./reserver.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -57,7 +58,8 @@ import "./reserver.css";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/reserver-un-audit" },
-  title: "Réserver un audit | Omega.AI",
+  /* 10/11/2026 — « | DALIRO » sur un site dédié à un logiciel (components/espace2/portail.ts) */
+  title: titreSite("Réserver un audit"),
   description:
     "Trois formats d'audit, gratuits à partir du cadrage de 45 minutes, pour mesurer ce que votre processus le plus coûteux représente. Sans engagement.",
 };
@@ -175,7 +177,7 @@ export default function ReserverUnAuditPage() {
                     l&apos;inverse.
                   </p>
                   <footer className="rdv-signature">
-                    <span>Omega.AI</span>
+                    <span>{NOM_SITE}</span>
                     <span>Le principe de l&apos;audit</span>
                   </footer>
                 </blockquote>

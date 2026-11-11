@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { ArrowRight } from "lucide-react";
 import MenuSobre from "@/app/reserver-un-audit/MenuSobre";
+import { EDITEUR } from "@/components/espace2/portail";
 import {
   DUREES_RDV,
   ERREURS,
@@ -147,7 +148,7 @@ export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
       email: d.email,
       entreprise: d.entreprise,
       secteur: d.secteur,
-      message: [`Fonction : ${d.fonction}`, `Pays : ${d.pays}`, `Connu d'Omega par : ${d.origine}`]
+      message: [`Fonction : ${d.fonction}`, `Pays : ${d.pays}`, `Connu de ${EDITEUR} par : ${d.origine}`]
         .filter((l) => !l.endsWith(" : "))
         .join("\n"),
       creneau: avecCreneau ? Number(horaire) : undefined,
@@ -218,7 +219,7 @@ export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
         />
         <MenuSobre
           nom="origine"
-          libelle="Comment avez-vous connu Omega ?"
+          libelle={`Comment avez-vous connu ${EDITEUR} ?`}
           pleine
           erreur={erreur("origine")}
           options={ORIGINES.map((o) => ({ valeur: o, libelle: o }))}

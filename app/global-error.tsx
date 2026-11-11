@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { EDITEUR } from "@/components/espace2/portail";
 
 /* ══════════════════════════════════════════════════════════════════════
    Dernier filet du site (25/09/2026)
@@ -44,10 +45,10 @@ export default function ErreurGlobale({
           padding: "0 24px",
         }}
       >
-        <title>Omega — Incident</title>
+        <title>{EDITEUR} — Incident</title>
         <main style={{ maxWidth: 480, textAlign: "center" }}>
           <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: SOURDINE, margin: 0 }}>
-            Omega
+            {EDITEUR}
           </p>
           <h1 style={{ fontSize: 30, lineHeight: 1.1, letterSpacing: "-0.02em", margin: "16px 0 0" }}>
             Le site est momentanément indisponible.

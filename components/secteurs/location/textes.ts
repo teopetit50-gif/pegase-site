@@ -1,3 +1,5 @@
+import { MARQUE_SITE } from "@/components/espace2/portail";
+
 /* Tavaro — textes.ts. COPIÉ le 24/09/2026 à 14 h 58 de
    `OMEGA/rentalos-site/src/contenu/textes.ts` (état du disque après le
    passage des moteurs en modules français, 14 h 31). Textes inchangés.
@@ -192,8 +194,10 @@ export const METHODE = {
 
 export const A_PROPOS = {
   etiquette: "04 / À propos",
-  identite:
-    " est conçu et développé en France par Omega pour les réseaux de location de véhicules. Ses trois associés viennent du logiciel d’entreprise, de l’ingénierie de l’intelligence artificielle et de la finance.",
+  /* 10/11/2026 — sur le site dédié à Tavaro, pas de mention d'Omega (components/espace2/portail.ts) */
+  identite: MARQUE_SITE
+    ? " est conçu et développé en France pour les réseaux de location de véhicules. Ses trois associés viennent du logiciel d’entreprise, de l’ingénierie de l’intelligence artificielle et de la finance."
+    : " est conçu et développé en France par Omega pour les réseaux de location de véhicules. Ses trois associés viennent du logiciel d’entreprise, de l’ingénierie de l’intelligence artificielle et de la finance.",
   equipe: [
     { prenom: "Henri", nom: "Henri Guichané", role: "CEO & fondateur", photo: "/secteurs-location/equipe/henri.jpg" },
     { prenom: "Vincent", nom: "Vincent Karmalecki", role: "CTO & co-fondateur", photo: "/secteurs-location/equipe/vincent.jpg" },

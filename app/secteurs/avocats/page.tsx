@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { canoniqueSecteur } from "@/components/espace2/portail";
+import { NOM_SITE, canoniqueSecteur, sansOmega, titreSite } from "@/components/espace2/portail";
 import PageShell from "@/components/PageShell";
 import Hero from "@/components/secteurs/avocats/Heros";
 import { Appel, Connexions, Fonctionnalites, Pieces, PointDuMatin } from "@/components/secteurs/avocats/Sections";
@@ -86,23 +86,24 @@ const DESCRIPTION =
   "Tamila lit l'intégralité d'un dossier contentieux, rattache chaque fait et chaque référence à sa pièce et à sa page, signale les incohérences prouvées et tient une piste d'audit exportable. Conçu par Omega pour les cabinets d'avocats.";
 
 export const metadata: Metadata = {
-  title: `${TITRE} | Omega.AI`,
-  description: DESCRIPTION,
+  /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  title: titreSite(TITRE),
+  description: sansOmega(DESCRIPTION),
   /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
   alternates: { canonical: canoniqueSecteur("avocats") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Omega.AI",
+    siteName: NOM_SITE,
     title: TITRE,
-    description: DESCRIPTION,
+    description: sansOmega(DESCRIPTION),
     url: "/secteurs/avocats",
     /* Déclarer un bloc openGraph remplace celui que Next déduit, image
        comprise : sans cette ligne la page partirait sans visuel (voir
        l'en-tête de app/offres/relances-impayes/page.tsx, 15/09). */
     images: ["/opengraph-image"],
   },
-  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: TITRE, description: sansOmega(DESCRIPTION) },
 };
 
 /* Le cadre de la source (cabinetos-site/src/app/page.tsx) moins l'entête et

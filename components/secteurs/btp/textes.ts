@@ -1,3 +1,5 @@
+import { MARQUE_SITE } from "@/components/espace2/portail";
+
 /* ══════════════════════════════════════════════════════════════════════
    Daliro (BTP) — les textes de la page /secteurs/btp
 
@@ -182,8 +184,9 @@ export const FORMULES = {
       { name: "Journal des validations", description: "Le journal garde la trace de chaque validation, avec son auteur et son heure.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Données dans l'Union européenne", description: "Vos données sont hébergées dans l'Union européenne.", values: { demarrage: true, chantiers: true, entreprise: true } },
     ] },
-    { title: "Accompagnement", description: "Omega met Daliro en service et suit votre compte.", features: [
-      { name: "Installation par Omega", description: "Nous raccordons vos devis, votre planning et les messages de vos équipes.", values: { demarrage: true, chantiers: true, entreprise: true } },
+    /* 10/11/2026 — sur le site dédié à Daliro, c'est Daliro qui parle, pas Omega (components/espace2/portail.ts) */
+    { title: "Accompagnement", description: MARQUE_SITE ? "Nous mettons Daliro en service et suivons votre compte." : "Omega met Daliro en service et suit votre compte.", features: [
+      { name: MARQUE_SITE ? "Installation par nos soins" : "Installation par Omega", description: "Nous raccordons vos devis, votre planning et les messages de vos équipes.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Assistance en français", description: "Une équipe qui connaît le fonctionnement d'un chantier répond à vos questions.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Point mensuel", description: "Chaque mois, nous rapprochons les travaux repérés des travaux facturés.", values: { demarrage: false, chantiers: true, entreprise: true } },
       { name: "Formation des chefs d'équipe", description: "La formation se fait sur le chantier, avec vos équipes.", values: { demarrage: false, chantiers: true, entreprise: true } },
@@ -214,7 +217,7 @@ export const FAQ = {
       { question: "Quel est le prix ?", answer: "Le prix dépend du nombre de chantiers ouverts et des fonctions retenues. Il est fixé pendant l'audit, sur vos chantiers réels, avant tout engagement." },
       { question: "Comment se passe l'audit ?", answer: "Nous examinons les devis, le planning et les échanges d'un ou deux chantiers en cours. Vous repartez avec ce que nous y avons relevé, que vous poursuiviez ou non." },
       { question: "Où sont hébergées les données ?", answer: "Vos données sont hébergées dans l'Union européenne. Daliro lit vos fichiers sans jamais les modifier." },
-      { question: "Qui édite Daliro ?", answer: "Daliro est conçu et développé en France par Omega, qui déploie des systèmes d'automatisation dans les entreprises et les groupes." },
+      { question: "Qui édite Daliro ?", answer: MARQUE_SITE ? "Daliro est conçu et développé en France, par une équipe qui déploie des systèmes d'automatisation dans les entreprises du bâtiment." : "Daliro est conçu et développé en France par Omega, qui déploie des systèmes d'automatisation dans les entreprises et les groupes." },
     ] },
   ],
 };

@@ -54,6 +54,7 @@ export const SECTEUR_PORTAIL: Record<Portail, string> = { daliro: "btp", tamila:
 export const canoniqueSecteur = (secteur: string): string =>
   PORTAIL_DEPLOIEMENT && SECTEUR_PORTAIL[PORTAIL_DEPLOIEMENT] === secteur ? "/" : `/secteurs/${secteur}`;
 
+
 export const lirePortail = (valeur: string | undefined | null): Portail | null =>
   (PORTAILS as readonly string[]).includes(valeur ?? "") ? (valeur as Portail) : null;
 
@@ -73,3 +74,45 @@ export function dansLePortail(chemin: string, portail: Portail = "daliro"): bool
   if (!premier || (premier !== portail && !PAGES_COMMUNES.includes(premier))) return false;
   return !(premier === "formation" && second && second !== portail && FORMATION_AUTRES.includes(second));
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   La MARQUE du site dédié (10/11/2026). Teo : « Daliro est un SaaS à part
+   entière. Rien à voir avec Omega. Ce n'est pas censé renvoyer chez
+   Omega. » Sur un déploiement dédié, le site est donc la marque du
+   logiciel : son en-tête et son pied (components/site-dedie/), son nom
+   dans l'onglet et les aperçus de partage (titreSite, NOM_SITE), ses
+   textes sans la signature d'Omega (sansOmega, EDITEUR), et aucune page
+   d'Omega servie (next.config.ts). Sur omegaai.fr, MARQUE_SITE est null et
+   tout reste Omega.
+   ══════════════════════════════════════════════════════════════════════ */
+export type MarqueSite = {
+  cle: Portail;
+  /* le nom en capitales (onglet, pied, aperçus) et en mot (dans une phrase) */
+  nom: string;
+  mot: string;
+  secteur: string;
+  /* les masques alpha de public/logos : signe seul et signe + mot */
+  mark: string;
+  lockup: string;
+};
+const MOTS_PORTAILS: Record<Portail, string> = { daliro: "Daliro", tamila: "Tamila", lorani: "Lorani", tiroma: "Tiroma", tavaro: "Tavaro", varelo: "Varelo" };
+export const MARQUE_SITE: MarqueSite | null = PORTAIL_DEPLOIEMENT
+  ? {
+      cle: PORTAIL_DEPLOIEMENT,
+      nom: NOMS_PORTAILS[PORTAIL_DEPLOIEMENT],
+      mot: MOTS_PORTAILS[PORTAIL_DEPLOIEMENT],
+      secteur: SECTEUR_PORTAIL[PORTAIL_DEPLOIEMENT],
+      mark: `/logos/${PORTAIL_DEPLOIEMENT}-mark.png`,
+      lockup: `/logos/${PORTAIL_DEPLOIEMENT}-lockup.png`,
+    }
+  : null;
+
+/** le nom du site : celui du logiciel sur un site dédié, Omega.AI sinon */
+export const NOM_SITE: string = MARQUE_SITE?.nom ?? "Omega.AI";
+/** qui parle dans les textes (« connu de … », « service client … ») */
+export const EDITEUR: string = MARQUE_SITE?.mot ?? "Omega";
+/** le titre d'onglet d'une page : « Titre | DALIRO » ou « Titre | Omega.AI » */
+export const titreSite = (titre: string): string =>
+  MARQUE_SITE && titre.toLowerCase().startsWith(MARQUE_SITE.mot.toLowerCase()) ? titre : `${titre} | ${NOM_SITE}`;
+/** sur un site dédié, retire la phrase « Conçu par Omega pour … » d'une description */
+export const sansOmega = (texte: string): string => (MARQUE_SITE ? texte.replace(/\s*Conçu par Omega[^.]*\./u, "").trim() : texte);

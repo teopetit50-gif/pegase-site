@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { canoniqueSecteur } from "@/components/espace2/portail";
+import { NOM_SITE, canoniqueSecteur, sansOmega, titreSite } from "@/components/espace2/portail";
 import type React from "react";
 import PageShell from "@/components/PageShell";
 import Heros from "@/components/secteurs/architectes/Heros";
@@ -84,23 +84,24 @@ const DESCRIPTION =
   "Lorani lit toutes les pièces d'une opération, planches, CCTP, DPGF, offres, fiches techniques et situations, et relève chaque incohérence avec la page, la valeur lue et la correction proposée, du dépôt du permis à la réception. Conçu par Omega pour les agences d'architecture.";
 
 export const metadata: Metadata = {
-  title: `${TITRE} | Omega.AI`,
-  description: DESCRIPTION,
+  /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */
+  title: titreSite(TITRE),
+  description: sansOmega(DESCRIPTION),
   /* 09/11/2026 — « / » sur le site dédié à ce métier (components/espace2/portail.ts) */
   alternates: { canonical: canoniqueSecteur("architectes") },
   openGraph: {
     type: "website",
     locale: "fr_FR",
-    siteName: "Omega.AI",
+    siteName: NOM_SITE,
     title: TITRE,
-    description: DESCRIPTION,
+    description: sansOmega(DESCRIPTION),
     url: "/secteurs/architectes",
     /* Déclarer un bloc openGraph remplace celui que Next déduit, image
        comprise : sans cette ligne la page partirait sans visuel (voir
        l'en-tête de app/offres/relances-impayes/page.tsx, 15/09). */
     images: ["/opengraph-image"],
   },
-  twitter: { card: "summary_large_image", title: TITRE, description: DESCRIPTION },
+  twitter: { card: "summary_large_image", title: TITRE, description: sansOmega(DESCRIPTION) },
 };
 
 /* Les libellés de la barre latérale du « Fonctionnement », que `Onglets`

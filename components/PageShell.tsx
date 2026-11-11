@@ -1,6 +1,8 @@
 import { ViewTransition } from "react";
 import Footer from "./Footer";
+import Pied from "./site-dedie/Pied";
 import Arrivee from "./Arrivee";
+import { MARQUE_SITE } from "./espace2/portail";
 
 /* `overflow-x-clip` sur le conteneur — et surtout PAS `hidden` — pour absorber
    les sections qui sortent du cadre en 100vw (le hero de la home, 05/08) :
@@ -35,7 +37,8 @@ export default function PageShell({ children }: { children: React.ReactNode }) {
         <main>
           <Arrivee />
           {children}
-          <Footer />
+          {/* 10/11/2026 — un site dédié à un logiciel porte son propre pied, sans lien Omega (site-dedie/Pied.tsx) */}
+          {MARQUE_SITE ? <Pied /> : <Footer />}
         </main>
       </ViewTransition>
     </div>
