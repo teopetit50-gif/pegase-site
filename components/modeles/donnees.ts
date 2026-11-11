@@ -468,7 +468,10 @@ export const MODELES: Modele[] = [
     style: "Sombre, chiffres, tourné vente",
     pour: "Direction commerciale, réseau de vente, éditeur d'outils commerciaux",
     capte: "les demandes de démonstration, le volume annoncé, et les rappels programmés",
-    demo: "https://agent-ai.nextjsshop-preview.workers.dev/",
+    /* 11/11/2026 — adresse 21st donnée par Teo, même gabarit que l'aperçu
+       nextjsshop agent-ai.nextjsshop-preview.workers.dev (captures faites
+       sur celui-ci le 15/09, identiques). */
+    demo: "https://agent-ai-v1.21st.app/",
     theme: "sombre",
     pages: ["", "-2", "-3", "-4"],
   },
@@ -567,7 +570,9 @@ export const MODELES: Modele[] = [
     style: "Infrastructure, sobre, technique",
     pour: "Hébergeur, infogérance, services informatiques, opérateur",
     capte: "les demandes de mission, le volume annoncé, et les rappels programmés",
-    demo: "https://zensend.nextjsshop-preview.workers.dev/",
+    /* 11/11/2026 — adresse 21st donnée par Teo, même gabarit que l'aperçu
+       nextjsshop zensend.nextjsshop-preview.workers.dev (captures du 15/09). */
+    demo: "https://nexuscloud-v1.21st.app/",
     theme: "clair",
     pages: ["", "-3"],
   },
@@ -1020,6 +1025,26 @@ export const MODELES: Modele[] = [
     demo: "https://hirael.com/embed/templates/creative-studio",
     theme: "sombre",
     pages: [""],
+  },
+  /* ══ vague 4 — 11/11/2026 ══════════════════════════════════════════
+     Teo a donné trois adresses à inscrire au catalogue : Radius,
+     agent-ai-v1.21st.app et nexuscloud-v1.21st.app. Les deux dernières
+     sont les hébergements 21st des gabarits déjà au catalogue sous
+     « Agent-AI » et « Nexuscloud » (mêmes pages, comparées capture contre
+     capture) : on ne les inscrit pas deux fois, leur `demo` passe à
+     l'adresse 21st. Seul Radius entre. Il sert déjà à la page Avocats
+     (Tamila), refaite 1:1 dessus le 11/11. Captures : outils/chrome.mjs
+     à 1440×1080 ×2, réduites à 1200 px, JPEG 82, comme les autres. */
+  {
+    slug: "radius",
+    cat: "produit",
+    nom: "Radius",
+    style: "Clair, sobre, application posée sur une photo",
+    pour: "Éditeur, cabinet, société de services — quand le produit doit se voir dès l'accueil",
+    capte: "les demandes de démonstration, la page d'origine, et la relance jusqu'au rendez-vous",
+    demo: "https://radius.nextjsshop-preview.workers.dev/",
+    theme: "clair",
+    pages: ["", "-2", "-3", "-4"],
   },
 ];
 

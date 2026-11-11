@@ -94,6 +94,9 @@ const CIBLES = [
   ["mindloop", "https://hirael.com/embed/templates/mindloop"],
   ["agencylanding", "https://hirael.com/embed/templates/agency-landing"],
   ["creativestudio", "https://hirael.com/embed/templates/creative-studio"],
+  // vague 4 (11/11/2026) — Radius, donné par Teo ; capturé ce jour-là avec
+  // outils/chrome.mjs (Brave headless), même format de sortie
+  ["radius", "https://radius.nextjsshop-preview.workers.dev/"],
 ];
 
 const SORTIE = process.argv[2];

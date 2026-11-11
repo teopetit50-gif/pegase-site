@@ -10,9 +10,9 @@ et s'il doit entrer au catalogue public, une entrée dans `components/modeles/do
 
 | Site | Adresse | Source | État |
 |---|---|---|---|
-| Radius | https://radius.nextjsshop-preview.workers.dev/ | nextjsshop | Déjà employé : la page Avocats (Tamila) refaite 1:1 dessus le 11/11. |
-| Agent AI (21st) | https://agent-ai-v1.21st.app/ | 21st.dev | Déjà employé : l'accueil d'omegaai.fr en est le décalque 1:1 depuis le 05/11. Ce n'est pas le même gabarit que « Agent-AI » de nextjsshop, déjà au catalogue. |
-| NexusCloud (21st) | https://nexuscloud-v1.21st.app/ | 21st.dev | Pas encore employé. Même gabarit que l'aperçu nextjsshop « zensend », entré au catalogue sous le nom Nexuscloud : deux adresses pour un seul dessin. |
+| Radius | https://radius.nextjsshop-preview.workers.dev/ | nextjsshop | Déjà employé : la page Avocats (Tamila) refaite 1:1 dessus le 11/11. Entré au catalogue /modeles le 11/11 avec ses pages internes. |
+| Agent AI (21st) | https://agent-ai-v1.21st.app/ | 21st.dev | Déjà employé : l'accueil d'omegaai.fr en est le décalque 1:1 depuis le 05/11. Même gabarit que « Agent-AI » de nextjsshop, déjà au catalogue (captures comparées) : l'entrée du catalogue pointe désormais sur cette adresse. |
+| NexusCloud (21st) | https://nexuscloud-v1.21st.app/ | 21st.dev | Pas encore employé. Même gabarit que l'aperçu nextjsshop « zensend », entré au catalogue sous le nom Nexuscloud : l'entrée du catalogue pointe désormais sur cette adresse. |
 
 Captures 1440 px du jour : `docs/references/captures/<nom>.jpg` (radius, agentaiv1, nexuscloudv1).
 
@@ -59,10 +59,10 @@ Détail et règles : `docs/refonte-metiers/REGLES.md` ; relevés par logiciel : 
 | Cal.com | Bookings | https://app.cal.com/bookings/upcoming | Daliro Équipes · Tiroma Fauteuils |
 | Cal.com | Availability | https://app.cal.com/availability | Daliro Équipes (première version, remplacée par Bookings le 03/11) |
 
-## Les gabarits achetés (catalogue /modeles, 83 entrées)
+## Les gabarits achetés (catalogue /modeles, 84 entrées)
 
 Source : `components/modeles/donnees.ts`. Démos des éditeurs, jamais une copie republiée par nous.
-Emplois connus : Payload (Grands groupes, 25/09) ; Vertex (BTP (24/09) et Hôtellerie (04/11)) ; Vetra (Avocats, 24/09 (remplacé par Radius le 11/11)) ; Nexuscloud (Même dessin que NexusCloud (21st), ajouté le 11/11).
+Emplois connus : Payload (Grands groupes, 25/09) ; Vertex (BTP (24/09) et Hôtellerie (04/11)) ; Vetra (Avocats, 24/09 (remplacé par Radius le 11/11)) ; Nexuscloud (Même dessin que NexusCloud (21st), adresse reprise le 11/11) ; Agent-AI (Même dessin qu'Agent AI (21st) : l'accueil d'omegaai.fr, 05/11) ; Radius (Avocats, 11/11 ; entré au catalogue le 11/11).
 
 | Nom | Adresse | Style | Pour | Catégorie |
 |---|---|---|---|---|
@@ -99,7 +99,7 @@ Emplois connus : Payload (Grands groupes, 25/09) ; Vertex (BTP (24/09) et Hôtel
 | Personal Site Kit | https://personal-site-kit-v2.21st.app | Une page, menu au clavier, très sobre | Indépendant, consultant, dirigeant qui se présente lui-même | Vous vendez votre expertise |
 | T3Code | https://t3code-cinematic-dark-saas-landing-page-template-v2.21st.app | Sombre cinématique, relief animé | Éditeur, marque technique, lancement qui doit impressionner | Vous vendez un service en ligne |
 | Evolv-Ai | https://evolv-ai.nextjsshop-preview.workers.dev/ | Sombre, flux et étapes | Société de services, exploitation, prestataire de traitement | Vous vendez un service en ligne |
-| Agent-AI | https://agent-ai.nextjsshop-preview.workers.dev/ | Sombre, chiffres, tourné vente | Direction commerciale, réseau de vente, éditeur d'outils commerciaux | Vous vendez un service en ligne |
+| Agent-AI ★ | https://agent-ai-v1.21st.app/ | Sombre, chiffres, tourné vente | Direction commerciale, réseau de vente, éditeur d'outils commerciaux | Vous vendez un service en ligne |
 | Mosa AI | https://mosa-ai.nextjsshop-preview.workers.dev/ | Sombre, conversation en scène | Éditeur, service d'assistance, plateforme d'échange | Vous vendez un service en ligne |
 | Deo-Ecommerce | https://deo-ecommerce.nextjsshop-preview.workers.dev/ | Boutique en ligne, horlogerie, très soigné | Commerce de détail, marque, vente en ligne de produits à forte valeur | Vous vendez un service en ligne |
 | Cypon-Analytics | https://cypon-analytics.nextjsshop-preview.workers.dev/ | Clair, mesures en temps réel | Éditeur, plateforme, direction qui pilote par les chiffres | Vous vendez un service en ligne |
@@ -108,7 +108,7 @@ Emplois connus : Payload (Grands groupes, 25/09) ; Vertex (BTP (24/09) et Hôtel
 | Omega (nextjsshop) | https://omega.nextjsshop-preview.workers.dev/ | Clair, illustration au trait, chiffres en avant | Agence, société de conseil, studio — le travail se prouve en réalisations | Vous montrez ce que vous réalisez |
 | Nexflow | https://nexflow.nextjsshop-preview.workers.dev/ | Clair, grand panneau sombre, logos connus | Éditeur, qualité, industrie, bureau de contrôle | Vous vendez un service en ligne |
 | Anox | https://anox.nextjsshop-preview.workers.dev/ | Studio de refonte, très dessiné | Studio, agence, prestataire de refonte et de migration | Vous montrez ce que vous réalisez |
-| Nexuscloud ★ | https://zensend.nextjsshop-preview.workers.dev/ | Infrastructure, sobre, technique | Hébergeur, infogérance, services informatiques, opérateur | Vous vendez un service en ligne |
+| Nexuscloud ★ | https://nexuscloud-v1.21st.app/ | Infrastructure, sobre, technique | Hébergeur, infogérance, services informatiques, opérateur | Vous vendez un service en ligne |
 | Aceai | https://aceai.nextjsshop-preview.workers.dev/ | Clair rosé, messagerie d'équipe en scène | Éditeur, outil d'équipe, service en ligne | Vous vendez un service en ligne |
 | FleetOps | https://fleetops.nextjsshop-preview.workers.dev/ | Tableaux de bord, flotte et tournées | Transport, logistique, location de véhicules, gestion de parc | Vous vendez un service en ligne |
 | Bookify | https://bookify.nextjsshop-preview.workers.dev/ | Gris clair, couverture en vitrine, sobre | Librairie, édition, formation, vente de contenu | Vous vendez un service en ligne |
@@ -149,3 +149,4 @@ Emplois connus : Payload (Grands groupes, 25/09) ; Vertex (BTP (24/09) et Hôtel
 | Mindloop | https://hirael.com/embed/templates/mindloop | Monochrome sombre, inscription en ligne | Média, lettre d'information, direction de la communication | Vous vendez un service en ligne |
 | Agency Landing | https://hirael.com/embed/templates/agency-landing | Lumineux, fond animé, réalisations | Agence, studio, création, communication | Vous montrez ce que vous réalisez |
 | Creative Studio | https://hirael.com/embed/templates/creative-studio | Sombre cinématique, révélations au défilement | Production, studio, événementiel, création | Vous montrez ce que vous réalisez |
+| Radius ★ | https://radius.nextjsshop-preview.workers.dev/ | Clair, sobre, application posée sur une photo | Éditeur, cabinet, société de services — quand le produit doit se voir dès l'accueil | Vous vendez un service en ligne |
