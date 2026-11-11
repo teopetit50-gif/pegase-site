@@ -10,7 +10,9 @@ import { lireConversations } from "@/lib/teo/whatsapp";
 /* /espace2/teo — la vue d'ensemble de MON ESPACE (11/11/2026) : la page « Home »
    d'une équipe de Linear, copiée de DALIRO, avec les clients, l'agenda, les
    conversations WhatsApp et la boîte mail de Teo. Les quatre lectures sont faites
-   ici, sous la session du gérant, en même temps. */
+   ici, sous la session du gérant, en même temps. Les clients et les rendez-vous
+   viennent du tableau des associés (lib/teo/tableau.ts), avec la session de Teo
+   dessus ; sans elle, la page le dit et propose de la brancher. */
 
 export const metadata: Metadata = {
   title: "Mon espace",
@@ -25,7 +27,14 @@ async function lireTout(): Promise<ReelEnsemble | null> {
     agenda: agenda.rendezVous,
     whatsapp: whatsapp.conversations,
     mails: mails.fils,
-    connexions: { google: mails.etat === "ok" ? "ok" : mails.etat, whatsapp: whatsapp.etat, adresse: mails.adresse, detail: mails.detail ?? agenda.detail ?? whatsapp.detail },
+    connexions: {
+      google: mails.etat === "ok" ? "ok" : mails.etat,
+      whatsapp: whatsapp.etat,
+      tableau: clients.etat,
+      adresse: mails.adresse,
+      compteTableau: clients.compte ?? agenda.compteTableau,
+      detail: mails.detail ?? agenda.detail ?? whatsapp.detail ?? clients.detail ?? agenda.detailTableau,
+    },
   };
 }
 

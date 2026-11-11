@@ -31,7 +31,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Calendar, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, ChevronsUpDown, Copy, Ellipsis, ExternalLink, Info, ListFilter, Mail, MapPin, Menu, Search, Tag, UserPlus, Video, X } from "lucide-react";
-import type { EtatGoogle, RendezVous } from "@/lib/teo/types";
+import type { EtatGoogle, EtatTableau, RendezVous } from "@/lib/teo/types";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { copier } from "../daliro/navigateur";
@@ -43,7 +43,7 @@ import "../daliro/dal-bookings.css";
 
 const BASE = `${RACINE}/teo`;
 
-export type ReelAgenda = { etat: EtatGoogle; detail: string | null; rendezVous: RendezVous[] };
+export type ReelAgenda = { etat: EtatGoogle; detail: string | null; tableau: EtatTableau; detailTableau: string | null; compteTableau: string | null; rendezVous: RendezVous[] };
 
 type Onglet = "a-venir" | "non-confirmes" | "plusieurs-jours" | "passes" | "annules";
 type Genre = "audit" | "installation" | "bilan" | "visio" | "autre";
@@ -222,7 +222,7 @@ export default function Agenda({ reel }: { reel: ReelAgenda | null }) {
 
   const optionsRdv = (r: RendezVous): Option[] => {
     const o: Option[] = [{ titre: "Le rendez-vous" }];
-    if (r.lien) o.push({ libelle: "Ouvrir dans Google Agenda", icone: ico(ExternalLink), href: r.lien });
+    if (r.lien) o.push({ libelle: r.origine === "tableau" ? "Ouvrir dans le tableau des associés" : "Ouvrir dans Google Agenda", icone: ico(ExternalLink), href: r.lien });
     if (r.visio) o.push({ libelle: "Rejoindre la visio", icone: ico(Video), href: r.visio });
     if (r.invites.length) o.push({ libelle: "Écrire aux invités", icone: ico(Mail), href: `mailto:${r.invites.map((i) => i.email).join(",")}?subject=${encodeURIComponent(r.titre)}` });
     if (r.lieu) o.push({ libelle: "Voir le lieu sur une carte", icone: ico(MapPin), href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.lieu)}` });
@@ -232,15 +232,24 @@ export default function Agenda({ reel }: { reel: ReelAgenda | null }) {
     return o;
   };
 
+  /* ce que la page dit de ses deux sources : le tableau des associés d'abord (c'est là que
+     vivent les rendez-vous de Teo), Google ensuite — un mot seulement s'il manque quelque chose */
+  const tableau: EtatTableau = enReel && reel ? reel.tableau : "ok";
   const note =
-    enReel && reel && etat !== "ok" ? (
-      <p className="teo-note" data-teinte={etat === "erreur" ? "rouge" : undefined} role="status">
+    enReel && reel && (tableau !== "ok" || etat !== "ok") ? (
+      <p className="teo-note" data-teinte={tableau === "erreur" || etat === "erreur" ? "rouge" : undefined} role="status">
         <Info width={16} height={16} aria-hidden="true" />
         <span>
-          {etat === "absent" ? (
+          {tableau === "absent" ? (
             <>
-              <b>Google Agenda n&apos;est pas branché.</b> Lancez <code>node outils/jeton-google.mjs</code> puis posez GOOGLE_OAUTH_* sur Vercel avec <code>outils/poser-variables-google.sh</code> (docs/espace-teo/README.md).
+              <b>Le tableau des associés n&apos;est pas branché.</b> Vos rendez-vous y sont : <Link href={`${BASE}?brancher=tableau`}>connectez votre compte du tableau</Link> depuis la vue d&apos;ensemble, une fois.
             </>
+          ) : tableau === "erreur" ? (
+            <>
+              <b>Le tableau des associés n&apos;a pas répondu.</b> {reel.detailTableau}
+            </>
+          ) : etat === "absent" ? (
+            <>Rendez-vous du tableau des associés ({reel.compteTableau}). Google Agenda n&apos;est pas branché : <code>node outils/jeton-google.mjs</code> puis GOOGLE_OAUTH_* sur Vercel (docs/espace-teo/README.md).</>
           ) : etat === "portee" ? (
             <>
               <b>Le jeton Google ne porte pas l&apos;agenda.</b> Relancez <code>node outils/jeton-google.mjs</code> et reposez GOOGLE_OAUTH_REFRESH_TOKEN.
@@ -839,7 +848,7 @@ function Detail({ r, du, fermer, precedente, suivante, options, copierLigne, fil
               <span className="dal-bk-logo teo-agenda-logo" aria-hidden="true">
                 <Calendar width={10} height={10} />
               </span>
-              Ouvrir dans Google Agenda
+              {r.origine === "tableau" ? "Ouvrir dans le tableau des associés" : "Ouvrir dans Google Agenda"}
             </a>
           ) : null}
           <button type="button" className="dal-bk-bouton dal-bk-bouton--icone" aria-label="Copier" title="Copier en texte" onClick={copierLigne}>

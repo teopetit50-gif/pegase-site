@@ -266,3 +266,30 @@ html[data-v2-theme="dark"] .teo-wa-bulle[data-sens="envoye"] .teo-wa-heure {
     min-width: 0;
   }
 }
+
+/* ——— brancher le tableau des associés depuis la vue d'ensemble (11/11, soir) ——— */
+.v2 .dal button.dal-h-pilule {
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.v2 .dal .dal-h-lien {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--dal-t1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.v2 .dal .dal-h-lien:hover {
+  color: var(--dal-accent, var(--dal-t1));
+}
+.v2 .dal .dat-vide a,
+.v2 .dal .teo-note a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

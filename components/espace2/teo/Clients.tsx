@@ -38,8 +38,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
-import type { ClientTeo } from "@/lib/teo/types";
-import { CANAUX_ECHANGE, ETAPES_CLIENT, TYPES_CLIENT } from "@/lib/teo/types";
+import type { ClientTeo, EtatTableau } from "@/lib/teo/types";
+import { CANAUX_ECHANGE, ETAPES_CLIENT, ETAPES_FINIES, TYPES_CLIENT } from "@/lib/teo/types";
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import { DatIcone, type NomDatIcone } from "../daliro/DatIcone";
@@ -52,32 +52,35 @@ import "../daliro/dal-attio.css";
 
 const BASE = `${RACINE}/teo`;
 
-export type ReelClients = { clients: ClientTeo[]; detail: string | null };
+export type ReelClients = { etat: EtatTableau; clients: ClientTeo[]; detail: string | null; compte: string | null };
 
 /* les vues : une par type de contact présent */
 type Groupe = { cle: string; libelle: string; types: string[] };
 const GROUPES: Groupe[] = [
   { cle: "prospects", libelle: "Prospects", types: ["Prospect"] },
+  { cle: "pilotes", libelle: "Pilotes", types: ["Pilote"] },
   { cle: "clients", libelle: "Clients", types: ["Client"] },
   { cle: "partenaires", libelle: "Partenaires", types: ["Partenaire", "Réseau"] },
   { cle: "autres", libelle: "Autres", types: ["Prestataire", "Candidat", "Autre"] },
 ];
-const rangement = (c: ClientTeo) => GROUPES.find((g) => g.types.includes(c.type)) ?? GROUPES[3];
+const rangement = (c: ClientTeo) => GROUPES.find((g) => g.types.includes(c.type)) ?? GROUPES[GROUPES.length - 1];
 
 /* la pastille « Connection strength » d'Attio, ses couleurs par niveau : ici, l'étape */
 const NIVEAUX: Record<string, { couleur: string; rang: number }> = {
-  "À contacter": { couleur: "#77797C", rang: 0 },
-  Contacté: { couleur: "#F97514", rang: 1 },
-  "En conversation": { couleur: "#F97514", rang: 2 },
-  "Audit réservé": { couleur: "#266DF0", rang: 3 },
-  "Audit tenu": { couleur: "#266DF0", rang: 4 },
-  "Récap envoyé": { couleur: "#266DF0", rang: 5 },
-  Signé: { couleur: "#00D17E", rang: 6 },
-  Installé: { couleur: "#00D17E", rang: 7 },
-  "En réel": { couleur: "#00D17E", rang: 8 },
-  "Partenaire actif": { couleur: "#00D17E", rang: 9 },
-  "En pause": { couleur: "#77797C", rang: 10 },
-  Perdu: { couleur: "#FF5454", rang: 11 },
+  "Nouveau lead": { couleur: "#77797C", rang: 0 },
+  "1er appel de prospection": { couleur: "#F97514", rang: 1 },
+  "2e appel de prospection": { couleur: "#F97514", rang: 2 },
+  "3e appel et +": { couleur: "#F97514", rang: 3 },
+  R1: { couleur: "#266DF0", rang: 4 },
+  R2: { couleur: "#266DF0", rang: 5 },
+  R3: { couleur: "#266DF0", rang: 6 },
+  Compliqué: { couleur: "#77797C", rang: 7 },
+  Signé: { couleur: "#00D17E", rang: 8 },
+  Perdu: { couleur: "#FF5454", rang: 9 },
+  "À recontacter dans 1 mois": { couleur: "#77797C", rang: 10 },
+  "À recontacter dans 2 mois": { couleur: "#77797C", rang: 11 },
+  "À recontacter dans 4 mois": { couleur: "#77797C", rang: 12 },
+  "À recontacter dans 6 mois": { couleur: "#77797C", rang: 13 },
 };
 
 const sansAccent = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -99,7 +102,7 @@ function relatif(jour: string, auj: string): string {
   return n > 0 ? `dans ${quoi}` : `il y a ${quoi}`;
 }
 const dernierEchange = (c: ClientTeo) => (c.echanges.length ? [...c.echanges].sort((a, b) => b.quand.localeCompare(a.quand))[0] : null);
-const aRelancer = (c: ClientTeo, auj: string) => !!c.prochaine_date && c.prochaine_date <= auj && !["Perdu", "En pause"].includes(c.etape);
+const aRelancer = (c: ClientTeo, auj: string) => !!c.prochaine_date && c.prochaine_date <= auj && !ETAPES_FINIES.includes(c.etape);
 
 /* ——— ce que ce navigateur retient ——— */
 const CLE_REPLIE = "espace2:teo:clients:replie";
@@ -163,6 +166,7 @@ const COLONNES: Colonne[] = [
   { cle: "tel", libelle: "Téléphone", icone: "Phone", largeur: 180, valeur: (c) => (c.telephone ? telephoneLisible(c.telephone) : null), tri: (c) => c.telephone ?? "~" },
   { cle: "mail", libelle: "Courriel", icone: "At", largeur: 250, valeur: (c) => c.courriel, tri: (c) => c.courriel ?? "~" },
   { cle: "source", libelle: "Source", icone: "DataText", largeur: 180, valeur: (c) => c.source, tri: (c) => c.source ?? "~" },
+  { cle: "suivi", libelle: "Suivi par", icone: "UserPlaceholderLight", largeur: 140, valeur: (c) => c.suivi_par, tri: (c) => c.suivi_par ?? "~" },
 ];
 const PAR_DEFAUT = ["etape", "action", "der", "entreprise"];
 const VIDES: Record<string, string> = { etape: "Sans étape", action: "Aucune action prévue", der: "Aucun échange", entreprise: "Aucune entreprise", type: "Aucun type", secteur: "Aucun secteur", commune: "Aucune commune", tel: "Aucun téléphone", mail: "Aucun courriel", source: "Aucune source" };
@@ -255,7 +259,7 @@ function useReplie(): [boolean, () => void] {
 }
 
 type Nouveau = { nom: string; entreprise: string; type: string; etape: string; telephone: string; courriel: string; commune: string; secteur: string };
-const NOUVEAU_VIDE: Nouveau = { nom: "", entreprise: "", type: "Prospect", etape: "À contacter", telephone: "", courriel: "", commune: "", secteur: "" };
+const NOUVEAU_VIDE: Nouveau = { nom: "", entreprise: "", type: "Prospect", etape: "Nouveau lead", telephone: "", courriel: "", commune: "", secteur: "" };
 
 export default function Clients({ reel }: { reel: ReelClients | null }) {
   const { reel: enReel } = useTeo();
@@ -361,7 +365,7 @@ export default function Clients({ reel }: { reel: ReelClients | null }) {
     if (courriel && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(courriel)) return setErreur(`« ${courriel} » n'est pas une adresse de courriel.`);
     setErreur(null);
     if (!enReel) {
-      const c: ClientTeo = { id: `local-${nid()}`, nom: nouveau.nom.trim(), entreprise: nouveau.entreprise.trim() || null, role: null, type: nouveau.type, etape: nouveau.etape, telephone: nouveau.telephone.trim() || null, courriel: courriel || null, commune: nouveau.commune.trim() || null, secteur: nouveau.secteur.trim() || null, source: null, prochaine_action: null, prochaine_date: null, note: null, maj: new Date().toISOString(), echanges: [] };
+      const c: ClientTeo = { id: `local-${nid()}`, nom: nouveau.nom.trim(), entreprise: nouveau.entreprise.trim() || null, role: null, suivi_par: "Teo", type: nouveau.type, etape: nouveau.etape, telephone: nouveau.telephone.trim() || null, courriel: courriel || null, commune: nouveau.commune.trim() || null, secteur: nouveau.secteur.trim() || null, source: null, prochaine_action: null, prochaine_date: null, note: null, maj: new Date().toISOString(), echanges: [] };
       setAjoutes((l) => [c, ...l]);
       setNouveau(null);
       toast(`${c.nom} est ajouté à l'exemple (rien n'est écrit en base).`);
@@ -420,7 +424,7 @@ export default function Clients({ reel }: { reel: ReelClients | null }) {
             onChanger={retoucher}
           />
         ) : (
-          <p className="dat-vide">{reel?.detail && enReel ? `La base réelle n'a pas répondu. ${reel.detail}` : "Ce contact n'est pas dans vos clients."}</p>
+          <p className="dat-vide">{reel?.detail && enReel ? `Le tableau des associés n'a pas répondu. ${reel.detail}` : enReel && reel?.etat === "absent" ? "Le tableau des associés n'est pas branché : vos clients y sont." : "Ce contact n'est pas dans vos clients."}</p>
         )
       ) : (
         <>
@@ -578,9 +582,13 @@ export default function Clients({ reel }: { reel: ReelClients | null }) {
             </Menu>
           </div>
 
-          {reel?.detail && enReel ? (
+          {enReel && reel?.etat === "absent" ? (
+            <p className="dat-vide" role="status">
+              Vos clients sont les prospects du tableau des associés, et il n&apos;est pas branché. <Link href={`${BASE}?brancher=tableau`}>Connectez votre compte du tableau</Link> depuis la vue d&apos;ensemble, une fois : le pipeline arrive ici.
+            </p>
+          ) : reel?.detail && enReel ? (
             <p className="dat-vide" role="alert">
-              La base réelle n&apos;a pas répondu. {reel.detail}
+              Le tableau des associés n&apos;a pas répondu. {reel.detail}
             </p>
           ) : !clients.length ? (
             <p className="dat-vide">Aucun contact suivi. « Nouveau client » ajoute le premier : un nom suffit.</p>
@@ -1207,7 +1215,7 @@ function Fiche({ c, auj, onglet: ongletParam, adresse, enReel, epingle, onEpingl
                 {detail("Location", "Commune", c.commune ?? "Aucune commune", !c.commune)}
                 {detail("Tag", "Secteur", c.secteur ?? "Aucun secteur", !c.secteur)}
                 {detail("DataText", "Source", c.source ?? "Aucune source", !c.source)}
-                {detail("Briefcase", "Rôle", c.role ?? "Aucun rôle", !c.role)}
+                {detail("UserPlaceholderLight", "Suivi par", c.suivi_par ?? "Personne", !c.suivi_par)}
                 {detail("Calendar", "Dernière mise à jour", majuscule(relatif(jourLocal(c.maj), auj)))}
               </>
             ) : null}

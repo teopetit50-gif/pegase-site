@@ -47,6 +47,7 @@ const c = (
   commune: x.commune ?? null,
   secteur: x.secteur ?? null,
   source: x.source ?? null,
+  suivi_par: x.suivi_par ?? "Teo",
   prochaine_action: x.prochaine_action ?? null,
   prochaine_date: x.prochaine_date ?? null,
   note: x.note ?? null,
@@ -55,7 +56,7 @@ const c = (
 });
 
 export const CLIENTS_EXEMPLE: ClientTeo[] = [
-  c(1, "Marc Rolland", "Rolland Bâtiment", "Client", "En réel", {
+  c(1, "Marc Rolland", "Rolland Bâtiment", "Client", "Signé", {
     role: "Gérant",
     telephone: "+590690110201",
     courriel: "m.rolland@example.com",
@@ -71,7 +72,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
       [-28, "Appel", "Audit tenu en visio. Trois chantiers, des avenants jamais signés : DALIRO."],
     ],
   }),
-  c(2, "Dr Hélène Saint-Clair", "Cabinet dentaire Saint-Clair", "Client", "Installé", {
+  c(2, "Dr Hélène Saint-Clair", "Cabinet dentaire Saint-Clair", "Client", "Signé", {
     role: "Praticienne",
     telephone: "+590690110202",
     courriel: "cabinet.saintclair@example.com",
@@ -86,7 +87,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
       [-20, "Appel", "Récap envoyé puis signé le soir même."],
     ],
   }),
-  c(3, "Maître Julien Delmas", "Delmas Avocats", "Prospect", "Audit réservé", {
+  c(3, "Maître Julien Delmas", "Delmas Avocats", "Prospect", "R1", {
     role: "Associé",
     telephone: "+590690110203",
     courriel: "j.delmas@example.com",
@@ -98,7 +99,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
     note: "Quatre collaborateurs. Les honoraires facturés en retard sont le point d'entrée.",
     echanges: [[-4, "E-mail", "A réservé l'audit depuis le site, lien Meet envoyé."]],
   }),
-  c(4, "Sandrine Lambert", "Garage Lambert", "Prospect", "En conversation", {
+  c(4, "Sandrine Lambert", "Garage Lambert", "Prospect", "2e appel de prospection", {
     role: "Gérante",
     telephone: "+590690110204",
     courriel: "garage.lambert@example.com",
@@ -113,7 +114,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
       [-16, "Appel", "Premier appel, a demandé un mail de présentation."],
     ],
   }),
-  c(5, "Patrick Garnier", "Garnier Toitures", "Prospect", "Récap envoyé", {
+  c(5, "Patrick Garnier", "Garnier Toitures", "Prospect", "R3", {
     telephone: "+590690110205",
     courriel: "p.garnier@example.com",
     commune: "Sainte-Anne",
@@ -126,7 +127,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
       [-8, "Rendez-vous", "Audit tenu sur son chantier de Sainte-Anne."],
     ],
   }),
-  c(6, "Agnès Morel", "Morel & Associés, architectes", "Prospect", "Audit tenu", {
+  c(6, "Agnès Morel", "Morel & Associés, architectes", "Prospect", "R2", {
     role: "Architecte associée",
     telephone: "+590690110206",
     courriel: "a.morel@example.com",
@@ -137,7 +138,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
     prochaine_date: jour(0),
     echanges: [[-1, "Rendez-vous", "Audit tenu à l'agence : les permis à suivre et le courrier de la mairie."]],
   }),
-  c(7, "Groupe Caraïbes Distribution", "Groupe Caraïbes Distribution", "Prospect", "Contacté", {
+  c(7, "Groupe Caraïbes Distribution", "Groupe Caraïbes Distribution", "Prospect", "1er appel de prospection", {
     nom: "Éric Vanier",
     role: "Directeur général",
     telephone: "+590690110207",
@@ -149,7 +150,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
     prochaine_date: jour(4),
     echanges: [[-7, "Message LinkedIn", "A répondu sur LinkedIn : « intéressé pour le groupe, pas avant la fin du mois »."]],
   }),
-  c(8, "Nadia Bertin", "Atelier Bertin", "Client", "En réel", {
+  c(8, "Nadia Bertin", "Atelier Bertin", "Client", "Signé", {
     role: "Gérante",
     telephone: "+590690110208",
     courriel: "contact.bertin@example.com",
@@ -161,7 +162,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
     note: "Première cliente. Quatre modules. Témoignage à filmer.",
     echanges: [[-15, "Visite", "Revue mensuelle à l'atelier : 4 impayés relancés, 2 réglés."]],
   }),
-  c(9, "Boulangerie Ma Mie", "Boulangerie Ma Mie", "Prospect", "À contacter", {
+  c(9, "Boulangerie Ma Mie", "Boulangerie Ma Mie", "Prospect", "Nouveau lead", {
     nom: "Léa Fontaine",
     role: "Gérante",
     telephone: "+590690110209",
@@ -194,7 +195,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
       [-13, "Rendez-vous", "Audit tenu à l'agence de Saint-François."],
     ],
   }),
-  c(12, "Isabelle Chéry", "Chéry Expertise comptable", "Partenaire", "Partenaire actif", {
+  c(12, "Isabelle Chéry", "Chéry Expertise comptable", "Partenaire", "Signé", {
     role: "Expert-comptable",
     telephone: "+590690110212",
     courriel: "i.chery@example.com",
@@ -206,7 +207,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
     note: "Trois clients envoyés depuis janvier.",
     echanges: [[-30, "Rendez-vous", "Déjeuner : deux cabinets d'architectes et un garage à présenter."]],
   }),
-  c(13, "Kévin Loiseau", "Loiseau Électricité", "Prospect", "En pause", {
+  c(13, "Kévin Loiseau", "Loiseau Électricité", "Prospect", "À recontacter dans 2 mois", {
     telephone: "+590690110213",
     commune: "Capesterre-Belle-Eau",
     secteur: "BTP",
@@ -215,7 +216,7 @@ export const CLIENTS_EXEMPLE: ClientTeo[] = [
     prochaine_date: jour(45),
     echanges: [[-22, "Appel", "« Trop de chantiers d'ici décembre, rappelez-moi en janvier. »"]],
   }),
-  c(14, "Mathilde Pierre", "Pierre & Fils, carrelage", "Prospect", "Audit réservé", {
+  c(14, "Mathilde Pierre", "Pierre & Fils, carrelage", "Prospect", "R1", {
     telephone: "+590690110214",
     courriel: "m.pierre@example.com",
     commune: "Morne-à-l'Eau",
@@ -244,6 +245,7 @@ const r = (id: string, titre: string, j: number, h: number, duree: number, x: Pa
     statut: "confirme",
     lien: "https://calendar.google.com/calendar/",
     agenda: "Omega",
+    origine: "google",
     ...x,
   };
 };

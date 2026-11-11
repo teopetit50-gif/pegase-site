@@ -12,6 +12,7 @@
 import { estAdmin } from "@/lib/omega/donnees";
 import { lireFil, marquerLu, repondre } from "@/lib/teo/gmail";
 import { changerClient, creerClient, noterEchange } from "@/lib/teo/clients";
+import { fermerSessionTableau, ouvrirSessionTableau } from "@/lib/teo/tableau";
 import { envoyer, marquerLus } from "@/lib/teo/whatsapp";
 import type { ClientTeo, FilMail, MessageWa } from "@/lib/teo/types";
 
@@ -50,6 +51,22 @@ export async function marquerWhatsAppLu(numero: string): Promise<string | null> 
   const refus = await garde();
   if (refus) return refus;
   return marquerLus(numero);
+}
+
+/* ——— Le tableau des associés (11/11, soir) ———
+   Le CRM et les rendez-vous de Mon espace sont ceux du tableau des associés,
+   lus avec la session de Teo DESSUS : on l'ouvre ici une fois (le même
+   compte que sur omega-tableau-associes), le cookie fait le reste. */
+export async function brancherTableau(courriel: string, mdp: string): Promise<{ ok: boolean; detail: string | null }> {
+  const refus = await garde();
+  if (refus) return { ok: false, detail: refus };
+  if (!courriel.trim() || !mdp) return { ok: false, detail: "Le courriel et le mot de passe du tableau." };
+  return ouvrirSessionTableau(courriel, mdp);
+}
+export async function debrancherTableau(): Promise<string | null> {
+  const refus = await garde();
+  if (refus) return refus;
+  return fermerSessionTableau();
 }
 
 /* ——— Clients ——— */

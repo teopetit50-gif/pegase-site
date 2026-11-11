@@ -13,16 +13,20 @@
      · les sections de ressources : Épinglés, « À relancer » (les clients
        dont la prochaine date est passée ou aujourd'hui), « Aujourd'hui »
        (l'agenda du jour), « Vos clients » (les plus récents) ;
-     · à droite : Membres (vous), Aller à, et Branchements (Gmail, Agenda,
-       WhatsApp : branché ou pas, honnêtement).
+     · à droite : Membres (vous), Aller à, et Branchements (le tableau des
+       associés, Gmail et Google Agenda, WhatsApp : branché ou pas,
+       honnêtement). Le tableau des associés se branche ICI : une fenêtre
+       demande le compte du tableau (courriel, mot de passe), une fois ;
+       ?brancher=tableau l'ouvre d'office (les pages Clients et Agenda y
+       renvoient tant que le tableau n'est pas branché).
    Les données : ./donnees (exemple, ou la base réelle lue par
    app/espace2/teo/page.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { UserRound } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { KeyRound, UserRound } from "lucide-react";
 import { Dialog, DialogBody, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogIcone, DialogTitle } from "@/components/ui/dialog";
 import { Loader } from "@/components/ui/loader";
 import { Avis } from "@/components/espace/ui";
@@ -32,8 +36,8 @@ import { useToast } from "../Toasts";
 import { DalCarte, DalMenu } from "../daliro/DalCadre";
 import { DalIcone, type NomDalIcone } from "../daliro/DalIcone";
 import { EtoilePleine } from "../daliro/IconesProjet";
-import { creerClientTeo } from "@/app/espace2/teo/actions";
-import { ETAPES_CLIENT, TYPES_CLIENT } from "@/lib/teo/types";
+import { brancherTableau, creerClientTeo, debrancherTableau } from "@/app/espace2/teo/actions";
+import { ETAPES_CLIENT, ETAPES_FINIES, TYPES_CLIENT } from "@/lib/teo/types";
 import { useTeo } from "./donnees";
 import { AGENDA_EXEMPLE, CLIENTS_EXEMPLE, MAILS_EXEMPLE, WHATSAPP_EXEMPLE } from "./exemples";
 import { aujourdhuiIso, heureLocale, jourLocal, useFavorisTeo } from "./navigateur";
@@ -42,12 +46,11 @@ import "../daliro/dal-home.css";
 const BASE = `${RACINE}/teo`;
 
 export type ReelEnsemble = { clients: ClientTeo[]; agenda: RendezVous[]; whatsapp: ConversationWa[]; mails: FilMail[]; connexions: Connexions };
-const CONNEXIONS_EXEMPLE: Connexions = { google: "ok", whatsapp: "ok", adresse: "teo@example.com", detail: null };
+const CONNEXIONS_EXEMPLE: Connexions = { google: "ok", whatsapp: "ok", tableau: "ok", adresse: "teo@example.com", compteTableau: "teo@example.com", detail: null };
 
 type Nouveau = { nom: string; entreprise: string; type: string; etape: string; telephone: string; courriel: string; commune: string; secteur: string };
-const VIDE: Nouveau = { nom: "", entreprise: "", type: "Prospect", etape: "À contacter", telephone: "", courriel: "", commune: "", secteur: "" };
+const VIDE: Nouveau = { nom: "", entreprise: "", type: "Prospect", etape: "Nouveau lead", telephone: "", courriel: "", commune: "", secteur: "" };
 
-const FINIES = ["Signé", "Installé", "En réel", "Partenaire actif", "Perdu", "En pause"];
 const ICONE_EPINGLE: Record<string, NomDalIcone> = { client: "Users", rdv: "Calendar", wa: "Chat", mail: "Email", vue: "CustomView" };
 
 export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
@@ -58,11 +61,11 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
   const toast = useToast();
 
   const suivis = d.clients.filter((c) => c.etape !== "Perdu");
-  const aRelancer = suivis.filter((c) => c.prochaine_date && c.prochaine_date <= auj && !["Perdu", "En pause"].includes(c.etape)).sort((x, y) => (x.prochaine_date ?? "").localeCompare(y.prochaine_date ?? ""));
+  const aRelancer = suivis.filter((c) => c.prochaine_date && c.prochaine_date <= auj && !ETAPES_FINIES.includes(c.etape)).sort((x, y) => (x.prochaine_date ?? "").localeCompare(y.prochaine_date ?? ""));
   const ceJour = d.agenda.filter((r) => r.statut !== "annule" && jourLocal(r.debut) <= auj && jourLocal(r.fin) >= auj).sort((x, y) => x.debut.localeCompare(y.debut));
   const waNonLus = d.whatsapp.reduce((n, c) => n + c.messages.filter((m) => m.sens === "recu" && !m.lu).length, 0);
   const mailsNonLus = d.mails.filter((f) => f.non_lu).length;
-  const enCours = suivis.filter((c) => !FINIES.includes(c.etape)).length;
+  const enCours = suivis.filter((c) => !ETAPES_FINIES.includes(c.etape)).length;
   const recents = [...suivis].sort((x, y) => y.maj.localeCompare(x.maj)).slice(0, 8);
 
   /* ——— « + » : un nouveau client (omega_contacts en base réelle ; en exemple, un mot) ——— */
@@ -89,6 +92,43 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
     toast(`C'est fait. ${r.client.nom} est dans vos clients.`, "vert");
     setNouveau(false);
     routeur.push(`${BASE}/clients?client=${encodeURIComponent(r.client.id)}`);
+    routeur.refresh();
+  };
+
+  /* ——— le tableau des associés : s'y connecter d'ici (11/11, soir) ——— */
+  const params = useSearchParams();
+  const [brancher, setBrancher] = useState(params.get("brancher") === "tableau");
+  const [compte, setCompte] = useState({ courriel: "", mdp: "" });
+  const [brancheEnCours, setBrancheEnCours] = useState(false);
+  const [erreurTableau, setErreurTableau] = useState<string | null>(null);
+  const ouvrirBrancher = () => {
+    setErreurTableau(null);
+    setBrancher(true);
+  };
+  const fermerBrancher = () => {
+    setBrancher(false);
+    if (params.get("brancher")) routeur.replace(BASE, { scroll: false });
+  };
+  const connecterTableau = async () => {
+    if (!enReel) {
+      toast("Données d'exemple : rien à brancher. Passez en base réelle (menu de l'organisation).");
+      fermerBrancher();
+      return;
+    }
+    setBrancheEnCours(true);
+    setErreurTableau(null);
+    const r = await brancherTableau(compte.courriel, compte.mdp);
+    setBrancheEnCours(false);
+    if (!r.ok) return setErreurTableau(r.detail ?? "Le tableau n'a pas répondu.");
+    setCompte({ courriel: "", mdp: "" });
+    toast("C'est branché : vos clients et vos rendez-vous sont ceux du tableau des associés.", "vert");
+    fermerBrancher();
+    routeur.refresh();
+  };
+  const deconnecterTableau = async () => {
+    const detail = await debrancherTableau();
+    if (detail) return toast(detail, "rouge");
+    toast("Le tableau des associés est débranché de Mon espace.");
     routeur.refresh();
   };
 
@@ -125,7 +165,9 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
   const relance = (c: ClientTeo) => (c.prochaine_date === auj ? "aujourd'hui" : c.prochaine_date ? `en retard depuis le ${c.prochaine_date.slice(8, 10)}/${c.prochaine_date.slice(5, 7)}` : "");
   const branchement = (etat: string, ok: string, absent: string): { texte: string; icone: NomDalIcone } =>
     etat === "ok" ? { texte: ok, icone: "IssueStatusDone" } : etat === "absent" || etat === "sans_table" ? { texte: absent, icone: "IssueStatusTodo" } : etat === "portee" ? { texte: "Jeton Google sans la boîte : relancer outils/jeton-google.mjs", icone: "Alert" } : { texte: "En erreur : voir la page", icone: "Alert" };
+  const bTableau = branchement(d.connexions.tableau, `Tableau des associés : ${d.connexions.compteTableau ?? "branché"}`, "Tableau des associés : à brancher (vos clients et rendez-vous y sont)");
   const bGoogle = branchement(d.connexions.google, `Gmail et Agenda : ${d.connexions.adresse ?? "branchés"}`, "Gmail et Agenda : pas branchés (GOOGLE_OAUTH_*)");
+  const agendaBranche = d.connexions.tableau === "ok" || d.connexions.google === "ok";
   const bWa = branchement(d.connexions.whatsapp, "WhatsApp : branché", d.connexions.whatsapp === "sans_table" ? "WhatsApp : la table n'existe pas encore (schema-whatsapp.sql)" : "WhatsApp : lecture seule (WHATSAPP_TOKEN absent)");
 
   return (
@@ -247,8 +289,13 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
                   <DalIcone nom="Section" />
                 </Link>
               </div>
-              {d.connexions.google !== "ok" && enReel ? (
-                <p className="dal-h-aide">{bGoogle.texte}.</p>
+              {!agendaBranche && enReel ? (
+                <p className="dal-h-aide">
+                  {bTableau.texte}.{" "}
+                  <button type="button" className="dal-h-lien" onClick={ouvrirBrancher}>
+                    Brancher
+                  </button>
+                </p>
               ) : ceJour.length === 0 ? (
                 <p className="dal-h-aide">Rien dans l&apos;agenda aujourd&apos;hui.</p>
               ) : (
@@ -280,7 +327,14 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
                   <DalIcone nom="Section" />
                 </Link>
               </div>
-              {recents.length === 0 ? (
+              {d.connexions.tableau !== "ok" && enReel ? (
+                <p className="dal-h-aide">
+                  {bTableau.texte}.{" "}
+                  <button type="button" className="dal-h-lien" onClick={ouvrirBrancher}>
+                    Brancher
+                  </button>
+                </p>
+              ) : recents.length === 0 ? (
                 <p className="dal-h-aide">Aucun client suivi. Ajoutez le premier : un nom suffit.</p>
               ) : (
                 <ul className="dal-h-liste">
@@ -322,6 +376,23 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
               <section className="dal-h-droite-section">
                 <h2 className="dal-h-libelle">Branchements</h2>
                 <nav className="dal-h-aller" aria-label="Branchements">
+                  {d.connexions.tableau === "ok" ? (
+                    <Link href={`${BASE}/clients`} className="dal-h-pilule" title="Vos clients et vos rendez-vous viennent du tableau des associés">
+                      <span className="dal-h-pilule-icone">
+                        <DalIcone nom={bTableau.icone} />
+                      </span>
+                      <span>{bTableau.texte}</span>
+                      <DalIcone nom="Chevron" className="dal-h-chevron" />
+                    </Link>
+                  ) : (
+                    <button type="button" className="dal-h-pilule" onClick={ouvrirBrancher} title={d.connexions.detail ?? undefined}>
+                      <span className="dal-h-pilule-icone">
+                        <DalIcone nom={bTableau.icone} />
+                      </span>
+                      <span>{bTableau.texte}</span>
+                      <DalIcone nom="Chevron" className="dal-h-chevron" />
+                    </button>
+                  )}
                   <Link href={`${BASE}/mails`} className="dal-h-pilule" title={d.connexions.detail ?? undefined}>
                     <span className="dal-h-pilule-icone">
                       <DalIcone nom={bGoogle.icone} />
@@ -416,6 +487,59 @@ export default function VueEnsemble({ reel }: { reel: ReelEnsemble | null }) {
           <DialogFooter>
             <button type="button" className="r-btn r-btn--noir" disabled={!f.nom.trim() || envoi} onClick={() => void creer()}>
               {envoi ? <Loader variant="spin" /> : null} Ajouter le client
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={brancher} onOpenChange={(o) => !o && fermerBrancher()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogIcone>
+              <KeyRound width={18} height={18} aria-hidden="true" />
+            </DialogIcone>
+            <DialogTitle>Brancher le tableau des associés</DialogTitle>
+            <DialogDescription>
+              Vos clients (le pipeline) et vos rendez-vous vivent dans le tableau des associés. Connectez-vous ici avec le compte que vous y utilisez, une fois : Mon espace lit et écrit ensuite en votre nom, dans le même tableau. Le mot de passe n&apos;est gardé nulle part, seule la session reste, dans ce navigateur.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogBody>
+            <form
+              className="esp-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void connecterTableau();
+              }}
+            >
+              <div className="esp-form-ligne">
+                <label className="rv-libelle">
+                  Courriel du tableau
+                  <input className="rv-champ" type="email" autoComplete="username" value={compte.courriel} onChange={(e) => setCompte({ ...compte, courriel: e.target.value })} placeholder="prenom@omegaai.fr" autoFocus />
+                </label>
+                <label className="rv-libelle">
+                  Mot de passe
+                  <input className="rv-champ" type="password" autoComplete="current-password" value={compte.mdp} onChange={(e) => setCompte({ ...compte, mdp: e.target.value })} />
+                </label>
+              </div>
+              {erreurTableau ? (
+                <Avis teinte="rouge" role="alert">
+                  {erreurTableau}
+                </Avis>
+              ) : null}
+              {d.connexions.tableau === "ok" && enReel ? (
+                <p className="dal-h-aide">
+                  Déjà branché avec {d.connexions.compteTableau}.{" "}
+                  <button type="button" className="dal-h-lien" onClick={() => void deconnecterTableau()}>
+                    Débrancher
+                  </button>
+                </p>
+              ) : null}
+              <button type="submit" hidden aria-hidden="true" tabIndex={-1} />
+            </form>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button" className="r-btn r-btn--noir" disabled={!compte.courriel.trim() || !compte.mdp || brancheEnCours} onClick={() => void connecterTableau()}>
+              {brancheEnCours ? <Loader variant="spin" /> : null} Brancher
             </button>
           </DialogFooter>
         </DialogContent>

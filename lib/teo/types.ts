@@ -13,10 +13,12 @@ export type ClientTeo = {
   nom: string;
   entreprise: string | null;
   role: string | null;
-  /* Prospect, Client, Partenaire, Réseau, Prestataire, Candidat, Autre */
+  /* Prospect, Pilote, Client (le statut du tableau des associés) ; Partenaire, Réseau, Prestataire, Candidat, Autre dans l'exemple */
   type: string;
-  /* À contacter, Contacté, En conversation, Audit réservé, Audit tenu, Récap envoyé, Signé, Installé, En réel, Partenaire actif, En pause, Perdu */
+  /* une colonne du pipeline du tableau des associés (ETAPES_CLIENT) */
   etape: string;
+  /* l'associé qui suit le prospect dans le tableau (Teo, Timothée), s'il est noté */
+  suivi_par: string | null;
   telephone: string | null;
   courriel: string | null;
   commune: string | null;
@@ -48,6 +50,8 @@ export type RendezVous = {
   lien: string | null;
   /* l'agenda d'où il vient */
   agenda: string;
+  /* Google Agenda, ou les rendez-vous du tableau des associés */
+  origine: "google" | "tableau";
 };
 
 /* ——— une conversation WhatsApp (omega_whatsapp_messages) ——— */
@@ -102,9 +106,42 @@ export type FilMail = {
 /* ——— l'état des branchements, pour le dire honnêtement sur chaque page ——— */
 export type EtatGoogle = "ok" | "absent" | "portee" | "erreur";
 export type EtatWhatsApp = "ok" | "sans_table" | "absent" | "erreur";
-export type Connexions = { google: EtatGoogle; whatsapp: EtatWhatsApp; adresse: string | null; detail: string | null };
+/* le tableau des associés : la session de Teo dessus est ouverte, absente, ou le tableau n'a pas répondu */
+export type EtatTableau = "ok" | "absent" | "erreur";
+export type Connexions = {
+  google: EtatGoogle;
+  whatsapp: EtatWhatsApp;
+  tableau: EtatTableau;
+  adresse: string | null;
+  /* le compte ouvert sur le tableau des associés */
+  compteTableau: string | null;
+  detail: string | null;
+};
 
-/* ——— les valeurs des listes déroulantes des clients (celles de /omega/contacts) ——— */
-export const TYPES_CLIENT = ["Prospect", "Client", "Partenaire", "Réseau", "Prestataire", "Candidat", "Autre"];
-export const ETAPES_CLIENT = ["À contacter", "Contacté", "En conversation", "Audit réservé", "Audit tenu", "Récap envoyé", "Signé", "Installé", "En réel", "Partenaire actif", "En pause", "Perdu"];
+/* ——— les valeurs des listes déroulantes des clients ———
+   Depuis le 11/11 au soir, ce sont celles du TABLEAU DES ASSOCIÉS
+   (omega-metiers/tableau, components/tableau/v2/etapes.ts et store.ts) :
+   les clients de Mon espace SONT ses prospects, même pipeline, mêmes mots. */
+export const TYPES_CLIENT = ["Prospect", "Pilote", "Client", "Partenaire", "Réseau", "Prestataire", "Candidat", "Autre"];
+/* les colonnes du pipeline, dans l'ordre du tableau : clé en base → libellé */
+export const PIPELINE: { cle: string; libelle: string; statut: string }[] = [
+  { cle: "nouveau", libelle: "Nouveau lead", statut: "nouveau" },
+  { cle: "appel1", libelle: "1er appel de prospection", statut: "contacte" },
+  { cle: "appel2", libelle: "2e appel de prospection", statut: "contacte" },
+  { cle: "appel3", libelle: "3e appel et +", statut: "contacte" },
+  { cle: "r1", libelle: "R1", statut: "rdv" },
+  { cle: "r2", libelle: "R2", statut: "pilote" },
+  { cle: "r3", libelle: "R3", statut: "pilote" },
+  { cle: "complique", libelle: "Compliqué", statut: "contacte" },
+  { cle: "signe", libelle: "Signé", statut: "client" },
+  { cle: "perdu", libelle: "Perdu", statut: "perdu" },
+  { cle: "rc1", libelle: "À recontacter dans 1 mois", statut: "contacte" },
+  { cle: "rc2", libelle: "À recontacter dans 2 mois", statut: "contacte" },
+  { cle: "rc4", libelle: "À recontacter dans 4 mois", statut: "contacte" },
+  { cle: "rc6", libelle: "À recontacter dans 6 mois", statut: "contacte" },
+];
+export const ETAPES_CLIENT = PIPELINE.map((e) => e.libelle);
+/* les étapes où il n'y a plus rien à relancer */
+export const ETAPES_FINIES = ["Signé", "Perdu"];
+/* le canal d'un échange : ce que le tableau range dans appels.source */
 export const CANAUX_ECHANGE = ["Appel", "Visite", "WhatsApp", "E-mail", "Rendez-vous", "Message LinkedIn"];
