@@ -30,17 +30,29 @@ La séquence complète, à chaque fois :
   d'une autre session, ne rien pousser et le dire.
 - **Ne jamais pousser une modification qu'on n'a pas écrite** « au passage ».
 
-## Les six sites dédiés ne se reconstruisent que si on les touche
+## Les six sites dédiés ne se déploient plus à chaque push
 
-Depuis le 11/11/2026 (plafond Vercel gratuit atteint : cent déploiements
-par vingt-quatre heures, sept projets reconstruits à chaque push), chaque
-projet Vercel de site dédié (daliro, lorani, tamila, tiroma, tavaro,
-varelo) passe par `outils/vercel-ignore.sh <cle>` avant de construire :
-la construction est ignorée quand les commits poussés ne touchent que
-les pages des autres métiers ou la vitrine Omega. Sa propre page, sa
-barre, `lib/`, `components/site-dedie/communs.tsx`, `portail.ts`,
-`app/layout.tsx`, `public/logos/` ou les dépendances le reconstruisent.
-`omegaai.fr` (pegase-site2) se reconstruit toujours. Si un site dédié
-doit repartir sans qu'un fichier à lui ait bougé, le relancer depuis
-Vercel (outil `create_deployment`, ou « Redeploy » dans le tableau de
-bord).
+Plafond Vercel gratuit : cent déploiements par vingt-quatre heures, atteint
+deux fois le 11/11/2026 (15 h 50, 18 h 15). Sept projets reconstruits à
+chaque push, une construction « ignorée » comptant quand même : quatorze
+pushs par jour et plus rien ne se met en ligne. Depuis le 11/11 au soir :
+
+- **omegaai.fr (pegase-site2) est le seul projet relié à GitHub.** Un push
+  sur `main` = un déploiement. Il se reconstruit toujours.
+- **Les six sites dédiés** (daliro, lorani, tamila, tiroma, tavaro,
+  varelo) ne doivent plus être reliés à GitHub (Vercel › projet ›
+  Settings › Git › Disconnect, six fois, par Teo ; tant que ce n'est pas
+  fait, chaque push les déploie encore). C'est l'action GitHub
+  `.github/workflows/sites-dedies.yml` qui les déploie, et seulement
+  ceux qu'un commit du push touche (même règle que
+  `outils/vercel-ignore.sh` : leur page, leur barre, `lib/`, `portail.ts`,
+  `components/site-dedie/`, `app/layout.tsx`, `public/logos/`, les
+  dépendances). Elle a besoin du secret GitHub `VERCEL_TOKEN`.
+- **Après un push qui touche un site dédié**, vérifier dans l'onglet
+  Actions de GitHub que le déploiement est parti ; s'il a échoué (secret
+  absent, plafond), déployer ce site depuis Vercel (outil
+  `create_deployment` avec le sha du commit, ou « Redeploy »), puis
+  vérifier `<logiciel>.omegaai.fr`.
+- **Un commit qui ne touche que `docs/`, `outils/` ou `.github/` ne met
+  rien en ligne** : le grouper avec le commit de site qui suit, plutôt que
+  de le pousser seul, économise un déploiement.

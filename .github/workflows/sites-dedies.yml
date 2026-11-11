@@ -1,0 +1,103 @@
+# ══════════════════════════════════════════════════════════════════════
+# Les six sites dédiés (daliro, lorani, tamila, tiroma, tavaro, varelo)
+# — 11/11/2026 au soir.
+#
+# LE PROBLÈME. Plafond Vercel gratuit : cent déploiements par vingt-quatre
+# heures, atteint le 11/11 à 15 h 50 puis de nouveau à 18 h 15. Sept
+# projets Vercel reliés au même dépôt se déployaient à chaque push sur
+# main, et une construction « ignorée » (outils/vercel-ignore.sh) compte
+# quand même pour un déploiement : quatorze pushs par jour, et tout
+# s'arrête. Plusieurs sessions poussent en parallèle : c'est arrivé deux
+# fois le même jour.
+#
+# LE REMÈDE. Les six projets de sites dédiés ne sont PLUS reliés à GitHub
+# (Teo, Vercel › projet › Settings › Git › Disconnect). Seul omegaai.fr
+# (pegase-site2) se déploie encore tout seul à chaque push : un
+# déploiement par push. Les sites dédiés, c'est cette action qui les
+# déploie, et seulement ceux qu'un commit du push touche vraiment (même
+# règle que outils/vercel-ignore.sh : leur page, leur barre, lib/,
+# portail, layout, logos, dépendances). Le déploiement part par la CLI
+# Vercel avec l'identifiant du projet : aucun lien Git n'est nécessaire,
+# la construction se fait chez Vercel avec les variables du projet
+# (NEXT_PUBLIC_PORTAIL).
+#
+# À POSER UNE FOIS dans GitHub (Settings › Secrets and variables › Actions) :
+# VERCEL_TOKEN, un jeton créé sur vercel.com/account/settings/tokens pour
+# l'équipe teo18. Tant qu'il manque, l'action échoue en le disant, et une
+# session déploie le site à la main (outil Vercel create_deployment, ou
+# « Redeploy » dans le tableau de bord).
+# ══════════════════════════════════════════════════════════════════════
+name: Sites dédiés
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sites-dedies
+  cancel-in-progress: false
+
+jobs:
+  deployer:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - site: daliro
+            projet: prj_Pjssj7PKpbpY5uJ9NGb4oycaFHPh
+          - site: lorani
+            projet: prj_b4rLNOu9d6FnF40TlQcfoxUHPfBG
+          - site: tamila
+            projet: prj_09Ax3DqxQ1M2R3fTluQQqFHXELov
+          - site: tiroma
+            projet: prj_BkCpEHsTecjgHWev68ac2aAmDpnf
+          - site: tavaro
+            projet: prj_fxF1lwxRZf4htkLrypOsjHEc5W8W
+          - site: varelo
+            projet: prj_l6l18zJGFSH5aow2Zaxm8IImxeMg
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ce push touche-t-il ${{ matrix.site }} ?
+        id: touche
+        env:
+          AVANT: ${{ github.event.before }}
+        run: |
+          set +e
+          VERCEL_GIT_PREVIOUS_SHA="$AVANT" bash outils/vercel-ignore.sh "${{ matrix.site }}"
+          code=$?
+          set -e
+          if [ "$code" = "1" ]; then echo "deployer=oui" >> "$GITHUB_OUTPUT"; else echo "deployer=non" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Vérifier le secret
+        if: steps.touche.outputs.deployer == 'oui'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Le secret VERCEL_TOKEN manque : ${{ matrix.site }} n'est pas déployé. Le poser dans Settings › Secrets › Actions, ou déployer ce site à la main depuis Vercel."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.touche.outputs.deployer == 'oui'
+        with:
+          node-version: 22
+
+      - name: Déployer ${{ matrix.site }} sur Vercel (construction chez Vercel)
+        if: steps.touche.outputs.deployer == 'oui'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_i1M2yUINJBwJA66d6L9i62OF
+          VERCEL_PROJECT_ID: ${{ matrix.projet }}
+        run: |
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN" \
+            -m githubCommitSha="${{ github.sha }}" -m githubCommitRef=main \
+            -m githubCommitMessage="$(git log -1 --format=%s | cut -c1-120)"
