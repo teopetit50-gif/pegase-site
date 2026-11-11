@@ -59,12 +59,13 @@ export const SECTEURS: Secteur[] = [
     slug: "btp",
     metier: "BTP",
     saas: "Daliro",
-    texte: "Les travaux supplémentaires sont chiffrés et signés avant exécution.",
-    ligne: "Travaux supplémentaires signés d'avance",
+    /* 11/11/2026 — brief daliro-v2 : du premier appel au décompte final */
+    texte: "Chaque chantier suivi du premier appel au décompte final.",
+    ligne: "De l'appel au décompte final",
     detail:
-      "Daliro relève dans les photos et les vocaux de vos équipes les travaux absents du marché, puis les chiffre sur vos prix unitaires. Vous obtenez l'accord écrit du client avant que l'ouvrage soit refermé.",
+      "Daliro prend l'appel et dicte le devis, vérifie le marché ligne à ligne, confirme les passages à J-2, lit ce que le terrain envoie déjà (photos, vocaux, mails), chiffre chaque travail hors marché et le fait signer avant l'ouvrage, cale les livraisons sur la pose, prépare la situation de fin de mois et suit la réception.",
     apercu:
-      "Avant le départ sur chantier, le conducteur de travaux reçoit trois listes par chantier : les travaux à facturer, les sous-traitants à confirmer à J-2 et les livraisons à caler sur le planning.",
+      "Chaque matin, le conducteur de travaux, le chef d'équipe et le bureau reçoivent chacun leur liste : l'avenant à faire signer, le sous-traitant à relancer, la livraison à décaler, la situation à relire.",
     combine: [
       { offre: "CASHD", raison: "Les situations et les factures échues relancées selon vos règles, après votre validation." },
       { offre: "FILED", raison: "Les factures des fournisseurs et des sous-traitants lues, contrôlées, transmises à la comptabilité." },
@@ -148,10 +149,11 @@ export const SECTEURS: Secteur[] = [
     slug: "hotellerie",
     metier: "Hôtels",
     saas: "Ostelo",
-    texte: "Commissions vérifiées, extras sur la note, chaque demande traitée.",
-    ligne: "L'argent qui se perd entre vos logiciels",
+    /* 11/11/2026 — brief ostelo-v2 : de la demande au dernier euro encaissé */
+    texte: "Chaque séjour suivi de la demande au dernier euro encaissé.",
+    ligne: "De la demande au dernier euro encaissé",
     detail:
-      "Ostelo répond à vos clients à toute heure et dans leur langue, en lisant vos disponibilités, et repropose chaque chambre annulée aux clients en liste d'attente. Avant l'arrivée il propose le surclassement, avant le départ il rattrape chaque extra oublié sur la note.",
+      "Ostelo répond à la demande à toute heure dans la langue du client, lit la réservation d'où qu'elle vienne, prépare l'avant-séjour, tient les extras sur la note, vérifie le départ, puis contrôle la commission de la plateforme, la carte virtuelle, l'avis et le retour de l'ancien client.",
     apercu:
       "Chaque matin, la réception trouve le travail de la nuit fait : les demandes traitées, les chambres annulées reprises, les extras à vérifier avant les départs.",
     combine: [

@@ -29,7 +29,7 @@ export type CarteSecteur = {
 
 const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: string }> = {
   btp: {
-    probleme: "Les travaux en plus faits sur le chantier n'arrivent pas toujours sur la facture.",
+    probleme: "Sur un chantier, l'information arrive dispersée dans des dizaines de messages.",
     photo: "/accueil-secteurs/btp.jpg",
     cadrage: "50% 38%",
   },

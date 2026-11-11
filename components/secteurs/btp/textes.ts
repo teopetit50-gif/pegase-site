@@ -33,11 +33,14 @@ export const CONTACT = {
   demo: LIEN_AUDIT,
 };
 
+/* 11/11/2026 — brief daliro-v2 (docs/briefs-saas/daliro-v2.md) : le chantier suivi du premier
+   appel au décompte final. Teo : « le premier titre, ce n'est pas vraiment l'outil qu'on vend ;
+   on vend un truc beaucoup plus complexe, regarde ce qu'on a fait avec Corail BTP ». */
 export const HERO = {
   pastille: "Entreprises du bâtiment",
-  titre: "Les travaux hors devis se perdent entre le chantier et la facture",
+  titre: "Chaque chantier suivi du premier appel au décompte final",
   texte:
-    "Daliro repère ces travaux dans les photos et les vocaux de vos équipes, les chiffre sur vos prix unitaires et prépare l'avenant, que le client signe avant l'exécution. Il confirme aussi vos sous-traitants deux jours avant leur passage.",
+    "Daliro prend l'appel et dicte le devis, vérifie le marché ligne à ligne, confirme vos équipes et vos sous-traitants à J-2, lit ce que le terrain envoie déjà (photos, vocaux, mails), chiffre chaque travail hors marché et le fait signer avant l'ouvrage, cale les livraisons sur la pose, prépare la situation de fin de mois et suit la réception. Chaque matin, chaque personne reçoit ce qu'elle a à décider.",
   audit: "Réserver un audit",
   demo: "Voir la démo",
   signature: "Conçu par",
@@ -145,7 +148,7 @@ export const LU = {
 export type Valeur = boolean | string;
 export const FORMULES = {
   titre: "Le prix dépend du nombre de chantiers que vous suivez",
-  sous: "Les trois formules se distinguent par le nombre de chantiers suivis et les fonctions ouvertes. Le prix est fixé pendant l'audit, une fois vos chantiers en cours examinés.",
+  sous: "Les trois formules se distinguent par le nombre de chantiers suivis et les étapes du fil ouvertes, de l'appel au décompte. Le prix est fixé pendant l'audit, une fois vos chantiers en cours examinés. Jamais par utilisateur.",
   comparer: ["Comparer", "les formules"],
   prix: "Prix fixé à l'audit,",
   prixSous: "selon vos chantiers ouverts",
@@ -156,6 +159,13 @@ export const FORMULES = {
     { id: "entreprise", name: "Entreprise", cta: "Réserver un audit" },
   ],
   groupes: [
+    { title: "Appels, mails et devis", description: "Le chantier commence au téléphone.", features: [
+      { name: "Appels transcrits en tickets", description: "Chaque appel reçu devient un ticket : qui, pour quel chantier, ce qui a été dit, et les suites à donner.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Mails rangés par chantier", description: "Les mails de l'entreprise, fournisseurs et clients, sont rattachés au chantier et au lot qu'ils concernent.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Devis dicté sur place", description: "Vous dictez le devis sur le chantier ; il sort chiffré sur votre bibliothèque de prix, à relire avant l'envoi.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Marché vérifié ligne à ligne", description: "Le devis signé est importé, chaque ligne rattachée à un lot, chaque écart accepté avec un motif, puis le marché est figé.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Point du matin par personne", description: "Le conducteur, le chef d'équipe, le bureau et le dirigeant reçoivent chacun leur liste de ce qu'ils ont à décider.", values: { demarrage: true, chantiers: true, entreprise: true } },
+    ] },
     { title: "Travaux supplémentaires", description: "Daliro les repère dans ce que vos équipes envoient.", features: [
       { name: "Lecture des photos et vocaux", description: "Daliro lit ce que vos équipes envoient déjà par WhatsApp, SMS ou courriel.", values: { demarrage: true, chantiers: true, entreprise: true } },
       { name: "Avenants chiffrés sur vos prix", description: "Chaque avenant est chiffré avec les prix unitaires de vos devis.", values: { demarrage: true, chantiers: true, entreprise: true } },
@@ -176,6 +186,13 @@ export const FORMULES = {
       { name: "Suivi des retours", description: "Daliro suit le matériel qui reste sur le chantier et doit repartir.", values: { demarrage: false, chantiers: false, entreprise: true } },
       { name: "Bons de livraison rapprochés", description: "Chaque bon de livraison est comparé à la commande.", values: { demarrage: false, chantiers: false, entreprise: true } },
       { name: "Avancement lu dans les photos", description: "Les photos de la semaine servent de base à la situation de fin de mois.", values: { demarrage: false, chantiers: false, entreprise: true } },
+    ] },
+    { title: "Situation, réception et argent", description: "Le chantier suivi jusqu'au décompte final.", features: [
+      { name: "Situation de fin de mois préparée", description: "L'avancement constaté sur les photos de la semaine donne la situation, lot par lot, à relire avant l'envoi.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Factures rattachées au chantier", description: "Chaque facture émise ou reçue est rattachée à son chantier et à son lot.", values: { demarrage: true, chantiers: true, entreprise: true } },
+      { name: "Réserves photographiées et suivies", description: "À la réception, chaque réserve est photographiée et datée ; celles hors marché sont chiffrées à part ; la levée est suivie jusqu'au décompte.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Marge à date par lot", description: "Le facturé, le déboursé et les heures par lot, pour qui voit les prix.", values: { demarrage: false, chantiers: true, entreprise: true } },
+      { name: "Résumé envoyé au maître d'ouvrage", description: "Le fil du chantier, résumé pour le client, à relire avant l'envoi.", values: { demarrage: false, chantiers: false, entreprise: true } },
     ] },
     { title: "Équipe et accès", description: "Le bureau et le terrain travaillent sur les mêmes informations.", features: [
       { name: "Comptes bureau", description: "Accès pour les conducteurs de travaux, les assistants et la direction.", values: { demarrage: "2", chantiers: "5", entreprise: "Sur mesure" } },
@@ -201,7 +218,8 @@ export const FAQ = {
   aria: "Catégories de questions",
   categories: [
     { id: "general", label: "Général", items: [
-      { question: "Qu'est-ce que Daliro ?", answer: "Daliro est un logiciel qui lit ce que vos équipes envoient déjà (photos, vocaux, messages) et le compare à vos marchés et à votre planning. Avant le départ sur chantier, vous savez ce qui est à facturer, à confirmer et à livrer, sans avoir changé de logiciel de gestion." },
+      { question: "Qu'est-ce que Daliro ?", answer: "Daliro suit chaque chantier du premier appel au décompte final. Il prend l'appel et dicte le devis, vérifie le marché, confirme les passages à J-2, lit ce que vos équipes envoient déjà (photos, vocaux, mails), chiffre les travaux hors marché et les fait signer avant l'ouvrage, cale les livraisons, prépare la situation et suit la réception. Chaque matin, chaque personne reçoit ce qu'elle a à décider, sans avoir changé de logiciel de gestion." },
+      { question: "Comment un appel devient-il un chantier ?", answer: "Chaque appel reçu est transcrit en ticket : qui a appelé, pour quel chantier, ce qui a été dit, les suites à donner. Sur place, vous dictez le devis ; il sort chiffré sur votre bibliothèque de prix et vous le relisez avant de l'envoyer. Une fois signé, il devient le marché du chantier, vérifié ligne à ligne." },
       { question: "Faut-il changer de logiciel de devis ?", answer: "Non. Daliro lit vos devis là où ils sont, depuis votre logiciel ou un export. Il ne remplace ni votre outil de devis, ni votre planning." },
       { question: "Les chefs d'équipe doivent-ils installer une application ?", answer: "Non. Ils continuent d'envoyer leurs photos et leurs vocaux comme aujourd'hui, et Daliro lit ces messages là où ils arrivent : WhatsApp, SMS ou courriel." },
       { question: "Qu'est-ce que Daliro ne fait pas ?", answer: "Daliro ne signe rien à votre place et n'envoie aucun avenant sans votre accord. La paie, la comptabilité et l'établissement des devis restent dans vos outils actuels." },

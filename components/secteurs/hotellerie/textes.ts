@@ -28,11 +28,12 @@ export const CONTACT = {
   demo: "/reserver-un-audit",
 };
 
+/* 11/11/2026 — brief ostelo-v2 : le séjour suivi de la demande au dernier euro encaissé */
 export const HERO = {
   pastille: "Pour les hôtels déjà équipés, du boutique-hôtel au groupe",
-  titre: "L'argent qui se perd entre vos logiciels, Ostelo le récupère",
+  titre: "Chaque séjour suivi de la demande au dernier euro encaissé",
   texte:
-    "Ostelo relie votre logiciel de réservation, vos restaurants et votre spa. Il repère les commissions facturées à tort, les cartes virtuelles jamais débitées, les extras absents de la note et les demandes restées sans réponse. Vos outils restent en place.",
+    "Ostelo répond à la demande à toute heure dans la langue du client, lit la réservation d'où qu'elle vienne, prépare l'avant-séjour, tient les extras sur la note, vérifie le départ, puis l'après : la commission de la plateforme contrôlée, la carte virtuelle débitée, l'avis suivi, l'ancien client revu. Vos outils restent en place, en lecture seule.",
   audit: "Réserver un audit",
   demo: "Voir la démo",
   signature: "Conçu par",
@@ -224,7 +225,7 @@ export const FAQ = {
   aria: "Catégories de questions",
   categories: [
     { id: "general", label: "Général", items: [
-      { question: "Qu'est-ce qu'Ostelo ?", answer: "Ostelo est un logiciel pour les hôtels qui lit vos réservations, vos annulations et les messages de vos clients, puis agit à votre place là où une réception débordée laisse filer du chiffre : demandes sans réponse, chambres annulées jamais revendues, extras oubliés sur la note, avis jamais demandés." },
+      { question: "Qu'est-ce qu'Ostelo ?", answer: "Ostelo suit chaque séjour de la demande au dernier euro encaissé : la demande traitée à toute heure dans la langue du client, la réservation lue d'où qu'elle vienne, l'avant-séjour préparé, les extras tenus sur la note, le départ sans oubli, puis la commission de la plateforme vérifiée, la carte virtuelle débitée, l'avis suivi et l'ancien client revu. Chaque matin, la réception reçoit ce que la nuit a laissé." },
       { question: "Faut-il changer de logiciel de réservation ?", answer: "Non. Ostelo lit votre logiciel de réservation en lecture seule, ou ses exports, et travaille à côté. Il ne remplace ni votre logiciel, ni votre gestionnaire de canaux, ni votre caisse." },
       { question: "J'ai déjà des outils d'IA et des automatisations. Est-ce utile ?", answer: "C'est le cas de la plupart des hôtels que nous rencontrons. Votre moteur de réservation, votre logiciel de restaurant et votre appli client font bien leur travail, chacun de son côté. Ostelo travaille entre eux : il vérifie ce qu'aucun ne vérifie, comme une commission facturée sur une annulation ou un soin absent de la note. L'audit commence par la liste de ce qui tourne chez vous, et dit aussi ce qu'il ne faut pas toucher." },
       { question: "Qu'est-ce qu'Ostelo ne fait pas ?", answer: "Ostelo n'invente aucun prix et n'accorde aucune exception : il applique votre grille et vos règles, et passe le reste à la réception. Il ne modifie jamais une réservation sans validation." },

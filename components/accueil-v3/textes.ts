@@ -233,7 +233,7 @@ export const METIERS = [
   {
     nom: "Daliro",
     metier: "BTP",
-    texte: "Les travaux supplémentaires sont chiffrés et signés avant exécution.",
+    texte: "Chaque chantier suivi du premier appel au décompte final.",
     href: "/secteurs/btp",
     image: "/accueil/daliro-clair.webp",
     pastille: null as string | null,
@@ -326,7 +326,7 @@ export const SITUATIONS = [
   },
   {
     texte:
-      "Les travaux supplémentaires repérés dans les photos et les vocaux du chantier sont chiffrés sur vos prix et signés avant que l'ouvrage soit refermé.",
+      "Chaque chantier suivi du premier appel au décompte final : le devis dicté, les passages confirmés, le terrain lu, l'avenant signé avant l'ouvrage, la situation préparée, la réception suivie.",
     nom: "Daliro",
     role: "Logiciel métier · BTP",
     logo: "/logos/daliro-mark.png",

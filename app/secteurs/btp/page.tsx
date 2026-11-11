@@ -65,9 +65,10 @@ import SeCombine from "@/components/secteurs/SeCombine";
    au blanc (Fonctions.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "Daliro · les travaux supplémentaires signés avant exécution";
+/* 11/11/2026 — brief daliro-v2 : le chantier suivi du premier appel au décompte final */
+const TITRE = "Daliro · chaque chantier suivi du premier appel au décompte final";
 const DESCRIPTION =
-  "Daliro compare les photos et les vocaux de vos équipes au marché signé, chiffre les travaux supplémentaires sur vos prix unitaires, prépare l'avenant et confirme vos sous-traitants à J-2. Conçu par Omega pour les entreprises du bâtiment.";
+  "Daliro suit chaque chantier du premier appel au décompte final : l'appel transcrit et le devis dicté, le marché vérifié, les passages confirmés à J-2, le terrain lu dans les photos et les vocaux, chaque travail hors marché chiffré et signé avant l'ouvrage, les livraisons calées, la situation préparée, la réception suivie. Conçu par Omega pour les entreprises du bâtiment.";
 
 export const metadata: Metadata = {
   /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */

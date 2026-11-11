@@ -138,3 +138,22 @@ d'une ETI (le plan du groupe, les sources en lecture seule, les actions, les age
 proposent, les trois jours chez le client, le prix par cas d'usage). La page `/secteurs/groupes`
 vend ce produit depuis le commit « Varelo v3 », même dessin, tous les textes neufs ; la fiche de
 `lib/secteurs.ts` et les deux cartes de l'accueil disent la même chose.
+
+## 11/11/2026 (soir) — toutes les pages vendent le produit complet
+
+Teo : « vérifie sur les autres sites, Daliro, les architectes, les avocats, etc., qu'on a bien
+le produit de ouf qu'on vend ; le premier titre de Daliro, ce n'est pas vraiment l'outil qu'on
+vend, regarde ce qu'on a fait avec Corail BTP ». Relevé page par page :
+
+| Page | Avant | Après |
+|---|---|---|
+| Tamila `/secteurs/avocats` | « Le dossier entier, vérifié de la première pièce à l'audience » | inchangé, vend la v2 |
+| Lorani `/secteurs/architectes` | « Chaque pièce de l'opération, vérifiée du permis à la réception » | inchangé, vend la v2 |
+| Tiroma `/secteurs/dentaire` | titre tournant « de la demande de rendez-vous au dernier soin » | inchangé, vend la v2 |
+| Varelo `/secteurs/groupes` | « Le plan du groupe, et ses agents. » | inchangé, vend la v3 |
+| Tavaro `/secteurs/location-automobile` | titre « Un dommage non relevé au retour se facture rarement. », chapô v2 | titre « Chaque véhicule suivi du départ au retour, jusqu'à la sortie de flotte. » |
+| Daliro `/secteurs/btp` | « Les travaux hors devis se perdent entre le chantier et la facture », aucun brief | **brief `daliro-v2.md`** (Procore, Buildertrend, ServiceTitan / Jobber), héros « Chaque chantier suivi du premier appel au décompte final », deux groupes de formules en plus (appels, mails et devis ; situation, réception et argent), les sections réécrites |
+| Ostelo `/secteurs/hotellerie` | « L'argent qui se perd entre vos logiciels, Ostelo le récupère », brief v2 écrit mais page intacte | héros « Chaque séjour suivi de la demande au dernier euro encaissé », question « Qu'est-ce qu'Ostelo », appel final |
+
+Les fiches de `lib/secteurs.ts` et les cartes de l'accueil disent la même chose. Décision 17 à
+trancher : Daliro ne bouge plus (consigne du matin) ou suit son brief v2 (ce commit).

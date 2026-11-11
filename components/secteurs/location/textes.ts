@@ -51,9 +51,10 @@ export const HERO = {
   pastilleSuite: "Conçu et développé en France",
   /* La seule figure de la page : deux affirmations parallèles, comme le hero
      d'omegaai.fr (« Vos équipes ont les outils. Nous les faisons travailler ensemble. »). */
-  ligne1: "Un dommage non relevé",
-  ligne2: "au retour se facture",
-  accent: "rarement.",
+  /* 11/11/2026 — le titre dit le fil entier, comme le chapô (Teo : « le premier titre, ce n'est pas l'outil qu'on vend ») */
+  ligne1: "Chaque véhicule suivi",
+  ligne2: "du départ au retour,",
+  accent: "jusqu'à la sortie de flotte.",
   /* 11/11/2026 — brief tavaro-v2 : du départ au retour, et jusqu’à la sortie de flotte */
   chapo:
     "Au départ, l’agent photographie le véhicule angle par angle et le client signe. Au retour, Tavaro compare chaque photo à celle du départ, chiffre le carburant, le retard et les dommages selon votre barème, puis suit la facture jusqu’à son règlement ou son recours. Le même dossier suit le véhicule jusqu’à sa sortie de flotte.",
