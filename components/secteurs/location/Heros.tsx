@@ -26,6 +26,7 @@
    <Link> vers /reserver-un-audit, mêmes classes. « Voir les modules » reste
    une ancre de la page (#moteurs) : il ne déclenche rien, il fait défiler.
    ══════════════════════════════════════════════════════════════════════ */
+import { LIEN_AUDIT } from "@/components/espace2/portail";
 import Link from "next/link";
 import { ContainerScroll } from "./DefilementHeros";
 import { FondPapier } from "./FondPapier";
@@ -64,7 +65,7 @@ export function Hero() {
             </p>
             <div className="mb-[4px] flex w-full max-w-[22rem] flex-col items-stretch justify-center gap-3 sm:w-auto sm:max-w-none sm:flex-row md:mb-[8px]">
               <Link
-                href="/reserver-un-audit"
+                href={LIEN_AUDIT}
                 className="inline-flex min-h-[44px] items-center justify-center rounded-[6px] border border-black/10 bg-[#1E3A8A] px-[20px] py-[12px] text-center f-syne text-[14px]/[1.5] uppercase text-white transition-colors hover:bg-[#172A66]"
                 data-cta="hero-demo"
               >

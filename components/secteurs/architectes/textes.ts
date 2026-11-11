@@ -1,3 +1,5 @@
+import { LIEN_AUDIT } from "@/components/espace2/portail";
+
 /* ══════════════════════════════════════════════════════════════════════
    Lorani (agences d'architecture) — textes.ts
 
@@ -26,8 +28,8 @@
    modifiés en même temps. Aucun montant sur la page (règle maison).
    ══════════════════════════════════════════════════════════════════════ */
 export const CONTACT = {
-  audit: "/reserver-un-audit",
-  demo: "/reserver-un-audit",
+  audit: LIEN_AUDIT,
+  demo: LIEN_AUDIT,
 };
 export const HERO = {
   cercle: ["Le dossier vérifié", "Agences d'architecture", "Permis · DCE · Chantier · Réception"],

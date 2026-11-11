@@ -1,3 +1,5 @@
+import { LIEN_AUDIT } from "@/components/espace2/portail";
+
 /* ══════════════════════════════════════════════════════════════════════
    Tiroma (/secteurs/dentaire) — les petits outils partagés par la page.
    Recopiés SUR PLACE (règle des secteurs rapatriés : aucun import de
@@ -6,7 +8,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 /* Tous les boutons d'action de la page mènent ici (règle maison). */
-export const RESERVER = "/reserver-un-audit";
+export const RESERVER = LIEN_AUDIT;
 
 /* La photo qui tient lieu du fond de la référence (dashboard-bg.jpg, droits
    inconnus) : la salle de soins, Unsplash, créditée dans

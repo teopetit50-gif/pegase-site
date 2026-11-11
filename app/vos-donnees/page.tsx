@@ -335,7 +335,7 @@ const PIED_OMEGA = [
 ];
 const PIED = MARQUE_SITE ? PIED_SITE_DEDIE : PIED_OMEGA;
 /* l'appel à l'action de la page : /commencer n'existe pas sur un site dédié, l'audit le remplace */
-const CTA = MARQUE_SITE ? { href: "/reserver-un-audit", label: "Réserver un audit" } : { href: "/commencer", label: "Commencer" };
+const CTA = MARQUE_SITE ? { href: "/#audit", label: "Réserver un audit" } : { href: "/commencer", label: "Commencer" };
 
 /* ══ la page ══════════════════════════════════════════════════════════ */
 

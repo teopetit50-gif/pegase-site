@@ -1,3 +1,5 @@
+import { LIEN_AUDIT } from "@/components/espace2/portail";
+
 /* ══════════════════════════════════════════════════════════════════════
    Varelo — les textes de /secteurs/groupes, v3 (25/09/2026)
 
@@ -38,7 +40,7 @@
      des IA génératives ».
    ══════════════════════════════════════════════════════════════════════ */
 
-export const AUDIT = "/reserver-un-audit";
+export const AUDIT = LIEN_AUDIT;
 export const DONNEES = "/vos-donnees";
 export const COURRIEL = "contact@omegaai.fr";
 

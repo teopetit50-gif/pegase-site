@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PAGE_OFFRE, secteur } from "@/lib/secteurs";
 import { MARQUE_SITE } from "@/components/espace2/portail";
+import SectionAudit from "@/components/site-dedie/SectionAudit";
 import "./se-combine.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -24,8 +25,9 @@ import "./se-combine.css";
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function SeCombine({ slug }: { slug: string }) {
-  /* 10/11/2026 — sur un site dédié à un logiciel, pas de bloc qui vend les offres d'Omega (components/espace2/portail.ts) */
-  if (MARQUE_SITE) return null;
+  /* 10/11/2026 — sur un site dédié à un logiciel, pas de bloc qui vend les offres d'Omega : à sa place, la section
+     « Réserver un audit » de la page, où mènent tous les boutons (components/site-dedie/SectionAudit.tsx) */
+  if (MARQUE_SITE) return <SectionAudit />;
   const s = secteur(slug);
   if (!s) return null;
 

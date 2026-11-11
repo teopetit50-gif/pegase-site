@@ -1,3 +1,5 @@
+import { LIEN_AUDIT } from "@/components/espace2/portail";
+
 /* ══════════════════════════════════════════════════════════════════════
    Tamila (cabinets d'avocats) — textes.ts
 
@@ -47,7 +49,7 @@
    produit doit s'y conformer. */
 
 export const CONTACT = {
-  audit: "/reserver-un-audit",
+  audit: LIEN_AUDIT,
 };
 
 export const HERO = {

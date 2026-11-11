@@ -85,7 +85,7 @@ const BESOINS = [
      l'installation de l'application. */
   /* 10/11/2026 — pas de page /tarifs sur un site dédié à un logiciel : la réunion d'installation se demande par l'audit (components/espace2/portail.ts) */
   ...(MARQUE_SITE ? [] : [{ q: "Réserver ma réunion d'installation", href: "/tarifs", lien: "Les tarifs" }]),
-  { q: "Demander un audit pour mon entreprise", href: "/reserver-un-audit", lien: "Réserver un audit" },
+  { q: "Demander un audit pour mon entreprise", href: MARQUE_SITE ? "/#audit" : "/reserver-un-audit", lien: "Réserver un audit" },
   { q: "Savoir où vont mes données", href: "/vos-donnees", lien: "Vos données" },
 ];
 
@@ -184,7 +184,7 @@ export default function ContactPage() {
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               {MARQUE_SITE ? (
-                <Link href="/reserver-un-audit" className="r-btn r-btn--fil">
+                <Link href="/#audit" className="r-btn r-btn--fil">
                   Réserver un audit
                 </Link>
               ) : (

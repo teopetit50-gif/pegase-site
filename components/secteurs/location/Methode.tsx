@@ -30,6 +30,7 @@
    LIEN (règle 6) : « Réserver un audit » ouvrait la modale de la source ;
    c'est un <Link> vers /reserver-un-audit, mêmes classes, mêmes icônes.
    ══════════════════════════════════════════════════════════════════════ */
+import { LIEN_AUDIT } from "@/components/espace2/portail";
 import { useRef } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform, useMotionTemplate } from "framer-motion";
@@ -65,7 +66,7 @@ export function Methode() {
             <div className="DesignSprints_introCopy">
               <p className="DesignSprints_introBody text-[clamp(18px,1.5vw,20px)]/[1.5] font-normal">{METHODE.chapo}</p>
               <Link
-                href="/reserver-un-audit"
+                href={LIEN_AUDIT}
                 className="DesignSprints_contactButton inline-flex items-center justify-between gap-[12px] rounded-[6px] bg-[#1E3A8A] px-[20px] py-[12px] f-syne text-white transition-colors hover:bg-[#172A66]"
                 data-cta="methode-demo"
               >

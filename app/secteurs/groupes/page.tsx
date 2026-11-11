@@ -74,15 +74,22 @@ export default function PageGroupes() {
     <PageShell>
       <div className="p-groupes">
         <Heros />
-        <Enonce titre={ENONCE_0.titre} paragraphes={ENONCE_0.paragraphes} />
-        <Enonce
-          titre={ENONCE_1.titre}
-          paragraphes={ENONCE_1.paragraphes}
-          ecran={ENONCE_1.ecran}
-        />
-        <Survol />
-        <Carrousel />
-        <Accordeon />
+        {/* 10/11/2026 — les ancres de la barre du site dédié à Varelo (components/site-dedie/entetes/Varelo.tsx) */}
+        <div id="principe" className="scroll-mt-16">
+          <Enonce titre={ENONCE_0.titre} paragraphes={ENONCE_0.paragraphes} />
+          <Enonce
+            titre={ENONCE_1.titre}
+            paragraphes={ENONCE_1.paragraphes}
+            ecran={ENONCE_1.ecran}
+          />
+        </div>
+        <div id="produit" className="scroll-mt-16">
+          <Survol />
+          <Carrousel />
+        </div>
+        <div id="questions" className="scroll-mt-16">
+          <Accordeon />
+        </div>
         <Enonce
           titre={ENONCE_2.titre}
           paragraphes={ENONCE_2.paragraphes}

@@ -115,6 +115,8 @@ const PAGES_OMEGA = ["blog", "commencer", "espace3", "formation", "integrations"
 const REDIRECTIONS_SITE_DEDIE = SECTEUR_DU_SITE
   ? [
       { source: "/secteurs/:chemin*", destination: "/", permanent: false },
+      /* 10/11 — pas de page d'audit sur un site dédié : l'audit est la section #audit de l'accueil (components/site-dedie/SectionAudit.tsx) */
+      { source: "/reserver-un-audit", destination: "/#audit", permanent: false },
       ...PAGES_OMEGA.flatMap((p) => [
         { source: `/${p}`, destination: "/", permanent: false },
         { source: `/${p}/:chemin*`, destination: "/", permanent: false },

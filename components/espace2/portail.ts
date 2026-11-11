@@ -114,5 +114,7 @@ export const EDITEUR: string = MARQUE_SITE?.mot ?? "Omega";
 /** le titre d'onglet d'une page : « Titre | DALIRO » ou « Titre | Omega.AI » */
 export const titreSite = (titre: string): string =>
   MARQUE_SITE && titre.toLowerCase().startsWith(MARQUE_SITE.mot.toLowerCase()) ? titre : `${titre} | ${NOM_SITE}`;
+/** où mène « Réserver un audit » : sur un site dédié, la section #audit de la page (components/site-dedie/SectionAudit.tsx) ; sinon la page d'Omega */
+export const LIEN_AUDIT: string = MARQUE_SITE ? "/#audit" : "/reserver-un-audit";
 /** sur un site dédié, retire la phrase « Conçu par Omega pour … » d'une description */
 export const sansOmega = (texte: string): string => (MARQUE_SITE ? texte.replace(/\s*Conçu par Omega[^.]*\./u, "").trim() : texte);

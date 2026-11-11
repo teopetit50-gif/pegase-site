@@ -10,7 +10,8 @@ import { MARQUE_SITE } from "@/components/espace2/portail";
    existe sur ce site : réserver un audit, le service client, les données.
    ══════════════════════════════════════════════════════════════════════ */
 const LIENS: { label: string; href: string }[] = [
-  { label: "Réserver un audit", href: "/reserver-un-audit" },
+  /* 10/11/2026 — l'audit est une section de la page d'accueil (SectionAudit.tsx), pas une page */
+  { label: "Réserver un audit", href: "/#audit" },
   { label: "Service client", href: "/contact" },
   { label: "Où vont vos données", href: "/vos-donnees" },
 ];

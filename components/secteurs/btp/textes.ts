@@ -1,4 +1,4 @@
-import { MARQUE_SITE } from "@/components/espace2/portail";
+import { LIEN_AUDIT, MARQUE_SITE } from "@/components/espace2/portail";
 
 /* ══════════════════════════════════════════════════════════════════════
    Daliro (BTP) — les textes de la page /secteurs/btp
@@ -29,8 +29,8 @@ import { MARQUE_SITE } from "@/components/espace2/portail";
    ══════════════════════════════════════════════════════════════════════ */
 export const MARQUE = "Daliro";
 export const CONTACT = {
-  audit: "/reserver-un-audit",
-  demo: "/reserver-un-audit",
+  audit: LIEN_AUDIT,
+  demo: LIEN_AUDIT,
 };
 
 export const HERO = {
