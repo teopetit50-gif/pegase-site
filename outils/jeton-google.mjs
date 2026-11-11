@@ -14,7 +14,8 @@
    AVANT DE LE LANCER, dans console.cloud.google.com, avec le compte
    Google d'Omega :
    1. un projet (n'importe lequel) ;
-   2. « API et services » → activer l'API Google Calendar ;
+   2. « API et services » → activer l'API Google Calendar et l'API Gmail
+      (la boîte de Mon espace, 11/11/2026) ;
    3. « Écran de consentement OAuth » → externe → et le PUBLIER
       (« En production »). Laissé en « Test », Google fait expirer le
       jeton au bout de SEPT JOURS et les liens s'arrêtent tout seuls un
@@ -38,7 +39,11 @@ if (!CLIENT_ID || !CLIENT_SECRET) {
 
 const PORT = 53682;
 const REDIRECT = `http://127.0.0.1:${PORT}`;
-const SCOPE = "https://www.googleapis.com/auth/calendar.events";
+/* 11/11/2026 — Mon espace (/espace2/teo) lit aussi l'agenda et la boîte
+   Gmail de Teo avec ce même jeton : la portée gmail.modify (lire, répondre,
+   marquer lu ; jamais supprimer) s'ajoute à celle de l'agenda. Dans la
+   console Google Cloud, activer aussi l'API Gmail avant de relancer. */
+const SCOPE = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/gmail.modify"].join(" ");
 
 const autorisation =
   "https://accounts.google.com/o/oauth2/v2/auth?" +
