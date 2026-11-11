@@ -43,10 +43,7 @@ const COLONNES: { titre: string; liens: { label: string; href: string; neuf?: bo
       { label: "Hébergement et droit applicable", href: "/#souverainete" },
     ],
   },
-  {
-    titre: "Compte",
-    liens: [{ label: "Connexion", href: "/espace2/tamila" }],
-  },
+  /* 11/11 — la colonne « Compte » (Connexion vers l'espace client) est partie : Teo, « Connexion, ça disparaît aussi » */
 ];
 
 const LIEN = "inline-block text-sm text-[#524f49] transition-colors duration-200 hover:text-[#0f0e0d]";
@@ -75,7 +72,7 @@ export default function PiedTamila() {
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-[#524f49]">{HERO.annonce}.</p>
           </div>
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 sm:gap-6 md:col-span-8 md:gap-8 lg:gap-12">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 sm:gap-6 md:col-span-8 md:gap-8 lg:gap-12">
             {COLONNES.map((c) => (
               <div key={c.titre} className="flex flex-col gap-4">
                 <h3 className="text-xs font-medium uppercase tracking-wider text-[#0f0e0d]">{c.titre}</h3>
