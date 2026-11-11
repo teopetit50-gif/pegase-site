@@ -8,6 +8,11 @@
 # script avant de construire ; sortie 0 = construction IGNORÉE, sortie 1 =
 # construire. Réglage par projet : `bash outils/vercel-ignore.sh <cle>`.
 #
+# 11/11 au soir — Vercel ne construit plus rien tout seul (vercel.json,
+# git.deploymentEnabled.main = false) : ce script sert désormais à
+# outils/a-deployer.sh et à l'action GitHub pour décider quels projets
+# déployer par l'API. Il reste posé en « Ignored Build Step » au cas où.
+#
 # Règle : un site dédié ne se reconstruit pas quand les commits poussés ne
 # touchent que les pages des AUTRES métiers, la vitrine Omega (offres,
 # accueil, modèles, blog…), les briefs ou les outils. Tout le reste
@@ -29,10 +34,11 @@ IFS='|' read -r MOI_COMP MOI_APP MOI_PUB <<<"$MOI"
 
 # les commits à examiner : depuis le dernier déploiement réussi, sinon le dernier commit
 AVANT="${VERCEL_GIT_PREVIOUS_SHA:-}"
+APRES="${VERCEL_GIT_COMMIT_SHA:-HEAD}"
 if [ -n "$AVANT" ] && git cat-file -e "$AVANT^{commit}" 2>/dev/null; then
-  FICHIERS=$(git diff --name-only "$AVANT" HEAD 2>/dev/null)
+  FICHIERS=$(git diff --name-only "$AVANT" "$APRES" 2>/dev/null)
 else
-  FICHIERS=$(git diff --name-only HEAD^ HEAD 2>/dev/null)
+  FICHIERS=$(git diff --name-only "$APRES^" "$APRES" 2>/dev/null)
 fi
 if [ -z "$FICHIERS" ]; then echo "diff illisible → construction"; exit 1; fi
 

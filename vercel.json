@@ -24,7 +24,8 @@
       "worker-c5": false,
       "claude/**": false,
       "reseau-espace2/**": false,
-      "refonte-metiers/**": false
+      "refonte-metiers/**": false,
+      "main": false
     }
   }
 }

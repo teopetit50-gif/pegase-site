@@ -79,22 +79,26 @@ commits, dont vingt-sept annulés). Les « deployment policies » qui
 permettraient de couper la source Git projet par projet sont réservées au
 plan Pro (réponse de l'API : `pro_plan_required`).
 
-Ce qui est en place :
+Teo (11/11, soir) : « fais tout tout seul, je n'ai pas envie de faire à la
+main ». Donc rien à déconnecter, rien à poser. Ce qui est en place :
 
-1. **Les six projets à déconnecter de GitHub** (Vercel › projet ›
-   Settings › Git › « Disconnect », six fois, par Teo : l'API ne le permet
-   pas sur le plan gratuit). Ensuite seul `pegase-site2` (omegaai.fr) se
-   déploie à chaque push. Fait le 11/11 par l'API : les aperçus
-   (« preview deployments ») des six projets sont désactivés.
-2. **L'action GitHub `.github/workflows/sites-dedies.yml`** déploie un site
-   dédié quand un commit du push le touche (règle de `vercel-ignore.sh`),
-   par la CLI Vercel avec l'identifiant du projet : la construction se fait
-   chez Vercel, avec les variables du projet, sans lien Git. Les sites se
-   déploient un par un (`max-parallel: 1`, un seul build à la fois sur le
-   plan gratuit).
-3. **Le secret GitHub `VERCEL_TOKEN`** (Settings › Secrets and variables ›
-   Actions), jeton créé sur vercel.com/account/settings/tokens pour l'équipe
-   `teo18`. Sans lui, l'action échoue en le disant.
+1. **Vercel n'écoute plus les pushs** : `vercel.json` porte
+   `git.deploymentEnabled.main = false`, ce qui vaut pour les sept projets
+   reliés au dépôt. Les aperçus des six sites dédiés sont désactivés par
+   l'API. Plus aucun déploiement ne naît d'un push.
+2. **La session qui pousse crée les déploiements par l'API** (outil Vercel
+   `create_deployment`, autorisé sur le plan gratuit) : `pegase-site2`
+   toujours, et chaque site dédié seulement s'il est touché.
+   `outils/a-deployer.sh <sha servi>` donne la liste ; la règle est celle de
+   `outils/vercel-ignore.sh`. Séquence complète dans CLAUDE.md.
+3. **Une tâche planifiée** (« Vercel : rattraper les déploiements en
+   retard », chaque heure, session neuve) compare le dernier commit de
+   `main` à ce que sert chaque projet et déploie ce qui manque. Elle
+   rattrape les pushs faits sans session et les plafonds du jour.
+4. **L'action GitHub `.github/workflows/sites-dedies.yml`** ferait la même
+   chose sans session si le secret `VERCEL_TOKEN` existait ; sans lui, elle
+   ne fait rien et le dit. Elle reste là pour le jour où on veut s'en
+   servir.
 
 Identifiants des projets (équipe `team_i1M2yUINJBwJA66d6L9i62OF`) :
 
@@ -110,6 +114,8 @@ Identifiants des projets (équipe `team_i1M2yUINJBwJA66d6L9i62OF`) :
 
 Budget attendu : un déploiement par push (omegaai.fr) plus un par site
 dédié réellement touché, soit vingt à trente par jour chargé au lieu de
-cent. L'autre voie, plus simple mais payante : le plan Pro de Vercel, qui
-lève le plafond et permet de couper la source Git des six projets sans
-les déconnecter.
+cent. Le prix : omegaai.fr n'est plus en ligne quarante-cinq secondes
+après le push, mais après le déploiement créé par la session (ou, au plus
+tard, par la tâche planifiée dans l'heure). L'autre voie, payante : le
+plan Pro de Vercel, qui lève le plafond ; `deploymentEnabled.main` repasse
+alors à `true` et tout redevient automatique côté Vercel.

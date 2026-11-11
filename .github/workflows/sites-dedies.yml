@@ -10,24 +10,22 @@
 # s'arrête. Plusieurs sessions poussent en parallèle : c'est arrivé deux
 # fois le même jour.
 #
-# LE REMÈDE. Les six projets de sites dédiés ne sont PLUS reliés à GitHub
-# (Teo, Vercel › projet › Settings › Git › Disconnect). Seul omegaai.fr
-# (pegase-site2) se déploie encore tout seul à chaque push : un
-# déploiement par push. Les sites dédiés, c'est cette action qui les
-# déploie, et seulement ceux qu'un commit du push touche vraiment (même
-# règle que outils/vercel-ignore.sh : leur page, leur barre, lib/,
-# portail, layout, logos, dépendances). Le déploiement part par la CLI
-# Vercel avec l'identifiant du projet : aucun lien Git n'est nécessaire,
-# la construction se fait chez Vercel avec les variables du projet
-# (NEXT_PUBLIC_PORTAIL).
-#
-# À POSER UNE FOIS dans GitHub (Settings › Secrets and variables › Actions) :
-# VERCEL_TOKEN, un jeton créé sur vercel.com/account/settings/tokens pour
-# l'équipe teo18. Tant qu'il manque, l'action échoue en le disant, et une
-# session déploie le site à la main (outil Vercel create_deployment, ou
-# « Redeploy » dans le tableau de bord).
+# LE REMÈDE. Vercel ne déploie plus rien tout seul sur un push
+# (vercel.json : git.deploymentEnabled.main = false, pour les sept projets).
+# Les déploiements sont créés par l'API : omegaai.fr (pegase-site2) à
+# chaque push, et chaque site dédié seulement quand un commit du push le
+# touche (règle de outils/vercel-ignore.sh, listée par outils/a-deployer.sh).
+# Qui les crée : la session qui a poussé (outil Vercel create_deployment,
+# règle de CLAUDE.md), et une tâche planifiée qui vérifie chaque heure que
+# rien n'est en retard. Cette action est la troisième voie, la seule qui
+# ne dépende d'aucune session : elle déploie par la CLI Vercel avec
+# l'identifiant du projet (construction chez Vercel, variables du projet).
+# Elle n'a besoin que d'un secret GitHub, VERCEL_TOKEN (jeton créé sur
+# vercel.com › Account › Settings › Tokens, équipe teo18). Tant qu'il
+# manque, elle ne fait rien et le dit, sans échouer : les deux autres
+# voies suffisent.
 # ══════════════════════════════════════════════════════════════════════
-name: Sites dédiés
+name: Déploiements Vercel
 
 on:
   push:
@@ -48,6 +46,8 @@ jobs:
       max-parallel: 1
       matrix:
         include:
+          - site: pegase-site2
+            projet: prj_fbQJSkiLGbPrJOhFWD4bIPRENutY
           - site: daliro
             projet: prj_Pjssj7PKpbpY5uJ9NGb4oycaFHPh
           - site: lorani
@@ -71,28 +71,32 @@ jobs:
           AVANT: ${{ github.event.before }}
         run: |
           set +e
-          VERCEL_GIT_PREVIOUS_SHA="$AVANT" bash outils/vercel-ignore.sh "${{ matrix.site }}"
-          code=$?
+          if [ "${{ matrix.site }}" = "pegase-site2" ]; then code=1; else
+            VERCEL_GIT_PREVIOUS_SHA="$AVANT" bash outils/vercel-ignore.sh "${{ matrix.site }}"; code=$?
+          fi
           set -e
           if [ "$code" = "1" ]; then echo "deployer=oui" >> "$GITHUB_OUTPUT"; else echo "deployer=non" >> "$GITHUB_OUTPUT"; fi
 
-      - name: Vérifier le secret
+      - name: Le secret VERCEL_TOKEN est-il posé ?
+        id: jeton
         if: steps.touche.outputs.deployer == 'oui'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
           if [ -z "$VERCEL_TOKEN" ]; then
-            echo "::error::Le secret VERCEL_TOKEN manque : ${{ matrix.site }} n'est pas déployé. Le poser dans Settings › Secrets › Actions, ou déployer ce site à la main depuis Vercel."
-            exit 1
+            echo "::warning::Pas de secret VERCEL_TOKEN : ${{ matrix.site }} sera déployé par la session qui a poussé ou par la tâche planifiée, pas par cette action."
+            echo "present=non" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=oui" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/setup-node@v4
-        if: steps.touche.outputs.deployer == 'oui'
+        if: steps.touche.outputs.deployer == 'oui' && steps.jeton.outputs.present == 'oui'
         with:
           node-version: 22
 
       - name: Déployer ${{ matrix.site }} sur Vercel (construction chez Vercel)
-        if: steps.touche.outputs.deployer == 'oui'
+        if: steps.touche.outputs.deployer == 'oui' && steps.jeton.outputs.present == 'oui'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: team_i1M2yUINJBwJA66d6L9i62OF
