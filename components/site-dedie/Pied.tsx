@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MARQUE_SITE } from "@/components/espace2/portail";
+import PiedTamila from "./pieds/Tamila";
 
 /* ══════════════════════════════════════════════════════════════════════
    Le pied d'un site dédié à un logiciel (10/11/2026)
@@ -14,9 +15,16 @@ import { MARQUE_SITE } from "@/components/espace2/portail";
    n'existent pas sur un site dédié (next.config.ts les renvoie à l'accueil). */
 const LIENS: { label: string; href: string }[] = [{ label: "Réserver un audit", href: "/#audit" }];
 
+/* 11/11/2026 — Tamila a son propre pied, celui du modèle Radius dont sa page
+   est le décalque (pieds/Tamila.tsx), comme sa barre (entetes/Tamila.tsx).
+   Les autres sites gardent le pied commun ci-dessous. */
+const PIEDS: Partial<Record<NonNullable<typeof MARQUE_SITE>["cle"], React.ComponentType>> = { tamila: PiedTamila };
+
 export default function Pied() {
   const marque = MARQUE_SITE;
   if (!marque) return null;
+  const Propre = PIEDS[marque.cle];
+  if (Propre) return <Propre />;
   return (
     <footer className="mx-[calc(50%-50vw)] border-t border-neutral-200 bg-white">
       <div className="mx-auto flex max-w-[1440px] flex-col gap-4 px-6 py-10 text-[13px] sm:flex-row sm:items-center sm:justify-between sm:px-10">
