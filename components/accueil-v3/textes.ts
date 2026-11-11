@@ -257,7 +257,7 @@ export const METIERS = [
   {
     nom: "Varelo",
     metier: "Grands groupes",
-    texte: "Toutes les sociétés du groupe travaillent avec la même IA, sur un seul référentiel.",
+    texte: "Le plan de tout le groupe, et des agents qui proposent une action que vous validez.",
     href: "/secteurs/groupes",
     image: "/accueil/varelo-clair.webp",
     pastille: "Lecture seule",
@@ -333,7 +333,7 @@ export const SITUATIONS = [
   },
   {
     texte:
-      "Toutes les sociétés du groupe lues par la même IA, en lecture seule. La direction reçoit chaque matin une page qui dit ce qui demande une décision.",
+      "Le plan de tout le groupe, une fiche par société, client, fournisseur et contrat, rempli en lecture seule. Des agents le lisent et proposent une action ; la direction décide.",
     nom: "Varelo",
     role: "Logiciel métier · grands groupes",
     logo: "/logos/varelo-mark.png",

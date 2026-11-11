@@ -52,7 +52,7 @@ const ACCUEIL: Record<string, { probleme: string; photo: string; cadrage?: strin
     photo: "/secteurs-dentaire/photos/praticien-au-fauteuil.jpg",
   },
   groupes: {
-    probleme: "Chaque équipe du groupe utilise sa propre IA.",
+    probleme: "Le même client porte trois noms dans trois sociétés.",
     photo: "/secteurs-groupes/carte-direction.jpg",
   },
 };

@@ -1,43 +1,42 @@
 import { LIEN_AUDIT } from "@/components/espace2/portail";
 
 /* ══════════════════════════════════════════════════════════════════════
-   Varelo — les textes de /secteurs/groupes, v3 (25/09/2026)
+   Varelo — les textes de /secteurs/groupes, v4 (11/11/2026)
 
    Un emplacement par emplacement de la référence (payload-marketing-v1
-   .21st.app), au même budget de signes. Le positionnement et les textes
-   viennent de la session « Namolu branding et positionnement » (25/09) :
-   Varelo est le point du matin de TOUT un groupe à plusieurs sociétés —
-   une quarantaine de sociétés, six pôles, cinq territoires.
+   .21st.app), au même budget de signes. Le dessin de la page (v3 du
+   25/09, décalque 1:1 de la référence passé en blanc) ne bouge pas ;
+   tous les textes sont neufs.
+
+   11/11/2026 — brief varelo-v3 (docs/briefs-saas/varelo-v3.md). Teo : « je
+   ne veux pas que tu te bases sur ce qu'on propose ; dis-moi ce qu'eux
+   font aux US et qu'on reproduise la même chose ». Le produit reproduit le
+   modèle de Palantir Foundry à l'échelle d'une ETI française : LE PLAN DU
+   GROUPE (leur ontologie : une fiche par société, client, fournisseur,
+   contrat, site, salarié, article, et les liens entre fiches), rempli en
+   lecture seule depuis les logiciels en place, LES ACTIONS possibles sur
+   chaque fiche (leurs action types, avec qui peut, ce que ça change, le
+   journal), LES AGENTS qui lisent le plan et PROPOSENT une action qu'une
+   personne valide (leur proposal pattern), et la vente en TROIS JOURS sur
+   les vraies données (leur bootcamp), facturée par cas d'usage. La marque
+   Palantir n'est jamais citée sur la page : on décrit le modèle.
 
    Règles maison tenues ici :
-   • aucun groupe nommé, aucun gain en %, aucun prix ;
-   • pas de témoignage : leurs « Editable demo testimonial » signés
-     « Example person » deviennent des SITUATIONS TYPES, sans personne ;
+   • aucun groupe nommé, aucun gain en %, aucun prix, aucun chiffre ;
+   • pas de témoignage : des SITUATIONS TYPES, sans personne ;
    • les écrans sont des données d'exemple, et la légende le dit ;
    • jamais prix, marges ni « vie chère », ni IA qui répond aux clients,
-     ni tri des candidatures (les mines du positionnement).
+     ni tri des candidatures (les mines du positionnement) ;
+   • aucune écriture dans les logiciels sources, aucun agent qui agit
+     sans validation : c'est écrit tel quel.
 
-   Les écrans (`ecran`) sont fabriqués en HTML sur des données d'exemple
-   puis photographiés : outils/ecrans-varelo/. Leurs rapports
-   largeur/hauteur sont ceux des images de la référence, un pour un.
-
-   26/09/2026 — l'accent passe sur la CENTRALISATION de l'IA. Teo : « on n'a
-   pas assez de texte qui explique ce que ça permet à un groupe genre SAFO
-   de faire ; la plupart des gros groupes ne centralisent pas leur IA, c'est
-   ça le problème, chacun utilise la sienne ». La matière vient du call avec
-   la DSI de ce groupe (25/08) : une IA générative partout, une autre en
-   logistique, rien de centralisé, une nomenclature par entité, des
-   logiciels achetés hors DSI. D'où un bloc de plus, le constat (ENONCE_0),
-   et des textes allongés dans les autres : ce que le socle fait, puis ce
-   qui reste à chaque direction.
-   Chiffres publics du constat (doctrine des textes, décision 1) :
-   • 78 % — Microsoft et LinkedIn, 2024 Work Trend Index, publié le
-     08/05/2024 (31 000 personnes, 31 pays) : « 78% of AI users are
-     bringing their own AI tools to work ».
-   • 9 % — Ifop pour Talan, baromètre « Les Français et les IA
-     génératives », vague 3, 2025 : « seuls 9 % des répondants travaillant
-     en entreprise indiquent que leur organisation leur a mis à disposition
-     des IA génératives ».
+   Les écrans (`ecran`) : deux vraies captures de /espace2/varelo (thème
+   clair, données d'exemple) et les écrans peints en HTML dans
+   outils/ecrans-varelo/. Leurs rapports largeur/hauteur sont ceux des
+   images de la référence, un pour un. Les mêmes images servent : ce
+   qu'elles montrent (le groupe, le référentiel, les contrats, les
+   réserves, les reportings, la lecture seule, la validation, l'Europe)
+   est exactement ce que le plan et ses agents vendent.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const AUDIT = LIEN_AUDIT;
@@ -58,69 +57,66 @@ const E = (nom: string, l: number, h: number, alt: string): Ecran => ({
 
 /* ── 1. héros ──────────────────────────────────────────────────────── */
 export const HEROS = {
-  titre: "Une seule IA pour tout le groupe.",
+  titre: "Le plan du groupe, et ses agents.",
   chapo:
-    "Varelo branche la même IA sur les logiciels, les tableurs et les dossiers de chaque société, sur chaque territoire, en lecture seule, et les range sous un seul référentiel. Chaque matin, elle dit à chaque direction ce qu'elle doit décider, avec le calcul et la pièce, et montre le groupe à la présidence sur une page rapprochée des comptes de chaque société.",
+    "Varelo dessine le plan de votre groupe : une fiche par société, par client, par fournisseur, par contrat, par site, et les liens entre elles. Le plan se remplit tout seul, en lecture seule, depuis les logiciels, les tableurs et les dossiers de chaque société. Des agents le lisent en continu et proposent une action ; la personne responsable décide. En trois jours sur vos vraies données, un premier cas d'usage tourne.",
   bouton: "Réserver un audit",
   legende:
-    "Le point du matin d'une direction financière, sur des données d'exemple.",
+    "Le plan d'un groupe et ses sociétés, sur des données d'exemple.",
   /* leur 3.0-homepage-live-preview-hero.png (3200 × 1915) et config.webp
-     (3200 × 1973) */
-  /* 11/11/2026 — Teo : « montre des captures du dashboard client à la place des faux écrans ».
-     Deux vraies captures de VARELO (/espace2/varelo et /espace2/varelo/finance, thème clair,
-     données d'exemple, 2880 × 1800) remplacent les écrans fabriqués. */
+     (3200 × 1973) ; deux vraies captures de /espace2/varelo (thème clair,
+     données d'exemple, 2880 × 1800) */
   ecrans: [
     {
       src: "/secteurs-groupes/ecrans/dashboard-groupe.png",
       l: 2880,
       h: 1800,
-      alt: "La vue d'ensemble de Varelo : le groupe sur une page, société par société, avec les décisions du matin de chaque direction.",
+      alt: "La vue d'ensemble de Varelo : le groupe sur une page, société par société, avec les propositions des agents pour chaque direction.",
     },
     {
-      src: "/secteurs-groupes/ecrans/dashboard-finance.png",
+      src: "/secteurs-groupes/ecrans/dashboard-referentiel.png",
       l: 2880,
       h: 1800,
-      alt: "La page Finance de Varelo : les encours, les échéances et les pièces à réclamer, pour toutes les sociétés du groupe.",
+      alt: "Le plan du groupe dans Varelo : les codes de chaque société rangés sous une seule fiche de client, de fournisseur ou d'article.",
     },
   ] as const,
 };
 
-/* ── 1 bis. le constat (26/09) ─────────────────────────────────────────
-   Un bloc `statement` de plus, sans écran, entre le héros et le collage :
-   le problème que Varelo règle, dit au niveau du marché (les deux
-   chiffres sourcés en tête de fichier), jamais comme un reproche fait au
-   lecteur. */
+/* ── 1 bis. le constat ──────────────────────────────────────────────────
+   Un bloc `statement` sans écran, entre le héros et l'énoncé : le
+   problème que le plan règle, dit comme une situation, jamais comme un
+   reproche fait au lecteur. Aucun chiffre : la doctrine des textes
+   n'en admet aucun sans source datée, et le constat n'en a pas besoin. */
 export const ENONCE_0 = {
-  titre: "Chaque équipe a sa propre IA.",
+  titre: "Le même client porte trois noms dans trois sociétés.",
   paragraphes: [
-    "Dans la plupart des groupes, l'IA est entrée par les équipes : la finance utilise un assistant, la logistique en teste un autre, une filiale a pris le sien.",
-    "D'après Microsoft et LinkedIn, 78 % des salariés qui se servent de l'IA au travail y viennent avec leurs propres outils. En France, 9 % seulement des salariés disent que leur entreprise leur a mis une IA à disposition.",
-    "Chaque outil lit alors les fichiers qu'on lui confie, avec la nomenclature de la société qui les a exportés. Les réponses changent d'une filiale à l'autre, et les données du groupe se dispersent entre autant d'outils qu'il y a d'équipes.",
+    "Dans un groupe, chaque société a ses logiciels, ses tableurs et ses propres noms pour les mêmes choses. Le client de la première s'appelle autrement dans la deuxième ; le fournisseur de la troisième a un autre code dans la quatrième.",
+    "Alors une question simple, « combien ce client nous doit-il dans tout le groupe », demande une semaine, trois exports et un tableur. Et une règle qui existe ici, un préavis de contrat, un délai de réserve, n'existe pas là.",
+    "Les logiciels en place ne le régleront pas : chacun tient sa société. Il manque le plan d'ensemble, celui qui relie les fiches des quarante sociétés et les regarde comme un seul groupe.",
   ],
 };
 
 /* ── 2. énoncé 1 (leur « Code-first for developers. ») ─────────────── */
 export const ENONCE_1 = {
-  titre: "Une page pour la présidence.\nUne liste par direction.",
-  /* 26/09 — la réponse au constat, avant le collage : le socle commun,
-     les règles écrites une fois, puis ce que chacun reçoit. */
+  titre: "Le plan, les sources,\nles actions, les agents.",
+  /* les quatre pièces du produit, dans l'ordre où la DSI les vérifie */
   paragraphes: [
-    "Varelo réunit ces usages sur un seul socle, en quatre étapes que la DSI peut vérifier une à une. La source d'abord : chaque logiciel, tableur ou dossier est branché en lecture seule, avec ce qui est lu, par qui et depuis quand.",
-    "Le référentiel ensuite : chaque client, fournisseur, article ou contrat reçoit un seul nom pour tout le groupe, et chaque rapprochement entre deux codes est proposé, puis validé ou refusé par une personne, à une date. Puis la règle : un délai de réserve, un préavis de contrat, une pièce à réclamer ou un seuil d'encours s'écrit une fois, avec son auteur et son périmètre, et s'applique dans chaque filiale.",
-    "La décision enfin : chaque matin, chaque direction reçoit ce qu'elle doit décider avec le calcul et la pièce, et la présidence lit le groupe sur une page dont chaque chiffre se rapproche des comptes de sa société, intra-groupe signalés.",
+    "Le plan d'abord. Une fiche par société, par client, par fournisseur, par contrat, par site, par salarié, par article, avec ses faits et ses liens : ce client appartient à cette société, ce contrat lie ce fournisseur à ces trois sociétés. Les codes de chaque logiciel sont rattachés à la fiche. Quand deux codes désignent la même chose, Varelo propose de les réunir, et une personne confirme.",
+    "Les sources ensuite. Chaque logiciel de gestion, chaque caisse, chaque tableur, chaque dossier est branché en lecture seule, avec ce qui est lu, par qui et depuis quand. Personne ne ressaisit rien, et rien n'est jamais écrit dans vos logiciels. Puis les actions : sur une fiche de contrat, on peut le dénoncer ; sur une livraison, émettre une réserve ; sur un client, relancer. Chaque action dit qui a le droit, ce qu'elle change, et s'inscrit au journal.",
+    "Les agents enfin. Ils lisent le plan en continu et proposent une action, avec la fiche, le calcul et la pièce : la lettre de dénonciation prête, la réserve rédigée, la relance préparée. La personne responsable accepte, corrige ou refuse. Un agent ne fait jamais rien seul.",
   ],
-  /* 11/11/2026 — le collage fabriqué est remplacé par la vraie page Référentiel de Varelo (/espace2/varelo/referentiel) */
+  /* la vraie page Référentiel de Varelo (/espace2/varelo/referentiel) : c'est le plan */
   ecran: {
     src: "/secteurs-groupes/ecrans/dashboard-referentiel.png",
     l: 2880,
     h: 1800,
-    alt: "Le référentiel de Varelo : les codes de chaque société rangés sous un seul nom de client, de fournisseur ou d'article.",
+    alt: "Le plan du groupe : les codes de chaque société rangés sous une seule fiche de client, de fournisseur ou d'article, avec les rapprochements proposés et validés.",
   },
 };
 
 /* ── 3. survol (leur hoverHighlights) ──────────────────────────────── */
 export const SURVOL = {
-  avant: "Chaque matin à 7 h, chaque direction reçoit :",
+  avant: "Quatre cas d'usage, prêts à tourner en trois jours :",
   lien: "En parler",
   bouton: "Réserver un audit",
   /* bas = l'image dans le flux ; dessus = la vignette posée par-dessus
@@ -129,12 +125,12 @@ export const SURVOL = {
      1800 × 1500 dessous, 1800 × 1518 dessus ; hh-dam 1800 × 1440. */
   entrees: [
     {
-      texte: "Le groupe sur une page, rapproché des comptes",
+      texte: "Le groupe sur une page",
       bas: E(
         "survol-groupe",
         1800,
         1440,
-        "La page du groupe : ventes, trésorerie et écarts de chaque société, sur une seule page, chaque chiffre rapproché des comptes de sa société.",
+        "Les fiches de société réunies sur une page : ventes, trésorerie et écarts de chaque société, chaque chiffre rattaché au chiffre de la société d'où il vient.",
       ),
       dessus: null,
     },
@@ -144,13 +140,13 @@ export const SURVOL = {
         "survol-contrats",
         1800,
         1586,
-        "Les contrats du groupe à reconduction tacite, chacun avec sa date limite de dénonciation.",
+        "Les fiches de contrat à reconduction tacite du groupe, chacune avec sa date limite de dénonciation calculée par l'agent.",
       ),
       dessus: E(
         "survol-contrats-fiche",
         1800,
         1586,
-        "La fiche d'un contrat : société, échéance, préavis et date limite pour le dénoncer.",
+        "La fiche d'un contrat : société, échéance, préavis, date limite, et la lettre de dénonciation proposée.",
       ),
     },
     {
@@ -159,13 +155,13 @@ export const SURVOL = {
         "survol-reserves",
         1800,
         1500,
-        "Une livraison reçue avec avarie : le transport, les colis et les photos du constat.",
+        "La fiche d'une livraison reçue avec avarie : le transport, les colis et les photos du constat.",
       ),
       dessus: E(
         "survol-reserves-delai",
         1800,
         1518,
-        "Le compte à rebours de la réserve : trois jours pour l'adresser au transporteur.",
+        "Le compte à rebours de l'agent : trois jours pour adresser la réserve au transporteur, la réserve rédigée en attente de validation.",
       ),
     },
     {
@@ -174,7 +170,7 @@ export const SURVOL = {
         "survol-reportings",
         1800,
         1440,
-        "Les reportings attendus par chaque marque, rangés par échéance.",
+        "Ce que chaque société doit à ses marques, ses banques et ses réseaux, rangé par échéance, avec la pièce.",
       ),
       dessus: null,
     },
@@ -187,69 +183,66 @@ export const CARROUSEL = {
   etiquette: "Situation type",
   lien: "En parler",
   /* chaque carte : la situation, qui la vit (leur « author ») et, en gris,
-     ce que Varelo lui envoie (leur « role ») */
+     ce que le plan et ses agents lui apportent (leur « role ») */
   cartes: [
-    /* 26/09 — la situation de la DSI ouvre le carrousel : c'est celle
-       du constat (ENONCE_0), dite par qui la vit. */
     {
       citation:
-        "Chaque filiale a pris son propre assistant d'IA, et les données du groupe circulent dans des outils que la DSI n'a pas choisis.",
-      role: "Direction des systèmes d'information",
-      liste: "Une seule IA pour le groupe",
+        "Le même client porte trois noms dans trois sociétés, et personne ne sait ce qu'il nous doit en tout.",
+      role: "Direction financière",
+      liste: "Une seule fiche, tous les codes",
     },
     {
       citation:
-        "Chaque société envoie son reporting à sa façon, et le chiffre du groupe arrive en retard.",
+        "Chaque société envoie son reporting à sa façon, et le chiffre du groupe arrive avec un mois de retard.",
       role: "Présidence du groupe",
       liste: "Le groupe sur une page",
     },
     {
       citation:
-        "Le contrat se renouvelle seul si personne ne le dénonce, et sa date est ailleurs.",
+        "Le contrat se renouvelle seul si personne ne le dénonce, et sa date est dans un tableur que personne n'ouvre.",
       role: "Direction juridique",
-      liste: "Les contrats à dénoncer",
+      liste: "L'agent compte le préavis, la lettre est prête",
     },
     {
       citation:
         "Sans réserve envoyée au transporteur sous trois jours, l'avarie devient une perte.",
       role: "Direction des opérations",
-      liste: "Les réserves à émettre",
+      liste: "L'agent rédige la réserve, vous validez",
     },
     {
       citation:
-        "Le même client porte trois noms dans trois sociétés, et personne ne voit son encours.",
-      role: "Direction financière",
-      liste: "Un seul référentiel",
+        "Les équipes ont pris chacune leur assistant d'IA, et aucun ne connaît les sociétés du groupe.",
+      role: "Direction des systèmes d'information",
+      liste: "Un plan que vos assistants peuvent lire",
     },
     {
       citation:
-        "Chaque territoire suit ses dossiers à sa façon, et le siège ne voit pas lesquels attendent encore une pièce.",
+        "Le préavis se compte à trois mois dans une société et à six dans l'autre, et personne ne sait qui a décidé quoi.",
       role: "Direction générale",
-      liste: "Les dossiers en attente",
+      liste: "Une action, une règle, un journal",
     },
     {
       citation:
-        "Les pièces d'un dossier arrivent par mail, par WhatsApp et sur papier, et il en manque toujours une au moment de le boucler.",
-      role: "Direction des opérations",
-      liste: "Les pièces à réclamer",
-    },
-    {
-      citation:
-        "Le préavis de contrat se compte à trois mois dans une société et à six dans l'autre, et personne ne sait qui a écrit la règle ni depuis quand.",
+        "On nous a déjà vendu une plateforme de données : six mois de projet, et rien que la direction puisse utiliser.",
       role: "Direction générale",
-      liste: "Le catalogue des règles",
+      liste: "Trois jours, un cas d'usage qui tourne",
+    },
+    {
+      citation:
+        "Je ne veux pas qu'un outil écrive dans nos logiciels ni qu'une IA décide à la place de mes directeurs.",
+      role: "Direction des systèmes d'information",
+      liste: "Lecture seule, et une personne décide",
     },
   ],
 };
 
 /* ── 5. accordéon (leur mediaContentAccordion) ─────────────────────── */
 export const ACCORDEON = {
-  /* 26/09 — les quatre garanties parlent à la DSI : c'est elle qui décide
-     de centraliser, et elle garde la main sur ce que l'IA lit. Chaque
-     texte passe à deux phrases : la garantie, puis ce qu'elle permet.
-     Les engagements repris ici sont ceux de /vos-donnees (hébergement à
-     Francfort ou chez le client, chiffrement, journal, aucun entraînement). */
-  titre: "La DSI garde la main sur l'IA du groupe",
+  /* les quatre garanties parlent à la DSI : c'est elle qui branche les
+     sources et qui règle ce que chaque agent a le droit de proposer. Les
+     engagements repris ici sont ceux de /vos-donnees (hébergement en
+     Europe ou chez le client, chiffrement, journal, aucun entraînement). */
+  titre: "La DSI tient le plan",
   /* rapports de la référence : folder-structure 2291 × 1442 ;
      visual-editing 2400 × 1275 ; vectordatabase 3200 × 1644 ;
      Define-schema 2400 × 1600 */
@@ -257,43 +250,43 @@ export const ACCORDEON = {
     {
       titre: "Lecture seule",
       texte:
-        "Varelo lit vos logiciels de gestion, vos caisses, vos tableurs et vos dossiers sans jamais rien y écrire. Chaque source se branche avec l'accord de la DSI et se débranche de la même façon.",
+        "Varelo lit vos logiciels de gestion, vos caisses, vos tableurs et vos dossiers sans jamais rien y écrire. Chaque source se branche avec l'accord de la DSI, avec la liste de ce qui est lu, et se débranche de la même façon.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-lecture-seule",
         2292,
         1442,
-        "Les sources d'une société branchées en lecture seule : logiciel de gestion, caisses, tableurs et documents.",
+        "Les sources d'une société branchées en lecture seule : logiciel de gestion, caisses, tableurs et documents, avec ce qui est lu.",
       ),
     },
     {
-      titre: "Un seul référentiel",
+      titre: "Un seul plan",
       texte:
-        "Chaque client, fournisseur ou article reçoit un seul nom pour tout le groupe, rattaché aux codes de chaque société. Chaque rapprochement est proposé, puis validé ou refusé par une personne, à une date, et les doublons comme les écarts entre sociétés restent visibles. L'IA raisonne donc sur les mêmes données dans toutes les filiales.",
+        "Chaque client, fournisseur, contrat ou article a une seule fiche pour tout le groupe, rattachée aux codes de chaque société. Chaque rapprochement est proposé, puis validé ou refusé par une personne, à une date, et reste réversible. Vos assistants d'IA, quels qu'ils soient, peuvent lire le plan sans le modifier.",
       lien: { texte: "En parler", href: AUDIT },
       ecran: E(
         "systemes-referentiel",
         2400,
         1274,
-        "Un même client inscrit sous trois noms dans trois sociétés, rangé sous un seul nom avec son encours total.",
+        "Un même client inscrit sous trois noms dans trois sociétés, réuni sous une seule fiche avec son encours total.",
       ),
     },
     {
-      titre: "Validation humaine",
+      titre: "L'agent propose, vous décidez",
       texte:
-        "Rien ne part sans l'accord de la direction concernée, décision par décision. Chaque proposition arrive avec son calcul, sa pièce et la règle qui l'a déclenchée, avec son auteur et son périmètre ; le journal garde qui a validé quoi.",
+        "Chaque action possible sur une fiche dit qui a le droit de la faire et ce qu'elle change. Un agent la propose avec la fiche, le calcul et la pièce ; la direction concernée accepte, corrige ou refuse ; le journal garde qui a décidé quoi. Aucun agent n'agit seul.",
       lien: { texte: "En parler", href: AUDIT },
       ecran: E(
         "systemes-validation",
         3200,
         1644,
-        "Une décision proposée à la direction juridique, avec son calcul, en attente de sa validation.",
+        "Une action proposée par un agent à la direction juridique, avec son calcul et sa pièce, en attente de sa décision.",
       ),
     },
     {
       titre: "Données en Europe",
       texte:
-        "Les données restent dans l'Union européenne ou sur vos propres serveurs, chiffrées, et chaque lecture est inscrite au journal. Aucune d'elles ne sert à entraîner un modèle.",
+        "Le plan et ses sources restent dans l'Union européenne ou sur vos propres serveurs, chiffrés, et chaque lecture est inscrite au journal. Aucune donnée du groupe ne sert à entraîner un modèle.",
       lien: { texte: "Où vivent vos données", href: DONNEES },
       ecran: E(
         "systemes-europe",
@@ -307,11 +300,11 @@ export const ACCORDEON = {
 
 /* ── 6. énoncé 2 (leur « We're building a better way. ») ───────────── */
 export const ENONCE_2 = {
-  titre: "Un pôle, puis le groupe.",
+  titre: "Trois jours, un cas d'usage, puis le groupe.",
   paragraphes: [
-    "Nous commençons par un pôle ou un territoire, une société et une direction. Le pilote se juge sur un trimestre complet, avec ses clôtures, ses échéances et ses chiffres réels.",
-    "Chaque société suivante se branche ensuite sur le même socle : elle reprend le référentiel, les règles et l'IA déjà validés, d'un territoire à l'autre.",
-    "Le groupe garde ainsi une seule IA à gouverner, quel que soit le nombre de sociétés qui la rejoignent.",
+    "Nous ne vendons pas une démonstration. Un ingénieur d'Omega vient trois jours chez vous, sur un pôle de trois ou quatre sociétés. Le premier jour, les sources sont branchées et le plan se remplit. Le deuxième, votre direction valide les rapprochements et choisit son cas d'usage. Le troisième soir, il tourne sur vos vraies données, et l'on compte ensemble ce qui est juste.",
+    "Le pilote se juge ensuite sur un trimestre complet, avec ses clôtures et ses échéances réelles. Chaque cas d'usage suivant se vend quand le précédent a prouvé, et chaque société suivante rejoint le même plan, avec ses fiches, ses règles et ses agents déjà validés.",
+    "Le prix se compte par cas d'usage, jamais par siège : la présidence, les directions et la DSI sont toutes dedans.",
   ],
   boutons: [
     { texte: "Réserver un audit", href: AUDIT },

@@ -128,3 +128,13 @@ référentiel validé par une personne est devenu la norme 2026 sous le nom d'on
 est dépassé, c'est le titre « Une seule IA pour tout le groupe » (promesse standard de Glean,
 Copilot, ChatGPT Enterprise, Gemini et Mistral à 20 à 75 $ le siège), le branchement par export,
 et le « jamais d'action ». Décisions 12 à 16 en section 9 de ce document.
+
+## 11/11/2026 (soir) — Varelo v3 : le plan du groupe et ses agents
+
+Teo : « je ne veux pas que tu te bases sur ce qu'on propose ; dis-moi ce qu'eux font aux US et
+qu'on reproduise la même chose ; explique-le plus facilement ; refais la page complètement ».
+`varelo-v3.md` remplace `varelo-v2.md` : on reproduit le modèle de Palantir Foundry à l'échelle
+d'une ETI (le plan du groupe, les sources en lecture seule, les actions, les agents qui
+proposent, les trois jours chez le client, le prix par cas d'usage). La page `/secteurs/groupes`
+vend ce produit depuis le commit « Varelo v3 », même dessin, tous les textes neufs ; la fiche de
+`lib/secteurs.ts` et les deux cartes de l'accueil disent la même chose.

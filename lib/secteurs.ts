@@ -172,13 +172,13 @@ export const SECTEURS: Secteur[] = [
     saas: "Varelo",
     /* 26/09 — l'accent passe sur la centralisation de l'IA du groupe
        (voir components/secteurs/groupes/textes.ts). */
-    /* 11/11/2026 — brief varelo-v2 : de la source branchée à la décision */
-    texte: "Le groupe lu, relié et décidé sur une page, de la source branchée à la décision.",
-    ligne: "Une seule IA pour tout le groupe",
+    /* 11/11/2026 — brief varelo-v3 : le plan du groupe et ses agents */
+    texte: "Le plan de tout le groupe, rempli en lecture seule, et des agents qui proposent une action que vous validez.",
+    ligne: "Le plan du groupe et ses agents",
     detail:
-      "Varelo branche la même IA sur les logiciels et les tableurs de chaque société, en lecture seule, range leurs chiffres sous un seul référentiel dont chaque rapprochement est visible, applique des règles écrites une fois pour le groupe, et remet chaque direction devant ses décisions, avec le calcul et la pièce ; la présidence voit le groupe sur une page rapprochée des comptes.",
+      "Varelo dessine le plan du groupe, une fiche par société, client, fournisseur, contrat et site, avec les liens entre elles et les codes de chaque logiciel rattachés ; il le remplit en lecture seule depuis les logiciels et les tableurs de chaque société, et des agents le lisent en continu pour proposer une action, avec la fiche, le calcul et la pièce, que la direction concernée accepte, corrige ou refuse. En trois jours sur les vraies données, un premier cas d'usage tourne.",
     apercu:
-      "Chaque matin à 7 h, chaque direction reçoit au plus trois décisions, et la présidence une page : les ventes, la trésorerie et les échéances de chaque société.",
+      "Un ingénieur vient trois jours sur un pôle de trois ou quatre sociétés : le plan se remplit, la direction valide les rapprochements, et le troisième soir un cas d'usage tourne sur les vraies données.",
     combine: [
       { offre: "FILED", raison: "Les factures fournisseurs de chaque société lues, contrôlées, transmises à sa comptabilité." },
       { offre: "CASHD", raison: "Les encours clients de chaque société suivis et relancés selon les règles du groupe." },

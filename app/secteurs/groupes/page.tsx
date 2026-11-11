@@ -45,12 +45,20 @@ import "./mobile.css";
    groupe (Teo : « la plupart des gros groupes ne centralisent pas leur IA,
    chacun utilise la sienne »). Le bloc 1b n'existe pas chez la référence :
    c'est un second `statement`, au même dessin, sans écran.
+
+   11/11/2026 — la page vend le produit v3 (docs/briefs-saas/varelo-v3.md) :
+   le plan du groupe (une fiche par société, client, fournisseur, contrat,
+   site ; les liens ; les codes de chaque logiciel rattachés), rempli en
+   lecture seule, les actions possibles sur chaque fiche, les agents qui
+   proposent et une personne qui décide, les quatre cas d'usage, et les
+   trois jours chez le client. Même dessin, tous les textes neufs
+   (components/secteurs/groupes/textes.ts).
    ══════════════════════════════════════════════════════════════════════ */
 
-/* 11/11/2026 — brief varelo-v2 : le groupe lu, relié et décidé sur une page, de la source à la décision */
-const TITRE = "Varelo · le groupe lu, relié et décidé sur une page";
+/* 11/11/2026 — brief varelo-v3 : le plan du groupe et ses agents (le modèle Foundry à l'échelle d'une ETI) */
+const TITRE = "Varelo · le plan de tout le groupe, des agents qui proposent";
 const DESCRIPTION =
-  "Varelo branche en lecture seule les logiciels, les tableurs et les dossiers de chaque société du groupe, les range sous un seul référentiel dont chaque rapprochement est visible, applique des règles écrites une fois, et remet chaque matin à chaque direction ses décisions avec leur calcul et leur pièce, et à la présidence le groupe sur une page rapprochée des comptes.";
+  "Varelo dessine le plan de votre groupe, une fiche par société, client, fournisseur, contrat et site, le remplit en lecture seule depuis les logiciels de chaque société, et met des agents dessus qui proposent une action que la personne responsable valide. En trois jours sur vos vraies données, un premier cas d'usage tourne.";
 
 export const metadata: Metadata = {
   /* 10/11/2026 — « | DALIRO » et sans « Conçu par Omega » sur le site dédié à ce métier (components/espace2/portail.ts) */
