@@ -1,0 +1,268 @@
+/* ══════════════════════════════════════════════════════════════════════
+   MON ESPACE — ce que les copies de DALIRO n'ont pas (11/11/2026)
+
+   Les cinq pages reprennent les feuilles de DALIRO telles quelles
+   (dal.css, dal-home.css, dal-attio.css, dal-bookings.css, dal-inbox.css,
+   dal-ticket.css, dal-mails.css et les feuilles de Plain). Ici seulement
+   ce que le contenu de Teo ajoute : le fil d'une conversation WhatsApp
+   (les bulles, dans la page du ticket de Linear), le composeur d'une
+   réponse (WhatsApp et mail), et la note « pas branché ».
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ——— la note de branchement, en tête d'une page ——— */
+.teo-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 12px 16px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--v2-gray-400);
+  border-radius: 8px;
+  background: var(--v2-bg-200);
+  font: 450 13px/1.45 var(--font-v2-inter, system-ui);
+  color: var(--v2-gray-800);
+}
+.teo-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+.teo-note b {
+  color: var(--v2-gray-1000);
+  font-weight: 600;
+}
+.teo-note code {
+  font: 12px/1.4 var(--font-v2-code, ui-monospace, monospace);
+}
+.teo-note[data-teinte="rouge"] {
+  border-color: color-mix(in srgb, #e5484d 40%, transparent);
+  background: color-mix(in srgb, #e5484d 8%, var(--v2-bg-200));
+}
+.teo-note[data-teinte="vert"] {
+  border-color: color-mix(in srgb, #30a46c 40%, transparent);
+  background: color-mix(in srgb, #30a46c 8%, var(--v2-bg-200));
+}
+.dal-h-corps .teo-note,
+.dal-bk-main .teo-note {
+  margin: 0 0 16px;
+}
+
+/* ——— le fil WhatsApp, dans la page du ticket (dal-tk-description) ——— */
+.teo-wa-fil {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0 12px;
+}
+.teo-wa-jour {
+  align-self: center;
+  margin: 10px 0 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--v2-gray-100);
+  font: 500 11px/1.4 var(--font-v2-inter, system-ui);
+  color: var(--v2-gray-800);
+  text-transform: capitalize;
+}
+.dal .teo-wa-bulle {
+  color: var(--dal-t1);
+}
+.dal .teo-wa-heure {
+  color: var(--dal-t3);
+}
+.dal .teo-cmp {
+  border-color: var(--dal-carte-bord);
+  background: var(--dal-carte);
+}
+.dal .teo-cmp textarea {
+  color: var(--dal-t1);
+}
+.dal .teo-cmp-tete,
+.dal .teo-cmp-aide {
+  color: var(--dal-t3);
+}
+.dal .teo-bouton {
+  border-color: var(--dal-menu-bord);
+  background: var(--dal-bouton);
+  color: var(--dal-t1);
+}
+.dal .teo-bouton--plein {
+  border-color: transparent;
+  background: var(--dal-t1);
+  color: var(--dal-app);
+}
+.dal .teo-note {
+  border-color: var(--dal-carte-bord);
+  background: var(--dal-carte);
+  color: var(--dal-t2);
+}
+.dal .teo-note b {
+  color: var(--dal-t1);
+}
+.teo-wa-bulle {
+  position: relative;
+  max-width: min(72%, 520px);
+  padding: 7px 10px 18px;
+  border-radius: 10px;
+  background: var(--dal-actif, var(--v2-gray-100));
+  color: var(--v2-gray-1000);
+  font: 450 13.5px/1.45 var(--font-v2-inter, system-ui);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.08);
+}
+.teo-wa-bulle[data-sens="envoye"] {
+  align-self: flex-end;
+  background: #d9fdd3;
+  color: #111b21;
+}
+/* le vert de WhatsApp : clair par défaut, sombre quand l'espace l'est (html[data-v2-theme], ou le système) */
+html[data-v2-theme="dark"] .teo-wa-bulle[data-sens="envoye"] {
+  background: #005c4b;
+  color: #e9edef;
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-v2-theme="light"]) .teo-wa-bulle[data-sens="envoye"] {
+    background: #005c4b;
+    color: #e9edef;
+  }
+}
+.teo-wa-bulle[data-type="audio"],
+.teo-wa-bulle[data-type="image"],
+.teo-wa-bulle[data-type="video"],
+.teo-wa-bulle[data-type="document"] {
+  font-style: italic;
+}
+.teo-wa-heure {
+  position: absolute;
+  right: 8px;
+  bottom: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font: 400 10.5px/1 var(--font-v2-inter, system-ui);
+  color: var(--v2-gray-600);
+}
+.teo-wa-bulle[data-sens="envoye"] .teo-wa-heure {
+  color: rgba(17, 27, 33, 0.55);
+}
+html[data-v2-theme="dark"] .teo-wa-bulle[data-sens="envoye"] .teo-wa-heure {
+  color: rgba(233, 237, 239, 0.6);
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-v2-theme="light"]) .teo-wa-bulle[data-sens="envoye"] .teo-wa-heure {
+    color: rgba(233, 237, 239, 0.6);
+  }
+}
+.teo-wa-heure[data-statut="lu"] svg {
+  color: #53bdeb;
+}
+.teo-wa-heure[data-statut="echec"] svg {
+  color: #e5484d;
+}
+
+/* ——— le composeur d'une réponse (WhatsApp : dans le ticket ; mail : sous le fil) ——— */
+.teo-cmp {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--v2-gray-400);
+  border-radius: 10px;
+  background: var(--v2-bg-100);
+}
+.teo-cmp-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12px/1.4 var(--font-v2-inter, system-ui);
+  color: var(--v2-gray-800);
+}
+.teo-cmp textarea {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--v2-gray-1000);
+  font: 450 13.5px/1.5 var(--font-v2-inter, system-ui);
+}
+.teo-cmp textarea::placeholder {
+  color: var(--v2-gray-600);
+}
+.teo-cmp-pied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.teo-cmp-pied .teo-pousse {
+  flex: 1;
+}
+.teo-cmp-aide {
+  font: 450 12px/1.4 var(--font-v2-inter, system-ui);
+  color: var(--v2-gray-600);
+}
+.teo-cmp-aide[data-teinte="rouge"] {
+  color: #e5484d;
+}
+.teo-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--v2-gray-400);
+  border-radius: 6px;
+  background: var(--v2-bg-100);
+  color: var(--v2-gray-1000);
+  font: 500 12.5px/1 var(--font-v2-inter, system-ui);
+  cursor: pointer;
+  text-decoration: none;
+}
+.teo-bouton:hover {
+  background: var(--v2-gray-100);
+}
+.teo-bouton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.teo-bouton--plein {
+  border-color: transparent;
+  background: var(--v2-gray-1000);
+  color: var(--v2-bg-100);
+}
+.teo-bouton--plein:hover {
+  background: var(--v2-gray-900);
+}
+
+/* ——— WhatsApp : l'avatar d'une conversation dans la liste de l'Inbox ——— */
+.dal-ap-avatar.teo-wa-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--teo-avatar, #25d366);
+  color: #fff;
+  font: 600 11px/1 var(--font-v2-inter, system-ui);
+}
+
+/* ——— l'agenda : la pastille d'un rendez-vous selon son genre ——— */
+.dal-bk-logo.teo-agenda-logo {
+  background: #4285f4;
+  color: #fff;
+}
+
+/* ——— WhatsApp sur mobile (≤ 768) : la conversation ouverte prend la place de la liste
+   (les Appels de DALIRO ouvrent une page à part ; ici le fil d'Ariane ramène à la liste) ——— */
+@media (max-width: 768px) {
+  .v2 .dal.teo-wa .dal-ap[data-ouvert] .dal-ap-liste {
+    display: none;
+  }
+  .v2 .dal.teo-wa .dal-ap[data-ouvert] .dal-ap-droite {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+  }
+}
