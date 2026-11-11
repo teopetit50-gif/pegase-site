@@ -29,3 +29,18 @@ La séquence complète, à chaque fois :
 - **Un `npm run build` rouge ne se pousse pas.** S'il casse sur le travail
   d'une autre session, ne rien pousser et le dire.
 - **Ne jamais pousser une modification qu'on n'a pas écrite** « au passage ».
+
+## Les six sites dédiés ne se reconstruisent que si on les touche
+
+Depuis le 11/11/2026 (plafond Vercel gratuit atteint : cent déploiements
+par vingt-quatre heures, sept projets reconstruits à chaque push), chaque
+projet Vercel de site dédié (daliro, lorani, tamila, tiroma, tavaro,
+varelo) passe par `outils/vercel-ignore.sh <cle>` avant de construire :
+la construction est ignorée quand les commits poussés ne touchent que
+les pages des autres métiers ou la vitrine Omega. Sa propre page, sa
+barre, `lib/`, `components/site-dedie/communs.tsx`, `portail.ts`,
+`app/layout.tsx`, `public/logos/` ou les dépendances le reconstruisent.
+`omegaai.fr` (pegase-site2) se reconstruit toujours. Si un site dédié
+doit repartir sans qu'un fichier à lui ait bougé, le relancer depuis
+Vercel (outil `create_deployment`, ou « Redeploy » dans le tableau de
+bord).
