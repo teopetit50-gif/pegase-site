@@ -117,3 +117,14 @@ Décisions à trancher, en plus des huit ci-dessus : (9) Tiroma lit-il Doctolib,
 liste d'attente du cabinet ? (10) Tavaro impose-t-il l'état des lieux de départ dans l'outil,
 même aux agences qui ont déjà une application de photos ? (11) Varelo rapproche-t-il la page
 présidence des comptes de société dès le MVP ? Recommandations dans chaque brief (section 11).
+
+## 11/11/2026 — Varelo face au marché américain
+
+Teo (11/11) : « fais la même recherche que pour les avocats et les architectes, mais pour notre
+SaaS groupe, et dis-nous si ce qu'on propose est obsolète ». La recherche est dans
+`varelo-marche-us.md`. En une ligne : le fil de Varelo (source → référentiel → règle → décision
+→ page présidence) n'est vendu par personne aux US à un groupe de 3 à 30 sociétés, et le
+référentiel validé par une personne est devenu la norme 2026 sous le nom d'ontologie ; ce qui
+est dépassé, c'est le titre « Une seule IA pour tout le groupe » (promesse standard de Glean,
+Copilot, ChatGPT Enterprise, Gemini et Mistral à 20 à 75 $ le siège), le branchement par export,
+et le « jamais d'action ». Décisions 12 à 16 en section 9 de ce document.
