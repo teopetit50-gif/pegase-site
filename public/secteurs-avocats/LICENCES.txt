@@ -1,0 +1,19 @@
+Fichiers de la page /secteurs/avocats (Tamila), refaite le 11/11/2026 sur le dessin du modèle
+Radius (21st.dev, https://radius.nextjsshop-preview.workers.dev/, acheté par Teo).
+
+polices/geist-*.woff2
+    Geist, Vercel — licence SIL Open Font License 1.1
+    https://github.com/vercel/geist-font/blob/main/LICENSE.TXT
+    Source : les fichiers woff2 servis par le modèle (sous-ensembles latin et latin-ext),
+    les mêmes que public/secteurs-dentaire/polices (Tiroma).
+
+fond.jpg (2400 × 1350)
+    La façade du Palais de justice de Paris (public/photos/avocats-palais-facade.jpg,
+    Slavan / Unsplash, voir public/photos/CREDITS.txt), passée en caractères par le script
+    fond-ascii.py de la session : l'équivalent Tamila du bg.jpg du modèle, derrière chaque
+    fenêtre d'exemple de la page.
+
+ecrans/tableau.png, ecrans/arrivees.png (2880 × 1800)
+    De vraies captures du tableau de bord client Tamila (/espace2/tamila et
+    /espace2/tamila/arrivees), thème clair, données d'exemple, fenêtre 1440 × 900 à ×2,
+    prises sur le build local du 11/11/2026 (script ecrans.mjs de la session).
