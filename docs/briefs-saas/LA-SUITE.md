@@ -88,3 +88,27 @@ reste.
 - Le texte intégral des DTU et Avis Techniques est payant : Lorani vérifie les références, pas le
   contenu, tant qu'un accord d'accès n'existe pas.
 - Le prix de l'abonnement par taille reste à fixer après les pilotes, dans les deux briefs.
+
+
+## 11/11/2026 — les trois autres logiciels ont leur brief v2
+
+Teo (11/11) : « pour tous les autres SaaS, sauf BTP, va chercher les trois ou quatre plus gros
+SaaS américains du domaine, regarde ce qu'ils font, et crée-moi un seul produit à vendre ».
+Lorani et Tamila vendent déjà le produit v2 en ligne (commit a1be36b du 08/11 : « le dossier
+vérifié de bout en bout »). Les trois suivants sont écrits sur le même modèle, à partir de ce que
+chaque page vend aujourd'hui :
+
+| Brief | Les briques US | Le fil « de A à Z » |
+|---|---|---|
+| `tiroma-v2.md` | Dental Intelligence (huddle, suivis), Weave (liste d'attente, textos), NexHealth (prise de rendez-vous, rappel) | de la demande de rendez-vous au dernier soin et au dernier règlement |
+| `tavaro-v2.md` | UVeye / ProovStation (inspection photo), RentWorks / TSD (dossier de location et réclamation), Samsara / Geotab (télématique) | du départ au retour et jusqu'à la sortie de flotte |
+| `varelo-v2.md` | Glean (sources et droits), Palantir Foundry (référentiel, actions), OneStream / Workiva (consolidation) | de la source branchée à la décision et à la page présidence |
+
+Daliro (BTP) ne bouge pas, à la demande de Teo. Ostelo (hôtellerie, nom de travail, page
+`/secteurs/hotellerie`) n'a pas de logiciel en ligne : pas de brief tant que le produit n'existe
+pas.
+
+Décisions à trancher, en plus des huit ci-dessus : (9) Tiroma lit-il Doctolib, ou seulement la
+liste d'attente du cabinet ? (10) Tavaro impose-t-il l'état des lieux de départ dans l'outil,
+même aux agences qui ont déjà une application de photos ? (11) Varelo rapproche-t-il la page
+présidence des comptes de société dès le MVP ? Recommandations dans chaque brief (section 11).
