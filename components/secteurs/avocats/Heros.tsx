@@ -1,136 +1,65 @@
 /* ══════════════════════════════════════════════════════════════════════
-   Tamila (cabinets d'avocats) — Heros.tsx
+   Tamila sur le dessin Radius — le héros (11/11/2026)
 
-   COPIÉ le 24/09/2026 à 13 h 37 de `OMEGA/cabinetos-site/src/components/
-   hero.tsx`. Géométrie, orbites (300/400/500 px, 40/80/200 s), étincelle du
-   badge et lueurs animées inchangées ; seules les couleurs changent.
-
-   CONVERSIONS (règle 3, jetons CLAIRS) : `text-foreground/N` → `text-[#171717]/N`
-   (orbites) · `text-muted-foreground` → `text-[#737373]` · `bg-background`
-   → `bg-[#ffffff]` · `border-border` → `border-[#e6e6e6]` · `from-background`
-   → `from-[#ffffff]` · `animate-flip`, `animate-image-glow` → `avocats-flip`,
-   `avocats-image-glow` (avocats.css) · `rounded-lg` → `rounded-[0.6rem]`
-   (le `--radius` de la source).
-
-   MONDE BLANC — ce qui a demandé plus qu'un échange de jetons :
-   · Orbites : les points et les six signes étaient du BLANC à 50-90 % sur
-     le noir ; ils deviennent l'ENCRE à la même opacité (le sens : des
-     marques qui contrastent avec le fond). Les signes sont le logo
-     officiel (marque.tsx).
-   · Badge « NOUVEAU » : son liseré était une ombre intérieure grise à 15 %
-     (le filet de la source) → #e6e6e6, le filet de la page. L'étincelle
-     qui fait le tour était BLANCHE — invisible sur le blanc ; elle passe au
-     bleu de la marque (#3b82f6), qui est déjà celui de la pastille. Le fond
-     s'éclaircissait au survol (`neutral-800` sur le noir) : il fonce
-     (#f5f5f5). Texte `neutral-100` → encre.
-   · Lueurs : sky-500 → blue-600 derrière le cadre, blue-600 au-dessus, et
-     blue-500 sur téléphone. Sur le noir, ce sont des lueurs ; posées
-     telles quelles sur le blanc, des taches. Même dessin, même flou, même
-     animation, teintes claires de la même famille (sky-300 → blue-400,
-     blue-400, blue-300) : la page s'éclaire de bleu au lieu de s'y noyer.
-   · Le bouton « Soumettre un dossier » était blanc sur noir ; il est encre
-     sur blanc (variante `default`, bouton.tsx).
-
-   LIENS (règle 6) : « Soumettre un dossier » visait https://omegaai.fr/
-   reserver → /reserver-un-audit (textes.ts), en <Link> : un <a> interne
-   rechargerait tout le site. Le badge garde son ancre #fonctionnalites.
-   ACCESSIBILITÉ : la source posait un <button> DANS un <a> (deux
-   éléments interactifs imbriqués) ; ici `Button asChild` fait du lien le
-   bouton, mêmes classes, même géométrie.
-   `spark` et `mask-gradient` n'étaient définies nulle part dans la source :
-   classes mortes, retirées. `before:animate-rotate` ne pouvait pas passer
-   en `before:avocats-rotate` (ce n'est pas un utilitaire) : l'animation du
-   pseudo-élément est écrite dans avocats.css (`.avocats-etincelle`).
-
-   24/09 (SOIR) — LE HÉROS D'UN CABINET (avocats.css, « registre d'un
-   cabinet ») :
-   · Orbites, étincelle du badge, taches bleues et fondu blanc du bas :
-     RETIRÉS. Le badge devient une étiquette filetée sur fond blanc, sa
-     pastille « NOUVEAU » passe au vert de Tamila (#193a29).
-   · Le h1 passe en serif 400 (avocats.css), interligne 1,08 au lieu de
-     1,25 : une serif de titrage se compose serrée.
-   · L'écran produit n'est plus posé sur des lueurs mais sur une photo de
-     la façade du Palais de justice de Paris (Slavan, Unsplash, crédits
-     dans public/photos/CREDITS.txt). Première version : l'écran DANS la
-     photo, collé au bas, comme chez Harvey — mais le dôme et la grille
-     sont au centre de la photo et l'écran les cachait tous deux : on ne
-     voyait qu'un ciel. D'où ce montage : un bandeau photo 11/5 cadré par
-     35 % du haut, et l'écran qui le chevauche à partir de 16 % de la
-     largeur (une marge en % se calcule sur la LARGEUR : le chevauchement
-     suit le bandeau à toutes les tailles). Le dôme, de 8 à 23 % de la
-     largeur depuis le haut du bandeau, reste entier au-dessus de l'écran
-     (qui commence à 29 %) ; à 10 %, on ne voyait que le ciel et la
-     lanterne.
+   Classe pour classe, la première section du modèle : deux colonnes dès
+   `lg` séparées d'un filet, hauteur 100vh − 4rem, à gauche l'annonce
+   fléchée, le h1 (30 → 36 → 48 px, 600, −.025em), le chapô et le bouton
+   noir ; à droite la fenêtre de 400 / 500 / 600 px : le fond passé en
+   caractères, puis l'écran du logiciel décalé vers le bas et la droite,
+   dans un cadre de verre (dégradé blanc, flou, ombre, anneau) à coin
+   haut-gauche arrondi, un filet de lumière sur son bord haut.
+   Les mots : HERO (textes.ts). L'écran : une VRAIE capture du tableau
+   de bord client, thème clair, données d'exemple
+   (public/secteurs-avocats/ecrans/tableau.png, voir page.tsx) — Teo veut
+   de vraies captures à la place des faux écrans.
    ══════════════════════════════════════════════════════════════════════ */
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import AnimationContainer from "./apparition";
-import { Button } from "./bouton";
-import ApercuDossier from "./ApercuDossier";
 import { CONTACT, HERO } from "./textes";
+import { Conteneur, FOND } from "./ui";
 
-/* Héros : badge, h1 serif, texte, bouton, puis l'écran produit dans la photo du Palais. */
-export default function Hero() {
+export default function Heros() {
   return (
-    <div className="relative flex flex-col items-center justify-center w-full py-20">
-      <div className="flex flex-col items-center justify-center gap-y-8 relative w-full">
-        <div className="flex flex-col items-center justify-center text-center gap-y-4 w-full">
-          <AnimationContainer className="relative hidden lg:block" delay={0.1}>
-            <Link
-              href="#fonctionnalites"
-              className="group mx-auto flex w-fit items-center rounded-full border border-[#e6e6e6] bg-[#ffffff] px-2 py-1 text-sm text-[#171717] transition-colors duration-200 hover:border-[#193a29]/30"
-            >
-              <span className="mr-2 flex h-[18px] items-center justify-center rounded-full bg-[#193a29] px-2 text-[9px] font-medium tracking-wide text-white">
-                {HERO.badge}
-              </span>
+    <section data-monde="clair" className="w-full border-b border-[#e5e7eb] bg-white">
+      <Conteneur large>
+        <div className="relative grid min-h-[calc(100vh-4rem)] grid-cols-1 items-center gap-8 py-12 lg:grid-cols-2 lg:gap-12 lg:py-0">
+          <div className="absolute bottom-0 left-1/2 top-0 hidden w-px -translate-x-1/2 bg-[#e5e7eb] lg:block" aria-hidden="true" />
+          <div className="flex max-w-xl flex-col justify-center lg:pr-8">
+            <Link href={CONTACT.audit} className="group mb-6 inline-flex w-fit items-center gap-1 text-sm text-[#4a5565] transition-colors hover:text-[#101828]">
               {HERO.annonce}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
             </Link>
-          </AnimationContainer>
-
-          <AnimationContainer delay={0.15}>
-            <h1 className="text-[2.5rem] md:text-5xl lg:text-7xl text-center leading-[1.08]! max-w-4xl mx-auto">
-              {HERO.titreAvant} <span className="avocats-accent">{HERO.titreMot}</span> {HERO.titreApres}
+            <h1 className="mb-6 text-3xl font-semibold leading-[1.1] tracking-tight text-[#101828] sm:text-4xl lg:text-5xl">
+              {HERO.titreAvant} {HERO.titreMot} {HERO.titreApres}
             </h1>
-          </AnimationContainer>
-
-          <AnimationContainer delay={0.2}>
-            <p className="max-w-xl mx-auto mt-2 text-base lg:text-lg text-center text-[#737373]">{HERO.texte}</p>
-          </AnimationContainer>
-
-          <AnimationContainer delay={0.25} className="z-20">
-            <div className="flex items-center justify-center mt-6 gap-x-4">
-              <Button asChild size="lg" className="group">
-                <Link href={CONTACT.audit}>
-                  {HERO.bouton}
-                  <ArrowRight className="size-4 group-hover:translate-x-1 transition-all duration-300" />
-                </Link>
-              </Button>
+            <p className="mb-8 text-base leading-relaxed text-[#4a5565] sm:text-lg">{HERO.texte}</p>
+            <div>
+              <Link href={CONTACT.audit} className="inline-flex items-center justify-center rounded-lg bg-black px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#1e2939]">
+                {HERO.bouton}
+              </Link>
             </div>
-          </AnimationContainer>
-
-          <AnimationContainer delay={0.3} className="relative mt-10 max-w-6xl mx-auto">
-            <figure>
-              <div className="relative aspect-[11/5] overflow-hidden rounded-xl lg:rounded-[28px] bg-[#d8cfc0]">
+          </div>
+          <div className="relative h-[400px] w-full sm:h-[500px] lg:h-[600px] lg:pl-8">
+            <div className="absolute inset-0 overflow-hidden lg:left-8">
+              <Image alt="" fill priority sizes="(max-width: 1024px) 100vw, 640px" className="object-cover" src={FOND} />
+            </div>
+            <div className="absolute bottom-0 left-8 right-0 top-8 overflow-hidden rounded-tl-xl bg-gradient-to-br from-white/60 via-white/20 to-white/40 p-[1.5px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.4)_inset] ring-1 ring-white/40 backdrop-blur-xl sm:left-12 sm:top-12 lg:left-20">
+              <div className="relative h-full w-full overflow-hidden rounded-tl-[10px] bg-white/10">
                 <Image
-                  src="/photos/avocats-palais-facade.jpg"
-                  alt=""
+                  alt="Le tableau de bord Tamila : les dossiers du cabinet, leurs délais à confirmer et les actes attendus sous quinze jours (exemple)"
                   fill
                   priority
-                  sizes="(min-width: 1280px) 1152px, 100vw"
-                  className="object-cover object-[50%_35%]"
+                  sizes="(max-width: 1024px) 100vw, 640px"
+                  className="object-cover object-left-top"
+                  src="/secteurs-avocats/ecrans/tableau.png"
                 />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/70 to-transparent" aria-hidden="true" />
               </div>
-              <div className="relative -mt-[16%] mx-3 sm:mx-8 lg:mx-16 overflow-hidden rounded-[0.6rem] lg:rounded-[18px] border border-black/10 bg-[#ffffff] shadow-[0_24px_60px_-20px_rgba(30,22,10,0.35)]">
-                <ApercuDossier />
-              </div>
-              <figcaption className="mt-3 text-left text-xs text-[#737373]">
-                {HERO.legende}
-              </figcaption>
-            </figure>
-          </AnimationContainer>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </Conteneur>
+    </section>
   );
 }

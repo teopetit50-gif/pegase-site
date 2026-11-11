@@ -1,245 +1,199 @@
 /* ══════════════════════════════════════════════════════════════════════
-   TAMILA (CABINETS D'AVOCATS) — le monde de la page /secteurs/avocats
+   TAMILA (CABINETS D'AVOCATS) — la peau de /secteurs/avocats, refaite le
+   11/11/2026 sur le dessin du modèle Radius (21st.dev, acheté par Teo :
+   https://radius.nextjsshop-preview.workers.dev/). Voir l'en-tête de
+   page.tsx. Tout ce fichier est descendant de `.p-avocats`, sauf les
+   @font-face et les @keyframes, globaux par nature — d'où leur préfixe
+   `avocats-`. Rien sur `:root`, aucun `@theme` (règles 2 et 3 des pages
+   métier, app/secteurs/RAPATRIEMENT.md).
 
-   RAPATRIÉ le 24/09/2026 (copie du disque à 13 h 37, heure de la
-   Guadeloupe) de `OMEGA/cabinetos-site/src/app/globals.css` (le dossier et
-   le projet Vercel gardent l'ancien nom CabinetOS). Méthode :
-   app/secteurs/RAPATRIEMENT.md. Les jetons vivent sous `.p-avocats`,
-   JAMAIS sur `:root` — sur `:root` ils repeindraient tout le site. Tout ce
-   fichier est donc descendant de `.p-avocats`.
-
-   ══════════════════════════════════════════════════════════════════════
-   RELEVÉ — la source, et ce qu'elle relevait elle-même
-   Le site Tamila décalque vetra-app.vercel.app (gabarit Tailwind v3,
-   composants Magic UI), relevé au style calculé le 24/09 par la session
-   qui l'a construit ; ses jetons shadcn, keyframes et utilitaires maison
-   sont recopiés de la feuille compilée de la référence. On reprend SON
-   résultat, mesuré de nouveau sur cabinetos-site-two.vercel.app aux cinq
-   largeurs (390, 768, 1024, 1440, 1700) — concordance dans
-   app/secteurs/RAPATRIEMENT.md.
-
-   COULEURS DE LA SOURCE — un thème UNIQUE, SOMBRE :
-     fond #09090b (240 10% 4%) · carte #0a0a0a · texte #fafafa ·
-     secondaire / muted / accent #262626 · texte atténué #a3a3a3 ·
-     filets #262626 · anneau #d4d4d4 · accent de marque bleu-500 #3b82f6.
-
-   TYPOGRAPHIE (source) — h1 36/45 → 72/90 (lg), 700 ; h2 de section
-   24 → 36 (md) → 48 (lg), 500, interligne `snug` ; mot d'accent en
-   Instrument Serif italique ; corps 16 → 18 (lg). Satoshi partout.
-
-   CADRE — un seul conteneur : 100 % puis 1280 px dès `lg`, gouttières
-   16 px puis 48 px dès `md` ; aucun filet vertical.
-   ══════════════════════════════════════════════════════════════════════
-
-   ── CE QUE LE RAPATRIEMENT CHANGE ───────────────────────────────────
-
-   1. TOUT PASSE AU CLAIR (Teo, 24/09 : « Omega c'est blanc, les SaaS qui
-      sont en noir, change les couleurs et mets tout en blanc »). Les
-      jetons ci-dessous sont les valeurs CLAIRES de la même famille shadcn,
-      alignées sur Daliro ; l'outil de conversion les a reçues par
-      `--jetons` (la table lue dans la source était celle du noir) :
-        fond, carte, popover        #ffffff   (était #09090b / #0a0a0a)
-        texte, primaire, anneau     #171717   (était #fafafa / #d4d4d4)
-        secondaire, muted, accent   #f5f5f5   (était #262626)
-        texte atténué               #737373   (était #a3a3a3)
-        filets, champs              #e6e6e6   (était #262626)
-      Le bleu de la marque (#3b82f6) ne bouge pas. Le reste — lueurs,
-      maquettes, ondes, orbites — est repris composant par composant ;
-      chaque choix est écrit en tête du fichier concerné.
-
-   2. PAS DE `@theme` (règle 3). Utilitaires de couleur convertis en
-      hexadécimal dans les composants. ⚠ Comme chez Daliro, `bg-muted`
-      existe ici (`--color-muted` #9b9ba3) : toujours converti.
-
-   3. LA COULEUR DES FILETS SANS COULEUR. La source pose
-      `*, ::before, ::after { border-color: hsl(var(--border)) }` en couche
-      de base. Ici Tailwind v4 les laisse en `currentColor`. La règle est
-      reprise, dans la couche `base`, pour la raison écrite dans btp.css :
-      hors couche, elle battrait les `border-blue-500` du balisage.
-
-   4. POLICES DU SITE (règle 5). Aucune `next/font` dans la page. Satoshi
-      (titres et corps), Inter (l'écran produit) et Instrument Serif (le mot
-      en italique des titres) partent :
-        `font-heading` → la police de titre du site (`--font-jakarta`),
-          posée sur h1-h3 ici, et par `.avocats-titre` ailleurs ;
-        `font-base`    → la police de corps (`--font-inter-tight`),
-          `.avocats-texte` ;
-        `font-subheading italic` → `.avocats-accent`, la police de titre
-          EN ITALIQUE. General Sans n'est servie qu'en romain : l'italique
-          est donc l'oblique que le navigateur calcule — c'est d'ailleurs
-          le dessin de la General Sans Italic, une oblique. Le mot d'accent
-          garde ainsi son rôle (se détacher du reste du titre) sans serif.
-      Toutes valent General Sans aujourd'hui (app/polices.css).
-
-   5. LA PEAU SORT DU CADRE 1440 (règle 1), comme `.p-relances` et
-      `.p-btp` : 100vw ; le contenu reste centré, section par section.
-
-   6. UN SEUL CONTEXTE D'EMPILEMENT, comme la source. Ses lueurs et ses
-      orbites sont en `z-index` négatif ; la source les tenait au-dessus du
-      fond de page par un `<main class="relative z-40">`. Ici c'est la peau
-      elle-même qui isole (`isolation: isolate`) : sans cela, les calques
-      négatifs passeraient SOUS le fond blanc de `.p-avocats` et toutes les
-      lueurs disparaîtraient, sans une erreur.
-   ══════════════════════════════════════════════════════════════════════
-
-   ── 24/09 (SOIR) : LE REGISTRE D'UN CABINET, PAS CELUI D'UNE STARTUP ──
-   Teo : « on ne voit pas assez que ça fait avocat ». Les textes parlaient
-   déjà comme un cabinet (art. 768, 66-5, bordereau) ; c'est l'habillage
-   qui restait celui du gabarit vetra (halos bleus, orbites, particules,
-   titres gras sans serif). Relevé de douze sites du métier le même soir
-   (Harvey, Legora, Doctrine, Spellbook, EvenUp, Eve, Legalfly, Gide,
-   Bredin Prat, August Debouzy, Darrois, Cravath) ; Teo a retenu six
-   points, appliqués ici et dans les composants :
-     1. TITRES EN SERIF, fins, le mot d'accent en italique vraie —
-        Newsreader (app/_polices/serif.ts), 400 comme Harvey et EvenUp.
-        Les h3 et l'écran produit restent dans la police du site.
-     2. FOND PAPIER #faf9f6 au lieu du blanc pur (Harvey, Legora : un
-        blanc cassé chaud), filets et gris chauds. REFUSÉ le même soir
-        par Teo : « je préfère le fond blanc plutôt que crème ». Retour
-        au blanc #ffffff et aux gris neutres d'origine (#e6e6e6,
-        #f5f5f5, #737373), dans les composants aussi.
-     3. PLUS AUCUN EFFET DE SaaS TECH : orbites, étincelle, halos flous,
-        particules et halo conique sont retirés (aucun site du métier
-        n'en porte). Le bleu électrique devient le VERT de Tamila,
-        #193a29 — la teinte de sa carte sur /secteurs.
-     5. PHOTOS DU PALAIS DE JUSTICE DE PARIS (Unsplash, crédits dans
-        public/photos/CREDITS.txt) : façade derrière l'écran produit,
-        grille « Liberté · Fraternité » dans le secret professionnel,
-        cour du Mai dans l'appel final.
-     8. L'ÉCRAN PRODUIT MONTRE UN VRAI ACTE : des conclusions
-        récapitulatives, paragraphes numérotés, un passage surligné et
-        son renvoi à la pièce en marge (ApercuDossier.tsx).
-    12. LE VOCABULAIRE DU PALAIS dans l'écran : juridiction et chambre,
-        n° RG, Me, audience de plaidoirie, commandement de payer.
-   (Les points 4, 6, 7, 9 à 11, 13 à 15 du relevé n'ont pas été retenus.)
+   RELEVÉ du modèle (feuille servie, Tailwind v4, et style calculé aux cinq
+   largeurs 390 / 768 / 1024 / 1440 / 1700, scratchpad modele/releve.json) :
+   · corps Geist 16 px / 24, antialiasé, encre oklch(14.5 % 0 0) sur blanc ;
+   · rayon de base .625rem (shadcn) : `rounded-md` vaut .5rem, `rounded-lg`
+     .625rem, `rounded-xl` .75rem (défaut), `rounded-2xl` 1rem (défaut) ;
+   · sections à 1500 px (px 16 / 24 / 32 / 48), barre, héros et bandeau à
+     1280 px (px 16 / 24 / 32) ; fonds #fff (héros, bandeau, pied),
+     #fafaf9 (sections), #0a0a0a (bloc sombre) ; filets #e5e5e3 ;
+   · h1 30/33 600 −.025em → 36 (sm) → 48 (lg) ; h2 de section 24/28.8
+     400 −.015em → 30 (sm) → 36 (md) → 38.4 (lg) ;
+   · animations : bandeau (marquee-left 22 s, −50 %), plan d'agent
+     (translateY 700 ms cubic-bezier(.77,0,.175,1), pas de 2 400 ms),
+     étiquette scintillante (shimmer-move 2.2 s), accordéon Radix.
    ══════════════════════════════════════════════════════════════════════ */
 
-.p-avocats {
-  /* ── jetons, thème CLAIR (voir 1) ─────────────────────────────────── */
-  --avocats-fond: #ffffff; /* --background, --card, --popover (le papier est refusé, voir 2) */
-  --avocats-texte: #171717; /* --foreground, --primary, --ring */
-  --avocats-doux: #f5f5f5; /* --secondary, --muted, --accent */
-  --avocats-attenue: #737373; /* --muted-foreground */
-  --avocats-filet: #e6e6e6; /* --border, --input */
-  --avocats-marque: #193a29; /* le vert de Tamila (carte de /secteurs) */
+/* ── Geist (OFL), servie depuis public/secteurs-avocats/polices ──────── */
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/secteurs-avocats/polices/geist-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/secteurs-avocats/polices/geist-latin-ext.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* le repli de next/font chez le modèle (Arial recalibrée) */
+@font-face {
+  font-family: "Geist Fallback";
+  src: local("Arial");
+  ascent-override: 95.94%;
+  descent-override: 28.16%;
+  line-gap-override: 0%;
+  size-adjust: 104.76%;
+}
 
-  background: var(--avocats-fond);
-  color: var(--avocats-texte);
-  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+/* ── La peau ─────────────────────────────────────────────────────────── */
+.p-avocats {
+  /* :root du modèle (shadcn) : ce qui sert aux utilitaires de la page */
+  --radius: 0.625rem;
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  /* html / body du modèle */
+  font-family: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: normal;
+  color: oklch(14.5% 0 0);
+  background: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  isolation: isolate;
-
-  /* Plein écran : la peau sort de <main> (plafonné à 1440 par PageShell).
-     Le div de PageShell porte `overflow-x-clip`, qui absorbe le débord de
-     `100vw` sans barre horizontale — et rogne les orbites du héros (rayon
-     500 px), comme le `overflow-x: hidden` du <body> de la source. */
+  -webkit-text-size-adjust: 100%;
+  /* la peau sort du <main> et va d'un bord à l'autre (comme .p-nivara) */
   width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  isolation: isolate;
 }
 
-/* Titres de page et de section : la serif (24/09 soir, voir 1). Graisse
-   posée ici, pas en utilitaire : ces règles sont hors couche et battent
-   les `font-bold` / `font-medium` du balisage d'origine. */
-.p-avocats h1,
-.p-avocats h2,
-.p-avocats .avocats-serif {
-  font-family: var(--font-avocats-serif), Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  letter-spacing: -0.012em;
-  font-optical-sizing: auto;
-}
-/* Intitulés de carte et écran produit : la police du site. */
-.p-avocats h3,
-.p-avocats .avocats-titre {
-  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
-}
-.p-avocats .avocats-texte {
-  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
-}
-/* Le mot d'accent : l'italique VRAIE de la serif (il était l'oblique
-   calculée de General Sans). */
-.p-avocats .avocats-accent {
-  font-family: var(--font-avocats-serif), Georgia, "Times New Roman", serif;
-  font-style: italic;
-  font-weight: 400;
-}
-
-/* Règle de base de la source, dans la couche `base` (voir 3). */
+/* ── Le preflight du modèle, borné à la peau ───────────────────────────
+      Dans `@layer base`, comme chez le modèle (et comme btp.css) : écrit
+      hors couche, le `padding: 0` de `*` battrait tous les `px-4` et
+      `py-16` du balisage, et le `font-size: inherit` des titres tous
+      les `text-2xl` (constaté au premier relevé : titres à 16 px,
+      gouttières à 0). ─────────────────────────────────────────────── */
 @layer base {
   .p-avocats *,
   .p-avocats ::before,
   .p-avocats ::after {
-    border-color: var(--avocats-filet);
+    box-sizing: border-box;
+    border: 0 solid;
+    margin: 0;
+    padding: 0;
   }
-  .p-avocats button:not(:disabled) {
+  .p-avocats :is(h1, h2, h3, h4, h5, h6) {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+  }
+  .p-avocats :is(ul, ol, menu) {
+    list-style: none;
+  }
+  .p-avocats a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+  .p-avocats :is(img, svg, video) {
+    display: block;
+    vertical-align: middle;
+  }
+  .p-avocats :is(img, video) {
+    max-width: 100%;
+    height: auto;
+  }
+  .p-avocats :is(button, input) {
+    font: inherit;
+    font-feature-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    opacity: 1;
+    background-color: transparent;
+    border-radius: 0;
+  }
+  .p-avocats button {
     cursor: pointer;
   }
+  .p-avocats hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  .p-avocats strong {
+    font-weight: bolder;
+  }
 }
 
-/* `.link` de la source : un soulignement qui se déroule au survol. Le
-   trait était `hsl(var(--foreground))` : l'encre, ici. */
-.p-avocats .avocats-lien {
-  position: relative;
-  transition: color 0.3s ease-in-out;
-}
-.p-avocats .avocats-lien::after {
-  content: "";
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 1px;
-  background-color: var(--avocats-texte);
-  transition: width 0.3s ease-in-out;
-  cursor: pointer;
-  border-radius: 10px;
-}
-.p-avocats .avocats-lien:hover::after {
-  width: 100%;
-}
-
-/* ── « Chaque pièce est lue » : `.companies` de la source ─────────────
-   Sa lueur bleue sous le filet (::after, flou 6 rem) est retirée le 24/09
-   au soir avec les autres halos (voir 3). Le filet reste : `.avocats-filet`. */
-
-/* Le filet entre le héros et « Chaque pièce est lue » — le SEUL séparateur
-   de la source. 24/09 (soir), règle de Teo : un séparateur entre sections
-   prend toute la largeur de la fenêtre (page.tsx le pose hors du
-   conteneur). Même dessin : plein au centre, fondu vers les bords
-   (dégradé radial de la source, ellipse de 50 % × 56 400 %). La teinte
-   était #222939, un bleu nuit à peine plus clair que le noir ; ici un
-   gris neutre à peine plus foncé que le blanc. */
-.p-avocats .avocats-filet {
-  height: 1px;
-  background: radial-gradient(50% 56400% at 50% 100%, #dcdcdc 0, rgba(220, 220, 220, 0) 100%);
-}
-
-/* ── Animations de la source ──────────────────────────────────────────
-   `--animate-*` du `@theme` source, renommés `avocats-*` : ni les classes
-   ni les `@keyframes` n'existent sur ce site, et les `@keyframes` sont
-   globaux quoi qu'on fasse — d'où le préfixe. Valeurs recopiées. */
-
-/* Les ondes des outils (ondes.tsx). */
-.p-avocats .avocats-ripple {
-  animation: avocats-ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
-}
-@keyframes avocats-ripple {
-  0%,
+/* ── Le bandeau (styled-jsx du modèle, marquee-left 22 s) ────────────── */
+@keyframes avocats-marquee-left {
+  from {
+    transform: translateX(0%);
+  }
   to {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translateX(-50%);
   }
-  50% {
-    transform: translate(-50%, -50%) scale(0.9);
+}
+.p-avocats .avocats-bandeau {
+  animation: avocats-marquee-left 22s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-avocats .avocats-bandeau {
+    animation: none !important;
+    transform: none !important;
   }
 }
 
-/* Orbites, étincelle du badge et lueurs de l'écran produit : retirées le
-   24/09 au soir (voir 3), avec leurs @keyframes. Restent les ondes. */
-
-/* La source coupait les ondes. */
-@media (prefers-reduced-motion: reduce) {
-  .p-avocats .avocats-ripple {
-    animation: none !important;
+/* ── L'étiquette scintillante et le voile du rapport (section
+      « performance » du modèle, <style> en ligne) ─────────────────────── */
+@keyframes avocats-shimmer {
+  0% {
+    background-position: 100% 0;
   }
+  100% {
+    background-position: -100% 0;
+  }
+}
+.p-avocats .avocats-shimmer {
+  background: linear-gradient(90deg, rgba(15, 14, 13, 0.4) 0%, rgba(15, 14, 13, 0.4) 35%, #0f0e0d 50%, rgba(15, 14, 13, 0.4) 65%, rgba(15, 14, 13, 0.4) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: avocats-shimmer 2.2s linear infinite;
+}
+.p-avocats .avocats-voile {
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+}
+
+/* ── L'accordéon Radix (keyframes du modèle) ─────────────────────────── */
+@keyframes avocats-accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+@keyframes avocats-accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+.p-avocats .avocats-accordeon[data-state="open"] {
+  animation: avocats-accordion-down 0.2s ease-out;
+}
+.p-avocats .avocats-accordeon[data-state="closed"] {
+  animation: avocats-accordion-up 0.2s ease-out;
 }
