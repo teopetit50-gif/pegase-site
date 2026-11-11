@@ -9,12 +9,10 @@ import { MARQUE_SITE } from "@/components/espace2/portail";
    NEXT_PUBLIC_PORTAIL. Même dessin que le pied d'Omega, réduit à ce qui
    existe sur ce site : réserver un audit, le service client, les données.
    ══════════════════════════════════════════════════════════════════════ */
-const LIENS: { label: string; href: string }[] = [
-  /* 10/11/2026 — l'audit est une section de la page d'accueil (SectionAudit.tsx), pas une page */
-  { label: "Réserver un audit", href: "/#audit" },
-  { label: "Service client", href: "/contact" },
-  { label: "Où vont vos données", href: "/vos-donnees" },
-];
+/* 10/11/2026 — Teo : « un site vitrine basique », une seule page. L'audit est
+   une section de l'accueil (SectionAudit.tsx) ; service client et données
+   n'existent pas sur un site dédié (next.config.ts les renvoie à l'accueil). */
+const LIENS: { label: string; href: string }[] = [{ label: "Réserver un audit", href: "/#audit" }];
 
 export default function Pied() {
   const marque = MARQUE_SITE;

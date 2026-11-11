@@ -111,7 +111,9 @@ const REECRITURES_SITE_DEDIE = SECTEUR_DU_SITE ? [{ source: "/", destination: `/
    logiciel. Restent : la racine, réserver un audit, le service client, les
    données, et l'espace client (/espace2, /auth, /api, /bienvenue, /p,
    /signer, /installation, /reserver), qui font partie du logiciel. */
-const PAGES_OMEGA = ["blog", "commencer", "espace3", "formation", "integrations", "modeles", "offres", "omega", "tarifs"];
+/* 10/11, suite — Teo : « un site vitrine basique », une seule page : service
+   client, données et réservation n'y existent pas non plus. */
+const PAGES_OMEGA = ["blog", "commencer", "contact", "espace3", "formation", "integrations", "modeles", "offres", "omega", "reserver", "tarifs", "vos-donnees"];
 const REDIRECTIONS_SITE_DEDIE = SECTEUR_DU_SITE
   ? [
       { source: "/secteurs/:chemin*", destination: "/", permanent: false },
