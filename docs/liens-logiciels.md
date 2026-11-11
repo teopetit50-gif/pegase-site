@@ -13,14 +13,33 @@ proxy.ts). La protection « Vercel Authentication » est désactivée : le
 lien s'ouvre sans compte Vercel. Chaque push sur `main` redéploie les six
 projets en plus d'omegaai.fr.
 
-| Logiciel | Métier | Lien Vercel | Variable posée | Projet Vercel | Mis en ligne |
-| --- | --- | --- | --- | --- | --- |
-| Daliro | BTP | https://daliro-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=daliro` | `daliro` | 09/11/2026 |
-| Tamila | Avocats | https://tamila-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=tamila` | `tamila` | 09/11/2026 |
-| Lorani | Architectes | https://lorani-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=lorani` | `lorani` | 09/11/2026 |
-| Tiroma | Dentaires | https://tiroma-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=tiroma` | `tiroma` | 09/11/2026 |
-| Tavaro | Location | https://tavaro-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=tavaro` | `tavaro` | 09/11/2026 |
-| Varelo | Groupes | https://varelo-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=varelo` | `varelo` | 09/11/2026 |
+| Logiciel | Métier | Adresse (11/11) | Lien Vercel d'origine | Variable posée | Projet Vercel | Mis en ligne |
+| --- | --- | --- | --- | --- | --- | --- |
+| Daliro | BTP | https://daliro.omegaai.fr | https://daliro-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=daliro` | `daliro` | 09/11/2026 |
+| Tamila | Avocats | https://tamila.omegaai.fr | https://tamila-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=tamila` | `tamila` | 09/11/2026 |
+| Lorani | Architectes | https://lorani.omegaai.fr | https://lorani-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=lorani` | `lorani` | 09/11/2026 |
+| Tiroma | Dentaires | https://tiroma.omegaai.fr | https://tiroma-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=tiroma` | `tiroma` | 09/11/2026 |
+| Tavaro | Location | https://tavaro.omegaai.fr | https://tavaro-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=tavaro` | `tavaro` | 09/11/2026 |
+| Varelo | Groupes | https://varelo.omegaai.fr | https://varelo-teo18.vercel.app | `NEXT_PUBLIC_PORTAIL=varelo` | `varelo` | 09/11/2026 |
+
+## 11/11/2026 — chaque logiciel a son sous-domaine d'omegaai.fr
+
+Teo (11/11) a demandé un nom à chaque logiciel, « hébergé comme omegaai.fr »,
+sans frais. Les noms propres (daliro.fr, tamila.fr, lorani.fr, tiroma.fr,
+tavaro.fr sont libres ; varelo.fr est pris, varelo.app est libre) coûtent
+environ 8 € HT par an chez OVH, où vit omegaai.fr ; Vercel ne vend pas le
+.fr. Dans l'attente, chaque projet Vercel porte un sous-domaine
+d'omegaai.fr, rattaché le 11/11 (Vercel, « Domains » de chaque projet) :
+`<logiciel>.omegaai.fr`. Chez OVH, la zone DNS d'omegaai.fr porte six
+entrées CNAME (`daliro`, `tamila`, `lorani`, `tiroma`, `tavaro`, `varelo`)
+vers `cname.vercel-dns.com.`, posées par Teo le 11/11. Le certificat HTTPS
+est posé par Vercel. Le jour où un nom propre est acheté, on le rattache
+au même projet et le sous-domaine redirige dessus.
+
+Attention : un sous-domaine d'omegaai.fr contredit la règle du 10/11
+(« rien à voir avec Omega ») dans l'adresse elle-même. C'est une solution
+d'attente, acceptée par Teo le 11/11 pour ne rien payer tant qu'un logiciel
+n'a pas son premier client.
 
 ## Ce que fait un lien
 
