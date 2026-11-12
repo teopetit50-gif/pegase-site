@@ -86,11 +86,15 @@ export default function BarreLorani() {
           borderRadius: 9999,
           boxShadow: OMBRE,
           backdropFilter: "blur(10px)",
+          /* 12/11, Teo, sur capture : « ça passe de long à court d'un coup, pas de sensation de fluidité » — sur un grand
+             écran c'est ce plafond qui borne la barre, pas le pourcentage ; posé dans style, il sautait sans animation.
+             Animé ici, la barre s'étire et se resserre vraiment, au même ressort que la largeur et la hauteur */
+          maxWidth: flotte ? 1240 : 1400,
         }}
         transition={RESSORT}
         /* 11/11, Teo : « quand elle se déplie, elle se colle en haut, faut que ce soit flottant » — 24 px du haut,
            84 % de large entre 1130 px (sept entrées, deux boutons et le logo côte à côte, dès xl) et 1240 px */
-        style={{ minWidth: 1130, maxWidth: flotte ? 1240 : 1400 }}
+        style={{ minWidth: 1130 }}
         className="relative z-[60] mx-auto hidden flex-row items-center justify-between rounded-full bg-white/95 px-5 py-2 ring-1 ring-black/[0.06] xl:flex"
       >
         <Accueil />
