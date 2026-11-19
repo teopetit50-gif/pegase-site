@@ -60,6 +60,11 @@ export const versV2 = (href: string) => (/^\/espace(\/|\?|$)/.test(href) && !hre
 const coche = (oui: boolean) => (oui ? <Check width={16} height={16} aria-label="choisi" /> : null);
 const I = { width: 16, height: 16, strokeWidth: 1.6, "aria-hidden": true } as const;
 
+/* 19/11/2026 — dans l'espace d'un logiciel métier, un des quatre moteurs se nomme par son usage (« Relances ») et non par son nom de code (CASHD) */
+const nomVu = (m: { cle: string; nom: string; libelle: string }, portail: Portail | null): string => (portail && MODULES_PRINCIPAUX.includes(m.cle) ? m.libelle : m.nom);
+/* l'espace d'un logiciel : son module en tête, puis les quatre moteurs (portail.ts, 19/11/2026) */
+const modulesDuPortail = (portail: Portail) => MODULES.filter((m) => m.cle === portail || MODULES_PRINCIPAUX.includes(m.cle)).sort((a, b) => Number(b.cle === portail) - Number(a.cle === portail));
+
 export default function Coquille({ utilisateur, police, portail = null, children }: { utilisateur: Utilisateur | null; police: string; portail?: Portail | null; children: React.ReactNode }) {
   const router = useRouter();
   /* les menus et fenêtres sont rendus dans <body>, hors de cet arbre : la
@@ -177,7 +182,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
   const portail = usePortail();
   /* 11/11/2026 — Mon espace (le gérant, /espace2/teo) : les menus du haut ne montrent que lui, comme l'espace d'un logiciel */
   const moi = dansMonEspace(chemin);
-  const modulesVus = moi ? [MODULE_TEO] : portail ? MODULES.filter((m) => m.cle === portail) : MODULES;
+  const modulesVus = moi ? [MODULE_TEO] : portail ? modulesDuPortail(portail) : MODULES;
   /* hors de son module (Notes, Réseau…), le sélecteur garde le nom DALIRO : « Tous les modules » n'existe pas ici */
   const porteeVue = portee ?? (portail ? (moduleDe(portail) ?? null) : null);
   /* 09/11/2026 — dans l'espace d'un logiciel, « Nouveau… » ouvre sa page de travail (la deuxième entrée de modules.ts : chantiers, projets, retours…), quel que soit le logiciel */
@@ -233,7 +238,7 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
               declencheur={
                 <>
                   {porteeVue ? <porteeVue.icone {...I} /> : <LayoutGrid {...I} />}
-                  <span className="v2-portee-nom">{porteeVue ? porteeVue.nom : "Tous les modules"}</span>
+                  <span className="v2-portee-nom">{porteeVue ? nomVu(porteeVue, portail) : "Tous les modules"}</span>
                   <ChevronsUpDown width={14} height={14} aria-hidden="true" />
                 </>
               }
@@ -246,8 +251,14 @@ function Cadre({ utilisateur, children }: { utilisateur: Utilisateur | null; chi
               {portail || moi ? null : <SeparateurMenu />}
               <SectionMenu titre="Modules">
                 {modulesVus.map((m) => (
-                  <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={m.nom} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
-                    {m.nom} <span className="v2-gris">· {m.libelle}</span>
+                  <ItemMenu key={m.cle} id={m.cle} href={`${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`} textValue={nomVu(m, portail)} icone={<m.icone {...I} />} suffixe={coche(m.cle === portee?.cle)}>
+                    {nomVu(m, portail) === m.nom ? (
+                      <>
+                        {m.nom} <span className="v2-gris">· {m.libelle}</span>
+                      </>
+                    ) : (
+                      m.libelle
+                    )}
                   </ItemMenu>
                 ))}
               </SectionMenu>
@@ -481,16 +492,18 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   /* 21/10/2026 — demande de Teo : sous les écrans de travail, une page par
      groupe de fonctions vendues sur la page produit du module */
   const fonctionsDe = (cle: string): Lien[] => FONCTIONS[cle] ?? [];
-  /* l'espace DALIRO seul : son module, sans les quatre communs ni les autres métiers */
+  /* l'espace d'un logiciel : son module en tête, puis les quatre moteurs, sans les autres métiers (19/11/2026) */
   const modules = moi
     ? [MODULE_TEO]
-    : MODULES.filter((m) => (portail ? m.cle === portail : MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier))
-        /* les quatre communs dans leur ordre, puis le module du métier */
-        .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
+    : portail
+      ? modulesDuPortail(portail)
+      : MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle) || m.cle === metier)
+          /* les quatre communs dans leur ordre, puis le module du métier */
+          .sort((a, b) => Number(a.cle === metier) - Number(b.cle === metier));
   const sectionModule = (m: (typeof MODULES)[number]): Section => ({
     cle: m.cle,
-    titre: m.nom,
-    sousTitre: m.libelle,
+    titre: nomVu(m, portail),
+    sousTitre: nomVu(m, portail) === m.nom ? m.libelle : undefined,
     icone: <m.icone {...R} />,
     /* FILED ouvre sur « À payer », son écran de travail */
     href: `${RACINE}/${m.cle}${m.cle === "filed" ? "/a-payer" : ""}`,
@@ -618,7 +631,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
         ],
       },
       /* Mon espace n'a pas de page de formation : ses pages de la formation sont celles des modules communs */
-      { titre: "Les modules", liens: (moi ? MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle)) : modules).map((m) => ({ libelle: m.nom, href: `${RACINE}/formation/${m.cle}` })) },
+      { titre: "Les modules", liens: (moi ? MODULES.filter((m) => MODULES_PRINCIPAUX.includes(m.cle)) : modules).map((m) => ({ libelle: nomVu(m, portail), href: `${RACINE}/formation/${m.cle}` })) },
       /* 03/11/2026 — lot 4 de la formation : le reste de l'espace, et le Réseau */
       {
         titre: "Aller plus loin",
@@ -631,8 +644,8 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   };
   /* 02/11/2026 — le Réseau Omega : les clients d'Omega entre eux (Fil, Membres, Messages, Opportunités), un groupe du rail sous les fiches */
   const reseau: Section = { cle: "reseau", titre: "Réseau", sousTitre: "Entre clients Omega", icone: <Network {...R} />, href: `${RACINE}/reseau`, racines: [`${RACINE}/reseau`], groupes: [{ titre: "Réseau Omega", liens: ONGLETS_RESEAU }] };
-  /* l'espace DALIRO seul : le module en tête, puis le travail et les fiches ; ni l'accueil de l'organisation, ni le Suivi */
-  const vues = portail || moi ? [sections[3], sections[1], sections[2]] : sections;
+  /* l'espace DALIRO seul : le module en tête, puis le travail et les fiches, puis les quatre moteurs (19/11/2026) ; ni l'accueil de l'organisation, ni le Suivi */
+  const vues = portail || moi ? [sections[3], sections[1], sections[2], ...sections.slice(4, 3 + modules.length)] : sections;
   const toutes = [...vues, reseau, ...autres, formation, reglages];
   const sous = (r: string) => chemin === r || chemin.startsWith(`${r}/`);
   const ouvre = (l: Lien) => (l.exact ? chemin === l.href : sous(l.racine ?? l.href)) || !!l.aussi?.some(sous);
@@ -651,7 +664,7 @@ function BarreLaterale({ utilisateur, chemin, fermer }: { utilisateur: Utilisate
   }
   /* les groupes du rail, séparés par un filet : l'accueil ; travail et fiches ; les modules ; le suivi */
   const railModules = sections.slice(3, 3 + modules.length);
-  const rail: Section[][] = (portail || moi ? [[vues[0]], vues.slice(1, 3), [reseau]] : [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)]).filter((g) => g.length);
+  const rail: Section[][] = (portail || moi ? [[vues[0]], vues.slice(1, 3), [reseau], vues.slice(3)] : [[sections[0]], sections.slice(1, 3), [reseau], railModules, sections.slice(3 + modules.length)]).filter((g) => g.length);
   /* 21/10 (soir), capture de Teo : la bulle « title » du navigateur restait
      dessinée par-dessus le rail ouvert (« Travail » collée sur « Accueil »),
      et parfois après le survol — le navigateur la pose et l'enlève à sa

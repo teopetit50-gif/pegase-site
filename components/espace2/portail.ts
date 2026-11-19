@@ -44,6 +44,18 @@ export const PORTAILS = ["daliro", "tamila", "lorani", "tiroma", "tavaro", "vare
 
 export type Portail = (typeof PORTAILS)[number];
 
+/* ══════════════════════════════════════════════════════════════════════
+   19/11/2026 — Teo : un ERP par métier, et « c'est à toi de tout faire ».
+   Le modèle retenu le même jour : un socle commun (les quatre moteurs qui
+   font le travail : documents reçus, relances, demandes clients, clients
+   qui décrochent) et, par-dessus, la couche du métier. L'espace de chaque
+   logiciel garde donc son module en tête, PLUS les quatre moteurs, comme
+   /espace2 complet donne les quatre communs et le module du métier. Sur le
+   site d'un logiciel, un moteur se nomme par son usage (« Relances »),
+   jamais par son nom de code chez Omega (CASHD).
+   ══════════════════════════════════════════════════════════════════════ */
+export const MOTEURS = ["filed", "cashd", "reput", "offload"] as const;
+
 /* le nom du logiciel, pour le titre de l'onglet d'un déploiement dédié */
 export const NOMS_PORTAILS: Record<Portail, string> = { daliro: "DALIRO", tamila: "TAMILA", lorani: "LORANI", tiroma: "TIROMA", tavaro: "TAVARO", varelo: "VARELO" };
 
@@ -65,10 +77,10 @@ export const PORTAIL_DEPLOIEMENT: Portail | null = lirePortail(process.env.NEXT_
    en plus de la page du logiciel lui-même */
 /* 11/11/2026 — « teo » : Mon espace, l'espace personnel du gérant (app/espace2/teo) ; il reste
    joignable même avec le témoin d'un logiciel posé, et son layout ne l'ouvre qu'au compte gérant */
-const PAGES_COMMUNES = ["taches", "notes", "appels", "entreprises", "contacts", "reseau", "reglages", "equipe", "formation", "teo"];
+const PAGES_COMMUNES: readonly string[] = ["taches", "notes", "appels", "entreprises", "contacts", "reseau", "reglages", "equipe", "formation", "teo", ...MOTEURS];
 
-/* les pages de la formation propres aux quatre modules et aux autres métiers */
-const FORMATION_AUTRES = ["filed", "cashd", "reput", "offload", ...PORTAILS];
+/* les pages de la formation propres aux autres métiers (celles des quatre moteurs restent ouvertes depuis le 19/11/2026) */
+const FORMATION_AUTRES: readonly string[] = PORTAILS;
 
 /** la page /espace2/… fait-elle partie de l'espace réduit à ce logiciel ? */
 export function dansLePortail(chemin: string, portail: Portail = "daliro"): boolean {
@@ -120,3 +132,13 @@ export const titreSite = (titre: string): string =>
 export const LIEN_AUDIT: string = MARQUE_SITE ? "/#audit" : "/reserver-un-audit";
 /** sur un site dédié, retire la phrase « Conçu par Omega pour … » d'une description */
 export const sansOmega = (texte: string): string => (MARQUE_SITE ? texte.replace(/\s*Conçu par Omega[^.]*\./u, "").trim() : texte);
+
+/* 19/11/2026 — les phrases des quatre moteurs qui nomment l'éditeur : CASHD, OFFLOAD et Omega sur
+   omegaai.fr ; sur le site d'un logiciel, l'usage et le nom du logiciel (aucun renvoi vers Omega) */
+export const PAS_INSTALLE_RELANCES: string = MARQUE_SITE
+  ? `Les relances ne sont pas encore installées pour votre organisation : ${MARQUE_SITE.mot} les installe en mode essai, puis vous déposez le premier export de votre facturier.`
+  : "CASHD n'est pas encore installé pour votre organisation : Omega l'installe en mode essai, puis vous déposez le premier export de votre facturier.";
+export const PAS_INSTALLE_DECROCHAGES: string = MARQUE_SITE
+  ? `Le suivi des clients qui décrochent n'est pas encore installé pour votre organisation : ${MARQUE_SITE.mot} l'installe en mode essai, puis vos exports de ventes alimentent l'historique.`
+  : "OFFLOAD n'est pas encore installé pour votre organisation : Omega l'installe en mode essai, puis vos exports de ventes alimentent l'historique.";
+export const ADRESSE_ESSAI: string = `Les relances validées partent vers l'adresse d'essai ${MARQUE_SITE ? `de ${MARQUE_SITE.mot}` : "d'Omega"}, jamais chez vos clients, tant que le gérant n'a pas basculé en réel.`;

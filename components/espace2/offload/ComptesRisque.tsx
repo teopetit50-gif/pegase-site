@@ -67,6 +67,7 @@ import { IconeCalendrier, IconeDiese, IconeDocument, IconeEnveloppe, IconeGroupe
 import { RACINE } from "../modules";
 import { useToast } from "../Toasts";
 import "./offload.css";
+import { PAS_INSTALLE_DECROCHAGES } from "@/components/espace2/portail";
 
 type Sante = Niveau | "inconnu";
 type Teinte = "vert" | "jaune" | "rouge" | "gris" | "bleu";
@@ -777,7 +778,7 @@ export default function ComptesRisque() {
   );
   if (erreur) return vide(`La base réelle n'a pas répondu : ${erreur}`);
   if (source === "reelle" && !reel) return vide("Lecture des comptes…");
-  if (!tableau || !tableau.reglages) return vide("OFFLOAD n'est pas encore installé pour votre organisation : Omega l'installe en mode essai, puis vos exports de ventes alimentent l'historique.");
+  if (!tableau || !tableau.reglages) return vide(PAS_INSTALLE_DECROCHAGES);
 
   const aValider = tableau.a_valider;
   const reglages = tableau.reglages;

@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, CornerDownLeft, Link2, Search } from "lucide-react";
 import { Autocomplete, Dialog, Input, Menu, Modal, ModalOverlay, TextField, useFilter } from "react-aria-components";
 import { ItemMenu, Kbd, SectionMenu } from "./ui";
-import { MODULES, ONGLETS_ORGANISATION, ONGLETS_RESEAU } from "./modules";
+import { MODULES, MODULES_PRINCIPAUX, ONGLETS_ORGANISATION, ONGLETS_RESEAU } from "./modules";
 import { dansLePortail } from "./portail";
 import { usePortail } from "./portail-contexte";
 import { useToast } from "./Toasts";
@@ -66,9 +66,10 @@ export default function Palette({ ouverte, changer }: { ouverte: boolean; change
                 ))}
               </SectionMenu>
               <SectionMenu titre="Modules">
-                {(portail ? MODULES.filter((m) => m.cle === portail) : MODULES).map((m) => (
-                  <ItemMenu key={m.cle} id={`aller:/espace2/${m.cle}`} textValue={`${m.nom} ${m.libelle}`} icone={<m.icone width={16} height={16} aria-hidden="true" />} suffixe={<span>{m.libelle}</span>}>
-                    {m.nom}
+                {/* 19/11/2026 — l'espace d'un logiciel propose aussi les quatre moteurs, nommés par leur usage (portail.ts) */}
+                {(portail ? MODULES.filter((m) => m.cle === portail || MODULES_PRINCIPAUX.includes(m.cle)) : MODULES).map((m) => (
+                  <ItemMenu key={m.cle} id={`aller:/espace2/${m.cle}`} textValue={portail && MODULES_PRINCIPAUX.includes(m.cle) ? m.libelle : `${m.nom} ${m.libelle}`} icone={<m.icone width={16} height={16} aria-hidden="true" />} suffixe={portail && MODULES_PRINCIPAUX.includes(m.cle) ? undefined : <span>{m.libelle}</span>}>
+                    {portail && MODULES_PRINCIPAUX.includes(m.cle) ? m.libelle : m.nom}
                   </ItemMenu>
                 ))}
               </SectionMenu>

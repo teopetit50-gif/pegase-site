@@ -90,6 +90,7 @@ import { RACINE } from "../modules";
 /* les fenêtres de geste et « Vos textes » portent les classes de l'écran d'avant (c2-sous, c2-coche…) */
 import "@/components/espace/cashd/cashd.css";
 import "./boite-debiteurs.css";
+import { ADRESSE_ESSAI, PAS_INSTALLE_RELANCES } from "@/components/espace2/portail";
 
 export type VueBoite = "debiteurs" | "relances";
 type Reel = { client: portes.MonClient | null; tableau: Tableau | null; relances: Relance[]; fiches: Record<string, Fiche> };
@@ -1203,7 +1204,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
     : chargement
       ? "Lecture de l'encours…"
       : source === "reelle" && reel && !reel.tableau?.reglages
-        ? "CASHD n'est pas encore installé pour votre organisation : Omega l'installe en mode essai, puis vous déposez le premier export de votre facturier."
+        ? PAS_INSTALLE_RELANCES
         : !nVus
           ? Object.keys(filtres).length || traiterSeul
             ? "Rien dans ce filtre."
@@ -1429,7 +1430,7 @@ export default function BoiteDebiteurs({ vue }: { vue: VueBoite }) {
             </nav>
             {essai ? (
               <div className="lin-outils-droite">
-                <span className="lin-meta" title="Les relances validées partent vers l'adresse d'essai d'Omega, jamais chez vos clients, tant que le gérant n'a pas basculé en réel.">
+                <span className="lin-meta" title={ADRESSE_ESSAI}>
                   Mode essai
                 </span>
               </div>

@@ -58,6 +58,7 @@ import { lienCompte } from "./donnees";
 /* la fenêtre du dépôt reprend les champs de l'écran d'avant (rv-libelle, rv-champ) */
 import "@/components/espace/cashd/cashd.css";
 import "./tableau-envois.css";
+import { ADRESSE_ESSAI, PAS_INSTALLE_RELANCES } from "@/components/espace2/portail";
 
 type Reel = { client: portes.MonClient | null; tableau: Tableau | null; relances: Relance[]; fiches: Record<string, Fiche> };
 type Groupe = "a_valider" | "a_envoyer" | "partie" | "repondue" | "arretee";
@@ -546,7 +547,7 @@ export default function TableauEnvois() {
     : chargement
       ? "Lecture des envois…"
       : source === "reelle" && reel && !reel.tableau?.reglages
-        ? "CASHD n'est pas encore installé pour votre organisation : Omega l'installe en mode essai, puis vous déposez le premier export de votre facturier."
+        ? PAS_INSTALLE_RELANCES
         : !vues.length && (Object.keys(filtres).length || traiterSeul)
           ? "Rien dans ce filtre."
           : !cartes.length
@@ -832,7 +833,7 @@ export default function TableauEnvois() {
           </nav>
           {essai ? (
             <div className="lin-outils-droite">
-              <span className="lin-meta" title="Les relances validées partent vers l'adresse d'essai d'Omega, jamais chez vos clients, tant que le gérant n'a pas basculé en réel.">
+              <span className="lin-meta" title={ADRESSE_ESSAI}>
                 Mode essai
               </span>
             </div>

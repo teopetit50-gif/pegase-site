@@ -37,6 +37,7 @@ import type { Fiche, Proposition, ReglementEtat, Tableau } from "@/components/es
 import { AvisRapport, CarteRapport, CourbeRapport, Rapport, SectionRapport, TableauRapport, pluriel, type Serie } from "../lin/Rapports";
 import { lienCompte } from "./donnees";
 import Link from "next/link";
+import { PAS_INSTALLE_RELANCES } from "@/components/espace2/portail";
 
 type Reel = { client: portes.MonClient | null; tableau: Tableau | null };
 const pct = (v: number | null) => (v === null ? "—" : `${String(v).replace(".", ",")} %`);
@@ -352,7 +353,7 @@ export default function Tresorerie() {
               </AvisRapport>
             ) : null}
             {source === "reelle" && reel && !reel.tableau?.reglages && !erreur ? (
-              <AvisRapport>CASHD n&apos;est pas encore installé pour votre organisation : Omega l&apos;installe en mode essai, puis vous déposez le premier export de votre facturier.</AvisRapport>
+              <AvisRapport>{PAS_INSTALLE_RELANCES}</AvisRapport>
             ) : null}
           </>
         }
