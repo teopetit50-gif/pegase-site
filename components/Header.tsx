@@ -399,8 +399,13 @@ export default function Header() {
               au-dessus d'une section sombre — fond transparent dans les deux
               cas. Le remplissage ne revient qu'au survol, en très léger, pour
               que le bouton reste vivant sans redevenir une pastille. */}
+          {/* 22/11 (Teo, « le site est trop fouillis ») — le bouton garde son
+              mot, « Commencer », mais mène droit à l'audit : la page
+              /commencer aiguillait entre plusieurs offres, et il n'y a plus
+              qu'un produit. /commencer redirige vers la même page
+              (next.config.ts). */}
           <Link
-            href="/commencer"
+            href="/reserver-un-audit"
             /* Caché, il reste dans le DOM : le démonter ferait sauter la
                largeur de la barre à chaque passage, et les intitulés du
                menu glisseraient à droite. Il perd sa prise au clavier et
@@ -741,7 +746,7 @@ export default function Header() {
               Nous contacter
             </Link>
             <Link
-              href="/commencer"
+              href="/reserver-un-audit"
               onClick={() => setOpen(false)}
               tabIndex={open ? undefined : -1}
               style={{

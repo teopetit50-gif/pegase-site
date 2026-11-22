@@ -34,6 +34,13 @@ entrée là suffit : elle apparaît aux deux endroits.
 4. **Tarifs** — lien direct
 5. **Ressources** — `/vos-donnees`, `/reserver-un-audit`, `/blog`
 
+> **22/11/2026 — quatre rubriques.** « Nos offres » devient « Logiciel » :
+> « Gestion » en tête (bloc de l'accueil), les quatre agents nommés par ce
+> qu'ils font, quatre métiers et « Tous les métiers ». « Votre site » sort du
+> menu ; `/modeles` et `/tarifs/site` restent en ligne. Le bouton
+> « Commencer » mène à `/reserver-un-audit`, et `/commencer` y redirige.
+> Le détail daté est dans `lib/menu.ts`.
+
 ## Les écarts assumés, à ne pas « corriger »
 
 - **`/vos-donnees` descend d'un cran.** Elle était une entrée de premier

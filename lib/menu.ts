@@ -1,4 +1,3 @@
-import { MODELES } from "@/components/modeles/donnees";
 import { SECTEURS } from "@/lib/secteurs";
 /* ══════════════════════════════════════════════════════════════════════
    Le menu principal — une seule source pour les deux surfaces (11/09/2026)
@@ -83,6 +82,24 @@ import { SECTEURS } from "@/lib/secteurs";
      en dernier, parce qu'elle se lit comme leur complément — « et si rien
      de tout ça ne correspond ».
 
+   · 22/11 — le site passe au discours ERP (Teo : « le site est trop
+     fouillis », puis « oui top, fais ça »). « Nos offres » devient
+     « Logiciel » :
+     - une entrée « Gestion » en tête, qui mène au bloc Gestion de
+       l'accueil en attendant que le logiciel de gestion ait sa page ;
+     - les quatre agents sont nommés par ce qu'ils font (Relances, Clients
+       inactifs, Demandes clients, Factures fournisseurs), plus par leur
+       marque, comme les métiers depuis le 25/09. La marque reste dans
+       `marque` : components/reservation/UnSeulAudit.tsx s'en sert pour
+       choisir le signe et écrire le nom, il ne change donc pas ;
+     - quatre métiers seulement dans le panneau (BTP, avocats, architectes,
+       grands groupes) et « Tous les métiers » pour les trois autres, qui
+       gardent leur page et leur place sur /secteurs.
+     « Votre site » SORT du menu : /modeles et /tarifs/site restent en
+     ligne, on y arrive par le pied de l'accueil et par /tarifs. Quatre
+     rubriques au lieu de cinq. Seul le contenu change : aucun composant
+     ni aucune feuille de style du menu n'est touché.
+
    ─ Les textes ─
 
    Ils ne sont pas écrits ici : ce sont ceux des cartes de /offres
@@ -102,6 +119,9 @@ export type Entree = {
      à plusieurs colonnes (« Nos offres »). Les entrées d'une même colonne
      se suivent dans la liste ; le panneau mobile en fait un intertitre. */
   colonne?: string;
+  /* 22/11 — la marque du logiciel (CASHD, REPUT…) quand l'intitulé du menu
+     dit ce qu'il fait. Lue par UnSeulAudit pour le signe et le nom. */
+  marque?: string;
 };
 
 export type Rubrique = {
@@ -109,51 +129,67 @@ export type Rubrique = {
   /* rubrique SIMPLE : un lien direct dans le bandeau, sans chevron. */
   href?: string;
   /* rubrique à panneau : la case large en tête, puis les rangées. */
-  vedette?: Required<Omit<Entree, "colonne">>;
+  vedette?: Required<Omit<Entree, "colonne" | "marque">>;
   entrees?: Entree[];
   /* chemins hors entrées qui allument aussi la rubrique (page d'ensemble
      d'une colonne, par exemple /secteurs) */
   racines?: string[];
 };
 
+/* l'intitulé de la rubrique du logiciel : UnSeulAudit la retrouve par lui */
+export const RUBRIQUE_LOGICIEL = "Logiciel";
+
+/* 22/11 — les métiers montrés dans le panneau ; les autres restent sur /secteurs */
+const METIERS_AU_MENU = ["btp", "avocats", "architectes", "groupes"];
+
 export const MENU: Rubrique[] = [
   {
-    label: "Nos offres",
+    label: RUBRIQUE_LOGICIEL,
     vedette: {
       href: "/offres",
-      label: "Toutes les offres",
+      label: "Tous les modules",
       texte: "Tout se combine, sur un seul audit.",
     },
     racines: ["/secteurs"],
     entrees: [
       {
+        href: "/#gestion",
+        label: "Gestion",
+        texte: "Ventes, achats, stock, banque, comptabilité",
+        colonne: "Pour toutes les entreprises",
+      },
+      {
         href: "/offres/relances-impayes",
-        label: "CASHD",
+        label: "Relances",
+        marque: "CASHD",
         texte: "Relance des devis et des factures échues",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/nouvelles-affaires",
-        label: "OFFLOAD",
-        texte: "Relance des clients inactifs",
+        label: "Clients inactifs",
+        marque: "OFFLOAD",
+        texte: "Reprise de contact avec vos anciens clients",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/demandes-clients",
-        label: "REPUT",
+        label: "Demandes clients",
+        marque: "REPUT",
         texte: "Chaque demande traitée, à toute heure",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/factures-fournisseurs",
-        label: "FILED",
-        texte: "Factures fournisseurs lues et transmises",
+        label: "Factures fournisseurs",
+        marque: "FILED",
+        texte: "Chaque facture lue, contrôlée et transmise",
         colonne: "Pour toutes les entreprises",
       },
       {
         href: "/offres/sur-mesure",
         label: "Sur mesure",
-        texte: "Le système propre à votre organisation",
+        texte: "Le module propre à votre organisation",
         colonne: "Pour toutes les entreprises",
       },
       /* Le métier en intitulé, une ligne courte dessous (`ligne`) : le
@@ -162,26 +198,17 @@ export const MENU: Rubrique[] = [
          puis « quand même une ligne descriptive par métier », puis
          « enlève les noms à côté » — le nom du logiciel ne figure plus dans
          le menu, il reste sur la page du métier. */
-      ...SECTEURS.map((s) => ({
+      ...SECTEURS.filter((s) => METIERS_AU_MENU.includes(s.slug)).map((s) => ({
         href: `/secteurs/${s.slug}`,
         label: s.metier,
         texte: s.ligne,
         colonne: "Pour votre métier",
       })),
-    ],
-  },
-  {
-    label: "Votre site",
-    entrees: [
       {
-        href: "/modeles",
-        label: "Voir les modèles",
-        texte: `${MODELES.length} modèles en ligne, consultables immédiatement.`,
-      },
-      {
-        href: "/tarifs/site",
-        label: "Prix et commande",
-        texte: "Ce que coûte un site, ce qu'il comprend, et la commande.",
+        href: "/secteurs",
+        label: "Tous les métiers",
+        texte: "Sept métiers, chacun avec son module",
+        colonne: "Pour votre métier",
       },
     ],
   },

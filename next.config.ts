@@ -165,6 +165,12 @@ const nextConfig: NextConfig = {
       { source: "/solutions", destination: "/offres", permanent: true },
       { source: "/moteurs/:system", destination: "/offres/:system", permanent: true },
       { source: "/solutions/:system", destination: "/offres/:system", permanent: true },
+      /* 22/11 (Teo, « le site est trop fouillis ») — /commencer aiguillait
+         entre les tarifs des groupes, ceux des PME et les sites web. Depuis
+         le passage au discours ERP il n'y a plus qu'une entrée : l'audit.
+         Redirection TEMPORAIRE (307) à dessein : la page existe toujours
+         dans app/commencer, et un navigateur garde une 308 en mémoire. */
+      { source: "/commencer", destination: "/reserver-un-audit", permanent: false },
       /* 30/07 : la page À propos (/contact) est supprimée à la demande de Teo.
          L'URL était dans le header, le pied de page et plusieurs fiches — on
          la redirige vers la page d'audit plutôt que de servir un 404. */

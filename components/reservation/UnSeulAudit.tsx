@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { SystemSigne } from "@/components/logos";
-import { MENU } from "@/lib/menu";
+import { MENU, RUBRIQUE_LOGICIEL } from "@/lib/menu";
 import "./UnSeulAudit.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -41,7 +41,7 @@ import "./UnSeulAudit.css";
    du même panneau (« Tout se combine, sur un seul audit. »).
    ══════════════════════════════════════════════════════════════════════ */
 
-const OFFRES = (MENU.find((r) => r.label === "Nos offres")?.entrees ?? []).filter((e) =>
+const OFFRES = (MENU.find((r) => r.label === RUBRIQUE_LOGICIEL)?.entrees ?? []).filter((e) =>
   e.href.startsWith("/offres/"),
 );
 
@@ -61,7 +61,7 @@ export default function UnSeulAudit() {
         </span>
         {OFFRES.slice(0, PLACES.length).map((o, i) => (
           <span key={o.href} className={`ua-tuile ua-tuile--${PLACES[i]}`}>
-            <SystemSigne system={o.label.toUpperCase()} taille={20} />
+            <SystemSigne system={(o.marque ?? o.label).toUpperCase()} taille={20} />
           </span>
         ))}
         <span className="ua-socle">
@@ -85,10 +85,10 @@ export default function UnSeulAudit() {
           <li key={o.href} className="ua-item">
             <Link href={o.href} className="ua-offre">
               <span aria-hidden className="ua-offre-signe">
-                <SystemSigne system={o.label.toUpperCase()} taille={18} />
+                <SystemSigne system={(o.marque ?? o.label).toUpperCase()} taille={18} />
               </span>
               <span className="ua-offre-corps">
-                <span className="ua-offre-nom">{o.label}</span>
+                <span className="ua-offre-nom">{o.marque ?? o.label}</span>
                 {o.texte ? <span className="ua-offre-ligne">{o.texte}</span> : null}
               </span>
               <ArrowUpRight aria-hidden strokeWidth={1.6} className="ua-offre-fleche" />
