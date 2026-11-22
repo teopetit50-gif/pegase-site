@@ -19,6 +19,7 @@ const CADRES = [
   /* 05/11 (Teo) — le hero montre la vue d'ensemble de CASHD (après un
      essai sur les avenants de Daliro, écarté). */
   ['cashd', '/espace2/cashd', 1440, 841],
+  ['gestion', '/espace2/filed', 1440, 841],
   /* 05/11 (Teo) — la section « Ce que fait Omega » : les trois façons
      d'automatiser (agents, logiciels métiers, sur mesure) et le pilotage */
   ['agents', '/espace2', 1440, 841],

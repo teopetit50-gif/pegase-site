@@ -9,6 +9,7 @@ import {
   BriefcaseBusiness,
   Check,
   CheckCheck,
+  LayoutDashboard,
   Mail,
   MessagesSquare,
   Phone,
@@ -75,9 +76,11 @@ import { MotsReveles } from "@/components/ui/hero-section";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-  title: "Omega.AI | L'automatisation des processus par l'IA",
+  /* 22/11 (Teo, « on part sur le sujet ERP ») — le titre et la description
+     suivent le hero de components/accueil-v3/textes.ts. */
+  title: "Omega.AI | L'ERP qui se configure avec l'IA",
   description:
-    "Agents IA, logiciels par métier et sur-mesure : on automatise les processus répétitifs des PME et des groupes, sur vos outils. Audit de 30 minutes offert.",
+    "Ventes, achats, stock, banque et comptabilité dans un seul logiciel, réglé par l'IA pour votre activité, avec des agents qui font le travail répétitif. Audit de 30 minutes offert.",
 };
 
 /* 05/11 (Teo, « en plus pro, j'aime pas les couleurs ») — les pastilles,
@@ -89,6 +92,7 @@ const NEUTRE = { texte: "text-white/75", pastille: "bg-white/[0.04] border-white
 const COULEURS = { green: NEUTRE, purple: NEUTRE, orange: NEUTRE, blue: NEUTRE };
 
 const ICONES_AGENTS = {
+  gestion: LayoutDashboard,
   agents: Bot,
   metiers: BriefcaseBusiness,
   "sur-mesure": Wrench,
