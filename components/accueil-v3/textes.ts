@@ -206,7 +206,7 @@ export const ETAPES = [
     couleur: "purple" as const,
     titre: "L'installation, guidée par l'IA",
     texte:
-      "L'IA pose les questions qui manquent, active vos modules et règle la TVA et le plan comptable. Nous reprenons vos données et votre expert-comptable valide. Aucun débit avant la fin de l'installation.",
+      "L'IA pose les questions qui manquent, active vos modules et règle la TVA et le plan comptable. Nous reprenons vos données et votre expert-comptable valide le paramétrage.",
     image: "/accueil/etape-2-clair.webp",
   },
   {
@@ -293,15 +293,21 @@ export const DONNEES = {
     "Un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne. Export complet et suppression sur demande.",
 };
 
-/* des engagements vérifiables, tous publiés sur /tarifs */
+/* des engagements vérifiables, tous publiés sur /tarifs
+
+   22/11 (Teo, « agents seulement ») — « 0 € avant l'installation » et
+   « remboursé 30 jours » ne valent que pour les agents, pas pour le
+   logiciel de gestion : les deux compteurs, la réponse « remboursement »
+   et la réponse « installation » de la FAQ le disent, et l'étape 02 ne
+   porte plus la phrase sur le débit. */
 export const CHIFFRES_INTRO = {
   surtitre: "En chiffres",
   titre: "Des engagements, pas des promesses",
 };
 export const CHIFFRES = [
   { valeur: 30, suffixe: " min", titre: "Pour un audit offert", sous: "Votre tarif est écrit à la fin" },
-  { valeur: 0, suffixe: " €", titre: "Débité avant l'installation", sous: "Vous payez ce qui tourne" },
-  { valeur: 30, suffixe: " j", titre: "Remboursement intégral", sous: "Après la mise en service, sans justifier" },
+  { valeur: 0, suffixe: " €", titre: "Débité avant l'installation", sous: "Vos agents : vous payez ce qui tourne" },
+  { valeur: 30, suffixe: " j", titre: "Remboursement intégral", sous: "Vos agents : sans avoir à justifier" },
   { valeur: 7, suffixe: "", titre: "Modules métier", sous: "Du chantier au cabinet d'avocats" },
 ];
 
@@ -479,7 +485,7 @@ export const FAQ: Question[] = [
     id: "remboursement",
     cat: "Tarifs",
     q: "Que se passe-t-il si l'offre ne convient pas ?",
-    r: "Le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir. Au-delà, la formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis.",
+    r: "Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
   },
   {
     id: "donnees",
@@ -509,7 +515,7 @@ export const FAQ: Question[] = [
     id: "installation",
     cat: "Accompagnement",
     q: "Qui s'occupe de l'installation ?",
-    r: "Notre équipe vous accompagne de bout en bout. L'IA règle le logiciel à partir de la description de votre activité, nous reprenons vos données, et votre expert-comptable valide le paramétrage comptable avant la mise en route. Aucun débit n'intervient avant la fin de l'installation.",
+    r: "Notre équipe vous accompagne de bout en bout. L'IA règle le logiciel à partir de la description de votre activité, nous reprenons vos données, et votre expert-comptable valide le paramétrage comptable avant la mise en route. Pour les agents, aucun débit n'intervient avant la fin de leur installation.",
   },
   {
     id: "support",
