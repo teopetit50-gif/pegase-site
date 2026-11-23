@@ -21,10 +21,11 @@
    CE QUI CHANGE, et pourquoi :
    1. AUCUN CLIENT INVENTÉ. La source signe six citations de personnes
       nommées et affiche leurs résultats (« 41 % de tickets en moins »).
-      Ici les onglets sont NOS agents et NOS modules, le texte est la
-      situation que chacun règle (les phrases de l'accueil, déjà
-      validées), et le grand chiffre est un FAIT DE CONCEPTION vérifiable
-      sur le site (une cadence, une règle), pas une performance.
+      Ici les onglets sont NOS six modules métier (repris le 23/11 : la
+      première version y mêlait les agents par leur nom de code). En
+      grand, l'objet du métier ; dessous, ce que fait le module ; à
+      droite, le problème de départ. Les deux phrases sont celles de
+      l'accueil (lib/secteurs-accueil), déjà validées.
    2. LES LOGOS SONT LES NÔTRES (public/logos), en gris comme dans le
       défilement de l'accueil ; la source compose des mots-symboles.
       Ceux des agents sont des fichiers BLANCS (relevé à la recette :
@@ -101,7 +102,7 @@ export default function MetiersOnglets({ recits }: { recits: Recit[] }) {
       }}
     >
       <Tabs.List
-        aria-label="Agents et modules"
+        aria-label="Modules métier"
         className="eb-trait grid w-full grid-cols-2 border-y sm:grid-cols-3 lg:grid-cols-6"
       >
         {recits.map((recit) => {
@@ -161,14 +162,16 @@ export default function MetiersOnglets({ recits }: { recits: Recit[] }) {
               {numero(recits.length)}
             </span>
             <p style={retard(1)} className="eb-anim-change m-0 mt-3 flex flex-col gap-1">
-              <span className="text-6xl leading-none font-normal tracking-tight tabular-nums sm:text-7xl">
+              <span className="text-5xl leading-none font-normal tracking-tight sm:text-6xl xl:text-7xl">
                 {recit.chiffre}
               </span>
               <span className="text-lg font-medium">{recit.libelle}</span>
             </p>
-            <span style={retard(2)} className="eb-anim-change eb-doux text-sm">
-              {recit.note}
-            </span>
+            {recit.note && (
+              <span style={retard(2)} className="eb-anim-change eb-doux text-sm">
+                {recit.note}
+              </span>
+            )}
           </div>
 
           <figure className="eb-trait m-0 flex flex-col gap-6 md:border-l md:pl-16">

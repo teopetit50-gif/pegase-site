@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════
-   FilFacture — la trace d'une relance, du brouillon au paiement
+   FilPiece — la trace d'une vente dans le logiciel, du devis au paiement
 
    ORIGINE. `timeline` de @robertlib (21st.dev, relevé le 23/11/2026 sur
    le registre) : une liste d'événements datés reliés par un trait — un
@@ -16,10 +16,15 @@
       (langue, fuseau, format d'heure, squelette de chargement, variante
       alternée) pour afficher des dates : les nôtres sont écrites en
       français dans la donnée, il ne reste que la liste.
-   2. LES TONS PORTENT UN SENS : vert pour le paiement, encre pour le
+   2. LE FIL EST CELUI DU LOGICIEL DE GESTION (repris le 23/11 : la
+      première version suivait une relance). C'est la même vente que
+      CycleVente : l'IA prépare le devis, vous le corrigez, vous validez
+      la facture, la banque rapproche. « L'IA prépare, vous validez.
+      Chaque action laisse une trace. »
+   3. LES TONS PORTENT UN SENS : vert pour le paiement, encre pour le
       reste. La source a sept couleurs de repère.
-   3. Une liste ordonnée native (`<ol>`), comme la source.
-   Les noms, dates et montants sont des EXEMPLES, et le bloc le dit.
+   Les noms, dates et montants sont ceux des écrans de /gestion : des
+   EXEMPLES, et le bloc le dit.
    ══════════════════════════════════════════════════════════════════════ */
 
 import type { ReactNode } from "react";
@@ -37,49 +42,49 @@ type Evenement = {
 
 const EVENEMENTS: Evenement[] = [
   {
-    titre: "Paiement de 2 480,00 € reçu",
-    heure: "24 sept. 2026, 14 h 02",
-    texte: "Virement rapproché avec la facture F-2041",
+    titre: "Virement de 2 496,00 € rapproché",
+    heure: "24 nov. 2026, 14 h 02",
+    texte: "Banque : facture F-2053 soldée, écriture passée en comptabilité",
     icone: <Banknote />,
     ton: "vert",
   },
   {
     titre: (
       <>
-        <b className="font-semibold">Vous</b> avez validé l&apos;envoi
+        <b className="font-semibold">Vous</b> avez validé la facture F-2053
       </>
     ),
-    heure: "22 sept. 2026, 9 h 30",
-    texte: "Relance envoyée à la comptabilité de Menuiserie Costa",
+    heure: "21 nov. 2026, 9 h 30",
+    texte: "Stock : trois articles sortis du dépôt nord",
     icone: <Send />,
   },
   {
     titre: (
       <>
-        <b className="font-semibold">Vous</b> avez corrigé la relance
+        <b className="font-semibold">Vous</b> avez corrigé le devis
       </>
     ),
-    heure: "22 sept. 2026, 9 h 28",
-    texte: "Deux passages réécrits avant l'envoi",
+    heure: "20 nov. 2026, 16 h 12",
+    texte: "Deux lignes modifiées avant l'envoi à Atelier Bertin",
     icone: <Pencil />,
     encart: [
-      { libelle: "Délai proposé", avant: "8 jours", apres: "15 jours" },
-      { libelle: "Formule", avant: "sans réponse de votre part", apres: "à votre convenance" },
+      { libelle: "Disjoncteur 16 A", avant: "60 pièces", apres: "80 pièces" },
+      { libelle: "Délai de livraison", avant: "10 jours", apres: "5 jours" },
     ],
   },
   {
     titre: (
       <>
-        <b className="font-semibold">CASHD</b> a rédigé la relance
+        <b className="font-semibold">L&apos;IA</b> a préparé le devis D-0314
       </>
     ),
-    heure: "22 sept. 2026, 7 h 00",
-    texte: "Facture F-2041 de Menuiserie Costa, échue depuis 12 jours",
+    heure: "20 nov. 2026, 15 h 40",
+    texte: "D'après la demande d'Atelier Bertin, à votre en-tête",
     icone: <FileText />,
   },
 ];
 
-export default function FilFacture() {
+export default function FilPiece() {
   return (
     <div className="eb w-full">
       <ol role="list" className="m-0 list-none p-0 text-sm">
@@ -108,7 +113,7 @@ export default function FilFacture() {
                   <dl className="eb-voile m-0 mt-2 flex flex-col gap-1 rounded-lg px-3 py-2">
                     {evenement.encart.map((ligne) => (
                       <div key={ligne.libelle} className="flex flex-wrap gap-x-1.5">
-                        <dt className="eb-texte">{ligne.libelle} :</dt>
+                        <dt className="eb-texte">{ligne.libelle}&nbsp;:</dt>
                         <dd className="eb-encre m-0">
                           <s className="eb-doux">{ligne.avant}</s> → {ligne.apres}
                         </dd>

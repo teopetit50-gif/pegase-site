@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { geistAccueil, geistMonoAccueil } from "../_polices/geist-accueil";
 import "@/components/accueil-v3/accueil.css";
-import { SITUATIONS } from "@/components/accueil-v3/textes";
 import Apparition, { GroupeApparition, MotsApparition } from "@/components/accueil/Apparition";
-import ApercuRecouvrement from "@/components/essai/ApercuRecouvrement";
-import CycleFacture from "@/components/essai/CycleFacture";
-import FilFacture from "@/components/essai/FilFacture";
+import ApercuGestion from "@/components/essai/ApercuGestion";
+import ChoixModules from "@/components/essai/ChoixModules";
+import CycleVente from "@/components/essai/CycleVente";
+import FilPiece from "@/components/essai/FilPiece";
 import MetiersOnglets, { type Recit } from "@/components/essai/MetiersOnglets";
-import OngletsAgents from "@/components/essai/OngletsAgents";
-import TrouveOffre from "@/components/essai/TrouveOffre";
+import OngletsGestion from "@/components/essai/OngletsGestion";
+import { CARTES_SECTEURS } from "@/lib/secteurs-accueil";
 
 /* ══════════════════════════════════════════════════════════════════════
    /essai-blocs — six blocs repris de 21st.dev, à juger avant de les poser
@@ -21,6 +21,14 @@ import TrouveOffre from "@/components/essai/TrouveOffre";
    là où il irait. Les blocs vivent dans components/essai/, chacun avec
    son origine et ses écarts en tête ; supprimer ce dossier et celui-ci
    supprime tout.
+
+   LE CONTENU A ÉTÉ REFAIT LE JOUR MÊME. La première version tournait
+   autour des relances et des agents nommés par leur code ; Teo : « t'as
+   bien vérifié ce qu'Omega est maintenant ? ». Omega est d'abord un
+   logiciel de gestion : les six blocs montrent une vente qui met tout à
+   jour, sa trace, les modules, le tableau de bord, les modules métier
+   et le choix des modules. Les mots sont ceux de /gestion et de
+   l'accueil, les données d'exemple celles des écrans de /gestion.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -28,120 +36,80 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/* Le grand chiffre de chaque onglet est un FAIT DE CONCEPTION déjà écrit
-   sur le site (cadence de relance, lecture seule, devis avant de
-   commencer), jamais une performance. Le texte, lui, vient de SITUATIONS. */
-const FAITS: Record<string, Pick<Recit, "chiffre" | "libelle" | "note" | "href" | "lien" | "logo" | "logoBlanc">> = {
-  CASHD: {
-    chiffre: "J+3",
-    libelle: "première relance, puis J+7 et J+21",
-    note: "Aucun envoi sans votre validation",
-    href: "/offres/relances-impayes",
-    lien: "Voir CASHD",
-    logo: "/logos/cashd-lockup.png",
-    logoBlanc: true,
-  },
-  REPUT: {
-    chiffre: "21\u00a0h",
-    libelle: "la réponse est rédigée aussitôt",
-    note: "Demandes reçues par mail et WhatsApp",
-    href: "/offres/demandes-clients",
-    lien: "Voir REPUT",
-    logo: "/logos/reput-lockup.png",
-    logoBlanc: true,
-  },
-  FILED: {
-    chiffre: "1\u00a0clic",
-    libelle: "pour valider une pièce déjà lue et contrôlée",
-    note: "Classée par fournisseur, transmise à la comptabilité",
-    href: "/offres/factures-fournisseurs",
-    lien: "Voir FILED",
-    logo: "/logos/filed-lockup.png",
-    logoBlanc: true,
-  },
-  Daliro: {
-    chiffre: "1\u00a0dossier",
-    libelle: "par chantier, du premier appel au décompte final",
-    note: "Devis, avenants, situations de travaux",
-    href: "/secteurs/btp",
-    lien: "Voir Daliro",
-    logo: "/logos/daliro-lockup.png",
-  },
-  Varelo: {
-    chiffre: "0\u00a0écriture",
-    libelle: "dans vos logiciels : tout se lit, rien ne s'y modifie",
-    note: "La direction décide de chaque action",
-    href: "/secteurs/groupes",
-    lien: "Voir Varelo",
-    logo: "/logos/varelo-lockup.png",
-  },
-  "Sur mesure": {
-    chiffre: "1\u00a0devis",
-    libelle: "écrit avant de commencer",
-    note: "Ce que fait le module, et son prix",
-    href: "/offres/sur-mesure",
-    lien: "Voir le sur-mesure",
-  },
+/* l'objet du métier, écrit en grand dans l'onglet ; le reste (nom du
+   module, problème, réponse) vient des cartes de secteurs de l'accueil */
+const OBJETS: Record<string, string> = {
+  btp: "Chantier",
+  avocats: "Dossier",
+  architectes: "Permis",
+  "location-automobile": "Véhicule",
+  dentaire: "Patient",
+  groupes: "Groupe",
 };
 
-const RECITS: Recit[] = SITUATIONS.filter((situation) => FAITS[situation.nom]).map((situation) => ({
-  id: situation.nom.toLowerCase().replace(/\s+/g, "-"),
-  nom: situation.nom,
-  texte: situation.texte,
-  role: situation.role,
-  ...FAITS[situation.nom],
+const RECITS: Recit[] = CARTES_SECTEURS.filter((carte) => OBJETS[carte.slug]).map((carte) => ({
+  id: carte.slug,
+  nom: carte.saas,
+  logo: `/logos/${carte.saas.toLowerCase()}-lockup.png`,
+  chiffre: OBJETS[carte.slug],
+  libelle: carte.reponse,
+  note: "",
+  texte: carte.probleme,
+  role: `Module métier · ${carte.metier}`,
+  href: `/secteurs/${carte.slug}`,
+  lien: `Voir ${carte.saas}`,
 }));
 
 const SECTIONS: { id: string; surtitre: string; titre: string; texte: string; bloc: ReactNode }[] = [
   {
-    id: "cycle",
+    id: "vente",
     surtitre: "Bloc M · d'après Shadcn Studio",
-    titre: "De la relance à l'encaissement, sous vos yeux",
-    texte: "L'agent rédige, vous validez, le client règle. Chaque étape se voit.",
-    bloc: <CycleFacture />,
+    titre: "Une vente validée, tout se met à jour",
+    texte: "Le devis devient facture, le stock sort, la banque rapproche, l'écriture passe. Sans ressaisie.",
+    bloc: <CycleVente />,
   },
   {
     id: "trace",
     surtitre: "Bloc N · d'après robertlib",
     titre: "Chaque action laisse une trace",
-    texte: "Qui a rédigé, qui a corrigé, qui a validé, et à quelle heure.",
+    texte: "Qui a préparé, qui a corrigé, qui a validé, et à quelle heure.",
     bloc: (
       <div className="mx-auto w-full max-w-[600px]">
-        <FilFacture />
+        <FilPiece />
       </div>
     ),
   },
   {
-    id: "agents",
+    id: "modules",
     surtitre: "Bloc A · d'après Cult UI",
-    titre: "Un onglet par agent, et ce qu'il prépare",
-    texte: "Le visiteur lit la phrase à gauche et voit le travail se faire à droite.",
+    titre: "Un onglet par pan du logiciel",
+    texte: "Le visiteur lit la phrase à gauche et voit l'écran se remplir à droite.",
     bloc: (
       <div className="overflow-hidden rounded-[20px] border border-white/[0.08]">
-        <OngletsAgents />
+        <OngletsGestion />
       </div>
     ),
   },
   {
-    id: "recouvrement",
+    id: "tableau",
     surtitre: "Bloc B · d'après felipemenezes098",
-    titre: "Tous vos impayés au même endroit",
-    texte: "Encours, relances et paiements se mettent à jour seuls.",
-    bloc: <ApercuRecouvrement />,
+    titre: "Toute votre gestion au même endroit",
+    texte: "Une information saisie une fois est à jour partout.",
+    bloc: <ApercuGestion />,
   },
   {
     id: "metiers",
     surtitre: "Bloc E · d'après Hirael",
     titre: "Chaque métier a ses règles. Son module les connaît.",
-    texte: "Un logo, un fait en grand, et la situation qu'il règle.",
+    texte: "Un logo, l'objet du métier en grand, et le problème que le module règle.",
     bloc: <MetiersOnglets recits={RECITS} />,
   },
   {
-    id: "palier",
+    id: "choix",
     surtitre: "Bloc G · d'après dhxwhy",
-    titre: "Cochez vos besoins, le palier se désigne",
-    texte: "Le visiteur choisit ce qu'il veut confier. Le montant, lui, s'écrit à l'audit.",
-    bloc: <TrouveOffre />,
+    titre: "Cochez ce dont vous avez besoin",
+    texte: "Les modules s'allument. Le prix, sur devis, est arrêté pendant l'audit.",
+    bloc: <ChoixModules />,
   },
 ];
 
@@ -157,8 +125,8 @@ export default function EssaiBlocs() {
                 Six blocs à l&apos;essai
               </h1>
               <p className="text-base md:text-lg text-white/55 leading-relaxed max-w-xl text-balance">
-                Repris de 21st.dev et remplis avec les cas d&apos;Omega, pour être jugés en conditions réelles avant
-                d&apos;aller sur le site.
+                Repris de 21st.dev et remplis avec le logiciel de gestion d&apos;Omega, pour être jugés en conditions
+                réelles avant d&apos;aller sur le site.
               </p>
             </div>
           </div>

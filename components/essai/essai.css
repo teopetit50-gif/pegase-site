@@ -3,6 +3,9 @@
 
    Six blocs repris de 21st.dev, choisis par Teo sur planches (« Oui,
    pose-les »), posés sur une page de travail avant de toucher à l'accueil.
+   Leur contenu a été refait le jour même autour du logiciel de gestion
+   (« y a plus d'histoire de CASHD ») : une vente, sa trace, les modules,
+   le tableau de bord, les métiers, le choix des modules.
    Chaque composant de ce dossier porte son origine et ses écarts en tête.
 
    Ce fichier ne porte que ce que les six partagent : les jetons, quelques
@@ -111,7 +114,7 @@
 .eb .eb-point { background-color: var(--eb-pale); }
 .eb .eb-monte { color: var(--eb-vert); }
 
-/* ── CycleFacture ── */
+/* ── CycleVente ── */
 .eb .eb-jalon-fait {
   border-color: var(--ton);
   background-color: var(--ton);
@@ -143,7 +146,7 @@
   color: #ffffff;
 }
 
-/* ── FilFacture ── */
+/* ── FilPiece ── */
 .eb .eb-repere {
   border-color: var(--eb-trait-fort);
   background-color: var(--eb-voile-2);
@@ -155,7 +158,7 @@
   color: var(--eb-vert);
 }
 
-/* ── OngletsAgents ── */
+/* ── OngletsGestion ── */
 /* la queue de la bulle : un carré tourné, glissé sous elle. Le tracé de
    la source est son actif ; celui-ci tient en quatre lignes. */
 .eb .eb-queue {
@@ -191,7 +194,7 @@
 /* les logos des agents sont des fichiers blancs : retournés en encre */
 .eb .eb-logo-blanc { filter: grayscale(1) invert(1); }
 
-/* ── TrouveOffre ── */
+/* ── ChoixModules ── */
 .eb .eb-efface { color: var(--eb-doux); }
 .eb .eb-efface:hover {
   background-color: var(--eb-voile);
