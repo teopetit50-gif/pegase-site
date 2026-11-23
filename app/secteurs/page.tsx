@@ -6,6 +6,7 @@ import { FolderOpen, ScanSearch, CircleCheck } from "lucide-react";
 import PageShell from "@/components/PageShell";
 import Mouvements from "@/components/secteurs/Mouvements";
 import CarteApercu from "@/components/secteurs/CarteApercu";
+import { DocumentMetier, ListeMatin } from "@/components/secteurs/ApercusHub";
 import { SECTEURS } from "@/lib/secteurs";
 import "./secteurs.css";
 import "./mobile.css";
@@ -129,7 +130,10 @@ const PILIERS: { Icone: LucideIcon; fond: string; titre: string; texte: string }
   },
 ];
 
-const capture = (slug: string) => `/apercus-secteurs/${slug}.png`;
+/* 22/11/2026 (Teo) — les fenêtres du héros et les cartes d'aperçu, qui
+   montraient deux fois la page d'accueil de chaque logiciel, sont dessinées
+   en code (components/secteurs/ApercusHub.tsx). La capture de Daliro, plus
+   bas, reste : Teo garde les vraies captures des logiciels métier. */
 
 /* ══ le bouton de la référence (FlatCta) ══════════════════════════════
    Même balisage que le `Bouton` de /offres/sur-mesure : le voile qui
@@ -185,21 +189,15 @@ export default function SecteursPage() {
             Le titre est le NOM de la gamme, en capitales de titre comme
             « RL Environments » (même parti que « Système Métier Sur
             Mesure » sur /offres/sur-mesure) : 16 signes pour leurs 15.
-            Les fenêtres sont décoratives (aria-hidden) : les mêmes
-            captures sont décrites plus bas, dans la bande d'aperçu. */}
+            Les fenêtres sont décoratives (aria-hidden) : chaque métier
+            est décrit plus bas, dans la bande d'aperçu. */}
         <div className="sct-cadre sct-cadre--hero">
           <section className="sct-plein">
             <div aria-hidden className="sct-media">
               <div className="sct-lueur" />
               {SECTEURS.map((s, i) => (
                 <div key={s.slug} className={`sct-fenetre sct-fenetre--${i}`}>
-                  <Image
-                    src={capture(s.slug)}
-                    alt=""
-                    fill
-                    loading="eager"
-                    sizes="(min-width: 768px) 33vw, 64vw"
-                  />
+                  <DocumentMetier slug={s.slug} />
                 </div>
               ))}
             </div>
@@ -267,12 +265,7 @@ export default function SecteursPage() {
               {SECTEURS.map((s, i) => (
                 <CarteApercu key={s.slug} href={`/secteurs/${s.slug}`}>
                   <div className="sct-apercu__image">
-                    <Image
-                      src={capture(s.slug)}
-                      alt={`Page d'accueil de ${s.saas}, le logiciel des ${s.metier === "BTP" ? "entreprises du BTP" : s.metier.toLowerCase()}`}
-                      fill
-                      sizes="(min-width: 768px) 50vw, 100vw"
-                    />
+                    <ListeMatin slug={s.slug} />
                   </div>
                   <div className="sct-apercu__texte">
                     <p className="sct-apercu__metier">{s.metier}</p>

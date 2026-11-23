@@ -62,12 +62,12 @@ export default function AppelOutil({ className }: { className?: string }) {
                 Votre outil n&apos;est pas dans la liste&nbsp;?
               </h2>
               <p data-reveal className="o-lead mt-5">
-                Cette liste recense ce qui est déjà raccordé, pas une limite. Dès qu&apos;un outil expose ses données, un système peut s&apos;y connecter. Dans le cas contraire, nous le disons pendant le diagnostic, pas après.
+                Cette liste n&apos;est pas une limite. Dès qu&apos;un outil donne accès à ses données, nous construisons le raccordement sur mesure. Sinon, nous vous le disons pendant l&apos;audit, pas après.
               </p>
             </div>
             <div data-reveal className="shrink-0">
-              <Link href="/commencer" className="o-btn o-btn--primary">
-                En parler lors du diagnostic
+              <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                En parler pendant l&apos;audit
               </Link>
             </div>
           </div>

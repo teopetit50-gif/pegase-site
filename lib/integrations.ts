@@ -48,19 +48,19 @@ type Fiche = { famille: Famille; role: string };
 export const OUTIL_INFOS: Record<string, Fiche> = {
   Gmail: {
     famille: "Messagerie",
-    role: "Le système lit les fils entrants, rédige les relances et les dépose en brouillon dans la messagerie. L'envoi reste le geste de vos équipes.",
+    role: "L'agent lit les fils entrants, rédige les relances et les dépose en brouillon dans la messagerie. L'envoi reste le geste de vos équipes.",
   },
   WhatsApp: {
     famille: "Messagerie",
-    role: "Les demandes reçues hors horaires trouvent une réponse, et tout ce qui sort du périmètre validé est transféré à vos équipes au lieu d'être approximé.",
+    role: "Les demandes reçues hors horaires ont leur réponse rédigée, qui part après votre validation. Le reste va à vos équipes.",
   },
   Telegram: {
     famille: "Messagerie",
-    role: "Canal de notification : le point du matin et les alertes de retard critique arrivent là où vos équipes regardent déjà.",
+    role: "Canal de notification : le point du matin et les alertes sur les gros retards de paiement arrivent là où vos équipes regardent déjà.",
   },
   "Google Sheets": {
     famille: "Tableur & base",
-    role: "Beaucoup de services pilotent encore leur encours dans un tableur. Le système y lit les échéances et y réécrit l'état de chaque relance.",
+    role: "Si vous suivez vos factures dans un tableur, l'agent y lit les échéances et y note l'état de chaque relance.",
   },
   Airtable: {
     famille: "Tableur & base",
@@ -68,11 +68,11 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Notion: {
     famille: "Tableur & base",
-    role: "Base de connaissances de REPUT : horaires, tarifs, conditions. Le système y puise ses réponses au lieu de les inventer.",
+    role: "Base de connaissances de REPUT : horaires, tarifs, conditions. L'agent y trouve ses réponses au lieu de les inventer.",
   },
   "Google Drive": {
     famille: "Fichiers",
-    role: "Dépôt des pièces classées : chaque facture fournisseur extraite est rangée par émetteur et par mois, prête pour la comptabilité.",
+    role: "Dépôt des pièces classées : chaque facture fournisseur lue est rangée par émetteur et par mois, prête pour la comptabilité.",
   },
   Dropbox: {
     famille: "Fichiers",
@@ -80,7 +80,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Stripe: {
     famille: "Paiement",
-    role: "Le système lit les encaissements et cesse de relancer une facture réglée, ce qui évite la relance de trop.",
+    role: "L'agent lit les encaissements et cesse de relancer une facture réglée, ce qui évite la relance de trop.",
   },
   PayPal: {
     famille: "Paiement",
@@ -92,15 +92,15 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   WooCommerce: {
     famille: "E-commerce",
-    role: "Même exploitation de l'historique de commandes, pour les sites marchands sous WordPress.",
+    role: "Même lecture de l'historique de commandes, pour les sites marchands sous WordPress.",
   },
   "Google Calendar": {
     famille: "Agenda",
-    role: "REPUT propose des créneaux réellement libres et pose le rendez-vous, sans double réservation.",
+    role: "REPUT propose des créneaux vraiment libres. Le rendez-vous est posé quand vous validez la réponse.",
   },
   Calendly: {
     famille: "Agenda",
-    role: "Quand la prise de rendez-vous passe déjà par là, le système s'y connecte plutôt que d'ouvrir un second canal.",
+    role: "Quand la prise de rendez-vous passe déjà par là, l'agent s'y connecte plutôt que d'ouvrir un second canal.",
   },
   "Google Meet": {
     famille: "Agenda",
@@ -112,11 +112,11 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   QuickBooks: {
     famille: "Comptabilité",
-    role: "Les pièces classées partent en dossier complet, avec leurs champs comptables extraits, sans ressaisie ni pièce manquante.",
+    role: "Après votre validation, les factures lues y arrivent avec leur montant, leur TVA et leur fournisseur, sans ressaisie.",
   },
   Sage: {
     famille: "Comptabilité",
-    role: "Même transmission structurée vers la comptabilité, au format attendu par l'outil.",
+    role: "Même transmission des factures, au format attendu par Sage.",
   },
   /* ⚠ 14/08/2026 — la fiche n8n a été RETIRÉE. Elle disait « le socle sur
      lequel tournent les moteurs » : c'était nommer notre outil interne sur
@@ -128,7 +128,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Trello: {
     famille: "Projet & CRM",
-    role: "Chaque relance sans réponse peut ouvrir une carte à traiter, pour que rien ne se perde entre deux dossiers.",
+    role: "Chaque relance sans réponse peut ouvrir une carte à traiter par l'équipe.",
   },
   Asana: {
     famille: "Projet & CRM",
@@ -136,17 +136,17 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   HubSpot: {
     famille: "Projet & CRM",
-    role: "Les réponses de prospection sont classées par niveau d'intérêt et écrites dans la fiche du contact.",
+    role: "Les réponses des clients recontactés sont classées par niveau d'intérêt et écrites dans la fiche du contact.",
   },
   /* clé « MailChimp » avec un C majuscule : c'est le `title` exact de
      simple-icons, et la fiche était silencieusement écartée sans lui */
   MailChimp: {
     famille: "Projet & CRM",
-    role: "Les vagues de réactivation partent sous votre marque, avec le suivi d'ouverture et de désinscription.",
+    role: "Après votre validation, les messages aux clients inactifs partent sous votre marque, avec le suivi des ouvertures et des désinscriptions.",
   },
   Typeform: {
     famille: "Formulaires",
-    role: "Une réponse à un formulaire déclenche la chaîne : qualification, accusé de réception, puis suivi.",
+    role: "Une réponse à un formulaire arrive chez l'agent, qui la classe et prépare la suite.",
   },
   "Google Forms": {
     famille: "Formulaires",
@@ -162,7 +162,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   WordPress: {
     famille: "Site web",
-    role: "Les demandes reçues par le formulaire du site entrent dans le même circuit que le reste.",
+    role: "Les demandes reçues par le formulaire du site arrivent chez REPUT, comme les autres demandes.",
   },
 };
 
@@ -171,13 +171,13 @@ export const MOTEUR_OUTILS = [
   {
     system: "CASHD",
     slug: "relances-impayes",
-    role: "Relance devis & factures",
+    role: "Relances de devis et de factures",
     outils: ["Gmail", "Google Sheets", "Stripe", "WhatsApp"],
   },
   {
     system: "REPUT",
     slug: "demandes-clients",
-    role: "Demandes entrantes & avis",
+    role: "Demandes clients et avis",
     outils: ["WhatsApp", "Gmail", "Google Calendar", "Notion"],
   },
   {
@@ -189,7 +189,7 @@ export const MOTEUR_OUTILS = [
   {
     system: "OFFLOAD",
     slug: "nouvelles-affaires",
-    role: "Relance des comptes inactifs",
+    role: "Clients inactifs recontactés",
     /* « MailChimp » : même casse que le `title` de simple-icons et que la
        clé d'OUTIL_INFOS plus haut, sans quoi le logo saute au rendu. */
     outils: ["Shopify", "Google Sheets", "MailChimp", "Gmail"],
@@ -203,24 +203,24 @@ export const RACCORDEMENT = [
     n: "01",
     titre: "Nous relevons vos outils",
     texte:
-      "Pendant le diagnostic, nous relevons les outils réellement utilisés par vos services, pas ceux de l'organigramme. Un tableur et une messagerie suffisent à faire tourner un système.",
+      "Pendant l'audit, nous relevons les outils que vos équipes utilisent vraiment, et les données à reprendre si Omega devient votre logiciel de gestion.",
   },
   {
     n: "02",
-    titre: "La lecture précède l'écriture",
+    titre: "Omega lit avant d'écrire",
     texte:
-      "Le système commence par lire : encours, historique, fils de discussion. Rien n'est écrit ni envoyé tant que cette lecture n'est pas validée.",
+      "Omega commence par lire : factures, historique, fils de discussion. Rien n'est écrit ni envoyé tant que vous n'avez pas vérifié ce qu'il a lu.",
   },
   {
     n: "03",
-    titre: "L'écriture passe par vos équipes",
+    titre: "Vos équipes valident chaque envoi",
     texte:
-      "Le système prépare ensuite chaque action et la dépose dans la file de validation, où vos équipes l'envoient, la corrigent ou l'abandonnent.",
+      "Les agents préparent ensuite chaque action et vous la présentent. Vos équipes l'envoient, la corrigent ou l'abandonnent.",
   },
   {
     n: "04",
-    titre: "Les données restent chez vous",
+    titre: "Vos données restent les vôtres",
     texte:
-      "Chaque entreprise dispose d'un espace de données chiffré, séparé des autres. Le jour où vous arrêtez, l'export complet vous est remis, puis l'espace est effacé.",
+      "Chaque entreprise a son espace de données chiffré, séparé des autres. Si vous arrêtez, nous vous remettons l'export complet et nous effaçons l'espace à votre demande.",
   },
 ];

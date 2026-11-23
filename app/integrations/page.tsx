@@ -65,13 +65,21 @@ import {
      5. clôture  → <AppelOutil>        (shadcnblocks « cta4 », carte claire)
    <FamilleOutils> n'est plus appelé (orphelin, gardé le temps de la recette) ;
    seul son type Outil sert encore ici.
+   22/11/2026 (Teo, « elle sert toujours à quelque chose ? Si oui, on a
+   besoin de modifier son contenu ») — la page disait « sans le modifier »
+   et « aucune migration », ce qui contredit l'accueil depuis qu'Omega est
+   un logiciel de gestion : nous reprenons les données du logiciel actuel.
+   Elle dit maintenant les deux chemins (vous passez sur Omega, ou vous
+   gardez votre logiciel et les agents s'y branchent) avec les mots de
+   l'accueil : « agent » et non « système », « audit » et non « diagnostic ».
+   Mêmes sections, mêmes composants, mêmes outils : seuls les textes changent.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
   alternates: { canonical: "/integrations" },
   title: "Intégrations | Omega.AI",
   description:
-    "Les systèmes Omega.AI s'intègrent aux outils déjà en place : messagerie, tableur, WhatsApp, agenda, paiement, comptabilité. Aucune migration.",
+    "Omega se branche sur vos outils (messagerie, tableur, WhatsApp, agenda, paiement, comptabilité) et reprend les données de votre logiciel actuel.",
 };
 
 /* Regroupement par famille, dans l'ordre déclaré. Un outil sans fiche
@@ -117,17 +125,17 @@ export default function Integrations() {
             </div>
             {/* .o-h2 sur un h1 : c'est l'échelle de la référence (48/67,2) */}
             <h1 data-reveal className="o-h2 mt-4 max-w-[720px]">
-              Intégrés à votre environnement, sans le modifier.
+              Omega se branche sur vos outils et reprend vos données.
             </h1>
             <p data-reveal className="o-lead mt-5 max-w-[640px]">
-              Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : les systèmes lisent et écrivent dans les outils où vos équipes travaillent déjà. Aucun compte à créer, aucune migration, aucun logiciel à apprendre, et vos données restent dans un espace dédié, chiffré, hébergé dans l&apos;Union européenne.
+              Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : Omega lit et écrit dans les outils où vos équipes travaillent déjà. Si Omega devient votre logiciel de gestion, nous reprenons vos données. Elles restent dans un espace dédié, chiffré, hébergé dans l&apos;Union européenne.
             </p>
             <div data-reveal className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/offres" className="o-btn o-btn--primary">
-                Vérifier la compatibilité
+              <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                Réserver un audit offert
               </Link>
               <Link href="/offres" className="o-btn o-btn--ghost">
-                Voir les systèmes
+                Voir le logiciel
                 <Chevron taille={13} />
               </Link>
             </div>
@@ -155,10 +163,10 @@ export default function Integrations() {
                 <span className="o-pill o-pill--xs">LE RACCORDEMENT</span>
               </div>
               <h2 data-reveal className="o-h2 mt-4 max-w-[600px]">
-                Comment un système s&apos;intègre.
+                Comment se passe le raccordement.
               </h2>
               <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Toujours dans le même ordre, et toujours en lecture avant l&apos;écriture, ce qui garantit qu&apos;aucun message ne part sur des données erronées.
+                Toujours dans le même ordre : Omega lit d&apos;abord, écrit ensuite. Rien ne part sans votre validation.
               </p>
             </div>
             <FriseRaccordement className="mt-16" />
@@ -170,13 +178,13 @@ export default function Integrations() {
           <div className="o-wrap">
             <div className="flex flex-col items-center text-center">
               <div data-reveal>
-                <span className="o-pill o-pill--xs">PAR SYSTÈME</span>
+                <span className="o-pill o-pill--xs">PAR AGENT</span>
               </div>
               <h2 data-reveal className="o-h2 mt-4 max-w-[620px]">
-                Ce que chaque système consomme.
+                Les outils dont chaque agent a besoin.
               </h2>
               <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Les quatre systèmes les plus déployés et les outils qu&apos;ils consomment réellement. Un système n&apos;a pas besoin de tout votre système d&apos;information, seulement des outils qui portent l&apos;information.
+                Les quatre agents et les outils qu&apos;ils utilisent le plus souvent. Un agent n&apos;a pas besoin de tous vos logiciels : seulement de ceux où se trouve l&apos;information.
               </p>
             </div>
             <CartesSystemes
