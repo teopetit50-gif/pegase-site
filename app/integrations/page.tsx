@@ -166,7 +166,7 @@ export default function Integrations() {
                 Comment se passe le raccordement.
               </h2>
               <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Toujours dans le même ordre : Omega lit d&apos;abord, écrit ensuite. Rien ne part sans votre validation.
+                Toujours dans le même ordre : Omega lit d&apos;abord, écrit ensuite. Vous décidez de ce qui part.
               </p>
             </div>
             <FriseRaccordement className="mt-16" />

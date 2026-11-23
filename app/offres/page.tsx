@@ -175,7 +175,7 @@ export const metadata: Metadata = {
      aucun style ne change : seuls les textes, à longueur égale. */
   title: "Le logiciel et ses modules | Omega.AI",
   description:
-    "Omega, le logiciel de gestion qui se configure avec l'IA : relances, réactivation des clients, demandes entrantes, factures fournisseurs, modules métier et sur-mesure. Tout passe par votre validation.",
+    "Omega, le logiciel de gestion qui se configure avec l'IA : relances, réactivation des clients, demandes entrantes, factures fournisseurs, modules métier et sur-mesure. Vous décidez de ce qui part.",
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -359,7 +359,7 @@ const CYCLE = [
   },
   { titre: "Qualification", texte: "Comprise et rattachée au bon dossier." },
   { titre: "Rédaction", texte: "Écrit depuis vos règles, pas d'un modèle figé." },
-  { titre: "Validation", texte: "Rien ne part sans votre accord." },
+  { titre: "Validation", texte: "Votre accord, ou une règle fixée par vous." },
 ];
 
 /* BLOC 5c — les quatre paquets.
@@ -719,7 +719,7 @@ export default function OffresPage() {
             <div className="ofd-wrap">
               <TeteSection
                 etiquette="Contrôle humain"
-                titre="Rien ne part sans vous."
+                titre="Vous décidez de ce qui part."
                 chapo="Le logiciel propose, vous tranchez."
                 large
               />
@@ -730,8 +730,8 @@ export default function OffresPage() {
                   <p className="ofd-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
                   <p className="ofd-scinde__corps">
                     Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui
-                    l&apos;a validé. Les niveaux d&apos;autonomie se règlent agent par agent, et se
-                    modifient à tout moment.
+                    l&apos;a validé. Au départ, tout passe par vous. Ensuite, vous pouvez laisser partir seuls certains envois, et
+                    revenir en arrière à tout moment.
                   </p>
                   <div className="ofd-scinde__actions">
                     <Cta href="/reserver-un-audit">Commencer</Cta>

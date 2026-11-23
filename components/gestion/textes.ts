@@ -194,7 +194,7 @@ export const MESURE = {
       id: "quatre-agents",
       titre: "Quatre agents",
       texte:
-        "Relances, demandes clients, factures fournisseurs, clients inactifs. Rien ne part sans votre validation.",
+        "Relances, demandes clients, factures fournisseurs, clients inactifs. Vous décidez de ce qui part.",
     },
     {
       id: "metiers",

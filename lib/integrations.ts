@@ -52,7 +52,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   WhatsApp: {
     famille: "Messagerie",
-    role: "Les demandes reçues hors horaires ont leur réponse rédigée, qui part après votre validation. Le reste va à vos équipes.",
+    role: "Les demandes reçues hors horaires ont leur réponse rédigée. Elle part seule si vous l'avez autorisé, sinon après votre validation.",
   },
   Telegram: {
     famille: "Messagerie",
@@ -96,7 +96,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   "Google Calendar": {
     famille: "Agenda",
-    role: "REPUT propose des créneaux vraiment libres. Le rendez-vous est posé quand vous validez la réponse.",
+    role: "REPUT propose des créneaux vraiment libres et pose le rendez-vous, si vous l'y avez autorisé.",
   },
   Calendly: {
     famille: "Agenda",
@@ -142,7 +142,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
      simple-icons, et la fiche était silencieusement écartée sans lui */
   MailChimp: {
     famille: "Projet & CRM",
-    role: "Après votre validation, les messages aux clients inactifs partent sous votre marque, avec le suivi des ouvertures et des désinscriptions.",
+    role: "Les messages aux clients inactifs partent sous votre marque, validés par vous ou autorisés d'avance. Les ouvertures et les désinscriptions sont suivies.",
   },
   Typeform: {
     famille: "Formulaires",
@@ -213,9 +213,9 @@ export const RACCORDEMENT = [
   },
   {
     n: "03",
-    titre: "Vos équipes valident chaque envoi",
+    titre: "Vos équipes décident de ce qui part",
     texte:
-      "Les agents préparent ensuite chaque action et vous la présentent. Vos équipes l'envoient, la corrigent ou l'abandonnent.",
+      "Les agents préparent chaque action et vous la présentent. Vos équipes l'envoient, la corrigent ou l'abandonnent. Elles peuvent ensuite autoriser certains envois à partir seuls.",
   },
   {
     n: "04",

@@ -187,11 +187,11 @@ export const AGENTS: Agent[] = [
   {
     id: "pilotage",
     onglet: "Validation",
-    resume: "Rien ne part sans votre accord.",
+    resume: "Vous décidez de ce qui part.",
     couleur: "blue",
     titre: "L'IA prépare, vous décidez",
     texte:
-      "Un seul écran vous montre ce qui est prêt, ce qui attend votre accord et ce qui a été fait. Vous validez ou vous corrigez en un clic. Rien ne part sans vous, et chaque action est enregistrée.",
+      "Un seul écran vous montre ce qui est prêt, ce qui attend votre accord et ce qui a été fait. Vous validez ou vous corrigez en un clic. Un agent n'envoie seul que ce que vous avez autorisé d'avance, et chaque action est enregistrée.",
     lien: "/espace2",
     bouton: "Voir l'espace client",
     image: "/accueil/pilotage-clair.webp",
@@ -228,7 +228,7 @@ export const ETAPES = [
     couleur: "orange" as const,
     titre: "Il vous reste à valider",
     texte:
-      "Chaque matin, ce qui est prêt vous attend. Un clic pour valider, un pour corriger. Rien ne part sans vous.",
+      "Chaque matin, ce qui est prêt vous attend. Un clic pour valider, un pour corriger. Vous décidez de ce qui part.",
     image: "/accueil/etape-3-clair.webp",
   },
 ];
@@ -354,7 +354,7 @@ export const SITUATIONS = [
   },
   {
     texte:
-      "Une demande arrive à 21 h. Sa réponse est rédigée aussitôt. Vous validez, elle part, et le client n'attend pas le lendemain.",
+      "Une demande arrive à 21 h. Sa réponse est rédigée aussitôt. Elle part seule si vous l'avez autorisé, sinon elle attend votre accord.",
     nom: "REPUT",
     role: "Agent · demandes clients",
     logo: "/logos/reput-mark.png",
@@ -433,7 +433,7 @@ export const PRIX = [
   },
   {
     nom: "Agents",
-    texte: "Un à quatre agents travaillent pour vous. Vous validez tout au même endroit.",
+    texte: "Un à quatre agents travaillent pour vous. Vous suivez tout au même endroit.",
     prix: "À l'usage",
     sous: "facturé à la pièce traitée",
     points: [
@@ -511,7 +511,7 @@ export const FAQ: Question[] = [
     id: "accord",
     cat: "Sécurité",
     q: "Un agent peut-il envoyer quelque chose sans mon accord ?",
-    r: "Non. Tout ce qui sort — une relance, une réponse, un courriel — passe d'abord par votre validation. Vous gardez la main sur ce qui part, et à qui.",
+    r: "Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un courriel. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment.",
   },
   {
     id: "outils",
@@ -558,7 +558,7 @@ export const APPEL = {
 };
 
 export const PIED = {
-  phrase: "Le logiciel de gestion où l'IA travaille pour vous : ventes, achats, stock, banque et comptabilité au même endroit. Rien ne part sans votre accord.",
+  phrase: "Le logiciel de gestion où l'IA travaille pour vous : ventes, achats, stock, banque et comptabilité au même endroit. Vous décidez de ce qui part.",
   colonnes: [
     {
       titre: "Agents",
