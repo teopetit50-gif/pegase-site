@@ -49,7 +49,7 @@ import {
   CadreVignette,
   VignetteEtape,
   VignetteMetier,
-  VignetteModules,
+  VignetteLogiciel,
   VignetteOnglet,
 } from "@/components/accueil-v3/vignettes";
 import {
@@ -294,9 +294,9 @@ export default function Home() {
               style={{ "--o-mot-d": "850ms" } as React.CSSProperties}
             >
               {/* 22/11 (Teo) — la capture du tableau de bord laisse la place à
-                  la grille des modules, comme la grille d'applications d'Odoo */}
-              <CadreVignette>
-                <VignetteModules />
+                  une vue d'ensemble du logiciel : chiffres, lignes, graphique */}
+              <CadreVignette large>
+                <VignetteLogiciel />
               </CadreVignette>
             </div>
           </div>
