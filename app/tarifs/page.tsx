@@ -88,7 +88,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    `Tarification à l'usage pour un, trois ou quatre postes automatisés sous validation humaine. Le montant est indexé sur le volume, arrêté à l'audit.`,
+    `Les agents sont facturés à l'usage, sur le volume traité ; le logiciel de gestion sur devis, selon les modules activés. Le montant est arrêté à l'audit.`,
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -129,6 +129,17 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
       "Le volume que cette page calcule est un ordre de grandeur, à la précision de vos déclarations. L'audit travaille sur vos exports : il relève la volumétrie réelle, ce taux de reprise, et ce qui n'est pas comptabilisé aujourd'hui. Le montant qui en sort est celui du devis, et il ne varie plus.",
     ],
   },
+  /* 22/11 (Teo, « on part sur le sujet ERP ») — la page chiffre les agents ;
+     le logiciel de gestion, lui, n'a pas de règle de calcul publiée. Cette
+     question le dit, pour que l'absence de barème ne se lise pas comme un
+     oubli. */
+  {
+    q: "Comment le logiciel de gestion est-il chiffré ?",
+    r: [
+      "Sur devis. Son tarif dépend des modules activés et du périmètre de votre activité ; il est arrêté à l'audit et figure au devis, avant tout engagement.",
+      "La règle de calcul détaillée sur cette page s'applique aux agents, facturés à la pièce traitée. Un seul audit cadre à la fois le logiciel de gestion et les agents.",
+    ],
+  },
   {
     q: "Le palier est-il modifiable en cours de contrat ?",
     r: [
@@ -152,7 +163,8 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Que se passe-t-il si l'offre ne convient pas ?",
     r: [
-      "Le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir, en formule mensuelle comme annuelle. Au-delà, la formule mensuelle reste résiliable à tout moment et l'annuelle court jusqu'à son terme. Dans les deux cas, l'export complet de vos données vous est remis, sans condition et sans frais.",
+      "Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir, en formule mensuelle comme annuelle. Au-delà, la formule mensuelle reste résiliable à tout moment et l'annuelle court jusqu'à son terme. Dans les deux cas, l'export complet de vos données vous est remis, sans condition et sans frais.",
+      "Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
     ],
   },
   {

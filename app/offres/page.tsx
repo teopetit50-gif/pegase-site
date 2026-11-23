@@ -169,9 +169,13 @@ import "./nos-offres.css";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/offres" },
-  title: "Nos offres | Omega.AI",
+  /* 22/11 (Teo, « on part sur le sujet ERP », puis « garde le design exact,
+     remplace juste le contenu ») — la page ne présente plus quatre systèmes
+     à part mais le logiciel de gestion et ses modules. Aucune structure ni
+     aucun style ne change : seuls les textes, à longueur égale. */
+  title: "Le logiciel et ses modules | Omega.AI",
   description:
-    "Quatre systèmes prêts à déployer : encaissements, réactivation commerciale, demandes entrantes, flux documentaires. Branchés sur vos outils, arrêtés à votre validation.",
+    "Omega, le logiciel de gestion qui se configure avec l'IA : relances, réactivation des clients, demandes entrantes, factures fournisseurs, modules métier et sur-mesure. Tout passe par votre validation.",
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -228,7 +232,7 @@ const ARGUMENTS = [
     teinte: "#79648c",
     titre: "Intégration",
     texte:
-      "Vos outils restent les vôtres. Les systèmes s'y branchent, sans interface de plus.",
+      "Omega se branche sur vos outils et reprend les données de votre logiciel actuel.",
   },
   {
     teinte: "#a8927c",
@@ -552,13 +556,13 @@ export default function OffresPage() {
                   « Nos offres » est l'exact pendant de leur « Data Engine » :
                   le nom de la page, et le chapô porte la promesse. */}
               <h1 data-reveal className="ofd-h1">
-                Nos offres
+                Le logiciel
               </h1>
               <p data-reveal className="ofd-lead">
-                Recevoir, comprendre, rédiger. Vous validez, le système envoie. Chaque jour.
+                Votre gestion dans un seul outil. Les agents préparent, vous validez.
               </p>
               <div data-reveal className="ofd-hero__actions">
-                <CtaPastille href="/commencer">Commencer</CtaPastille>
+                <CtaPastille href="/reserver-un-audit">Commencer</CtaPastille>
               </div>
             </div>
           </div>
@@ -630,7 +634,7 @@ export default function OffresPage() {
                         de gauche et décalerait les quatre cartes. */}
                     <h2 className="ofd-h3">Où que vous travailliez.</h2>
                     <p className="ofd-body">
-                      Les systèmes tournent en ligne, pas sur un poste. Vos équipes les
+                      Le logiciel tourne en ligne, pas sur un poste. Vos équipes le
                       retrouvent où qu&apos;elles soient.
                     </p>
                   </div>
@@ -697,7 +701,7 @@ export default function OffresPage() {
                 <div data-reveal>
                   <p className="ofd-mono">Sur mesure</p>
                   <h3 className="ofd-h3">
-                    Quand aucun système du catalogue ne couvre le processus, nous concevons celui qui manque.
+                    Quand votre processus demande un module à part, nous le construisons sur mesure.
                   </h3>
                 </div>
                 <div data-reveal>
@@ -716,7 +720,7 @@ export default function OffresPage() {
               <TeteSection
                 etiquette="Contrôle humain"
                 titre="Rien ne part sans vous."
-                chapo="Le système propose, vous tranchez."
+                chapo="Le logiciel propose, vous tranchez."
                 large
               />
 
@@ -730,7 +734,7 @@ export default function OffresPage() {
                     modifient en cours d&apos;exploitation.
                   </p>
                   <div className="ofd-scinde__actions">
-                    <Cta href="/commencer">Commencer</Cta>
+                    <Cta href="/reserver-un-audit">Commencer</Cta>
                     <Cta href="/integrations" variante="trait">
                       Vérifier la compatibilité
                     </Cta>
@@ -755,7 +759,7 @@ export default function OffresPage() {
             <div className="ofd-wrap">
               <TeteSection
                 etiquette="Ce qu'on installe"
-                titre="Un système par processus, de bout en bout."
+                titre="Un module par processus, de bout en bout."
                 chapo="De la demande reçue au message parti."
               />
 
@@ -802,7 +806,7 @@ export default function OffresPage() {
                   entreprise, puis le logiciel de chaque métier (5c bis). */}
               <TeteSection
                 etiquette="Pour toutes les entreprises"
-                titre="Quatre processus, quatre systèmes déjà construits."
+                titre="Quatre processus, quatre agents pour les reprendre."
               />
 
               <div className="ofd-cartes4">
@@ -839,7 +843,7 @@ export default function OffresPage() {
             <div className="ofd-wrap">
               <TeteSection
                 etiquette="Pour votre métier"
-                titre="Un logiciel par métier, qui se combine avec les quatre."
+                titre="Un module par métier, qui se combine avec les agents."
                 chapo="Un seul audit cadre l'ensemble."
               />
 
@@ -921,7 +925,7 @@ export default function OffresPage() {
                         Des demandes plus rapides que leur traitement, des relances suspendues à une
                         personne.
                       </p>
-                      <span className="ofd-ardoise__tag">Ce que les quatre systèmes reprennent</span>
+                      <span className="ofd-ardoise__tag">Ce que les quatre agents reprennent</span>
                     </div>
                   </div>
                 </div>
@@ -950,7 +954,7 @@ export default function OffresPage() {
                   Un chiffrage avant tout engagement.
                 </h2>
                 <div data-reveal className="ofd-hero__actions">
-                  <CtaPastille href="/commencer">Commencer</CtaPastille>
+                  <CtaPastille href="/reserver-un-audit">Commencer</CtaPastille>
                   <Cta href="/offres/sur-mesure" variante="trait-blanc">
                     Découvrir le sur-mesure
                   </Cta>
