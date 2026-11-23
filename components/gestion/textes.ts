@@ -1,5 +1,6 @@
 /* ══════════════════════════════════════════════════════════════════════
-   LES TEXTES DE /gestion (22/11/2026, repris le 23/11 pour Crystal AI)
+   LES TEXTES DE /gestion (22/11/2026, repris le 23/11 pour Crystal AI,
+   réécrits le 23/11 au soir dans le registre de la charte)
 
    Le dessin est celui de crystal-ai-v1.21st.app (gabarit Crystal AI de
    21st.dev), recopié au pixel ; le relevé et les écarts sont en tête de
@@ -8,15 +9,16 @@
    le démarrage, les agents, les modules métier et le sur-mesure.
 
    D'OÙ VIENNENT LES FAITS. Tous sont repris de components/accueil-v3/
-   textes.ts (HERO, AGENTS, ETAPES, PRIX, FAQ) et des métadonnées de
-   /tarifs ; aucun n'est ajouté :
+   textes.ts (HERO, AGENTS, ETAPES, PRIX, FAQ), des métadonnées de /tarifs
+   et de ce que montrent les écrans de cette page (ECRANS, en bas, et
+   components/gestion/visuels.tsx) ; aucun n'est ajouté :
      · une information saisie une fois est à jour partout ;
      · vous décrivez votre activité, l'IA pose les questions qui manquent
        puis fait les réglages (modules, TVA, plan comptable, modèles de
        documents) ; votre expert-comptable vérifie avant le démarrage ;
        nous reprenons les données de votre logiciel actuel ;
      · quatre agents (relances, demandes clients, factures fournisseurs,
-       clients inactifs), et rien ne part sans votre validation ;
+       clients inactifs), et vous décidez de ce qui part ;
      · sept métiers ont leur module, et nous construisons ce qui manque ;
      · le prix est sur devis, arrêté pendant un audit offert de 30 minutes.
    AUCUN montant. « 0 € avant l'installation » et « remboursé 30 jours » ne
@@ -33,14 +35,30 @@
      · « We're hiring! » → les quatre agents.
 
    LE BUDGET DE TEXTE. Chaque emplacement porte, en commentaire, le nombre
-   de signes de la référence (« réf. ») : le français s'y tient, à quelques
-   signes près.
+   de signes de la référence (« réf. ») : le français s'en approche, et le
+   rendu est vérifié aux cinq largeurs quand un texte le dépasse.
 
-   L'écriture suit l'accueil (Teo, 22/11 : « regarde Odoo, les textes
-   doivent être clairs ») : des titres de six à neuf mots, des mots de tous
-   les jours, une idée par phrase, « vous » pour le lecteur, « nous » pour
-   Omega. Devant « ? » et « : », l'espace est insécable ( ) : sans
-   elle, le signe part seul à la ligne.
+   L'ÉCRITURE (Teo, 23/11 : « la page gestion n'est pas assez travaillée,
+   les textes sont pas assez pro », puis, devant six exemples : « Oui,
+   réécris tout »). La première version était taillée au nombre de signes
+   du gabarit anglais : des listes sans verbe (« Vos devis, vos commandes
+   et vos factures. »), des phrases de trois mots, des « Il » et « Elle »
+   seuls en tête de phrase. La prose suit maintenant la charte
+   (OMEGA/DOCTRINE-TEXTES-SAAS.md, §11, 12 et 16, l'étalon Qonto) :
+     1. le logiciel est sujet d'un verbe conjugué (« le module Ventes
+        suit », « Omega propose ») ; « vous » arrive dans la proposition
+        suivante, sujet de son propre geste ;
+     2. un bloc porte deux ou trois phrases : ce que c'est, ce que cela
+        fait, ce qui vous reste ;
+     3. le lien logique s'écrit : comme, quand, puis, dès que, si ;
+     4. les termes sont ceux du métier (bon de commande, réception, dépôt,
+        seuil, relevé, plan comptable, TVA), mais seulement ceux que la
+        page montre déjà dans ses écrans : aucune fonction n'est ajoutée ;
+     5. une seule question sur la page, celle de l'appel final.
+   Les libellés (onglets, noms de cartes, colonnes, points de liste,
+   boutons) restent nominaux : ce sont des étiquettes, pas de la prose.
+   « Vous » pour le lecteur, « nous » pour Omega. Devant « ? » et « : »,
+   l'espace est insécable ( ) : sans elle, le signe part seul à la ligne.
    ══════════════════════════════════════════════════════════════════════ */
 
 export const AUDIT = "/reserver-un-audit";
@@ -50,9 +68,9 @@ export const AGENTS = "/offres";
 export type Bouton = { libelle: string; href: string; plein?: boolean };
 
 export const META = {
-  titre: "Logiciel de gestion : six modules reliés | Omega.AI",
+  titre: "Logiciel de gestion : six modules reliés | Omega.AI",
   description:
-    "Le logiciel de gestion d'Omega : ventes, achats, stock, banque, comptabilité et documents reliés. Une information saisie une fois est à jour partout. L'IA fait les réglages, des agents font le travail répétitif, vous validez.",
+    "Omega réunit ventes, achats, stock, banque, comptabilité et documents dans un seul logiciel de gestion. L'IA le paramètre pour votre activité, des agents font le travail répétitif, et vous décidez de ce qui part.",
 };
 
 /* ── le héros ── réf. h1 en deux lignes de 23 et 12 signes ; chapô 157
@@ -60,7 +78,7 @@ export const META = {
 export const HERO = {
   titre: ["Toute votre gestion", "au même endroit"],
   chapo:
-    "Ventes, achats, stock, banque, comptabilité, documents. Une information saisie une fois est à jour partout.",
+    "Omega réunit ventes, achats, stock, banque et comptabilité dans un seul logiciel. Comme les modules partagent les mêmes données, une pièce saisie une fois est à jour partout.",
   principal: { libelle: "Réserver un audit offert", href: AUDIT, plein: true } as Bouton,
   second: { libelle: "Voir les tarifs", href: TARIFS } as Bouton,
 };
@@ -68,30 +86,36 @@ export const HERO = {
 /* ── les onglets par module ── réf. titre 30 signes dont 9 accentués ;
    onglet 7 à 18 signes ; dans le panneau, titre 7 à 18 signes et texte
    136 signes (3 lignes de 360 px à 1440). Les onglets par secteur de la
-   référence deviennent les modules ; l'identifiant désigne l'écran. */
+   référence deviennent les modules ; l'identifiant désigne l'écran.
+   Ces quatre textes et ce titre sont aussi lus par le bloc des onglets
+   de l'accueil (components/essai/OngletsGestion). */
 export type OngletTexte = { id: string; titre: string; texte: string };
 export const MODULES = {
-  titre: ["Six modules reliés,", "une seule saisie."],
+  titre: ["Six modules partagent", "les mêmes données."],
   onglets: [
     {
       id: "ventes",
       titre: "Ventes",
-      texte: "Vos devis, vos commandes et vos factures. Une vente validée met à jour le stock et la comptabilité.",
+      texte:
+        "Le module Ventes suit chaque affaire du devis à l'encaissement. Quand vous validez une vente, le stock et la comptabilité sont mis à jour.",
     },
     {
       id: "achats",
       titre: "Achats",
-      texte: "Vos commandes fournisseurs et leurs factures. Une réception met le stock à jour.",
+      texte:
+        "Le module Achats suit vos commandes fournisseurs, de l'envoi à la facture. Dès qu'une livraison est réceptionnée, le stock est mis à jour.",
     },
     {
       id: "stock",
       titre: "Stock",
-      texte: "Chaque article, ses quantités et ses mouvements. Ventes et achats s'y inscrivent sans ressaisie.",
+      texte:
+        "Le module Stock tient chaque article par dépôt, avec son seuil d'alerte. Ventes et achats y inscrivent leurs mouvements, sans ressaisie.",
     },
     {
       id: "banque",
       titre: "Banque et comptabilité",
-      texte: "Vos relevés, vos écritures, votre TVA. Les pièces des autres modules y arrivent déjà saisies.",
+      texte:
+        "Omega propose une pièce pour chaque ligne de relevé et suit votre TVA. Les écritures arrivent des autres modules, sans ressaisie.",
     },
   ] as OngletTexte[],
 };
@@ -106,7 +130,7 @@ export const METIERS = {
   titre: ["Sept métiers ont déjà", "leur module"],
   pari: {
     titre: "Notre pari",
-    texte: "Un logiciel de gestion doit s'adapter à votre activité. Pas l'inverse.",
+    texte: "Un logiciel de gestion doit s'adapter aux règles de votre métier, et non vous imposer les siennes.",
   },
   cases: [
     { cle: "btp", nom: "BTP" },
@@ -127,21 +151,21 @@ export const REGLAGES = {
   titre: ["Décrivez votre activité,", "l'IA fait les réglages."],
   fort: "Avec Omega, l'installation part d'une conversation.",
   suite:
-    "L'IA pose les questions qui manquent, puis fait les réglages : modules, TVA, plan comptable, modèles de documents.",
+    "L'IA pose les questions qui manquent, puis paramètre vos modules, votre TVA, votre plan comptable et vos modèles de documents.",
   bouton: { libelle: "Réserver un audit offert", href: AUDIT, plein: true } as Bouton,
   cartes: [
     {
       id: "conversation",
       nom: "Conversation.",
       categorie: "Vous décrivez",
-      texte: "Vous parlez de votre activité avec vos mots. L'IA complète par ses questions.",
+      texte: "Vous décrivez votre activité, puis l'IA pose les questions qui manquent.",
       href: AUDIT,
     },
     {
       id: "comptes",
       nom: "Réglages.",
-      categorie: "L'IA les fait",
-      texte: "Elle active vos modules, règle la TVA et prépare votre plan comptable.",
+      categorie: "L'IA paramètre",
+      texte: "L'IA active vos modules, paramètre la TVA et prépare votre plan comptable.",
       href: AUDIT,
     },
   ],
@@ -155,28 +179,28 @@ export const DEMARRAGE = {
   surtitre: "Pas à pas",
   titre: ["Nous préparons le démarrage", "avec vous"],
   texte:
-    "Tout commence par un audit offert de 30 minutes. Nous reprenons ensuite vos données, et votre expert-comptable vérifie les réglages avant le démarrage.",
+    "Le déploiement commence par un audit offert de 30 minutes. Nous reprenons ensuite vos données, puis votre expert-comptable vérifie le paramétrage comptable avant le démarrage.",
   bouton: { libelle: "Voir les tarifs", href: TARIFS } as Bouton,
   cartes: [
     {
       cle: "audit",
       titre: "L'audit offert",
-      texte: "30 minutes pour décrire votre activité. Votre prix, sur devis, y est arrêté.",
+      texte: "En 30 minutes, nous passons votre activité en revue et arrêtons votre prix.",
     },
     {
       cle: "documents",
       titre: "Vos documents",
-      texte: "Devis, factures, bons de livraison : vos modèles sont prêts, à votre en-tête.",
+      texte: "Vos modèles de devis, de factures et de bons de livraison sont à votre en-tête.",
     },
     {
       cle: "donnees",
       titre: "Vos données",
-      texte: "Nous reprenons les données de votre logiciel actuel.",
+      texte: "Nous reprenons vos clients, vos articles, vos factures en cours et vos soldes.",
     },
     {
       cle: "comptable",
       titre: "Votre expert-comptable",
-      texte: "Il vérifie les réglages comptables avant le démarrage.",
+      texte: "Le plan comptable et la TVA lui sont soumis pour vérification avant le démarrage.",
     },
   ],
 };
@@ -186,26 +210,26 @@ export const DEMARRAGE = {
    de trois volets : intitulé 5 à 10 signes, texte 125 signes (2 lignes).
    L'identifiant désigne l'écran, la clé l'icône (Mesure.tsx). */
 export const MESURE = {
-  titre: ["Des agents, votre métier", "et du sur-mesure."],
+  titre: ["Omega va plus loin", "que la gestion."],
   texte:
-    "Quatre agents font le travail répétitif dans votre logiciel. Sept métiers ont leur module. Ce qui vous manque, nous le construisons sur mesure.",
+    "Quatre agents font le travail répétitif dans votre logiciel, et sept métiers ont déjà leur module. Si un besoin reste sans réponse, nous construisons le module qui manque.",
   volets: [
     {
       id: "quatre-agents",
       titre: "Quatre agents",
       texte:
-        "Relances, demandes clients, factures fournisseurs, clients inactifs. Vous décidez de ce qui part.",
+        "Relances, réponses aux clients, factures fournisseurs, clients inactifs : les agents préparent, et vous décidez de ce qui part.",
     },
     {
       id: "metiers",
       titre: "Sept modules métier",
       texte:
-        "BTP, avocats, architectes, loueurs automobiles, cabinets dentaires, hôtels, grands groupes : chacun a son module.",
+        "BTP, avocats, architectes, loueurs automobiles, cabinets dentaires, hôtels, grands groupes : chaque métier a son module.",
     },
     {
       id: "sur-mesure",
       titre: "Sur mesure",
-      texte: "Il vous manque un module ? Nous le construisons et l'ajoutons à votre logiciel.",
+      texte: "Quand un besoin n'est couvert par aucun module, nous le construisons et l'ajoutons à votre logiciel.",
     },
   ] as OngletTexte[],
 };
@@ -216,7 +240,7 @@ export const MESURE = {
    Réf. nom 3 à 10 signes ; valeur 2 à 6 signes, suivie de « /mo » ; bouton
    10 à 14 signes (162 px utiles à 1440 : 22 signes au plus) ; deux lignes
    de 19 à 34 signes ; intertitre 24 signes ; quatre ou cinq points de 22
-   à 39 signes. */
+   à 39 signes. Tout y est étiquette : rien ne se conjugue. */
 export type Colonne = {
   nom: string;
   valeur: string;
@@ -229,7 +253,7 @@ export type Colonne = {
 export const OFFRE: Colonne[] = [
   {
     nom: "Audit",
-    valeur: "30 min",
+    valeur: "30 min",
     suffixe: "offert",
     bouton: { libelle: "Réserver l'audit", href: AUDIT, plein: true },
     lignes: ["Avant tout engagement", "Votre prix y est arrêté"],
@@ -279,7 +303,7 @@ export const OFFRE: Colonne[] = [
     nom: "Sur mesure",
     valeur: "Sur devis",
     bouton: { libelle: "Réserver l'audit", href: AUDIT, plein: true },
-    lignes: ["Il vous manque un module ?", "Nous le construisons"],
+    lignes: ["Un module vous manque", "Nous le construisons"],
     intertitre: "Comment ça se passe",
     points: [
       "Votre besoin, étudié avec vous",
@@ -302,45 +326,46 @@ export const QUESTIONS = {
     {
       id: "omega",
       q: "Qu'est-ce qu'Omega ?",
-      r: "Omega est un éditeur de logiciels français. Nous faisons un logiciel de gestion, un ERP : ventes, achats, stock, banque, comptabilité et documents au même endroit. L'IA l'adapte à votre activité. Des agents y font le travail répétitif : relances, demandes clients, factures fournisseurs, clients inactifs. Sept métiers ont leur module, et nous construisons sur mesure ce qui vous manque.",
+      r: "Omega est un éditeur de logiciels français. Nous développons un logiciel de gestion, c'est-à-dire un ERP : ventes, achats, stock, banque, comptabilité et documents y partagent les mêmes données. L'IA le paramètre pour votre activité, puis des agents y font le travail répétitif : relances, demandes clients, factures fournisseurs, clients inactifs. Sept métiers ont déjà leur module, et nous construisons sur mesure celui qui vous manque.",
     },
     {
       id: "erp",
       q: "En quoi est-ce différent d'un ERP classique ?",
-      r: "Avec Omega, l'installation part d'une conversation. Vous décrivez votre activité, l'IA pose les questions qui manquent, puis fait les réglages : modules, TVA, plan comptable, modèles de documents. Votre expert-comptable vérifie avant le démarrage. Ensuite, les agents font le travail répétitif : il vous reste à valider.",
+      r: "Avec Omega, l'installation part d'une conversation. Vous décrivez votre activité, l'IA pose les questions qui manquent, puis paramètre les modules, la TVA, le plan comptable et les modèles de documents. Votre expert-comptable vérifie ce paramétrage avant le démarrage. Ensuite, les agents font le travail répétitif, et il vous reste à valider.",
     },
     {
       id: "outils",
       q: "Faut-il changer nos outils ?",
-      r: "Vous choisissez. Omega peut devenir votre logiciel de gestion, avec la reprise des données de votre logiciel actuel, ou commencer par des agents branchés sur ce que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et bien d'autres.",
+      r: "Ce choix vous appartient. Omega peut devenir votre logiciel de gestion, auquel cas nous reprenons les données de votre logiciel actuel. Omega peut aussi commencer par des agents raccordés aux outils que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et d'autres.",
     },
     {
       id: "installation",
       q: "Qui s'occupe de l'installation ?",
-      r: "Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage.",
+      r: "Notre équipe s'en charge du début à la fin. L'IA paramètre le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, puis votre expert-comptable vérifie le paramétrage comptable avant le démarrage.",
     },
     {
       id: "donnees",
       q: "Où sont mes données ?",
-      r: "Dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne et jamais mélangé à celui d'un autre client. L'IA ne reçoit que le strict nécessaire à chaque tâche, et rien n'est réutilisé à d'autres fins.",
+      r: "Vos données sont dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne et jamais mélangé à celui d'un autre client. L'IA ne reçoit que le strict nécessaire à chaque tâche, et rien n'est réutilisé à d'autres fins.",
     },
     {
       id: "prix",
       q: "Pourquoi aucun prix n'est-il affiché ?",
-      r: "Le prix du logiciel de gestion dépend des modules que vous activez. Nous le calculons avec vous pendant l'audit offert de 30 minutes : vous repartez avec un tarif écrit, avant tout engagement.",
+      r: "Le prix du logiciel de gestion dépend des modules que vous activez. Nous le calculons avec vous pendant l'audit offert de 30 minutes : vous repartez avec un tarif écrit, avant tout engagement.",
     },
   ],
 };
 
 /* ── l'appel final ── réf. titre 33 signes ; deux cartes : 15 à 18 signes
    en gras puis 88 à 92 signes, un bouton ; bandeau du bas : 13 signes,
-   une icône, 42 signes, un bouton de 14 signes. */
+   une icône, 42 signes, un bouton de 14 signes. Le titre est la seule
+   question de la page ; les deux amorces en gras y répondent. */
 export const APPEL = {
   titre: "Par où commencer ?",
   cartes: [
     {
-      fort: "Par un audit offert de 30 minutes.",
-      texte: "Votre prix, sur devis, y est arrêté avec vous.",
+      fort: "Par un audit offert de 30 minutes.",
+      texte: "Nous y passons votre activité en revue, et votre prix, sur devis, y est arrêté avec vous.",
       bouton: { libelle: "Réserver un audit offert", href: AUDIT, plein: true } as Bouton,
     },
     {
@@ -351,7 +376,7 @@ export const APPEL = {
   ],
   bandeau: {
     titre: "Quatre agents IA",
-    texte: "Ils font le travail répétitif. Vous validez.",
+    texte: "Ils font le travail répétitif, et vous validez.",
     bouton: { libelle: "Voir les quatre agents", href: AGENTS } as Bouton,
   },
 };
@@ -361,18 +386,18 @@ export const APPEL = {
    sont des exemples : un négoce de matériel électrique. */
 export const ECRANS = {
   tableau:
-    "Exemple d'écran : le tableau de bord du logiciel, avec les ventes du mois, ce qui reste à encaisser et à payer, le solde en banque, les tâches du jour et les dernières pièces.",
-  devis: "Exemple d'écran : un devis en cours de rédaction, avec ses lignes, son total et l'état du stock.",
-  commande: "Exemple d'écran : un bon de commande envoyé à un fournisseur, avec sa livraison attendue.",
-  article: "Exemple d'écran : la fiche d'un article, son stock par dépôt et ses derniers mouvements.",
+    "Exemple d'écran : le tableau de bord du logiciel, avec les ventes du mois, ce qui reste à encaisser et à payer, le solde en banque, les tâches du jour et les dernières pièces.",
+  devis: "Exemple d'écran : un devis en cours de rédaction, avec ses lignes, son total et l'état du stock.",
+  commande: "Exemple d'écran : un bon de commande envoyé à un fournisseur, avec sa livraison attendue.",
+  article: "Exemple d'écran : la fiche d'un article, son stock par dépôt et ses derniers mouvements.",
   rapprochement:
-    "Exemple d'écran : le relevé bancaire du mois et les factures proposées pour chaque ligne.",
-  conversation: "Exemple d'écran : la conversation où l'IA pose ses questions avant de faire les réglages.",
-  comptes: "Exemple d'écran : le plan comptable et la TVA préparés par l'IA, à vérifier par l'expert-comptable.",
-  modele: "Exemple d'écran : un modèle de facture à l'en-tête de l'entreprise.",
+    "Exemple d'écran : le relevé bancaire du mois et les factures proposées pour chaque ligne.",
+  conversation: "Exemple d'écran : la conversation où l'IA pose ses questions avant de faire les réglages.",
+  comptes: "Exemple d'écran : le plan comptable et la TVA préparés par l'IA, à vérifier par l'expert-comptable.",
+  modele: "Exemple d'écran : un modèle de facture à l'en-tête de l'entreprise.",
   reprise:
-    "Exemple d'écran : la reprise des clients, des fournisseurs, des articles et des factures du logiciel actuel.",
-  nuit: "Exemple d'écran : le travail des quatre agents pendant la nuit, prêt à valider le matin.",
-  modules: "Exemple d'écran : les six modules de gestion actifs et les sept modules métier à ajouter.",
-  planning: "Exemple d'écran : un module construit sur mesure, le planning des équipes de la semaine.",
+    "Exemple d'écran : la reprise des clients, des fournisseurs, des articles et des factures du logiciel actuel.",
+  nuit: "Exemple d'écran : le travail des quatre agents pendant la nuit, prêt à valider le matin.",
+  modules: "Exemple d'écran : les six modules de gestion actifs et les sept modules métier à ajouter.",
+  planning: "Exemple d'écran : un module construit sur mesure, le planning des équipes de la semaine.",
 };
