@@ -70,7 +70,7 @@ export type Bouton = { libelle: string; href: string; plein?: boolean };
 export const META = {
   titre: "Logiciel de gestion : six modules reliés | Omega.AI",
   description:
-    "Omega réunit ventes, achats, stock, banque, comptabilité et documents dans un seul logiciel de gestion. L'IA le paramètre pour votre activité, des agents font le travail répétitif, et vous décidez de ce qui part.",
+    "Omega réunit ventes, achats, stock, banque, comptabilité et documents dans un seul logiciel de gestion. L'IA le paramètre pour votre activité, puis des agents font le travail répétitif ; vous décidez de ce qui part.",
 };
 
 /* ── le héros ── réf. h1 en deux lignes de 23 et 12 signes ; chapô 157
@@ -115,7 +115,7 @@ export const MODULES = {
       id: "banque",
       titre: "Banque et comptabilité",
       texte:
-        "Omega propose une pièce pour chaque ligne de relevé et suit votre TVA. Les écritures arrivent des autres modules, sans ressaisie.",
+        "Omega propose une pièce pour chaque ligne de relevé et suit votre TVA. Les ventes et les achats y passent leurs écritures.",
     },
   ] as OngletTexte[],
 };
@@ -190,7 +190,7 @@ export const DEMARRAGE = {
     {
       cle: "documents",
       titre: "Vos documents",
-      texte: "Vos modèles de devis, de factures et de bons de livraison sont à votre en-tête.",
+      texte: "Nous mettons vos devis, vos factures et vos bons de livraison à votre en-tête.",
     },
     {
       cle: "donnees",
@@ -218,7 +218,7 @@ export const MESURE = {
       id: "quatre-agents",
       titre: "Quatre agents",
       texte:
-        "Relances, réponses aux clients, factures fournisseurs, clients inactifs : les agents préparent, et vous décidez de ce qui part.",
+        "Les agents traitent relances, demandes clients, factures fournisseurs et clients inactifs, puis vous décidez de ce qui part.",
     },
     {
       id: "metiers",
@@ -229,7 +229,7 @@ export const MESURE = {
     {
       id: "sur-mesure",
       titre: "Sur mesure",
-      texte: "Quand un besoin n'est couvert par aucun module, nous le construisons et l'ajoutons à votre logiciel.",
+      texte: "Quand un besoin n'est couvert par aucun module, nous construisons celui qui y répond et l'ajoutons à votre logiciel.",
     },
   ] as OngletTexte[],
 };
@@ -304,7 +304,7 @@ export const OFFRE: Colonne[] = [
     valeur: "Sur devis",
     bouton: { libelle: "Réserver l'audit", href: AUDIT, plein: true },
     lignes: ["Un module vous manque", "Nous le construisons"],
-    intertitre: "Comment ça se passe",
+    intertitre: "Comment nous procédons",
     points: [
       "Votre besoin, étudié avec vous",
       "Un module construit pour vous",
@@ -331,17 +331,17 @@ export const QUESTIONS = {
     {
       id: "erp",
       q: "En quoi est-ce différent d'un ERP classique ?",
-      r: "Avec Omega, l'installation part d'une conversation. Vous décrivez votre activité, l'IA pose les questions qui manquent, puis paramètre les modules, la TVA, le plan comptable et les modèles de documents. Votre expert-comptable vérifie ce paramétrage avant le démarrage. Ensuite, les agents font le travail répétitif, et il vous reste à valider.",
+      r: "Avec Omega, l'installation part d'une conversation. Vous décrivez votre activité, puis l'IA pose les questions qui manquent et paramètre les modules, la TVA, le plan comptable et les modèles de documents. Votre expert-comptable vérifie ce paramétrage avant le démarrage. Ensuite, les agents font le travail répétitif, et il vous reste à valider.",
     },
     {
       id: "outils",
       q: "Faut-il changer nos outils ?",
-      r: "Ce choix vous appartient. Omega peut devenir votre logiciel de gestion, auquel cas nous reprenons les données de votre logiciel actuel. Omega peut aussi commencer par des agents raccordés aux outils que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et d'autres.",
+      r: "Ce choix vous appartient. Omega peut devenir votre logiciel de gestion : nous reprenons alors les données de votre logiciel actuel. Omega peut aussi commencer par des agents raccordés aux outils que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et d'autres.",
     },
     {
       id: "installation",
       q: "Qui s'occupe de l'installation ?",
-      r: "Notre équipe s'en charge du début à la fin. L'IA paramètre le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, puis votre expert-comptable vérifie le paramétrage comptable avant le démarrage.",
+      r: "Notre équipe s'en charge du début à la fin. L'IA paramètre le logiciel à partir de ce que vous lui décrivez. Nous reprenons ensuite vos données, puis votre expert-comptable vérifie le paramétrage comptable avant le démarrage.",
     },
     {
       id: "donnees",
@@ -365,7 +365,7 @@ export const APPEL = {
   cartes: [
     {
       fort: "Par un audit offert de 30 minutes.",
-      texte: "Nous y passons votre activité en revue, et votre prix, sur devis, y est arrêté avec vous.",
+      texte: "Nous y passons votre activité en revue, puis nous arrêtons votre prix avec vous.",
       bouton: { libelle: "Réserver un audit offert", href: AUDIT, plein: true } as Bouton,
     },
     {
@@ -376,7 +376,7 @@ export const APPEL = {
   ],
   bandeau: {
     titre: "Quatre agents IA",
-    texte: "Ils font le travail répétitif, et vous validez.",
+    texte: "Vous validez ce que préparent les agents.",
     bouton: { libelle: "Voir les quatre agents", href: AGENTS } as Bouton,
   },
 };
