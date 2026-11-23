@@ -11,7 +11,8 @@
 
    CE QUI EST REPRIS TEL QUEL : la boucle et ses instants (1,5 s l'appui,
    1,7 / 4 / 6,4 / 7,6 s les étapes, 7,6 → 8,6 s le compteur, fondu de
-   0,3 s aux deux bouts), la géométrie de la carte (en-tête 44 px, pied
+   0,3 s aux deux bouts ; le fondu d'entrée attend 0,35 s, le temps que
+   l'état de fin se rétracte cadre éteint), la géométrie de la carte (en-tête 44 px, pied
    46 px, jalons 16 px, corps de 11 à 12 px, montant en 30 px) et le
    panneau latéral de 260 px.
 
@@ -93,6 +94,7 @@ const CYCLE = 12;
 const FONDU = CYCLE - 0.8;
 const APPUI = [1.5, 1.7];
 const COMPTE = [7.6, 8.6];
+const REPRISE = 0.35;
 const EN_BANQUE = [54210, 56706];
 
 const adoucir = (x: number) => {
@@ -192,7 +194,12 @@ export default function CycleVente() {
       if (enVue) {
         const fond = u >= FONDU;
         const t = fond ? FONDU - 0.01 : u;
-        el.style.opacity = String(fond ? Math.max(0, 1 - (u - FONDU) / 0.3) : Math.min(1, u / 0.3));
+        /* le retour au début se fait cadre éteint : sans cette attente, le
+           tampon et les jalons de la fin se rétractaient sous les yeux,
+           à côté d'une pastille déjà revenue à « À valider » */
+        el.style.opacity = String(
+          fond ? Math.max(0, 1 - (u - FONDU) / 0.3) : Math.min(1, Math.max(0, (u - REPRISE) / 0.3)),
+        );
         const suivante = phaseA(t);
         setPhase((p) =>
           p.etape === suivante.etape && p.appuye === suivante.appuye && p.banque === suivante.banque ? p : suivante,
