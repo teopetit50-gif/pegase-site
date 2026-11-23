@@ -38,7 +38,7 @@ import {
   LOGICIELS_INTRO,
   METIERS,
   METIERS_INTRO,
-  OUTILS,
+  MODULES,
   PIED,
   PRIX,
   PRIX_INTRO,
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
      suivent le hero de components/accueil-v3/textes.ts. */
   title: "Omega.AI | L'ERP qui se configure avec l'IA",
   description:
-    "Ventes, achats, stock, banque et comptabilité dans un seul logiciel, réglé par l'IA pour votre activité, avec des agents qui font le travail répétitif. Audit de 30 minutes offert.",
+    "Omega, le logiciel de gestion (ERP) où l'IA travaille pour vous : ventes, achats, stock, banque et comptabilité au même endroit. L'IA l'adapte à votre activité et fait le travail répétitif. Audit de 30 minutes offert.",
 };
 
 /* 05/11 (Teo, « en plus pro, j'aime pas les couleurs ») — les pastilles,
@@ -270,7 +270,7 @@ export default function Home() {
               style={{ "--o-mot-d": "750ms" } as React.CSSProperties}
             >
               <Defilement>
-                {OUTILS.map((o) => (
+                {MODULES.map((o) => (
                   <div key={o} className="aa-marquee-item">
                     <span className="text-xl md:text-2xl font-semibold tracking-tight text-white/45 whitespace-nowrap">
                       {o}

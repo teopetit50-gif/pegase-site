@@ -53,27 +53,41 @@ export const AUDIT = "/reserver-un-audit";
    ne dit plus « on automatise sur vos outils » mais ce qu'est le produit :
    un logiciel de gestion qui se configure avec l'IA, où des agents font le
    travail répétitif. La formule vient de la note produit de Yacer (22/11). */
+/* 22/11, 2ᵉ passe (Teo : « regarde Odoo comment ils ont fait, on ne comprend
+   pas assez, les textes ne sont pas assez clairs ») — toute la page est
+   réécrite à la manière de la page d'accueil d'Odoo, relevée le jour même :
+     · des titres de six à neuf mots, un seul message chacun ;
+     · des noms que tout le monde connaît (ventes, achats, stock, banque,
+       comptabilité) plutôt que des notions (paramétrage, périmètre,
+       processus, pilotage) ;
+     · une idée par phrase, adressée au lecteur ;
+     · sous le titre, la liste de ce que fait le logiciel, comme leur grille
+       d'applications.
+   Le dessin ne bouge pas : seuls les mots changent. */
 export const HERO = {
-  titre: "L'ERP qui se configure avec l'IA et travaille à votre place",
+  titre: "Le logiciel de gestion où l'IA travaille pour vous",
   chapo:
-    "Omega réunit ventes, achats, stock, banque et comptabilité dans un seul logiciel. Vous décrivez votre activité, l'IA le règle et des agents font le travail répétitif, en PME comme en groupe.",
+    "Omega est un ERP : ventes, achats, stock, banque et comptabilité au même endroit. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez.",
   bouton: "Réserver un audit offert",
 };
 
-/* les outils de nos clients — liste de /integrations, en texte */
-export const OUTILS = [
-  "Gmail",
-  "WhatsApp",
-  "Google Sheets",
-  "Google Drive",
-  "Notion",
-  "HubSpot",
-  "Sage",
-  "QuickBooks",
-  "Shopify",
-  "Stripe",
-  "Calendly",
-  "Airtable",
+/* 22/11 — le bandeau sous le titre listait les outils de nos clients (Gmail,
+   Sage…) ; il liste maintenant ce que fait le logiciel, comme la grille
+   d'applications d'Odoo : on comprend le produit en lisant des noms. Les
+   outils raccordés restent dans la FAQ et sur /integrations. */
+export const MODULES = [
+  "Ventes",
+  "Achats",
+  "Stock",
+  "Banque",
+  "Comptabilité",
+  "Documents",
+  "Relances",
+  "Demandes clients",
+  "Factures fournisseurs",
+  "Clients inactifs",
+  "Modules métier",
+  "Sur mesure",
 ];
 
 /* 05/11 (Teo) — « essayez l'espace client en direct » remplacé par une
@@ -83,7 +97,7 @@ export const DEMO = {
   surtitre: "Voir la démo",
   titre: "Omega, en quinze secondes",
   texte:
-    "Ce que vos agents préparent pendant la nuit, et la seule chose qui vous reste à faire le matin : valider.",
+    "La nuit, les agents préparent le travail. Le matin, il vous reste une chose à faire : valider.",
   /* 05/11 — refaite en blanc avec la page (noms neufs : aucun cache ne
      resservira la version sombre) */
   video: "/accueil/demo-clair-15s.mp4",
@@ -114,7 +128,7 @@ export type Agent = {
    de l'espace client (outils/accueil-captures.mjs, cadre « gestion »). */
 export const AGENTS_INTRO = {
   surtitre: "Ce que fait Omega",
-  titre: ["Toute votre gestion dans un seul logiciel,", "et des agents IA qui y travaillent"],
+  titre: ["Un seul logiciel pour tout gérer.", "Des agents IA pour le travail répétitif."],
 };
 
 export const AGENTS: Agent[] = [
@@ -123,9 +137,9 @@ export const AGENTS: Agent[] = [
     onglet: "Gestion",
     resume: "Ventes, achats, stock, banque, comptabilité, documents.",
     couleur: "blue",
-    titre: "Toute votre gestion au même endroit, réglée pour votre activité",
+    titre: "Toute votre gestion au même endroit",
     texte:
-      "Clients, ventes, achats, stock, banque, comptabilité et documents partagent les mêmes données. Vous décrivez votre activité : l'IA active les bons modules et règle la TVA, le plan comptable et vos modèles de documents. Votre expert-comptable valide le paramétrage avant la mise en route.",
+      "Ventes, achats, stock, banque, comptabilité et documents sont reliés : une information saisie une fois est à jour partout. Vous décrivez votre activité, l'IA fait les réglages : TVA, plan comptable, modèles de documents. Votre expert-comptable vérifie avant le démarrage.",
     lien: AUDIT,
     bouton: "Réserver un audit",
     image: "/accueil/gestion-clair.webp",
@@ -136,9 +150,9 @@ export const AGENTS: Agent[] = [
     onglet: "Agents IA",
     resume: "Relances, demandes clients, factures fournisseurs, clients inactifs.",
     couleur: "green",
-    titre: "Quatre agents font le travail répétitif à votre place",
+    titre: "Quatre agents font le travail répétitif",
     texte:
-      "Relancer les impayés, répondre aux demandes, traiter les factures fournisseurs, reprendre contact avec les clients devenus inactifs. Chaque agent prépare tout dans le logiciel : il ne vous reste qu'à valider.",
+      "Ils relancent les impayés, répondent aux demandes, traitent les factures fournisseurs et recontactent les clients inactifs. Tout est prêt dans le logiciel. Il vous reste à valider.",
     lien: "/offres",
     bouton: "Voir les quatre agents",
     image: "/accueil/agents-clair.webp",
@@ -147,24 +161,24 @@ export const AGENTS: Agent[] = [
   {
     id: "metiers",
     onglet: "Modules métier",
-    resume: "Sept secteurs ont leur module, construit sur leurs règles.",
+    resume: "BTP, avocats, architectes, hôtels : sept métiers ont leur module.",
     couleur: "purple",
-    titre: "Un module qui connaît déjà les règles de votre métier",
+    titre: "Un module fait pour votre métier",
     texte:
-      "Avenants de chantier, pièces d'un dossier d'avocat, plans d'un permis de construire, états des lieux d'un loueur, plannings d'un cabinet dentaire, réservations d'un hôtel, tableaux de bord d'un groupe : chaque secteur a ses contraintes, et son module est construit pour elles.",
+      "Un chantier a ses avenants, un dossier d'avocat ses pièces, un permis ses plans. Chaque module connaît les règles de son métier. Sept métiers ont le leur : BTP, avocats, architectes, loueurs automobiles, cabinets dentaires, hôtels et grands groupes.",
     lien: "/secteurs",
-    bouton: "Trouver votre secteur",
+    bouton: "Trouver votre métier",
     image: "/accueil/metiers-clair.webp",
     alt: "Daliro, le module BTP : les avenants à chiffrer, valider et signer",
   },
   {
     id: "sur-mesure",
     onglet: "Sur mesure",
-    resume: "Votre besoin n'est dans aucune liste ? On le construit.",
+    resume: "Votre besoin n'est pas dans la liste ? Nous le construisons.",
     couleur: "orange",
-    titre: "Le module qui n'existe que chez vous, construit pour vous",
+    titre: "Il vous manque un module ? Nous le construisons.",
     texte:
-      "Validation des achats, planning des équipes, tableaux à consolider, échanges entre services : nous cartographions le processus avec vous, puis nous le construisons et l'ajoutons à votre logiciel. Son périmètre et son prix sont écrits avant de commencer.",
+      "Validation des achats, planning des équipes, tableaux à regrouper : nous regardons avec vous comment vous travaillez. Puis nous construisons le module et l'ajoutons à votre logiciel. Ce qu'il fait et son prix sont écrits avant de commencer.",
     lien: "/offres/sur-mesure",
     bouton: "Découvrir le sur-mesure",
     image: "/accueil/sur-mesure-clair.webp",
@@ -172,24 +186,24 @@ export const AGENTS: Agent[] = [
   },
   {
     id: "pilotage",
-    onglet: "Pilotage",
-    resume: "Tout passe par votre validation, dans un seul espace.",
+    onglet: "Validation",
+    resume: "Rien ne part sans votre accord.",
     couleur: "blue",
-    titre: "Vous gardez la main sur tout ce que fait l'IA",
+    titre: "L'IA prépare, vous décidez",
     texte:
-      "Gestion, agents et modules remontent dans le même espace : ce qui est prêt, ce qui attend votre accord, ce qui a été fait. Rien ne part sans validation, et chaque action laisse une trace.",
+      "Un seul écran vous montre ce qui est prêt, ce qui attend votre accord et ce qui a été fait. Vous validez ou vous corrigez en un clic. Rien ne part sans vous, et chaque action est enregistrée.",
     lien: "/espace2",
     bouton: "Voir l'espace client",
     image: "/accueil/pilotage-clair.webp",
-    alt: "La file des validations du matin dans l'espace client",
+    alt: "Les validations du matin dans l'espace client",
   },
 ];
 
 export const ETAPES_INTRO = {
   surtitre: "Comment ça marche",
-  titre: "De l'audit au logiciel réglé pour votre activité",
+  titre: "Trois étapes pour démarrer",
   texte:
-    "Trois étapes : vous décrivez votre activité, Omega se règle, et vous validez ce que les agents préparent.",
+    "Vous décrivez votre activité. Omega s'y adapte. Vous validez ce que les agents préparent.",
 };
 
 export const ETAPES = [
@@ -198,21 +212,21 @@ export const ETAPES = [
     couleur: "green" as const,
     titre: "Un audit de 30 minutes",
     texte:
-      "Vous décrivez votre activité, nous relevons sur vos exports vos volumes et ce qui prend du temps chaque mois. Vous repartez avec le périmètre et le tarif, écrits. C'est offert.",
+      "Vous décrivez votre activité. Nous regardons ce qui vous prend du temps chaque mois. Vous repartez avec une proposition écrite : ce qui est compris, et à quel prix. C'est offert.",
     image: "/accueil/etape-1-clair.webp",
   },
   {
     n: "02",
     couleur: "purple" as const,
-    titre: "L'installation, guidée par l'IA",
+    titre: "L'IA installe votre logiciel",
     texte:
-      "L'IA pose les questions qui manquent, active vos modules et règle la TVA et le plan comptable. Nous reprenons vos données et votre expert-comptable valide le paramétrage.",
+      "Elle vous pose quelques questions, puis fait les réglages : modules, TVA, plan comptable. Nous reprenons les données de votre logiciel actuel. Votre expert-comptable vérifie les réglages comptables.",
     image: "/accueil/etape-2-clair.webp",
   },
   {
     n: "03",
     couleur: "orange" as const,
-    titre: "Vous validez, ils exécutent",
+    titre: "Il vous reste à valider",
     texte:
       "Chaque matin, ce qui est prêt vous attend. Un clic pour valider, un pour corriger. Rien ne part sans vous.",
     image: "/accueil/etape-3-clair.webp",
@@ -229,7 +243,7 @@ export const ETAPES_PIED = {
 export const CITATIONS = [
   {
     texte:
-      "Ce qu'on automatise, ce n'est pas les gens. C'est tout ce qui les empêche de faire leur vrai travail.",
+      "Ce que nous automatisons, ce ne sont pas les gens. C'est tout ce qui les empêche de faire leur vrai travail.",
     signe: "Omega",
     role: "Notre conviction",
   },
@@ -313,7 +327,7 @@ export const CHIFFRES = [
 
 export const LOGICIELS_INTRO = {
   surtitre: "Pour chaque métier",
-  titre: "Chaque métier a ses règles. Ses modules aussi.",
+  titre: "Chaque métier a ses règles. Son module les connaît.",
 };
 export const LOGICIELS = [
   { nom: "Daliro", src: "/logos/daliro-lockup.png" },
@@ -340,37 +354,37 @@ export const SITUATIONS = [
   },
   {
     texte:
-      "Une demande reçue à 21 h obtient sa réponse à 21 h. Le client qui attendait un devis ne part plus chez le concurrent qui a décroché le premier.",
+      "Une demande arrive à 21 h. Sa réponse est rédigée aussitôt. Vous validez, elle part, et le client n'attend pas le lendemain.",
     nom: "REPUT",
     role: "Agent · demandes clients",
     logo: "/logos/reput-mark.png",
   },
   {
     texte:
-      "Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée, rangée et comptabilisée dans votre logiciel.",
+      "Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée et rangée. Vous validez, elle est comptabilisée.",
     nom: "FILED",
     role: "Agent · documents reçus",
     logo: "/logos/filed-mark.png",
   },
   {
     texte:
-      "Chaque chantier suivi du premier appel au décompte final : le devis dicté, les passages confirmés, le terrain lu, l'avenant signé avant l'ouvrage, la situation préparée, la réception suivie.",
+      "Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux, la situation de travaux est préparée.",
     nom: "Daliro",
     role: "Module métier · BTP",
     logo: "/logos/daliro-mark.png",
   },
   {
     texte:
-      "Le plan de tout le groupe, une fiche par société, client, fournisseur et contrat, rempli en lecture seule. Des agents le lisent et proposent une action ; la direction décide.",
+      "Tout le groupe sur un seul plan : une fiche par société, client, fournisseur et contrat, remplie depuis vos logiciels sans rien y modifier. Des agents le lisent et proposent une action ; la direction décide.",
     nom: "Varelo",
     role: "Module métier · grands groupes",
     logo: "/logos/varelo-mark.png",
   },
   {
     texte:
-      "Votre processus n'est dans aucune liste : validation des achats, planning des équipes, tableaux à consolider. Nous le dessinons avec vous, puis nous le construisons dans votre logiciel de gestion ou sur vos outils actuels.",
+      "Votre besoin n'est dans aucune liste : validation des achats, planning des équipes, tableaux à regrouper. Nous le construisons avec vous, dans votre logiciel de gestion ou sur vos outils actuels.",
     nom: "Sur mesure",
-    role: "Processus propres à votre entreprise",
+    role: "Ce qui n'existe que chez vous",
     logo: "/logos/surmesure-mark.svg",
   },
 ];
@@ -379,7 +393,7 @@ export const PRIX_INTRO = {
   surtitre: "Tarifs",
   titre: "Un tarif écrit avant tout engagement",
   texte:
-    "Le montant dépend des modules que vous activez et du volume que les agents traitent pour vous. Nous le relevons sur vos exports pendant l'audit.",
+    "Le prix dépend des modules que vous choisissez et du nombre de pièces que les agents traitent pour vous. Nous le calculons avec vous pendant l'audit.",
 };
 
 /* 22/11 — la carte du milieu, la carte forte, devient le logiciel de
@@ -388,14 +402,14 @@ export const PRIX_INTRO = {
 export const PRIX = [
   {
     nom: "Audit",
-    texte: "Pour savoir ce qu'Omega peut reprendre chez vous, et à quel prix.",
+    texte: "Pour savoir ce qu'Omega peut faire chez vous, et à quel prix.",
     prix: "Offert",
     sous: "30 minutes, sans engagement",
     points: [
-      "Votre activité et vos volumes, relevés sur vos exports",
-      "Les modules et les agents à activer, classés par gain",
-      "Le périmètre et le tarif, écrits",
-      "Le plan de mise en service",
+      "Votre activité, passée en revue avec vous",
+      "Les modules et les agents utiles chez vous",
+      "Une proposition écrite, prix compris",
+      "Le calendrier de démarrage",
     ],
     bouton: "Réserver l'audit",
     href: AUDIT,
@@ -403,15 +417,15 @@ export const PRIX = [
   },
   {
     nom: "Logiciel de gestion",
-    texte: "Votre gestion au même endroit, réglée par l'IA pour votre activité.",
+    texte: "Toute votre gestion au même endroit, adaptée à votre activité par l'IA.",
     prix: "Sur devis",
-    sous: "selon les modules activés",
+    sous: "selon les modules choisis",
     points: [
       "Ventes, achats, stock, banque, comptabilité",
       "Sept modules métier, et du sur-mesure",
       "Vos données reprises de votre logiciel actuel",
-      "Paramétrage validé par votre expert-comptable",
-      "Un interlocuteur dédié dans notre équipe",
+      "Réglages vérifiés par votre expert-comptable",
+      "Un interlocuteur dans notre équipe",
     ],
     bouton: "Parler à l'équipe",
     href: "/contact",
@@ -419,7 +433,7 @@ export const PRIX = [
   },
   {
     nom: "Agents",
-    texte: "Un à quatre agents en service, pilotés sur une seule file de validation.",
+    texte: "Un à quatre agents travaillent pour vous. Vous validez tout au même endroit.",
     prix: "À l'usage",
     sous: "facturé à la pièce traitée",
     points: [
@@ -443,19 +457,19 @@ export const FAQ: Question[] = [
     id: "omega",
     cat: "Général",
     q: "Qu'est-ce qu'Omega ?",
-    r: "Omega est un éditeur de logiciels français. Notre logiciel de gestion (ERP) se configure avec l'IA : ventes, achats, stock, banque, comptabilité et documents au même endroit, des agents qui y font le travail répétitif (relances, demandes clients, factures fournisseurs, clients inactifs), sept modules métier, et du sur-mesure pour ce qui n'existe que chez vous.",
+    r: "Omega est un éditeur de logiciels français. Nous faisons un logiciel de gestion, un ERP : ventes, achats, stock, banque, comptabilité et documents au même endroit. L'IA l'adapte à votre activité. Des agents y font le travail répétitif : relances, demandes clients, factures fournisseurs, clients inactifs. Sept métiers ont leur module, et nous construisons sur mesure ce qui vous manque.",
   },
   {
     id: "erp",
     cat: "Général",
     q: "En quoi est-ce différent d'un ERP classique ?",
-    r: "Avec Omega, le paramétrage part d'une conversation : vous décrivez votre activité, l'IA pose les questions qui manquent, puis active les modules et règle la TVA, le plan comptable et les modèles de documents. Votre expert-comptable valide avant la mise en route. Ensuite, les agents font le travail répétitif et vous présentent un résultat prêt à valider.",
+    r: "Avec Omega, l'installation part d'une conversation. Vous décrivez votre activité, l'IA pose les questions qui manquent, puis fait les réglages : modules, TVA, plan comptable, modèles de documents. Votre expert-comptable vérifie avant le démarrage. Ensuite, les agents font le travail répétitif : il vous reste à valider.",
   },
   {
     id: "sur-mesure",
     cat: "Général",
-    q: "Pouvez-vous automatiser un processus propre à notre entreprise ?",
-    r: "Oui, c'est l'offre sur mesure. Pendant l'audit, nous cartographions le processus avec vous : qui intervient, sur quels logiciels, avec quelles règles de validation. Vous repartez avec le périmètre et le prix, écrits avant tout engagement.",
+    q: "Pouvez-vous construire un module rien que pour nous ?",
+    r: "Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement.",
   },
   {
     id: "difference",
@@ -479,7 +493,7 @@ export const FAQ: Question[] = [
     id: "utilisateur",
     cat: "Tarifs",
     q: "Faut-il payer par utilisateur ?",
-    r: "Pas pour les agents : l'unité facturée est la pièce traitée, une facture lue, une demande reçue, une relance envoyée. Le tarif du logiciel de gestion dépend des modules activés et vous est remis écrit à l'audit. Nous ne prenons jamais de pourcentage sur vos encaissements.",
+    r: "Pas pour les agents : l'unité facturée est la pièce traitée : une facture lue, une demande reçue, une relance envoyée. Le tarif du logiciel de gestion dépend des modules activés et vous est remis écrit à l'audit. Nous ne prenons jamais de pourcentage sur vos encaissements.",
   },
   {
     id: "remboursement",
@@ -491,7 +505,7 @@ export const FAQ: Question[] = [
     id: "donnees",
     cat: "Sécurité",
     q: "Où sont mes données ?",
-    r: "Dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne et jamais mélangé à celui d'un autre client. Les modèles ne reçoivent que le strict nécessaire à chaque tâche, et rien n'est réutilisé à d'autres fins.",
+    r: "Dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne et jamais mélangé à celui d'un autre client. L'IA ne reçoit que le strict nécessaire à chaque tâche, et rien n'est réutilisé à d'autres fins.",
   },
   {
     id: "accord",
@@ -509,13 +523,13 @@ export const FAQ: Question[] = [
     id: "absent",
     cat: "Intégrations",
     q: "Et si notre logiciel n'est pas dans la liste ?",
-    r: "Nous en parlons pendant l'audit. Raccorder un logiciel métier ou reprendre les données d'un logiciel absent de la liste fait partie de l'offre sur mesure, avec un périmètre et un tarif écrits avant de commencer.",
+    r: "Nous en parlons pendant l'audit. Raccorder un logiciel métier ou reprendre les données d'un logiciel absent de la liste fait partie de l'offre sur mesure. Ce qui est compris et le prix sont écrits avant de commencer.",
   },
   {
     id: "installation",
     cat: "Accompagnement",
     q: "Qui s'occupe de l'installation ?",
-    r: "Notre équipe vous accompagne de bout en bout. L'IA règle le logiciel à partir de la description de votre activité, nous reprenons vos données, et votre expert-comptable valide le paramétrage comptable avant la mise en route. Pour les agents, aucun débit n'intervient avant la fin de leur installation.",
+    r: "Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation.",
   },
   {
     id: "support",
@@ -544,7 +558,7 @@ export const APPEL = {
 };
 
 export const PIED = {
-  phrase: "L'ERP qui se configure avec l'IA : votre gestion au même endroit, des agents, des modules métier et du sur-mesure, sous votre validation.",
+  phrase: "Le logiciel de gestion où l'IA travaille pour vous : ventes, achats, stock, banque et comptabilité au même endroit. Rien ne part sans votre accord.",
   colonnes: [
     {
       titre: "Agents",
