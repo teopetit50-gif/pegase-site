@@ -46,6 +46,13 @@ import {
   type Agent,
 } from "@/components/accueil-v3/textes";
 import {
+  CadreVignette,
+  VignetteEtape,
+  VignetteMetier,
+  VignetteModules,
+  VignetteOnglet,
+} from "@/components/accueil-v3/vignettes";
+import {
   Citations,
   Compteur,
   Faq,
@@ -194,7 +201,10 @@ function Article({ a }: { a: Agent }) {
         {a.bouton}
         <ArrowRight className="w-4 h-4" />
       </Link>
-      <Cadre src={a.image} alt={a.alt} ratio="1240/724" />
+      {/* 22/11 (Teo, « des components pour remplacer les images ») */}
+      <CadreVignette>
+        <VignetteOnglet id={a.id} />
+      </CadreVignette>
     </article>
   );
 }
@@ -283,13 +293,11 @@ export default function Home() {
               className="o-bloc-apparait relative w-full mt-4 md:mt-8 px-6 md:px-10 pb-6 md:pb-10"
               style={{ "--o-mot-d": "850ms" } as React.CSSProperties}
             >
-              <Cadre
-                src="/accueil/cashd-clair.webp"
-                alt="CASHD, le tableau de bord des relances : encours, paliers et relances prêtes à valider"
-                ratio="1240/724"
-                className="object-cover object-top grayscale-75"
-                priority
-              />
+              {/* 22/11 (Teo) — la capture du tableau de bord laisse la place à
+                  la grille des modules, comme la grille d'applications d'Odoo */}
+              <CadreVignette>
+                <VignetteModules />
+              </CadreVignette>
             </div>
           </div>
         </section>
@@ -400,13 +408,9 @@ export default function Home() {
                         {e.n}
                       </div>
                       <div className="relative w-full aspect-[4/3] overflow-hidden border-b border-white/[0.06]">
-                        <Image
-                          src={e.image}
-                          alt={e.titre}
-                          fill
-                          sizes="(min-width: 768px) 33vw, 100vw"
-                          className="object-cover object-top grayscale-75"
-                        />
+                        <div className="aa-vig absolute inset-0 flex bg-[#fafafa]">
+                          <VignetteEtape n={e.n} />
+                        </div>
                       </div>
                       <div className="relative flex flex-col gap-3 px-6 pb-6">
                         <div className="flex items-center gap-3 mb-1">
@@ -482,13 +486,9 @@ export default function Home() {
                   >
                     <Link href={m.href} className="flex flex-col">
                       <div className="relative w-full overflow-hidden" style={{ aspectRatio: "567 / 278" }}>
-                        <Image
-                          src={m.image}
-                          alt={`${m.nom}, le logiciel des ${m.metier.toLowerCase()}`}
-                          fill
-                          sizes="(min-width: 768px) 50vw, 100vw"
-                          className="absolute inset-0 object-cover object-top grayscale-75"
-                        />
+                        <div className="absolute inset-0">
+                          <VignetteMetier nom={m.nom} />
+                        </div>
                       </div>
                       <div className="flex flex-col gap-2 p-[18px] md:p-[28px]">
                         <span className="inline-flex flex-wrap items-center gap-2">

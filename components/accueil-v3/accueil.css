@@ -222,3 +222,8 @@
 .aa-clair .aa-cadre-lisere {
   background: linear-gradient(rgba(10, 10, 10, 0.1), rgba(10, 10, 10, 0.1));
 }
+
+/* 22/11 — les vignettes en code (vignettes.tsx) : leurs icônes gardent le
+   trait plein. La règle « svg circle » du thème clair, écrite pour les
+   anneaux décoratifs, délavait les roues et les points des pictogrammes. */
+.aa-clair .aa-vig svg circle { stroke: currentColor; fill: none }
