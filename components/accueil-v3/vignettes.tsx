@@ -66,7 +66,7 @@ export function CadreVignette({ children, large = false }: { children: React.Rea
         <div className="aa-cadre-lisere pointer-events-none absolute inset-0 z-50 rounded-[20px]" />
         <div
           aria-hidden="true"
-          className={`hidden md:block [grid-area:1/1] self-start w-full ${large ? "aspect-[2/1]" : "aspect-[1240/724]"}`}
+          className={`hidden md:block [grid-area:1/1] self-start w-full ${large ? "aspect-[5/2]" : "aspect-[1240/724]"}`}
         />
         <div className="aa-vig relative flex w-full [grid-area:1/1] overflow-hidden rounded-[10px] md:rounded-[12px] bg-[#fafafa]">
           {children}
