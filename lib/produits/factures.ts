@@ -27,7 +27,7 @@
    le héros de la page. */
 export const MARQUE = {
   nom: "FILED",
-  endos: "un système Omega.AI",
+  endos: "un agent Omega.AI",
 };
 
 /* La barre de navigation d'ancres du site source (NAV) est partie avec
@@ -47,7 +47,7 @@ export const MARQUE = {
    qui distingue vraiment — les concurrents demandent un logiciel. */
 export const HERO = {
   titre1: "Vos équipes ne ressaisiront",
-  titre2: "plus une seule facture.",
+  titre2: "plus vos factures.",
   para1: "Vous connectez une messagerie. C'est la seule chose à faire.",
   para2: "FILED lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu'au dossier de votre comptabilité.",
   cta1: "COMMENCER",
@@ -71,7 +71,7 @@ export const BANDEAU = [
   "Photo prise sur le parking",
   "Pièce jointe",
   "Montant écrit dans le corps du mail",
-  "Facture-X",
+  "Factur-X",
   "Ticket de caisse froissé",
   "Avoir",
   "Relevé",
@@ -111,7 +111,7 @@ export const FONCTIONNEMENT = {
   titre1: "Vos comptes ne reçoivent",
   titre2: "que des pièces vérifiées.",
   para:
-    "Une pièce mal rangée ne se découvre qu'au bilan. FILED recoupe donc le HT, la TVA et le TTC de chaque facture, et ne la classe que si les trois montants tombent juste.",
+    "Une pièce mal rangée ne se découvre qu'au bilan. FILED recoupe donc le HT, la TVA et le TTC de chaque facture. Il ne la classe que si les trois montants tombent juste.",
 };
 
 export const SUIVI = {
@@ -134,7 +134,7 @@ export const PALIERS = [
     nom: "Découverte",
     prix: null as string | null,
     periode: "/ mois",
-    pitch: "Pour évaluer le système sur vos factures réelles.",
+    pitch: "Pour évaluer FILED sur vos factures réelles.",
     cta: "Commencer",
     lignes: [
       "20 factures par mois",
@@ -170,7 +170,7 @@ export const PALIERS = [
     lignes: [
       "500 factures par mois",
       "Boîtes mail illimitées",
-      "File de validation partagée",
+      "Validation partagée",
       "Catégories d'achat sur mesure",
       "Historique complet",
       "Journal de tout ce qui a été lu",
@@ -217,7 +217,7 @@ export const GARDE_FOUS = {
   titre1: "FILED lit",
   titre2: "vos comptes sans y toucher.",
   para:
-    "Un système branché sur votre comptabilité doit d'abord prouver ce qu'il refuse de faire. Les deux limites ci-dessous ne se désactivent nulle part, parce qu'elles tiennent à la façon dont le produit est construit.",
+    "Un agent branché sur votre comptabilité doit d'abord prouver ce qu'il refuse de faire. Les deux limites ci-dessous ne se désactivent nulle part, parce qu'elles tiennent à la façon dont le produit est construit.",
   cartes: [
     {
       titre: "Il n'écrit à personne.",
@@ -287,7 +287,7 @@ export const FAQ = {
       r: "Sur des serveurs situés dans l'Union européenne. Vos fichiers d'origine sont conservés tels quels, vous pouvez les récupérer ou tout effacer à tout moment.",
     },
     {
-      q: "Ce système assure-t-il la conformité à la facturation électronique ?",
+      q: "FILED assure-t-il la conformité à la facturation électronique ?",
       r: "Non, et personne ne devrait vous le présenter ainsi. Le raccordement à une plateforme immatriculée relève de votre outil de facturation et de votre comptabilité. FILED lit et classe ce qui vous arrive, quel que soit le canal.",
     },
     {

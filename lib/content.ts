@@ -93,12 +93,12 @@ export const nomPaquet = (code: string) => NOM_PAQUET[code] ?? code;
 export const FAMILLES: Famille[] = [
   {
     id: "installes",
-    tag: "Ce qui se déploie",
+    tag: "Les agents",
     accent: "text-gold",
-    title1: "Quatre processus",
-    title2: "pris en charge.",
-    desc: "Sécuriser les encaissements, réactiver le chiffre qui dort dans votre historique, répondre à toute heure, structurer les flux documentaires. Quatre systèmes, intégrés aux outils que vos équipes utilisent déjà.",
-    cta: "Voir les quatre systèmes",
+    title1: "Quatre tâches",
+    title2: "prises en charge.",
+    desc: "Sécuriser les encaissements, réactiver le chiffre qui dort dans votre historique, répondre à toute heure, traiter les documents reçus. Quatre agents, dans le logiciel Omega ou sur les outils de vos équipes.",
+    cta: "Voir les quatre agents",
     proof: {
       type: "quote",
       text: "Une entreprise ne perd pas son chiffre d'un coup. Elle le perd par un devis sans réponse, un appel manqué, une facture jamais relancée.",
@@ -109,13 +109,13 @@ export const FAMILLES: Famille[] = [
         system: "CASHD",
         slug: "relances-impayes",
         title: "CASHD · encaissements",
-        job: "Les devis restés sans réponse et les factures échues font l'objet d'une relance graduée, rédigée au cas par cas selon le montant en jeu, l'ancienneté du retard et l'historique du compte. Le recouvrement cesse de dépendre de la vigilance et de la disponibilité d'une seule personne.",
+        job: "Les devis restés sans réponse et les factures échues font l'objet d'une relance graduée, rédigée au cas par cas selon le montant en jeu, l'ancienneté du retard et l'historique du compte. Le recouvrement suit son cours, quelle que soit la charge de votre équipe.",
         benefit: "Relance à J+3, J+7, J+21, aucun envoi sans votre validation.",
       },
       {
         system: "OFFLOAD",
         slug: "nouvelles-affaires",
-        title: "OFFLOAD · réactivation commerciale",
+        title: "OFFLOAD · clients inactifs",
         job: "Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste.",
         benefit: "Les clients inactifs classés par valeur, un message par compte et par trimestre.",
       },
@@ -129,7 +129,7 @@ export const FAMILLES: Famille[] = [
       {
         system: "FILED",
         slug: "factures-fournisseurs",
-        title: "FILED · flux documentaires",
+        title: "FILED · documents reçus",
         /* 15/09/2026 (Teo) — « on parle pas que des factures, c'est tous les
            documents, peu importe le doc que l'entreprise reçoit ; il sait
            lire ET rédiger pour tout type de document ». Ces deux champs
@@ -249,18 +249,18 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce que fait OFFLOAD dans un garage",
-        p: "Le système OFFLOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
+        p: "L'agent OFFLOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
       },
       {
         h: "Pendant ce temps, l'accueil répond",
-        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. Le système REPUT les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
+        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. L'agent REPUT les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
       },
       {
         h: "Et les factures d'atelier suivent le même chemin",
-        p: "Pour les clients professionnels et les flottes qui règlent à réception, le système CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
+        p: "Pour les clients professionnels et les flottes qui règlent à réception, l'agent CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
       },
       {
-        p: "Tout cela s'installe sur les outils déjà en place (le fichier existant, la messagerie, WhatsApp), sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un système, la recommandation est de ne rien installer.",
+        p: "Tout cela s'installe sur les outils déjà en place (le fichier existant, la messagerie, WhatsApp), sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
       },
     ],
   },
@@ -280,11 +280,11 @@ export const POSTS: Post[] = [
       },
       {
         h: "Pourquoi le suivi saute toujours",
-        p: "Ce n'est pas de la négligence, c'est une question de journées : on ne relance pas un prospect à 19 heures en rentrant d'un chantier, et le lundi il y a plus urgent. Le suivi des devis est un travail de bureau régulier dans un métier qui n'a pas de bureau régulier. C'est exactement le genre de tâche qui se confie à un système.",
+        p: "Ce n'est pas de la négligence, c'est une question de journées : on ne relance pas un prospect à 19 heures en rentrant d'un chantier, et le lundi il y a plus urgent. Le suivi des devis est un travail de bureau régulier dans un métier qui n'a pas de bureau régulier. C'est exactement le genre de tâche qui se confie à un agent.",
       },
       {
         h: "Ce que fait CASHD sur les devis",
-        p: "Le système CASHD reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis le système s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier (chantier, intervention, acompte, situation), et le dirigeant valide le ton une fois pour toutes.",
+        p: "L'agent CASHD reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis CASHD s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier (chantier, intervention, acompte, situation), et le dirigeant valide le ton une fois pour toutes.",
       },
       {
         h: "Côté factures, la même discipline",
@@ -292,7 +292,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Les demandes entrantes et les pièces fournisseurs suivent",
-        p: "Le système REPUT accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. Le système FILED lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
+        p: "L'agent REPUT accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. L'agent FILED lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
       },
       {
         p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien, et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
@@ -323,18 +323,18 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce que fait REPUT dans une agence",
-        p: "Le système REPUT rassemble les demandes entrantes (mail, WhatsApp), dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
+        p: "L'agent REPUT rassemble les demandes entrantes (mail, WhatsApp) dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
       },
       {
         h: "OFFLOAD : la base dormante d'une agence vaut de l'or",
-        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. Le système OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
+        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. L'agent OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
       },
       {
         h: "Le matin, deux minutes pour tout voir",
         p: "Chaque matin, le point du jour pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant la première visite. Et la règle de la maison s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir sans contrôle.",
       },
       {
-        p: "L'installation se fait sur les outils déjà en place (la messagerie, WhatsApp, le tableur de contacts), sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un système, la recommandation est de ne rien installer.",
+        p: "L'installation se fait sur les outils déjà en place (la messagerie, WhatsApp, le tableur de contacts), sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
       },
     ],
   },
@@ -350,15 +350,15 @@ export const POSTS: Post[] = [
       "Le dispositif régional couvre l'essentiel du coût d'une automatisation pour les entreprises de Guadeloupe. Qui est éligible, quels montants, et comment on monte le dossier avec vous.",
     body: [
       {
-        p: "La Région Guadeloupe soutient la transformation numérique des entreprises à travers le dispositif Chèque TIC : une subvention plafonnée à 10 000 €, qui couvre de 40 à 80 % du coût d'un projet numérique selon la nature des dépenses, 80 % sur la présence web et la sécurité, 40 % sur les logiciels de gestion et le matériel. Un projet d'automatisation Omega.AI (installation d'un système, raccordement aux outils, formation), entre précisément dans le champ de ce dispositif.",
+        p: "La Région Guadeloupe soutient la transformation numérique des entreprises à travers le dispositif Chèque TIC : une subvention plafonnée à 10 000 €, qui couvre de 40 à 80 % du coût d'un projet numérique selon la nature des dépenses, 80 % sur la présence web et la sécurité, 40 % sur les logiciels de gestion et le matériel. Un projet d'automatisation Omega.AI (installation d'un agent, raccordement aux outils, formation) entre précisément dans le champ de ce dispositif.",
       },
       {
         h: "Qui est éligible",
-        p: "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe depuis au moins un an, à jour de leurs obligations sociales et fiscales. Les critères précis (effectif, chiffre d'affaires, secteurs prioritaires, plafonds), sont fixés par la Région et évoluent selon les enveloppes votées. C'est la première chose que nous vérifions lors de l'audit : votre éligibilité est confirmée avant tout engagement, pas après.",
+        p: "Le dispositif s'adresse aux très petites entreprises immatriculées en Guadeloupe depuis au moins un an, à jour de leurs obligations sociales et fiscales. Les critères précis (effectif, chiffre d'affaires, secteurs prioritaires, plafonds) sont fixés par la Région et évoluent selon les enveloppes votées. C'est la première chose que nous vérifions lors de l'audit : votre éligibilité est confirmée avant tout engagement, pas après.",
       },
       {
         h: "Ce que le dispositif couvre",
-        p: "La subvention porte sur les dépenses du projet numérique : la prestation d'installation, le paramétrage des outils, l'accompagnement à la prise en main. Concrètement, sur une installation devisée, la part restant à la charge de l'entreprise peut être ramenée à une fraction du montant total : ce qui change complètement le calcul de retour sur investissement d'un système de relance ou d'un accueil automatisé.",
+        p: "La subvention porte sur les dépenses du projet numérique : la prestation d'installation, le réglage des outils, l'accompagnement à la prise en main. Concrètement, sur une installation devisée, la part restant à la charge de l'entreprise peut être ramenée à une fraction du montant total : ce qui change complètement le calcul de retour sur investissement d'un agent de relance ou d'un accueil automatisé.",
       },
       {
         h: "Comment le dossier se monte",
@@ -393,11 +393,11 @@ export const POSTS: Post[] = [
       },
       {
         h: "Le choix Omega.AI : un espace dédié par client",
-        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les systèmes agissent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
+        p: "Chez Omega.AI, chaque entreprise a son espace de données propre : chiffré, hébergé dans l'Union européenne, strictement séparé de celui des autres clients. Vous gardez vos outils de tous les jours (messagerie, tableur, WhatsApp), et c'est là que les agents travaillent. Les modèles d'intelligence artificielle utilisés reçoivent le strict nécessaire à chaque tâche, jamais l'intégralité d'un fichier, et rien n'est réutilisé à d'autres fins.",
       },
       {
         h: "Ce que cela change concrètement",
-        p: "En cas de contrôle ou de demande d'un client, vous savez répondre : les données sont dans votre espace dédié, traitées par ce système, pour cette finalité. Le registre des traitements est documenté à l'installation. Et le jour où vous arrêtez, l'export complet vous est remis et l'espace est effacé : c'est contractuel, pas une promesse orale.",
+        p: "En cas de contrôle ou de demande d'un client, vous savez répondre : les données sont dans votre espace dédié, traitées par cet agent, pour cette finalité. Le registre des traitements est documenté à l'installation. Et le jour où vous arrêtez, l'export complet vous est remis et l'espace est effacé : c'est contractuel, pas une promesse orale.",
       },
     ],
   },
@@ -425,10 +425,10 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce qu'une relance systématique change",
-        p: "Un système comme CASHD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà, chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : ce ne sont pas les clients qui manquent de trésorerie qui paient plus vite, ce sont les clients qui payaient en dernier ceux qui ne relançaient pas.",
+        p: "Un agent comme CASHD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà, chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : les clients paient d'abord les fournisseurs qui relancent avec régularité.",
       },
       {
-        p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un système de relance, financé en partie par le Chèque TIC, jusqu'à 10 000 €, pour les entreprises éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
+        p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un agent de relance, financé en partie par le Chèque TIC, jusqu'à 10 000 €, pour les entreprises éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
       },
     ],
   },

@@ -44,7 +44,7 @@
 export const MARQUE = {
   nom: "CASHD",
   role: "relance devis & factures",
-  signature: "un système Omega.AI",
+  signature: "un agent Omega.AI",
   /* 11/09 — l'adresse passe de `bonjour@` à `contact@` : c'est la seule
      adresse de ce site (dix occurrences), et deux adresses de contact sur
      un même site est un défaut, pas une nuance. Reroutage au sens de la
@@ -96,7 +96,7 @@ export const HEROS = {
      faire. L'adresse reste affichée en clair dans la FAQ, pour qui
      préfère écrire depuis sa propre boîte. */
   boutonSecondaire: { texte: "Nous écrire", href: "/contact" },
-  mention: "Un système",
+  mention: "Un agent",
 } as const;
 
 /* Ruban défilant, sur grand écran seulement.
@@ -168,14 +168,14 @@ export const PRINCIPE = {
       points: [
         "Le ton suit le montant et l'ancienneté du retard",
         "L'historique de paiement du client pèse aussi",
-        "Un client ne reçoit jamais deux fois le même texte",
+        "Chaque client reçoit un texte écrit pour lui",
       ],
     },
     {
       cle: "arrete",
       titre: "Vous gardez la main",
       texte:
-        "Tout ce qui doit partir passe par une file de validation, qui reste la seule porte de sortie du système.",
+        "Tout ce qui doit partir attend votre accord, et rien ne sort par un autre chemin.",
       /* PASSE CORRECTRICE — « Approuver, corriger ou suspendre » était un
          ternaire d'infinitifs ; la bande de chiffres porte déjà ces trois
          gestes en phrase, donc la puce dit ici la règle et non la liste.
@@ -264,7 +264,7 @@ export const BENTO = {
       id: "escalade",
       titre: "Un paiement arrête la séquence",
       texte:
-        "Le facturier est relu avant chaque envoi, donc un règlement encaissé la veille coupe la séquence avant qu'elle reparte. Un client qui a payé n'est jamais relancé.",
+        "Le facturier est relu avant chaque envoi, donc un règlement encaissé la veille coupe la séquence avant qu'elle reparte. Un paiement enregistré arrête donc les relances.",
     },
     {
       id: "ton",
@@ -275,7 +275,7 @@ export const BENTO = {
     {
       id: "journal",
       titre: "Chaque envoi laisse une trace",
-      texte: "Le système date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible.",
+      texte: "CASHD date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible.",
     },
   ],
 } as const;
@@ -325,7 +325,7 @@ export const ECRANS = {
       alt: "L'écran Trésorerie : la balance âgée de l'encours, par tranche d'ancienneté, avec le délai moyen de règlement.",
     },
   ],
-  preuves: ["Aucun outil à remplacer", "Rien ne part sans vous", "Vos données restent chez vous"],
+  preuves: ["Aucun outil à remplacer", "Rien ne part sans vous", "Données hébergées dans l'UE"],
 } as const;
 
 /* Bande d'indicateurs. Quatre chiffres qui sont des FAITS DE CONCEPTION,
@@ -364,7 +364,7 @@ export const FRANCE = {
      tic 3, en trois mots et sans verbe, juste au-dessus d'un titre qui
      dit déjà la même chose. Le sourcil redevient une étiquette de
      section : il annonce la question, le titre y répond. */
-  sourcil: "D'où vient ce système",
+  sourcil: "D'où vient cet agent",
   titre: "Un produit français",
   chapo:
     "L'origine d'un logiciel semble secondaire tant que tout va bien. Le jour où un problème survient, elle décide qui vous répond, en quelle langue, et sous quel droit vous êtes.",
@@ -372,17 +372,17 @@ export const FRANCE = {
     {
       titre: "Conçu et développé en France",
       texte:
-        "Le système est développé en France, et rien n'est sous-traité ailleurs.",
+        "CASHD est développé en France, par notre propre équipe.",
     },
     {
       titre: "Vos données sont hébergées dans l'Union européenne",
       texte:
-        "Votre entreprise dispose d'un espace chiffré et distinct. Pour rédiger un message, le système n'en extrait que le nécessaire, jamais votre facturier entier.",
+        "Votre entreprise dispose d'un espace chiffré et distinct. Pour rédiger un message, CASHD n'en extrait que le nécessaire, jamais votre facturier entier.",
     },
     {
       titre: "L'assistance se fait en français",
       texte:
-        "Quand vous avez une question, elle est traitée par les personnes qui ont installé le système chez vous.",
+        "Quand vous avez une question, elle est traitée par les personnes qui ont installé CASHD chez vous.",
     },
     {
       titre: "Facturation en euros, droit français",
@@ -414,7 +414,7 @@ export const QUESTIONS = {
         },
         {
           q: "Qui écrit les messages ?",
-          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par le système à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
+          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par CASHD à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
         },
         {
           q: "Mes clients risquent-ils de mal le prendre ?",
@@ -428,15 +428,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Puis-je exclure certains clients ?",
-          r: "Oui. Une liste blanche est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. Ces contacts sortent du périmètre automatique, et seul vous pouvez les y remettre.",
+          r: "Oui. Une liste d'exclusion est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. CASHD ne relance pas ces contacts, et vous seul pouvez les réintégrer.",
         },
         {
           q: "Faut-il changer de logiciel de facturation ?",
-          r: "Non. Le système lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes et vos habitudes. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
+          r: "Non. CASHD lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes. Il travaille aussi dans le logiciel de gestion Omega, si vous le choisissez. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
         },
         {
           q: "Une personne s'en occupe déjà chez nous.",
-          r: "Le système ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. Elle cesse seulement de tenir le compte de qui doit quoi et de courir après les retards.",
+          r: "CASHD ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. Elle cesse seulement de tenir le compte de qui doit quoi et de courir après les retards.",
         },
       ],
     },
@@ -446,15 +446,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Où vont mes données ?",
-          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, le système transmet à un modèle le strict nécessaire, un client, une facture, un historique, et jamais votre facturier entier.",
+          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, CASHD transmet à un modèle le strict nécessaire, un client, une facture, un historique, et jamais votre facturier entier.",
         },
         {
           q: "Un message peut-il partir sans moi ?",
-          r: "Non. Tout ce qui doit partir passe par une file de validation : vous approuvez, vous corrigez ou vous suspendez. La mise en demeure exige en plus une validation explicite, à chaque fois.",
+          r: "Non. Tout ce qui doit partir attend votre accord : vous approuvez, vous corrigez ou vous suspendez. La mise en demeure exige en plus une validation explicite, à chaque fois.",
         },
         {
           q: "Quel est le tarif ?",
-          r: "Le tarif dépend de votre encours et du nombre de comptes à suivre, et l'annoncer avant de les avoir mesurés n'aurait pas de sens. Écrivez-nous : nous chiffrons votre cas sur vos volumes réels, et vous décidez après.",
+          r: "Vous êtes facturé à l'usage, à la pièce traitée, c'est-à-dire à la relance envoyée. Rien n'est débité avant l'installation, et vous êtes remboursé pendant 30 jours. Écrivez-nous : nous chiffrons votre cas sur vos volumes réels, et vous décidez après.",
         },
       ],
     },
@@ -472,7 +472,7 @@ export const QUESTIONS = {
 export const CLOTURE = {
   titre: "Ce qui attend dehors ne rentrera pas seul.",
   chapo:
-    "Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : le système ne demande rien d'autre.",
+    "Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : CASHD ne demande rien d'autre.",
   /* Même reroutage que le bouton du héros. */
   bouton: "Réserver un audit",
 } as const;

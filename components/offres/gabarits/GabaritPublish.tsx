@@ -150,7 +150,7 @@ export default function GabaritPublish({
             </p>
 
             <div data-reveal className="mt-[25px] flex flex-wrap items-center justify-center gap-3">
-              <Link href="/commencer" className="o-btn o-btn--primary">
+              <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
                 Chiffrer mon cas
               </Link>
               <Link href="#reglages" className="o-btn o-btn--ghost">
@@ -216,7 +216,7 @@ export default function GabaritPublish({
             titre={fiche.sections?.integrationsTitre ?? "Branché sur ce que vous avez."}
             chapo={
               fiche.sections?.integrationsChapo ??
-              "Messagerie, tableur, stockage, comptabilité : le moteur lit et écrit là où vous travaillez déjà. Ni compte à créer, ni migration."
+              "Messagerie, tableur, stockage, comptabilité : l'agent lit et écrit dans le logiciel Omega ou là où vous travaillez déjà."
             }
           />
         </div>
@@ -240,7 +240,7 @@ export default function GabaritPublish({
           <CarteMedia
             badge="Cadré avec vous"
             titre="Des règles, pas des devinettes"
-            texte="Le moteur classe selon les règles fixées à l'installation, et selon elles seules. Une pièce qui sort du cadre est mise de côté : jamais rangée au jugé."
+            texte="L'agent classe selon les règles fixées à l'installation, et selon elles seules. Une pièce qui sort du cadre est mise de côté : jamais rangée au jugé."
             lien={{ label: "Comment se passe l'installation", href: "/tarifs#grille" }}
           >
             <MaqRegleClassement fiche={fiche} />
@@ -249,7 +249,7 @@ export default function GabaritPublish({
             badge="Chaque mois"
             titre="Un dossier prêt à ouvrir"
             texte="Pièces nommées, horodatées, réparties par journal. Le cabinet reçoit un dossier constitué, pas une pile de PDF à trier."
-            lien={{ label: "Voir les autres moteurs", href: "/offres" }}
+            lien={{ label: "Voir les autres agents", href: "/offres" }}
           >
             <MaqDossierCabinet />
           </CarteMedia>
@@ -260,7 +260,7 @@ export default function GabaritPublish({
       <section className="o-wrap pb-[110px]">
         <EnTete
           pastille="Compris"
-          titre="Ce qui vient avec le moteur."
+          titre="Ce qui vient avec l'agent."
           chapo={
             fiche.sections?.comprisChapo ??
             "Le classement n'est que la partie visible. Ce qui suit est livré avec, sans supplément et sans négociation."
@@ -315,11 +315,11 @@ export default function GabaritPublish({
             <span className="o-pill o-pill--xs w-fit">Avant tout</span>
             <h3 className="o-h5 mt-6">L&apos;audit : 30 min</h3>
             <p className="o-body mt-3 !text-[15px]">
-              On chiffre ce que le problème vous coûte, on vérifie que{" "}
-              {m.system} est bien le bon moteur, et on regarde votre éligibilité
+              Nous chiffrons ce que le problème vous coûte, vérifions que{" "}
+              {m.system} est bien le bon agent, et regardons votre éligibilité
               au Chèque TIC.
             </p>
-            <Link href="/commencer" className="o-btn o-btn--primary !mt-8 mt-auto w-full">
+            <Link href="/reserver-un-audit" className="o-btn o-btn--primary !mt-8 mt-auto w-full">
               Commencer
             </Link>
           </div>
@@ -330,7 +330,7 @@ export default function GabaritPublish({
       <section className="pb-[110px]">
         <div className="o-wrap flex flex-col items-center text-center">
           <div data-reveal>
-            <span className="o-pill">Catalogue</span>
+            <span className="o-pill">Les agents</span>
           </div>
           {/* 07/08 — même correction que dans GabaritHome : le compte était
               figé à « Onze », hérité des douze moteurs d'avant le
@@ -339,12 +339,12 @@ export default function GabaritPublish({
               annonçaient cinq. */}
           <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
             {NOMBRES[autres.length] ?? autres.length} autre
-            {autres.length > 1 ? "s" : ""} système
+            {autres.length > 1 ? "s" : ""} agent
             {autres.length > 1 ? "s" : ""}.
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
             {fiche.sections?.catalogueChapo ??
-              `${m.system} n'est peut-être pas celui à installer en premier. L'audit désigne le moteur au meilleur retour chez vous, et il arrive que ce soit un autre.`}
+              `${m.system} n'est peut-être pas celui à installer en premier. L'audit désigne l'agent au meilleur retour chez vous, et il arrive que ce soit un autre.`}
           </p>
         </div>
         <div data-reveal className="mt-16">
@@ -372,10 +372,10 @@ export default function GabaritPublish({
           </h2>
           <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
             {fiche.sections?.clotureChapo ??
-              "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
+              "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne l'agent au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
-            <Link href="/commencer" className="o-btn o-btn--primary">
+            <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
               Commencer
               <Chevron taille={14} />
             </Link>

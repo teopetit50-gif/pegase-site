@@ -104,7 +104,7 @@ function BlocAlterne({
           <h2 className="o-h2 mt-5 max-w-[520px]">{titre}</h2>
           <p className="o-body mt-5 max-w-[450px]">{texte}</p>
           <div className="mt-8 flex flex-wrap items-center gap-5">
-            <Link href="/commencer" className="o-btn o-btn--primary">
+            <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
               Commencer
               <Chevron taille={13} />
             </Link>
@@ -209,7 +209,7 @@ export default function GabaritIntegration({
               </div>
 
               <div data-reveal className="mt-9">
-                <Link href="/commencer" className="o-btn o-btn--primary">
+                <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
                   Chiffrer mon cas
                   <Chevron taille={13} />
                 </Link>
@@ -291,7 +291,7 @@ export default function GabaritIntegration({
           eyebrow={blocs[0].eyebrow}
           titre={blocs[0].titre}
           texte={blocs[0].texte}
-          lien={{ label: "Voir les autres moteurs", href: "/offres" }}
+          lien={{ label: "Voir les autres agents", href: "/offres" }}
           media={<DemoFiche demo={fiche.demo} />}
         />
         {blocs[1] ? (
@@ -341,7 +341,7 @@ export default function GabaritIntegration({
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
             La règle qui prime sur toutes les autres, sur {m.system} comme sur
-            les onze autres moteurs.
+            les autres agents.
           </p>
         </div>
 
@@ -354,7 +354,7 @@ export default function GabaritIntegration({
           </blockquote>
           <p className="o-lead mt-8 max-w-[760px]">
             Cet engagement ne se négocie pas à l&apos;installation : il
-            conditionne le fonctionnement du moteur. Les premières semaines,
+            conditionne le fonctionnement de l&apos;agent. Les premières semaines,
             tout vous est soumis avant envoi. Ensuite, vous décidez poste par
             poste ce qui part seul et ce qui attend votre accord.
           </p>
@@ -367,7 +367,7 @@ export default function GabaritIntegration({
             </span>
             <div>
               <div className="text-[16px] font-semibold text-[#fafafa]">
-                Le desk Omega.AI
+                L&apos;équipe Omega.AI
               </div>
               <div className="o-small">Installation et supervision</div>
             </div>
@@ -441,10 +441,10 @@ export default function GabaritIntegration({
           </h2>
           <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
             {fiche.sections?.clotureChapo ??
-              "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne le moteur au meilleur retour : celui-ci, ou un autre."}
+              "L'audit gratuit chiffre ce que votre difficulté principale vous coûte et désigne l'agent au meilleur retour : celui-ci, ou un autre."}
           </p>
           <div className="relative mt-8">
-            <Link href="/commencer" className="o-btn o-btn--primary">
+            <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
               Commencer
               <Chevron taille={14} />
             </Link>

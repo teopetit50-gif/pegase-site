@@ -363,7 +363,7 @@ function CarteFile() {
 
   return (
     <Fenetre>
-      <EnTete gauche="FILE DE VALIDATION · EN DIRECT" droite="4 en attente" point />
+      <EnTete gauche="À VALIDER · EN DIRECT" droite="4 en attente" point />
       <div className="flex flex-col gap-2 p-5">
         {FILE.map(([t, d, q], i) => (
           <div

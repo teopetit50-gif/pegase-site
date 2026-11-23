@@ -56,12 +56,12 @@ const QUALIFICATION: Boite = {
 };
 const REGLES: Boite = {
   titre: "Règles",
-  texte: "Ce que le système a le droit de faire, défini avec vous.",
+  texte: "Ce que l'agent a le droit de faire, défini avec vous.",
 };
 const REDACTION: Boite = {
   titre: "Rédaction",
   sous: "(au cas par cas)",
-  texte: "Le message est écrit depuis vos règles, pas d'un modèle figé.",
+  texte: "Le message est écrit selon vos règles, pas sur un modèle figé.",
 };
 const JOURNAL: Boite = {
   titre: "Journal",

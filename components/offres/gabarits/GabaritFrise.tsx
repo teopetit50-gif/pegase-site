@@ -139,8 +139,8 @@ export default function GabaritFrise({
               </p>
 
               <div data-reveal className="gfr-actions">
-                <Link href="/commencer" className="o-btn o-btn--primary">
-                  Demander un diagnostic
+                <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                  Réserver un audit
                 </Link>
                 <Link href="#fonctionnement" className="o-btn o-btn--ghost">
                   Voir le fonctionnement
@@ -203,7 +203,7 @@ export default function GabaritFrise({
         >
           <div className="o-wrap">
             <EnTete
-              pastille="Périmètre"
+              pastille="Ce qu'il fait"
               titre={sections?.pointsTitre ?? `${m.system} en quatre points.`}
               chapo={sections?.pointsChapo}
             />
@@ -350,7 +350,7 @@ export default function GabaritFrise({
             <div data-reveal className="gfr-bloc">
               <h3 className="o-h5">Le Chèque TIC vérifié</h3>
               <p className="o-body gfr-bloc-texte">
-                Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l&apos;installation. L&apos;éligibilité est vérifiée pendant le diagnostic, avant tout engagement de votre part.
+                Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l&apos;installation. L&apos;éligibilité est vérifiée pendant l&apos;audit, avant tout engagement de votre part.
               </p>
             </div>
           </div>

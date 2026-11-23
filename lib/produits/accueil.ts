@@ -55,7 +55,7 @@
 export const MARQUE = {
   nom: "REPUT",
   role: "demandes entrantes & avis",
-  signature: "un système Omega.AI",
+  signature: "un agent Omega.AI",
   /* 17/09 — `espace` (app.omegaai.fr) retirée : plus aucun lien du site
      ne mène au cockpit. La constante n'était plus lue par aucun rendu. */
   audit: "/reserver-un-audit",
@@ -131,7 +131,7 @@ export const APPORT = {
   etiquette: "Le coût de l'attente",
   titre: "Une demande lue le lundi à 9 h n'est plus une demande",
   chapo:
-    "Pendant ce temps, le client a écrit à trois autres entreprises, et le premier qui lui a répondu a pris l'affaire.",
+    "Pendant ce temps, le client a écrit à d'autres entreprises, et le premier qui lui a répondu a pris l'affaire.",
   bouton: { libelle: "Réserver un audit", href: MARQUE.audit },
   faits: [
     {
@@ -142,7 +142,7 @@ export const APPORT = {
     {
       chiffre: "0",
       texte:
-        "Réponse inventée : quand il ne sait pas, il transfère à vos équipes.",
+        "Réponse hors de votre base : quand il ne sait pas, il transfère à vos équipes.",
     },
   ],
 };
@@ -182,7 +182,7 @@ export const CAPACITES = {
       etiquette: "Qualification",
       titre: "Une urgence ne finit pas dans la file d'attente",
       texte:
-        "Chaque demande est d'abord qualifiée, puis elle suit le circuit que vous avez défini pour son type. Quand elle est urgente, le téléphone de l'astreinte sonne.",
+        "Chaque demande est d'abord triée par type, puis elle suit le circuit que vous avez défini. Quand elle est urgente, le téléphone de l'astreinte sonne.",
       panneau: "tri",
     },
     {
@@ -212,7 +212,7 @@ export const ETAPES = {
   etiquette: "Installation",
   titre: "Vous ne changez ni vos numéros, ni vos habitudes",
   chapo:
-    "L'installation demande une heure d'entretien, puis le branchement de vos canaux, et une semaine de rodage pendant laquelle vos équipes relisent chaque réponse.",
+    "L'installation demande une heure d'entretien et le branchement de vos canaux. Pendant une semaine, vos équipes relisent chaque réponse.",
   bouton: { libelle: "Réserver un audit", href: MARQUE.audit },
   etapes: [
     {
@@ -231,7 +231,7 @@ export const ETAPES = {
       numero: "03",
       titre: "Une semaine en double",
       texte:
-        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. REPUT prend ensuite son rythme sur les postes que vous ouvrez.",
+        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. Ensuite, vous choisissez les demandes auxquelles REPUT répond seul.",
     },
   ],
 };
@@ -419,19 +419,19 @@ export const QUESTIONS = {
     },
     {
       q: "Et si REPUT invente une réponse ?",
-      r: "REPUT ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec la fiche de son escalade.",
+      r: "REPUT ne peut répondre qu'à partir de la base construite avec vous. Hors de cette base, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec le résumé de l'échange.",
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",
       r: "La réservation s'écrit directement dans votre agenda, en temps réel. Le second créneau n'apparaît plus comme disponible, et le client se voit proposer les suivants.",
     },
     {
-      q: "Qui décide de ce qui part seul ?",
-      r: "C'est vous qui fixez la frontière. Les premières semaines, tout vous est soumis avant envoi. Ensuite, vous décidez poste par poste ce qui part seul et ce qui attend votre accord. Chaque échange, transféré ou non, reste archivé et consultable.",
+      q: "Qui valide ce que REPUT répond ?",
+      r: "Vous validez d'abord la base, et REPUT ne dit rien qui n'y figure. Les premières semaines, chaque réponse vous est soumise avant envoi. Ensuite, vous choisissez les demandes qui attendent votre accord. Chaque échange, transféré ou non, reste archivé et consultable.",
     },
     {
       q: "Et les avis, comment sont-ils demandés ?",
-      r: "La demande part dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit toujours par se voir.",
+      r: "La demande part dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit par se voir.",
     },
   ],
 } as const;

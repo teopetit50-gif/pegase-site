@@ -115,8 +115,8 @@ export default function GabaritHome({
               </p>
 
               <div data-reveal className="mt-7 flex flex-wrap items-center gap-3">
-                <Link href="/commencer" className="o-btn o-btn--primary">
-                  Demander un diagnostic
+                <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
+                  Réserver un audit
                 </Link>
                 <Link href="#fonctionnement" className="o-btn o-btn--ghost">
                   Voir le fonctionnement
@@ -207,7 +207,7 @@ export default function GabaritHome({
               H1 plus haut. Repli sur l'ancienne formule si la fiche ne porte
               pas encore sa copie. */}
           <EnTete
-            pastille="Périmètre"
+            pastille="Ce qu'il fait"
             titre={fiche.sections?.pointsTitre ?? `${m.system} en quatre points.`}
             chapo={fiche.sections?.pointsChapo ?? fiche.pitch}
           />
@@ -246,7 +246,7 @@ export default function GabaritHome({
             titre={fiche.sections?.integrationsTitre ?? "Intégré à votre environnement."}
             chapo={
               fiche.sections?.integrationsChapo ??
-              "Messagerie, tableur, paiement, e-commerce, agenda : le système lit et écrit dans les outils où vos équipes travaillent déjà, sans compte à créer ni migration."
+              "Messagerie, tableur, paiement, e-commerce, agenda : l'agent lit et écrit dans le logiciel Omega ou dans les outils de vos équipes, sans migration imposée."
             }
           />
         </div>
@@ -269,7 +269,7 @@ export default function GabaritHome({
         />
         <div className="mt-20 grid grid-cols-1 gap-10 lg:grid-cols-3">
           <div data-reveal className="o-card-plate px-8 pb-10 pt-10">
-            <h3 className="o-h4">Le système en situation</h3>
+            <h3 className="o-h4">L&apos;agent en situation</h3>
             <p className="o-body mt-3">
               {fiche.sections?.situationChapo ??
                 `Ce que ${m.system} produit concrètement, sur un cas type.`}
@@ -292,7 +292,7 @@ export default function GabaritHome({
                 servies par ce gabarit. */}
             <p className="o-body mt-3">
               {fiche.sections?.outilsChapo ??
-                "Le système lit et écrit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre."}
+                "L'agent travaille dans le logiciel Omega ou dans vos outils actuels, sans rien vous faire réapprendre."}
             </p>
             <div className="mt-8">
               <ChaineOutils outils={fiche.outils} />
@@ -332,10 +332,10 @@ export default function GabaritHome({
         <div className="o-wrap">
           <EnTete
             pastille="Pensé pour"
-            titre="À qui ce système s'adresse."
+            titre="À qui cet agent s'adresse."
             chapo={
               fiche.sections?.cibleChapo ??
-              `${m.system} a été conçu pour les organisations où ce problème coûte le plus cher. Si ce n'est pas votre cas, le diagnostic désignera un autre système.`
+              `${m.system} a été conçu pour les organisations où ce problème coûte le plus cher. Si ce n'est pas votre cas, l'audit désignera un autre agent.`
             }
           />
         </div>
@@ -358,7 +358,7 @@ export default function GabaritHome({
       <section className="pb-[110px]">
         <div className="o-wrap flex flex-col items-center text-center">
           <div data-reveal>
-            <span className="o-pill">Catalogue</span>
+            <span className="o-pill">Les agents</span>
           </div>
           {/* 07/08 — « Onze autres moteurs. » était figé dans le balisage et
               datait des douze moteurs d'avant le regroupement en paquets : la
@@ -367,12 +367,12 @@ export default function GabaritHome({
               il suit le catalogue sans qu'on y repense. */}
           <h2 data-reveal className="o-h2 mt-2.5 max-w-[600px]">
             {NOMBRES[autres.length] ?? autres.length} autre
-            {autres.length > 1 ? "s" : ""} système
+            {autres.length > 1 ? "s" : ""} agent
             {autres.length > 1 ? "s" : ""}.
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
             {fiche.sections?.catalogueChapo ??
-              `${m.system} n'est pas toujours celui à déployer en premier. Le diagnostic désigne le système au meilleur retour pour votre organisation, et il arrive que ce soit un autre.`}
+              `${m.system} n'est pas toujours celui à déployer en premier. L'audit désigne l'agent au meilleur retour pour votre organisation, et il arrive que ce soit un autre.`}
           </p>
           <div data-reveal className="mt-5">
             <Link href="/offres" className="o-link">
@@ -390,15 +390,15 @@ export default function GabaritHome({
       <section className="o-wrap pb-[110px]">
         <EnTete
           pastille="Inclus"
-          titre="Ce qui vient avec le système."
+          titre="Ce qui vient avec l'agent."
           chapo={
             fiche.sections?.comprisChapo ??
-            "Le système n'est que la partie visible. Ce qui suit est livré avec lui, sans supplément."
+            "L'agent n'est que la partie visible. Ce qui suit est livré avec lui, sans supplément."
           }
         />
         <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
           <div data-reveal className="o-card-plate p-8 sm:p-10">
-            <h3 className="o-h5">Une file de validation</h3>
+            <h3 className="o-h5">Une liste de messages à valider</h3>
             <p className="o-body mt-2.5">
               Tout ce qui doit partir y passe. Vos équipes approuvent, corrigent ou suspendent, aussi longtemps que vous le jugez utile.
             </p>
@@ -418,7 +418,7 @@ export default function GabaritHome({
           <div data-reveal className="o-card-plate p-8 sm:p-10">
             <h3 className="o-h5">Le Chèque TIC vérifié</h3>
             <p className="o-body mt-2.5">
-              Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l&apos;installation. L&apos;éligibilité est vérifiée pendant le diagnostic, avant tout engagement de votre part.
+              Pour les entreprises immatriculées en Guadeloupe et éligibles, la Région finance une partie de l&apos;installation. L&apos;éligibilité est vérifiée pendant l&apos;audit, avant tout engagement de votre part.
             </p>
           </div>
         </div>

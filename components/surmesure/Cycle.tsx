@@ -45,8 +45,8 @@
 
 type Boite = { titre: string; texte?: string };
 
-const ENTREE: Boite = { titre: "Cadrage" };
-const SORTIE: Boite = { titre: "Mise en service" };
+const ENTREE: Boite = { titre: "Audit" };
+const SORTIE: Boite = { titre: "Mise en route" };
 
 const REGLES: Boite = {
   titre: "Règles",
@@ -54,7 +54,7 @@ const REGLES: Boite = {
 };
 const CONTROLES: Boite = {
   titre: "Contrôles",
-  texte: "Vérifications de cohérence et alertes sur seuils, avant toute écriture.",
+  texte: "Chaque donnée est vérifiée, et un seuil dépassé déclenche une alerte.",
 };
 const VALIDATION: Boite = {
   titre: "Validation",
@@ -62,7 +62,7 @@ const VALIDATION: Boite = {
 };
 const MESURE: Boite = {
   titre: "Mesure",
-  texte: "L'effet est mesuré sur le périmètre en service, pour décider de l'élargir.",
+  texte: "Les résultats du module sont mesurés, pour décider de l'étendre.",
 };
 const RETOURS: Boite = { titre: "Retours de vos équipes" };
 

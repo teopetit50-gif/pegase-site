@@ -147,7 +147,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/offres/sur-mesure" },
   title: "Sur mesure | Omega.AI",
   description:
-    "Quand aucun des quatre systèmes ne couvre le besoin, Omega.AI conçoit celui qui manque : cadré, chiffré, puis construit sur vos règles et intégré à votre environnement.",
+    "Il vous manque un module ? Omega.AI le construit, l'ajoute à votre logiciel de gestion ou le branche sur vos outils. Ce qu'il fait et son prix sont écrits avant de commencer.",
 };
 
 /* La fiche garde la structure `Fiche` du catalogue, champ pour champ :
@@ -160,7 +160,7 @@ const FICHE: Fiche = {
   sections: {
     pointsTitre: "Ce que couvre le sur-mesure.",
     pointsChapo:
-      "Un processus interne, un logiciel métier, un pont entre deux outils : le périmètre s'écrit avec vos équipes avant tout chiffrage.",
+      "Une tâche interne, une application métier, un pont entre deux outils. Ce que fait le module et son prix sont écrits avant de commencer.",
     detailChapo:
       "Ce que nous cadrons avant d'écrire une ligne, ce que nous construisons, et ce qui reste sous votre décision.",
     cibleChapo:
@@ -254,7 +254,7 @@ const FICHE: Fiche = {
       { text: "Tâche qui demande un jugement au cas par cas", badge: "Écarté", tone: "off" },
     ],
     footer:
-      "Les trois suivent des règles qui s'écrivent. Une tâche qui demande un jugement au cas par cas reste chez vous, et nous le disons au cadrage.",
+      "Les trois suivent des règles qui s'écrivent. Une tâche qui demande un jugement au cas par cas reste chez vous, et nous vous le disons pendant l'audit.",
   },
 };
 
@@ -323,8 +323,8 @@ const TRACE_TOTAL = 9100;
 const PERIMETRES = [
   {
     Icone: PictoApplication,
-    titre: "Logiciels métier",
-    texte: "Une application avec son interface, sa base et ses droits.",
+    titre: "Applications métier",
+    texte: "Un module avec ses écrans, ses données et ses droits.",
   },
   {
     Icone: PictoPont,
@@ -382,10 +382,10 @@ const EXEMPLES: Cas[] = [
     texte:
       "Deux logiciels qui ne se parlent pas : la donnée passe de l'un à l'autre sans que personne la retape.",
     legende: "Pont entre outils",
-    sousLegende: "Règles écrites avant tout chiffrage",
+    sousLegende: "Règles et prix écrits avant de commencer",
     mesures: [
       { value: "2", label: "Outils reliés", sub: "La donnée n'est saisie qu'une fois" },
-      { value: "Jours", label: "Ordre de grandeur", sub: "Un pont entre deux outils se compte en jours" },
+      { value: "Jours", label: "Ordre de grandeur", sub: "Le délai exact est écrit avant de commencer" },
     ],
   },
   {
@@ -393,12 +393,12 @@ const EXEMPLES: Cas[] = [
     visuel: <CroquisDocument />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[1].text : "",
     texte:
-      "Les pièces sont lues, contrôlées et classées à l'arrivée, pas au moment où quelqu'un s'en occupe.",
+      "Les pièces sont lues, contrôlées et classées dès leur arrivée.",
     legende: "Traitement de documents",
-    sousLegende: "Contrôle à réception, pas après coup",
+    sousLegende: "Contrôle dès la réception",
     mesures: [
       { value: "0", label: "Ressaisie", sub: "Les informations extraites ne sont pas retapées" },
-      { value: "Tous", label: "Formats acceptés", sub: "La pièce est lue telle qu'elle arrive" },
+      { value: "Tel quel", label: "Format d'arrivée", sub: "La pièce est lue telle qu'elle arrive" },
     ],
   },
   {
@@ -406,12 +406,12 @@ const EXEMPLES: Cas[] = [
     visuel: <CroquisSuivi />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
     texte:
-      "Une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit vos services.",
-    legende: "Logiciel métier",
-    sousLegende: "Construit sur vos règles, branché sur vos outils",
+      "Un module avec ses écrans, ses données et ses droits, ajouté à votre logiciel Omega.",
+    legende: "Application métier",
+    sousLegende: "Ajouté à votre logiciel ou branché sur vos outils",
     mesures: [
-      { value: "1", label: "Application", sub: "Interface, base de données et droits" },
-      { value: "Semaines", label: "Ordre de grandeur", sub: "Un logiciel métier complet se compte en semaines" },
+      { value: "1", label: "Module", sub: "Écrans, données et droits" },
+      { value: "Semaines", label: "Ordre de grandeur", sub: "Le délai exact est écrit avant de commencer" },
     ],
   },
 ];
@@ -650,10 +650,10 @@ export default function SurMesurePage() {
             <div aria-hidden className="smd-voile smd-voile--clair" />
             <div className="smd-plein__texte">
               <h1 data-arrivee className="smd-h1">
-                Système Métier Sur Mesure
+                Votre Module Sur Mesure
               </h1>
               <p data-arrivee className="smd-lead">
-                Nous concevons celui qui manque.
+                Nous construisons celui qui manque.
               </p>
               <div data-arrivee>
                 <Bouton href="/reserver-un-audit">Parler de votre cas</Bouton>
@@ -674,7 +674,7 @@ export default function SurMesurePage() {
                 budget de texte qui se relève, pas la largeur qui
                 s'élargit. */}
             <p data-reveal className="smd-chapo mx-auto mb-12 max-w-[698px] !text-base !text-black/70 text-center">
-              <span className="mr-2">Un système sur mesure se branche sur vos outils.</span>
+              <span className="mr-2">Un module sur mesure se branche sur vos outils.</span>
               <Link href="/integrations" className="smd-lien !text-base">
                 Voir nos intégrations
                 <span aria-hidden>→</span>
@@ -716,7 +716,7 @@ export default function SurMesurePage() {
           <div className="smd-wrap">
             <Entete
               etiquette="Aperçu"
-              titre="Un système, pas un produit."
+              titre="Le module qui vous manque."
               chapo={fr(FICHE.sections?.pointsChapo ?? "")}
             />
           </div>
@@ -744,7 +744,7 @@ export default function SurMesurePage() {
               />
               <p className="smd-body mt-4 !text-[0.8125rem]">
                 Exemple de déroulé, sur des durées réalistes. Les étapes et leur
-                enchaînement sont ceux d’un système en service&nbsp;; les valeurs ne
+                enchaînement sont ceux d’un module en service&nbsp;; les valeurs ne
                 sont pas celles d’un client.
               </p>
             </div>
@@ -786,7 +786,7 @@ export default function SurMesurePage() {
                     nom. Colonnes 2-3 pour elle, 5 à 11 pour la
                     citation : elles ne se touchent pas. */}
                 <p className="smd-citation__label">
-                  Ce que le catalogue{"\n"}ne couvre pas
+                  Ce que le logiciel{"\n"}ne couvre pas
                 </p>
                 <div className="smd-citation__colonne">
                   <div className="smd-citation__corps">
@@ -798,10 +798,10 @@ export default function SurMesurePage() {
                           plus basse. Le texte complet de Teo fait la bonne
                           longueur — la coupe n'avait rien gagné. */}
                       <span className="smd-citation__texte">
-                        «&nbsp;Le sur-mesure commence là où l&apos;hypothèse du catalogue
-                        s&apos;arrête&nbsp;: quand le processus qui coûte le plus cher est
+                        «&nbsp;Le sur-mesure commence là où le logiciel et ses modules
+                        s&apos;arrêtent&nbsp;: quand la tâche qui coûte le plus cher est
                         propre à votre métier, à votre organisation ou à votre système
-                        d&apos;information, et qu&apos;aucun produit sur étagère ne le
+                        d&apos;information, et qu&apos;aucun produit sur étagère ne la
                         traite sans le déformer.&nbsp;»
                       </span>
                     </Revele>
@@ -809,7 +809,7 @@ export default function SurMesurePage() {
                   <Revele delai={180}>
                     <span className="flex flex-wrap items-center justify-between gap-4 lg:justify-end lg:gap-6">
                       <span className="smd-citation__nom">Omega.AI</span>
-                      <span className="smd-citation__jeton">Cadrage avant devis</span>
+                      <span className="smd-citation__jeton">Audit avant devis</span>
                     </span>
                   </Revele>
                 </div>
@@ -856,9 +856,9 @@ export default function SurMesurePage() {
           <div className="smd-wrap">
             <Entete
               etiquette="Ce que vous obtenez"
-              titre="Un système de plus, dans le même espace."
+              titre="Un module de plus, dans le même logiciel."
               chapo={fr(
-                "Un système sur mesure se livre là où vivent déjà les autres : même file de validation, même journal, mêmes droits par service."
+                "Le module s'ajoute à votre logiciel, à côté des autres. Même validation, même journal, mêmes droits par service."
               )}
             />
             {/* 16/09, Teo : « cette section n'est pas la même que sur le
@@ -887,9 +887,9 @@ export default function SurMesurePage() {
         <section className="smd-sec">
           <div className="smd-wrap">
             <Entete
-              etiquette="Périmètres"
+              etiquette="Usages"
               titre="Ce que couvre le sur-mesure."
-              chapo="Si la tâche suit des règles qu'on peut écrire, elle peut être reprise."
+              chapo="Si une tâche suit des règles claires, nous construisons le module qui la fait."
             />
             <div className="smd-fonctions">
               {PERIMETRES.map(({ Icone, titre, texte }) => (
@@ -909,7 +909,7 @@ export default function SurMesurePage() {
             L'emplacement de leurs vidéos de démonstration — écart nº 3. */}
         <section className="smd-sec">
           <div className="smd-wrap">
-            <Entete etiquette="Exemples" titre="Trois besoins traités hors catalogue." />
+            <Entete etiquette="Exemples" titre="Trois exemples de modules sur mesure." />
             <div data-reveal>
               <Casestudies cas={EXEMPLES} />
             </div>
@@ -926,10 +926,10 @@ export default function SurMesurePage() {
         <section className="smd-sec">
           <div className="smd-wrap">
             <Entete
-              etiquette="Le catalogue"
-              titre="Les quatre systèmes déjà construits."
+              etiquette="Les agents"
+              titre="Les quatre agents du logiciel."
               chapo={fr(
-                "Avant de concevoir celui qui manque, vérifiez qu'il n'existe pas déjà : quatre processus, quatre systèmes prêts."
+                "Relances, demandes clients, factures fournisseurs et clients inactifs : quatre agents s'en chargent."
               )}
             />
             <Feature11 volets={volets} />
@@ -979,8 +979,8 @@ export default function SurMesurePage() {
                 Parler de votre cas.
               </h2>
               <p data-reveal className="smd-lead max-w-[42rem]">
-                Trente minutes sur le processus tel qu&apos;il se déroule aujourd&apos;hui.
-                Rien n&apos;est chiffré avant que ce soit clair.
+                Trente minutes pour regarder comment vous travaillez aujourd&apos;hui.
+                Le module et son prix sont écrits avant de commencer.
               </p>
               <div data-reveal>
                 <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>

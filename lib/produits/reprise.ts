@@ -71,7 +71,7 @@
 
 export const MARQUE = {
   nom: "OFFLOAD",
-  bailleur: "un système Omega.AI",
+  bailleur: "un agent Omega.AI",
   /* Sur le site source, la signature d'éditeur était réduite au seul logo,
      lien vers omegaai.fr. Ici on EST omegaai.fr : le lien devient relatif, et
      il perd son `target="_blank"` — on n'ouvre pas un onglet pour aller chez
@@ -102,7 +102,7 @@ export const HEROS = {
      chercher. La troisième, l'échéance qui redevient due, est portée par la
      section des fonctionnalités et par la carte du message. */
   chapo:
-    "Un compte qui commandait deux fois par an cesse de commander, et le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. OFFLOAD relit votre base clients chaque matin et vous dit à qui écrire.",
+    "Un compte qui commandait deux fois par an cesse de commander. Le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. OFFLOAD relit votre base clients chaque matin et vous dit à qui écrire.",
   /* 15/09/2026 — LES DEUX BOUTONS DU HÉROS MENAIENT AU MÊME ENDROIT.
      Ils portaient tous les deux « /contact » : le principal et le
      secondaire d'un héros de page produit ouvraient le même formulaire,
@@ -163,7 +163,7 @@ export const FONCTIONNALITES = {
        trois épingles portent les trois relances, dans l'ordre de la suite. */
     titre: "À 7 h 30, votre liste de relances est prête.",
     suite:
-      "OFFLOAD lit votre CRM et votre historique de facturation pendant la nuit, puis il ne garde que les comptes dont le silence dépasse votre délai.",
+      "OFFLOAD lit votre CRM et votre historique de facturation pendant la nuit. Il ne garde que les comptes dont le silence dépasse votre délai.",
     epingles: [
       /* Le champ `drapeau` portait un numéro de département ; il porte
          maintenant la durée du silence, rendue à gauche de l'étiquette.
@@ -193,7 +193,7 @@ export const FONCTIONNALITES = {
       { code: "1/T", texte: "Un message par trimestre au plus" },
       { code: "@", texte: "Par courriel, depuis votre adresse" },
       { code: "×", texte: "Jamais un compte en litige" },
-      { code: "1×", texte: "Jamais deux fois le même compte" },
+      { code: "1×", texte: "Un seul message par compte et par vague" },
     ],
   },
 
@@ -205,16 +205,16 @@ export const FONCTIONNALITES = {
      relances. */
   citation: {
     texte:
-      "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. Le système n'en sort pas, et il s'arrête au premier doute. »",
+      "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. OFFLOAD n'en sort pas, et il s'arrête au premier doute. »",
     signataire: "La règle qui ne se négocie pas",
-    role: "Sur OFFLOAD comme sur tout le système Omega.AI",
+    role: "Sur OFFLOAD comme sur chaque agent Omega.AI",
   },
 
   /* ── Carte 3 · la consigne en français ──────────────────────────────── */
   carteLangue: {
     titre: "Vous dictez les règles en français.",
     suite:
-      "Vous n'avez aucune case à cocher : une phrase suffit, et le système l'applique ensuite à chaque relance.",
+      "Vous n'avez aucune case à cocher : une phrase suffit, et OFFLOAD l'applique ensuite à chaque relance.",
     /* `role: "moteur"` est une clé technique de composant, pas un mot rendu :
        elle ne se renomme pas (doctrine partie III, §18). */
     echanges: [
@@ -234,7 +234,7 @@ export const FONCTIONNALITES = {
   carteTrace: {
     titre: "Chaque client reçoit son propre message.",
     suite:
-      "Le système y reprend la date, la référence et le montant de sa dernière ligne de facturation, ce qui est l'inverse d'un publipostage envoyé à toute la base.",
+      "OFFLOAD y reprend la date, la référence et le montant de sa dernière ligne de facturation. Aucun message n'est envoyé en série à toute la base.",
     phrase: "Bonjour Martin, je retrouve votre",
     phraseCitee: "passage du 14 mars 2025, réf. 4821, 615 €",
     nbSources: 3,
@@ -243,7 +243,7 @@ export const FONCTIONNALITES = {
 };
 
 export const CHIFFRES = {
-  titre: "Une base clients que personne ne relance s'éteint par paliers.",
+  titre: "Une base clients jamais relancée s'éteint par paliers.",
   suite: "La courbe ci-dessous se lit sur n'importe quel historique de ventes.",
   /* `cellules` N'EST PLUS RENDU sur cette page depuis le 14/09 : les quatre
      tuiles ont été remplacées par le bloc `#perimetre`
@@ -317,7 +317,7 @@ export const METIERS = {
       echappe:
         "Un compte qui commandait tous les mois espace ses commandes, puis il s'arrête. Personne ne l'appelle, parce que rien n'a été réclamé et que le chiffre global tient encore.",
       cherche:
-        "OFFLOAD mesure la fréquence de commande habituelle de chaque compte dans votre ERP, puis il signale ceux qui décrochent avant que le trimestre le montre.",
+        "OFFLOAD mesure dans votre ERP la fréquence de commande habituelle de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
       reste:
         "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, parce qu'OFFLOAD y lit sans jamais y écrire.",
     },
@@ -374,7 +374,7 @@ export const QUESTIONS = {
   items: [
     {
       q: "Qu'est-ce qu'OFFLOAD, concrètement ?",
-      r: "OFFLOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse. Vous ne changez pas d'outil, puisque tout vous arrive dans votre messagerie.",
+      r: "OFFLOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse une fois validé. OFFLOAD travaille sur vos outils actuels, ou dans le logiciel de gestion Omega si vous le choisissez.",
     },
     {
       q: "Nos clients vont-ils se sentir sollicités de trop près ?",
@@ -382,7 +382,7 @@ export const QUESTIONS = {
     },
     {
       q: "Combien de comptes faut-il dans la base pour que cela se justifie ?",
-      r: "Cela dépend moins de la volumétrie que de ce que vaut un compte réactivé : deux cents comptes dans le bâtiment ne pèsent pas comme deux mille en commerce de détail. Nous faisons ce calcul avec vos chiffres pendant le diagnostic, avant tout engagement, et si la relance à la main reste plus simple chez vous, nous vous le disons.",
+      r: "Cela dépend moins du nombre de comptes que de ce que vaut un compte réactivé : deux cents comptes dans le bâtiment ne pèsent pas comme deux mille en commerce de détail. Nous faisons ce calcul avec vos chiffres pendant l'audit, avant tout engagement, et si la relance à la main reste plus simple chez vous, nous vous le disons.",
     },
     {
       q: "Nos données sont réparties entre un CRM, un ERP et des dossiers papier. Est-ce exploitable ?",
@@ -390,11 +390,11 @@ export const QUESTIONS = {
     },
     {
       q: "OFFLOAD peut-il écrire n'importe quoi à nos clients ?",
-      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vos équipes relisent la première vague nom par nom, puis vous décidez ce qui part seul et ce qui attend votre accord.",
+      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vos équipes relisent la première vague nom par nom. Ensuite, une relance ne part sans relecture que si vous avez autorisé ce type d'envoi.",
     },
     {
       q: "Que se passe-t-il si quelque chose déraille ?",
-      r: "Le système s'arrête de lui-même. Un compte ne reçoit jamais deux relances, un nom que vous avez retiré ne revient dans aucune vague, chaque envoi est horodaté dans un journal, et au premier doute la coupure est automatique. Nous préférons un mardi sans vague à un mardi où le même client reçoit deux messages.",
+      r: "OFFLOAD s'arrête de lui-même au premier doute. Un compte reçoit une seule relance par vague, et un nom retiré ne revient plus. Chaque envoi est horodaté dans un journal. Nous préférons un mardi sans vague à un mardi où le même client reçoit deux messages.",
     },
   ],
 };
@@ -427,7 +427,7 @@ export const FRANCAIS = {
       icone: "langue" as const,
       titre: "Écrit en français",
       texte:
-        "Les relances sont rédigées en français, dans le vocabulaire de votre secteur, et vos équipes les relisent avant qu'elles partent.",
+        "Les relances sont rédigées en français, dans le vocabulaire de votre secteur, et aucune ne part sans votre accord.",
     },
     {
       /* Ancien intitulé : « Vos données restent en Europe ». Il disait la

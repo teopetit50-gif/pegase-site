@@ -33,13 +33,13 @@ export const CATALOGUE: Catalogue = {
   chapo:
     "Trois relances, un seul système : le compte qui n'a plus commandé, l'échéance qui redevient due et l'affaire restée en plan. Voici ce qu'il lit, ce qu'il écarte et ce qu'il vous laisse décider.",
   mention:
-    "Le système lit votre CRM, votre historique de facturation et vos fiches d'intervention, et rien d'autre. Il n'écrit dans aucun de ces outils, ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
+    "OFFLOAD lit votre CRM, votre historique de facturation et vos fiches d'intervention, et rien d'autre. Il n'écrit dans aucun de ces outils, ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
   familles: [
     {
       nom: "Lecture de la base clients",
       icone: "search",
       lignes: [
-        { t: "Le système croise votre historique de facturation et le référentiel clients de votre CRM.", atteste: true },
+        { t: "OFFLOAD croise votre historique de facturation et le référentiel clients de votre CRM.", atteste: true },
         { t: "Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez.", atteste: true },
         { t: "La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté.", atteste: false },
         { t: "Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique.", atteste: false },
@@ -102,7 +102,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit.", atteste: true },
         { t: "Une demande d'arrêt vaut retrait immédiat et définitif du cycle.", atteste: true },
         { t: "Les listes d'exclusion se tiennent par compte, par secteur et par commercial.", atteste: false },
-        { t: "Le système s'arrête de lui-même au premier doute, et vous le signale.", atteste: true },
+        { t: "OFFLOAD s'arrête de lui-même au premier doute, et vous le signale.", atteste: true },
         { t: "Chaque message parti reste au journal, daté et consultable.", atteste: true },
       ],
     },
@@ -125,7 +125,7 @@ export const CAS_LIMITES: BlocCasLimites = {
   etiquette: "Les cas tordus",
   titre: "Ce qui arrive vraiment quand on réactive une base clients.",
   chapo:
-    "Douze situations que vos commerciaux connaissent, et ce que le système en fait. Aucune ne se règle en envoyant le message quand même.",
+    "Douze situations que vos commerciaux connaissent, et ce qu'OFFLOAD en fait. Aucune ne se règle en envoyant le message quand même.",
   cas: [
     {
       q: "Le compte a déjà été appelé la semaine dernière par un commercial.",
@@ -137,7 +137,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "L'interlocuteur a quitté l'entreprise depuis la dernière commande.",
-      r: "La réponse d'absence est reconnue et le compte est signalé comme à réattribuer. Le système ne devine pas le successeur.",
+      r: "La réponse d'absence est reconnue et le compte est signalé comme à réattribuer. OFFLOAD ne devine pas le successeur.",
     },
     {
       q: "Le même groupe apparaît sous trois raisons sociales.",
@@ -212,7 +212,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "Le système lit votre CRM ou votre ERP, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par export et dépôt de fichiers.",
+        "OFFLOAD lit votre CRM ou votre ERP, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par export et dépôt de fichiers.",
     },
     {
       icone: "chart",

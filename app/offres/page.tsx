@@ -320,7 +320,7 @@ const SCHEMA = {
     corps: ["Tout ce qui est parti, et qui", "l'a validé."],
   },
   retour: "Vos corrections",
-  note: "*Réception et envoi se font dans vos outils : aucun compte à créer.",
+  note: "*Les demandes arrivent par vos canaux habituels, les réponses partent par les mêmes.",
 };
 
 /* BLOC 5b — LA RANGÉE SOUS LE SCHÉMA.
@@ -701,7 +701,7 @@ export default function OffresPage() {
                 <div data-reveal>
                   <p className="ofd-mono">Sur mesure</p>
                   <h3 className="ofd-h3">
-                    Quand votre processus demande un module à part, nous le construisons sur mesure.
+                    Il vous manque un module&nbsp;? Nous le construisons et l&apos;ajoutons à votre logiciel.
                   </h3>
                 </div>
                 <div data-reveal>
@@ -730,8 +730,8 @@ export default function OffresPage() {
                   <p className="ofd-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
                   <p className="ofd-scinde__corps">
                     Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui
-                    l&apos;a validé. Les niveaux d&apos;autonomie se règlent poste par poste, et se
-                    modifient en cours d&apos;exploitation.
+                    l&apos;a validé. Les niveaux d&apos;autonomie se règlent agent par agent, et se
+                    modifient à tout moment.
                   </p>
                   <div className="ofd-scinde__actions">
                     <Cta href="/reserver-un-audit">Commencer</Cta>
@@ -743,7 +743,7 @@ export default function OffresPage() {
 
                 <div data-reveal className="ofd-scinde__media">
                   <ChatMessages
-                    titre="File de validation"
+                    titre="À valider"
                     question={VALIDATION.question}
                     libelleValidation={VALIDATION.libelle}
                     propositions={VALIDATION.propositions}
@@ -758,8 +758,8 @@ export default function OffresPage() {
           <section data-monde="clair" className="ofd-sec">
             <div className="ofd-wrap">
               <TeteSection
-                etiquette="Ce qu'on installe"
-                titre="Un module par processus, de bout en bout."
+                etiquette="Ce que fait un agent"
+                titre="Un agent par tâche, de bout en bout."
                 chapo="De la demande reçue au message parti."
               />
 
@@ -806,7 +806,7 @@ export default function OffresPage() {
                   entreprise, puis le logiciel de chaque métier (5c bis). */}
               <TeteSection
                 etiquette="Pour toutes les entreprises"
-                titre="Quatre processus, quatre agents pour les reprendre."
+                titre="Quatre agents pour le travail répétitif."
               />
 
               <div className="ofd-cartes4">
@@ -843,8 +843,8 @@ export default function OffresPage() {
             <div className="ofd-wrap">
               <TeteSection
                 etiquette="Pour votre métier"
-                titre="Un module par métier, qui se combine avec les agents."
-                chapo="Un seul audit cadre l'ensemble."
+                titre="Un module par métier, combiné aux agents."
+                chapo="Un seul audit pour l'ensemble."
               />
 
               <div className="ofd-cartes3">
@@ -951,7 +951,7 @@ export default function OffresPage() {
               <div aria-hidden className="ofd-hero-voile" />
               <div className="ofd-hero__col">
                 <h2 data-reveal className="ofd-h1">
-                  Un chiffrage avant tout engagement.
+                  Un prix écrit avant tout engagement.
                 </h2>
                 <div data-reveal className="ofd-hero__actions">
                   <CtaPastille href="/reserver-un-audit">Commencer</CtaPastille>

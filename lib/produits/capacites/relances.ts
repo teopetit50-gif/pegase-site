@@ -22,7 +22,7 @@ export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
   titre: "Tout ce que CASHD prend en charge.",
   chapo:
-    "Une créance traverse six étapes entre son émission et son encaissement. Voici ce que le système tient à chacune d'elles, y compris quand le client conteste, paie en plusieurs fois ou ne répond plus.",
+    "Une créance traverse six étapes entre son émission et son encaissement. Voici ce que CASHD tient à chacune d'elles, y compris quand le client conteste, paie en plusieurs fois ou ne répond plus.",
   mention:
     "Le périmètre se règle à l'installation : une organisation n'active que ce dont ses services ont besoin. Quel que soit le réglage, aucun message ne part sans la validation d'une personne.",
   familles: [
@@ -30,7 +30,7 @@ export const CATALOGUE: Catalogue = {
       nom: "Suivi de l'encours",
       icone: "search",
       lignes: [
-        { t: "Le système relit votre facturier chaque matin, avant d'écrire la moindre relance.", atteste: true },
+        { t: "CASHD relit votre facturier chaque matin, avant d'écrire la moindre relance.", atteste: true },
         { t: "Chaque devis porte le nombre de jours écoulés depuis son envoi.", atteste: true },
         { t: "Chaque facture porte son montant dû, son retard et le compte concerné.", atteste: true },
         { t: "Un règlement encaissé la veille sort de la liste du jour.", atteste: true },
@@ -119,11 +119,11 @@ export const CAS_LIMITES: BlocCasLimites = {
   etiquette: "Les cas tordus",
   titre: "Ce qui arrive vraiment quand on relance un client.",
   chapo:
-    "Douze situations que vos équipes connaissent, et ce que le système en fait. Aucune ne se règle en envoyant la relance quand même.",
+    "Douze situations que vos équipes connaissent, et ce que CASHD en fait. Aucune ne se règle en envoyant la relance quand même.",
   cas: [
     {
       q: "Le client a payé hier soir, et la relance était prête.",
-      r: "Le facturier est relu avant chaque envoi, donc le règlement de la veille retire le compte de la liste du jour. La relance préparée est abandonnée avant d'atteindre la file de validation.",
+      r: "Le facturier est relu avant chaque envoi, donc le règlement de la veille retire le compte de la liste du jour. La relance préparée est abandonnée avant de vous être soumise.",
     },
     {
       q: "Le client conteste une seule ligne de la facture.",
@@ -206,7 +206,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "Le système lit votre facturation et vos encaissements là où ils vivent déjà, tableur compris. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation.",
+        "CASHD lit votre facturation et vos encaissements là où ils vivent déjà, tableur compris. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation.",
     },
     {
       icone: "chart",

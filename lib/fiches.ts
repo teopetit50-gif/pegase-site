@@ -150,33 +150,33 @@ export const FICHES: Record<string, Fiche> = {
       pointsChapo:
         "Une relecture du facturier au réveil, un protocole gradué dans la journée, un état des encours tenu à jour en permanence.",
       detailChapo:
-        "Ce que CASHD lit dans votre tableur, ce qui détermine le ton d'un message, et la limite qu'il ne franchit pas sans vous.",
+        "Ce que CASHD lit dans votre facturation, ce qui détermine le ton d'un message, et la limite qu'il ne franchit pas sans vous.",
       cibleChapo:
         "Les activités qui livrent d'abord et facturent ensuite. C'est là que l'encours se creuse sans bruit, et là qu'un retard oublié devient un impayé.",
       faqChapo: "Les trois questions posées à chaque installation de CASHD.",
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
-        "CASHD lit le tableur où vit votre facturation, vérifie les encaissements dans votre outil de paiement, et écrit dans la messagerie d'où partent vos relances. Aucun compte à ouvrir, aucune donnée à migrer, aucun logiciel à apprendre.",
+        "CASHD lit votre facturation, dans le logiciel Omega ou dans votre tableur. Il vérifie les encaissements dans votre outil de paiement et écrit depuis votre messagerie. Si vous gardez vos outils, rien n'est à migrer.",
       marcheTitre: "Une échéance dépassée, une chaîne, votre validation.",
       marcheChapo:
         "Le déclencheur est toujours un fait vérifiable de votre facturier : une facture qui franchit son échéance, un devis qui reste sans réponse. La chaîne se déroule ensuite étape par étape, et la dernière s'arrête devant vous.",
       situationChapo:
         "Ce que CASHD produit concrètement, sur une facture émise et jamais réglée.",
       outilsChapo:
-        "Le moteur travaille dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
+        "CASHD travaille dans le logiciel Omega ou dans vos outils actuels, sans rien vous faire réapprendre.",
       catalogueChapo:
-        "Un encours qui traîne n'est pas toujours le premier problème à traiter. L'audit compare ce que chaque moteur vous rapporterait, et il arrive qu'il désigne un autre.",
+        "Un encours qui traîne n'est pas toujours le premier problème à traiter. L'audit compare ce que chaque agent vous rapporterait, et peut en désigner un autre.",
       comprisChapo:
         "La relance est la partie qu'on voit. Ce qui suit est livré avec, sans supplément et sans négociation.",
     },
     fonctionnement: [
-      "CASHD lit chaque matin le tableur de facturation que vous tenez déjà (vos colonnes, vos habitudes, rien à changer) et en tire un échéancier vivant. Pour chaque devis, le nombre de jours écoulés sans réponse. Pour chaque facture, le retard, le montant, le client. Un règlement encaissé la veille sort de la liste avant toute action : un client qui a payé n'est jamais recontacté.",
+      "CASHD lit chaque matin votre facturation, dans le logiciel Omega ou dans le tableur que vous tenez déjà, et en tire un échéancier à jour. Pour chaque devis, le nombre de jours écoulés sans réponse. Pour chaque facture, le retard, le montant, le client. Un règlement encaissé la veille sort de la liste avant toute action : un client qui a payé ne reçoit plus de relance.",
       "Sur cette lecture s'applique un protocole gradué : rappel courtois vers J+7, relance ferme vers J+21, puis, si le silence persiste, dossier de mise en demeure constitué avec ses pièces. Les devis suivent une cadence plus resserrée, J+3 puis J+7 : un devis qui refroidit se perd plus vite qu'une facture, et se rattrape moins bien.",
       "Chaque message est écrit pour un cas précis. Le ton suit trois variables : le montant en jeu, l'ancienneté du retard, l'historique de paiement du client. Un bon payeur momentanément en retard et un mauvais payeur récidiviste ne reçoivent ni le même texte, ni la même fermeté. En parallèle, l'état de vos encours reste consultable en permanence : qui doit quoi, depuis quand, quelle action suit.",
     ],
     points: [
       "Relecture quotidienne : devis restés sans réponse (relance à J+3 puis J+7), factures dépassées (J+7 puis J+21)",
-      "Messages rédigés au cas par cas, selon le montant, l'ancienneté et l'historique : jamais deux fois le même texte au même client",
+      "Messages rédigés au cas par cas, selon le montant, l'ancienneté et l'historique : un texte différent à chaque relance du même client",
       "Escalade graduée : rappel courtois, relance ferme, puis dossier de mise en demeure constitué avec ses pièces",
       "État des encours consultable à tout moment : qui doit quoi, depuis quand, quelle action suit",
     ],
@@ -186,12 +186,12 @@ export const FICHES: Record<string, Fiche> = {
     cible: ["Artisans & BTP", "Garages", "Grossistes", "Services B2B"],
     etapes: [
       {
-        t: "Raccordement au facturier",
-        d: "CASHD se branche sur votre tableur de facturation tel qu'il est, on ne change ni vos colonnes ni vos habitudes. Une demi-journée, historique inclus.",
+        t: "Branchement à votre facturation",
+        d: "CASHD se branche sur votre facturation telle qu'elle est. Nous ne changeons ni vos colonnes ni vos habitudes, et l'historique est repris.",
       },
       {
         t: "Réglage des cadences et des tons",
-        d: "Ensemble, on fixe les délais de relance, les gabarits de messages et les clients à exclure. C'est votre politique de recouvrement, écrite noir sur blanc.",
+        d: "Ensemble, nous fixons les délais de relance, les gabarits de messages et les clients à exclure. C'est votre politique de recouvrement, écrite noir sur blanc.",
       },
       {
         t: "Premier cycle supervisé",
@@ -205,11 +205,11 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         q: "Puis-je exclure certains clients ?",
-        a: "Oui. Une liste blanche est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. Ces contacts sortent du périmètre automatique, et seul vous pouvez les y remettre.",
+        a: "Oui. Une liste blanche est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. Ces contacts sortent des relances automatiques, et vous seul pouvez les y remettre.",
       },
       {
         q: "Qui écrit les messages ?",
-        a: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par le moteur à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
+        a: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par CASHD à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
       },
     ],
     demo: {
@@ -243,18 +243,18 @@ export const FICHES: Record<string, Fiche> = {
         "Une demande reçue à 21 h obtient sa réponse à 21 h, et cette réponse ne dit rien que vous n'ayez validé.",
       blocTitres: ["Répondre, puis qualifier", "Les cas transférés"],
       faqChapo:
-        "Ce que le client sait, ce que le moteur s'interdit, ce que fait l'agenda : les trois questions posées à chaque installation.",
+        "Ce que le client sait, ce que REPUT s'interdit, ce que fait l'agenda : les trois questions posées à chaque installation.",
       clotureChapo:
-        "L'audit gratuit chiffre ce que vous coûtent les demandes restées sans réponse, et le compare à ce que les autres moteurs vous feraient gagner.",
+        "L'audit offert chiffre ce que vous coûtent les demandes restées sans réponse, et le compare à ce que les autres agents vous feraient gagner.",
     },
     fonctionnement: [
-      "À l'installation, on construit ensemble la base de connaissances de votre entreprise : horaires, tarifs, prestations, durées d'intervention, politique d'annulation, et les questions qui reviennent le plus souvent. REPUT s'appuie exclusivement dessus. Il ne comble jamais un trou par une supposition : une demande hors périmètre déclenche un transfert vers vous, pas une approximation.",
-      "Sur WhatsApp comme par mail, il répond en moins d'une minute à toute heure, week-ends et jours fériés compris, et commence par qualifier : devis, urgence, réclamation ou simple renseignement. Chaque type suit ensuite son circuit. S'il s'agit d'un rendez-vous, il propose un créneau réellement libre dans votre agenda, le réserve, confirme au client et programme un rappel la veille.",
+      "À l'installation, nous construisons ensemble la base de connaissances de votre entreprise : horaires, tarifs, prestations, durées d'intervention, politique d'annulation, et les questions qui reviennent le plus souvent. REPUT s'appuie exclusivement dessus. Il ne comble jamais un trou par une supposition : une demande qu'elle ne couvre pas vous est transférée, sans approximation.",
+      "Sur WhatsApp comme par mail, il répond aussitôt, à toute heure, week-ends et jours fériés compris, et commence par qualifier : devis, urgence, réclamation ou simple renseignement. Chaque type suit ensuite son circuit. S'il s'agit d'un rendez-vous, il propose un créneau réellement libre dans votre agenda, le réserve, confirme au client et programme un rappel la veille.",
       "Les situations sensibles et les mots d'urgence sont définis avec vous à l'installation, et ne sont jamais traités à l'aveugle : votre téléphone sonne immédiatement, la conversation vous est transférée avec tout son historique. Le reste tourne seul, et chaque échange reste archivé.",
-      "Une fois l'affaire faite et la facture réglée, le même poste prend le relais sur votre réputation. Une demande d'avis part dans les trois jours, relancée une fois, puis une seconde si rien ne vient, avec six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et ça finit toujours par se voir.",
+      "Une fois l'affaire faite et la facture réglée, le même poste prend le relais sur votre réputation. Une demande d'avis part dans les trois jours, relancée une fois, puis une seconde si rien ne vient, avec six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit par se voir.",
     ],
     points: [
-      "Réponse en moins d'une minute, 24 h/24, week-ends et jours fériés compris",
+      "Réponse immédiate, 24 h/24, week-ends et jours fériés compris",
       "Rendez-vous posés directement dans votre agenda, avec confirmation au client et rappel la veille",
       "Qualification systématique : chaque type de demande (devis, urgence, réclamation, renseignement) suit son circuit",
       "Transfert immédiat des cas sensibles, avec l'historique complet de la conversation",
@@ -267,7 +267,7 @@ export const FICHES: Record<string, Fiche> = {
     etapes: [
       {
         t: "Construction de la base",
-        d: "Un entretien d'une heure suffit : prestations, tarifs, horaires, règles maison. Tout ce que le moteur a le droit de dire vient de là, et de nulle part ailleurs.",
+        d: "Un entretien d'une heure suffit : prestations, tarifs, horaires, règles maison. Tout ce que REPUT a le droit de dire vient de là, et de nulle part ailleurs.",
       },
       {
         t: "Branchement des canaux",
@@ -275,17 +275,17 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Rodage en double écoute",
-        d: "La première semaine, vous recevez copie de chaque conversation. On ajuste les réponses sur les cas réels, puis le moteur prend son rythme.",
+        d: "La première semaine, vous recevez copie de chaque conversation. Nous ajustons les réponses sur les cas réels, puis REPUT prend son rythme.",
       },
     ],
     faq: [
       {
         q: "Le client comprend-il qu'il ne parle pas à un humain ?",
-        a: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. L'expérience montre que ce qui agace un client, ce n'est pas de parler à une machine : c'est d'attendre jusqu'à lundi.",
+        a: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. Le client sait qu'il échange avec un assistant : il obtient sa réponse sur-le-champ.",
       },
       {
         q: "Et s'il invente une réponse ?",
-        a: "Il ne peut répondre qu'à partir de la base construite avec vous. Hors de ce périmètre, il ne formule pas d'hypothèse : il transfère, avec l'historique complet de l'échange.",
+        a: "Il ne peut répondre qu'à partir de la base construite avec vous. Hors de cette base, il ne formule pas d'hypothèse : il transfère, avec l'historique complet de l'échange.",
       },
       {
         q: "Que se passe-t-il si deux clients demandent le même créneau ?",
@@ -326,20 +326,20 @@ export const FICHES: Record<string, Fiche> = {
     sections: {
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
-        "FILED récupère vos pièces dans votre messagerie, quel que soit leur format (PDF, scan ou photo) et les range sur le Drive de votre entreprise. Aucun logiciel comptable à acquérir, aucune donnée à migrer.",
+        "FILED récupère vos pièces dans votre messagerie, quel que soit leur format (PDF, scan ou photo). Il les range dans le logiciel Omega ou sur le Drive de votre entreprise, sans logiciel comptable à acheter.",
       comprisChapo:
         "Le classement est la partie qu'on voit. Ce qui suit est livré avec, sans supplément et sans négociation.",
       catalogueChapo:
-        "Le temps passé sur la paperasse n'est pas toujours le premier poste à traiter. L'audit compare ce que chaque moteur vous rapporterait, et il arrive qu'il désigne un autre.",
+        "Le temps passé sur la paperasse n'est pas toujours le premier poste à traiter. L'audit compare ce que chaque agent vous rapporterait, et peut en désigner un autre.",
       clotureChapo:
-        "L'audit gratuit chiffre les heures que vous passez sur vos pièces comptables, et les compare à ce que les autres moteurs vous feraient gagner.",
+        "L'audit offert chiffre les heures que vous passez sur vos pièces comptables, et les compare à ce que les autres agents vous feraient gagner.",
       faqChapo:
         "Le cabinet, les pièces illisibles, le stockage : les trois questions posées à chaque installation de FILED.",
     },
     fonctionnement: [
-      "Vous transférez vos factures fournisseurs vers une adresse dédiée : PDF reçus par mail, scans, photos de tickets prises au comptoir. FILED lit chaque pièce quel qu'en soit le format et en extrait les champs comptables : émetteur, date, montants HT, TVA et TTC, échéance, mode de règlement. La saisie manuelle disparaît, et avec elle la ressaisie du dimanche soir.",
+      "Vous transférez vos factures fournisseurs vers une adresse dédiée : PDF reçus par mail, scans, photos de tickets prises au comptoir. FILED lit chaque pièce quel qu'en soit le format et en extrait les champs comptables : émetteur, date, montants HT, TVA et TTC, échéance, mode de règlement. Chaque champ arrive rempli, prêt pour la comptabilité, sans saisie manuelle.",
       "Chaque extraction passe des contrôles au fil de l'eau : doublon d'une pièce déjà reçue, montant inhabituel pour ce fournisseur, taux de TVA incohérent. Ce qui est certain est classé automatiquement par fournisseur. Ce qui laisse un doute est marqué « à vérifier » et vous est signalé, jamais rangé en silence avec une erreur à l'intérieur.",
-      "Tout est stocké dans une arborescence à votre nom, sur le Drive de votre entreprise. À date fixe, le dossier du mois part vers votre cabinet comptable dans le format qu'il préfère : il gagne du temps sans rien changer à ses méthodes, et vous n'avez plus à courir après les pièces manquantes.",
+      "Tout est rangé dans des dossiers à votre nom, dans le logiciel Omega ou sur le Drive de votre entreprise. À date fixe, le dossier du mois part vers votre cabinet comptable dans le format qu'il préfère : il gagne du temps sans rien changer à ses méthodes, et reçoit chaque mois un dossier complet.",
     ],
     points: [
       "Lecture de tous les formats : PDF natifs, scans, photos de tickets prises au comptoir",
@@ -357,12 +357,12 @@ export const FICHES: Record<string, Fiche> = {
         d: "Une adresse de collecte est créée, l'arborescence de classement montée sur votre Drive. Vous transférez vos pièces, le reste suit.",
       },
       {
-        t: "Calibrage sur votre historique",
-        d: "Le moteur apprend vos fournisseurs récurrents sur les trois derniers mois : formats de facture, montants habituels, taux de TVA pratiqués.",
+        t: "Réglage sur votre historique",
+        d: "FILED apprend vos fournisseurs récurrents sur les trois derniers mois : formats de facture, montants habituels, taux de TVA pratiqués.",
       },
       {
         t: "Accord avec le cabinet",
-        d: "On cale avec votre comptable le format et la date de transmission. Le cabinet reçoit un dossier propre, toujours identique, toujours à l'heure.",
+        d: "Nous convenons avec votre comptable du format et de la date d'envoi. Le cabinet reçoit un dossier propre, au même format, à la date prévue.",
       },
     ],
     faq: [
@@ -376,7 +376,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         q: "Où sont stockées mes factures ?",
-        a: "Sur le Drive de votre entreprise, dans une arborescence à votre nom. La lecture des pièces transite par votre espace dédié (chiffré, hébergé dans l'Union européenne) et rien n'est réutilisé à d'autres fins.",
+        a: "Dans le logiciel Omega ou sur le Drive de votre entreprise, dans des dossiers à votre nom. La lecture des pièces transite par votre espace dédié (chiffré, hébergé dans l'Union européenne) et rien n'est réutilisé à d'autres fins.",
       },
     ],
     demo: {
@@ -390,7 +390,7 @@ export const FICHES: Record<string, Fiche> = {
         ["Montant TTC", "1 488,00 €"],
         ["Échéance", "11/08/2026"],
       ],
-      status: "Classée → Juillet / Comptoir Pièces Auto · aucun doublon détecté",
+      status: "Classée → Juillet / Métalco · aucun doublon détecté",
     },
   },
   PULSE: {
@@ -507,16 +507,16 @@ export const FICHES: Record<string, Fiche> = {
       faqChapo:
         "La taille du fichier, la pression sur les clients, l'état des données : les trois questions posées à chaque installation.",
       clotureChapo:
-        "L'audit gratuit chiffre ce qui dort dans votre fichier client, et le compare à ce que les autres moteurs vous feraient gagner.",
+        "L'audit offert chiffre ce qui dort dans votre fichier client, et le compare à ce que les autres agents vous feraient gagner.",
     },
     fonctionnement: [
-      "OFFLOAD croise votre historique de ventes et votre fichier de contacts pour cartographier vos clients silencieux, puis les classe par valeur et par récence. On réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
+      "OFFLOAD croise votre historique de ventes et votre fichier de contacts pour repérer vos clients silencieux, puis les classe par valeur et par récence. Il réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
       "Chaque client reçoit un message écrit pour lui, ancré dans son historique réel : dernier achat, dernier passage, prestation habituelle. C'est l'inverse exact d'une newsletter envoyée à tous, et c'est ce qui sépare un message qu'on ouvre d'un message qu'on supprime.",
       "Le plafond est volontaire : une sollicitation par trimestre et par client, sur WhatsApp en priorité quand le numéro existe, sinon par mail, jamais les deux. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation vous revient.",
       "La deuxième liste est datée d'avance. Les entretiens annuels, les révisions et les contrôles périodiques redeviennent dus à une date connue, et le client est prévenu la semaine qui précède plutôt que le jour où l'échéance tombe. La troisième rassemble les affaires restées en plan : la pièce arrivée que personne n'est venu chercher, l'intervention terminée qui dort sur une étagère, et le stock qu'elles immobilisent.",
     ],
     points: [
-      "Segmentation par valeur et par récence : on réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher",
+      "Segmentation par valeur et par récence : OFFLOAD réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher",
       "Message individuel ancré dans l'historique réel : dernier achat, dernier passage, préférence connue",
       "Cadence plafonnée : une sollicitation par trimestre et par client, jamais davantage",
       "Arrêt immédiat dès qu'une réponse arrive, même négative : la conversation vous revient",
@@ -537,7 +537,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Vagues suivantes en rythme",
-        d: "Le moteur enchaîne au rythme convenu, mesure les retours vague après vague, et concentre l'effort sur les profils de clients qui répondent le mieux.",
+        d: "OFFLOAD enchaîne au rythme convenu, mesure les retours vague après vague, et concentre l'effort sur les profils de clients qui répondent le mieux.",
       },
     ],
     faq: [
@@ -551,17 +551,17 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         q: "Mon fichier est réparti entre un tableur et des dossiers papier. C'est jouable ?",
-        a: "Un export de votre outil de gestion suffit pour commencer, et un tableur fait aussi l'affaire. Ce qu'il faut sur chaque ligne, c'est un nom, une date et un montant, parce que le reste se déduit. Ce qui dort sur papier n'entre pas tout seul : on regarde ensemble ce qui vaut la peine d'être saisi.",
+        a: "Un export de votre outil de gestion suffit pour commencer, et un tableur fait aussi l'affaire. Ce qu'il faut sur chaque ligne, c'est un nom, une date et un montant, parce que le reste se déduit. Ce qui dort sur papier n'entre pas tout seul : nous regardons ensemble ce qui vaut la peine d'être saisi.",
       },
     ],
     demo: {
       type: "chat",
       title: "Cliente inactive depuis 8 mois",
-      sub: "Institut Beauté Kréol, réactivation OFFLOAD",
+      sub: "Institut Beauté Lumière, réactivation OFFLOAD",
       messages: [
         {
           from: "bot",
-          text: "Bonjour Mme Larcher, ici Beauté Kréol. Votre dernier soin visage remonte à janvier : votre créneau habituel du samedi matin est libre ce mois-ci, avec 10 % fidélité. On vous le réserve ?",
+          text: "Bonjour Mme Larcher, ici Beauté Lumière. Votre dernier soin visage remonte à janvier : votre créneau habituel du samedi matin est libre ce mois-ci, avec 10 % fidélité. On vous le réserve ?",
           time: "10:02",
         },
         { from: "client", text: "Ah oui pourquoi pas ! Samedi 10h c'est possible ?", time: "10:34" },
