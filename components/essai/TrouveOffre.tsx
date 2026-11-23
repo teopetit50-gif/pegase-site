@@ -34,6 +34,10 @@
       éclairée) : à 38 % un besoin tenait sur quatre lignes.
    5. Les actions sont des LIENS (vers l'audit, vers le sur-mesure), pas
       des boutons qui appellent une fonction.
+   6. « AGENT », PAS « POSTE » (règle du 23/11, commit 887a8a85) : le
+      groupe et l'unité parlent d'agents. Les noms des paliers restent
+      ceux que /tarifs publie encore (« Un poste », « Trois postes ») :
+      ils changeront avec lib/paliers, pas ici.
    ══════════════════════════════════════════════════════════════════════ */
 
 import Link from "next/link";
@@ -56,9 +60,9 @@ type Palier = {
 
 /* les noms sont ceux de /tarifs (lib/paliers) ; l'ordre va du plus petit au plus large */
 const PALIERS: Palier[] = [
-  { id: "un", nom: "Un poste", capacite: 1, horsListe: false, chiffre: "1", unite: "poste", bouton: "Réserver un audit", href: "/reserver-un-audit" },
-  { id: "trois", nom: "Trois postes", capacite: 3, horsListe: false, chiffre: "3", unite: "postes", bouton: "Réserver un audit", href: "/reserver-un-audit" },
-  { id: "complet", nom: "Tout Omega", capacite: 4, horsListe: false, chiffre: "4", unite: "postes", bouton: "Réserver un audit", href: "/reserver-un-audit" },
+  { id: "un", nom: "Un poste", capacite: 1, horsListe: false, chiffre: "1", unite: "agent", bouton: "Réserver un audit", href: "/reserver-un-audit" },
+  { id: "trois", nom: "Trois postes", capacite: 3, horsListe: false, chiffre: "3", unite: "agents", bouton: "Réserver un audit", href: "/reserver-un-audit" },
+  { id: "complet", nom: "Tout Omega", capacite: 4, horsListe: false, chiffre: "4", unite: "agents", bouton: "Réserver un audit", href: "/reserver-un-audit" },
   { id: "mesure", nom: "Sur mesure", capacite: 4, horsListe: true, chiffre: "+", unite: "hors liste", bouton: "Décrire votre cas", href: "/offres/sur-mesure" },
 ];
 
@@ -76,7 +80,7 @@ const BESOINS: Besoin[] = [
     id: poste.id,
     libelle: LIBELLES[poste.id],
     code: poste.system,
-    groupe: "Les quatre postes",
+    groupe: "Les quatre agents",
     horsListe: false,
   })),
   { id: "hors-liste", libelle: "Une tâche propre à votre métier", groupe: "Hors liste", horsListe: true },
