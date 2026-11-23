@@ -23,8 +23,8 @@ export default function Faq() {
     <div className="mx-0 grid gap-8 lg:mx-5 lg:grid-cols-12 lg:gap-16">
       <div className="lg:col-span-5">
         <p className="max-w-sm text-[15px] leading-relaxed text-[#737373]">
-          Sept questions, sept réponses courtes. Deux d&apos;entre elles disent ce que le
-          système ne fait pas — c&apos;est souvent ce qu&apos;on cherche en premier.
+          Sept questions, sept réponses courtes. Deux d&apos;entre elles disent ce que
+          FILED ne fait pas — c&apos;est souvent ce qu&apos;on cherche en premier.
         </p>
       </div>
 
