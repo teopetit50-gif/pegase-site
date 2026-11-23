@@ -1,5 +1,5 @@
 import { ArrowRight } from "lucide-react";
-import { HEROS, MARQUE, ECRANS } from "@/lib/produits/relances";
+import { HEROS, MARQUE } from "@/lib/produits/relances";
 import { Panneau } from "./Panneau";
 import Lien from "@/components/Lien";
 
@@ -125,10 +125,11 @@ export function Heros() {
                       "linear-gradient(to bottom, black 0%, black var(--fondu), transparent 100%)",
                   }}
                 >
+                  {/* 22/11 — le héros a sa propre vue d'ensemble : il montrait
+                      la même capture que le premier écran, plus bas */}
                   <Panneau
-                    apercu={ECRANS.onglets[0].apercu}
-                    alt={ECRANS.onglets[0].alt}
-                    priorite
+                    apercu="vue"
+                    alt="La vue d'ensemble des relances : ce qu'on vous doit, les relances écrites cette nuit et l'encours par ancienneté."
                   />
                 </div>
               </div>

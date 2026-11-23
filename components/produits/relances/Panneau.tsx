@@ -1,4 +1,4 @@
-import { getImageProps } from "next/image";
+import { ApercuRelances } from "./Apercus";
 
 /* Le cadre d'application relevé sur la référence : `rounded-lg
    sm:rounded-xl`, filet `#e6e6e6`, fond blanc, et deux ombres distinctes
@@ -37,38 +37,16 @@ import { getImageProps } from "next/image";
    (outils/logos-modules/signes.py). Le dossier est neuf parce que
    l'optimiseur d'images garde une URL déjà servie en cache pendant des heures. */
 
-const LARGE = { width: 2880, height: 1640, sizes: "(min-width: 1280px) 840px, 100vw" };
-const ETROIT = { width: 1120, height: 1800, sizes: "100vw" };
-
-const DOSSIER = "/produits/relances/v2";
-
-export function Panneau({
-  apercu,
-  alt,
-  priorite = false,
-}: {
-  apercu: string;
-  alt: string;
-  priorite?: boolean;
-}) {
-  const commun = { quality: 75, priority: priorite, alt };
-  const { props: etroit } = getImageProps({
-    ...commun,
-    ...ETROIT,
-    src: `${DOSSIER}/${apercu}-mobile.png`,
-  });
-  const { props: large } = getImageProps({
-    ...commun,
-    ...LARGE,
-    src: `${DOSSIER}/${apercu}.png`,
-  });
-
+/* 22/11/2026 (Teo, « fais pareil pour les autres pages ») — le cadre ne
+   porte plus une capture de l'espace client mais un aperçu dessiné en code
+   (Apercus.tsx). Tout ce qui précède sur `<picture>` et les fichiers PNG
+   raconte l'ancien montage ; les images de `public/produits/relances/` ne
+   sont plus appelées. `alt` devient l'étiquette lue par les lecteurs
+   d'écran, à la place des dizaines de chiffres de l'aperçu. */
+export function Panneau({ apercu, alt }: { apercu: string; alt: string }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-[#e6e6e6] bg-[#ffffff] shadow-[0px_2px_6px_0px_rgba(28,40,64,0.06),0px_6px_20px_-2px_rgba(28,40,64,0.08)] sm:rounded-xl">
-      <picture>
-        <source media="(min-width: 640px)" srcSet={large.srcSet} sizes={large.sizes} />
-        <img {...etroit} alt={alt} className="h-auto w-full" />
-      </picture>
+    <div role="img" aria-label={alt} className="overflow-hidden rounded-lg border border-[#e6e6e6] bg-[#ffffff] shadow-[0px_2px_6px_0px_rgba(28,40,64,0.06),0px_6px_20px_-2px_rgba(28,40,64,0.08)] sm:rounded-xl">
+      <ApercuRelances cle={apercu} />
     </div>
   );
 }

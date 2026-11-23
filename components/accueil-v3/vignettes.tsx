@@ -29,8 +29,6 @@ import {
   Building2,
   Calculator,
   CarFront,
-  Check,
-  Clock,
   DraftingCompass,
   FileText,
   FolderOpen,
@@ -48,11 +46,7 @@ import {
   UserRoundCheck,
   type LucideIcon,
 } from "lucide-react";
-
-const ENCRE = "text-[#0a0a0a]";
-const SOURD = "text-black/55";
-const CARTE = "rounded-xl border border-black/[0.07] bg-[#fff]";
-const FILET = "border-t border-black/[0.06]";
+import { Bloc, Bulle, CARTE, ENCRE, FILET, Fait, Ligne, Pastille, SOURD } from "@/components/vignettes/briques";
 
 /* le cadre des captures, avec un composant dedans. Le rapport est un
    minimum, pas une cage : une cale invisible le porte et partage la même
@@ -73,83 +67,6 @@ export function CadreVignette({ children, large = false }: { children: React.Rea
         </div>
       </div>
     </div>
-  );
-}
-
-/* ── les briques ── */
-function Pastille({ children, pleine = false }: { children: React.ReactNode; pleine?: boolean }) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
-        pleine ? "bg-[#0a0a0a] text-[#fff]" : `bg-black/[0.05] ${ENCRE}`
-      }`}
-    >
-      {children}
-    </span>
-  );
-}
-
-function Bloc({
-  I,
-  titre,
-  droite,
-  children,
-  className = "flex",
-}: {
-  I: LucideIcon;
-  titre: string;
-  droite?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`${CARTE} min-w-0 flex-col gap-2 p-3 xl:gap-2.5 xl:p-4 ${className}`}>
-      <div className="flex items-center gap-2">
-        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-black/[0.05] ${ENCRE}`}>
-          <I className="h-3.5 w-3.5" strokeWidth={1.7} />
-        </span>
-        <span className={`truncate text-xs font-medium ${ENCRE}`}>{titre}</span>
-        {droite ? <span className={`ml-auto shrink-0 text-[11px] ${SOURD}`}>{droite}</span> : null}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function Ligne({ g, d, etat, pleine = false }: { g: string; d?: string; etat?: string; pleine?: boolean }) {
-  return (
-    <div className="flex items-center gap-2 text-[11px] leading-tight">
-      <span className={`min-w-0 flex-1 truncate ${ENCRE}`}>{g}</span>
-      {d ? <span className={`shrink-0 whitespace-nowrap tabular-nums ${SOURD}`}>{d}</span> : null}
-      {etat ? <Pastille pleine={pleine}>{etat}</Pastille> : null}
-    </div>
-  );
-}
-
-function Fait({ ok = true, children }: { ok?: boolean; children: React.ReactNode }) {
-  return (
-    <li className={`flex items-start gap-2 text-[11px] leading-snug ${ok ? ENCRE : SOURD}`}>
-      {ok ? (
-        <span className="mt-px flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-[#0a0a0a] text-[#fff]">
-          <Check className="h-2 w-2" strokeWidth={3.5} />
-        </span>
-      ) : (
-        <Clock className="mt-px h-3.5 w-3.5 shrink-0" strokeWidth={1.7} />
-      )}
-      <span className="min-w-0">{children}</span>
-    </li>
-  );
-}
-
-function Bulle({ moi = false, children }: { moi?: boolean; children: React.ReactNode }) {
-  return (
-    <p
-      className={`max-w-[88%] rounded-lg px-2.5 py-1.5 text-[11px] leading-snug ${
-        moi ? "self-end bg-[#0a0a0a] text-[#fff]" : `self-start bg-black/[0.05] ${ENCRE}`
-      }`}
-    >
-      {children}
-    </p>
   );
 }
 

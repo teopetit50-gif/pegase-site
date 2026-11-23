@@ -294,7 +294,7 @@ export const BENTO = {
 export const ECRANS = {
   titre: "Votre espace tient en quatre écrans",
   chapo:
-    "Vous y voyez qui vous doit de l'argent, où en est chaque relance, ce qui est parti hier et ce qui devrait rentrer. Les captures ci-dessous sont celles de l'espace, montrées telles quelles.",
+    "Vous y voyez qui vous doit de l'argent, où en est chaque relance, ce qui est parti hier et ce qui devrait rentrer.",
   onglets: [
     {
       cle: "encours",
