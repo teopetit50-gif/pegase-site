@@ -1,0 +1,309 @@
+/* ══════════════════════════════════════════════════════════════════════
+   .p-gestion — /gestion, le logiciel de gestion d'Omega (23/11/2026)
+   Décalque 1:1 de https://crystal-ai-v1.21st.app/ (le gabarit
+   « Crystal AI » de 21st.dev, acheté par Teo le 23/11), thème clair.
+   Il remplace le premier montage du 22/11, dessiné sur NexusCloud.
+
+   ── LE RELEVÉ ─────────────────────────────────────────────────────────
+   HTML rendu côté serveur et feuille compilée (260 ko) relevés le 23/11,
+   aplatis (2 007 lignes), puis mesurés au style calculé aux CINQ largeurs
+   (390, 768, 1024, 1440, 1700), une page rechargée par largeur. Toute la
+   page est en utilitaires Tailwind recopiés du balisage, dans l'ordre du
+   DOM : ils sont dans components/gestion/*.tsx. Ce fichier ne porte que
+   ce qu'un utilitaire ne sait pas dire, préfixé `ge-` et rangé sous
+   `.p-gestion`. Le supprimer avec app/gestion/ et components/gestion/
+   supprime la page, sans effet ailleurs.
+
+   La grille (leur composant « SectionGrid ») : trois colonnes,
+     [full] minmax(16px,1fr) [content] minmax(0,1248px) [content] minmax(16px,1fr) [full]
+   soit une colonne de contenu de 358 / 736 / 992 / 1248 / 1248 px aux
+   cinq largeurs, bordée de deux filets #e7e5e4 sur toute la page. Entre
+   deux sections : un filet de 1 px, une bande hachurée de 40 px, et un
+   repère en losange (12 px, #d6d3d1) à chaque croisement.
+
+   Mesuré (identique aux cinq largeurs, sauf mention) :
+     h1            36/45, graisse 500, #1c1917 ; 2ᵉ ligne en #342d27
+     chapô         20/25 en #44403b
+     boutons       36 px de haut, rayon 10 px, 16/24 (14/20 pour deux),
+                   plein #403630 graisse 400, filet #e7e5e4 graisse 500
+     h2            24/30, graisse 500
+     texte de section  16/22 en #79716b
+     surtitre      12/16, graisse 600, capitales, interlettre 0,6 px
+     onglets       barre de 32 px, 14/20 graisse 500 ; panneau : titre
+                   20/25 graisse 600, texte 16/26 en #44403b
+     bandeau       case de 160 px (128 px sous lg), rayon 10 px
+     carte produit visuel de 256 px (224 px sous md), nom 18/22,5,
+                   texte 14/19,25
+     carte à icône tuile de 40 px, titre 16/24, texte 14/22,75
+     accordéon     ligne de 74 px, intitulé 16/24, texte 14/19,25
+     colonnes      surtitre 12/16 interlettre 1,2 px, valeur 36/36
+                   (30/30 à 390), lignes 14/19,25
+     questions     ligne de 72 px, 16/22 graisse 500
+     appel         cartes 20/27,5 ; bandeau du bas 24/30 puis 16/22
+   Le rayon de la référence vaut 0,625 rem : ses `rounded-lg` font 10 px et
+   ses `rounded-2xl` 18 px, écrits ici en valeurs arbitraires (le thème du
+   site garde les rayons Tailwind par défaut).
+
+   ── LES POLICES ───────────────────────────────────────────────────────
+   Geist et Geist Mono, comme la référence, chargées par
+   app/_polices/geist-accueil.ts (le fichier de l'accueil : aucune police
+   ajoutée). Geist Mono n'est que la police à chasse fixe par défaut,
+   comme chez eux : aucun texte de la page ne l'emploie.
+
+   ── LES COULEURS ──────────────────────────────────────────────────────
+   Celles de la référence : la gamme `stone` de Tailwind et son « walnut »
+   maison (#403630 pour les boutons, #342d27 pour les accents, #4b4038
+   pour l'anneau de focus, #1e1a16 pour le trait de l'onglet ouvert).
+   Écart : là où elle écrit un texte en stone-400 sur blanc (2,6:1), il
+   est ici en stone-500 (4,6:1).
+
+   ── CE QUI N'EST PAS REPRIS : LEURS FICHIERS ──────────────────────────
+   · /hero-bg.jpg : le fichier répond 404 chez eux et son calque est posé
+     en `-z-10` derrière un `bg-stone-100` : on ne voit qu'un aplat
+     #f5f5f4. Ici le même aplat, plus leur propre trame de points et leur
+     dégradé de carte (`ge-pointille`, `from-stone-50 via-stone-100
+     to-stone-200/70`) : un fond dessiné en CSS, aucune image.
+   · /dashboard.webp et les quatre captures d'onglet : des écrans dessinés
+     en code, components/gestion/visuels.tsx.
+   · les trois dessins SVG de leur accordéon et les deux animations de
+     leurs cartes produit : des écrans de visuels.tsx.
+   · les logos de clients : sept métiers, en mots, avec une icône.
+   · les icônes « Solar » (Iconify) : celles de lucide, déjà dans le site.
+
+   ── LE MOUVEMENT ──────────────────────────────────────────────────────
+   Leurs images clés et les réglages de leurs transitions (lus dans leurs
+   scripts : la courbe est partout cubic-bezier(.25, 1, .5, 1)) :
+     héros                   ge-entree      0,6 s, 20 px, un bloc toutes
+                                            les 0,12 s après 0,1 s
+     entrée dans la fenêtre  ge-apparait    0,5 s (0,4 s pour les cases),
+                                            12 à 20 px, une seule fois
+     changement d'onglet     ge-onglet-*    0,35 s, sortie puis entrée
+     changement d'écran      ge-ecran-*     0,35 s, échelle 0,96
+     accordion-down / up     ge-accordion-* 0,2 s ease-out
+     caret-blink             ge-curseur     la ligne en cours de saisie
+   ══════════════════════════════════════════════════════════════════════ */
+
+.p-gestion {
+  font-family: var(--font-geist-aa), ui-sans-serif, system-ui, sans-serif;
+  background: #fff;
+  color: #1c1917;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.p-gestion code,
+.p-gestion kbd,
+.p-gestion .font-mono {
+  font-family: var(--font-geist-mono-aa), ui-monospace, monospace;
+}
+
+/* ── leurs utilitaires maison ── h1-head, h2-head, p-desc, eyebrow-label */
+.p-gestion .ge-h1 {
+  font-size: 2.25rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #1c1917;
+}
+.p-gestion .ge-h2 {
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: #1c1917;
+}
+.p-gestion .ge-desc {
+  font-size: 1rem;
+  line-height: 1.375;
+  color: #79716b;
+}
+.p-gestion .ge-surtitre {
+  font-size: 0.75rem;
+  line-height: calc(1 / 0.75);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #342d27;
+}
+
+/* ── la bande hachurée ── un trait de 1 px tous les 10 px, #d6d3d1 */
+.p-gestion .ge-hachure {
+  background-image: repeating-linear-gradient(
+    to right,
+    rgb(214 211 209) 0px,
+    rgb(214 211 209) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+}
+
+/* ── le repère ── chez eux un carré de 12 px en `corner-shape: bevel` et
+   rayon 5 px. `corner-shape` n'existe que dans Chrome : le même octogone
+   est tracé ici au `clip-path`, identique dans tous les navigateurs. */
+.p-gestion .ge-repere {
+  width: 0.75rem;
+  height: 0.75rem;
+  background: #d6d3d1;
+  clip-path: polygon(5px 0, 7px 0, 12px 5px, 12px 7px, 7px 12px, 5px 12px, 0 7px, 0 5px);
+}
+
+/* ── la trame de points ── celle de leurs cartes produit : 16 px */
+.p-gestion .ge-pointille {
+  background-image: radial-gradient(circle, rgb(168 162 158 / 0.4) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* ── l'écran qui dépasse du bas d'une carte produit ── leur `scroll-fade-b`
+   (un masque en dégradé vers le bas), posé sur le cadre et non sur l'écran */
+.p-gestion .ge-fondu-bas {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 58%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 58%, transparent 97%);
+}
+
+/* ── le héros ── leurs trois blocs entrent l'un après l'autre. En CSS, sans
+   JavaScript : l'animation part à la première image, rien ne clignote. */
+.p-gestion .ge-entree {
+  animation: ge-entree 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+  animation-delay: var(--ge-retard, 0.1s);
+}
+@keyframes ge-entree {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── l'entrée dans la fenêtre ── Apparition.tsx pose `data-ge` : « arme »
+   sous la fenêtre, « joue » à l'arrivée, puis l'attribut est retiré. Sans
+   JavaScript rien n'est posé : le contenu est simplement là. */
+.p-gestion [data-ge="arme"] {
+  opacity: 0;
+  transform: translate3d(var(--ge-x, 0px), var(--ge-y, 16px), 0);
+}
+.p-gestion [data-ge="joue"] {
+  animation: ge-apparait var(--ge-duree, 0.5s) cubic-bezier(0.25, 1, 0.5, 1) var(--ge-retard, 0s) both;
+}
+@keyframes ge-apparait {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--ge-x, 0px), var(--ge-y, 16px), 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── le panneau d'onglet ── sortie vers le haut, entrée par le bas */
+.p-gestion .ge-onglet-sort {
+  animation: ge-onglet-sort 0.35s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+.p-gestion .ge-onglet-entre {
+  animation: ge-onglet-entre 0.35s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+@keyframes ge-onglet-sort {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+@keyframes ge-onglet-entre {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* ── l'écran de l'accordéon ── il se retire puis revient à l'échelle 0,96 */
+.p-gestion .ge-ecran-sort {
+  animation: ge-ecran-sort 0.35s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+.p-gestion .ge-ecran-entre {
+  animation: ge-ecran-entre 0.35s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+@keyframes ge-ecran-sort {
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes ge-ecran-entre {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+/* ── le volet d'un accordéon ── accordion-down et accordion-up de la
+   référence. La hauteur d'arrivée est mesurée au clic (volet.ts) ; un
+   volet replié garde sa place dans le document (hauteur 0) mais sort de
+   la lecture et du clavier (`visibility`). `data-anime` n'est posé qu'au
+   premier clic : rien ne s'anime au chargement. */
+.p-gestion .ge-volet {
+  overflow: hidden;
+}
+.p-gestion .ge-volet[data-etat="ferme"] {
+  height: 0;
+  visibility: hidden;
+}
+.p-gestion .ge-volet[data-anime][data-etat="ouvert"] {
+  animation: ge-accordion-down 0.2s ease-out;
+}
+.p-gestion .ge-volet[data-anime][data-etat="ferme"] {
+  animation: ge-accordion-up 0.2s ease-out;
+}
+@keyframes ge-accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--ge-hauteur, auto);
+  }
+}
+@keyframes ge-accordion-up {
+  from {
+    height: var(--ge-hauteur, auto);
+    visibility: visible;
+  }
+  to {
+    height: 0;
+    visibility: visible;
+  }
+}
+
+/* ── le curseur de la ligne en cours de saisie ── caret-blink de la référence */
+.p-gestion .ge-curseur {
+  animation: ge-curseur 1.25s ease-out infinite;
+}
+@keyframes ge-curseur {
+  0%,
+  70%,
+  to {
+    opacity: 1;
+  }
+  20%,
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── « réduire les animations » ── tout est en place sans mouvement */
+@media (prefers-reduced-motion: reduce) {
+  .p-gestion .ge-entree,
+  .p-gestion [data-ge="joue"],
+  .p-gestion .ge-onglet-sort,
+  .p-gestion .ge-onglet-entre,
+  .p-gestion .ge-ecran-sort,
+  .p-gestion .ge-ecran-entre,
+  .p-gestion .ge-volet[data-anime][data-etat="ouvert"],
+  .p-gestion .ge-volet[data-anime][data-etat="ferme"],
+  .p-gestion .ge-curseur,
+  .p-gestion .ge-ecran .animate-pulse {
+    animation: none;
+  }
+  .p-gestion [data-ge="arme"] {
+    opacity: 1;
+    transform: none;
+  }
+}

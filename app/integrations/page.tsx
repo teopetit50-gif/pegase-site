@@ -134,7 +134,7 @@ export default function Integrations() {
               <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
                 Réserver un audit offert
               </Link>
-              <Link href="/offres" className="o-btn o-btn--ghost">
+              <Link href="/gestion" className="o-btn o-btn--ghost">
                 Voir le logiciel
                 <Chevron taille={13} />
               </Link>

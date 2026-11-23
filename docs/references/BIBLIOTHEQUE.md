@@ -16,11 +16,18 @@ et s'il doit entrer au catalogue public, une entrée dans `components/modeles/do
 
 Captures 1440 px du jour : `docs/references/captures/<nom>.jpg` (radius, agentaiv1, nexuscloudv1).
 
+## Ajouté le 23/11/2026
+
+| Site | Adresse | Source | État |
+|---|---|---|---|
+| Crystal AI (21st) | https://crystal-ai-v1.21st.app/ | 21st.dev | Acheté par Teo le 23/11/2026 pour la page Gestion, refaite 1:1 dessus le jour même. Clair, palette pierre, cadres hachurés, onglets et accordéon. Pas au catalogue public /modeles. |
+
 ## Ce que chaque page d'Omega a copié
 
 | Page | Route | Logiciel | Référence | Date | Note |
 |---|---|---|---|---|---|
 | Accueil | `omegaai.fr` | Omega | [Agent AI (21st)](https://agent-ai-v1.21st.app/) | 05/11/2026 | Décalque 1:1, bloc par bloc dans l'ordre de la référence ; les écrans du gabarit remplacés par des captures de l'espace client. |
+| Gestion | `/gestion` | Omega | [Crystal AI (21st)](https://crystal-ai-v1.21st.app/) | 23/11/2026 | Décalque 1:1, thème clair. Les captures et le fond photo du gabarit sont remplacés par des écrans dessinés en code (components/gestion/visuels.tsx) ; sa grille de prix devient « ce que vous recevez », sans montant ; ses logos de clients deviennent les sept métiers. Un premier montage sur NexusCloud (22/11) a été abandonné : Teo choisit le gabarit. |
 | Grands groupes | `/secteurs/groupes` | Varelo | [Payload marketing (21st)](https://payload-marketing-v1.21st.app/) | 25/09/2026 | Décalque 1:1, gabarit noir passé en blanc. Teo : « je préfère un truc fait à l'identique plutôt qu'un truc fait à 80 % ». |
 | BTP | `/secteurs/btp` | Daliro | [Vertex](https://vertex-one-lovat.vercel.app) | 24/09/2026 | Page d'accueil de chantieros-site rapatriée dans omegaai.fr : grille de fonctionnalités, « Trusted by » et formules de Vertex. |
 | Hôtellerie | `/secteurs/hotellerie` | Ostelo | [Vertex, par la page BTP](https://vertex-one-lovat.vercel.app) | 04/11/2026 | Copie de la page BTP : mêmes composants, même UX, textes du métier hôtelier. |

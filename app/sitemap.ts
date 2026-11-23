@@ -25,6 +25,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const fixes: { url: string; priorite: number; frequence: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
     { url: "/", priorite: 1, frequence: "weekly" },
     { url: "/offres", priorite: 0.9, frequence: "weekly" },
+    /* 22/11 — la page du logiciel de gestion (l'ERP), ouverte ce jour. */
+    { url: "/gestion", priorite: 0.9, frequence: "monthly" },
     /* 10/09 — /offres/sur-mesure manquait depuis toujours (relevé à l'audit
        du 16/08 et resté tel quel). Ce n'est pas une étape de parcours mais
        une porte d'entrée : « logiciel métier », « pont entre deux outils »

@@ -85,8 +85,10 @@ import { SECTEURS } from "@/lib/secteurs";
    · 22/11 — le site passe au discours ERP (Teo : « le site est trop
      fouillis », puis « oui top, fais ça »). « Nos offres » devient
      « Logiciel » :
-     - une entrée « Gestion » en tête, qui mène au bloc Gestion de
-       l'accueil en attendant que le logiciel de gestion ait sa page ;
+     - une entrée « Gestion » en tête. Elle menait d'abord au bloc Gestion
+       de l'accueil (`/#gestion`), ce que Teo a lu comme un copier-coller de
+       l'accueil ; depuis le soir même elle mène à sa propre page, /gestion,
+       décalque du gabarit Crystal AI (21st.dev), acheté par Teo le 23/11 ;
      - les quatre agents sont nommés par ce qu'ils font (Relances, Clients
        inactifs, Demandes clients, Factures fournisseurs), plus par leur
        marque, comme les métiers depuis le 25/09. La marque reste dans
@@ -153,7 +155,7 @@ export const MENU: Rubrique[] = [
     racines: ["/secteurs"],
     entrees: [
       {
-        href: "/#gestion",
+        href: "/gestion",
         label: "Gestion",
         texte: "Ventes, achats, stock, banque, comptabilité",
         colonne: "Pour toutes les entreprises",
