@@ -47,17 +47,20 @@ const ENCRE = "text-[#0a0a0a]";
 const SOURD = "text-black/55";
 const CARTE = "rounded-xl border border-black/[0.07] bg-[#fff]";
 
-/* le cadre des captures, avec un composant dedans ; sur téléphone la
-   hauteur suit le contenu au lieu du rapport 1240/724, trop bas pour lire */
+/* le cadre des captures, avec un composant dedans. Le rapport 1240/724 est
+   un minimum, pas une cage : une cale invisible porte le rapport et partage
+   la même case de grille que le contenu, si bien que la case prend la plus
+   grande des deux hauteurs. À 768 et 1024 px, où le panneau est étroit, un
+   cadre au rapport fixe rognait le bas des vignettes Agents et Validation.
+   Sur téléphone il n'y a pas de cale : la hauteur suit le contenu. */
 export function CadreVignette({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl">
-      <div className="relative w-full md:aspect-[1240/724]">
-        <div className="relative md:absolute md:inset-0 rounded-[20px] p-1 md:p-1.5 bg-neutral-800/40 backdrop-blur-md overflow-hidden">
-          <div className="aa-cadre-lisere pointer-events-none absolute inset-0 z-50 rounded-[20px]" />
-          <div className="aa-vig relative flex h-full w-full overflow-hidden rounded-[10px] md:rounded-[12px] bg-[#fafafa]">
-            {children}
-          </div>
+    <div className="relative w-full rounded-2xl">
+      <div className="relative grid w-full rounded-[20px] p-1 md:p-1.5 bg-neutral-800/40 backdrop-blur-md overflow-hidden">
+        <div className="aa-cadre-lisere pointer-events-none absolute inset-0 z-50 rounded-[20px]" />
+        <div aria-hidden="true" className="hidden md:block [grid-area:1/1] self-start w-full aspect-[1240/724]" />
+        <div className="aa-vig relative flex w-full [grid-area:1/1] overflow-hidden rounded-[10px] md:rounded-[12px] bg-[#fafafa]">
+          {children}
         </div>
       </div>
     </div>
@@ -114,7 +117,7 @@ const MODULES: [LucideIcon, string][] = [
 
 export function VignetteModules() {
   return (
-    <div className="grid w-full grid-cols-3 gap-2 p-3 md:h-full md:grid-cols-4 md:grid-rows-3 md:gap-3 md:p-6">
+    <div className="grid w-full grid-cols-3 gap-2 p-3 md:grid-cols-4 md:grid-rows-3 md:gap-3 md:p-6">
       {MODULES.map(([I, nom]) => (
         <Tuile key={nom} I={I} nom={nom} />
       ))}
@@ -123,11 +126,11 @@ export function VignetteModules() {
 }
 
 /* ── gestion et étape 02 : vous décrivez, l'IA fait les réglages ── */
-const REGLAGES = ["Modules activés", "TVA", "Plan comptable", "Modèles de documents"];
+const REGLAGES = ["Modules activés", "TVA et plan comptable", "Modèles de documents"];
 
 export function VignetteReglages({ compacte = false }: { compacte?: boolean }) {
   return (
-    <div className={`grid w-full gap-2 p-3 md:gap-3 ${compacte ? "content-center md:p-4" : "md:h-full md:grid-cols-2 md:p-6"}`}>
+    <div className={`grid w-full gap-2 p-3 md:gap-3 ${compacte ? "content-center" : "md:grid-cols-2 md:p-6"}`}>
       <div className={`${CARTE} flex-col justify-center gap-2 p-3 md:gap-3 ${compacte ? "hidden" : "flex md:p-6"}`}>
         <Entete titre="Vous décrivez votre activité" />
         <p className={`rounded-lg bg-black/[0.04] p-3 text-xs leading-relaxed ${compacte ? "" : "md:text-base"} ${ENCRE}`}>
@@ -196,7 +199,7 @@ const METIERS: [LucideIcon, string][] = [
 
 export function VignetteMetiers() {
   return (
-    <div className="grid w-full grid-cols-2 gap-2 p-3 md:h-full md:grid-cols-4 md:grid-rows-2 md:gap-3 md:p-6">
+    <div className="grid w-full grid-cols-2 gap-2 p-3 md:grid-cols-4 md:grid-rows-2 md:gap-3 md:p-6">
       {METIERS.map(([I, nom]) => (
         <Tuile key={nom} I={I} nom={nom} />
       ))}
@@ -240,16 +243,16 @@ const A_VALIDER: [string, string, string][] = [
 
 export function VignetteValidation({ compacte = false }: { compacte?: boolean }) {
   return (
-    <div className={`flex w-full flex-col justify-center gap-2 p-3 ${compacte ? "md:p-4" : "md:gap-3 md:p-6"}`}>
+    <div className={`flex w-full flex-col justify-center p-3 ${compacte ? "gap-1.5" : "gap-2 md:gap-3 md:p-6"}`}>
       <Entete titre="À valider ce matin" droite="3 éléments" />
       {A_VALIDER.map(([type, objet, montant], k) => (
-        <div key={type} className={`${CARTE} flex items-center gap-3 p-3 ${compacte ? "" : "md:p-4"}`}>
+        <div key={type} className={`${CARTE} flex items-center gap-3 ${compacte ? "px-3 py-2" : "p-3 md:p-4"}`}>
           <span className="flex min-w-0 flex-1 flex-col">
             <span className={`truncate text-xs font-medium ${compacte ? "" : "md:text-base"} ${ENCRE}`}>
               {type}
               {montant ? <span className={`font-normal ${SOURD}`}> · {montant}</span> : null}
             </span>
-            <span className={`truncate text-[11px] ${compacte ? "" : "md:text-sm"} ${SOURD}`}>{objet}</span>
+            {compacte ? null : <span className={`truncate text-[11px] md:text-sm ${SOURD}`}>{objet}</span>}
           </span>
           {k === 0 ? (
             <>
@@ -272,14 +275,11 @@ const AUDIT_POINTS = ["Votre activité, passée en revue", "Les modules et les a
 export function VignetteAudit() {
   return (
     <div className="flex w-full flex-col justify-center gap-2 p-3 md:p-4">
-      <div className={`${CARTE} flex items-center justify-between gap-3 p-3`}>
-        <span className="flex flex-col">
-          <span className={`text-xs font-medium ${ENCRE}`}>Audit</span>
-          <span className={`text-[11px] ${SOURD}`}>30 minutes, sans engagement</span>
-        </span>
-        <Pastille>Offert</Pastille>
-      </div>
       <ul className={`${CARTE} flex flex-col gap-2 p-3`}>
+        <li className="flex items-center justify-between gap-2">
+          <span className={`text-xs font-medium ${ENCRE}`}>Audit de 30 minutes</span>
+          <Pastille>Offert</Pastille>
+        </li>
         {AUDIT_POINTS.map((p) => (
           <li key={p} className={`flex items-center gap-2 text-xs ${ENCRE}`}>
             <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#0a0a0a] text-[#fff]">

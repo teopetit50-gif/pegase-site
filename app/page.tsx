@@ -407,8 +407,8 @@ export default function Home() {
                       >
                         {e.n}
                       </div>
-                      <div className="relative w-full aspect-[4/3] overflow-hidden border-b border-white/[0.06]">
-                        <div className="aa-vig absolute inset-0 flex bg-[#fafafa]">
+                      <div className="relative flex w-full aspect-[4/3] border-b border-white/[0.06]">
+                        <div className="aa-vig flex w-full bg-[#fafafa]">
                           <VignetteEtape n={e.n} />
                         </div>
                       </div>
