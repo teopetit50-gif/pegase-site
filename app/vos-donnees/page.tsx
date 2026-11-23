@@ -322,6 +322,7 @@ const PIED_OMEGA = [
     liens: [
       { label: "Blog", href: "/blog" },
       { label: "Commencer", href: "/commencer" },
+      { label: "Mentions légales", href: "/mentions-legales" },
     ],
   },
   {

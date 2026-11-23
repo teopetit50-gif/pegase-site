@@ -844,6 +844,10 @@ export default function Home() {
                 <Link className="text-xs text-white/45 hover:text-white/70 transition-colors" href="/contact">
                   Service client
                 </Link>
+                {/* 23/11/2026 — la page revient (éditeur : Orval Consulting) ; la LCEN veut ces mentions joignables depuis l'accueil */}
+                <Link className="text-xs text-white/45 hover:text-white/70 transition-colors" href="/mentions-legales">
+                  Mentions légales
+                </Link>
               </div>
             </div>
           </div>
