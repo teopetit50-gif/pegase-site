@@ -1,0 +1,284 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LES BLOCS À L'ESSAI — /essai-blocs (23/11/2026)
+
+   Six blocs repris de 21st.dev, choisis par Teo sur planches (« Oui,
+   pose-les »), posés sur une page de travail avant de toucher à l'accueil.
+   Chaque composant de ce dossier porte son origine et ses écarts en tête.
+
+   Ce fichier ne porte que ce que les six partagent : les jetons, quelques
+   aides de couleur et les images clés. Tout est préfixé `eb-` et vit sous
+   la classe racine `.eb` : supprimer components/essai/ et
+   app/essai-blocs/ supprime la page, sans effet ailleurs.
+
+   LES JETONS sont ceux de l'accueil en version blanche
+   (components/accueil-v3/accueil.css, bloc `.aa-clair`), écrits en dur
+   plutôt qu'en utilitaires `text-white/55` : sous `.aa-clair`, `bg-white`
+   devient noir et `text-neutral-950` devient blanc, ce qui retourne un
+   bloc écrit normalement. Ici une couleur dit ce qu'elle est.
+
+     encre                 rgb(10,10,10)
+     texte courant         encre à .68   (text-white/60 de l'accueil)
+     texte secondaire      encre à .58   (text-white/50)
+     filets                encre à .10   (border-white/[0.08])
+     surfaces              blanc ; voile encre à .036 (bg-white/[0.04])
+     ombre des cartes      0 1px 3px .08 + liseré 1px .04 (relevée sur
+                           tabs-illustration-vercel, --ga-shadow)
+
+   LES PASTILLES PORTENT UN SENS, pas une variation : ambre = attend votre
+   accord, vert = encaissé, rouge = échu, neutre sinon.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.eb {
+  --eb-encre: rgb(10, 10, 10);
+  --eb-texte: rgba(10, 10, 10, 0.68);
+  --eb-doux: rgba(10, 10, 10, 0.58);
+  --eb-pale: rgba(10, 10, 10, 0.4);
+  --eb-trait: rgba(10, 10, 10, 0.1);
+  --eb-trait-fort: rgba(10, 10, 10, 0.16);
+  --eb-blanc: #ffffff;
+  --eb-voile: rgba(10, 10, 10, 0.036);
+  --eb-voile-2: rgba(10, 10, 10, 0.018);
+  --eb-ambre: #b45309;
+  --eb-vert: #15803d;
+  --eb-rouge: #b91c1c;
+  --eb-ombre: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --eb-courbe: cubic-bezier(0.23, 1, 0.32, 1);
+  color: var(--eb-encre);
+}
+
+/* ── aides de couleur ── */
+.eb .eb-encre { color: var(--eb-encre); }
+.eb .eb-texte { color: var(--eb-texte); }
+.eb .eb-doux { color: var(--eb-doux); }
+.eb .eb-pale { color: var(--eb-pale); }
+.eb .eb-trait { border-color: var(--eb-trait); }
+.eb .eb-trait-fort { border-color: var(--eb-trait-fort); }
+.eb .eb-blanc { background-color: var(--eb-blanc); }
+.eb .eb-voile { background-color: var(--eb-voile); }
+.eb .eb-voile-2 { background-color: var(--eb-voile-2); }
+.eb .eb-ombre { box-shadow: var(--eb-ombre); }
+.eb .eb-plein { background-color: var(--eb-encre); color: #ffffff; }
+.eb .eb-plein:hover { background-color: #262626; }
+
+/* le ton d'une pastille, d'une étape, d'une ligne : une seule variable */
+.eb .eb-ton-neutre { --ton: var(--eb-doux); }
+.eb .eb-ton-encre { --ton: var(--eb-encre); }
+.eb .eb-ton-ambre { --ton: var(--eb-ambre); }
+.eb .eb-ton-vert { --ton: var(--eb-vert); }
+.eb .eb-ton-rouge { --ton: var(--eb-rouge); }
+.eb .eb-puce {
+  color: var(--ton);
+  background-color: color-mix(in srgb, var(--ton) 11%, #ffffff);
+  transition: color 0.3s, background-color 0.3s;
+}
+.eb .eb-ton-fond { background-color: var(--ton); }
+.eb .eb-ton-texte { color: var(--ton); }
+.eb .eb-ton-bord { border-color: var(--ton); }
+
+/* L'accueil délave les cercles de ses anneaux décoratifs (`.aa-clair svg
+   circle`). Les pictogrammes de ces blocs gardent leur trait plein, comme
+   les vignettes (`.aa-vig`) depuis le 22/11. */
+.aa-clair .eb svg circle {
+  stroke: currentColor;
+  fill: none;
+}
+
+/* un lien de fin de carte : texte, puis flèche qui avance d'un cran */
+.eb .eb-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--eb-encre);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s;
+}
+.eb .eb-lien:hover { text-decoration-color: currentColor; }
+.eb .eb-lien svg { transition: transform 0.15s ease-out; }
+.eb .eb-lien:hover svg { transform: translateX(2px); }
+
+.eb :focus-visible {
+  outline: 2px solid var(--eb-encre);
+  outline-offset: 2px;
+}
+
+/* ── pièces communes ── */
+.eb .eb-piste { background-color: var(--eb-trait); }
+.eb .eb-remplit { background-color: #1a1a1a; }
+.eb .eb-point { background-color: var(--eb-pale); }
+.eb .eb-monte { color: var(--eb-vert); }
+
+/* ── CycleFacture ── */
+.eb .eb-jalon-fait {
+  border-color: var(--ton);
+  background-color: var(--ton);
+  color: #ffffff;
+}
+.eb .eb-roue {
+  border-color: var(--ton);
+  border-top-color: transparent;
+  color: transparent;
+  animation: eb-tourne 0.8s linear infinite;
+}
+.eb .eb-tampon {
+  color: var(--eb-vert);
+  border-color: var(--eb-vert);
+}
+.eb .eb-bouton-plein {
+  background-color: var(--eb-encre);
+  border-color: var(--eb-encre);
+  color: #ffffff;
+}
+.eb .eb-bouton-clair {
+  background-color: #ffffff;
+  border-color: var(--eb-trait-fort);
+  color: var(--eb-encre);
+}
+.eb .eb-bouton-vert {
+  background-color: var(--eb-vert);
+  border-color: var(--eb-vert);
+  color: #ffffff;
+}
+
+/* ── FilFacture ── */
+.eb .eb-repere {
+  border-color: var(--eb-trait-fort);
+  background-color: var(--eb-voile-2);
+  color: var(--eb-texte);
+}
+.eb .eb-repere-vert {
+  border-color: color-mix(in srgb, var(--eb-vert) 30%, #ffffff);
+  background-color: color-mix(in srgb, var(--eb-vert) 8%, #ffffff);
+  color: var(--eb-vert);
+}
+
+/* ── OngletsAgents ── */
+/* la queue de la bulle : un carré tourné, glissé sous elle. Le tracé de
+   la source est son actif ; celui-ci tient en quatre lignes. */
+.eb .eb-queue {
+  position: absolute;
+  left: -5px;
+  bottom: 10px;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background-color: #ffffff;
+  box-shadow: var(--eb-ombre);
+  transform: rotate(45deg);
+}
+.eb .eb-barre-curseur {
+  display: inline-block;
+  width: 2px;
+  height: 15px;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background-color: var(--eb-texte);
+}
+.eb .eb-deplie {
+  transition:
+    max-height 350ms var(--eb-courbe),
+    opacity 250ms var(--eb-courbe);
+}
+
+/* ── MetiersOnglets ── */
+.eb .eb-onglet { transition: background-color 0.15s; }
+.eb .eb-onglet:hover { background-color: var(--eb-voile-2); }
+.eb .eb-ligne-active { background-color: var(--eb-encre); }
+
+/* ── TrouveOffre ── */
+.eb .eb-efface { color: var(--eb-doux); }
+.eb .eb-efface:hover {
+  background-color: var(--eb-voile);
+  color: var(--eb-encre);
+}
+.eb .eb-phare {
+  border-color: rgba(10, 10, 10, 0.12);
+  background-color: rgba(10, 10, 10, 0.035);
+}
+.eb .eb-phare-haut { background-color: var(--eb-encre); }
+.eb .eb-phare-voile { background-image: linear-gradient(to bottom, rgba(10, 10, 10, 0.07), transparent); }
+.eb .eb-rangee { border-bottom: 1px solid rgba(10, 10, 10, 0.06); }
+.eb .eb-rangee:last-child { border-bottom: 0; }
+.eb .eb-case-pleine {
+  border-color: var(--eb-encre);
+  background-color: var(--eb-encre);
+  color: #ffffff;
+}
+.eb .eb-case-vide {
+  border-color: var(--eb-pale);
+  background-color: #ffffff;
+}
+.eb .eb-case-saisie:focus-visible + .eb-case {
+  outline: 2px solid var(--eb-encre);
+  outline-offset: 2px;
+}
+.eb .eb-action {
+  background-color: #ffffff;
+  color: var(--eb-texte);
+  box-shadow: inset 0 0 0 1px var(--eb-trait-fort);
+}
+.eb .eb-action:hover {
+  background-color: var(--eb-voile);
+  color: var(--eb-encre);
+}
+
+/* ── images clés ── */
+/* relevées sur tabs-illustration-vercel : blink, panelIn, descIn */
+@keyframes eb-clignote { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes eb-panneau {
+  from { opacity: 0; transform: scale(0.97) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes eb-desc {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* relevée sur logo-cloud-04 : l'échange du panneau (fade + 8 px, 250 ms)
+   et la ligne de progression de l'onglet actif */
+@keyframes eb-change {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes eb-avance {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+/* relevée sur plan-finder-pricing-table : la coche qui confirme */
+@keyframes eb-confirme { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+@keyframes eb-tourne { to { transform: rotate(360deg); } }
+/* une ligne qui arrive dans une liste (agents : clients inactifs, pièces lues) */
+@keyframes eb-ligne {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.eb .eb-anim-panneau { animation: eb-panneau 400ms var(--eb-courbe) both; }
+.eb .eb-anim-desc { animation: eb-desc 400ms var(--eb-courbe) both; }
+.eb .eb-anim-change { animation: eb-change 250ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.eb .eb-anim-ligne { animation: eb-ligne 320ms var(--eb-courbe) both; }
+.eb .eb-anim-confirme { animation: eb-confirme 240ms ease-in-out; }
+.eb .eb-anim-tourne { animation: eb-tourne 0.8s linear infinite; }
+.eb .eb-curseur { animation: eb-clignote 1s step-end infinite; }
+.eb .eb-avance {
+  transform-origin: left;
+  animation-name: eb-avance;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eb .eb-anim-panneau,
+  .eb .eb-anim-desc,
+  .eb .eb-anim-change,
+  .eb .eb-anim-ligne,
+  .eb .eb-anim-confirme,
+  .eb .eb-anim-tourne,
+  .eb .eb-curseur,
+  .eb .eb-roue,
+  .eb .eb-avance {
+    animation: none;
+  }
+}
