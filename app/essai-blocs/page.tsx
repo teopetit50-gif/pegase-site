@@ -6,9 +6,9 @@ import Apparition, { GroupeApparition, MotsApparition } from "@/components/accue
 import ApercuGestion from "@/components/essai/ApercuGestion";
 import CycleVente from "@/components/essai/CycleVente";
 import FilPiece from "@/components/essai/FilPiece";
-import MetiersOnglets, { type Recit } from "@/components/essai/MetiersOnglets";
+import MetiersOnglets from "@/components/essai/MetiersOnglets";
 import OngletsGestion from "@/components/essai/OngletsGestion";
-import { CARTES_SECTEURS } from "@/lib/secteurs-accueil";
+import { RECITS_METIERS } from "@/components/essai/recits";
 
 /* ══════════════════════════════════════════════════════════════════════
    /essai-blocs — cinq blocs repris de 21st.dev, à juger avant de les poser
@@ -18,8 +18,9 @@ import { CARTES_SECTEURS } from "@/lib/secteurs-accueil";
    reprend l'habillage exact d'une section de l'accueil (rails, lueur,
    surtitre, titre, phrase : app/page.tsx) pour que chaque bloc se juge
    là où il irait. Les blocs vivent dans components/essai/, chacun avec
-   son origine et ses écarts en tête ; supprimer ce dossier et celui-ci
-   supprime tout.
+   son origine et ses écarts en tête. Trois d'entre eux sont montés sur
+   l'accueil depuis le 23/11 (OngletsGestion, CycleVente, MetiersOnglets) :
+   cette page peut partir, pas components/essai/.
 
    LE CONTENU A ÉTÉ REFAIT LE JOUR MÊME. La première version tournait
    autour des relances et des agents nommés par leur code ; Teo : « t'as
@@ -38,30 +39,6 @@ export const metadata: Metadata = {
   title: "Blocs à l'essai | Omega.AI",
   robots: { index: false, follow: false },
 };
-
-/* l'objet du métier, écrit en grand dans l'onglet ; le reste (nom du
-   module, problème, réponse) vient des cartes de secteurs de l'accueil */
-const OBJETS: Record<string, string> = {
-  btp: "Chantier",
-  avocats: "Dossier",
-  architectes: "Permis",
-  "location-automobile": "Véhicule",
-  dentaire: "Patient",
-  groupes: "Groupe",
-};
-
-const RECITS: Recit[] = CARTES_SECTEURS.filter((carte) => OBJETS[carte.slug]).map((carte) => ({
-  id: carte.slug,
-  nom: carte.saas,
-  logo: `/logos/${carte.saas.toLowerCase()}-lockup.png`,
-  chiffre: OBJETS[carte.slug],
-  libelle: carte.reponse,
-  note: "",
-  texte: carte.probleme,
-  role: `Module métier · ${carte.metier}`,
-  href: `/secteurs/${carte.slug}`,
-  lien: `Voir ${carte.saas}`,
-}));
 
 const SECTIONS: { id: string; surtitre: string; titre: string; texte: string; bloc: ReactNode }[] = [
   {
@@ -105,7 +82,7 @@ const SECTIONS: { id: string; surtitre: string; titre: string; texte: string; bl
     surtitre: "Bloc E · d'après Hirael",
     titre: "Chaque métier a ses règles. Son module les connaît.",
     texte: "Un logo, l'objet du métier en grand, et le problème que le module règle.",
-    bloc: <MetiersOnglets recits={RECITS} />,
+    bloc: <MetiersOnglets recits={RECITS_METIERS} />,
   },
 ];
 

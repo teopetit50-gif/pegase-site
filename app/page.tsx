@@ -34,7 +34,6 @@ import {
   ETAPES_PIED,
   FAQ_INTRO,
   HERO,
-  LOGICIELS,
   LOGICIELS_INTRO,
   METIERS,
   METIERS_INTRO,
@@ -42,7 +41,7 @@ import {
   PIED,
   PRIX,
   PRIX_INTRO,
-  SITUATIONS,
+  VENTE,
   type Agent,
 } from "@/components/accueil-v3/textes";
 import {
@@ -59,6 +58,10 @@ import {
   VideoDemo,
 } from "@/components/accueil-v3/interactifs";
 import { COURRIEL, LIEN_TELEPHONE } from "@/lib/reservation";
+import CycleVente from "@/components/essai/CycleVente";
+import MetiersOnglets from "@/components/essai/MetiersOnglets";
+import OngletsGestion from "@/components/essai/OngletsGestion";
+import { RECITS_METIERS } from "@/components/essai/recits";
 import Apparition, {
   GroupeApparition,
   MotsApparition,
@@ -371,6 +374,16 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+              {/* 23/11 (Teo, « Oui, sur l'accueil ») — un onglet par pan du
+                  logiciel, et son écran qui se remplit. Bloc repris de
+                  21st.dev, jugé sur /essai-blocs (components/essai). */}
+              <div className="border-t border-white/[0.08] px-2 sm:px-6 md:px-10 py-10 md:py-14" data-bloc="modules">
+                <Apparition>
+                  <div className="overflow-hidden rounded-[20px] border border-white/[0.08]">
+                    <OngletsGestion />
+                  </div>
+                </Apparition>
+              </div>
             </div>
           </div>
         </section>
@@ -426,6 +439,18 @@ export default function Home() {
                   );
                 })}
               </div>
+              {/* 23/11 (Teo, « Oui, sur l'accueil ») — après les trois étapes,
+                  ce qui se passe ensuite : une vente validée, et le stock,
+                  la banque, la comptabilité qui suivent. Bloc repris de
+                  21st.dev, jugé sur /essai-blocs (components/essai). */}
+              <Apparition className="px-2 sm:px-6 md:px-12 pt-12 md:pt-16 pb-12 md:pb-16" >
+                <div className="flex flex-col gap-3 px-4 md:px-0 pb-8 md:pb-10 max-w-2xl" data-bloc="vente">
+                  <p className="text-sm font-medium text-white/55">{VENTE.surtitre}</p>
+                  <h3 className="text-xl md:text-3xl font-normal tracking-tight text-white leading-tight">{VENTE.titre}</h3>
+                  <p className="text-base text-white/55 leading-relaxed">{VENTE.texte}</p>
+                </div>
+                <CycleVente />
+              </Apparition>
               <Apparition className="px-6 md:px-12 py-12 md:py-16 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 border-t border-white/[0.08]">
                 <div className="flex flex-col gap-2">
                   <p className="text-sm font-medium text-white">{ETAPES_PIED.libelle}</p>
@@ -587,55 +612,19 @@ export default function Home() {
                   <MotsApparition texte={LOGICIELS_INTRO.titre} depart={80} />
                 </h2>
               </GroupeApparition>
-              <Apparition delai={150} className="pb-12 md:pb-16">
-                <Defilement>
-                  {LOGICIELS.map((l) => (
-                    <div key={l.nom} className="aa-marquee-item">
-                      <Image
-                        src={l.src}
-                        alt={l.nom}
-                        width={120}
-                        height={33}
-                        className="h-6 md:h-7 w-auto object-contain grayscale invert opacity-45"
-                      />
-                    </div>
-                  ))}
-                </Defilement>
+              {/* 23/11 (Teo, « Oui, sur l'accueil ») — les logos qui défilaient
+                  deviennent des onglets : l'objet du métier en grand, ce que
+                  fait le module, le problème de départ. Ils remplacent aussi
+                  les six cartes de situations qui suivaient (trois étaient
+                  signées du nom de code d'un agent). Bloc repris de 21st.dev,
+                  jugé sur /essai-blocs (components/essai). */}
+              <Apparition delai={150} className="px-2 sm:px-6 md:px-12 pb-12 md:pb-16">
+                <MetiersOnglets recits={RECITS_METIERS} />
               </Apparition>
             </div>
           </div>
         </section>
 
-        {/* ════════ six situations ════════ */}
-        <section className="relative w-full bg-neutral-950" data-section="testimonial-grid">
-          <div className="w-full border-t border-b border-white/[0.08]">
-            <div className="max-w-7xl mx-auto p-2 border-l border-r border-white/[0.08]">
-              <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[6px]">
-                {SITUATIONS.map((s, k) => (
-                  <Apparition
-                    as="li"
-                    key={s.nom}
-                    delai={(k % 3) * 100}
-                    className="flex flex-col justify-between rounded-xl border border-white/[0.08] bg-white/[0.02] p-6 md:p-8 min-h-[280px]"
-                  >
-                    <blockquote className="text-[15px] md:text-base text-white/85 leading-[1.55] mb-8">
-                      «&nbsp;{s.texte}&nbsp;»
-                    </blockquote>
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-9 h-9 rounded-full overflow-hidden bg-white/10 shrink-0 flex items-center justify-center">
-                        <Image src={s.logo} alt="" width={20} height={20} className="w-5 h-5 invert" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-white leading-tight">{s.nom}</span>
-                        <span className="text-xs text-white/50 leading-tight mt-0.5">{s.role}</span>
-                      </div>
-                    </div>
-                  </Apparition>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
 
         {/* ════════ tarifs ════════ */}
         <section className="relative w-full bg-neutral-950" data-section="pricing-preview">

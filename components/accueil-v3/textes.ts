@@ -602,3 +602,14 @@ export const PIED = {
     },
   ],
 };
+
+/* 23/11 (Teo, sur la page d'essai : « j'aime tout sauf ça », puis « Oui,
+   sur l'accueil ») — l'en-tête du bloc posé sous les trois étapes : une
+   vente validée, et le stock, la banque, la comptabilité qui suivent
+   (components/essai/CycleVente). Le titre reprend la phrase de /gestion,
+   « une vente validée met à jour le stock et la comptabilité ». */
+export const VENTE = {
+  surtitre: "Ensuite, au quotidien",
+  titre: "Une vente validée, tout se met à jour",
+  texte: "Le devis devient facture, le stock sort, la banque rapproche, l'écriture passe. Sans ressaisie.",
+};

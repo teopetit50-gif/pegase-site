@@ -11,8 +11,12 @@
 
    Ce fichier ne porte que ce que les six partagent : les jetons, quelques
    aides de couleur et les images clés. Tout est préfixé `eb-` et vit sous
-   la classe racine `.eb` : supprimer components/essai/ et
-   app/essai-blocs/ supprime la page, sans effet ailleurs.
+   la classe racine `.eb`.
+
+   ATTENTION, CE DOSSIER N'EST PLUS SEULEMENT UN ESSAI. Depuis le 23/11
+   (Teo : « Oui, sur l'accueil »), app/page.tsx monte trois de ces blocs :
+   OngletsGestion, CycleVente et MetiersOnglets. Supprimer
+   components/essai/ casserait l'accueil.
 
    LES JETONS sont ceux de l'accueil en version blanche
    (components/accueil-v3/accueil.css, bloc `.aa-clair`), écrits en dur
