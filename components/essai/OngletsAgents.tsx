@@ -36,7 +36,9 @@
    5. DES BOUTONS, PAS `all: unset`. La source efface l'anneau de focus ;
       ici de vrais boutons, `aria-expanded`, et l'illustration est
       décorative (`aria-hidden`), le texte de l'onglet disant l'essentiel.
-   6. EMPILÉ SOUS 768 px (la source reste en ligne et déborde).
+   6. EMPILÉ SOUS 768 px (la source reste en ligne et déborde), et les
+      marges de 40 px ne s'appliquent qu'à partir de 1024 px : à 768 px
+      elles ne laissaient que 190 px à la bulle.
    Les noms et les montants des illustrations sont des EXEMPLES.
    ══════════════════════════════════════════════════════════════════════ */
 
@@ -212,10 +214,10 @@ function ListePiece() {
 }
 
 const RELANCE =
-  "Bonjour Monsieur Costa, sauf erreur de notre part, la facture F-2041 de 2 480,00 € est arrivée à échéance le 30 septembre. Pouvez-vous nous indiquer la date de règlement prévue ? Si le virement est déjà parti, ne tenez pas compte de ce message. Nous restons à votre disposition pour tout justificatif. Bien cordialement, Atelier Bertin.";
+  "Bonjour Monsieur Costa, sauf erreur de notre part, la facture F-2041 de 2\u202f480,00\u00a0€ est arrivée à échéance le 30\u00a0septembre. Pouvez-vous nous indiquer la date de règlement prévue ? Si le virement est déjà parti, ne tenez pas compte de ce message. Nous restons à votre disposition pour tout justificatif. Bien cordialement, Atelier Bertin.";
 
 const REPONSE =
-  "Bonjour, oui, nous sommes ouverts le samedi de 8 h à 12 h. Je vous propose samedi à 9 h 30 pour votre devis. Ce créneau vous convient-il ?";
+  "Bonjour, oui, nous sommes ouverts le samedi de 8\u00a0h à 12\u00a0h. Je vous propose samedi à 9\u00a0h\u00a030 pour votre devis. Ce créneau vous convient-il ?";
 
 function Illustration({ id }: { id: string }) {
   if (id === "cashd")
@@ -231,7 +233,7 @@ function Illustration({ id }: { id: string }) {
           texte={REPONSE}
           entete={
             <div className="eb-voile mb-3 rounded-xl px-3 py-2 text-[13px] leading-[1.45]">
-              <span className="eb-doux block text-[11px]">Reçu à 21 h 04 · WhatsApp</span>
+              <span className="eb-doux block text-[11px]">Reçu à 21&nbsp;h&nbsp;04 · WhatsApp</span>
               Bonjour, êtes-vous ouverts samedi matin ? J&apos;aimerais passer pour un devis.
             </div>
           }
@@ -306,7 +308,7 @@ export default function OngletsAgents({
       }}
     >
       {/* à gauche : les onglets et leur phrase */}
-      <div className="flex flex-1 flex-col justify-center px-6 py-8 md:px-10 md:py-12">
+      <div className="flex flex-1 flex-col justify-center px-6 py-8 lg:px-10 lg:py-12">
         <h3 className="m-0 mb-6 text-2xl leading-[1.2] font-medium tracking-[-0.03em] md:mb-9">{titre}</h3>
         <div className="flex flex-col">
           {POSTES.map((poste, index) => {
@@ -367,7 +369,7 @@ export default function OngletsAgents({
       <div className="eb-piste h-px w-full shrink-0 md:h-auto md:w-px md:self-stretch" />
 
       {/* à droite : ce que l'agent prépare */}
-      <div aria-hidden="true" className="flex flex-1 flex-col items-start justify-end p-6 md:p-10">
+      <div aria-hidden="true" className="flex flex-1 flex-col items-start justify-end p-6 lg:p-10">
         <div key={actif} className="eb-anim-panneau w-full">
           <Illustration id={POSTES[actif].id} />
         </div>

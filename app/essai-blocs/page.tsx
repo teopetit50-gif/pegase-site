@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 /* Le grand chiffre de chaque onglet est un FAIT DE CONCEPTION déjà écrit
    sur le site (cadence de relance, lecture seule, devis avant de
    commencer), jamais une performance. Le texte, lui, vient de SITUATIONS. */
-const FAITS: Record<string, Pick<Recit, "chiffre" | "libelle" | "note" | "href" | "lien" | "logo">> = {
+const FAITS: Record<string, Pick<Recit, "chiffre" | "libelle" | "note" | "href" | "lien" | "logo" | "logoBlanc">> = {
   CASHD: {
     chiffre: "J+3",
     libelle: "première relance, puis J+7 et J+21",
@@ -39,25 +39,28 @@ const FAITS: Record<string, Pick<Recit, "chiffre" | "libelle" | "note" | "href" 
     href: "/offres/relances-impayes",
     lien: "Voir CASHD",
     logo: "/logos/cashd-lockup.png",
+    logoBlanc: true,
   },
   REPUT: {
-    chiffre: "21 h",
+    chiffre: "21\u00a0h",
     libelle: "la réponse est rédigée aussitôt",
     note: "Demandes reçues par mail et WhatsApp",
     href: "/offres/demandes-clients",
     lien: "Voir REPUT",
     logo: "/logos/reput-lockup.png",
+    logoBlanc: true,
   },
   FILED: {
-    chiffre: "1 clic",
+    chiffre: "1\u00a0clic",
     libelle: "pour valider une pièce déjà lue et contrôlée",
     note: "Classée par fournisseur, transmise à la comptabilité",
     href: "/offres/factures-fournisseurs",
     lien: "Voir FILED",
     logo: "/logos/filed-lockup.png",
+    logoBlanc: true,
   },
   Daliro: {
-    chiffre: "1 dossier",
+    chiffre: "1\u00a0dossier",
     libelle: "par chantier, du premier appel au décompte final",
     note: "Devis, avenants, situations de travaux",
     href: "/secteurs/btp",
@@ -65,7 +68,7 @@ const FAITS: Record<string, Pick<Recit, "chiffre" | "libelle" | "note" | "href" 
     logo: "/logos/daliro-lockup.png",
   },
   Varelo: {
-    chiffre: "0 écriture",
+    chiffre: "0\u00a0écriture",
     libelle: "dans vos logiciels : tout se lit, rien ne s'y modifie",
     note: "La direction décide de chaque action",
     href: "/secteurs/groupes",
@@ -73,7 +76,7 @@ const FAITS: Record<string, Pick<Recit, "chiffre" | "libelle" | "note" | "href" 
     logo: "/logos/varelo-lockup.png",
   },
   "Sur mesure": {
-    chiffre: "1 devis",
+    chiffre: "1\u00a0devis",
     libelle: "écrit avant de commencer",
     note: "Ce que fait le module, et son prix",
     href: "/offres/sur-mesure",

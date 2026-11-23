@@ -27,6 +27,9 @@
       sur le site (une cadence, une règle), pas une performance.
    2. LES LOGOS SONT LES NÔTRES (public/logos), en gris comme dans le
       défilement de l'accueil ; la source compose des mots-symboles.
+      Ceux des agents sont des fichiers BLANCS (relevé à la recette :
+      luminance 255) : `logoBlanc` les retourne en encre, sans quoi
+      trois onglets sur six sont vides.
    3. LA GRAISSE DES TITRES DE L'ACCUEIL : chiffre et citation en normal,
       là où la source est en demi-gras.
    4. Les onglets sont ceux de Radix (clavier et rôles natifs), sans la
@@ -48,6 +51,8 @@ export type Recit = {
   nom: string;
   /** le logo complet (signe + nom) ; sans lui, le nom s'écrit en toutes lettres */
   logo?: string;
+  /** vrai quand le fichier du logo est blanc (les agents) : il est retourné en encre */
+  logoBlanc?: boolean;
   chiffre: string;
   libelle: string;
   note: string;
@@ -113,7 +118,7 @@ export default function MetiersOnglets({ recits }: { recits: Recit[] }) {
                   alt={recit.nom}
                   width={120}
                   height={33}
-                  className={`h-6 w-auto object-contain grayscale transition-opacity duration-150 ${estActif ? "opacity-100" : "opacity-45"}`}
+                  className={`h-6 w-auto object-contain transition-opacity duration-150 ${recit.logoBlanc ? "eb-logo-blanc" : "eb-logo"} ${estActif ? "opacity-100" : "opacity-45"}`}
                 />
               ) : (
                 <span

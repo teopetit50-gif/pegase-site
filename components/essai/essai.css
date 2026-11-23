@@ -187,6 +187,9 @@
 .eb .eb-onglet { transition: background-color 0.15s; }
 .eb .eb-onglet:hover { background-color: var(--eb-voile-2); }
 .eb .eb-ligne-active { background-color: var(--eb-encre); }
+.eb .eb-logo { filter: grayscale(1); }
+/* les logos des agents sont des fichiers blancs : retournés en encre */
+.eb .eb-logo-blanc { filter: grayscale(1) invert(1); }
 
 /* ── TrouveOffre ── */
 .eb .eb-efface { color: var(--eb-doux); }
@@ -200,6 +203,13 @@
 }
 .eb .eb-phare-haut { background-color: var(--eb-encre); }
 .eb .eb-phare-voile { background-image: linear-gradient(to bottom, rgba(10, 10, 10, 0.07), transparent); }
+/* la colonne des besoins : 46 % sous 640 px, 38 % au-delà (la source) ;
+   la colonne éclairée lit la même variable */
+.eb .eb-tableau { --eb-col: 46%; }
+@media (min-width: 640px) {
+  .eb .eb-tableau { --eb-col: 38%; }
+}
+.eb .eb-col-besoin { width: var(--eb-col); }
 .eb .eb-rangee { border-bottom: 1px solid rgba(10, 10, 10, 0.06); }
 .eb .eb-rangee:last-child { border-bottom: 0; }
 .eb .eb-case-pleine {

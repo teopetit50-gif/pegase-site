@@ -269,7 +269,7 @@ export default function CycleFacture() {
             </div>
 
             <div className="relative flex shrink-0 flex-col gap-0.5">
-              <b className="text-3xl leading-[1.1] font-[650] tracking-[-0.02em] tabular-nums">2 480,00 €</b>
+              <b className="text-3xl leading-[1.1] font-[650] tracking-[-0.02em] whitespace-nowrap tabular-nums">2 480,00 €</b>
               <span
                 className={`truncate text-xs transition-colors duration-300 ${payee ? "eb-ton-texte font-[550]" : "eb-doux"}`}
               >

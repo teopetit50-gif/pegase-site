@@ -28,8 +28,10 @@
    3. DES CORPS LISIBLES. La source écrit en 9 à 11 px ; ici 11 à 13 px,
       le plancher des interfaces du site.
    4. À 390 px, QUATRE COLONNES DE 48 px ne portent ni « au choix » ni un
-      bouton : sous 640 px les mentions disparaissent (la coche reste) et
-      le pied devient un seul bouton sous le tableau.
+      bouton : sous 640 px les mentions disparaissent (la coche reste), le
+      pied devient un seul bouton sous le tableau, et la colonne des
+      besoins passe de 38 à 46 % (`--eb-col`, que suit la colonne
+      éclairée) : à 38 % un besoin tenait sur quatre lignes.
    5. Les actions sont des LIENS (vers l'audit, vers le sur-mesure), pas
       des boutons qui appellent une fonction.
    ══════════════════════════════════════════════════════════════════════ */
@@ -155,12 +157,12 @@ export default function TrouveOffre() {
         </div>
 
         {/* ── le tableau ── */}
-        <div className="relative isolate overflow-hidden rounded-b-2xl">
+        <div className="eb-tableau relative isolate overflow-hidden rounded-b-2xl">
           <div
             aria-hidden="true"
             style={{
-              left: "38%",
-              width: `${62 / PALIERS.length}%`,
+              left: "var(--eb-col)",
+              width: `calc((100% - var(--eb-col)) / ${PALIERS.length})`,
               transform: `translateX(${rang * 100}%)`,
               opacity: meilleur ? 1 : 0,
             }}
@@ -175,7 +177,7 @@ export default function TrouveOffre() {
             aria-labelledby={idTitre}
           >
             <colgroup>
-              <col style={{ width: "38%" }} />
+              <col className="eb-col-besoin" />
               {PALIERS.map((palier) => (
                 <col key={palier.id} />
               ))}
@@ -224,7 +226,7 @@ export default function TrouveOffre() {
                   const coche = coches.includes(besoin.id);
                   return (
                     <tr key={besoin.id} className="eb-rangee">
-                      <th scope="row" className="px-3 text-left font-normal">
+                      <th scope="row" className="px-2 text-left font-normal sm:px-3">
                         <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-1 py-1.5">
                           <input
                             type="checkbox"
