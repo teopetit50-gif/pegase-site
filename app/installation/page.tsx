@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
-import { POSTES, lirePeriodicite } from "@/lib/paliers";
+import { lirePeriodicite, postesDepuisUrl } from "@/lib/paliers";
 import { utilisateurCourant } from "@/lib/supabase/server";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -56,8 +56,7 @@ export default async function InstallationPage({
   searchParams: Promise<{ postes?: string; periodicite?: string; pieces?: string }>;
 }) {
   const sp = await searchParams;
-  const demandes = (sp.postes ?? "").split(",").map((x) => x.trim());
-  const postes = POSTES.filter((p) => demandes.includes(p.id)).map((p) => p.id);
+  const postes = postesDepuisUrl(sp.postes).map((p) => p.id);
   if (!postes.length) redirect("/tarifs");
   const periodicite = lirePeriodicite(sp.periodicite);
   /* 15/09 — le volume de pièces, venu de la carte de /tarifs. Il ne sert PAS

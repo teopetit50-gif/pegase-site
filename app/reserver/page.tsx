@@ -3,7 +3,7 @@ import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
 import PriseDeCreneau from "@/components/reservation/PriseDeCreneau";
 import { MODELES } from "@/components/modeles/donnees";
-import { POSTES, prixPourVolume } from "@/lib/paliers";
+import { postesDepuisUrl, prixPourVolume } from "@/lib/paliers";
 import { formuleSite, phraseFormuleSite } from "@/lib/formules-site";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -88,9 +88,7 @@ export default async function ReserverPage({
      (reserver_audit ne le fait que pour le parcours installation). C'est
      une estimation écrite noir sur blanc, que le visiteur voit dans le
      message et peut corriger avant d'envoyer. */
-  const postesEstimes = POSTES.filter((p) =>
-    (sp.postes ?? "").split(",").map((x) => x.trim()).includes(p.id),
-  );
+  const postesEstimes = postesDepuisUrl(sp.postes);
   const piecesBrut = Number.parseInt(sp.pieces ?? "", 10);
   const piecesEstimees = Number.isFinite(piecesBrut) && piecesBrut > 0 ? piecesBrut : 0;
   /* 15/09, dernière passe — LE MESSAGE NE PORTE PLUS DE MONTANT. Il

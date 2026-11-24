@@ -22,7 +22,7 @@
    Ajouter un paquet : déposer les deux fichiers, ajouter la ligne dans
    LOGOS. Rien d'autre. */
 
-import { nomPaquet, agentPaquet } from "@/lib/content";
+import { nomPaquet, agentPaquet, codePaquet } from "@/lib/content";
 
 type Logo = { mark: string; lockup?: string };
 
@@ -81,7 +81,7 @@ const OMBRE =
   "0 10px 22px -8px rgba(15, 16, 19, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 0 0 1px rgba(15, 16, 19, 0.06)";
 
 export function SystemLogo({ system }: { system: string }) {
-  const logo = LOGOS[system];
+  const logo = LOGOS[codePaquet(system)];
 
   if (!logo) {
     /* Repli monogramme — voir le commentaire PULSE/VAULT ci-dessus. */
@@ -126,7 +126,7 @@ export function SystemLogo({ system }: { system: string }) {
    Le zoom au survol reprend exactement le geste qu'avaient les photos, pour
    que la carte réagisse pareil sous la souris. */
 export function SystemMarque({ system }: { system: string }) {
-  const logo = LOGOS[system];
+  const logo = LOGOS[codePaquet(system)];
   if (!logo) return null;
   return (
     <span aria-hidden className="o-marque-fond">
@@ -153,7 +153,7 @@ export function SystemLockup({
   hauteur?: number;
   couleur?: string;
 }) {
-  const logo = LOGOS[system];
+  const logo = LOGOS[codePaquet(system)];
   if (!logo?.lockup) return <span className="font-semibold">{nomPaquet(system)}</span>;
   return (
     <span
@@ -192,7 +192,7 @@ export function SystemSigne({
   taille?: number;
   couleur?: string;
 }) {
-  const logo = LOGOS[system];
+  const logo = LOGOS[codePaquet(system)];
 
   if (!logo) {
     return (
@@ -230,4 +230,4 @@ export function SystemSigne({
 }
 
 /* Le signe d'un paquet, pour un masque CSS posé hors de ce fichier. */
-export const signePaquet = (system: string) => LOGOS[system]?.mark;
+export const signePaquet = (system: string) => LOGOS[codePaquet(system)]?.mark;

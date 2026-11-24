@@ -78,6 +78,16 @@ function useSiteUrl(): FormuleSite | undefined {
  *  pas dans l'URL et ne doit jamais y être : il se recalcule à l'arrivée
  *  (/reserver), sinon n'importe qui se fabriquerait un tarif en tapant
  *  dans la barre d'adresse. */
+/* 24/11/2026 — les postes voyagent par le slug de leur offre. Un lien
+   d'avant cette date porte encore l'ancien identifiant : il est ramené à
+   son slug ici, pour que l'estimation suive. */
+const ANCIENNES_CLES: Record<string, string> = {
+  cashd: "relances-impayes",
+  frontd: "demandes-clients",
+  reload: "nouvelles-affaires",
+  filed: "factures-fournisseurs",
+};
+
 function useEstimationUrl(noms?: Record<string, string>) {
   const [ctx, setCtx] = useState<{ postes: string[]; pieces: number }>({
     postes: [],
@@ -88,7 +98,7 @@ function useEstimationUrl(noms?: Record<string, string>) {
       const q = new URLSearchParams(window.location.search);
       const postes = (q.get("postes") ?? "")
         .split(",")
-        .map((x) => x.trim())
+        .map((x) => ANCIENNES_CLES[x.trim()] ?? x.trim())
         .filter((x) => x && (!noms || noms[x]));
       const pieces = Number.parseInt(q.get("pieces") ?? "", 10);
       const volume = Number.isFinite(pieces) && pieces > 0 ? pieces : 0;

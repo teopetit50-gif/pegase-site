@@ -99,7 +99,27 @@ export const NOM_PAQUET: Record<string, string> = {
   VAULT: "Validation",
 };
 
-export const nomPaquet = (code: string) => NOM_PAQUET[code] ?? code;
+/* 24/11/2026, suite — le code d'un paquet ne quitte plus le serveur. Une
+   clé React ou une prop de composant client part dans le source de la page :
+   c'est le slug de l'offre qui voyage (« relances-impayes »), jamais le
+   code. Les tables se lisent donc par code OU par slug, et `codePaquet`
+   ramène l'un à l'autre. */
+export const SLUG_PAQUET: Record<string, string> = {
+  CASHD: "relances-impayes",
+  OFFLOAD: "nouvelles-affaires",
+  REPUT: "demandes-clients",
+  FILED: "factures-fournisseurs",
+  PULSE: "point-du-matin",
+  VAULT: "securite",
+};
+
+const CODE_DU_SLUG: Record<string, string> = Object.fromEntries(
+  Object.entries(SLUG_PAQUET).map(([code, slug]) => [slug, code]),
+);
+
+export const codePaquet = (codeOuSlug: string) => CODE_DU_SLUG[codeOuSlug] ?? codeOuSlug;
+
+export const nomPaquet = (codeOuSlug: string) => NOM_PAQUET[codePaquet(codeOuSlug)] ?? codeOuSlug;
 
 /* La forme qui désigne un agent depuis une autre page que la sienne :
    « Voir l'agent de relance », « Logo de l'agent de relance ». Sur sa
@@ -115,7 +135,7 @@ export const AGENT_PAQUET: Record<string, string> = {
   VAULT: "le système de validation",
 };
 
-export const agentPaquet = (code: string) => AGENT_PAQUET[code] ?? "l'agent";
+export const agentPaquet = (codeOuSlug: string) => AGENT_PAQUET[codePaquet(codeOuSlug)] ?? "l'agent";
 
 /* Le rôle d'un paquet = son titre amputé de son nom affiché
    (« Relances · encaissements » → « encaissements »). Un titre qui n'est

@@ -221,7 +221,7 @@ export default async function PreAuditPage({
 
           <div className="mt-10 grid gap-5 lg:grid-cols-3">
             {audit.moteurs.map((m) => (
-              <CarteMoteur key={m.system} moteur={m} />
+              <CarteMoteur key={m.slug} moteur={m} />
             ))}
           </div>
         </section>

@@ -453,7 +453,7 @@ export function BandeauAutresMoteurs({
     <div className="o-marquee">
       <div className="o-marquee-piste o-marquee-piste--lent gap-6">
         {doubles.map((m, i) => (
-          <a key={`${m.system}-${i}`} href={m.href} className="w-[360px] shrink-0">
+          <a key={`${m.href}-${i}`} href={m.href} className="w-[360px] shrink-0">
             <CarteBlanche className="h-full transition-transform duration-300 hover:-translate-y-1">
               <div className="px-6 py-6">
                 <div

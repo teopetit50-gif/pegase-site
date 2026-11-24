@@ -190,7 +190,6 @@ export default function Integrations() {
             <CartesSystemes
               className="mt-16"
               systemes={MOTEUR_OUTILS.map((m) => ({
-                system: m.system,
                 slug: m.slug,
                 role: m.role,
                 /* aplati ici comme PAR_FAMILLE : CartesSystemes est un

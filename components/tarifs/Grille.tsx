@@ -204,6 +204,7 @@ import {
   POSTES,
   type Monde,
   type Palier,
+  cleUrlDuPoste,
 } from "@/lib/paliers";
 
 /* le prix en euros, sans centimes — le format que NumberFlow anime */
@@ -423,7 +424,7 @@ function CartePalier({
      recalcule à l'arrivée (voir app/reserver/page.tsx), et il n'y arrive
      que comme une phrase du message, pour que l'entretien parte des
      chiffres du visiteur. */
-  const href = lienAudit(p.aChoisir === null ? POSTES.map((x) => x.id) : choisis, 0);
+  const href = lienAudit((p.aChoisir === null ? POSTES.map((x) => x.id) : choisis).map(cleUrlDuPoste), 0);
   const Icone = ICONE_PALIER[p.id];
 
   return (

@@ -166,6 +166,19 @@ export const POSTES: Poste[] = [
   },
 ];
 
+/* 24/11/2026 — dans une adresse, un poste s'écrit par le slug de son offre
+   (« relances-impayes »), plus par son identifiant interne : l'adresse se
+   lit dans la barre du navigateur et reste dans le source de la page. Les
+   anciens identifiants restent LUS, pour qu'un lien déjà envoyé ouvre
+   toujours la bonne estimation. L'identifiant interne, lui, ne change pas :
+   c'est celui que reçoit la fonction SQL de /installation. */
+export const cleUrlDuPoste = (id: string) => POSTES.find((p) => p.id === id)?.slug ?? id;
+
+export const postesDepuisUrl = (brut: string | null | undefined): Poste[] => {
+  const demandes = (brut ?? "").split(",").map((x) => x.trim());
+  return POSTES.filter((p) => demandes.includes(p.slug) || demandes.includes(p.id));
+};
+
 /* ——— la cinquième ligne des cartes (07/09/2026, Teo : « une option pour
    faire comprendre qu'Omega peut tout faire ») ———
    Pas un poste de plus : une ligne sous les quatre, dans chaque carte, qui

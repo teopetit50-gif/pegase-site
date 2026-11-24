@@ -46,7 +46,7 @@ export default function SeCombine({ slug }: { slug: string }) {
 
         <div className="scb-cartes">
           {s.combine.map(({ offre, raison }) => (
-            <Link key={offre} href={PAGE_OFFRE[offre]} className="scb-carte">
+            <Link key={PAGE_OFFRE[offre]} href={PAGE_OFFRE[offre]} className="scb-carte">
               <span
                 aria-hidden
                 className="scb-signe"

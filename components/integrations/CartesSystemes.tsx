@@ -66,7 +66,6 @@ import "./CartesSystemes.css";
 export type PastilleOutil = { title: string; hex: string; path: string };
 
 export type Systeme = {
-  system: string;
   slug: string;
   role: string;
   outils: PastilleOutil[];
@@ -109,7 +108,7 @@ export default function CartesSystemes({
         const allume = actif === i;
         return (
           <Link
-            key={m.system}
+            key={m.slug}
             href={`/offres/${m.slug}`}
             data-reveal
             className="csy-porte"
@@ -142,9 +141,9 @@ export default function CartesSystemes({
               className="o-card-soft csy-carte flex h-full flex-col p-7"
             >
               <div className="csy-tete flex items-center gap-3">
-                <SystemLogo system={m.system} />
+                <SystemLogo system={m.slug} />
                 <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#09090b]">
-                  {nomPaquet(m.system)}
+                  {nomPaquet(m.slug)}
                 </span>
               </div>
 
