@@ -604,7 +604,7 @@ export default function PriseDeCreneau({
                 <li key={p.id} className="flex items-center gap-2.5 text-[14px] leading-[21px] text-[#3d3d3d]">
                   <SystemLogo system={p.system} />
                   <span>
-                    <span className="font-medium text-[#050505]">{p.system}</span> · {p.nom}
+                    <span className="font-medium text-[#050505]">{p.nom}</span>
                   </span>
                 </li>
               ))}

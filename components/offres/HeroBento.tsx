@@ -171,7 +171,7 @@ export function HeroBento() {
       {/* ═══════════ tuile large — l'encours et sa courbe ═══════════ */}
       <Link
         href="/offres/relances-impayes"
-        aria-label="CASHD · encaissements — voir le système des relances"
+        aria-label="Relances — voir l'agent de relance"
         className="group relative z-0 block overflow-hidden rounded-[20px] transition-colors duration-200 hover:border-[var(--o-muted)] border border-[var(--o-line)] bg-[var(--o-soft)] p-5 sm:col-span-2 sm:p-6 lg:pb-[118px]"
       >
         <div

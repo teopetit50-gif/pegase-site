@@ -52,7 +52,7 @@ const PHOTO: Record<
     pos: "object-[center_38%]",
   },
   OFFLOAD: {
-    src: "/photos/offload-chip.jpg",
+    src: "/photos/processeur.jpg",
     alt: "Processeur installé sur une carte mère, gros plan sombre",
     voile: 0.55,
   },

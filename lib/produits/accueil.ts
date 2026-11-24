@@ -53,7 +53,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 export const MARQUE = {
-  nom: "REPUT",
+  nom: "Demandes clients",
   role: "demandes entrantes & avis",
   signature: "un agent Omega.AI",
   /* 17/09 — `espace` (app.omegaai.fr) retirée : plus aucun lien du site
@@ -93,7 +93,7 @@ export const HERO = {
   chapo:
     "Pendant que vos équipes sont en intervention ou que le service est fermé, votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé.",
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
-  secondaire: { libelle: "Voir ce que REPUT répond", href: "#apport" },
+  secondaire: { libelle: "Voir ce que l'agent répond", href: "#apport" },
 };
 
 /* Le ruban de la référence fait défiler des logos de clients. FRONTD n'a
@@ -163,7 +163,7 @@ export const APPORT = {
    fait, ce qui vous reste. Tenue à une seule phrase, chaque carte se
    réécrivait en fragment sans verbe. */
 export const CAPACITES = {
-  etiquette: "Ce que REPUT fait",
+  etiquette: "Ce que l'agent fait",
   titreDebut: "Quand un client écrit à 21 h 47, il obtient",
   titreMots: ["sa réponse", "son créneau"],
   titreLiaison: "et",
@@ -174,7 +174,7 @@ export const CAPACITES = {
       etiquette: "Réception",
       titre: "La réponse part avant la réouverture",
       texte:
-        "REPUT lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
+        "L'agent lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
       panneau: "conversation",
     },
     {
@@ -231,7 +231,7 @@ export const ETAPES = {
       numero: "03",
       titre: "Une semaine en double",
       texte:
-        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. Ensuite, vous choisissez les demandes auxquelles REPUT répond seul.",
+        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. Ensuite, vous choisissez les demandes auxquelles l'agent répond seul.",
     },
   ],
 };
@@ -262,7 +262,7 @@ export const CANAUX = {
      de ligne — le chapô tient en deux lignes à `max-w-lg`. */
   titre: "Vous n'avez aucun logiciel de plus à ouvrir",
   chapo:
-    "REPUT se place derrière les canaux que vous utilisez déjà, puis répond à partir de votre base.",
+    "L'agent se place derrière les canaux que vous utilisez déjà, puis répond à partir de votre base.",
   bouton: { libelle: "Voir l'installation", href: "#etapes" },
   /* Deux libellés, comme la référence : la pastille flottante est centrée
      sur sa tuile, donc un nom long déborde sur le bouton du centre — les
@@ -418,16 +418,16 @@ export const QUESTIONS = {
       r: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. Un client s'accommode de parler à une machine. Ce qui l'agace, c'est d'attendre jusqu'à lundi.",
     },
     {
-      q: "Et si REPUT invente une réponse ?",
-      r: "REPUT ne peut répondre qu'à partir de la base construite avec vous. Hors de cette base, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec le résumé de l'échange.",
+      q: "Et si l'agent invente une réponse ?",
+      r: "L'agent ne peut répondre qu'à partir de la base construite avec vous. Hors de cette base, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec le résumé de l'échange.",
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",
       r: "La réservation s'écrit directement dans votre agenda, en temps réel. Le second créneau n'apparaît plus comme disponible, et le client se voit proposer les suivants.",
     },
     {
-      q: "Qui valide ce que REPUT répond ?",
-      r: "Vous validez d'abord la base, et REPUT ne dit rien qui n'y figure. Les premières semaines, chaque réponse vous est soumise avant envoi. Ensuite, vous choisissez les demandes qui attendent votre accord. Chaque échange, transféré ou non, reste archivé et consultable.",
+      q: "Qui valide ce que l'agent répond ?",
+      r: "Vous validez d'abord la base, et l'agent ne dit rien qui n'y figure. Les premières semaines, chaque réponse vous est soumise avant envoi. Ensuite, vous choisissez les demandes qui attendent votre accord. Chaque échange, transféré ou non, reste archivé et consultable.",
     },
     {
       q: "Et les avis, comment sont-ils demandés ?",
@@ -438,7 +438,7 @@ export const QUESTIONS = {
 
 export const CLOTURE = {
   etiquette: MARQUE.signature,
-  titre: `${MARQUE.nom} est-il adapté à votre organisation ?`,
+  titre: "Cet agent est-il adapté à votre organisation ?",
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
   /* 15/09 (soir) — le bouton disait « Se connecter » et menait à
      /connexion, page supprimée : Teo, « plus rien sur le site ne doit
@@ -515,7 +515,7 @@ export const FRANCAIS = {
    Rien n'est retouché : c'est le scénario écrit dans le texte source. */
 export const CONVERSATION = {
   contexte: "Samedi, 21 h 47",
-  sousTitre: "Le service est fermé, REPUT répond",
+  sousTitre: "Le service est fermé, l'agent répond",
   messages: [
     {
       de: "client",

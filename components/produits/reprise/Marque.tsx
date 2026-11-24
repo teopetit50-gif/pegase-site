@@ -26,10 +26,10 @@
    Safari exige encore les préfixes -webkit-mask-* en 2026.
 
    27/09/2026 — RELOAD devient OFFLOAD, son signe devient
-   `/logos/offload-mark.png` (voir components/logos.tsx).
+   `/logos/agent-clients-inactifs-mark.png` (voir components/logos.tsx).
    ══════════════════════════════════════════════════════════════════════ */
 
-const MASQUE = "/logos/offload-mark.png";
+const MASQUE = "/logos/agent-clients-inactifs-mark.png";
 
 export function Symbole({ className }: { className?: string }) {
   return (

@@ -232,7 +232,7 @@ export const SERVICES_DETAIL: Record<string, ServiceDetail> = {
       ],
       installation:
         "Opérationnel en quelques jours. Vous transférez vos factures à une adresse de collecte dédiée, on monte l'arborescence de classement sur votre Drive et on cale le format de transmission avec votre comptable. Rien à installer, rien à ressaisir de votre côté.",
-      ctaTitre: "Voir OFFLOAD tourner sur vos propres factures",
+      ctaTitre: "Voir l'agent tourner sur vos propres factures",
       ctaTexte:
         "On prend vos pièces des trois derniers mois et on vous montre le dossier que votre cabinet recevrait.",
     }),

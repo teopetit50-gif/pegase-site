@@ -336,10 +336,6 @@ export const LOGICIELS = [
   { nom: "Tavaro", src: "/logos/tavaro-lockup.png" },
   { nom: "Tiroma", src: "/logos/tiroma-lockup.png" },
   { nom: "Varelo", src: "/logos/varelo-lockup.png" },
-  { nom: "CASHD", src: "/logos/cashd-lockup.png" },
-  { nom: "REPUT", src: "/logos/reput-lockup.png" },
-  { nom: "OFFLOAD", src: "/logos/offload-lockup.png" },
-  { nom: "FILED", src: "/logos/filed-lockup.png" },
 ];
 
 /* six processus pénibles, de la PME au groupe, jusqu'au sur-mesure —
@@ -348,23 +344,23 @@ export const SITUATIONS = [
   {
     texte:
       "Les factures échues s'accumulent parce que relancer gêne tout le monde. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent.",
-    nom: "CASHD",
+    nom: "Relances",
     role: "Agent · relances et encaissements",
-    logo: "/logos/cashd-mark.png",
+    logo: "/logos/agent-relances-mark.png",
   },
   {
     texte:
       "Une demande arrive à 21 h. Sa réponse est rédigée aussitôt. Elle part seule si vous l'avez autorisé, sinon elle attend votre accord.",
-    nom: "REPUT",
+    nom: "Demandes clients",
     role: "Agent · demandes clients",
-    logo: "/logos/reput-mark.png",
+    logo: "/logos/agent-demandes-mark.png",
   },
   {
     texte:
       "Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée et rangée. Vous validez, elle est comptabilisée.",
-    nom: "FILED",
+    nom: "Factures fournisseurs",
     role: "Agent · documents reçus",
-    logo: "/logos/filed-mark.png",
+    logo: "/logos/agent-factures-mark.png",
   },
   {
     texte:
@@ -563,10 +559,10 @@ export const PIED = {
     {
       titre: "Agents",
       liens: [
-        { label: "CASHD", href: "/offres/relances-impayes" },
-        { label: "REPUT", href: "/offres/demandes-clients" },
-        { label: "OFFLOAD", href: "/offres/nouvelles-affaires" },
-        { label: "FILED", href: "/offres/factures-fournisseurs" },
+        { label: "Relances", href: "/offres/relances-impayes" },
+        { label: "Demandes clients", href: "/offres/demandes-clients" },
+        { label: "Clients inactifs", href: "/offres/nouvelles-affaires" },
+        { label: "Factures fournisseurs", href: "/offres/factures-fournisseurs" },
         { label: "Sur mesure", href: "/offres/sur-mesure" },
       ],
     },

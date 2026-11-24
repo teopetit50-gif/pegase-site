@@ -5,6 +5,7 @@ import { Chevron } from "@/components/offres/MediaMoteurs";
 import { DemoFiche, PastillesOutils } from "@/components/offres/MediaFiche";
 import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
+import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    Gabarit « intégration » — d'après ocoya.com/integrations/[marque]
@@ -142,7 +143,7 @@ export default function GabaritIntegration({
              l'autre. Repli sur l'ancienne formule si la copie manque. */
           titre:
             fiche.sections?.blocTitres?.[i] ??
-            (i === 0 ? `${m.system} au travail` : "Ce qui vous revient"),
+            (i === 0 ? `${nomPaquet(m.system)} au travail` : "Ce qui vous revient"),
           texte: p,
         }))
       : fiche.etapes.slice(0, 2).map((e, i) => ({
@@ -182,7 +183,7 @@ export default function GabaritIntegration({
                   séparaient déjà proprement le nom du rôle ; c'est cette forme
                   qui est reprise ici. */}
               <h1 data-reveal className="o-h2 mt-6">
-                <span style={{ color: accentSombre }}>{m.system}</span>
+                <span style={{ color: accentSombre }}>{nomPaquet(m.system)}</span>
                 <span className="text-[#fafafa]"> {role}</span>
               </h1>
 
@@ -340,7 +341,7 @@ export default function GabaritIntegration({
             Vous gardez la main.
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
-            La règle qui prime sur toutes les autres, sur {m.system} comme sur
+            La règle qui prime sur toutes les autres, sur {nomPaquet(m.system)} comme sur
             les autres agents.
           </p>
         </div>
@@ -382,7 +383,7 @@ export default function GabaritIntegration({
             <SystemLogo system={m.system} />
           </div>
           <h2 data-reveal className="o-h2 mt-14">
-            {m.system}
+            {nomPaquet(m.system)}
           </h2>
           <div data-reveal className="mt-6 space-y-5">
             {paragraphes.map((p, i) => (
@@ -437,7 +438,7 @@ export default function GabaritIntegration({
           />
 
           <h2 className="o-h2 relative mx-auto max-w-[1040px]">
-            {m.system} est-il le bon pour vous ?
+            {nomPaquet(m.system)} est-il le bon pour vous ?
           </h2>
           <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
             {fiche.sections?.clotureChapo ??

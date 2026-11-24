@@ -35,7 +35,7 @@ hired.jpg  (1600x900, 109 Ko)
     Licence : Unsplash License — https://unsplash.com/license
     Sujet   : Woman in glasses interviews man at office desk.
 
-offload.jpg  (1600x1067, 96 Ko)
+document-administratif.jpg  (1600x1067, 96 Ko)
     Auteur  : Anastassia Anufrieva
     Profil  : https://unsplash.com/@antoie
     Photo   : https://unsplash.com/photos/a-woman-sitting-at-a-table-reading-a-paper-ecHGTPfjNfA
@@ -98,7 +98,7 @@ answr-phone.jpg  (1600x1066)  — onglet ANSWR
     Photo   : https://unsplash.com/photos/a-black-and-white-cell-phone-with-a-blank-screen-z1Hq3zufiW8
     Licence : Unsplash License — https://unsplash.com/license
 
-offload-chip.jpg  (1600x1066)  — onglet OFFLOAD
+processeur.jpg  (1600x1066)
     Sujet   : processeur (CPU) sur carte mère, gros plan sombre
     Auteur  : @tdx_104 — https://unsplash.com/@tdx_104
     Photo   : https://unsplash.com/photos/a-close-up-of-a-cpu-on-top-of-a-motherboard-R9ed2PUrL_w
@@ -214,7 +214,7 @@ Mise à jour du 08/08/2026 — 5 fichiers pour /vos-donnees, page refaite
 sur la référence scale.com/global-public-sector. Largeur 1600 px,
 qualité 78, comme le reste de la bibliothèque. Aucune photo Unsplash+
 (bibliothèque payante) : les cinq viennent de la bibliothèque gratuite.
-Les visuels précédents de la page (offload-chip, revive-chip,
+Les visuels précédents de la page (processeur, revive-chip,
 regle-execution, regle-proximite, brief, payd, answr, billd,
 histoire-constat) ne servent plus /vos-donnees mais restent utilisés
 ailleurs sur le site — ne pas les supprimer.

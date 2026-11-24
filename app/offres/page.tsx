@@ -379,7 +379,7 @@ const CYCLE = [
 const PAQUETS = [
   {
     icone: Bell,
-    titre: "CASHD",
+    titre: "Relances",
     href: "/offres/relances-impayes",
     lignes: [
       "Relance des devis",
@@ -390,19 +390,19 @@ const PAQUETS = [
   },
   {
     icone: Users,
-    titre: "OFFLOAD",
+    titre: "Clients inactifs",
     href: "/offres/nouvelles-affaires",
-    lignes: ["Clients inactifs", "Classement par valeur", "Un message par trimestre"],
+    lignes: ["Repérés dans votre historique", "Classement par valeur", "Un message par trimestre"],
   },
   {
     icone: MessageSquare,
-    titre: "REPUT",
+    titre: "Demandes clients",
     href: "/offres/demandes-clients",
     lignes: ["Réponse à toute heure", "Prise de rendez-vous"],
   },
   {
     icone: FileText,
-    titre: "FILED",
+    titre: "Factures fournisseurs",
     href: "/offres/factures-fournisseurs",
     lignes: ["Lecture et classement"],
   },

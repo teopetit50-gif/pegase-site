@@ -70,7 +70,7 @@
  */
 
 export const MARQUE = {
-  nom: "OFFLOAD",
+  nom: "Clients inactifs",
   bailleur: "un agent Omega.AI",
   /* Sur le site source, la signature d'éditeur était réduite au seul logo,
      lien vers omegaai.fr. Ici on EST omegaai.fr : le lien devient relatif, et
@@ -102,7 +102,7 @@ export const HEROS = {
      chercher. La troisième, l'échéance qui redevient due, est portée par la
      section des fonctionnalités et par la carte du message. */
   chapo:
-    "Un compte qui commandait deux fois par an cesse de commander. Le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. OFFLOAD relit votre base clients chaque matin et vous dit à qui écrire.",
+    "Un compte qui commandait deux fois par an cesse de commander. Le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. L'agent relit votre base clients chaque matin et vous dit à qui écrire.",
   /* 15/09/2026 — LES DEUX BOUTONS DU HÉROS MENAIENT AU MÊME ENDROIT.
      Ils portaient tous les deux « /contact » : le principal et le
      secondaire d'un héros de page produit ouvraient le même formulaire,
@@ -126,7 +126,7 @@ export const OUTILS = {
      de lg. Au-delà de ~150 signes il passe à cinq lignes et fait grandir le
      bandeau. */
   phrase:
-    "Votre historique de ventes vit dans un CRM, un ERP ou un tableur, et vos clients écrivent à votre messagerie. OFFLOAD lit les deux, donc vous ne déployez rien.",
+    "Votre historique de ventes vit dans un CRM, un ERP ou un tableur, et vos clients écrivent à votre messagerie. L'agent lit les deux, donc vous ne déployez rien.",
   /* Un seul mot par case : les cases font 5 à 7 rem, « Google Sheets » y
      passe à la ligne et chevauche ses voisines. */
   noms: ["Gmail", "Outlook", "Sheets", "Excel", "CSV"],
@@ -141,7 +141,7 @@ export const MANIFESTE = {
      quota de figures de la page est dépensé sous la FAQ. */
   phrase:
     "Un client ne part presque jamais chez un concurrent : il cesse de penser à vous, parce que personne ne lui a écrit entre-temps.",
-  signature: "Le problème qu'OFFLOAD règle",
+  signature: "Le problème que l'agent règle",
   /* La règle interdit d'inventer une preuve, pas de se taire sur ce qu'on n'a
      pas. La phrase dit qui parle, et rien de plus. */
   precision: "Nous parlons ici en notre nom",
@@ -154,7 +154,7 @@ export const FONCTIONNALITES = {
      pour toutes ; le reste de la page s'y adosse sans les redire en bloc. */
   titre: "Une relance se lit dans votre historique.",
   suite:
-    "OFFLOAD y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
+    "L'agent y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
 
   /* ── Carte 1 · la lecture du fichier ────────────────────────────────── */
   carteCarte: {
@@ -163,7 +163,7 @@ export const FONCTIONNALITES = {
        trois épingles portent les trois relances, dans l'ordre de la suite. */
     titre: "À 7 h 30, votre liste de relances est prête.",
     suite:
-      "OFFLOAD lit votre CRM et votre historique de facturation pendant la nuit. Il ne garde que les comptes dont le silence dépasse votre délai.",
+      "L'agent lit votre CRM et votre historique de facturation pendant la nuit. Il ne garde que les comptes dont le silence dépasse votre délai.",
     epingles: [
       /* Le champ `drapeau` portait un numéro de département ; il porte
          maintenant la durée du silence, rendue à gauche de l'étiquette.
@@ -205,16 +205,16 @@ export const FONCTIONNALITES = {
      relances. */
   citation: {
     texte:
-      "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. OFFLOAD n'en sort pas, et il s'arrête au premier doute. »",
+      "« Vos règles de ton, vos interdits et vos tournures sont écrits avant la première vague. L'agent n'en sort pas, et il s'arrête au premier doute. »",
     signataire: "La règle qui ne se négocie pas",
-    role: "Sur OFFLOAD comme sur chaque agent Omega.AI",
+    role: "Sur cet agent comme sur tous les autres agents Omega.AI",
   },
 
   /* ── Carte 3 · la consigne en français ──────────────────────────────── */
   carteLangue: {
     titre: "Vous dictez les règles en français.",
     suite:
-      "Vous n'avez aucune case à cocher : une phrase suffit, et OFFLOAD l'applique ensuite à chaque relance.",
+      "Vous n'avez aucune case à cocher : une phrase suffit, et l'agent l'applique ensuite à chaque relance.",
     /* `role: "moteur"` est une clé technique de composant, pas un mot rendu :
        elle ne se renomme pas (doctrine partie III, §18). */
     echanges: [
@@ -234,7 +234,7 @@ export const FONCTIONNALITES = {
   carteTrace: {
     titre: "Chaque client reçoit son propre message.",
     suite:
-      "OFFLOAD y reprend la date, la référence et le montant de sa dernière ligne de facturation. Aucun message n'est envoyé en série à toute la base.",
+      "L'agent y reprend la date, la référence et le montant de sa dernière ligne de facturation. Aucun message n'est envoyé en série à toute la base.",
     phrase: "Bonjour Martin, je retrouve votre",
     phraseCitee: "passage du 14 mars 2025, réf. 4821, 615 €",
     nbSources: 3,
@@ -293,7 +293,7 @@ export const METIERS = {
      choses (planning, stock, atelier, caisse) reste au logiciel métier. */
   blocs: {
     echappe: "Ce qui vous échappe",
-    cherche: "Ce qu'OFFLOAD va chercher",
+    cherche: "Ce que l'agent va chercher",
     reste: "Ce qui reste chez vous",
   },
   secteurs: [
@@ -305,9 +305,9 @@ export const METIERS = {
       echappe:
         "La révision d'un client tombe pendant un mois chargé, personne ne l'appelle, et il finit par la faire dans un centre auto en passant.",
       cherche:
-        "OFFLOAD suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
+        "L'agent suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
       reste:
-        "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce qu'OFFLOAD ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
+        "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce que l'agent ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
     },
     {
       cle: "negoce",
@@ -317,9 +317,9 @@ export const METIERS = {
       echappe:
         "Un compte qui commandait tous les mois espace ses commandes, puis il s'arrête. Personne ne l'appelle, parce que rien n'a été réclamé et que le chiffre global tient encore.",
       cherche:
-        "OFFLOAD mesure dans votre ERP la fréquence de commande habituelle de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
+        "L'agent mesure dans votre ERP la fréquence de commande habituelle de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
       reste:
-        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, parce qu'OFFLOAD y lit sans jamais y écrire.",
+        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, parce que l'agent y lit sans jamais y écrire.",
     },
     {
       cle: "clim",
@@ -329,7 +329,7 @@ export const METIERS = {
       echappe:
         "L'entretien annuel saute une année, puis il saute la suivante, et le contrat s'éteint sans que personne l'ait jamais résilié.",
       cherche:
-        "OFFLOAD tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il écrit au client la semaine d'avant.",
+        "L'agent tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il écrit au client la semaine d'avant.",
       reste: "Vous gardez l'intervention, le déplacement et le prix que vous facturez.",
     },
     {
@@ -340,7 +340,7 @@ export const METIERS = {
       echappe:
         "Vous avez livré un chantier il y a trois ans. Le client engage une nouvelle tranche cette année, et il consulte quelqu'un d'autre parce qu'il ne vous a plus vu depuis la réception.",
       cherche:
-        "OFFLOAD reprend vos chantiers réceptionnés, puis il propose un mot aux clients dont le dernier passage remonte à plus longtemps que le délai que vous fixez.",
+        "L'agent reprend vos chantiers réceptionnés, puis il propose un mot aux clients dont le dernier passage remonte à plus longtemps que le délai que vous fixez.",
       reste:
         "Vous fixez vos prix, vous choisissez vos équipes et vous décidez d'y retourner ou non.",
     },
@@ -352,7 +352,7 @@ export const METIERS = {
       echappe:
         "La facture est soldée et le dossier se referme. Six mois plus tard, le client rappelle un concurrent qui, lui, avait écrit.",
       cherche:
-        "OFFLOAD repère les missions closes depuis assez longtemps pour qu'une prise de contact se justifie, sans insistance.",
+        "L'agent repère les missions closes depuis assez longtemps pour qu'une prise de contact se justifie, sans insistance.",
       reste: "Vous choisissez ce que vous souhaitez leur proposer, et à quel prix.",
     },
   ],
@@ -373,8 +373,8 @@ export const QUESTIONS = {
   lien: "/contact",
   items: [
     {
-      q: "Qu'est-ce qu'OFFLOAD, concrètement ?",
-      r: "OFFLOAD lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse une fois validé. OFFLOAD travaille sur vos outils actuels, ou dans le logiciel de gestion Omega si vous le choisissez.",
+      q: "Que fait cet agent, concrètement ?",
+      r: "L'agent lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse une fois validé. L'agent travaille sur vos outils actuels, ou dans le logiciel de gestion Omega si vous le choisissez.",
     },
     {
       q: "Nos clients vont-ils se sentir sollicités de trop près ?",
@@ -389,12 +389,12 @@ export const QUESTIONS = {
       r: "Un export CSV de votre CRM ou de votre ERP suffit pour commencer, et un tableur fait aussi l'affaire. Ce qu'il faut sur chaque ligne, c'est un identifiant de compte, une date et un montant, parce que le reste se déduit. Ce qui dort sur papier n'entre pas de lui-même, donc nous arbitrons ensemble ce qui vaut la peine d'être saisi.",
     },
     {
-      q: "OFFLOAD peut-il écrire n'importe quoi à nos clients ?",
+      q: "L'agent peut-il écrire n'importe quoi à nos clients ?",
       r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vos équipes relisent la première vague nom par nom. Ensuite, une relance ne part sans relecture que si vous avez autorisé ce type d'envoi.",
     },
     {
       q: "Que se passe-t-il si quelque chose déraille ?",
-      r: "OFFLOAD s'arrête de lui-même au premier doute. Un compte reçoit une seule relance par vague, et un nom retiré ne revient plus. Chaque envoi est horodaté dans un journal. Nous préférons un mardi sans vague à un mardi où le même client reçoit deux messages.",
+      r: "L'agent s'arrête de lui-même au premier doute. Un compte reçoit une seule relance par vague, et un nom retiré ne revient plus. Chaque envoi est horodaté dans un journal. Nous préférons un mardi sans vague à un mardi où le même client reçoit deux messages.",
     },
   ],
 };
@@ -448,7 +448,7 @@ export const FRANCAIS = {
 export const APPEL = {
   titre: "Reprendre contact avec vos anciens clients",
   texte:
-    "OFFLOAD relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange.",
+    "L'agent relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange.",
   /* Réaiguillé sur le parcours du site : le site source envoyait sur son
      propre /contact, qui n'existe pas ici sous cette forme. */
   bouton: { texte: "Commencer", lien: "/reserver-un-audit" },

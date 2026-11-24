@@ -104,7 +104,7 @@ export default async function ReserverPage({
     if (!postesEstimes.length && !piecesEstimees) return undefined;
     const bouts: string[] = [];
     if (postesEstimes.length) {
-      bouts.push(`postes visés : ${postesEstimes.map((p) => p.system).join(", ")}`);
+      bouts.push(`postes visés : ${postesEstimes.map((p) => p.nom).join(", ")}`);
     }
     if (piecesEstimees) {
       bouts.push(`${piecesEstimees.toLocaleString("fr-FR")} pièces par mois`);

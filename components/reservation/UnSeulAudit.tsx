@@ -88,7 +88,7 @@ export default function UnSeulAudit() {
                 <SystemSigne system={(o.marque ?? o.label).toUpperCase()} taille={18} />
               </span>
               <span className="ua-offre-corps">
-                <span className="ua-offre-nom">{o.marque ?? o.label}</span>
+                <span className="ua-offre-nom">{o.label}</span>
                 {o.texte ? <span className="ua-offre-ligne">{o.texte}</span> : null}
               </span>
               <ArrowUpRight aria-hidden strokeWidth={1.6} className="ua-offre-fleche" />

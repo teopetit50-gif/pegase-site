@@ -4,7 +4,7 @@
    Teo, 10/09/2026 : « CASHD a son logo, RELOAD a aussi son logo, ceux
    présents sur Omega ; tu as fait des logos différents de ceux de base ».
    Le signe dessiné à la main pour la vitrine est donc retiré au profit du
-   fichier livré, `public/logos/filed-mark.png`, repris tel quel de
+   fichier livré, `public/logos/agent-factures-mark.png`, repris tel quel de
    PEGASE/pegase-site/public/logos.
 
    Ce fichier est un MASQUE ALPHA : sa couleur RGB est uniforme, seule la
@@ -17,7 +17,7 @@
    Safari exige encore les préfixes -webkit-mask-* en 2026.
    ══════════════════════════════════════════════════════════════════════ */
 
-const MASQUE = "/logos/filed-mark.png";
+const MASQUE = "/logos/agent-factures-mark.png";
 
 export function Marque({ className }: { className?: string }) {
   return (

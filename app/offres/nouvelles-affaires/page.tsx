@@ -53,7 +53,7 @@ import "./reprise.css";
    du site source. */
 export const metadata: Metadata = {
   alternates: { canonical: "/offres/nouvelles-affaires" },
-  title: "OFFLOAD | Omega.AI",
+  title: "Clients inactifs · reprise de contact | Omega.AI",
   description:
     "Votre fichier client relu chaque matin : les comptes qui n'ont plus commandé, les entretiens redevenus dus et les affaires restées en plan. La relance est rédigée, vos équipes la valident. Un système Omega.AI.",
 };

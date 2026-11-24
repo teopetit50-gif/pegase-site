@@ -68,7 +68,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Notion: {
     famille: "Tableur & base",
-    role: "Base de connaissances de REPUT : horaires, tarifs, conditions. L'agent y trouve ses réponses au lieu de les inventer.",
+    role: "Base de connaissances de l'agent des demandes clients : horaires, tarifs, conditions. Il y trouve ses réponses au lieu de les inventer.",
   },
   "Google Drive": {
     famille: "Fichiers",
@@ -88,7 +88,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   Shopify: {
     famille: "E-commerce",
-    role: "OFFLOAD lit l'historique de commandes pour identifier les clients inactifs et les classer par valeur et par récence.",
+    role: "L'agent des clients inactifs lit l'historique de commandes pour repérer les clients qui n'achètent plus et les classer par valeur et par récence.",
   },
   WooCommerce: {
     famille: "E-commerce",
@@ -96,7 +96,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   "Google Calendar": {
     famille: "Agenda",
-    role: "REPUT propose des créneaux vraiment libres et pose le rendez-vous, si vous l'y avez autorisé.",
+    role: "L'agent des demandes clients propose des créneaux vraiment libres et pose le rendez-vous, si vous l'y avez autorisé.",
   },
   Calendly: {
     famille: "Agenda",
@@ -162,7 +162,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
   },
   WordPress: {
     famille: "Site web",
-    role: "Les demandes reçues par le formulaire du site arrivent chez REPUT, comme les autres demandes.",
+    role: "Les demandes reçues par le formulaire du site arrivent à l'agent des demandes clients, comme les autres demandes.",
   },
 };
 
@@ -171,25 +171,25 @@ export const MOTEUR_OUTILS = [
   {
     system: "CASHD",
     slug: "relances-impayes",
-    role: "Relances de devis et de factures",
+    role: "Devis sans réponse et factures échues",
     outils: ["Gmail", "Google Sheets", "Stripe", "WhatsApp"],
   },
   {
     system: "REPUT",
     slug: "demandes-clients",
-    role: "Demandes clients et avis",
+    role: "Réponse à toute heure et demande d'avis",
     outils: ["WhatsApp", "Gmail", "Google Calendar", "Notion"],
   },
   {
     system: "FILED",
     slug: "factures-fournisseurs",
-    role: "Factures fournisseurs",
+    role: "Lues, contrôlées, classées",
     outils: ["Gmail", "Google Drive", "QuickBooks", "Sage"],
   },
   {
     system: "OFFLOAD",
     slug: "nouvelles-affaires",
-    role: "Clients inactifs recontactés",
+    role: "Recontactés un par un, classés par valeur",
     /* « MailChimp » : même casse que le `title` de simple-icons et que la
        clé d'OUTIL_INFOS plus haut, sans quoi le logo saute au rendu. */
     outils: ["Shopify", "Google Sheets", "MailChimp", "Gmail"],

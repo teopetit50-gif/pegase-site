@@ -110,6 +110,13 @@
   .offres .csy-role {
     min-height: calc(2 * 1.8em);
   }
+  /* 24/11/2026 — le titre d'une carte n'est plus un code de cinq lettres
+     mais ce que fait l'agent (« Factures fournisseurs »). À quatre colonnes
+     étroites il passe sur deux lignes dans trois cartes sur quatre : deux
+     lignes réservées gardent les quatre rôles sur la même ligne de base. */
+  .offres .csy-tete {
+    min-height: 3rem;
+  }
 }
 
 /* ——— une pastille d'outil ———

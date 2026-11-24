@@ -1,7 +1,7 @@
 import Link from "next/link";
 import CopierPrompt from "./CopierPrompt";
 import type { Douleur, MoteurReco, Remede } from "@/lib/audits";
-import { nomPaquet } from "@/lib/content";
+import { nomPaquet, agentPaquet } from "@/lib/content";
 import "./CartesFiche.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -120,7 +120,7 @@ export function CarteRemede({ remede }: { remede: Remede }) {
         <CopierPrompt texte={remede.prompt} />
         {remede.moteur ? (
           <span className="fic-remede-suite">
-            En continu&nbsp;: <span className="fic-remede-code">{remede.moteur}</span>
+            En continu&nbsp;: {agentPaquet(remede.moteur)}
           </span>
         ) : null}
       </div>

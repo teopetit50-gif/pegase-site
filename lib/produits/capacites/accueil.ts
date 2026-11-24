@@ -14,11 +14,11 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que REPUT prend en charge.",
+  titre: "Tout ce que l'agent prend en charge.",
   chapo:
-    "Une demande entrante traverse cinq étapes avant d'être traitée : elle arrive, elle est comprise, elle reçoit une réponse, elle se transforme en rendez-vous ou elle remonte. Voici ce que REPUT tient à chacune.",
+    "Une demande entrante traverse cinq étapes avant d'être traitée : elle arrive, elle est comprise, elle reçoit une réponse, elle se transforme en rendez-vous ou elle remonte. Voici ce que l'agent tient à chacune.",
   mention:
-    "REPUT ne répond jamais hors de la base de connaissances que vous avez validée. Tout ce qui sort de cette base est transféré à vos équipes, avec le résumé de l'échange.",
+    "L'agent ne répond jamais hors de la base de connaissances que vous avez validée. Tout ce qui sort de cette base est transféré à vos équipes, avec le résumé de l'échange.",
   familles: [
     {
       nom: "Canaux et réception",
@@ -53,7 +53,7 @@ export const CATALOGUE: Catalogue = {
       icone: "message",
       lignes: [
         { t: "La réponse est tirée de la base de connaissances construite avec vos équipes.", atteste: true },
-        { t: "Hors de cette base, REPUT ne formule aucune hypothèse et transfère.", atteste: true },
+        { t: "Hors de cette base, l'agent ne formule aucune hypothèse et transfère.", atteste: true },
         { t: "La base est versionnée : chaque règle porte sa date et son auteur.", atteste: false },
         { t: "Une modification de tarif ou d'horaire s'applique à la réponse suivante.", atteste: false },
         { t: "Le ton, la signature et les formules se règlent entité par entité.", atteste: false },
@@ -107,7 +107,7 @@ export const CAS_LIMITES: BlocCasLimites = {
   etiquette: "Les cas tordus",
   titre: "Ce qui arrive vraiment sur une ligne d'accueil.",
   chapo:
-    "Douze situations que vos équipes reconnaîtront, et ce que REPUT en fait. Aucune ne se règle en répondant quand même.",
+    "Douze situations que vos équipes reconnaîtront, et ce que l'agent en fait. Aucune ne se règle en répondant quand même.",
   cas: [
     {
       q: "Le client écrit dans une langue étrangère.",
@@ -127,7 +127,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "La question porte sur un prix qui n'est pas dans la base.",
-      r: "REPUT ne l'invente pas. Il dit que le point sera vérifié, puis transfère la demande à la personne qui peut répondre.",
+      r: "L'agent ne l'invente pas. Il dit que le point sera vérifié, puis transfère la demande à la personne qui peut répondre.",
     },
     {
       q: "Le message est une réclamation, pas une demande.",
@@ -139,7 +139,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "Le message ne contient qu'une photo, sans un mot.",
-      r: "La pièce est conservée et rattachée au dossier. REPUT demande la précision qui manque plutôt que de supposer la demande.",
+      r: "La pièce est conservée et rattachée au dossier. L'agent demande la précision qui manque plutôt que de supposer la demande.",
     },
     {
       q: "Le client répond trois semaines plus tard sur le même fil.",
@@ -194,7 +194,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "REPUT se place derrière vos canaux actuels et écrit dans vos agendas. Vos clients continuent d'écrire au même numéro et à la même adresse qu'hier.",
+        "L'agent se place derrière vos canaux actuels et écrit dans vos agendas. Vos clients continuent d'écrire au même numéro et à la même adresse qu'hier.",
     },
     {
       icone: "chart",

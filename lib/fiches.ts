@@ -146,31 +146,31 @@ export const FICHES: Record<string, Fiche> = {
     pitch: "Les encaissements sécurisés, sans mobiliser vos équipes.",
     meta: "Les échéances suivies et relancées chaque jour, selon vos règles de gestion.",
     sections: {
-      pointsTitre: "Ce que CASHD fait de votre matinée.",
+      pointsTitre: "Ce que l'agent fait de votre matinée.",
       pointsChapo:
         "Une relecture du facturier au réveil, un protocole gradué dans la journée, un état des encours tenu à jour en permanence.",
       detailChapo:
-        "Ce que CASHD lit dans votre facturation, ce qui détermine le ton d'un message, et la limite qu'il ne franchit pas sans vous.",
+        "Ce que l'agent lit dans votre facturation, ce qui détermine le ton d'un message, et la limite qu'il ne franchit pas sans vous.",
       cibleChapo:
         "Les activités qui livrent d'abord et facturent ensuite. C'est là que l'encours se creuse sans bruit, et là qu'un retard oublié devient un impayé.",
-      faqChapo: "Les trois questions posées à chaque installation de CASHD.",
+      faqChapo: "Les trois questions posées à chaque installation de l'agent.",
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
-        "CASHD lit votre facturation, dans le logiciel Omega ou dans votre tableur. Il vérifie les encaissements dans votre outil de paiement et écrit depuis votre messagerie. Si vous gardez vos outils, rien n'est à migrer.",
+        "L'agent lit votre facturation, dans le logiciel Omega ou dans votre tableur. Il vérifie les encaissements dans votre outil de paiement et écrit depuis votre messagerie. Si vous gardez vos outils, rien n'est à migrer.",
       marcheTitre: "Une échéance dépassée, une chaîne, votre validation.",
       marcheChapo:
         "Le déclencheur est toujours un fait vérifiable de votre facturier : une facture qui franchit son échéance, un devis qui reste sans réponse. La chaîne se déroule ensuite étape par étape, et la dernière s'arrête devant vous.",
       situationChapo:
-        "Ce que CASHD produit concrètement, sur une facture émise et jamais réglée.",
+        "Ce que l'agent produit concrètement, sur une facture émise et jamais réglée.",
       outilsChapo:
-        "CASHD travaille dans le logiciel Omega ou dans vos outils actuels, sans rien vous faire réapprendre.",
+        "L'agent travaille dans le logiciel Omega ou dans vos outils actuels, sans rien vous faire réapprendre.",
       catalogueChapo:
         "Un encours qui traîne n'est pas toujours le premier problème à traiter. L'audit compare ce que chaque agent vous rapporterait, et peut en désigner un autre.",
       comprisChapo:
         "La relance est la partie qu'on voit. Ce qui suit est livré avec, sans supplément et sans négociation.",
     },
     fonctionnement: [
-      "CASHD lit chaque matin votre facturation, dans le logiciel Omega ou dans le tableur que vous tenez déjà, et en tire un échéancier à jour. Pour chaque devis, le nombre de jours écoulés sans réponse. Pour chaque facture, le retard, le montant, le client. Un règlement encaissé la veille sort de la liste avant toute action : un client qui a payé ne reçoit plus de relance.",
+      "L'agent lit chaque matin votre facturation, dans le logiciel Omega ou dans le tableur que vous tenez déjà, et en tire un échéancier à jour. Pour chaque devis, le nombre de jours écoulés sans réponse. Pour chaque facture, le retard, le montant, le client. Un règlement encaissé la veille sort de la liste avant toute action : un client qui a payé ne reçoit plus de relance.",
       "Sur cette lecture s'applique un protocole gradué : rappel courtois vers J+7, relance ferme vers J+21, puis, si le silence persiste, dossier de mise en demeure constitué avec ses pièces. Les devis suivent une cadence plus resserrée, J+3 puis J+7 : un devis qui refroidit se perd plus vite qu'une facture, et se rattrape moins bien.",
       "Chaque message est écrit pour un cas précis. Le ton suit trois variables : le montant en jeu, l'ancienneté du retard, l'historique de paiement du client. Un bon payeur momentanément en retard et un mauvais payeur récidiviste ne reçoivent ni le même texte, ni la même fermeté. En parallèle, l'état de vos encours reste consultable en permanence : qui doit quoi, depuis quand, quelle action suit.",
     ],
@@ -187,7 +187,7 @@ export const FICHES: Record<string, Fiche> = {
     etapes: [
       {
         t: "Branchement à votre facturation",
-        d: "CASHD se branche sur votre facturation telle qu'elle est. Nous ne changeons ni vos colonnes ni vos habitudes, et l'historique est repris.",
+        d: "L'agent se branche sur votre facturation telle qu'elle est. Nous ne changeons ni vos colonnes ni vos habitudes, et l'historique est repris.",
       },
       {
         t: "Réglage des cadences et des tons",
@@ -201,7 +201,7 @@ export const FICHES: Record<string, Fiche> = {
     faq: [
       {
         q: "Et si un client paie entre deux relances ?",
-        a: "CASHD relit le facturier avant chaque action. Un règlement enregistré interrompt la séquence sur-le-champ : un client qui a payé ne reçoit pas de relance.",
+        a: "L'agent relit le facturier avant chaque action. Un règlement enregistré interrompt la séquence sur-le-champ : un client qui a payé ne reçoit pas de relance.",
       },
       {
         q: "Puis-je exclure certains clients ?",
@@ -209,7 +209,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         q: "Qui écrit les messages ?",
-        a: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par CASHD à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
+        a: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par l'agent à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
       },
     ],
     demo: {
@@ -243,12 +243,12 @@ export const FICHES: Record<string, Fiche> = {
         "Une demande reçue à 21 h obtient sa réponse à 21 h, et cette réponse ne dit rien que vous n'ayez validé.",
       blocTitres: ["Répondre, puis qualifier", "Les cas transférés"],
       faqChapo:
-        "Ce que le client sait, ce que REPUT s'interdit, ce que fait l'agenda : les trois questions posées à chaque installation.",
+        "Ce que le client sait, ce que l'agent s'interdit, ce que fait l'agenda : les trois questions posées à chaque installation.",
       clotureChapo:
         "L'audit offert chiffre ce que vous coûtent les demandes restées sans réponse, et le compare à ce que les autres agents vous feraient gagner.",
     },
     fonctionnement: [
-      "À l'installation, nous construisons ensemble la base de connaissances de votre entreprise : horaires, tarifs, prestations, durées d'intervention, politique d'annulation, et les questions qui reviennent le plus souvent. REPUT s'appuie exclusivement dessus. Il ne comble jamais un trou par une supposition : une demande qu'elle ne couvre pas vous est transférée, sans approximation.",
+      "À l'installation, nous construisons ensemble la base de connaissances de votre entreprise : horaires, tarifs, prestations, durées d'intervention, politique d'annulation, et les questions qui reviennent le plus souvent. L'agent s'appuie exclusivement dessus. Il ne comble jamais un trou par une supposition : une demande qu'elle ne couvre pas vous est transférée, sans approximation.",
       "Sur WhatsApp comme par mail, il répond aussitôt, à toute heure, week-ends et jours fériés compris, et commence par qualifier : devis, urgence, réclamation ou simple renseignement. Chaque type suit ensuite son circuit. S'il s'agit d'un rendez-vous, il propose un créneau réellement libre dans votre agenda, le réserve, confirme au client et programme un rappel la veille.",
       "Les situations sensibles et les mots d'urgence sont définis avec vous à l'installation, et ne sont jamais traités à l'aveugle : votre téléphone sonne immédiatement, la conversation vous est transférée avec tout son historique. Le reste tourne seul, et chaque échange reste archivé.",
       "Une fois l'affaire faite et la facture réglée, le même poste prend le relais sur votre réputation. Une demande d'avis part dans les trois jours, relancée une fois, puis une seconde si rien ne vient, avec six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit par se voir.",
@@ -267,7 +267,7 @@ export const FICHES: Record<string, Fiche> = {
     etapes: [
       {
         t: "Construction de la base",
-        d: "Un entretien d'une heure suffit : prestations, tarifs, horaires, règles maison. Tout ce que REPUT a le droit de dire vient de là, et de nulle part ailleurs.",
+        d: "Un entretien d'une heure suffit : prestations, tarifs, horaires, règles maison. Tout ce que l'agent a le droit de dire vient de là, et de nulle part ailleurs.",
       },
       {
         t: "Branchement des canaux",
@@ -275,7 +275,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Rodage en double écoute",
-        d: "La première semaine, vous recevez copie de chaque conversation. Nous ajustons les réponses sur les cas réels, puis REPUT prend son rythme.",
+        d: "La première semaine, vous recevez copie de chaque conversation. Nous ajustons les réponses sur les cas réels, puis l'agent prend son rythme.",
       },
     ],
     faq: [
@@ -295,7 +295,7 @@ export const FICHES: Record<string, Fiche> = {
     demo: {
       type: "chat",
       title: "Samedi, 21 h 47",
-      sub: "L'atelier est fermé, REPUT répond",
+      sub: "L'atelier est fermé, l'agent répond",
       messages: [
         {
           from: "client",
@@ -318,7 +318,7 @@ export const FICHES: Record<string, Fiche> = {
     },
   },
   FILED: {
-    photo: "/photos/offload.jpg",
+    photo: "/photos/document-administratif.jpg",
     photoAlt: "Une personne attablée dépouille un document administratif.",
     photoVoile: 0.81,
     pitch: "Tout document reçu, traité sans une ligne de saisie.",
@@ -326,7 +326,7 @@ export const FICHES: Record<string, Fiche> = {
     sections: {
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
-        "FILED récupère vos pièces dans votre messagerie, quel que soit leur format (PDF, scan ou photo). Il les range dans le logiciel Omega ou sur le Drive de votre entreprise, sans logiciel comptable à acheter.",
+        "L'agent récupère vos pièces dans votre messagerie, quel que soit leur format (PDF, scan ou photo). Il les range dans le logiciel Omega ou sur le Drive de votre entreprise, sans logiciel comptable à acheter.",
       comprisChapo:
         "Le classement est la partie qu'on voit. Ce qui suit est livré avec, sans supplément et sans négociation.",
       catalogueChapo:
@@ -334,10 +334,10 @@ export const FICHES: Record<string, Fiche> = {
       clotureChapo:
         "L'audit offert chiffre les heures que vous passez sur vos pièces comptables, et les compare à ce que les autres agents vous feraient gagner.",
       faqChapo:
-        "Le cabinet, les pièces illisibles, le stockage : les trois questions posées à chaque installation de FILED.",
+        "Le cabinet, les pièces illisibles, le stockage : les trois questions posées à chaque installation de l'agent.",
     },
     fonctionnement: [
-      "Vous transférez vos factures fournisseurs vers une adresse dédiée : PDF reçus par mail, scans, photos de tickets prises au comptoir. FILED lit chaque pièce quel qu'en soit le format et en extrait les champs comptables : émetteur, date, montants HT, TVA et TTC, échéance, mode de règlement. Chaque champ arrive rempli, prêt pour la comptabilité, sans saisie manuelle.",
+      "Vous transférez vos factures fournisseurs vers une adresse dédiée : PDF reçus par mail, scans, photos de tickets prises au comptoir. L'agent lit chaque pièce quel qu'en soit le format et en extrait les champs comptables : émetteur, date, montants HT, TVA et TTC, échéance, mode de règlement. Chaque champ arrive rempli, prêt pour la comptabilité, sans saisie manuelle.",
       "Chaque extraction passe des contrôles au fil de l'eau : doublon d'une pièce déjà reçue, montant inhabituel pour ce fournisseur, taux de TVA incohérent. Ce qui est certain est classé automatiquement par fournisseur. Ce qui laisse un doute est marqué « à vérifier » et vous est signalé, jamais rangé en silence avec une erreur à l'intérieur.",
       "Tout est rangé dans des dossiers à votre nom, dans le logiciel Omega ou sur le Drive de votre entreprise. À date fixe, le dossier du mois part vers votre cabinet comptable dans le format qu'il préfère : il gagne du temps sans rien changer à ses méthodes, et reçoit chaque mois un dossier complet.",
     ],
@@ -358,7 +358,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Réglage sur votre historique",
-        d: "FILED apprend vos fournisseurs récurrents sur les trois derniers mois : formats de facture, montants habituels, taux de TVA pratiqués.",
+        d: "L'agent apprend vos fournisseurs récurrents sur les trois derniers mois : formats de facture, montants habituels, taux de TVA pratiqués.",
       },
       {
         t: "Accord avec le cabinet",
@@ -414,21 +414,21 @@ export const FICHES: Record<string, Fiche> = {
         "L'heure, le format, la source des chiffres : les questions posées à chaque installation.",
       integrationsTitre: "Vos outils actuels suffisent.",
       integrationsChapo:
-        "PULSE ne crée aucune donnée. Il lit ce qui existe déjà (facturation, agenda, messagerie, systèmes installés) et le restitue en un seul endroit, sans demander de saisie supplémentaire à vos équipes.",
+        "Le point du matin ne crée aucune donnée. Il lit ce qui existe déjà (facturation, agenda, messagerie, systèmes installés) et le restitue en un seul endroit, sans demander de saisie supplémentaire à vos équipes.",
       marcheTitre: "Une nuit de collecte, un message, votre lecture.",
       marcheChapo:
         "La chaîne se déclenche à heure fixe, sans événement extérieur : chaque nuit, les sources sont relues, les écarts calculés, les priorités classées. À 7 h, il ne reste qu'un message.",
-      situationChapo: "Ce que PULSE produit concrètement, un mardi ordinaire.",
+      situationChapo: "Ce que le point du matin produit concrètement, un mardi ordinaire.",
       outilsChapo:
         "Le système lit dans vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
       catalogueChapo:
-        "PULSE rend compte de ce que les autres systèmes font : seul, il a moins à restituer. Le diagnostic détermine l'ordre de déploiement le plus rentable, et il commence rarement par celui-ci.",
+        "Le point du matin rend compte de ce que les autres systèmes font : seul, il a moins à restituer. Le diagnostic détermine l'ordre de déploiement le plus rentable, et il commence rarement par celui-ci.",
       comprisChapo:
         "Le point du matin est la partie visible. Ce qui suit est livré avec lui, sans supplément.",
     },
     fonctionnement: [
-      "Chaque nuit, PULSE rassemble ce que vos outils et le reste du système savent déjà (encaissements, relances, agenda, retards) et le condense en un message unique, hiérarchisé, livré à 7 h. Aucun tableau de bord supplémentaire à ouvrir : un point qui se lit comme un SMS. La limite d'un message par jour n'est pas une contrainte technique, c'est une règle : au-delà, plus personne ne les lit.",
-      "Une fois par semaine, PULSE relit ce qui s'est réellement passé et vous propose entre zéro et trois enseignements tirés de faits observés : une formulation que vous corrigez systématiquement, un délai qui ne tient jamais, une question de client qui revient sans arrêt. Vous validez ou vous refusez. Seul ce que vous acceptez entre en mémoire et sert les semaines suivantes. Rien n'est retenu dans votre dos, et ce que vous refusez est effacé.",
+      "Chaque nuit, le point du matin rassemble ce que vos outils et le reste du système savent déjà (encaissements, relances, agenda, retards) et le condense en un message unique, hiérarchisé, livré à 7 h. Aucun tableau de bord supplémentaire à ouvrir : un point qui se lit comme un SMS. La limite d'un message par jour n'est pas une contrainte technique, c'est une règle : au-delà, plus personne ne les lit.",
+      "Une fois par semaine, le point du matin relit ce qui s'est réellement passé et vous propose entre zéro et trois enseignements tirés de faits observés : une formulation que vous corrigez systématiquement, un délai qui ne tient jamais, une question de client qui revient sans arrêt. Vous validez ou vous refusez. Seul ce que vous acceptez entre en mémoire et sert les semaines suivantes. Rien n'est retenu dans votre dos, et ce que vous refusez est effacé.",
     ],
     points: [
       "Encaissements de la veille et évolution des encours, comparés à la semaine précédente",
@@ -448,7 +448,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Branchement des sources",
-        d: "Tableur, agenda, systèmes déjà actifs : PULSE lit ce qui existe. Aucune saisie supplémentaire n'est demandée à vos équipes.",
+        d: "Tableur, agenda, systèmes déjà actifs : le point du matin lit ce qui existe. Aucune saisie supplémentaire n'est demandée à vos équipes.",
       },
       {
         t: "Ajustement du format",
@@ -466,7 +466,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         q: "D'où viennent les chiffres ?",
-        a: "De vos propres outils : facturation, agenda, messagerie, et les systèmes installés chez vous. PULSE n'invente aucun chiffre et n'en estime aucun, puisque chaque ligne est traçable jusqu'à sa source.",
+        a: "De vos propres outils : facturation, agenda, messagerie, et les systèmes installés chez vous. Le point du matin n'invente aucun chiffre et n'en estime aucun, puisque chaque ligne est traçable jusqu'à sa source.",
       },
       {
         q: "Le système apprend-il seul ?",
@@ -475,7 +475,7 @@ export const FICHES: Record<string, Fiche> = {
     ],
     demo: {
       type: "message",
-      title: "PULSE · mardi 21 juillet, 7 h 00",
+      title: "Point du matin · mardi 21 juillet, 7 h 00",
       lines: [
         {
           label: "Trésorerie",
@@ -510,13 +510,13 @@ export const FICHES: Record<string, Fiche> = {
         "L'audit offert chiffre ce qui dort dans votre fichier client, et le compare à ce que les autres agents vous feraient gagner.",
     },
     fonctionnement: [
-      "OFFLOAD croise votre historique de ventes et votre fichier de contacts pour repérer vos clients silencieux, puis les classe par valeur et par récence. Il réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
+      "L'agent croise votre historique de ventes et votre fichier de contacts pour repérer vos clients silencieux, puis les classe par valeur et par récence. Il réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher, avant les occasionnels plus anciens : l'effort va là où le retour est le plus probable.",
       "Chaque client reçoit un message écrit pour lui, ancré dans son historique réel : dernier achat, dernier passage, prestation habituelle. C'est l'inverse exact d'une newsletter envoyée à tous, et c'est ce qui sépare un message qu'on ouvre d'un message qu'on supprime.",
       "Le plafond est volontaire : une sollicitation par trimestre et par client, sur WhatsApp en priorité quand le numéro existe, sinon par mail, jamais les deux. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation vous revient.",
       "La deuxième liste est datée d'avance. Les entretiens annuels, les révisions et les contrôles périodiques redeviennent dus à une date connue, et le client est prévenu la semaine qui précède plutôt que le jour où l'échéance tombe. La troisième rassemble les affaires restées en plan : la pièce arrivée que personne n'est venu chercher, l'intervention terminée qui dort sur une étagère, et le stock qu'elles immobilisent.",
     ],
     points: [
-      "Segmentation par valeur et par récence : OFFLOAD réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher",
+      "Segmentation par valeur et par récence : l'agent réveille d'abord ceux qui rapportaient le plus et qui viennent de décrocher",
       "Message individuel ancré dans l'historique réel : dernier achat, dernier passage, préférence connue",
       "Cadence plafonnée : une sollicitation par trimestre et par client, jamais davantage",
       "Arrêt immédiat dès qu'une réponse arrive, même négative : la conversation vous revient",
@@ -529,7 +529,7 @@ export const FICHES: Record<string, Fiche> = {
     etapes: [
       {
         t: "Analyse du fichier",
-        d: "OFFLOAD croise votre historique de ventes et votre fichier de contacts, et dresse la carte de vos dormants : qui, depuis quand, pour quelle valeur historique.",
+        d: "L'agent croise votre historique de ventes et votre fichier de contacts, et dresse la carte de vos dormants : qui, depuis quand, pour quelle valeur historique.",
       },
       {
         t: "Validation de la première vague",
@@ -537,7 +537,7 @@ export const FICHES: Record<string, Fiche> = {
       },
       {
         t: "Vagues suivantes en rythme",
-        d: "OFFLOAD enchaîne au rythme convenu, mesure les retours vague après vague, et concentre l'effort sur les profils de clients qui répondent le mieux.",
+        d: "L'agent enchaîne au rythme convenu, mesure les retours vague après vague, et concentre l'effort sur les profils de clients qui répondent le mieux.",
       },
     ],
     faq: [
@@ -557,7 +557,7 @@ export const FICHES: Record<string, Fiche> = {
     demo: {
       type: "chat",
       title: "Cliente inactive depuis 8 mois",
-      sub: "Institut Beauté Lumière, réactivation OFFLOAD",
+      sub: "Institut Beauté Lumière, réactivation",
       messages: [
         {
           from: "bot",
@@ -593,16 +593,16 @@ export const FICHES: Record<string, Fiche> = {
       faqChapo: "Le contrôle, la sortie, les données : les trois questions posées à chaque diagnostic.",
       integrationsTitre: "Le socle est posé sous tous les systèmes",
       integrationsChapo:
-        "VAULT ne s'installe pas à côté des autres systèmes : il s'installe en dessous. Tout ce que CASHD, OFFLOAD, REPUT ou FILED préparent passe par lui avant de partir. Un système mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
+        "Le système de validation ne s'installe pas à côté des autres systèmes : il s'installe en dessous. Tout ce que les agents préparent passe par lui avant de partir. Un système mal configuré ne peut pas le contourner : le contrôle est en dessous de lui, pas à côté.",
       marcheTitre: "Un envoi préparé, douze contrôles, votre décision.",
       marcheChapo:
         "Entre le moment où un système prépare un message et celui où il part, douze vérifications s'exécutent dans la base de données. Un message qui échoue à l'une d'elles n'est pas reporté à plus tard : il n'est jamais écrit.",
       situationChapo:
-        "Ce que VAULT arrête concrètement, sur une journée ordinaire de relances.",
+        "Ce que le système de validation arrête concrètement, sur une journée ordinaire de relances.",
       outilsChapo:
         "Le système contrôle ce qui sort de vos outils actuels. Aucun n'est remplacé, aucun n'est à réapprendre.",
       catalogueChapo:
-        "VAULT ne s'installe jamais seul : il encadre les systèmes que vous choisissez. Le diagnostic désigne celui par lequel commencer, et le socle vient avec.",
+        "Le système de validation ne s'installe jamais seul : il encadre les systèmes que vous choisissez. Le diagnostic désigne celui par lequel commencer, et le socle vient avec.",
       comprisChapo:
         "Les contrôles sont la partie visible. Ce qui suit est livré avec eux, sans supplément.",
     },

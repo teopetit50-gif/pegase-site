@@ -26,7 +26,7 @@
    Il reste le nom du produit et son endossement, tous deux affichés dans
    le héros de la page. */
 export const MARQUE = {
-  nom: "FILED",
+  nom: "Factures fournisseurs",
   endos: "un agent Omega.AI",
 };
 
@@ -49,7 +49,7 @@ export const HERO = {
   titre1: "Vos équipes ne ressaisiront",
   titre2: "plus vos factures.",
   para1: "Vous connectez une messagerie. C'est la seule chose à faire.",
-  para2: "FILED lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu'au dossier de votre comptabilité.",
+  para2: "L'agent lit chaque pièce qui arrive, recoupe ses montants et la classe jusqu'au dossier de votre comptabilité.",
   cta1: "COMMENCER",
   /* « VOIR UNE DÉMO » promettait une démo qui n'existe pas : le bouton
      descend à #principe, qui est la suite de la page. */
@@ -111,7 +111,7 @@ export const FONCTIONNEMENT = {
   titre1: "Vos comptes ne reçoivent",
   titre2: "que des pièces vérifiées.",
   para:
-    "Une pièce mal rangée ne se découvre qu'au bilan. FILED recoupe donc le HT, la TVA et le TTC de chaque facture. Il ne la classe que si les trois montants tombent juste.",
+    "Une pièce mal rangée ne se découvre qu'au bilan. L'agent recoupe donc le HT, la TVA et le TTC de chaque facture. Il ne la classe que si les trois montants tombent juste.",
 };
 
 export const SUIVI = {
@@ -134,7 +134,7 @@ export const PALIERS = [
     nom: "Découverte",
     prix: null as string | null,
     periode: "/ mois",
-    pitch: "Pour évaluer FILED sur vos factures réelles.",
+    pitch: "Pour évaluer l'agent sur vos factures réelles.",
     cta: "Commencer",
     lignes: [
       "20 factures par mois",
@@ -214,7 +214,7 @@ export const PALIERS = [
    prises : l'alternance composant · texte, et la preuve avant le prix
    (voir LISEZ-MOI). */
 export const GARDE_FOUS = {
-  titre1: "FILED lit",
+  titre1: "L'agent lit",
   titre2: "vos comptes sans y toucher.",
   para:
     "Un agent branché sur votre comptabilité doit d'abord prouver ce qu'il refuse de faire. Les deux limites ci-dessous ne se désactivent nulle part, parce qu'elles tiennent à la façon dont le produit est construit.",
@@ -222,8 +222,8 @@ export const GARDE_FOUS = {
     {
       titre: "Il n'écrit à personne.",
       texte:
-        "FILED n'envoie aucun message en votre nom, ni à vos clients, ni à vos fournisseurs, ni à votre banque. Ses accès s'arrêtent à la lecture, donc il ne peut pas payer à votre place.",
-      court: "FILED n'envoie aucun message en votre nom, et ses accès s'arrêtent à la lecture.",
+        "L'agent n'envoie aucun message en votre nom, ni à vos clients, ni à vos fournisseurs, ni à votre banque. Ses accès s'arrêtent à la lecture, donc il ne peut pas payer à votre place.",
+      court: "L'agent n'envoie aucun message en votre nom, et ses accès s'arrêtent à la lecture.",
       faits: [
         "Zéro message envoyé en votre nom",
         "Aucun accès à vos moyens de paiement",
@@ -247,7 +247,7 @@ export const GARDE_FOUS = {
 export const CONFORMITE = {
   titre: "Facturation électronique",
   texte:
-    "Depuis le 1ᵉʳ septembre 2026, toute entreprise établie en France doit pouvoir recevoir des factures électroniques. FILED ne vend pas cette mise en conformité : le raccordement relève de votre outil de facturation.",
+    "Depuis le 1ᵉʳ septembre 2026, toute entreprise établie en France doit pouvoir recevoir des factures électroniques. Nous ne vendons pas cette mise en conformité : le raccordement relève de votre outil de facturation.",
 };
 
 /* La FAQ. Chaque réponse est vérifiable sur le produit — aucune ne
@@ -275,7 +275,7 @@ export const FAQ = {
       r: "Non. Elle reçoit un dossier classé dans le format qu'elle utilise déjà, à la date convenue pendant l'installation. Elle gagne du temps sans rien changer à ses méthodes.",
     },
     {
-      q: "FILED écrit-il à mes clients ou à mes fournisseurs ?",
+      q: "L'agent écrit-il à mes clients ou à mes fournisseurs ?",
       r: "Jamais. Il lit, recoupe, classe et transmet à votre comptabilité. Il n'envoie aucun message en votre nom et n'a accès à aucun moyen de paiement.",
     },
     {
@@ -287,8 +287,8 @@ export const FAQ = {
       r: "Sur des serveurs situés dans l'Union européenne. Vos fichiers d'origine sont conservés tels quels, vous pouvez les récupérer ou tout effacer à tout moment.",
     },
     {
-      q: "FILED assure-t-il la conformité à la facturation électronique ?",
-      r: "Non, et personne ne devrait vous le présenter ainsi. Le raccordement à une plateforme immatriculée relève de votre outil de facturation et de votre comptabilité. FILED lit et classe ce qui vous arrive, quel que soit le canal.",
+      q: "L'agent assure-t-il la conformité à la facturation électronique ?",
+      r: "Non, et personne ne devrait vous le présenter ainsi. Le raccordement à une plateforme immatriculée relève de votre outil de facturation et de votre comptabilité. L'agent lit et classe ce qui vous arrive, quel que soit le canal.",
     },
     {
       q: "Puis-je arrêter à tout moment ?",

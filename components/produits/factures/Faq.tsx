@@ -24,7 +24,7 @@ export default function Faq() {
       <div className="lg:col-span-5">
         <p className="max-w-sm text-[15px] leading-relaxed text-[#737373]">
           Sept questions, sept réponses courtes. Deux d&apos;entre elles disent ce que
-          FILED ne fait pas — c&apos;est souvent ce qu&apos;on cherche en premier.
+          L&apos;agent ne fait pas — c&apos;est souvent ce qu&apos;on cherche en premier.
         </p>
       </div>
 

@@ -15,9 +15,9 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que FILED prend en charge.",
+  titre: "Tout ce que l'agent prend en charge.",
   chapo:
-    "Une facture fournisseur traverse six étapes avant d'entrer en comptabilité. Voici ce que FILED tient à chacune d'elles, y compris quand la pièce arrive mal.",
+    "Une facture fournisseur traverse six étapes avant d'entrer en comptabilité. Voici ce que l'agent tient à chacune d'elles, y compris quand la pièce arrive mal.",
   mention:
     "Le périmètre se règle à l'installation : une organisation n'active que ce dont ses services ont besoin, et les contrôles restent actifs quel que soit le réglage.",
   familles: [
@@ -105,7 +105,7 @@ export const CAS_LIMITES: BlocCasLimites = {
   etiquette: "Les cas tordus",
   titre: "Ce qui arrive vraiment dans une comptabilité fournisseurs.",
   chapo:
-    "Douze situations que vos équipes connaissent, et ce que FILED en fait. Aucune ne se règle en classant la pièce quand même.",
+    "Douze situations que vos équipes connaissent, et ce que l'agent en fait. Aucune ne se règle en classant la pièce quand même.",
   cas: [
     {
       q: "Le fournisseur envoie sa facture depuis une adresse personnelle.",
@@ -149,7 +149,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "Le fournisseur n'existe pas encore dans votre comptabilité.",
-      r: "La pièce est lue, puis mise en attente avec le nom lu sur la facture : une personne confirme ce fournisseur une fois, et ses factures suivantes passent seules. FILED n'écrit rien dans votre plan comptable.",
+      r: "La pièce est lue, puis mise en attente avec le nom lu sur la facture : une personne confirme ce fournisseur une fois, et ses factures suivantes passent seules. L'agent n'écrit rien dans votre plan comptable.",
     },
     {
       q: "La pièce arrive longtemps après sa date d'émission.",
@@ -192,7 +192,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "FILED lit et écrit dans vos outils de comptabilité et de gestion. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation.",
+        "L'agent lit et écrit dans vos outils de comptabilité et de gestion. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation.",
     },
     {
       icone: "chart",

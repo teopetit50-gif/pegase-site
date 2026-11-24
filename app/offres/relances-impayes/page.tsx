@@ -62,9 +62,9 @@ import "./relances.css";
    framer-motion). L'inclure aurait chargé GSAP et ScrollTrigger pour rien.
    ══════════════════════════════════════════════════════════════════════ */
 
-const TITRE = "CASHD · vos échéances suivies chaque matin";
+const TITRE = "Relances · vos échéances suivies chaque matin";
 const DESCRIPTION =
-  "CASHD relit chaque matin le facturier que vous tenez déjà et relance devis et factures en votre nom. Aucun message ne part sans votre accord. Un système Omega.";
+  "Un agent relit chaque matin le facturier que vous tenez déjà et relance devis et factures en votre nom. Aucun message ne part sans votre accord. Un système Omega.";
 
 export const metadata: Metadata = {
   title: `${TITRE} | Omega.AI`,

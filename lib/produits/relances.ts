@@ -42,7 +42,7 @@
  */
 
 export const MARQUE = {
-  nom: "CASHD",
+  nom: "Relances",
   role: "relance devis & factures",
   signature: "un agent Omega.AI",
   /* 11/09 — l'adresse passe de `bonjour@` à `contact@` : c'est la seule
@@ -141,7 +141,7 @@ export const PRINCIPE = {
     {
       cle: "relit",
       titre: "Vous savez qui doit quoi",
-      texte: "CASHD relit votre facturier chaque matin, avant d'écrire quoi que ce soit.",
+      texte: "L'agent relit votre facturier chaque matin, avant d'écrire quoi que ce soit.",
       /* PASSE CORRECTRICE — les deux premières puces étaient des groupes
          nominaux, la troisième une phrase : une liste qui change de nature
          en cours de route. Les trois portent maintenant un verbe conjugué,
@@ -275,7 +275,7 @@ export const BENTO = {
     {
       id: "journal",
       titre: "Chaque envoi laisse une trace",
-      texte: "CASHD date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible.",
+      texte: "L'agent date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible.",
     },
   ],
 } as const;
@@ -372,17 +372,17 @@ export const FRANCE = {
     {
       titre: "Conçu et développé en France",
       texte:
-        "CASHD est développé en France, par notre propre équipe.",
+        "L'agent est développé en France, par notre propre équipe.",
     },
     {
       titre: "Vos données sont hébergées dans l'Union européenne",
       texte:
-        "Votre entreprise dispose d'un espace chiffré et distinct. Pour rédiger un message, CASHD n'en extrait que le nécessaire, jamais votre facturier entier.",
+        "Votre entreprise dispose d'un espace chiffré et distinct. Pour rédiger un message, l'agent n'en extrait que le nécessaire, jamais votre facturier entier.",
     },
     {
       titre: "L'assistance se fait en français",
       texte:
-        "Quand vous avez une question, elle est traitée par les personnes qui ont installé CASHD chez vous.",
+        "Quand vous avez une question, elle est traitée par les personnes qui ont installé l'agent chez vous.",
     },
     {
       titre: "Facturation en euros, droit français",
@@ -410,11 +410,11 @@ export const QUESTIONS = {
       items: [
         {
           q: "Et si un client paie entre deux relances ?",
-          r: "CASHD relit votre facturier avant chaque action. Un règlement enregistré interrompt la séquence sur-le-champ : un client qui a payé ne reçoit pas de relance.",
+          r: "L'agent relit votre facturier avant chaque action. Un règlement enregistré interrompt la séquence sur-le-champ : un client qui a payé ne reçoit pas de relance.",
         },
         {
           q: "Qui écrit les messages ?",
-          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par CASHD à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
+          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par l'agent à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
         },
         {
           q: "Mes clients risquent-ils de mal le prendre ?",
@@ -428,15 +428,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Puis-je exclure certains clients ?",
-          r: "Oui. Une liste d'exclusion est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. CASHD ne relance pas ces contacts, et vous seul pouvez les réintégrer.",
+          r: "Oui. Une liste d'exclusion est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. L'agent ne relance pas ces contacts, et vous seul pouvez les réintégrer.",
         },
         {
           q: "Faut-il changer de logiciel de facturation ?",
-          r: "Non. CASHD lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes. Il travaille aussi dans le logiciel de gestion Omega, si vous le choisissez. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
+          r: "Non. L'agent lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes. Il travaille aussi dans le logiciel de gestion Omega, si vous le choisissez. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
         },
         {
           q: "Une personne s'en occupe déjà chez nous.",
-          r: "CASHD ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. Elle cesse seulement de tenir le compte de qui doit quoi et de courir après les retards.",
+          r: "L'agent ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. Elle cesse seulement de tenir le compte de qui doit quoi et de courir après les retards.",
         },
       ],
     },
@@ -446,7 +446,7 @@ export const QUESTIONS = {
       items: [
         {
           q: "Où vont mes données ?",
-          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, CASHD transmet à un modèle le strict nécessaire, un client, une facture, un historique, et jamais votre facturier entier.",
+          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, l'agent transmet à un modèle le strict nécessaire, un client, une facture, un historique, et jamais votre facturier entier.",
         },
         {
           q: "Un message peut-il partir sans moi ?",
@@ -472,7 +472,7 @@ export const QUESTIONS = {
 export const CLOTURE = {
   titre: "Ce qui attend dehors ne rentrera pas seul.",
   chapo:
-    "Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : CASHD ne demande rien d'autre.",
+    "Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : l'agent ne demande rien d'autre.",
   /* Même reroutage que le bouton du héros. */
   bouton: "Réserver un audit",
 } as const;

@@ -5,6 +5,8 @@ import { PAGE_OFFRE, secteur } from "@/lib/secteurs";
 import { MARQUE_SITE } from "@/components/espace2/portail";
 import SectionAudit from "@/components/site-dedie/SectionAudit";
 import "./se-combine.css";
+import { agentPaquet, nomPaquet } from "@/lib/content";
+import { signePaquet } from "@/components/logos";
 
 /* ══════════════════════════════════════════════════════════════════════
    « Se combine avec » — le dernier bloc de chaque page métier (25/09/2026)
@@ -50,14 +52,14 @@ export default function SeCombine({ slug }: { slug: string }) {
                 className="scb-signe"
                 style={
                   {
-                    "--scb-signe": `url(/logos/${offre.toLowerCase()}-mark.png)`,
+                    "--scb-signe": `url(${signePaquet(offre)})`,
                   } as CSSProperties
                 }
               />
-              <h3 className="scb-nom">{offre}</h3>
+              <h3 className="scb-nom">{nomPaquet(offre)}</h3>
               <p className="scb-raison">{raison}</p>
               <span className="scb-lien">
-                Voir {offre}
+                Voir {agentPaquet(offre)}
                 <ArrowRight aria-hidden size={15} strokeWidth={1.75} />
               </span>
             </Link>

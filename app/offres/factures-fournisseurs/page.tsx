@@ -92,7 +92,7 @@ import "./factures.css";
    plus rien). */
 export const metadata: Metadata = {
   alternates: { canonical: "/offres/factures-fournisseurs" },
-  title: "FILED · flux documentaires | Omega.AI",
+  title: "Factures fournisseurs · flux documentaires | Omega.AI",
   description:
     "Vous connectez une messagerie. Chaque facture fournisseur est lue quel qu'en soit le format, ses montants recoupés, la pièce classée et transmise à votre comptabilité.",
 };
@@ -185,7 +185,7 @@ export default function PageFactures() {
                   sautent (règle 6), et la page produit de FILED ne
                   se serait plus nommée nulle part. Il est récupéré ici,
                   au-dessus du titre, où une page produit se nomme.
-                  `filed-mark.png` est un MASQUE ALPHA : un <img>
+                  `agent-factures-mark.png` est un MASQUE ALPHA : un <img>
                   n'afficherait rien, `Marque` le pose en mask-image sur un
                   fond `currentColor` — d'où la couleur par `text-`. */}
               <Apparition>

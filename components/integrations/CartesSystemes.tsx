@@ -5,8 +5,8 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/cn";
 import { SystemLogo } from "@/components/logos";
-import { Chevron } from "@/components/offres/MediaMoteurs";
 import { nomPaquet } from "@/lib/content";
+import { Chevron } from "@/components/offres/MediaMoteurs";
 import "./CartesSystemes.css";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -141,7 +141,7 @@ export default function CartesSystemes({
               data-actif={allume ? "true" : "false"}
               className="o-card-soft csy-carte flex h-full flex-col p-7"
             >
-              <div className="flex items-center gap-3">
+              <div className="csy-tete flex items-center gap-3">
                 <SystemLogo system={m.system} />
                 <span className="text-[16px] font-semibold tracking-[-0.02em] text-[#09090b]">
                   {nomPaquet(m.system)}

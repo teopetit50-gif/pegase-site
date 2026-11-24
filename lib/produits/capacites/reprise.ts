@@ -29,17 +29,17 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce qu'OFFLOAD prend en charge.",
+  titre: "Tout ce que l'agent prend en charge.",
   chapo:
     "Trois relances, un seul système : le compte qui n'a plus commandé, l'échéance qui redevient due et l'affaire restée en plan. Voici ce qu'il lit, ce qu'il écarte et ce qu'il vous laisse décider.",
   mention:
-    "OFFLOAD lit votre CRM, votre historique de facturation et vos fiches d'intervention, et rien d'autre. Il n'écrit dans aucun de ces outils, ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
+    "L'agent lit votre CRM, votre historique de facturation et vos fiches d'intervention, et rien d'autre. Il n'écrit dans aucun de ces outils, ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
   familles: [
     {
       nom: "Lecture de la base clients",
       icone: "search",
       lignes: [
-        { t: "OFFLOAD croise votre historique de facturation et le référentiel clients de votre CRM.", atteste: true },
+        { t: "L'agent croise votre historique de facturation et le référentiel clients de votre CRM.", atteste: true },
         { t: "Chaque compte est classé par la date de son dernier contact, au-delà d'un seuil que vous fixez.", atteste: true },
         { t: "La fréquence d'achat habituelle d'un compte est mesurée, puis son décrochage détecté.", atteste: false },
         { t: "Les comptes sont priorisés par valeur attendue, pas par ordre alphabétique.", atteste: false },
@@ -89,7 +89,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Une pièce commandée pour un compte inactif est rattachée à sa fiche.", atteste: false },
         { t: "Les affaires closes sans suite sont distinguées de celles qui attendent encore.", atteste: false },
         { t: "Un compte relancé deux fois sans réponse passe en décision manuelle.", atteste: false },
-        { t: "La relance de retrait ne porte aucune mention de paiement, qui relève de CASHD.", atteste: false },
+        { t: "La relance de retrait ne porte aucune mention de paiement, qui relève de l'agent qui relance les devis et les factures.", atteste: false },
         { t: "Le magasin voit en une liste ce qui dort et depuis combien de temps.", atteste: false },
       ],
     },
@@ -102,7 +102,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit.", atteste: true },
         { t: "Une demande d'arrêt vaut retrait immédiat et définitif du cycle.", atteste: true },
         { t: "Les listes d'exclusion se tiennent par compte, par secteur et par commercial.", atteste: false },
-        { t: "OFFLOAD s'arrête de lui-même au premier doute, et vous le signale.", atteste: true },
+        { t: "L'agent s'arrête de lui-même au premier doute, et vous le signale.", atteste: true },
         { t: "Chaque message parti reste au journal, daté et consultable.", atteste: true },
       ],
     },
@@ -125,7 +125,7 @@ export const CAS_LIMITES: BlocCasLimites = {
   etiquette: "Les cas tordus",
   titre: "Ce qui arrive vraiment quand on réactive une base clients.",
   chapo:
-    "Douze situations que vos commerciaux connaissent, et ce qu'OFFLOAD en fait. Aucune ne se règle en envoyant le message quand même.",
+    "Douze situations que vos commerciaux connaissent, et ce que l'agent en fait. Aucune ne se règle en envoyant le message quand même.",
   cas: [
     {
       q: "Le compte a déjà été appelé la semaine dernière par un commercial.",
@@ -137,7 +137,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "L'interlocuteur a quitté l'entreprise depuis la dernière commande.",
-      r: "La réponse d'absence est reconnue et le compte est signalé comme à réattribuer. OFFLOAD ne devine pas le successeur.",
+      r: "La réponse d'absence est reconnue et le compte est signalé comme à réattribuer. L'agent ne devine pas le successeur.",
     },
     {
       q: "Le même groupe apparaît sous trois raisons sociales.",
@@ -153,7 +153,7 @@ export const CAS_LIMITES: BlocCasLimites = {
     },
     {
       q: "Le compte a une facture en retard chez vous.",
-      r: "Il sort de la vague de relance commerciale, parce qu'une relance d'impayé et une relance commerciale ne se croisent jamais. Le recouvrement relève de CASHD, pas d'ici.",
+      r: "Il sort de la vague de relance commerciale, parce qu'une relance d'impayé et une relance commerciale ne se croisent jamais. Le recouvrement relève de l'agent qui relance les devis et les factures, pas d'ici.",
     },
     {
       q: "Deux entités du même groupe ont chacune leur échéance.",
@@ -212,7 +212,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "OFFLOAD lit votre CRM ou votre ERP, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par export et dépôt de fichiers.",
+        "L'agent lit votre CRM ou votre ERP, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par export et dépôt de fichiers.",
     },
     {
       icone: "chart",

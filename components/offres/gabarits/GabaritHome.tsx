@@ -14,6 +14,7 @@ import {
 import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
 import { NOMBRES } from "./types";
+import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    Gabarit « home » — d'après ocoya.com (page d'accueil)
@@ -98,7 +99,7 @@ export default function GabaritHome({
                     className="text-[26px] font-semibold tracking-[-0.03em] text-[#fafafa]"
                     style={{ fontFamily: "var(--font-jakarta)" }}
                   >
-                    {m.system}
+                    {nomPaquet(m.system)}
                   </div>
                   <div className="o-small !text-[#a1a1aa]">{role}</div>
                 </div>
@@ -191,7 +192,7 @@ export default function GabaritHome({
       {/* ════════ 2 · BANDEAU DES OUTILS DU MOTEUR ════════ */}
       <section className="pb-[40px] pt-[70px]">
         <p data-reveal className="o-lead mb-10 text-center">
-          {m.system} se branche sur ce que vous tenez déjà
+          {nomPaquet(m.system)} se branche sur ce que vous tenez déjà
         </p>
         <div data-reveal>
           <BandeauOutilsMoteur outils={fiche.outils} />
@@ -208,7 +209,7 @@ export default function GabaritHome({
               pas encore sa copie. */}
           <EnTete
             pastille="Ce qu'il fait"
-            titre={fiche.sections?.pointsTitre ?? `${m.system} en quatre points.`}
+            titre={fiche.sections?.pointsTitre ?? `${nomPaquet(m.system)} en quatre points.`}
             chapo={fiche.sections?.pointsChapo ?? fiche.pitch}
           />
         </div>
@@ -272,7 +273,7 @@ export default function GabaritHome({
             <h3 className="o-h4">L&apos;agent en situation</h3>
             <p className="o-body mt-3">
               {fiche.sections?.situationChapo ??
-                `Ce que ${m.system} produit concrètement, sur un cas type.`}
+                `Ce que ${nomPaquet(m.system)} produit concrètement, sur un cas type.`}
             </p>
             <div className="mt-8">
               <DemoFiche demo={fiche.demo} />
@@ -308,7 +309,7 @@ export default function GabaritHome({
           titre="Le fonctionnement dans le détail."
           chapo={
             fiche.sections?.detailChapo ??
-            `Le fonctionnement de ${m.system}, sans raccourci : ce qu'il lit, ce qu'il décide, et ce qu'il vous laisse trancher.`
+            `Le fonctionnement de ${nomPaquet(m.system)}, sans raccourci : ce qu'il lit, ce qu'il décide, et ce qu'il vous laisse trancher.`
           }
         />
         <div className="mx-auto mt-20 grid max-w-[1040px] grid-cols-1 gap-8 lg:grid-cols-2">
@@ -335,7 +336,7 @@ export default function GabaritHome({
             titre="À qui cet agent s'adresse."
             chapo={
               fiche.sections?.cibleChapo ??
-              `${m.system} a été conçu pour les organisations où ce problème coûte le plus cher. Si ce n'est pas votre cas, l'audit désignera un autre agent.`
+              `${nomPaquet(m.system)} a été conçu pour les organisations où ce problème coûte le plus cher. Si ce n'est pas votre cas, l'audit désignera un autre agent.`
             }
           />
         </div>
@@ -372,7 +373,7 @@ export default function GabaritHome({
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
             {fiche.sections?.catalogueChapo ??
-              `${m.system} n'est pas toujours celui à déployer en premier. L'audit désigne l'agent au meilleur retour pour votre organisation, et il arrive que ce soit un autre.`}
+              `${nomPaquet(m.system)} n'est pas toujours celui à déployer en premier. L'audit désigne l'agent au meilleur retour pour votre organisation, et il arrive que ce soit un autre.`}
           </p>
           <div data-reveal className="mt-5">
             <Link href="/offres" className="o-link">

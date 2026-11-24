@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import PageMotion from "@/components/PageMotion";
-import { FAMILLES } from "@/lib/content";
+import { FAMILLES, sansNomPaquet } from "@/lib/content";
 import { FICHES } from "@/lib/fiches";
 import GabaritHome from "@/components/offres/gabarits/GabaritHome";
 import GabaritIntegration from "@/components/offres/gabarits/GabaritIntegration";
@@ -110,25 +110,18 @@ export default async function FicheMoteurPage({
     ? fiche.fonctionnement
     : [fiche.fonctionnement];
 
-  /* le rôle du paquet = son titre amputé de son nom (« CASHD — relance… ») */
-  const sansNom = (titre: string, nom: string) =>
-    /* 15/09 — le point médian manquait à la classe, alors que c'est LE
-       séparateur des six titres de lib/content.ts : un « · » orphelin
-       s'affichait sous le nom du produit, sur les six fiches, en production. */
-    titre.startsWith(nom)
-      ? titre.slice(nom.length).replace(/^[\s:·•–—-]+/, "")
-      : titre;
+  /* le rôle du paquet = son titre amputé de son nom affiché (lib/content.ts) */
 
   const props = {
     m,
     fiche,
-    role: sansNom(m.title, m.system),
+    role: sansNomPaquet(m.title, m.system),
     paragraphes,
     accent: ACCENT_FAMILLE[m.famille.id] ?? "#09090b",
     accentSombre: ACCENT_FAMILLE_SOMBRE[m.famille.id] ?? "#fafafa",
     autres: ALL.filter((x) => x.system !== m.system).map((x) => ({
       system: x.system,
-      role: sansNom(x.title, x.system),
+      role: sansNomPaquet(x.title, x.system),
       pitch: FICHES[x.system]?.pitch ?? x.benefit,
       href: `/offres/${x.slug}`,
     })),

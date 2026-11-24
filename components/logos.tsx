@@ -22,9 +22,9 @@
    Ajouter un paquet : déposer les deux fichiers, ajouter la ligne dans
    LOGOS. Rien d'autre. */
 
-import { nomPaquet } from "@/lib/content";
+import { nomPaquet, agentPaquet } from "@/lib/content";
 
-type Logo = { mark: string; lockup: string };
+type Logo = { mark: string; lockup?: string };
 
 /* Les six logos livrés le 05/08. AHEAD et COVERD sont présents et prêts,
    mais lib/content.ts ne les publie pas tant que les paquets sont vides —
@@ -43,16 +43,18 @@ type Logo = { mark: string; lockup: string };
    sigles internes, et un appel oublié affichera le bon signe plutôt
    qu'une case vide. Les commentaires du dépôt datés d'avant le 27/09
    parlent encore de RELOAD et FRONTD : c'est leur histoire, pas un oubli. */
-const OFFLOAD: Logo = { mark: "/logos/offload-mark.png", lockup: "/logos/offload-lockup.png" };
-const REPUT: Logo = { mark: "/logos/reput-mark.png", lockup: "/logos/reput-lockup.png" };
+const OFFLOAD: Logo = { mark: "/logos/agent-clients-inactifs-mark.png" };
+const REPUT: Logo = { mark: "/logos/agent-demandes-mark.png" };
 
 const LOGOS: Record<string, Logo> = {
-  CASHD: { mark: "/logos/cashd-mark.png", lockup: "/logos/cashd-lockup.png" },
+  /* 24/11/2026 — les quatre agents n'ont plus de lockup : le mot dessiné
+     était leur code, qui ne s'affiche plus nulle part. Le signe reste. */
+  CASHD: { mark: "/logos/agent-relances-mark.png" },
   OFFLOAD,
   REPUT,
   RELOAD: OFFLOAD,
   FRONTD: REPUT,
-  FILED: { mark: "/logos/filed-mark.png", lockup: "/logos/filed-lockup.png" },
+  FILED: { mark: "/logos/agent-factures-mark.png" },
   AHEAD: { mark: "/logos/ahead-mark.png", lockup: "/logos/ahead-lockup.png" },
   COVERD: { mark: "/logos/coverd-mark.png", lockup: "/logos/coverd-lockup.png" },
   /* 07/08/2026 — « Sur mesure » n'est pas un paquet catalogue mais il a sa
@@ -89,14 +91,14 @@ export function SystemLogo({ system }: { system: string }) {
           className="text-[15px] font-semibold tracking-[-0.03em]"
           style={{ color: ENCRE }}
         >
-          {system.slice(0, 1)}
+          {nomPaquet(system).slice(0, 1)}
         </span>
       </span>
     );
   }
 
   return (
-    <span className={TUILE} style={{ boxShadow: OMBRE }} aria-label={`Logo ${nomPaquet(system)}`}>
+    <span className={TUILE} style={{ boxShadow: OMBRE }} aria-label={`Logo de ${agentPaquet(system)}`}>
       <span
         className="block h-[26px] w-[26px]"
         style={{
@@ -152,11 +154,11 @@ export function SystemLockup({
   couleur?: string;
 }) {
   const logo = LOGOS[system];
-  if (!logo) return <span className="font-semibold">{system}</span>;
+  if (!logo?.lockup) return <span className="font-semibold">{nomPaquet(system)}</span>;
   return (
     <span
       role="img"
-      aria-label={`Logo ${nomPaquet(system)}`}
+      aria-label={`Logo de ${agentPaquet(system)}`}
       className="inline-block"
       style={{
         height: hauteur,
@@ -200,7 +202,7 @@ export function SystemSigne({
         className="font-semibold tracking-[-0.03em]"
         style={{ color: couleur, fontSize: taille * 0.6 }}
       >
-        {system.slice(0, 1)}
+        {nomPaquet(system).slice(0, 1)}
       </span>
     );
   }
@@ -208,7 +210,7 @@ export function SystemSigne({
   return (
     <span
       role="img"
-      aria-label={`Logo ${nomPaquet(system)}`}
+      aria-label={`Logo de ${agentPaquet(system)}`}
       className="block"
       style={{
         height: taille,
@@ -226,3 +228,6 @@ export function SystemSigne({
     />
   );
 }
+
+/* Le signe d'un paquet, pour un masque CSS posé hors de ce fichier. */
+export const signePaquet = (system: string) => LOGOS[system]?.mark;

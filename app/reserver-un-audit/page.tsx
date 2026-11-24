@@ -72,7 +72,7 @@ const NOMS_MODELES: Record<string, string> = Object.fromEntries(
 );
 
 const NOMS_POSTES: Record<string, string> = Object.fromEntries(
-  POSTES.map((p) => [p.id, `${p.system} · ${p.nom}`]),
+  POSTES.map((p) => [p.id, p.nom]),
 );
 
 /* Les outils de la carte : la liste des onze de ce matin, moins les quatre

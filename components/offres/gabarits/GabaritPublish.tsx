@@ -11,6 +11,7 @@ import {
 import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
 import { NOMBRES } from "./types";
+import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    Gabarit « publish » — d'après ocoya.com/features/publish
@@ -135,7 +136,7 @@ export default function GabaritPublish({
                   className="text-[24px] font-semibold tracking-[-0.03em]"
                   style={{ fontFamily: "var(--font-jakarta)", color: accentSombre }}
                 >
-                  {m.system}
+                  {nomPaquet(m.system)}
                 </div>
                 <div className="o-small">{role}</div>
               </div>
@@ -316,7 +317,7 @@ export default function GabaritPublish({
             <h3 className="o-h5 mt-6">L&apos;audit : 30 min</h3>
             <p className="o-body mt-3 !text-[15px]">
               Nous chiffrons ce que le problème vous coûte, vérifions que{" "}
-              {m.system} est bien le bon agent, et regardons votre éligibilité
+              {nomPaquet(m.system)} est bien le bon agent, et regardons votre éligibilité
               au Chèque TIC.
             </p>
             <Link href="/reserver-un-audit" className="o-btn o-btn--primary !mt-8 mt-auto w-full">
@@ -344,7 +345,7 @@ export default function GabaritPublish({
           </h2>
           <p data-reveal className="o-lead mt-4 max-w-[650px]">
             {fiche.sections?.catalogueChapo ??
-              `${m.system} n'est peut-être pas celui à installer en premier. L'audit désigne l'agent au meilleur retour chez vous, et il arrive que ce soit un autre.`}
+              `${nomPaquet(m.system)} n'est peut-être pas celui à installer en premier. L'audit désigne l'agent au meilleur retour chez vous, et il arrive que ce soit un autre.`}
           </p>
         </div>
         <div data-reveal className="mt-16">
@@ -368,7 +369,7 @@ export default function GabaritPublish({
             className="o-dots o-dots-fade-up pointer-events-none absolute inset-x-0 bottom-0 top-1/2"
           />
           <h2 className="o-h2 relative mx-auto max-w-[1040px]">
-            {m.system} est-il le bon pour vous ?
+            {nomPaquet(m.system)} est-il le bon pour vous ?
           </h2>
           <p className="o-lead relative mx-auto mt-4 max-w-[610px]">
             {fiche.sections?.clotureChapo ??

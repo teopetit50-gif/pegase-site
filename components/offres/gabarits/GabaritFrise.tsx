@@ -12,6 +12,7 @@ import BlocFaq from "./BlocFaq";
 import type { GabaritProps } from "./types";
 import { NOMBRES } from "./types";
 import "./GabaritFrise.css";
+import { nomPaquet } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
    Gabarit « frise » — la page des DEUX paquets compris (15/09/2026)
@@ -124,7 +125,7 @@ export default function GabaritFrise({
               <div data-reveal className="gfr-identite">
                 <SystemLogo system={m.system} />
                 <div>
-                  <div className="gfr-nom">{m.system}</div>
+                  <div className="gfr-nom">{nomPaquet(m.system)}</div>
                   <div className="o-small">{roleNet(role)}</div>
                 </div>
               </div>
@@ -204,7 +205,7 @@ export default function GabaritFrise({
           <div className="o-wrap">
             <EnTete
               pastille="Ce qu'il fait"
-              titre={sections?.pointsTitre ?? `${m.system} en quatre points.`}
+              titre={sections?.pointsTitre ?? `${nomPaquet(m.system)} en quatre points.`}
               chapo={sections?.pointsChapo}
             />
             <div className="gfr-frise">

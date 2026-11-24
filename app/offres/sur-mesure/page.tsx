@@ -23,7 +23,7 @@ import {
   PictoPiece,
   PictoPont,
 } from "@/components/surmesure/Panneaux";
-import { FAMILLES } from "@/lib/content";
+import { FAMILLES, agentPaquet, nomPaquet, sansNomPaquet } from "@/lib/content";
 import { fr } from "@/lib/typo";
 import { Bell, FileText, MessageSquare, Users } from "lucide-react";
 import Casestudies, { type Cas } from "@/components/ui/case-studies";
@@ -435,12 +435,6 @@ const PICTOS: Record<string, React.ReactNode> = {
    exactement ceux que porte sa propre page. */
 const CATALOGUE = ["CASHD", "OFFLOAD", "REPUT", "FILED"];
 
-/* « CASHD · encaissements » → « encaissements ». Le séparateur du
-   catalogue est le point médian ; les autres formes sont acceptées parce
-   que FAMILLES en a porté plusieurs. */
-const sansNom = (titre: string, nom: string) =>
-  titre.startsWith(nom) ? titre.slice(nom.length).replace(/^[\s·:–—-]+/, "") : titre;
-
 /* ——— § 2 · les outils du client —————————————————————————————————
    TROIS, en mot-symbole noir, comme la référence (Meta / cohere / NTT en
    `brightness-0`). Trois décisions, chacune vérifiée en rendant les
@@ -563,7 +557,7 @@ export default function SurMesurePage() {
     .sort((a, b) => CATALOGUE.indexOf(a.system) - CATALOGUE.indexOf(b.system))
     .map((x) => ({
       system: x.system,
-      role: sansNom(x.title, x.system),
+      role: sansNomPaquet(x.title, x.system),
       href: `/offres/${x.slug}`,
       photo: FICHES[x.system]?.photo ?? "",
       photoAlt: FICHES[x.system]?.photoAlt ?? "",
@@ -585,16 +579,16 @@ export default function SurMesurePage() {
      onglet n'est pas une porte, et quatre systèmes qui se présentent
      doivent pouvoir se visiter. */
   const volets: Volet[] = catalogue.map((p) => ({
-    valeur: p.system.toLowerCase(),
+    valeur: p.href.replace("/offres/", ""),
     icone: PICTOS[p.system],
-    titre: p.system,
+    titre: nomPaquet(p.system),
     resume: fr(p.benefit),
     panneau: (
       <div className="f11-fiche">
         <p className="f11-fiche__role">{fr(p.role)}</p>
         <p className="f11-fiche__corps">{fr(p.job)}</p>
         <Link href={p.href} className="smd-lien">
-          Voir la page de {p.system}
+          Voir {agentPaquet(p.system)}
         </Link>
       </div>
     ),

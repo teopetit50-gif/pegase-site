@@ -81,14 +81,50 @@ export type Famille = {
    PULSE et VAULT n'y ont jamais figuré : ils sont compris, ils n'ont pas
    de site, et le repli `?? code` les rend déjà tels quels.
    ══════════════════════════════════════════════════════════════════════ */
+/* 24/11/2026 (Teo) — « les termes CASHD, FILED etc. ne doivent pas
+   apparaître ». Les agents restent, leurs codes sortent de tout ce qui
+   s'affiche : chaque agent se nomme par ce qu'il fait. Le champ `system`
+   garde le code, il indexe toujours les fiches, les logos et les paliers ;
+   c'est cette table qui le traduit, avec les libellés du menu
+   (lib/menu.ts). Les anciens codes y sont aussi, pour qu'un lien ou une
+   donnée restée à l'ancien nom n'affiche jamais un code. */
 export const NOM_PAQUET: Record<string, string> = {
-  CASHD: "CASHD",
-  OFFLOAD: "OFFLOAD",
-  REPUT: "REPUT",
-  FILED: "FILED",
+  CASHD: "Relances",
+  OFFLOAD: "Clients inactifs",
+  REPUT: "Demandes clients",
+  FILED: "Factures fournisseurs",
+  RELOAD: "Clients inactifs",
+  FRONTD: "Demandes clients",
+  PULSE: "Point du matin",
+  VAULT: "Validation",
 };
 
 export const nomPaquet = (code: string) => NOM_PAQUET[code] ?? code;
+
+/* La forme qui désigne un agent depuis une autre page que la sienne :
+   « Voir l'agent de relance », « Logo de l'agent de relance ». Sur sa
+   propre page, un agent s'écrit « l'agent » tout court. */
+export const AGENT_PAQUET: Record<string, string> = {
+  CASHD: "l'agent de relance",
+  OFFLOAD: "l'agent des clients inactifs",
+  REPUT: "l'agent des demandes clients",
+  FILED: "l'agent des factures fournisseurs",
+  RELOAD: "l'agent des clients inactifs",
+  FRONTD: "l'agent des demandes clients",
+  PULSE: "le point du matin",
+  VAULT: "le système de validation",
+};
+
+export const agentPaquet = (code: string) => AGENT_PAQUET[code] ?? "l'agent";
+
+/* Le rôle d'un paquet = son titre amputé de son nom affiché
+   (« Relances · encaissements » → « encaissements »). Un titre qui n'est
+   que le nom est rendu tel quel. */
+export const sansNomPaquet = (titre: string, code: string) => {
+  const nom = nomPaquet(code);
+  if (!titre.startsWith(nom)) return titre;
+  return titre.slice(nom.length).replace(/^[\s:·•–—-]+/, "") || titre;
+};
 
 export const FAMILLES: Famille[] = [
   {
@@ -108,28 +144,28 @@ export const FAMILLES: Famille[] = [
       {
         system: "CASHD",
         slug: "relances-impayes",
-        title: "CASHD · encaissements",
+        title: "Relances · encaissements",
         job: "Les devis restés sans réponse et les factures échues font l'objet d'une relance graduée, rédigée au cas par cas selon le montant en jeu, l'ancienneté du retard et l'historique du compte. Le recouvrement suit son cours, quelle que soit la charge de votre équipe.",
         benefit: "Relance à J+3, J+7, J+21, aucun envoi sans votre validation.",
       },
       {
         system: "OFFLOAD",
         slug: "nouvelles-affaires",
-        title: "OFFLOAD · clients inactifs",
+        title: "Clients inactifs · reprise de contact",
         job: "Les clients inactifs sont identifiés dans votre historique de ventes, classés par valeur et par récence, puis recontactés un par un avec un message ancré dans ce qu'ils ont réellement acheté. Les entretiens qui redeviennent dus et les commandes que personne n'est venu reprendre entrent dans la même liste.",
         benefit: "Les clients inactifs classés par valeur, un message par compte et par trimestre.",
       },
       {
         system: "REPUT",
         slug: "demandes-clients",
-        title: "REPUT · demandes entrantes & avis",
+        title: "Demandes clients · réponses et avis",
         job: "Les demandes reçues par e-mail et par WhatsApp (horaires, tarifs, disponibilités, prise de rendez-vous) obtiennent une réponse à toute heure, tirée de la base de connaissances validée par vos équipes et jamais inventée. Chaque client satisfait se voit ensuite demander un avis au moment où il est le plus enclin à le laisser.",
         benefit: "Une demande reçue à 21 h reçoit sa réponse à 21 h, sur son canal.",
       },
       {
         system: "FILED",
         slug: "factures-fournisseurs",
-        title: "FILED · documents reçus",
+        title: "Factures fournisseurs · documents reçus",
         /* 15/09/2026 (Teo) — « on parle pas que des factures, c'est tous les
            documents, peu importe le doc que l'entreprise reçoit ; il sait
            lire ET rédiger pour tout type de document ». Ces deux champs
@@ -164,14 +200,14 @@ export const FAMILLES: Famille[] = [
       {
         system: "PULSE",
         slug: "point-du-matin",
-        title: "PULSE · le point du matin",
+        title: "Point du matin · l'activité en un message",
         job: "Chaque matin, un message unique rassemble ce qui est parti la veille, ce qui attend validation, ce qui a été bloqué et l'état de l'encours. Chaque semaine, le système vous propose ce qu'il a compris de vos corrections : vous validez ou refusez, et il ne retient que ce que vous avez accepté.",
         benefit: "L'état réel de l'activité en un message, lu en deux minutes.",
       },
       {
         system: "VAULT",
         slug: "securite",
-        title: "VAULT · validation et verrous",
+        title: "Validation · contrôles et verrous",
         job: "Rien ne part sans validation. La demande d'arrêt d'un client interrompt tout, définitivement et sur tous les canaux. Douze contrôles inscrits dans la base de données elle-même refusent ce qui ne doit pas partir : relancer un compte qui a réglé, écrire un dimanche soir, envoyer deux messages coup sur coup au même interlocuteur.",
         benefit: "Douze contrôles avant chaque envoi, et un journal de tout ce qui est parti.",
       },
@@ -248,16 +284,16 @@ export const POSTS: Post[] = [
         p: "La plupart des garages ont ce fichier : des années de clients, avec la date du dernier passage et ce qui a été fait. Personne n'a le temps de l'exploiter : les journées se passent sous les ponts, pas au téléphone. Rappeler chaque client à l'approche de l'anniversaire de sa révision serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
       },
       {
-        h: "Ce que fait OFFLOAD dans un garage",
-        p: "L'agent OFFLOAD lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
+        h: "Ce que fait l'agent des clients inactifs dans un garage",
+        p: "L'agent lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
       },
       {
         h: "Pendant ce temps, l'accueil répond",
-        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. L'agent REPUT les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
+        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. L'agent des demandes clients les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
       },
       {
         h: "Et les factures d'atelier suivent le même chemin",
-        p: "Pour les clients professionnels et les flottes qui règlent à réception, l'agent CASHD relance aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
+        p: "Pour les clients professionnels et les flottes qui règlent à réception, l'agent de relance écrit aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
       },
       {
         p: "Tout cela s'installe sur les outils déjà en place (le fichier existant, la messagerie, WhatsApp), sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
@@ -270,7 +306,7 @@ export const POSTS: Post[] = [
     author: "Pôle métiers",
     date: "3 août 2026",
     cat: "Métier",
-    cover: "/photos/offload.jpg",
+    cover: "/photos/document-administratif.jpg",
     title: "Artisan du bâtiment : les devis qu'on ne relance jamais",
     excerpt:
       "Des heures à chiffrer, puis plus rien : le devis part et le suivi s'arrête, parce que le chantier en cours passe d'abord. Ce qu'une relance organisée change pour une entreprise de travaux : sans y passer ses soirées.",
@@ -283,8 +319,8 @@ export const POSTS: Post[] = [
         p: "Ce n'est pas de la négligence, c'est une question de journées : on ne relance pas un prospect à 19 heures en rentrant d'un chantier, et le lundi il y a plus urgent. Le suivi des devis est un travail de bureau régulier dans un métier qui n'a pas de bureau régulier. C'est exactement le genre de tâche qui se confie à un agent.",
       },
       {
-        h: "Ce que fait CASHD sur les devis",
-        p: "L'agent CASHD reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis CASHD s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier (chantier, intervention, acompte, situation), et le dirigeant valide le ton une fois pour toutes.",
+        h: "Ce que fait l'agent de relance sur les devis",
+        p: "L'agent reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis l'agent s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier (chantier, intervention, acompte, situation), et le dirigeant valide le ton une fois pour toutes.",
       },
       {
         h: "Côté factures, la même discipline",
@@ -292,7 +328,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Les demandes entrantes et les pièces fournisseurs suivent",
-        p: "L'agent REPUT accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. L'agent FILED lit les factures fournisseurs reçues par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
+        p: "L'agent des demandes clients accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. L'agent des factures fournisseurs lit celles qui arrivent par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
       },
       {
         p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien, et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
@@ -322,12 +358,12 @@ export const POSTS: Post[] = [
         p: "Le coût ne se limite pas à la visite manquée. Un contact mal qualifié fait perdre du temps à tout le monde : visites organisées sans vérifier le financement, critères jamais posés, allers-retours pour des informations qui tenaient en trois questions. Et pendant que l'entrant déborde, le stock dort : les acquéreurs dont le projet n'a pas abouti, les vendeurs qui « attendaient de voir », les contacts d'estimation restés sans suite, personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
       },
       {
-        h: "Ce que fait REPUT dans une agence",
-        p: "L'agent REPUT rassemble les demandes entrantes (mail, WhatsApp) dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
+        h: "Ce que fait l'agent des demandes clients dans une agence",
+        p: "L'agent des demandes clients rassemble les demandes entrantes (mail, WhatsApp) dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent immobilier avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
       },
       {
-        h: "OFFLOAD : la base dormante d'une agence vaut de l'or",
-        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. L'agent OFFLOAD reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
+        h: "Clients inactifs : la base dormante d'une agence vaut de l'or",
+        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. L'agent des clients inactifs reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent immobilier ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
       },
       {
         h: "Le matin, deux minutes pour tout voir",
@@ -375,7 +411,7 @@ export const POSTS: Post[] = [
     author: "Pôle données",
     date: "2 juin 2026",
     cat: "Données",
-    cover: "/photos/offload-chip.jpg",
+    cover: "/photos/processeur.jpg",
     title: "RGPD : où sont hébergées vos données chez Omega.AI",
     excerpt:
       "Un espace dédié par client : chiffré, hébergé dans l'Union européenne, jamais mélangé, jamais revendu, effaçable sur demande. Ce que cela change pour une entreprise responsable de son fichier clients.",
@@ -425,7 +461,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Ce qu'une relance systématique change",
-        p: "Un agent comme CASHD ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà, chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : les clients paient d'abord les fournisseurs qui relancent avec régularité.",
+        p: "Un agent de relance ne se fatigue pas et n'oublie rien : devis relancé à J+3 puis J+7, facture échue relancée à J+7 puis J+21, mise en demeure préparée au-delà, chaque message adapté à l'ancienneté du retard, chaque envoi soumis à votre validation. Les entreprises qui passent à la relance systématique constatent le même phénomène : les clients paient d'abord les fournisseurs qui relancent avec régularité.",
       },
       {
         p: "Le calcul à faire est simple : additionnez vos factures échues de plus de trente jours, ajoutez les devis restés sans réponse le mois dernier, et comparez au coût d'un agent de relance, financé en partie par le Chèque TIC, jusqu'à 10 000 €, pour les entreprises éligibles. C'est précisément le chiffre que l'audit gratuit établit en trente minutes.",
