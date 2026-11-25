@@ -5,19 +5,19 @@
 
    Modèle choisi par Teo sur 21st.dev : la « pricing section » à curseur
    « Number of Users » au-dessus de trois cartes (pastille centrée, grand
-   prix, description, ligne de calcul, coches, bouton pleine largeur ; la
-   carte du milieu en avant).
+   prix, description, coches, bouton pleine largeur ; la carte du milieu
+   en avant).
 
-   Ce qui change par rapport au modèle :
-   · le curseur ne recalcule QUE le logiciel de gestion, 34,90 € par
-     personne et par mois. Les agents gardent leur prix fixé à l'audit, et
-     les deux ne s'additionnent jamais (règle des associés du 24/11) ;
-   · pas de Radix Slider ni de Badge shadcn : le projet n'en a pas, et un
-     <input type="range"> natif suffit (clavier, lecteur d'écran) sans
-     toucher au package-lock que partagent toutes les sessions ;
-   · le chiffre roule avec NumberFlow, déjà au projet ;
-   · les couleurs sont celles de l'accueil (fond neutral-950, blancs
-     translucides), pas les jetons shadcn.
+   Le même jour, L'AFFICHAGE À LA ODOO (Teo : « regarde Odoo, il affiche
+   quoi pour paraître pas cher ? ») : le prix d'UNE personne en très gros,
+   les centimes en exposant avec l'unité dessous, « dès 69 » pour les
+   agents, 0 € pour l'audit. Le curseur ne touche plus au grand chiffre :
+   il calcule, dans la ligne du dessous, ce que coûte le logiciel pour N
+   personnes. Les agents ne s'y ajoutent jamais (règle du 24/11).
+
+   Le reste ne change pas : <input type="range"> natif (pas de Radix
+   Slider, pour ne pas toucher au package-lock partagé), NumberFlow pour
+   le total, classes « blanches » que .aa-clair traduit en encre.
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useState } from "react";
@@ -25,13 +25,50 @@ import Link from "next/link";
 import NumberFlow from "@number-flow/react";
 import { ArrowRight, CircleCheck } from "lucide-react";
 import Apparition from "@/components/accueil/Apparition";
-import { CURSEUR, PRIX } from "@/components/accueil-v3/textes";
+import { CURSEUR, PRIX, PRIX_NOTE } from "@/components/accueil-v3/textes";
 
 /* le montant au centime près, sans l'erreur de virgule flottante de 34,9 × 3 */
 const montant = (parPersonne: number, personnes: number) =>
   Math.round(parPersonne * 100 * personnes) / 100;
 
 const personnesTexte = (n: number) => (n === 1 ? "1\u00a0personne" : `${n}\u00a0personnes`);
+
+type Chiffre = { avant: string | null; entier: string; centimes: string | null };
+
+/* le grand chiffre à la Odoo : « dès » en petit, l'entier en très gros,
+   les centimes et l'euro en exposant, l'unité sous les centimes */
+function GrandChiffre({ c, unite, lu, fort }: { c: Chiffre; unite: string | null; lu: string; fort: boolean }) {
+  return (
+    <p className="mt-5 flex items-start justify-center gap-1.5">
+      <span className="sr-only">{lu}</span>
+      {c.avant ? (
+        <span aria-hidden className="self-end pb-2 text-base text-white/55 md:pb-2.5">
+          {c.avant}
+        </span>
+      ) : null}
+      <span
+        aria-hidden
+        className={[
+          "text-6xl font-semibold leading-none tracking-tight tabular-nums md:text-7xl",
+          fort ? "text-white" : "text-white/90",
+        ].join(" ")}
+      >
+        {c.entier}
+      </span>
+      <span aria-hidden className="flex flex-col items-start pt-1 text-left">
+        <span
+          className={[
+            "text-2xl font-semibold leading-none md:text-3xl",
+            fort ? "text-white" : "text-white/90",
+          ].join(" ")}
+        >
+          {c.centimes ? `${c.centimes}\u00a0€` : "€"}
+        </span>
+        {unite ? <span className="mt-1.5 whitespace-nowrap text-xs leading-tight text-white/55">{unite}</span> : null}
+      </span>
+    </p>
+  );
+}
 
 export default function TarifsCurseur() {
   const [personnes, setPersonnes] = useState(CURSEUR.defaut);
@@ -94,17 +131,6 @@ export default function TarifsCurseur() {
                   : "border-white/[0.08] bg-white/[0.02]",
               ].join(" ")}
             >
-              {/* la mention de la carte forte, à cheval sur le filet (comme
-                  « Recommandé » sur /tarifs) : dans la pastille du nom, elle
-                  la cassait sur deux lignes à 390 px */}
-              {p.badge ? (
-                <span className="absolute inset-x-0 -top-3.5 mx-auto w-fit whitespace-nowrap rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-950">
-                  <span aria-hidden>★ </span>
-                  {p.badge}
-                </span>
-              ) : null}
-
-              {/* pastille, prix, description, ligne de calcul — centrés */}
               <div className="text-center">
                 <span
                   className={[
@@ -115,38 +141,33 @@ export default function TarifsCurseur() {
                   {p.nom}
                 </span>
 
-                <p
-                  className={[
-                    "mt-5 text-4xl font-semibold tracking-tight tabular-nums md:text-[2.75rem]",
-                    p.fort ? "text-white" : "text-white/90",
-                  ].join(" ")}
-                >
-                  {total === null ? (
-                    p.prix
+                <GrandChiffre c={p.chiffre} unite={p.unite} lu={p.lu} fort={p.fort} />
+
+                {/* la ligne du curseur : le logiciel pour N personnes */}
+                <p className="mt-3 min-h-5 text-sm text-white/60">
+                  {total === null || personnes === 1 ? (
+                    p.sous
                   ) : (
-                    <NumberFlow
-                      value={total}
-                      locales="fr-FR"
-                      format={{
-                        style: "currency",
-                        currency: "EUR",
-                        minimumFractionDigits: Number.isInteger(total) ? 0 : 2,
-                        maximumFractionDigits: 2,
-                      }}
-                    />
+                    <>
+                      Pour {personnesTexte(personnes)}{"\u00a0"}:{" "}
+                      <NumberFlow
+                        value={total}
+                        locales="fr-FR"
+                        format={{
+                          style: "currency",
+                          currency: "EUR",
+                          minimumFractionDigits: Number.isInteger(total) ? 0 : 2,
+                          maximumFractionDigits: 2,
+                        }}
+                        className="font-medium text-white/85"
+                      />{" "}
+                      HT par mois
+                    </>
                   )}
-                  {total === null ? null : <span className="text-xl font-normal text-white/55">/mois</span>}
                 </p>
 
-                <p className="mx-auto mt-3 max-w-[30ch] text-sm leading-relaxed text-white/60 text-balance">
+                <p className="mx-auto mt-4 max-w-[30ch] text-sm leading-relaxed text-white/55 text-balance">
                   {p.texte}
-                </p>
-                <p className="mt-2 text-xs text-white/45">
-                  {total === null
-                    ? p.sous
-                    : personnes === 1
-                      ? "HT pour 1\u00a0personne"
-                      : `HT pour ${personnesTexte(personnes)}, soit ${p.prix} par personne`}
                 </p>
               </div>
 
@@ -181,6 +202,10 @@ export default function TarifsCurseur() {
           );
         })}
       </div>
+
+      <p className="mx-auto mt-10 max-w-2xl text-center text-xs leading-relaxed text-white/45 text-balance">
+        {PRIX_NOTE}
+      </p>
     </div>
   );
 }

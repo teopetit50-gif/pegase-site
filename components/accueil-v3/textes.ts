@@ -387,21 +387,22 @@ export const SITUATIONS = [
 
 export const PRIX_INTRO = {
   surtitre: "Tarifs",
-  titre: "Deux prix par mois, une installation",
+  titre: "Le logiciel de gestion coûte 34,90\u00a0€ par personne et par mois",
   texte:
-    "Le logiciel de gestion se paie par personne. Chaque agent a son propre prix, fixé à l'audit selon le travail qu'il fait. L'installation se paie une seule fois. Prix hors taxes.",
+    "Ce prix comprend les six modules de gestion, des ventes à la comptabilité, et il s'applique dès la première personne. Les agents font le travail répétitif, et chacun a son propre prix, à partir de 69\u00a0€ par mois. Prix hors taxes.",
 };
 
-/* 22/11 — la carte du milieu, la carte forte, devient le logiciel de
-   gestion ; les agents gardent leur formule à l'usage, en troisième.
-   25/11/2026 — les prix deviennent publics (« Nos prix », v7) : le
-   logiciel à 34,90 € par personne, les agents de 69 à 890 € fixés à
-   l'audit. Le paiement à l'année n'est plus proposé tant qu'il n'est pas
-   tranché. */
-/* 25/11/2026 — le curseur « Nombre de personnes » de l'accueil (modèle
-   21st.dev « pricing section » à curseur, choisi par Teo). Il ne recalcule
-   QUE le logiciel (34,90 € × personnes) : les agents ont leur prix, fixé à
-   l'audit, et logiciel et agents ne s'additionnent jamais en un total. */
+/* 25/11/2026 — L'AFFICHAGE À LA ODOO (Teo : « j'aime pas ce que t'affiches
+   en prix, regarde Odoo, il affiche quoi pour paraître pas cher ? »).
+   Relevé sur odoo.com/fr_FR/pricing le même jour : un 0 € en première
+   carte, le prix d'UNE personne en très gros, les centimes en exposant,
+   l'installation absente des cartes. Nous reprenons les quatre, rien de
+   plus : pas de prix barré (il faudrait un vrai prix antérieur) ni
+   d'affichage à l'année (non tranché).
+   · `chiffre` : le grand nombre découpé (« dès » · « 69 » · « ,90 ») ;
+   · `lu` : la phrase entière pour les lecteurs d'écran ;
+   · `parPersonne` : seul le logiciel suit le curseur, dans la ligne
+     sous le prix — jamais additionné aux agents (règle du 24/11). */
 export const CURSEUR = {
   libelle: "Nombre de personnes",
   min: 1,
@@ -409,12 +410,17 @@ export const CURSEUR = {
   defaut: 10,
 };
 
+export const PRIX_NOTE =
+  "Le prix du logiciel comprend 50\u00a0Go de documents. Nous assurons aussi l'hébergement, les sauvegardes et la surveillance du service, sans supplément. L'installation se paie une seule fois\u00a0: son prix est détaillé sur la page Tarifs.";
+
 export const PRIX = [
   {
     nom: "Audit",
     texte: "Pour savoir ce qu'Omega peut faire chez vous, et à quel prix.",
-    prix: "Offert",
-    sous: "30 minutes, sans engagement",
+    chiffre: { avant: null, entier: "0", centimes: null },
+    unite: null,
+    lu: "Audit offert",
+    sous: "30 minutes, offert et sans engagement",
     points: [
       "Votre activité, passée en revue avec vous",
       "Les modules et les agents utiles chez vous",
@@ -425,15 +431,16 @@ export const PRIX = [
     href: AUDIT,
     fort: false,
     parPersonne: null,
-    badge: null,
   },
   {
     nom: "Logiciel de gestion",
     texte: "Toute votre gestion au même endroit, adaptée à votre activité par l'IA.",
-    prix: "34,90\u00a0€",
-    sous: "HT par personne et par mois, dès la première",
+    chiffre: { avant: null, entier: "34", centimes: ",90" },
+    unite: "HT / personne / mois",
+    lu: "34,90\u00a0€ HT par personne et par mois",
+    sous: "Dès la première personne",
     points: [
-      "Ventes, achats, stock, banque, comptabilité",
+      "Ventes, achats, stock, banque, comptabilité, documents",
       "Sans minimum de personnes",
       "Sept modules métier et du sur-mesure, chiffrés à l'audit",
       "Vos données reprises de votre logiciel actuel",
@@ -444,18 +451,15 @@ export const PRIX = [
     href: "/contact",
     fort: true,
     parPersonne: 34.9,
-    /* pas de mention « ★ Recommandé » (relecture du 25/11) : recommander une
-       carte avant l'audit fait le travail de l'audit, et l'étoile parle
-       le langage des avis clients. La carte reste en avant par sa forme. */
-    badge: null,
   },
   {
     nom: "Agents",
     texte: "Quatre agents, et ceux que nous construisons pour vous. Vous suivez tout au même endroit.",
-    prix: "69 à 890\u00a0€",
-    sous: "HT par agent et par mois, fixé à l'audit",
+    chiffre: { avant: "dès", entier: "69", centimes: null },
+    unite: "HT / agent / mois",
+    lu: "À partir de 69\u00a0€ HT par agent et par mois",
+    sous: "Prix fixé à l'audit, selon le volume traité",
     points: [
-      "Un prix fixé selon le volume traité",
       "Jamais un pourcentage de vos encaissements",
       "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
       "Aucun débit avant la fin de l'installation",
@@ -467,7 +471,6 @@ export const PRIX = [
     href: "/tarifs",
     fort: false,
     parPersonne: null,
-    badge: null,
   },
 ];
 
@@ -508,7 +511,7 @@ export const FAQ: Question[] = [
     id: "prix",
     cat: "Tarifs",
     q: "Combien coûte Omega\u00a0?",
-    r: "Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte de 69 à 890\u00a0€ HT par mois\u00a0: son prix dépend du travail qu'il fait, et il est fixé à l'audit. L'installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent. Une entreprise de 10 personnes paie ainsi 349\u00a0€ HT par mois de logiciel, plus ses agents.",
+    r: "Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 69\u00a0€ HT par mois\u00a0: son prix dépend du travail qu'il fait, et il est fixé à l'audit. L'installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent. Une entreprise de 10 personnes paie ainsi 349\u00a0€ HT par mois de logiciel, plus ses agents.",
   },
   {
     id: "utilisateur",

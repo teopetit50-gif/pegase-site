@@ -666,8 +666,8 @@ export default function Grille() {
       <section data-monde="clair" className="pb-10 sm:pb-14">
         <HeroSection
           annonce="Tarifs"
-          titre={{ debut: "Deux prix par mois,", accent: "une installation." }}
-          description="Le logiciel de gestion se paie par personne. Chaque agent a son propre prix, fixé à l'audit selon le travail qu'il fait. L'installation se paie une seule fois, à part."
+          titre={{ debut: "Le logiciel de gestion coûte", accent: "34,90\u00a0€ par personne et par mois." }}
+          description={"Ce prix comprend les six modules de gestion, des ventes à la comptabilité, et il s'applique dès la première personne. Les agents font le travail répétitif, et chacun a son propre prix, à partir de 69\u00a0€ par mois. Prix hors taxes."}
           ctaTexte="Réserver un audit"
           ctaHref="/reserver-un-audit"
           souscta="30 minutes, gratuit, sans engagement"

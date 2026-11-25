@@ -83,7 +83,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    "Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois. Chaque agent IA coûte de 69 à 890\u00a0€ HT par mois, et son prix est fixé à l'audit. L'installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent.",
+    "Le logiciel de gestion Omega coûte 34,90\u00a0€ HT par personne et par mois, sans minimum. Chaque agent IA coûte à partir de 69\u00a0€ HT par mois, et son prix est fixé à l'audit.",
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -119,7 +119,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Combien coûte Omega\u00a0?",
     r: [
-      "Vous payez chaque mois deux prix, celui du logiciel et celui de vos agents, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte de 69 à 890\u00a0€ HT par mois, selon le travail qu'il fait pour vous. L'installation coûte dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent.",
+      "Le logiciel et les agents se paient chacun au mois, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 69\u00a0€ HT par mois, selon le travail qu'il fait pour vous. L'installation coûte dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent.",
       "Exemple\u00a0: une entreprise de 10 personnes paie 349\u00a0€ HT par mois pour le logiciel de gestion. S'y ajoute le prix de ses agents, écrit au devis.",
     ],
   },
@@ -174,7 +174,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Plusieurs services valident chez nous : cette grille s'applique-t-elle ?",
     r: [
-      "En partie seulement. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par personne et par mois pour le logiciel, de 69 à 890\u00a0€ HT par mois pour chaque agent. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
+      "En partie seulement. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par personne et par mois pour le logiciel, à partir de 69\u00a0€ HT par mois pour chaque agent. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
       "Votre point d'entrée est le diagnostic, dans un format plus long : nous relevons votre volumétrie service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
@@ -208,7 +208,7 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "Chaque agent est payé au travail qu'il fait",
     texte:
-      "Il coûte de 69 à 890\u00a0€ HT par mois, selon le volume qu'il traite\u00a0: factures lues, demandes reçues, relances envoyées.",
+      "Il coûte à partir de 69\u00a0€ HT par mois, selon le volume qu'il traite\u00a0: factures lues, demandes reçues, relances envoyées.",
     points: [
       "Deux entreprises de même taille n'ont pas le même volume",
       "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
@@ -226,7 +226,7 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "L'installation se paie une fois",
     texte:
-      "Pour le logiciel, elle coûte 1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT selon la taille de votre entreprise\u00a0; pour chaque agent, 290, 590 ou 1\u00a0190\u00a0€ HT. Aucun débit n'intervient avant la fin de l'installation.",
+      "Pour le logiciel, elle coûte 1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT selon la taille de votre entreprise\u00a0; pour chaque agent, 290, 590 ou 1\u00a0190\u00a0€ HT. Pour les agents, rien n'est débité avant la fin de leur installation.",
     points: [
       "Elle peut relever du Chèque TIC, porté par la Région Guadeloupe, pour les entreprises qui y sont immatriculées",
       "Les agents restent mensuels, sans engagement",

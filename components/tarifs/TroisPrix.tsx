@@ -2,25 +2,35 @@
    Les prix publics d'Omega — 25/11/2026 (Teo, d'après « Nos prix », v7,
    et « Ce qui change par rapport à la version 7 », 24/11).
 
-   Le client voit deux prix par mois, le logiciel et ses agents, puis une
-   installation payée une fois. Ce sont deux facturations indépendantes :
-   le bloc ne les additionne JAMAIS en un total « tout compris ».
+   Logiciel et agents sont deux facturations indépendantes : le bloc ne
+   les additionne JAMAIS en un total « tout compris ».
+
+   Le même jour, L'AFFICHAGE À LA ODOO (relevé sur odoo.com/fr_FR/pricing) :
+   un 0 € en première carte (l'audit), le prix d'UNE personne en très gros
+   avec les centimes en exposant, « dès 69 » pour les agents. L'installation
+   sort des cartes : une ligne dessous, le détail dans « Comment nous
+   chiffrons » et la FAQ. Pas de prix barré ni d'affichage à l'année.
 
    Ce qui n'est PAS écrit ici, faute de décision : l'assistant IA (vendu
    à part ou inclus avec un quota), le compte « léger », le paiement à
-   l'année, un prix « à partir de » par agent. Ce qui ne s'écrit jamais :
-   le barème interne des agents, les marges, la majoration des fichiers en
-   désordre, la TVA antillaise (doctrine §17 bis).
+   l'année. Ce qui ne s'écrit jamais : le barème interne des agents, les
+   marges, la majoration des fichiers en désordre, la TVA antillaise
+   (doctrine §17 bis).
    ══════════════════════════════════════════════════════════════════════ */
 
 import { Check } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 
+type Chiffre = { avant: string | null; entier: string; centimes: string | null };
+
 type Prix = {
   nom: string;
-  montant: string;
-  unite: string;
+  chiffre: Chiffre;
+  unite: string | null;
+  /* la phrase entière, pour les lecteurs d'écran */
+  lu: string;
+  sous: string;
   texte: string;
   points: string[];
   fort?: boolean;
@@ -28,25 +38,42 @@ type Prix = {
 
 export const PRIX_PUBLICS: Prix[] = [
   {
-    nom: "Logiciel de gestion",
-    montant: "34,90\u00a0€",
-    unite: "HT par personne et par mois",
+    nom: "Audit",
+    chiffre: { avant: null, entier: "0", centimes: null },
+    unite: null,
+    lu: "Audit offert",
+    sous: "30 minutes, offert et sans engagement",
     texte:
-      "Ventes, achats, stock, banque, comptabilité et documents partagent les mêmes données. Le prix est le même pour tous, dès la première personne.",
+      "Nous passons votre activité en revue avec vous, puis votre prix est écrit avant que vous signiez.",
     points: [
-      "Sans minimum de personnes",
+      "Les modules et les agents utiles chez vous",
+      "Une proposition écrite, prix compris",
+      "Le calendrier de démarrage",
+    ],
+  },
+  {
+    nom: "Logiciel de gestion",
+    chiffre: { avant: null, entier: "34", centimes: ",90" },
+    unite: "HT / personne / mois",
+    lu: "34,90\u00a0€ HT par personne et par mois",
+    sous: "Sans minimum, dès la première personne",
+    texte:
+      "Ventes, achats, stock, banque, comptabilité et documents partagent les mêmes données. Le prix est le même pour tous.",
+    points: [
       "Les six modules compris",
       "Un compte par personne\u00a0: vous savez qui a validé chaque facture",
       "50\u00a0Go de documents compris",
+      "Hébergement, sauvegardes et surveillance du service compris",
     ],
     fort: true,
   },
   {
     nom: "Agents IA",
-    montant: "69 à 890\u00a0€",
-    unite: "HT par agent et par mois",
-    texte:
-      "Chaque agent est payé au travail qu'il fait pour vous. Son prix est fixé à l'audit, selon le volume qu'il traite.",
+    chiffre: { avant: "dès", entier: "69", centimes: null },
+    unite: "HT / agent / mois",
+    lu: "À partir de 69\u00a0€ HT par agent et par mois",
+    sous: "Prix fixé à l'audit, selon le volume traité",
+    texte: "Chaque agent est payé au travail qu'il fait pour vous\u00a0: une facture lue, une relance envoyée.",
     points: [
       "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
       "Vous êtes prévenu à 75\u00a0%, puis à 90\u00a0% du forfait",
@@ -54,22 +81,38 @@ export const PRIX_PUBLICS: Prix[] = [
       "Remboursé pendant 30 jours",
     ],
   },
-  {
-    nom: "Installation",
-    montant: "dès 1\u00a0200\u00a0€",
-    unite: "HT pour le logiciel, une seule fois",
-    texte:
-      "Nous reprenons vos données, l'IA paramètre le logiciel, puis votre expert-comptable vérifie les réglages. Le prix du logiciel dépend de la taille de votre entreprise.",
-    points: [
-      "1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT pour le logiciel",
-      "290, 590 ou 1\u00a0190\u00a0€ HT par agent",
-      "Aucun débit avant la fin de l'installation",
-    ],
-  },
 ];
+
+export const NOTE_INSTALLATION =
+  "L'installation se paie une seule fois\u00a0: dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent. Pour les agents, rien n'est débité avant la fin de leur installation.";
 
 export const NOTE_TVA =
   "Prix hors taxes. La TVA s'y ajoute au taux qui s'applique à votre entreprise.";
+
+/* le grand chiffre à la Odoo : « dès » en petit, l'entier en très gros,
+   les centimes et l'euro en exposant, l'unité sous les centimes */
+function GrandChiffre({ p }: { p: Prix }) {
+  const c = p.chiffre;
+  return (
+    <p className="mt-4 flex items-start gap-1.5">
+      <span className="sr-only">{p.lu}</span>
+      {c.avant ? (
+        <span aria-hidden className="self-end pb-1.5 text-base text-[#616161]">
+          {c.avant}
+        </span>
+      ) : null}
+      <span aria-hidden className="text-6xl font-bold leading-none tracking-[-0.03em] text-[#050505]">
+        {c.entier}
+      </span>
+      <span aria-hidden className="flex flex-col items-start pt-1">
+        <span className="text-2xl font-bold leading-none text-[#050505]">
+          {c.centimes ? `${c.centimes}\u00a0€` : "€"}
+        </span>
+        {p.unite ? <span className="mt-1.5 whitespace-nowrap text-xs leading-tight text-[#616161]">{p.unite}</span> : null}
+      </span>
+    </p>
+  );
+}
 
 export default function TroisPrix() {
   return (
@@ -85,8 +128,8 @@ export default function TroisPrix() {
           >
             <CardHeader className="pb-4 pt-7">
               <CardTitle className="font-[family-name:var(--font-jakarta)] text-xl">{p.nom}</CardTitle>
-              <p className="mt-3 text-4xl font-bold tracking-[-0.02em] text-[#050505]">{p.montant}</p>
-              <p className="mt-1 text-sm text-[#616161]">{p.unite}</p>
+              <GrandChiffre p={p} />
+              <p className="mt-2 text-sm text-[#616161]">{p.sous}</p>
               <CardDescription className="pt-3 text-[15px] leading-relaxed text-[#3d3d3d]">
                 {p.texte}
               </CardDescription>
@@ -104,7 +147,8 @@ export default function TroisPrix() {
           </Card>
         ))}
       </div>
-      <p className="mt-6 text-center text-xs text-[#767676]">{NOTE_TVA}</p>
+      <p className="mt-6 text-center text-sm text-[#3d3d3d]">{NOTE_INSTALLATION}</p>
+      <p className="mt-2 text-center text-xs text-[#767676]">{NOTE_TVA}</p>
     </div>
   );
 }
