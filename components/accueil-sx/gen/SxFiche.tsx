@@ -79,7 +79,7 @@ export default function SxFiche() {
                       {"L"}
                     </span>
                     <strong>
-                      {"Laurent & Fils"}
+                      {"Holding Laurent"}
                     </strong>
                     <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-sort-vertical-bold"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                       <path d={"M12 13.125C12.3012 13.125 12.5732 13.3052 12.6907 13.5827C12.8081 13.8601 12.7481 14.1808 12.5384 14.3971L8.53841 18.5221C8.39716 18.6678 8.2029 18.75 7.99999 18.75C7.79708 18.75 7.60282 18.6678 7.46156 18.5221L3.46156 14.3971C3.25185 14.1808 3.19189 13.8601 3.30931 13.5827C3.42673 13.3052 3.69874 13.125 3.99999 13.125H7.24999V6C7.24999 5.58579 7.58577 5.25 7.99999 5.25C8.4142 5.25 8.74999 5.58579 8.74999 6V13.125H12Z"} fill={"currentColor"} />
@@ -200,19 +200,19 @@ export default function SxFiche() {
                     <li>
                       <i className={"sb-entity-dot"} style={{ "background": "#16a34a" } as CSSProperties} />
                       <span>
-                        {"Laurent Menuiserie SAS"}
+                        {"Maison Laurent SAS"}
                       </span>
                     </li>
                     <li>
                       <i className={"sb-entity-dot"} style={{ "background": "#2d00f7" } as CSSProperties} />
                       <span>
-                        {"Laurent Pose SARL"}
+                        {"Alpes Distribution"}
                       </span>
                     </li>
                     <li>
                       <i className={"sb-entity-dot"} style={{ "background": "#f06a00" } as CSSProperties} />
                       <span>
-                        {"Laurent Négoce"}
+                        {"Jura Services"}
                       </span>
                     </li>
                   </ul>
@@ -348,7 +348,7 @@ export default function SxFiche() {
                             </span>
                           </div>
                           <p>
-                            {"Hôtel des Quais · Bordeaux · Laurent Menuiserie SAS"}
+                            {"Roux Conseil · Bordeaux · Maison Laurent SAS"}
                           </p>
                         </div>
                       </div>
@@ -387,7 +387,7 @@ export default function SxFiche() {
                               {" Résumé de l'IA"}
                             </div>
                             <p>
-                              {"Anne-Marie Roux a signé son devis le 28 oct. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov. et la visite de fin de chantier suit le 3 fév."}
+                              {"Anne-Marie Roux a signé son devis le 28 oct. L'acompte est encaissé, le matériel commandé et la livraison planifiée. La facture part le 27 nov. et le point de fin de projet suit le 3 fév."}
                             </p>
                           </div>
                         </div>
@@ -426,10 +426,10 @@ export default function SxFiche() {
                               </span>
                               <div>
                                 <strong>
-                                  {"Fin de chantier"}
+                                  {"Fin de projet"}
                                 </strong>
                                 <p>
-                                  {"Mar. 3 fév. · avec Rémi Lambert"}
+                                  {"Mer. 3 fév. · avec Rémi Lambert"}
                                 </p>
                               </div>
                               <span className={"sb-when"}>
@@ -521,7 +521,7 @@ export default function SxFiche() {
                               </div>
                               <div>
                                 <dt>
-                                  {"Situations facturées"}
+                                  {"Factures émises"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -534,7 +534,7 @@ export default function SxFiche() {
                               </div>
                               <div>
                                 <dt>
-                                  {"Avenants signés"}
+                                  {"Livraisons faites"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -547,7 +547,7 @@ export default function SxFiche() {
                               </div>
                               <div>
                                 <dt>
-                                  {"Réserves levées"}
+                                  {"Paiements reçus"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -603,10 +603,10 @@ export default function SxFiche() {
                             </span>
                           </div>
                           <div aria-hidden={"true"} data-slot={"pay-breakdown-chart-divider"} className={"h-px origin-left bg-border-soft"} />
-                          <div role={"slider"} tabIndex={0} aria-label={"Encaissé à ce jour, par poste"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Pose, 3–6 nov. · 32 h : 1 006,08 €"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
+                          <div role={"slider"} tabIndex={0} aria-label={"Encaissé à ce jour, par poste"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Prestation, 3–6 nov. · 32 h : 1 006,08 €"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
                             <SxBarres
                               categories={[
-                                { cle: "normal-hours", etiquette: "Pose", part: "75 %", couleur: "purple", montants: [1006.08, 1257.6] },
+                                { cle: "normal-hours", etiquette: "Prestation", part: "75 %", couleur: "purple", montants: [1006.08, 1257.6] },
                                 { cle: "overtime", etiquette: "Fournitures", part: "10 %", couleur: "blue", montants: [188.64, 125.76] },
                                 { cle: "benefits", etiquette: "Déplacements", part: "9 %", couleur: "orange", montants: [150, 64.29, 51.42] },
                                 { cle: "employer-contributions", etiquette: "Options", part: "6 %", couleur: "green", montants: [128.57, 22.64, 24.5] },
@@ -616,7 +616,7 @@ export default function SxFiche() {
                         </div>
                       </div>
                       <div className={"sb-record-side"}>
-                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-spend"} role={"group"} aria-label={"Dépenses du chantier"}>
+                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-spend"} role={"group"} aria-label={"Dépenses du projet"}>
                           <div className={"flex items-center justify-between gap-4"}>
                             <div className={"flex min-w-0 items-center gap-3"}>
                               <span data-slot={"chart-icon-tile"} className={"relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[13.2px] bg-primary-orange-500 text-fg-white [&_svg]:size-6 shadow-[0_8.8px_7.92px_-6.6px_rgb(0_0_0/0.16),0_4.4px_7.92px_rgb(1_1_1/0.08)]"}>
@@ -635,7 +635,7 @@ export default function SxFiche() {
                               </span>
                               <div className={"flex min-w-0 flex-col gap-1.5"}>
                                 <p className={"typo-heading-01-semibold -my-0.5 truncate py-0.5 text-fg-loud"}>
-                                  {"Dépenses du chantier"}
+                                  {"Dépenses du projet"}
                                 </p>
                                 <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
                                   {"7 048,50 € depuis le devis · 28 oct."}
@@ -650,14 +650,14 @@ export default function SxFiche() {
                           </div>
                           <div data-slot={"spend-column-chart-born"} className={"flex flex-col items-start gap-2.5"}>
                             <p className={"typo-label-03-medium hug-w whitespace-nowrap text-fg-soft"}>
-                              {"Main-d'œuvre"}
+                              {"Prestation"}
                             </p>
                             <p className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
                               {"2 578,08 € · 37 %"}
                             </p>
                           </div>
                           <div className={"flex flex-col gap-2"}>
-                            <div role={"group"} aria-label={"Dépenses du chantier, par poste"} data-slot={"spend-column-chart-plot"} className={"relative isolate flex gap-2"} style={{ "height": "208.921px" } as CSSProperties}>
+                            <div role={"group"} aria-label={"Dépenses du projet, par poste"} data-slot={"spend-column-chart-plot"} className={"relative isolate flex gap-2"} style={{ "height": "208.921px" } as CSSProperties}>
                               <svg aria-hidden={"true"} className={"pointer-events-none absolute size-0 overflow-hidden"}>
                                 <defs>
                                   <linearGradient id={"_R_ruhtavb_-grey-right"} gradientUnits={"userSpaceOnUse"} x1={"35.8613"} y1={"8.0502"} x2={"35.8613"} y2={"188.448"}>
@@ -678,7 +678,7 @@ export default function SxFiche() {
                                   </linearGradient>
                                 </defs>
                               </svg>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Pose : 2,6 k€"} aria-pressed={"true"} tabIndex={0} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Prestation : 2,6 k€"} aria-pressed={"true"} tabIndex={0} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "188.921px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -700,7 +700,7 @@ export default function SxFiche() {
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Vernis : 65 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Envoi : 65 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "4.773px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -722,7 +722,7 @@ export default function SxFiche() {
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Bois : 394 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Matériel : 394 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "28.893px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -744,7 +744,7 @@ export default function SxFiche() {
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Visserie : 450 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Licences : 450 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "32.976px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -766,7 +766,7 @@ export default function SxFiche() {
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Renfort : 2,2 k€"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Intérim : 2,2 k€"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "163.047px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -816,27 +816,27 @@ export default function SxFiche() {
                               <span data-slot={"spend-column-chart-pill"} className={"absolute inset-y-0 rounded-lg bg-surface-muted"} style={{ "left": "calc(0 * ((100% - 40px) / 6 + 8px))", "width": "calc((100% - 40px) / 6)" } as CSSProperties} />
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-semibold text-fg-white"}>
-                                  {"Pose"}
+                                  {"Prestation"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Vernis"}
+                                  {"Envoi"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Bois"}
+                                  {"Matériel"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Visserie"}
+                                  {"Licences"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Renfort"}
+                                  {"Intérim"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
@@ -892,7 +892,7 @@ export default function SxFiche() {
                                   {" avec le devis"}
                                 </p>
                                 <small>
-                                  {"Agent Omega · 30 oct."}
+                                  {"Banque · 30 oct."}
                                 </small>
                               </div>
                             </li>
@@ -908,7 +908,7 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Chantier ouvert"}
+                                    {"Projet ouvert"}
                                   </strong>
                                   {", suivi par Rémi Lambert"}
                                 </p>
@@ -927,9 +927,9 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Commande de bois"}
+                                    {"Commande de matériel"}
                                   </strong>
-                                  {" passée chez Roux Matériaux"}
+                                  {" passée chez Papeteries Dumas"}
                                 </p>
                                 <small>
                                   {"Achats · 2 nov."}
@@ -947,7 +947,7 @@ export default function SxFiche() {
                                   <strong>
                                     {"Stock réservé"}
                                   </strong>
-                                  {" pour 18 panneaux, selon le devis"}
+                                  {" pour 18 articles, selon le devis"}
                                 </p>
                                 <small>
                                   {"Stock · 3 nov."}
@@ -981,7 +981,7 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Fin de chantier"}
+                                    {"Fin de projet"}
                                   </strong>
                                   {" prévue le 3 fév."}
                                 </p>

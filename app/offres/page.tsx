@@ -27,7 +27,6 @@ import Bouton from "@/components/charte/Bouton";
 import Pastille from "@/components/charte/Pastille";
 import { GrilleCartes, Scene } from "@/components/charte/Cartes";
 import { POSTS } from "@/lib/content";
-import { SECTEURS } from "@/lib/secteurs";
 import "./nos-offres.css";
 import "@/components/charte/pages/offres.css";
 
@@ -181,7 +180,7 @@ export const metadata: Metadata = {
      aucun style ne change : seuls les textes, à longueur égale. */
   title: "Le logiciel et ses modules | Omega.AI",
   description:
-    "Omega, le logiciel de gestion qui se configure avec l'IA : relances, réactivation des clients, demandes entrantes, factures fournisseurs, modules métier et sur-mesure. Vous décidez de ce qui part.",
+    "Omega, le logiciel de gestion qui se configure avec l'IA : ventes, achats, stock, banque, comptabilité et documents, avec des agents pour les relances, les clients inactifs, les demandes et les factures fournisseurs. Vous décidez de ce qui part.",
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -441,8 +440,8 @@ const PAQUETS = [
    Longueurs, référence puis nous : 22-33 · 18-25. */
 const RESSOURCES = [
   { slug: "impayes-cout-attendre", libelle: "Le coût d'attendre", icone: Hourglass },
-  { slug: "btp-devis-jamais-relances", libelle: "Les devis sans réponse", icone: FileClock },
-  { slug: "immobilier-repondre-en-premier", libelle: "Répondre en premier", icone: Send },
+  { slug: "devis-sans-relance", libelle: "Les devis sans réponse", icone: FileClock },
+  { slug: "repondre-en-premier", libelle: "Répondre en premier", icone: Send },
   { slug: "facturation-electronique-2026", libelle: "La facture électronique", icone: ReceiptText },
 ]
   .map((r) => ({ ...r, post: POSTS.find((p) => p.slug === r.slug) }))
@@ -682,10 +681,7 @@ export default function OffresPage() {
 
           {/* ═══ 5c · LES QUATRE AGENTS, en grille de cartes jointives ═══ */}
           <Section id="catalogue" className="of-ancre">
-            {/* 25/09 (Teo) — le catalogue a deux parties, les mêmes que les
-                deux colonnes du menu : ce qui sert à toute entreprise, puis
-                le logiciel de chaque métier (5c bis). */}
-            <EnTeteSection pastille="Pour toutes les entreprises" titre="Quatre agents pour le travail répétitif." />
+            <EnTeteSection pastille="Les agents" titre="Quatre agents pour le travail répétitif." />
             <GrilleCartes colonnes={4}>
               {PAQUETS.map(({ icone: Icone, titre, href, lignes }) => (
                 <Link key={titre} href={href} className="ch-carte of-fiche">
@@ -708,44 +704,10 @@ export default function OffresPage() {
             </GrilleCartes>
           </Section>
 
-          {/* ═══ 5c bis · LE LOGICIEL DE CHAQUE MÉTIER ═══
-              25/09 (Teo) — « on peut aussi bien prendre le SaaS BTP et vouloir
-              prendre CASHD ». Le métier en titre, le logiciel en dessous : on
-              cherche « BTP », pas « Daliro ». */}
-          <Section id="metiers" className="of-ancre">
-            <EnTeteSection
-              pastille="Pour votre métier"
-              titre="Un module par métier, combiné aux agents."
-              chapo="Un seul audit pour l'ensemble."
-            />
-            <div className="of-metiers">
-              <GrilleCartes colonnes={3}>
-                {SECTEURS.map((s) => (
-                  <Link key={s.slug} href={`/secteurs/${s.slug}`} className="ch-carte of-fiche of-fiche--metier">
-                    <div className="ch-carte-texte">
-                      <span
-                        aria-hidden
-                        className="of-fiche__icone of-fiche__signe"
-                        style={
-                          {
-                            "--of-signe": `url(/logos/${s.saas.toLowerCase()}-mark.png)`,
-                          } as React.CSSProperties
-                        }
-                      />
-                      <h3>{s.metier}</h3>
-                      <p className="of-fiche__saas">{s.saas}</p>
-                      <p>{s.texte}</p>
-                    </div>
-                  </Link>
-                ))}
-              </GrilleCartes>
-            </div>
-            <div className="of-cellule of-metiers__pied">
-              <Bouton href="/secteurs" icone="chevron">
-                Voir tous les métiers
-              </Bouton>
-            </div>
-          </Section>
+          {/* 25/11 (Teo : « arrête de parler ou montrer comme exemple les
+              trucs BTP etc, les SaaS métier ; focus sur l'ERP, les agents
+              qu'on vend ») — le bloc 5c bis, « Un module par métier », sort
+              de la page. Les pages /secteurs restent en ligne, sans lien. */}
 
           {/* ═══ 5d · LES RESSOURCES : le pictogramme au trait dans sa
                  scène, le titre court dessous ═══ */}

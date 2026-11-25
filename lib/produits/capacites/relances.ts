@@ -47,7 +47,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Une facture échue suit trois paliers : deux relances, puis la mise en demeure.", atteste: true },
         { t: "Un devis sans réponse est relancé au troisième jour, puis sept jours après ce rappel.", atteste: true },
         { t: "La fermeté du message suit le palier atteint, du rappel à la mise en demeure.", atteste: true },
-        { t: "Chaque message reprend le secteur du compte, sa référence, son montant et son retard.", atteste: true },
+        { t: "Chaque message reprend le nom du compte, sa référence, son montant et son retard.", atteste: true },
         { t: "Les relances partent par courriel, depuis la boîte de votre entreprise.", atteste: true },
         { t: "Au-delà d'un montant que vous fixez, la relance remonte à la direction avant l'envoi.", atteste: true },
         { t: "Chaque facture suit sa propre séquence, avec son palier et son échéance.", atteste: true },
@@ -154,7 +154,7 @@ export const CAS_LIMITES: BlocCasLimites = {
       r: "Le compte est signalé comme réciproque et sort du cycle automatique. La compensation relève d'une décision de la direction financière, jamais d'une relance partie seule.",
     },
     {
-      q: "Le dossier est passé entre les mains d'un avocat.",
+      q: "Le dossier est passé au contentieux.",
       r: "Le compte bascule en recouvrement et toute relance commerciale cesse, y compris celle qui était déjà rédigée. Les pièces, les envois et les accusés sont réunis dans un dossier remis à qui vous désignez.",
     },
     {

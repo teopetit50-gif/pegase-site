@@ -417,7 +417,7 @@ export default function SxAgents() {
                       {"Gabriel Meyer"}
                     </strong>
                     <p>
-                      {"Avez-vous un créneau pour une pose cette semaine ?"}
+                      {"Pouvez-vous me rappeler cette semaine ?"}
                     </p>
                     <div className={"ft-reply"}>
                       <i className={"ft-skeleton"} style={{ "width": "92%" } as CSSProperties} />

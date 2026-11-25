@@ -124,7 +124,7 @@ export const OUTIL_INFOS: Record<string, Fiche> = {
      outils du client figurent ici. Ne pas la remettre. */
   Zapier: {
     famille: "Automatisation",
-    role: "Passerelle vers les outils métier qui ne sont pas raccordés en direct.",
+    role: "Passerelle vers les autres outils, quand ils ne sont pas raccordés en direct.",
   },
   Trello: {
     famille: "Projet & CRM",

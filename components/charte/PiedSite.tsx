@@ -24,9 +24,9 @@ export default function PiedSite() {
           <div className={"relative mx-auto w-full max-w-[1920px] border-b border-current/10 px-[32px] ipad:px-[52px] desktop-sm:px-[72px]"}>
             <div className={"grid grid-cols-1 divide-y divide-current/10 md:grid-cols-4 md:divide-x md:divide-y-0"}>
               <div className={"relative"}>
-                <Link href={"/offres"} data-gutter-guide={"bottom"} className={"group flex items-center justify-between border-b border-current/10 px-3 py-2.5 text-sm transition-colors hover:bg-current/5"}>
+                <Link href={"/offres#catalogue"} data-gutter-guide={"bottom"} className={"group flex items-center justify-between border-b border-current/10 px-3 py-2.5 text-sm transition-colors hover:bg-current/5"}>
                   <span className={"font-medium"}>
-                    {"Logiciel"}
+                    {"Agents"}
                   </span>
                   <svg xmlns={"http://www.w3.org/2000/svg"} width={"24"} height={"24"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"} strokeLinecap={"round"} strokeLinejoin={"round"} className={"lucide lucide-arrow-right size-4 opacity-55 transition-[opacity,translate] group-hover:translate-x-0.5 group-hover:opacity-100"} aria-hidden={"true"}>
                     <path d={"M5 12h14"} />
@@ -35,7 +35,7 @@ export default function PiedSite() {
                 </Link>
                 <div className={"px-3 pt-2 pb-8"}>
                   <h3 className={"mt-2 mb-4 text-xs font-medium tracking-wider uppercase opacity-75"}>
-                    {"Agents"}
+                    {"Le travail répétitif"}
                   </h3>
                   <ul className={"flex flex-col gap-1.5"}>
                     <li>
@@ -68,9 +68,9 @@ export default function PiedSite() {
               </div>
               <div className={"relative"}>
                 <span data-gutter-guide={"top"} aria-hidden={"true"} className={"absolute inset-x-0 top-0 h-px md:hidden"} />
-                <Link href={"/secteurs"} data-gutter-guide={"bottom"} className={"group flex items-center justify-between border-b border-current/10 px-3 py-2.5 text-sm transition-colors hover:bg-current/5"}>
+                <Link href={"/gestion"} data-gutter-guide={"bottom"} className={"group flex items-center justify-between border-b border-current/10 px-3 py-2.5 text-sm transition-colors hover:bg-current/5"}>
                   <span className={"font-medium"}>
-                    {"Métiers"}
+                    {"Gestion"}
                   </span>
                   <svg xmlns={"http://www.w3.org/2000/svg"} width={"24"} height={"24"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"} strokeLinecap={"round"} strokeLinejoin={"round"} className={"lucide lucide-arrow-right size-4 opacity-55 transition-[opacity,translate] group-hover:translate-x-0.5 group-hover:opacity-100"} aria-hidden={"true"}>
                     <path d={"M5 12h14"} />
@@ -79,32 +79,32 @@ export default function PiedSite() {
                 </Link>
                 <div className={"px-3 pt-2 pb-8"}>
                   <h3 className={"mt-2 mb-4 text-xs font-medium tracking-wider uppercase opacity-75"}>
-                    {"Modules métier"}
+                    {"L'ERP"}
                   </h3>
                   <ul className={"flex flex-col gap-1.5"}>
                     <li>
-                      <Link href={"/secteurs/btp"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"BTP"}
+                      <Link href={"/gestion#modules"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Ventes"}
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/secteurs/avocats"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Avocats"}
+                      <Link href={"/gestion#modules"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Achats"}
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/secteurs/architectes"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Architectes"}
+                      <Link href={"/gestion#modules"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Stock"}
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/secteurs/location-automobile"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Loueurs automobiles"}
+                      <Link href={"/gestion#modules"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Banque"}
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/secteurs/dentaire"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Cabinets dentaires"}
+                      <Link href={"/gestion#modules"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Comptabilité"}
                       </Link>
                     </li>
                   </ul>
@@ -127,8 +127,8 @@ export default function PiedSite() {
                   </h3>
                   <ul className={"flex flex-col gap-1.5"}>
                     <li>
-                      <Link href={"/gestion"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Gestion"}
+                      <Link href={"/offres"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Toute l'offre"}
                       </Link>
                     </li>
                     <li>
@@ -147,8 +147,8 @@ export default function PiedSite() {
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/vos-donnees"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Où vont vos données"}
+                      <Link href={"/tarifs#automatisations"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Automatisations"}
                       </Link>
                     </li>
                   </ul>
@@ -191,8 +191,8 @@ export default function PiedSite() {
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/secteurs"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Tous les métiers"}
+                      <Link href={"/vos-donnees"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Où vont vos données"}
                       </Link>
                     </li>
                   </ul>

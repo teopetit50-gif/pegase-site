@@ -189,7 +189,7 @@ export function PanneauMethode({
               ))}
             </ul>
             <p className="smd-chiffre-label mt-6 !text-left md:mt-8">
-              Aucun secteur n&apos;est exclu · le critère est le processus, pas le métier
+              Aucune entreprise n&apos;est exclue · le critère est le processus
             </p>
           </div>
         </div>

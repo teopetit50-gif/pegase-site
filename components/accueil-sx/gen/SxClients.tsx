@@ -16,12 +16,12 @@ export default function SxClients() {
               {"Ce qu'Omega reprend, cas par cas."}
               <br />
               <span>
-                {"Du chantier au cabinet, du site unique au groupe."}
+                {"De la vente à la clôture, du site unique au groupe."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Nos agents et nos modules métier prennent ces situations en charge chaque jour. Vous gardez la décision."}
+            {"Les agents et les modules de l'ERP prennent ces situations en charge chaque jour. Vous gardez la décision."}
           </p>
         </header>
         <div className={"ts-grid"}>
@@ -31,7 +31,7 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque devis en attente et chaque facture échue reçoivent leur relance à la bonne date, et chaque demande sa réponse. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent."}
+                {"Chaque matin, les relances des devis en attente et des factures échues sont prêtes, écrites dans votre ton, et chaque demande reçue a sa réponse rédigée. Rien ne part sans votre validation."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
@@ -44,13 +44,13 @@ export default function SxClients() {
             </figcaption>
           </figure>
           <div className={"ts-cell ts-logo is-shaded"} data-gutter-guide={"bottom"}>
-            <span className={"ts-wordmark"} role={"img"} aria-label={"Daliro, le module du BTP"}>
+            <span className={"ts-wordmark"} role={"img"} aria-label={"Ventes, le module des devis et des factures"}>
               <span className={"is-moreno"}>
                 <b>
-                  {"DALIRO"}
+                  {"VENTES"}
                 </b>
                 <small>
-                  {"BÂTIMENT"}
+                  {"DEVIS · FACTURES"}
                 </small>
               </span>
             </span>
@@ -68,30 +68,30 @@ export default function SxClients() {
             </figcaption>
           </figure>
           <div className={"ts-cell ts-logo"} data-gutter-guide={"bottom"}>
-            <span className={"ts-wordmark"} role={"img"} aria-label={"Tamila, le module des avocats"}>
+            <span className={"ts-wordmark"} role={"img"} aria-label={"Banque, le module des rapprochements"}>
               <span className={"is-marula"}>
                 <svg viewBox={"0 0 24 24"} aria-hidden={"true"}>
                   <circle cx={"12"} cy={"12"} r={"11"} fill={"currentColor"} />
                   <path d={"M7.5 16.5c0-5 3.4-8.6 9.5-9 0 6-3.6 9.4-9.5 9Z"} fill={"#f5f5f2"} />
                 </svg>
                 <b>
-                  {"tamila"}
+                  {"BANQUE"}
                 </b>
                 <span>
-                  {"avocats"}
+                  {"& TVA"}
                 </span>
               </span>
             </span>
           </div>
           <div className={"ts-cell ts-logo"} data-gutter-guide={"bottom"}>
-            <span className={"ts-wordmark"} role={"img"} aria-label={"Lorani, le module des architectes"}>
+            <span className={"ts-wordmark"} role={"img"} aria-label={"Stock, le module des articles"}>
               <span className={"is-saltpan"}>
                 <svg viewBox={"0 0 24 24"} aria-hidden={"true"}>
                   <rect x={"2.25"} y={"2.25"} width={"19.5"} height={"19.5"} rx={"3"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.5"} />
                   <path d={"M3.5 20.5 20.5 3.5V18a2.5 2.5 0 0 1-2.5 2.5Z"} fill={"currentColor"} />
                 </svg>
                 <b>
-                  {"LORANI"}
+                  {"STOCK"}
                 </b>
               </span>
             </span>
@@ -102,15 +102,15 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux et la situation de travaux est préparée."}
+                {"Chaque facture reçue est lue et rapprochée de sa commande. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
               <strong>
-                {"Daliro"}
+                {"Factures fournisseurs"}
               </strong>
               <span>
-                {"Module métier · BTP"}
+                {"Agent · factures fournisseurs"}
               </span>
             </figcaption>
           </figure>

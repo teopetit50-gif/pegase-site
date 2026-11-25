@@ -157,7 +157,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
     q: "Que comprend l'abonnement des agents\u00a0?",
     r: [
       "L'exploitation des postes retenus, le rapport quotidien, les règles de validation avant envoi, la prise en compte de vos corrections et le suivi. La réunion d'installation est comprise dans le forfait d'installation : nous raccordons vos outils ensemble, en visioconférence, écran partagé.",
-      "Un raccordement spécifique, tel qu'un logiciel métier peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement, jamais découvert en cours de projet.",
+      "Un raccordement spécifique, tel qu'un logiciel peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement, jamais découvert en cours de projet.",
     ],
   },
   {

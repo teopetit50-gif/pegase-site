@@ -285,7 +285,7 @@ export const METIERS = {
      on choisit son cas, on ne le regarde pas défiler. */
   titre: "Personne ne laisse partir un client par négligence.",
   suite:
-    "Ces cinq secteurs perdent le même chiffre pour cinq raisons différentes. Ouvrez celui qui vous concerne.",
+    "Cinq situations, cinq façons de perdre un client sans le voir. Ouvrez celle qui vous ressemble.",
   /* Chaque secteur porte trois blocs, et le troisième — « ce qui reste chez
      vous » — n'est pas une précaution juridique : c'est ce qui rend les deux
      autres crédibles. Une grille toute verte ne se croit pas. Il dit aussi la
@@ -298,56 +298,55 @@ export const METIERS = {
   },
   secteurs: [
     {
-      cle: "apresvente",
-      nom: "Après-vente",
-      secteur: "Concession & après-vente",
-      icone: "atelier" as const,
+      cle: "devis",
+      nom: "Devis",
+      secteur: "Un devis resté sans suite",
+      icone: "devis" as const,
       echappe:
-        "La révision d'un client tombe pendant un mois chargé, personne ne l'appelle, et il finit par la faire dans un centre auto en passant.",
+        "Un client a demandé un devis l'an dernier, puis son projet a été reporté. Personne ne le recontacte, et quand le projet revient, il consulte un concurrent.",
       cherche:
-        "L'agent suit les entretiens qui arrivent à échéance, puis il repère les comptes silencieux et les commandes que personne n'a reprises.",
-      reste:
-        "Votre planning d'atelier et votre stock de pièces restent dans votre DMS, parce que l'agent ne s'y substitue pas : il le lit, puis il écrit ailleurs.",
+        "L'agent reprend les devis restés sans suite depuis le délai que vous fixez, puis il demande au client où en est son projet.",
+      reste: "Vous gardez le devis, ses conditions et la décision de le mettre à jour.",
     },
     {
-      cle: "negoce",
-      nom: "Négoce",
-      secteur: "Commerce de gros & négoce",
+      cle: "commandes",
+      nom: "Commandes",
+      secteur: "Un compte qui décroche",
       icone: "negoce" as const,
       echappe:
         "Un compte qui commandait tous les mois espace ses commandes, puis il s'arrête. Personne ne l'appelle, parce que rien n'a été réclamé et que le chiffre global tient encore.",
       cherche:
-        "L'agent mesure dans votre ERP la fréquence de commande habituelle de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
+        "L'agent mesure dans votre logiciel de gestion la fréquence de commande habituelle de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
       reste:
-        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, parce que l'agent y lit sans jamais y écrire.",
+        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre logiciel de gestion, Omega ou l'actuel, parce que l'agent y lit sans jamais y écrire.",
     },
     {
-      cle: "clim",
-      nom: "Climatisation",
-      secteur: "Climatisation & froid",
-      icone: "froid" as const,
+      cle: "contrats",
+      nom: "Contrats",
+      secteur: "Un contrat qui s'éteint",
+      icone: "contrat" as const,
       echappe:
-        "L'entretien annuel saute une année, puis il saute la suivante, et le contrat s'éteint sans que personne l'ait jamais résilié.",
+        "Un contrat annuel n'est pas renouvelé une année, puis la suivante, et il s'éteint sans que personne l'ait jamais résilié.",
       cherche:
-        "L'agent tient la liste de vos installations et la date à laquelle l'entretien de chacune redevient dû, puis il écrit au client la semaine d'avant.",
-      reste: "Vous gardez l'intervention, le déplacement et le prix que vous facturez.",
+        "L'agent tient la liste de vos contrats et la date à laquelle chacun arrive à échéance, puis il écrit au client un mois avant.",
+      reste: "Vous gardez les conditions du contrat et le prix que vous facturez.",
     },
     {
-      cle: "batiment",
-      nom: "Bâtiment",
-      secteur: "Entreprise générale du bâtiment",
-      icone: "chantier" as const,
+      cle: "projets",
+      nom: "Projets",
+      secteur: "Un projet livré il y a longtemps",
+      icone: "projet" as const,
       echappe:
-        "Vous avez livré un chantier il y a trois ans. Le client engage une nouvelle tranche cette année, et il consulte quelqu'un d'autre parce qu'il ne vous a plus vu depuis la réception.",
+        "Vous avez livré un projet il y a trois ans. Le client en lance un nouveau cette année, et il consulte quelqu'un d'autre parce qu'il ne vous a plus vu depuis.",
       cherche:
-        "L'agent reprend vos chantiers réceptionnés, puis il propose un mot aux clients dont le dernier passage remonte à plus longtemps que le délai que vous fixez.",
+        "L'agent reprend vos projets livrés, puis il propose un mot aux clients dont le dernier contact remonte à plus longtemps que le délai que vous fixez.",
       reste:
-        "Vous fixez vos prix, vous choisissez vos équipes et vous décidez d'y retourner ou non.",
+        "Vous fixez vos prix, vous choisissez vos équipes et vous décidez de la suite à donner.",
     },
     {
-      cle: "conseil",
-      nom: "Conseil",
-      secteur: "Cabinet de conseil",
+      cle: "missions",
+      nom: "Missions",
+      secteur: "Une mission close",
       icone: "bureau" as const,
       echappe:
         "La facture est soldée et le dossier se referme. Six mois plus tard, le client rappelle un concurrent qui, lui, avait écrit.",
@@ -382,7 +381,7 @@ export const QUESTIONS = {
     },
     {
       q: "Combien de comptes faut-il dans la base pour que cela se justifie ?",
-      r: "Cela dépend moins du nombre de comptes que de ce que vaut un compte réactivé : deux cents comptes dans le bâtiment ne pèsent pas comme deux mille en commerce de détail. Nous faisons ce calcul avec vos chiffres pendant l'audit, avant tout engagement, et si la relance à la main reste plus simple chez vous, nous vous le disons.",
+      r: "Cela dépend moins du nombre de comptes que de ce que vaut un compte réactivé : deux cents comptes à gros panier ne pèsent pas comme deux mille petits clients. Nous faisons ce calcul avec vos chiffres pendant l'audit, avant tout engagement, et si la relance à la main reste plus simple chez vous, nous vous le disons.",
     },
     {
       q: "Nos données sont réparties entre un CRM, un ERP et des dossiers papier. Est-ce exploitable ?",
@@ -427,7 +426,7 @@ export const FRANCAIS = {
       icone: "langue" as const,
       titre: "Écrit en français",
       texte:
-        "Les relances sont rédigées en français, dans le vocabulaire de votre secteur, et aucune ne part sans votre accord.",
+        "Les relances sont rédigées en français, dans le vocabulaire de votre entreprise, et aucune ne part sans votre accord.",
     },
     {
       /* Ancien intitulé : « Vos données restent en Europe ». Il disait la

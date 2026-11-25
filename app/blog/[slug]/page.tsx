@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import Cadre from "@/components/charte/Cadre";
 import "@/components/charte/pages/blog.css";
@@ -10,7 +10,8 @@ import {
   IconeCalendrier,
 } from "@/components/blog/BlogKit";
 import CartesArticles from "@/components/blog/CartesArticles";
-import { POSTS } from "@/lib/content";
+import { ANCIENNES_ADRESSES, POSTS } from "@/lib/content";
+import { fr } from "@/lib/typo";
 import { SITE_URL } from "@/lib/site";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -79,6 +80,8 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const nouvelle = ANCIENNES_ADRESSES[slug];
+  if (nouvelle) permanentRedirect(`/blog/${nouvelle}`);
   const post = POSTS.find((p) => p.slug === slug);
   if (!post) notFound();
 
@@ -108,7 +111,7 @@ export default async function ArticlePage({
                 <span className="b-tag-plate">{post.cat.toLowerCase()}</span>
               </div>
               <h1 data-reveal className="b-article-h1 mt-6">
-                {post.title}
+                {fr(post.title)}
               </h1>
             </div>
           </div>
@@ -157,8 +160,8 @@ export default async function ArticlePage({
               <div className="b-rte mt-12 sm:mt-14">
                 {post.body.map((b, idx) => (
                   <div key={idx}>
-                    {b.h && <h2>{b.h}</h2>}
-                    <p>{b.p}</p>
+                    {b.h && <h2>{fr(b.h)}</h2>}
+                    <p>{fr(b.p)}</p>
                   </div>
                 ))}
               </div>

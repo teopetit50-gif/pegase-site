@@ -165,22 +165,22 @@ const FICHE: Fiche = {
   sections: {
     pointsTitre: "Ce que couvre le sur-mesure.",
     pointsChapo:
-      "Une tâche interne, une application métier, un pont entre deux outils. Ce que fait le module et son prix sont écrits avant de commencer.",
+      "Une tâche interne, une application sur mesure, un pont entre deux outils. Ce que fait le module et son prix sont écrits avant de commencer.",
     detailChapo:
       "Ce que nous cadrons avant d'écrire une ligne, ce que nous construisons, et ce qui reste sous votre décision.",
     cibleChapo:
-      "Aucun secteur n'est exclu : un système sur mesure se justifie dès qu'une tâche se répète selon des règles qui peuvent s'écrire, quel que soit le métier.",
+      "Aucune entreprise n'est exclue : un système sur mesure se justifie dès qu'une tâche se répète selon des règles qui peuvent s'écrire.",
     faqChapo: "Les questions qu'une direction pose avant de lancer un projet sur mesure.",
   },
 
   fonctionnement: [
-    "Le catalogue Omega.AI couvre quatre processus présents dans presque toutes les organisations : les encaissements, la réactivation commerciale, les demandes entrantes et les flux documentaires. Ils se déploient vite parce que le besoin est le même partout. Le sur-mesure commence là où cette hypothèse s'arrête : quand le processus qui coûte le plus cher est propre à votre métier, à votre organisation ou à votre système d'information, et qu'aucun produit sur étagère ne le traite sans le déformer.",
-    "Le périmètre n'est pas limité à l'automatisation de messages. Un système sur mesure peut être un logiciel métier complet avec son interface et sa base de données, un pont entre deux outils qui ne communiquent pas, un calcul ou un contrôle répété que personne n'a le temps de faire, une extraction de données depuis des documents, un tableau de bord alimenté en continu, ou un assistant interne qui répond sur vos propres procédures. Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise.",
-    "La méthode ne change pas de celle des quatre systèmes : on part de votre processus réel, pas d'un modèle. On écrit les règles avec vous, on définit ce qui s'exécute seul et ce qui attend votre validation, et on branche le résultat sur les outils que vous utilisez déjà plutôt que d'en imposer de nouveaux. La mise en production est progressive : un périmètre restreint d'abord, mesuré, puis élargi une fois qu'il tient.",
+    "L'ERP Omega couvre la gestion courante, et ses quatre agents traitent des processus présents dans presque toutes les organisations : les encaissements, la réactivation commerciale, les demandes entrantes et les factures fournisseurs. Ils se déploient vite parce que le besoin est le même partout. Le sur-mesure commence là où cette hypothèse s'arrête : quand le processus qui coûte le plus cher est propre à votre organisation ou à votre système d'information, et qu'aucun produit sur étagère ne le traite sans le déformer.",
+    "Le périmètre n'est pas limité à l'automatisation de messages. Un système sur mesure peut être une application complète avec son interface et sa base de données, un pont entre deux outils qui ne communiquent pas, un calcul ou un contrôle répété que personne n'a le temps de faire, une extraction de données depuis des documents, un tableau de bord alimenté en continu, ou un assistant interne qui répond sur vos propres procédures. Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise.",
+    "La méthode est celle de nos agents : nous partons de votre processus réel, pas d'un modèle. Nous écrivons les règles avec vous, définissons ce qui s'exécute seul et ce qui attend votre validation, puis le résultat devient un module d'Omega ou se branche sur vos outils actuels. La mise en production est progressive : un périmètre restreint d'abord, mesuré, puis élargi une fois qu'il tient.",
   ],
 
   points: [
-    "Logiciels métier : une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services",
+    "Applications sur mesure : une application avec son interface, sa base et ses droits, quand aucun outil du marché ne suit le fonctionnement de vos services",
     "Ponts entre outils : deux logiciels qui ne communiquent pas, une double saisie quotidienne ou un export repris à la main chaque semaine",
     "Traitement de documents : lecture, contrôle, extraction et classement de pièces reçues dans n'importe quel format",
     "Contrôles et calculs répétitifs : vérifications de cohérence, alertes sur seuils, états produits à date fixe sans intervention de vos équipes",
@@ -193,21 +193,19 @@ const FICHE: Fiche = {
      entrées sont les FAMILLES d'outils les plus fréquentes, pas une
      limite. */
   outils: [
-    "Vos outils métier",
+    "Vos outils actuels",
     "Google Sheets / Excel",
     "Gmail / Outlook",
     "Bases de données",
   ],
 
   cible: [
-    "Industrie & production",
-    "Santé & professions libérales",
-    "Transport & logistique",
-    "Immobilier & gestion",
-    "Cabinets & conseil",
-    "Commerce & distribution",
-    "BTP & travaux publics",
-    "Associations & secteur public",
+    "Sociétés de 5 à 50 personnes",
+    "Sociétés de 50 à 500 personnes",
+    "Groupes multi-sociétés",
+    "Sièges et filiales",
+    "Réseaux et franchises",
+    "Associations",
   ],
 
   etapes: [
@@ -236,12 +234,12 @@ const FICHE: Fiche = {
       a: "Oui, deux cas. Ceux dont les règles ne peuvent pas s'écrire : si chaque situation demande un jugement humain, l'automatisation n'apporte rien de fiable. Et ceux dont le gain ne couvre pas le coût de construction : nous le disons au cadrage, avant tout devis.",
     },
     {
-      q: "Travaillez-vous dans mon secteur ?",
-      a: "La question porte moins sur le secteur que sur le processus. Une extraction de données depuis des documents fonctionne de la même façon chez un transporteur et dans un groupe de distribution : seuls les règles métier et le vocabulaire changent, et c'est précisément ce que le cadrage écrit avec vos équipes.",
+      q: "Notre fonctionnement est-il trop particulier ?",
+      a: "La question porte moins sur votre activité que sur le processus. Une extraction de données depuis des documents fonctionne de la même façon dans une société de dix personnes et dans un groupe : seuls les règles et le vocabulaire changent, et c'est précisément ce que le cadrage écrit avec vos équipes.",
     },
     {
       q: "Quels sont les délais et le coût ?",
-      a: "Ils dépendent entièrement du périmètre, et c'est la raison pour laquelle le cadrage précède le devis. Un pont entre deux outils se compte en jours, un logiciel métier complet en semaines. Vous recevez un montant ferme et un périmètre écrit avant de vous engager.",
+      a: "Ils dépendent entièrement du périmètre, et c'est la raison pour laquelle le cadrage précède le devis. Un pont entre deux outils se compte en jours, une application complète en semaines. Vous recevez un montant ferme et un périmètre écrit avant de vous engager.",
     },
     {
       q: "À qui appartient ce qui est construit ?",
@@ -302,7 +300,7 @@ const TRACE: TraceSpan[] = [
   { id: "attente", label: "attente.validation", kind: "agent", start: 4220, end: 7600, detail: "accord donné" },
   { id: "avis", label: "avis.responsable", kind: "io", parentId: "attente", start: 4260, end: 4620, detail: "1 destinataire" },
   { id: "reponse", label: "reponse.humaine", kind: "io", parentId: "attente", start: 7180, end: 7560, detail: "validé" },
-  { id: "ecriture", label: "ecriture.outil-metier", kind: "io", start: 7640, end: 8720, detail: "3 lignes" },
+  { id: "ecriture", label: "ecriture.outil-cible", kind: "io", start: 7640, end: 8720, detail: "3 lignes" },
   { id: "journal", label: "journal.ecriture", kind: "io", start: 8760, end: 9100, detail: "horodaté" },
 ];
 const TRACE_TOTAL = 9100;
@@ -328,7 +326,7 @@ const TRACE_TOTAL = 9100;
 const PERIMETRES = [
   {
     Icone: PictoApplication,
-    titre: "Applications métier",
+    titre: "Applications sur mesure",
     texte: "Un module avec ses écrans, ses données et ses droits.",
   },
   {
@@ -412,7 +410,7 @@ const EXEMPLES: Cas[] = [
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
     texte:
       "Un module avec ses écrans, ses données et ses droits, ajouté à votre logiciel Omega.",
-    legende: "Application métier",
+    legende: "Application sur mesure",
     sousLegende: "Ajouté à votre logiciel ou branché sur vos outils",
     mesures: [
       { value: "1", label: "Module", sub: "Écrans, données et droits" },
@@ -657,7 +655,7 @@ export default function SurMesurePage() {
                 <p className="sm-citation__phrase">
                   «&nbsp;Le sur-mesure commence là où le logiciel et ses modules
                   s&apos;arrêtent&nbsp;: quand la tâche qui coûte le plus cher est
-                  propre à votre métier, à votre organisation ou à votre système
+                  propre à votre organisation ou à votre système
                   d&apos;information, et qu&apos;aucun produit sur étagère ne la
                   traite sans le déformer.&nbsp;»
                 </p>

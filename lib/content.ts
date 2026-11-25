@@ -249,6 +249,15 @@ export type Post = {
   body: { h?: string; p: string }[];
 };
 
+/* 25/11 — trois articles perdent leur métier (Teo : « arrête de parler ou
+   montrer comme exemple les trucs BTP etc ») et leur adresse avec : les
+   anciennes renvoient en 308 vers les nouvelles (app/blog/[slug]/page.tsx). */
+export const ANCIENNES_ADRESSES: Record<string, string> = {
+  "garage-fichier-clients": "anciens-clients",
+  "btp-devis-jamais-relances": "devis-sans-relance",
+  "immobilier-repondre-en-premier": "repondre-en-premier",
+};
+
 export const POSTS: Post[] = [
   {
     slug: "facturation-electronique-2026",
@@ -286,111 +295,111 @@ export const POSTS: Post[] = [
     ],
   },
   {
-    slug: "garage-fichier-clients",
+    slug: "anciens-clients",
     initials: "PM",
-    author: "Pôle métiers",
+    author: "Pôle agents",
     date: "3 août 2026",
-    cat: "Métier",
+    cat: "Agents",
     cover: "/photos/payd-comptoir.jpg",
-    title: "Garage : vos anciens clients sont votre meilleure publicité",
+    title: "Vos anciens clients sont votre meilleure publicité",
     excerpt:
-      "Chaque véhicule passé à l'atelier reviendra : chez vous ou chez un autre. Comment un garage indépendant fait revenir ses clients à la bonne date, sans embaucher personne à l'accueil.",
+      "Un client satisfait reviendra, chez vous ou chez un concurrent. Comment une PME fait revenir ses clients au bon moment, sans embaucher personne pour les rappeler.",
     body: [
       {
-        p: "Un garage n'a pas un problème de clients : il en voit passer toute l'année. Son problème, c'est ce qui se passe après la restitution. Le véhicule repart, le dossier se ferme, et plus personne n'y pense : jusqu'à ce que le client revienne de lui-même, dans un an, ou n'importe quand, ou jamais. Pourtant la date de son prochain passage est presque écrite d'avance : une révision se refait à l'année, un contrôle technique a une échéance. Ce rendez-vous-là, quelqu'un le prendra. La seule question est de savoir avec qui.",
+        p: "Une PME n'a pas un problème de clients : elle en voit passer toute l'année. Son problème, c'est ce qui se passe après la dernière facture. Le dossier se ferme, et plus personne n'y pense, jusqu'à ce que le client revienne de lui-même, dans un an, plus tard ou jamais. Pourtant la date de son prochain besoin est souvent écrite d'avance : un entretien se refait à l'année, un contrat arrive à échéance, un stock s'épuise au même rythme. Ce besoin-là, quelqu'un y répondra. La seule question est de savoir qui.",
       },
       {
-        h: "Le fichier dort, l'atelier déborde",
-        p: "La plupart des garages ont ce fichier : des années de clients, avec la date du dernier passage et ce qui a été fait. Personne n'a le temps de l'exploiter : les journées se passent sous les ponts, pas au téléphone. Rappeler chaque client à l'approche de l'anniversaire de sa révision serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
+        h: "Le fichier dort, l'équipe déborde",
+        p: "La plupart des entreprises ont ce fichier : des années de clients, avec la date du dernier achat et ce qui a été vendu. Personne n'a le temps de l'exploiter, parce que les journées passent à servir les clients du jour. Rappeler chaque client au moment où son besoin revient serait le travail le plus rentable de la semaine, et c'est précisément celui qui saute toujours.",
       },
       {
-        h: "Ce que fait l'agent des clients inactifs dans un garage",
-        p: "L'agent lit le fichier et repère les clients dont le dernier passage approche de l'année. Chacun reçoit un message personnel (le véhicule, la prestation réalisée, une proposition de faire un point avant le prochain contrôle), jamais une campagne de masse, jamais deux fois, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'un garagiste qui suit son véhicule ; le garage remplit son planning avec des rendez-vous qu'il aurait perdus.",
+        h: "Ce que fait l'agent des clients inactifs",
+        p: "L'agent lit le fichier et repère les clients dont le prochain besoin approche, ou qui n'ont plus commandé depuis le délai que vous fixez. Chacun reçoit un message personnel (le dernier achat, la prestation réalisée, une proposition de faire le point), jamais une campagne de masse, à la cadence que vous fixez, et celui qui répond STOP ne sera plus jamais contacté. Le client a le sentiment d'une entreprise qui suit son dossier ; vous remplissez votre carnet avec des affaires que vous auriez perdues.",
       },
       {
-        h: "Pendant ce temps, l'accueil répond",
-        p: "Les demandes de rendez-vous et de devis arrivent par téléphone pendant qu'on a les mains dans un moteur, par WhatsApp le soir, par mail n'importe quand. L'agent des demandes clients les reçoit dans une seule file, pose les bonnes questions (marque, modèle, immatriculation, symptôme, disponibilités pour déposer le véhicule), et transmet à l'atelier un dossier prêt à traiter. Il ne donne jamais un prix ni un délai : dès que c'est sérieux, c'est l'humain qui reprend.",
+        h: "Pendant ce temps, les demandes trouvent une réponse",
+        p: "Les demandes de rendez-vous et de devis arrivent par le formulaire du site, par WhatsApp le soir et par mail à toute heure. L'agent des demandes clients les rassemble dans une seule file, pose les bonnes questions (le besoin, la quantité, le délai, les disponibilités) et répond à partir de la base construite avec vous, tarifs et créneaux compris. Tout ce qui n'y figure pas vous est transmis avec le résumé de l'échange.",
       },
       {
-        h: "Et les factures d'atelier suivent le même chemin",
-        p: "Pour les clients professionnels et les flottes qui règlent à réception, l'agent de relance écrit aux bonnes dates avec des messages que le dirigeant valide, en proposant le règlement au comptoir, par virement ou en plusieurs fois. Chaque matin, le point du jour pose l'état en deux minutes : les véhicules à restituer, les devis en attente, les relances parties.",
+        h: "Et les factures suivent le même chemin",
+        p: "Pour les clients qui règlent à réception, l'agent de relance écrit aux bonnes dates, avec des messages que vous validez, en proposant le virement ou un règlement en plusieurs fois. Le point du matin pose l'état en deux minutes : les commandes à livrer, les devis en attente, les relances parties.",
       },
       {
-        p: "Tout cela s'installe sur les outils déjà en place (le fichier existant, la messagerie, WhatsApp), sans changer de logiciel. Et l'installation commence par une mesure : l'audit gratuit compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
+        p: "Les agents travaillent dans Omega, avec vos ventes et votre comptabilité ; si vous préférez commencer par eux, ils se branchent d'abord sur votre fichier clients, votre messagerie et WhatsApp. Et l'installation commence par une mesure : l'audit offert compte les clients dormants exploitables du fichier et les demandes restées sans réponse. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
       },
     ],
   },
   {
-    slug: "btp-devis-jamais-relances",
+    slug: "devis-sans-relance",
     initials: "PM",
-    author: "Pôle métiers",
+    author: "Pôle agents",
     date: "3 août 2026",
-    cat: "Métier",
+    cat: "Agents",
     cover: "/photos/document-administratif.jpg",
-    title: "Artisan du bâtiment : les devis qu'on ne relance jamais",
+    title: "Les devis qu'on ne relance jamais",
     excerpt:
-      "Des heures à chiffrer, puis plus rien : le devis part et le suivi s'arrête, parce que le chantier en cours passe d'abord. Ce qu'une relance organisée change pour une entreprise de travaux : sans y passer ses soirées.",
+      "Des heures à chiffrer, puis plus rien : le devis part et le suivi s'arrête, parce que le travail du jour passe d'abord. Ce qu'une relance organisée change pour une PME, sans y passer ses soirées.",
     body: [
       {
-        p: "Un devis de travaux coûte cher à produire : la visite, le métré, les prix fournisseurs, la mise en page, souvent une heure ou deux par proposition, prises le soir. Et puis il part, et il ne se passe plus rien. Le chantier en cours prend le dessus, la relance se fait « quand on y pense », c'est-à-dire tard, ou jamais. Le particulier, lui, a demandé trois devis : il signe fréquemment avec l'entreprise qui a rappelé la première, pas avec la moins chère.",
+        p: "Un devis coûte cher à produire : comprendre le besoin, chiffrer, vérifier les prix fournisseurs, mettre en page, souvent une heure ou deux par proposition. Et puis il part, et il ne se passe plus rien. Le travail du jour prend le dessus, la relance se fait « quand on y pense », c'est-à-dire tard, ou jamais. Le client, lui, a souvent demandé plusieurs devis : il signe fréquemment avec l'entreprise qui a rappelé la première, pas avec la moins chère.",
       },
       {
         h: "Pourquoi le suivi saute toujours",
-        p: "Ce n'est pas de la négligence, c'est une question de journées : on ne relance pas un prospect à 19 heures en rentrant d'un chantier, et le lundi il y a plus urgent. Le suivi des devis est un travail de bureau régulier dans un métier qui n'a pas de bureau régulier. C'est exactement le genre de tâche qui se confie à un agent.",
+        p: "Ce n'est pas de la négligence, c'est une question de journées : on ne relance pas un prospect à 19 heures entre deux urgences, et le lundi il y a plus pressé. Le suivi des devis est un travail de bureau régulier, que personne n'a le temps de faire régulièrement. C'est exactement le genre de tâche qui se confie à un agent.",
       },
       {
         h: "Ce que fait l'agent de relance sur les devis",
-        p: "L'agent reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant de passer voir le chantier ou de caler une date d'intervention. Une seconde relance suit si besoin, puis l'agent s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans le vocabulaire du métier (chantier, intervention, acompte, situation), et le dirigeant valide le ton une fois pour toutes.",
+        p: "L'agent reprend chaque devis envoyé et le suit : quelques jours sans réponse, et un message de suivi part, formulation cordiale, jamais le mot « relance », en proposant d'en parler ou de fixer un rendez-vous. Deux relances suivent si besoin, à J+7 et à J+21, puis l'agent s'arrête : il n'insiste jamais au point d'abîmer la relation. Chaque message est rédigé dans votre vocabulaire, et vous validez chaque matin la liste des messages qui partent.",
       },
       {
         h: "Côté factures, la même discipline",
-        p: "Une fois le chantier livré, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur validation expresse du dirigeant. Le détail de ce circuit, et de ce qu'il change pour la trésorerie, est dans notre article consacré au coût des impayés.",
+        p: "Une fois la prestation livrée, les factures suivent le même chemin : rappel à l'échéance, relances progressives, proposition d'échelonnement pour les gros montants, et mise en demeure uniquement sur votre validation expresse. Le détail de ce circuit, et de ce qu'il change pour la trésorerie, est dans notre article consacré au coût des impayés.",
       },
       {
         h: "Les demandes entrantes et les pièces fournisseurs suivent",
-        p: "L'agent des demandes clients accueille les demandes de devis qui arrivent par mail et WhatsApp (nature des travaux, commune du chantier, délai, photos), et escalade immédiatement tout ce qui ressemble à une urgence. L'agent des factures fournisseurs lit celles qui arrivent par mail et les range au journal d'achats, prêtes pour le cabinet : la saisie du dimanche soir disparaît.",
+        p: "L'agent des demandes clients accueille les demandes de devis qui arrivent par mail et WhatsApp (le besoin, la quantité, le délai, les pièces jointes), et vous signale immédiatement tout ce qui ressemble à une urgence. L'agent des factures fournisseurs lit celles qui arrivent par mail et les range au journal d'achats après les avoir contrôlées, prêtes pour votre expert-comptable.",
       },
       {
-        p: "L'installation se fait sur les outils existants, sans changer de méthode de travail. Elle commence par une mesure, pas par une promesse : l'audit gratuit compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien, et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
+        p: "Les agents travaillent dans Omega, avec vos ventes et votre comptabilité ; si vous préférez commencer par eux, ils se branchent d'abord sur vos outils actuels. L'installation commence par une mesure, pas par une promesse : l'audit offert compte les devis restés sans relance sur les trois derniers mois et leur montant cumulé. C'est souvent le chiffre le plus surprenant de l'entretien, et si le calcul ne justifie rien, la recommandation est de ne rien installer.",
       },
     ],
   },
   {
-    slug: "immobilier-repondre-en-premier",
+    slug: "repondre-en-premier",
     initials: "PM",
-    author: "Pôle métiers",
+    author: "Pôle agents",
     date: "2 août 2026",
-    cat: "Métier",
+    cat: "Agents",
     cover: "/photos/answr-phone.jpg",
-    title: "Agence immobilière : le premier qui répond décroche la visite",
+    title: "Le premier qui répond décroche le client",
     excerpt:
-      "Les contacts arrivent par les portails, WhatsApp et le téléphone : pendant que les journées se passent en visites et en estimations. Comment une agence indépendante répond à tout sans embaucher, et ce qu'on mesure avant d'installer quoi que ce soit.",
+      "Les demandes arrivent par le site, WhatsApp, le mail et le téléphone, pendant que les journées se passent ailleurs. Comment une PME répond à chaque demande écrite sans embaucher, et ce qu'on mesure avant d'installer quoi que ce soit.",
     body: [
       {
-        p: "Un acquéreur qui cherche ne contacte jamais une seule agence : il écrit à toutes celles qui ont un bien dans ses critères, souvent le soir même de sa recherche. Un vendeur qui compare des agences pour un mandat juge d'abord une chose : la vitesse et la tenue de la première réponse. Dans les deux cas, l'agence qui répond en premier prend l'avantage, et c'est rarement une question de compétence, presque toujours une question de disponibilité.",
+        p: "Un client qui cherche ne contacte jamais une seule entreprise : il écrit à toutes celles qui semblent répondre à son besoin, souvent le soir même de sa recherche. Et il juge d'abord une chose : la vitesse et la tenue de la première réponse. L'entreprise qui répond en premier prend l'avantage, et c'est rarement une question de compétence, presque toujours une question de disponibilité.",
       },
       {
-        h: "D'où viennent les contacts, et où ils se perdent",
-        p: "Une agence indépendante reçoit ses demandes par les portails d'annonces, le formulaire du site, WhatsApp et le téléphone, y compris pendant les visites, précisément quand personne ne peut répondre. Chaque canal vit sa vie : rien ne rassemble les demandes au même endroit, rien ne trace celles qui sont restées sans réponse. Les messages du soir et du week-end attendent le lundi ; le prospect, lui, n'attend pas : il a déjà rappelé l'agence suivante de sa liste.",
+        h: "D'où viennent les demandes, et où elles se perdent",
+        p: "Une PME reçoit ses demandes par le formulaire du site, le mail, WhatsApp et le téléphone, y compris pendant les rendez-vous, précisément quand personne ne peut répondre. Chaque canal vit sa vie : rien ne rassemble les demandes au même endroit, rien ne trace celles qui sont restées sans réponse. Les messages du soir et du week-end attendent le lundi ; le prospect, lui, n'attend pas : il a déjà écrit à l'entreprise suivante de sa liste.",
       },
       {
         h: "Ce qu'une réponse tardive coûte vraiment",
-        p: "Le coût ne se limite pas à la visite manquée. Un contact mal qualifié fait perdre du temps à tout le monde : visites organisées sans vérifier le financement, critères jamais posés, allers-retours pour des informations qui tenaient en trois questions. Et pendant que l'entrant déborde, le stock dort : les acquéreurs dont le projet n'a pas abouti, les vendeurs qui « attendaient de voir », les contacts d'estimation restés sans suite, personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
+        p: "Le coût ne se limite pas à l'affaire manquée. Une demande mal qualifiée fait perdre du temps à tout le monde : rendez-vous pris sans connaître le besoin, budget jamais posé, allers-retours pour des informations qui tenaient en trois questions. Et pendant que les demandes débordent, le fichier dort : les prospects dont le projet n'a pas abouti, ceux qui « attendaient de voir », les devis restés sans suite. Personne n'a le temps de les rappeler, alors que ce sont les affaires les moins chères à conclure.",
       },
       {
-        h: "Ce que fait l'agent des demandes clients dans une agence",
-        p: "L'agent des demandes clients rassemble les demandes entrantes (mail, WhatsApp) dans une seule file. Il répond immédiatement aux questions simples et pose les questions de qualification qui évitent les visites pour rien : secteur recherché, calendrier, financement en cours. Il ne s'engage jamais sur un prix, une disponibilité ou un rendez-vous : dès qu'une demande est sérieuse ou sensible, elle est transmise à l'agent immobilier avec le résumé de l'échange, prête à être traitée. Plus rien n'attend vingt-quatre heures, et chaque conversation reste journalisée.",
+        h: "Ce que fait l'agent des demandes clients",
+        p: "L'agent des demandes clients rassemble les demandes entrantes (mail, WhatsApp) dans une seule file. Il rédige aussitôt la réponse, qui part seule si vous l'avez autorisé, et pose les questions qui évitent les rendez-vous pour rien : le besoin, le calendrier, le budget. Il répond à partir de la base construite avec vous, tarifs et créneaux compris ; tout ce qui n'y figure pas vous est transmis avec le résumé de l'échange. Chaque demande a sa réponse rédigée dès son arrivée, et chaque conversation reste journalisée.",
       },
       {
-        h: "Clients inactifs : la base dormante d'une agence vaut de l'or",
-        p: "Chaque agence possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. L'agent des clients inactifs reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient à l'agent immobilier ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait : proprement.",
+        h: "Clients inactifs : la base dormante vaut de l'or",
+        p: "Chaque entreprise possède un fichier de contacts qui n'ont pas abouti, et qui n'ont jamais été recontactés. L'agent des clients inactifs reprend cette base à cadence maîtrisée : un message personnel, adapté à l'historique du contact, jamais une campagne de masse. Celui qui répond sort du circuit automatique et revient vers vous ; celui qui demande à ne plus être contacté ne l'est plus jamais. Le travail que personne n'a le temps de faire se fait, proprement.",
       },
       {
         h: "Le matin, deux minutes pour tout voir",
-        p: "Chaque matin, le point du jour pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant la première visite. Et la règle de la maison s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir sans contrôle.",
+        p: "Le point du matin pose l'état de la veille : les demandes arrivées, celles qui attendent une décision, les reprises de contact parties. Il se lit en deux minutes avant le premier rendez-vous. Notre règle s'applique ici comme partout : les messages types sont validés par vous avant la mise en route, et tout ce qui sort du cadre remonte à un humain au lieu de partir sans contrôle.",
       },
       {
-        p: "L'installation se fait sur les outils déjà en place (la messagerie, WhatsApp, le tableur de contacts), sans changer de logiciel ni de méthode de travail. Et elle commence par une mesure, pas par une promesse : l'audit gratuit compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
+        p: "Les agents travaillent dans Omega, avec vos ventes et votre comptabilité ; si vous préférez commencer par eux, ils se branchent d'abord sur votre messagerie, WhatsApp et votre tableur de contacts. Et l'installation commence par une mesure, pas par une promesse : l'audit offert compte les demandes restées sans réponse sous vingt-quatre heures et les contacts dormants exploitables. Si le chiffre ne justifie pas un agent, la recommandation est de ne rien installer.",
       },
     ],
   },
@@ -477,7 +486,7 @@ export const POSTS: Post[] = [
       },
       {
         h: "Pourquoi la relance manuelle échoue",
-        p: "Personne n'aime relancer. Résultat : on relance tard, on relance les gros montants en oubliant les petits, on saute une semaine parce que l'atelier déborde. Le client, lui, apprend vite qui relance systématiquement et qui laisse filer, et paie en priorité les fournisseurs organisés. L'irrégularité de la relance est exactement ce qui la rend inefficace.",
+        p: "Comme personne n'aime relancer, la relance part tard, vise les gros montants en oubliant les petits, et saute une semaine dès que le travail déborde. Le client, lui, apprend vite qui relance systématiquement et qui laisse filer, et paie en priorité les fournisseurs organisés. L'irrégularité de la relance est exactement ce qui la rend inefficace.",
       },
       {
         h: "Ce qu'une relance systématique change",

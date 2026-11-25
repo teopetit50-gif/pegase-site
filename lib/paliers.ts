@@ -742,7 +742,7 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
   cas: [
     "Un processus hors des quatre postes",
     "Plusieurs services aux règles de validation distinctes",
-    "Un logiciel métier à raccorder",
+    "Un logiciel peu répandu à raccorder",
   ],
   pointsTitre: "Inclus dans le devis",
   points: [

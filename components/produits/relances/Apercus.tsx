@@ -18,8 +18,8 @@ const FOND = "flex w-full flex-col gap-2 bg-[#fafafa] p-3 md:gap-3 md:p-4";
 /* ── héros : la vue d'ensemble ── */
 const PRETES: [string, string, string][] = [
   ["Transports Morel", "8 589,60 €", "Mise en demeure"],
-  ["Garage Lemaire", "2 150,00 €", "Relance 2"],
-  ["Plomberie Garnier", "940,00 €", "Rappel"],
+  ["Lemaire SAS", "2 150,00 €", "Relance 2"],
+  ["Garnier Services", "940,00 €", "Rappel"],
   ["Sté Alpha", "6 420,00 €", "Relance 1"],
 ];
 const AGES: [string, string, number][] = [
@@ -72,11 +72,11 @@ function Vue() {
 const DEBITEURS: [string, string, string, string, boolean][] = [
   ["Transports Morel", "En retard", "Mise en demeure prête", "8 589,60 €", true],
   ["Sté Alpha", "En retard", "Relance 1 prête", "6 420,00 €", true],
-  ["Menuiserie Roux", "En pause", "Litige en cours", "3 860,40 €", false],
-  ["Garage Lemaire", "En retard", "Relance 2 prête", "2 150,00 €", true],
-  ["Plomberie Garnier", "En retard", "Rappel prêt", "940,00 €", true],
-  ["Cabinet Durand", "Ne plus contacter", "Dossier transmis", "1 280,00 €", false],
-  ["Atelier Bertin", "À jour", "Aucune relance", "0,00 €", false],
+  ["Roux Conseil", "En pause", "Litige en cours", "3 860,40 €", false],
+  ["Lemaire SAS", "En retard", "Relance 2 prête", "2 150,00 €", true],
+  ["Garnier Services", "En retard", "Rappel prêt", "940,00 €", true],
+  ["Durand SARL", "Ne plus contacter", "Dossier transmis", "1 280,00 €", false],
+  ["Bertin & Cie", "À jour", "Aucune relance", "0,00 €", false],
 ];
 
 function Debiteurs() {
@@ -113,9 +113,9 @@ function Debiteurs() {
 
 /* ── écran 2 : Relances, les créances rangées par état ── */
 const COLONNES: [string, [string, string][]][] = [
-  ["Vient d'échoir", [["F-2052 · Atelier Bertin", "1 240,00 €"], ["F-2050 · Cabinet Durand", "680,00 €"]]],
-  ["Rappel envoyé", [["F-2041 · Plomberie Garnier", "940,00 €"], ["F-2039 · Sté Alpha", "2 140,00 €"]]],
-  ["Relance à valider", [["F-2031 · Garage Lemaire", "2 150,00 €"], ["F-2027 · Sté Alpha", "4 280,00 €"]]],
+  ["Vient d'échoir", [["F-2052 · Bertin & Cie", "1 240,00 €"], ["F-2050 · Durand SARL", "680,00 €"]]],
+  ["Rappel envoyé", [["F-2041 · Garnier Services", "940,00 €"], ["F-2039 · Sté Alpha", "2 140,00 €"]]],
+  ["Relance à valider", [["F-2031 · Lemaire SAS", "2 150,00 €"], ["F-2027 · Sté Alpha", "4 280,00 €"]]],
   ["Mise en demeure", [["F-1988 · Transports Morel", "8 589,60 €"]]],
 ];
 
@@ -153,12 +153,12 @@ function Relances() {
 
 /* ── écran 3 : Envois, le journal de ce qui est parti ── */
 const ENVOIS: [string, string, string, string, string][] = [
-  ["08 h 02", "Garage Lemaire", "Relance · facture F-2031", "E-mail", "Envoyé"],
-  ["08 h 02", "Plomberie Garnier", "Rappel · facture F-2041", "E-mail", "Lu"],
+  ["08 h 02", "Lemaire SAS", "Relance · facture F-2031", "E-mail", "Envoyé"],
+  ["08 h 02", "Garnier Services", "Rappel · facture F-2041", "E-mail", "Lu"],
   ["Hier, 17 h 40", "Sté Alpha", "Relance · facture F-2027", "E-mail", "Répondu"],
   ["Hier, 17 h 40", "Transports Morel", "Mise en demeure · F-1988", "Courrier", "Envoyé"],
-  ["Lundi, 09 h 15", "Cabinet Durand", "Rappel · facture F-2019", "E-mail", "Lu"],
-  ["Lundi, 09 h 15", "Menuiserie Roux", "Rappel · facture F-2011", "E-mail", "Répondu"],
+  ["Lundi, 09 h 15", "Durand SARL", "Rappel · facture F-2019", "E-mail", "Lu"],
+  ["Lundi, 09 h 15", "Roux Conseil", "Rappel · facture F-2011", "E-mail", "Répondu"],
 ];
 
 function Envois() {

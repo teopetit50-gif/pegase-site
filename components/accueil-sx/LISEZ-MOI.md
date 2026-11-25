@@ -102,13 +102,25 @@ pseudo-éléments, les positions).
     vignettes sont des mots-symboles typographiques (`ia-*.svg`, dessinés
     par `outils/sx/dessiner.mjs`), jamais les logos des marques. Le
     premier bouton mène à `/offres` (« Voir les agents »).
-14. **Les modules métier en sobre** (Teo, 25/11 : « trop enfantin ») :
-    une seule encre, les vrais signes de nos logiciels à la place des
-    lettres colorées, plus de rangées « Couleur » ni « Angles », carte du
-    téléphone sans bulle, devis droit. `sx.css`, « 8. ».
+14. **La section des documents en sobre** (Teo, 25/11 : « trop enfantin ») :
+    une seule encre, plus de rangées « Couleur » ni « Angles », carte du
+    téléphone sans bulle, devis droit. `sx.css`, « 8. ». Les pastilles
+    portaient d'abord les signes de nos logiciels métier ; depuis le point
+    16, elles portent l'initiale de la société, à l'encre de la page.
 15. **Les tarifs sont juste au-dessus de « Prêt dès le jour J »** (Teo,
     25/11 : « tu ne les échanges pas, tu les mets au-dessus ») : déplacés
     dans `app/page.tsx`, entre la plateforme et la fiche.
+16. **Aucun exemple métier** (Teo, 25/11, après le point 14 : « arrête de
+    parler ou montrer comme exemple les trucs BTP etc, les SaaS métier ;
+    focus sur l'ERP, les agents qu'on vend »). La fiche client suit le
+    projet d'une société quelconque (Maison Laurent SAS, client Roux
+    Conseil) ; la section qui présentait les modules métier (Daliro,
+    Tamila…) présente les documents à l'en-tête de chaque société du
+    groupe, pastilles à initiales ; les « Situations » nomment les modules
+    Ventes, Banque et Stock et l'agent des factures fournisseurs ; la barre
+    et le pied mènent aux agents et à la gestion, plus à /secteurs.
+    Textes : `outils/sx/textes.py` ; menu : `SxMenuMobile.tsx` ; pastilles :
+    `sx.css`, « 8. ».
 
 ## Ce qui n'est pas porté
 

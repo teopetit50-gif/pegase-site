@@ -29,7 +29,7 @@ B["nav"] = """Navigation principale
 Accueil Omega
 Omega
 Logiciel
-Métiers
+Agents
 Intégrations
 Tarifs
 Parler à l'équipe
@@ -134,7 +134,7 @@ Résumé de l'IA
 Voir les 2 cas
 Valider les relances
 Chaque facture reçue est lue, contrôlée et rangée sans ressaisie. L'agent rapproche la commande, vérifie les montants et prépare l'écriture.
-Facture Roux Matériaux
+Facture Papeteries Dumas
 =
 =
 =
@@ -162,7 +162,7 @@ Confiance
 Les demandes arrivent par mail et WhatsApp. L'agent rédige la réponse, vérifie l'agenda de l'équipe et vous la soumet avec le contexte.
 Demande client
 =
-Pose de mardi à jeudi : l'agenda de Maya est libre, et 3 poseurs sur 4 restent disponibles.
+Rendez-vous de mardi à jeudi : l'agenda de Maya est libre, et 3 personnes sur 4 restent disponibles.
 Réponse rédigée
 Agenda vérifié
 Lun
@@ -175,7 +175,7 @@ Libre
 Alice
 =
 Maya
-Pose · 3 jours
+Rendez-vous · 3 jours
 =
 Paul
 Proposer d'autres dates
@@ -193,10 +193,10 @@ DÉC
 Loyer · SCI des Quais
 Charge fixe
 Prête à payer
-Bois · Roux Matériaux
-Matériaux
+Fournitures · Papeteries Dumas
+Achats
 =
-Engins · Loca Chantier
+Véhicules · Loca Pro
 Location
 À valider
 =
@@ -206,7 +206,7 @@ Rémi
 Entretien · Net Service
 2 pièces manquantes
 RIB modifié détecté
-Le RIB de la facture Loca Chantier diffère de celui de la fiche. En 12 mois, aucun paiement vers ce compte :
+Le RIB de la facture Loca Pro diffère de celui de la fiche. En 12 mois, aucun paiement vers ce compte :
 2 140 € suspendus.
 12 mois comparés
 Voir le détail
@@ -268,7 +268,7 @@ Audit offert
 Voir la gestion
 Navigation du logiciel
 =
-Laurent & Fils
+Holding Laurent
 Rechercher
 =
 Accueil
@@ -284,9 +284,9 @@ Banque
 Comptabilité
 Documents
 Sociétés
-Laurent Menuiserie SAS
-Laurent Pose SARL
-Laurent Négoce
+Maison Laurent SAS
+Alpes Distribution
+Jura Services
 Réglages
 =
 Alice Morel
@@ -307,21 +307,21 @@ Aide
 Plus d'options
 Demander à l'IA
 À jour
-Hôtel des Quais · Bordeaux · Laurent Menuiserie SAS
+Roux Conseil · Bordeaux · Maison Laurent SAS
 Sections de la fiche
 Vue d'ensemble
 Devis
 Factures
 Activité
 Résumé de l'IA
-Anne-Marie Roux a signé son devis le 28 oct. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov. et la visite de fin de chantier suit le 3 fév.
+Anne-Marie Roux a signé son devis le 28 oct. L'acompte est encaissé, le matériel commandé et la livraison planifiée. La facture part le 27 nov. et le point de fin de projet suit le 3 fév.
 À venir
 À venir
 À facturer
 Ven. 27 nov. · 5 450 € HT
 Dans 13 jours
-Fin de chantier
-Mar. 3 fév. · avec Rémi Lambert
+Fin de projet
+Mer. 3 fév. · avec Rémi Lambert
 Dans 81 jours
 Devis
 Devis
@@ -339,11 +339,11 @@ Indicateurs de novembre
 Indicateurs de novembre
 Étapes faites
 =
-Situations facturées
+Factures émises
 =
-Avenants signés
+Livraisons faites
 =
-Réserves levées
+Paiements reçus
 =
 Mois en cours
 Dans les temps
@@ -355,8 +355,8 @@ Encaissé à ce jour
 2 066,95 €
 Voir la facture
 Encaissé à ce jour, par poste
-Pose, 3–6 nov. · 32 h : 1 006,08 €
-Pose
+Prestation, 3–6 nov. · 32 h : 1 006,08 €
+Prestation
 75 %
 Fournitures
 10 %
@@ -364,27 +364,27 @@ Déplacements
 9 %
 Options
 6 %
-Dépenses du chantier
-Dépenses du chantier
+Dépenses du projet
+Dépenses du projet
 7 048,50 € depuis le devis · 28 oct.
-Main-d'œuvre
+Prestation
 2 578,08 € · 37 %
-Dépenses du chantier, par poste
-Pose : 2,6 k€
+Dépenses du projet, par poste
+Prestation : 2,6 k€
 2,6 k€
-Vernis : 65 €
+Envoi : 65 €
 65 €
-Bois : 394 €
+Matériel : 394 €
 394 €
-Visserie : 450 €
+Licences : 450 €
 450 €
-Renfort : 2,2 k€
+Intérim : 2,2 k€
 2,2 k€
 Location : 1,2 k€
 1,2 k€
-Bois
-Visserie
-Renfort
+Matériel
+Licences
+Intérim
 Location
 Activité
 Devis signé
@@ -392,15 +392,15 @@ par Anne-Marie Roux et Rémi
 Signature électronique · 28 oct.
 Acompte rapproché
 avec le devis
-Agent Omega · 30 oct.
-Chantier ouvert
+Banque · 30 oct.
+Projet ouvert
 , suivi par Rémi Lambert
 Ventes · 31 oct.
-Commande de bois
-passée chez Roux Matériaux
+Commande de matériel
+passée chez Papeteries Dumas
 Achats · 2 nov.
 Stock réservé
-pour 18 panneaux, selon le devis
+pour 18 articles, selon le devis
 Stock · 3 nov.
 Facture de location
 de 1 240 € validée et saisie
@@ -466,7 +466,7 @@ Régler l'agent des clients inactifs
 Ajouter l'agent des clients inactifs
 =
 Gabriel Meyer
-Avez-vous un créneau pour une pose cette semaine ?
+Pouvez-vous me rappeler cette semaine ?
 Demandes clients
 Une demande arrive par mail ou WhatsApp, à toute heure. Sa réponse est rédigée aussitôt, puis elle part seule si vous l'avez autorisé, ou attend votre accord.
 Régler l'agent des demandes
@@ -490,25 +490,25 @@ Le Chat
 DeepMind
 GPT"""
 
-B["s5 Marque"] = """Modules métier
-Un module fait pour votre métier.
-Vos règles, vos documents, votre vocabulaire.
-Un chantier a ses avenants, un dossier d'avocat ses pièces, un permis ses plans. Chaque module connaît les règles de son métier.
-Module métier
+B["s5 Marque"] = """Documents
+Vos documents, à votre image.
+Votre logo, vos couleurs, vos mentions.
+Devis, factures et relances partent au nom de chaque société, avec ses mentions légales, ses conditions et sa numérotation.
+Votre société
 Aperçu
-Choisir un métier
-D
-Daliro
-BTP
-T
-Tamila
-Cabinets d'avocats
-L
-Lorani
-Architectes
-V
-Varelo
-Grands groupes
+Choisir une société
+M
+Maison Laurent
+Société principale
+A
+Alpes Distribution
+Filiale
+J
+Jura Services
+Filiale
+H
+Holding Laurent
+Holding
 Couleur
 Sarcelle
 Marine
@@ -522,17 +522,17 @@ Vifs
 =
 Jeudi 19 novembre
 Bonjour Maya
-Prochain chantier · 25 novembre
+Prochaine livraison · 25 novembre
 4 218,60 €
 Reste à payer sur le devis
 Devis
-Avenants
-Photos
-Avancement
-62 % réalisé
+Commandes
+Documents
+Paiements
+19 % réglé
 Accueil
 Factures
-Chantiers
+Commandes
 Moi
 Devis
 Novembre 2026
@@ -540,42 +540,42 @@ Client
 Maya Martin
 Date du devis
 12 nov. 2026
-Chantier
-Cuisine sur mesure
+Objet
+Équipement des bureaux
 Validité
 30 jours
 Prestations
-Fourniture et pose
+Fourniture et livraison
 5 450,00 €
-Plan de travail, 6 h
+Installation, 6 h
 186,00 €
 Déductions
 Acompte versé
 −1 021,40 €
 Remise, 5 %
 −272,50 €
-Reprise de l'ancien plan
+Reprise de l'ancien matériel
 −123,50 €
 Reste à payer
-Émis avec Daliro. Une question sur ce devis ? Répondez depuis votre espace.
-Votre métier, dès l'installation.
-Choisissez votre module : l'application, les documents et les notifications parlent aussitôt le langage de votre métier.
-24 sociétés
+Émis avec Omega. Une question sur ce devis ? Répondez simplement à ce mail.
+À votre image, dès l'installation.
+Choisissez une société : ses devis, ses factures et ses relances prennent aussitôt son logo et ses couleurs.
+4 sociétés
 Chercher une société
 H
-Hôtel des Quais
+Holding Laurent
 48 personnes
 · clôture de novembre
 Validée
-Menuiserie Laurent
+Maison Laurent
 12 personnes
 À valider
 =
-Atelier du Port
+Alpes Distribution
 136 personnes
 Clôturée le 15 nov.
 =
-Jardins du Sud
+Jura Services
 9 personnes
 Installation
 Ajouter une société
@@ -590,7 +590,7 @@ par personne, par mois
 Agent de relance
 Devis et factures relancés
 dès 69 €
-Pour Menuiserie Laurent
+Pour Maison Laurent
 12 personnes × 34,90 €
 418,80 €
 Écrite à la fin de l'audit, prix hors taxes
@@ -638,24 +638,24 @@ Voir les agents"""
 
 B["s7 Clients"] = """Situations
 Ce qu'Omega reprend, cas par cas.
-Du chantier au cabinet, du site unique au groupe.
-Nos agents et nos modules métier prennent ces situations en charge chaque jour. Vous gardez la décision.
-Chaque devis en attente et chaque facture échue reçoivent leur relance à la bonne date, et chaque demande sa réponse. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent.
+De la vente à la clôture, du site unique au groupe.
+Les agents et les modules de l'ERP prennent ces situations en charge chaque jour. Vous gardez la décision.
+Chaque matin, les relances des devis en attente et des factures échues sont prêtes, écrites dans votre ton, et chaque demande reçue a sa réponse rédigée. Rien ne part sans votre validation.
 Relances
 Agent · relances et encaissements
-Daliro, le module du BTP
-DALIRO
-BÂTIMENT
+Ventes, le module des devis et des factures
+VENTES
+DEVIS · FACTURES
 « L'IA prépare, vous validez. Chaque action laisse une trace. »
 Omega · notre méthode
-Tamila, le module des avocats
-tamila
-avocats
-Lorani, le module des architectes
-LORANI
-Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux et la situation de travaux est préparée.
-Daliro
-Module métier · BTP"""
+Banque, le module des rapprochements
+BANQUE
+& TVA
+Stock, le module des articles
+STOCK
+Chaque facture reçue est lue et rapprochée de sa commande. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord.
+Factures fournisseurs
+Agent · factures fournisseurs"""
 
 B["s8 Tarifs"] = """Tarifs
 Un prix par personne.
@@ -717,10 +717,10 @@ Découvrir le sur-mesure
 Construit pour vous
 Votre organisation, étudiée avec vous
 Un module ajouté à votre logiciel
-Vos logiciels métier raccordés
+Vos outils actuels raccordés
 Données d'un autre logiciel reprises
 Ce qu'il fait, écrit avant de commencer
-Sept modules métier comme base"""
+Les six modules comme base"""
 
 B["s9 Bande"] = ""
 
@@ -750,34 +750,34 @@ Vous repartez avec un prix écrit.
 En 30 minutes, nous vous disons ce qu'Omega peut reprendre chez vous et ce que cela coûte. Sans engagement.
 Parler à l'équipe"""
 
-B["pied"] = """Logiciel
-Agents
+B["pied"] = """Agents
+Le travail répétitif
 Relances
 Demandes clients
 Clients inactifs
 Factures fournisseurs
 Sur mesure
-Métiers
-Modules métier
-BTP
-Avocats
-Architectes
-Loueurs automobiles
-Cabinets dentaires
+Gestion
+L'ERP
+Ventes
+Achats
+Stock
+Banque
+Comptabilité
 Tarifs
 Ressources
-Gestion
+Toute l'offre
 Intégrations
 Modèles de site
 Blog
-Où vont vos données
+Automatisations
 Audit offert
 Omega
 Réserver un audit
 Espace client
 Service client
 Mentions légales
-Tous les métiers
+Où vont vos données
 © 2026 Omega. Tous droits réservés.
 OMEGA
 Réserver un audit"""
@@ -785,7 +785,7 @@ Réserver un audit"""
 # Ce qu'une liste alignée ne sait pas dire : la n-ième occurrence d'un même
 # texte de la référence, quand elle doit se rendre autrement dans le bloc.
 PRECIS = {
-    "s2 Fiche": {"Pay##2": "Pose", "Payroll##2": "Vernis"},
+    "s2 Fiche": {"Pay##2": "Prestation", "Payroll##2": "Envoi"},
     "s5 Marque": {"M##2": "M", "a person, monthly##2": "par agent, par mois"},
     "s8 Tarifs": {
         "per employee##2": "HT par personne", "a month##2": "par mois",
@@ -798,7 +798,7 @@ PRECIS = {
 
 AUDIT = "/reserver-un-audit"
 LIENS = {
-    "nav": {"Synnax": "/", "Platform": "/offres", "Solutions": "/secteurs", "Developers": "/integrations",
+    "nav": {"Synnax": "/", "Platform": "/offres", "Solutions": "/offres#catalogue", "Developers": "/integrations",
             "Pricing": "/tarifs", "Talk To Sales": "/contact", "Get Started": AUDIT},
     "hero": {"We've closed a $20m seed round.": AUDIT, "Get it on Mac": AUDIT, "Explore Now": "/offres"},
     "s2 Fiche": {"Start a migration": AUDIT, "Book a demo": "/gestion"},
@@ -812,13 +812,13 @@ LIENS = {
     "s10 FAQ": {"Talk to sales": "/contact"},
     "s11 Appel": {"Get started": AUDIT, "Talk to sales": "/contact"},
     "pied": {
-        "LinkedIn": "/offres", "Payroll": "/offres/relances-impayes", "Onboarding": "/offres/demandes-clients",
+        "LinkedIn": "/offres#catalogue", "Payroll": "/offres/relances-impayes", "Onboarding": "/offres/demandes-clients",
         "Time off": "/offres/nouvelles-affaires", "Compliance": "/offres/factures-fournisseurs", "Insights": "/offres/sur-mesure",
-        "X": "/secteurs", "Agents": "/secteurs/btp", "Integrations": "/secteurs/avocats", "White labelling": "/secteurs/architectes",
-        "Security": "/secteurs/location-automobile", "Pricing": "/secteurs/dentaire",
-        "YouTube": "/tarifs", "About": "/gestion", "Customers": "/integrations", "Careers": "/modeles", "FAQs": "/blog", "Contact sales": "/vos-donnees",
+        "X": "/gestion", "Agents": "/gestion#modules", "Integrations": "/gestion#modules", "White labelling": "/gestion#modules",
+        "Security": "/gestion#modules", "Pricing": "/gestion#modules",
+        "YouTube": "/tarifs", "About": "/offres", "Customers": "/integrations", "Careers": "/modeles", "FAQs": "/blog", "Contact sales": "/tarifs#automatisations",
         "Instagram": AUDIT, "Terms of service": AUDIT, "Privacy policy": "/espace2", "Cookie policy": "/contact",
-        "POPIA": "/mentions-legales", "Data processing": "/secteurs", "Get it on Mac": AUDIT,
+        "POPIA": "/mentions-legales", "Data processing": "/vos-donnees", "Get it on Mac": AUDIT,
     },
 }
 

@@ -1615,10 +1615,11 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
         · la carte du téléphone sans sa bulle, le devis droit. */
 .sx .wl-grid{--wl-brand:#121212 !important;--wl-radius:10px !important}
 .sx .wl-kit-row{display:none}
-.sx .wl-mark{background:#fff url(/logos/daliro-mark.png) center/62% no-repeat !important;color:transparent !important;box-shadow:inset 0 0 0 1px #e4e4e1}
-.sx .wl-kit-brand:nth-child(2) .wl-mark{background-image:url(/logos/tamila-mark.png) !important}
-.sx .wl-kit-brand:nth-child(3) .wl-mark{background-image:url(/logos/lorani-mark.png) !important}
-.sx .wl-kit-brand:nth-child(4) .wl-mark{background-image:url(/logos/varelo-mark.png) !important}
+/* 25/11, plus tard (Teo : « arrête de montrer les SaaS métier ») — les
+   pastilles ne portent plus les signes de Daliro, Tamila, Lorani et Varelo
+   mais l'initiale de chaque société, à l'encre de la page, cerclée d'un
+   filet : la même sobriété, sans aucun logiciel métier. */
+.sx .wl-mark{background:#fff !important;color:#121212 !important;box-shadow:inset 0 0 0 1px #e4e4e1}
 .sx .wl-kit-brand[aria-pressed=true]{background:#f6f6f4;box-shadow:inset 0 0 0 1px #e4e4e1}
 .sx .wl-pay-card{background:linear-gradient(165deg,#262626 0%,#111 70%)}
 .sx .wl-pay-card:after{display:none}

@@ -101,7 +101,7 @@ export const CATALOGUE: Catalogue = {
         { t: "Le commercial en charge reprend la main sur un compte d'un seul geste.", atteste: false },
         { t: "Aucun prix ni aucun délai n'est avancé dans un message sans que vous l'ayez écrit.", atteste: true },
         { t: "Une demande d'arrêt vaut retrait immédiat et définitif du cycle.", atteste: true },
-        { t: "Les listes d'exclusion se tiennent par compte, par secteur et par commercial.", atteste: false },
+        { t: "Les listes d'exclusion se tiennent par compte, par segment et par commercial.", atteste: false },
         { t: "L'agent s'arrête de lui-même au premier doute, et vous le signale.", atteste: true },
         { t: "Chaque message parti reste au journal, daté et consultable.", atteste: true },
       ],
@@ -200,7 +200,7 @@ export const ECHELLE: BlocEchelle = {
       icone: "scale",
       titre: "Des règles de sollicitation",
       texte:
-        "Le plafond par compte, la durée de quarantaine et les secteurs exclus sont des réglages, pas des habitudes. Chaque changement reste daté et attribué.",
+        "Le plafond par compte, la durée de quarantaine et les segments exclus sont des réglages, pas des habitudes. Chaque changement reste daté et attribué.",
     },
     {
       icone: "lock",

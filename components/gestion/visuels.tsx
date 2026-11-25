@@ -33,11 +33,11 @@
    (Geist, comme les vignettes de l'accueil).
 
    LES DONNÉES SONT DES EXEMPLES et se tiennent entre elles, ainsi qu'avec
-   l'accueil et la page Relances : un négoce de matériel électrique, deux
-   dépôts, les clients Atelier Bertin, Menuiserie Roux et Garage Lemaire,
-   le fournisseur Sté Électra. Le devis D-0314 fait 1 384,32 € partout, la
+   l'accueil et la page Relances : un distributeur de fournitures de bureau, deux
+   dépôts, les clients Bertin & Cie, Roux Conseil et Lemaire SAS,
+   le fournisseur Papeteries Dumas. Le devis D-0314 fait 1 384,32 € partout, la
    commande BC-0119 2 496,00 € partout, elle arrive le jeudi 26 novembre
-   dans la fiche article comme dans le planning ; le disjoncteur 16 A est
+   dans la fiche article comme dans le planning ; la cartouche d'encre noire est
    à 12 en stock, comme sur l'accueil ; l'encours de 39 293,12 € et ses
    14 factures sont ceux de la page Relances.
 
@@ -47,16 +47,12 @@
 import {
   ArrowUp,
   Bot,
-  Building2,
   Calculator,
-  CarFront,
+  ChartColumn,
   Check,
   Clock,
-  DraftingCompass,
   FileText,
   FolderOpen,
-  HardHat,
-  Hotel,
   Landmark,
   LayoutDashboard,
   Link2,
@@ -64,16 +60,16 @@ import {
   Package,
   Plus,
   ReceiptText,
-  Scale,
   Search,
   Send,
   Settings2,
   ShoppingCart,
-  Smile,
   Sparkles,
+  TrendingUp,
   Truck,
   UserRoundCheck,
   Users,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -88,7 +84,6 @@ import {
   Pastille,
   SOURD,
 } from "@/components/vignettes/briques";
-import { SECTEURS } from "@/lib/secteurs";
 import { ECRANS } from "./textes";
 
 /* ── les pièces communes ── */
@@ -184,11 +179,11 @@ const A_FAIRE: [string, string, boolean][] = [
   ["29 éléments des agents", "À valider", true],
 ];
 const PIECES: [string, string, string, string, string, boolean][] = [
-  ["D-0314 · Devis", "Atelier Bertin", "Ventes", "1 384,32 €", "Brouillon", false],
-  ["F-2053 · Facture", "Menuiserie Roux", "Ventes", "1 920,00 €", "Envoyée", false],
-  ["BC-0119 · Commande", "Sté Électra", "Achats", "2 496,00 €", "Envoyée", false],
-  ["BL-0871 · Livraison", "Garage Lemaire", "Stock", "38 articles", "Livrée", false],
-  ["8841 · Facture reçue", "Sté Électra", "Achats", "1 032,48 €", "Payée", false],
+  ["D-0314 · Devis", "Bertin & Cie", "Ventes", "1 384,32 €", "Brouillon", false],
+  ["F-2053 · Facture", "Roux Conseil", "Ventes", "1 920,00 €", "Envoyée", false],
+  ["BC-0119 · Commande", "Papeteries Dumas", "Achats", "2 496,00 €", "Envoyée", false],
+  ["BL-0871 · Livraison", "Lemaire SAS", "Stock", "38 articles", "Livrée", false],
+  ["8841 · Facture reçue", "Papeteries Dumas", "Achats", "1 032,48 €", "Payée", false],
 ];
 /* des largeurs fixes, jamais `auto` : chaque rangée est sa propre grille,
    et une colonne `auto` ne s'alignerait pas d'une rangée à l'autre */
@@ -345,7 +340,7 @@ export function TableauDeBord() {
             </div>
 
             <div className={`${CARTE} flex min-w-0 flex-col gap-2 p-3`}>
-              <Tete titre="Une saisie, à jour partout" sous="Devis D-0312 · Garage Lemaire" />
+              <Tete titre="Une saisie, à jour partout" sous="Devis D-0312 · Lemaire SAS" />
               <ul className={`flex flex-col gap-1.5 pt-2 ${FILET}`}>
                 <Fait>Devis accepté</Fait>
                 <Fait>Bon de livraison créé</Fait>
@@ -366,10 +361,10 @@ export function TableauDeBord() {
 
 const COLS_DEVIS = "grid grid-cols-[minmax(0,1fr)_1.75rem_2.75rem_3.5rem] gap-2";
 const LIGNES_DEVIS: [string, string, string, string][] = [
-  ["Câble 2,5 mm², couronne 100 m", "6", "62,00", "372,00"],
-  ["Disjoncteur 16 A", "24", "8,90", "213,60"],
-  ["Prise 2P+T", "120", "3,45", "414,00"],
-  ["Gaine ICTA 20, couronne 100 m", "4", "38,50", "154,00"],
+  ["Ramette A4, carton de 5", "6", "62,00", "372,00"],
+  ["Cartouche d'encre noire", "24", "8,90", "213,60"],
+  ["Classeur à levier", "120", "3,45", "414,00"],
+  ["Enveloppes C4, boîte de 250", "4", "38,50", "154,00"],
 ];
 
 function Totaux({ ht, tva, ttc }: { ht: string; tva: string; ttc: string }) {
@@ -389,7 +384,7 @@ export function EcranDevis() {
   return (
     <Fenetre titre="Ventes · Devis D-0314" alt={ECRANS.devis}>
       <Tete
-        titre="Devis D-0314 · Atelier Bertin"
+        titre="Devis D-0314 · Bertin & Cie"
         sous="20 novembre 2026 · valable 30 jours"
         droite={<Pastille>Brouillon</Pastille>}
       />
@@ -411,7 +406,7 @@ export function EcranDevis() {
         {/* la ligne en cours de saisie */}
         <div className={`${COLS_DEVIS} ${RANGEE} ${FILET}`}>
           <span className={`flex min-w-0 items-center ${ENCRE}`}>
-            <span className="truncate">Interrupteur va-et-vient</span>
+            <span className="truncate">Agrafeuse de bureau</span>
             <span className="ge-curseur ml-px h-3 w-px shrink-0 bg-[#0a0a0a]" />
           </span>
           <span className={`${NOMBRE} ${SOURD}`}>—</span>
@@ -421,7 +416,7 @@ export function EcranDevis() {
       </div>
       <div className="flex items-center gap-2 rounded-md bg-black/[0.04] px-2 py-1.5">
         <Package className={`h-3.5 w-3.5 shrink-0 ${ENCRE}`} strokeWidth={1.7} />
-        <span className={`min-w-0 flex-1 text-[11px] leading-snug ${ENCRE}`}>Disjoncteur 16 A : 12 en stock, 24 demandés</span>
+        <span className={`min-w-0 flex-1 text-[11px] leading-snug ${ENCRE}`}>Cartouche d&apos;encre noire : 12 en stock, 24 demandés</span>
         <Pastille pleine>À commander</Pastille>
       </div>
       <Totaux ht="1 153,60 €" tva="230,72 €" ttc="1 384,32 €" />
@@ -442,15 +437,15 @@ const SUIVI: [string, boolean][] = [
   ["Facturée", false],
 ];
 const LIGNES_COMMANDE: [string, string, string, string][] = [
-  ["Disjoncteur 16 A", "200", "6,20", "1 240,00"],
-  ["Câble 2,5 mm², couronne 100 m", "10", "48,00", "480,00"],
-  ["Prise 2P+T", "150", "2,40", "360,00"],
+  ["Cartouche d'encre noire", "200", "6,20", "1 240,00"],
+  ["Ramette A4, carton de 5", "10", "48,00", "480,00"],
+  ["Classeur à levier", "150", "2,40", "360,00"],
 ];
 
 export function EcranCommande() {
   return (
     <Fenetre titre="Achats · Commande BC-0119" alt={ECRANS.commande}>
-      <Tete titre="Bon de commande BC-0119" sous="Sté Électra · pour le dépôt nord" droite={<Pastille>Envoyée</Pastille>} />
+      <Tete titre="Bon de commande BC-0119" sous="Papeteries Dumas · pour le dépôt nord" droite={<Pastille>Envoyée</Pastille>} />
       <ol className={`${CARTE} flex items-start px-1 py-2.5`}>
         {SUIVI.map(([etape, fait], k) => (
           <li key={etape} className="flex min-w-0 flex-1 flex-col items-center gap-1">
@@ -511,8 +506,8 @@ const MOUVEMENTS: [string, string, string, string, number][] = [
 
 export function EcranArticle() {
   return (
-    <Fenetre titre="Stock · Disjoncteur 16 A" alt={ECRANS.article}>
-      <Tete titre="Disjoncteur 16 A" sous="Réf. DJ-16A · 2 dépôts" droite={<Pastille pleine>À commander</Pastille>} />
+    <Fenetre titre="Stock · Cartouche d'encre noire" alt={ECRANS.article}>
+      <Tete titre="Cartouche d'encre noire" sous="Réf. CE-N01 · 2 dépôts" droite={<Pastille pleine>À commander</Pastille>} />
       <div className="grid grid-cols-3 gap-2">
         <Chiffre libelle="En stock" valeur="12" />
         <Chiffre libelle="Seuil" valeur="40" />
@@ -557,10 +552,10 @@ export function EcranArticle() {
 /* ══════════ 01 · banque : le rapprochement d'un relevé ══════════ */
 
 const RELEVE: [string, string, string, string, boolean][] = [
-  ["VIR ATELIER BERTIN", "+ 1 240,00", "F-2048", "Rapprochée", false],
-  ["VIR MENUISERIE ROUX", "+ 3 860,40", "F-2049", "Rapprochée", false],
+  ["VIR BERTIN ET CIE", "+ 1 240,00", "F-2048", "Rapprochée", false],
+  ["VIR ROUX CONSEIL", "+ 3 860,40", "F-2049", "Rapprochée", false],
   ["PRLV STE ELECTRA", "− 1 032,48", "Facture 8841", "Rapprochée", false],
-  ["VIR GARAGE LEMAIRE", "+ 684,00", "F-2044", "Proposée", true],
+  ["VIR LEMAIRE SAS", "+ 684,00", "F-2044", "Proposée", true],
   ["CB CARBURANT", "− 86,40", "Note de frais", "Proposée", true],
   ["PRLV LOYER DEPOT", "− 2 300,00", "Aucune pièce", "À justifier", false],
 ];
@@ -693,9 +688,9 @@ export function EcranComptes() {
 
 const TRAIT = "h-1 rounded-full bg-black/10";
 const LIGNES_FACTURE: [string, string, string][] = [
-  ["Prise 2P+T", "40", "138,00"],
-  ["Câble 2,5 mm², couronne 100 m", "2", "124,00"],
-  ["Disjoncteur 16 A", "10", "89,00"],
+  ["Classeur à levier", "40", "138,00"],
+  ["Ramette A4, carton de 5", "2", "124,00"],
+  ["Cartouche d'encre noire", "10", "89,00"],
 ];
 
 export function EcranModele() {
@@ -728,7 +723,7 @@ export function EcranModele() {
             </div>
           </div>
           <div className="ml-auto flex w-1/2 flex-col gap-1.5">
-            <span className={`truncate text-[10px] font-medium ${ENCRE}`}>Garage Lemaire</span>
+            <span className={`truncate text-[10px] font-medium ${ENCRE}`}>Lemaire SAS</span>
             <span className={`${TRAIT} w-full`} />
             <span className={`${TRAIT} w-2/3`} />
           </div>
@@ -878,18 +873,22 @@ export function EcranNuit() {
   );
 }
 
-/* ══════════ 03 · métiers : les modules actifs, ceux à ajouter ══════════ */
+/* ══════════ 03 · automatisations : les modules actifs, celles à ajouter ══════════
+   25/11 (Teo : « arrête de parler ou montrer comme exemple les trucs BTP
+   etc, les SaaS métier ; focus sur l'ERP, les agents ») — l'écran listait
+   les sept modules métier à ajouter ; il liste des automatisations, l'offre
+   de /tarifs (installée une fois). Exemples, choisis hors du travail des
+   quatre agents. */
 
 const SIX = ["Ventes", "Achats", "Stock", "Banque", "Comptabilité", "Documents"];
-const ICONES_METIERS: Record<string, LucideIcon> = {
-  btp: HardHat,
-  avocats: Scale,
-  architectes: DraftingCompass,
-  "location-automobile": CarFront,
-  dentaire: Smile,
-  hotellerie: Hotel,
-  groupes: Building2,
-};
+const AUTOMATISATIONS: { nom: string; ligne: string; icone: LucideIcon }[] = [
+  { nom: "Alerte de stock", ligne: "Un article passe sous son seuil", icone: Package },
+  { nom: "Seuil de trésorerie", ligne: "Le solde passe sous votre plancher", icone: Wallet },
+  { nom: "Retard fournisseur", ligne: "Une livraison attendue n'est pas arrivée", icone: Clock },
+  { nom: "Réassort", ligne: "La commande fournisseur préparée", icone: Truck },
+  { nom: "Hausse de prix", ligne: "Un tarif fournisseur augmente", icone: TrendingUp },
+  { nom: "Rapport du mois", ligne: "Ventes et marge, le 1er du mois", icone: ChartColumn },
+];
 
 export function EcranModules() {
   return (
@@ -909,28 +908,25 @@ export function EcranModules() {
         ))}
       </div>
       <div className={`flex items-center justify-between gap-2 pt-2 ${FILET}`}>
-        <span className={`text-xs font-medium ${ENCRE}`}>Modules métier</span>
-        <span className={`text-[11px] ${SOURD}`}>7 à ajouter</span>
+        <span className={`text-xs font-medium ${ENCRE}`}>Automatisations</span>
+        <span className={`text-[11px] ${SOURD}`}>6 proposées</span>
       </div>
       <div className={`${CARTE} flex flex-col p-1`}>
-        {SECTEURS.map((s, k) => {
-          const I = ICONES_METIERS[s.slug] ?? Building2;
-          return (
-            <div key={s.slug} className={`flex items-center gap-2 px-2 py-1 ${k ? FILET : ""}`}>
-              <I className={`h-3.5 w-3.5 shrink-0 ${ENCRE}`} strokeWidth={1.7} />
-              <span className={`shrink-0 whitespace-nowrap text-[11px] font-medium ${ENCRE}`}>{s.metier}</span>
-              <span className={`min-w-0 flex-1 truncate text-[10px] ${SOURD}`}>{s.ligne}</span>
-              <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border border-black/15 ${ENCRE}`}>
-                <Plus className="h-2.5 w-2.5" strokeWidth={2.4} />
-              </span>
-            </div>
-          );
-        })}
+        {AUTOMATISATIONS.map(({ nom, ligne, icone: I }, k) => (
+          <div key={nom} className={`flex items-center gap-2 px-2 py-1 ${k ? FILET : ""}`}>
+            <I className={`h-3.5 w-3.5 shrink-0 ${ENCRE}`} strokeWidth={1.7} />
+            <span className={`shrink-0 whitespace-nowrap text-[11px] font-medium ${ENCRE}`}>{nom}</span>
+            <span className={`min-w-0 flex-1 truncate text-[10px] ${SOURD}`}>{ligne}</span>
+            <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border border-black/15 ${ENCRE}`}>
+              <Plus className="h-2.5 w-2.5" strokeWidth={2.4} />
+            </span>
+          </div>
+        ))}
       </div>
       <div className="flex items-center gap-2 rounded-md border border-dashed border-black/20 px-2 py-1.5">
         <Plus className={`h-3.5 w-3.5 shrink-0 ${ENCRE}`} strokeWidth={1.8} />
-        <span className={`shrink-0 text-[11px] font-medium ${ENCRE}`}>Votre métier</span>
-        <span className={`min-w-0 flex-1 truncate text-[10px] ${SOURD}`}>Construit sur mesure</span>
+        <span className={`shrink-0 text-[11px] font-medium ${ENCRE}`}>Votre automatisation</span>
+        <span className={`min-w-0 flex-1 truncate text-[10px] ${SOURD}`}>Construite sur mesure</span>
       </div>
     </Fenetre>
   );

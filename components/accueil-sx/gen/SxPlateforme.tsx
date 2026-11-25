@@ -681,7 +681,7 @@ export default function SxPlateforme() {
                                     </svg>
                                   </span>
                                 </span>
-                                {"Facture Roux Matériaux"}
+                                {"Facture Papeteries Dumas"}
                               </h3>
                               <div className={"mt-2 flex items-center justify-end sm:mt-0"}>
                                 <svg className={"-rotate-90"} height={"14"} viewBox={"0 0 14 14"} width={"14"}>
@@ -997,7 +997,7 @@ export default function SxPlateforme() {
                         </div>
                         <div className={"platform-leave-note"}>
                           <p>
-                            {"Pose de mardi à jeudi : l'agenda de Maya est libre, et 3 poseurs sur 4 restent disponibles."}
+                            {"Rendez-vous de mardi à jeudi : l'agenda de Maya est libre, et 3 personnes sur 4 restent disponibles."}
                           </p>
                           <div className={"platform-tags"}>
                             <span className={"platform-status  "}>
@@ -1129,7 +1129,7 @@ export default function SxPlateforme() {
                         </span>
                         <span className={"platform-leave-span"} style={{ "gridColumn": "span 3" } as CSSProperties}>
                           <span className={"platform-leave-bar"}>
-                            {"Pose · 3 jours"}
+                            {"Rendez-vous · 3 jours"}
                           </span>
                         </span>
                         <span>
@@ -1464,12 +1464,12 @@ export default function SxPlateforme() {
                                     {"07"}
                                   </span>
                                   <span className={"truncate"}>
-                                    {"Bois · Roux Matériaux"}
+                                    {"Fournitures · Papeteries Dumas"}
                                   </span>
                                 </span>
                               </td>
                               <td className={"truncate px-4 text-foreground text-left"}>
-                                {"Matériaux"}
+                                {"Achats"}
                               </td>
                               <td className={"truncate px-4 text-foreground text-left"}>
                                 <span className={"flex items-center gap-2"}>
@@ -1497,7 +1497,7 @@ export default function SxPlateforme() {
                                     {"15"}
                                   </span>
                                   <span className={"truncate"}>
-                                    {"Engins · Loca Chantier"}
+                                    {"Véhicules · Loca Pro"}
                                   </span>
                                 </span>
                               </td>
@@ -1603,7 +1603,7 @@ export default function SxPlateforme() {
                         </div>
                         <div className={"platform-agent-note"}>
                           <p>
-                            {"Le RIB de la facture Loca Chantier diffère de celui de la fiche. En 12 mois, aucun paiement vers ce compte : "}
+                            {"Le RIB de la facture Loca Pro diffère de celui de la fiche. En 12 mois, aucun paiement vers ce compte : "}
                             <strong>
                               {"2 140 € suspendus."}
                             </strong>

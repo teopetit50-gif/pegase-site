@@ -150,7 +150,7 @@ const LIGNES: Ligne[] = [
   { nom: "Loc'Outils Ouest", voie: "Scan · 912,00 €", debut: 21, fin: 62, avance: 0.42, etat: "attente", mot: "À valider" },
   { nom: "Transports Kervadec", voie: "Mail · 148,20 €", debut: 33, fin: 74, avance: 0.66, etat: "fait", mot: "Recoupée" },
   { nom: "Papeterie du Port", voie: "Photo · 76,90 €", debut: 45, fin: 78, avance: 0.18, etat: "ecarte", mot: "Doublon écarté" },
-  { nom: "Cabinet Mercier", voie: "Mensuel · 540,00 €", debut: 54, fin: 97, avance: 1, etat: "fait", mot: "Transmise" },
+  { nom: "Mercier & Associés", voie: "Mensuel · 540,00 €", debut: 54, fin: 97, avance: 1, etat: "fait", mot: "Transmise" },
 ];
 
 /* Trois états, trois couleurs, pas une de plus. Le rouge est le jeton

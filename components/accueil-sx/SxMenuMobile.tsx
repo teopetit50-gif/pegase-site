@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 
 const ENTREES: [string, string][] = [
   ["Logiciel", "/offres"],
-  ["Métiers", "/secteurs"],
+  ["Agents", "/offres#catalogue"],
   ["Intégrations", "/integrations"],
   ["Tarifs", "/tarifs"],
 ];

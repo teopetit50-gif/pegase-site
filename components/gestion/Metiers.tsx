@@ -1,18 +1,16 @@
 import {
   ArrowUpRight,
-  Building2,
-  CarFront,
-  DraftingCompass,
-  HardHat,
-  Hotel,
+  Bot,
+  Calculator,
+  FileText,
+  Landmark,
+  Package,
   Plus,
   Quote,
-  Scale,
-  Smile,
+  ReceiptText,
+  ShoppingCart,
   type LucideIcon,
 } from "lucide-react";
-import Lien from "@/components/Lien";
-import { secteur } from "@/lib/secteurs";
 import Apparition from "./Apparition";
 import { Bloc } from "./Trame";
 import { METIERS } from "./textes";
@@ -41,21 +39,24 @@ import { METIERS } from "./textes";
      de large à 1024 px, où « automobiles » ne tient pas en 18 px.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* 25/11 — les cases ne nomment plus des métiers mais ce que vous recevez :
+   les six modules, les agents, le sur-mesure (textes.ts, METIERS). Aucune
+   n'est un lien : les modules se lisent sur cette page même. */
 const ICONES: Record<string, LucideIcon> = {
-  btp: HardHat,
-  avocats: Scale,
-  architectes: DraftingCompass,
-  "location-automobile": CarFront,
-  dentaire: Smile,
-  hotellerie: Hotel,
-  groupes: Building2,
+  ventes: ReceiptText,
+  achats: ShoppingCart,
+  stock: Package,
+  banque: Landmark,
+  comptabilite: Calculator,
+  documents: FileText,
+  agents: Bot,
   "sur-mesure": Plus,
 };
 
 const CASE = "group relative flex h-32 rounded-[10px] bg-white transition-colors hover:bg-stone-100 lg:h-40";
 
 function Marque({ cle, nom, lien }: { cle: string; nom: string; lien: boolean }) {
-  const I = ICONES[cle] ?? Building2;
+  const I = ICONES[cle] ?? Plus;
   return (
     <div className="relative flex h-full w-full items-center justify-center p-4">
       <div
@@ -100,27 +101,15 @@ export function Metiers() {
           </div>
         </Apparition>
         <ul className="grid min-w-0 flex-1 grid-cols-2 gap-px bg-stone-200 md:grid-cols-4">
-          {METIERS.cases.map((c, i) => {
-            const page = secteur(c.cle);
-            return (
-              <li key={c.cle}>
-                <Apparition y={12} duree={0.4} retard={0.05 * i} marge={50}>
-                  {page ? (
-                    <Lien
-                      href={`/secteurs/${page.slug}`}
-                      className={`${CASE} outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4b4038]/40`}
-                    >
-                      <Marque cle={c.cle} nom={c.nom} lien />
-                    </Lien>
-                  ) : (
-                    <div className={CASE}>
-                      <Marque cle={c.cle} nom={c.nom} lien={false} />
-                    </div>
-                  )}
-                </Apparition>
-              </li>
-            );
-          })}
+          {METIERS.cases.map((c, i) => (
+            <li key={c.cle}>
+              <Apparition y={12} duree={0.4} retard={0.05 * i} marge={50}>
+                <div className={CASE}>
+                  <Marque cle={c.cle} nom={c.nom} lien={false} />
+                </div>
+              </Apparition>
+            </li>
+          ))}
         </ul>
       </div>
     </Bloc>

@@ -31,7 +31,7 @@ const CAS = [
     suggestion: {
       qui: "Suggestion sans IA",
       texte:
-        "Votre stock de vis passe souvent sous 10 unités sans que personne ne le voie. Je peux prévenir Julien dès que cela arrive. Installation : 49 € HT, une fois. Ensuite, rien à payer.",
+        "Votre stock de cartouches d'encre passe souvent sous 10 unités sans que personne ne le voie. Je peux prévenir Julien dès que cela arrive. Installation : 49 € HT, une fois. Ensuite, rien à payer.",
     },
   },
   {

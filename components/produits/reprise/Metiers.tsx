@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { HardHat, PackageCheck, Wrench, Snowflake, Briefcase } from "lucide-react";
+import { Briefcase, CalendarClock, FileClock, FolderCheck, PackageCheck } from "lucide-react";
 import { METIERS as M } from "@/lib/produits/reprise";
 import { Cadre, TitreSection } from "./Cadre";
 import { cn } from "./cn";
@@ -45,10 +45,10 @@ import { cn } from "./cn";
  *  À 16 px et strokeWidth 1.75, Smartphone n'aurait été qu'un rectangle
  *  arrondi : dans une piste de cinq onglets il ne se distingue pas. */
 const ICONES = {
-  atelier: Wrench,
+  devis: FileClock,
   negoce: PackageCheck,
-  froid: Snowflake,
-  chantier: HardHat,
+  contrat: CalendarClock,
+  projet: FolderCheck,
   bureau: Briefcase,
 } as const;
 
@@ -90,7 +90,7 @@ export function Metiers() {
                 filets verticaux qui séparent les onglets. */}
             <div
               role="tablist"
-              aria-label="Métiers concernés"
+              aria-label="Situations"
               onKeyDown={auClavier}
               className="flex divide-x divide-dashed divide-[#d9d9d9] overflow-x-auto border-[#d9d9d9] border-t border-b border-dashed"
             >

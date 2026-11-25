@@ -126,21 +126,25 @@ export const MODULES = {
    À gauche une conviction d'Omega (CITATIONS de l'accueil, même esprit),
    à droite les sept métiers et le sur-mesure, en mots ; la clé désigne
    l'icône et la page du métier (components/gestion/Metiers.tsx). */
+/* 25/11 (Teo : « arrête de parler ou montrer comme exemple les trucs BTP
+   etc, les SaaS métier ; focus sur l'ERP, les agents qu'on vend ») — le
+   bandeau ne nomme plus les sept métiers : il nomme les six modules, les
+   agents et le sur-mesure, ce que vous recevez. Aucune case n'est un lien. */
 export const METIERS = {
-  titre: ["Sept métiers ont déjà", "leur module"],
+  titre: ["Six modules et des agents,", "dans un seul logiciel"],
   pari: {
     titre: "Notre pari",
-    texte: "Un logiciel de gestion doit s'adapter aux règles de votre métier, et non vous imposer les siennes.",
+    texte: "Un logiciel de gestion doit s'adapter à votre façon de travailler, et non vous imposer la sienne.",
   },
   cases: [
-    { cle: "btp", nom: "BTP" },
-    { cle: "avocats", nom: "Avocats" },
-    { cle: "architectes", nom: "Architectes" },
-    { cle: "location-automobile", nom: "Loueurs automobiles" },
-    { cle: "dentaire", nom: "Cabinets dentaires" },
-    { cle: "hotellerie", nom: "Hôtels" },
-    { cle: "groupes", nom: "Grands groupes" },
-    { cle: "sur-mesure", nom: "Votre métier" },
+    { cle: "ventes", nom: "Ventes" },
+    { cle: "achats", nom: "Achats" },
+    { cle: "stock", nom: "Stock" },
+    { cle: "banque", nom: "Banque" },
+    { cle: "comptabilite", nom: "Comptabilité" },
+    { cle: "documents", nom: "Documents" },
+    { cle: "agents", nom: "Agents IA" },
+    { cle: "sur-mesure", nom: "Sur mesure" },
   ],
 };
 
@@ -212,7 +216,7 @@ export const DEMARRAGE = {
 export const MESURE = {
   titre: ["Omega va plus loin", "que la gestion."],
   texte:
-    "Quatre agents font le travail répétitif dans votre logiciel, et sept métiers ont déjà leur module. Si un besoin reste sans réponse, nous construisons le module qui manque.",
+    "Quatre agents font le travail répétitif dans votre logiciel, et des automatisations s'ajoutent en une fois. Si un besoin reste sans réponse, nous construisons le module qui manque.",
   volets: [
     {
       id: "quatre-agents",
@@ -222,9 +226,9 @@ export const MESURE = {
     },
     {
       id: "metiers",
-      titre: "Sept modules métier",
+      titre: "Automatisations",
       texte:
-        "BTP, avocats, architectes, loueurs automobiles, cabinets dentaires, hôtels, grands groupes : chaque métier a son module.",
+        "Une alerte de stock, un seuil de trésorerie, un rapport du mois : chaque automatisation s'installe une fois, puis travaille seule.",
     },
     {
       id: "sur-mesure",
@@ -283,21 +287,13 @@ export const OFFRE: Colonne[] = [
     points: ["Relances", "Demandes clients", "Factures fournisseurs", "Clients inactifs"],
   },
   {
-    nom: "Métiers",
-    valeur: "7",
-    suffixe: "modules métier",
-    bouton: { libelle: "Réserver l'audit", href: AUDIT, plein: true },
-    lignes: ["Un module par métier", "Prix sur devis"],
-    intertitre: "Les sept métiers",
-    points: [
-      "BTP",
-      "Avocats",
-      "Architectes",
-      "Loueurs automobiles",
-      "Cabinets dentaires",
-      "Hôtels",
-      "Grands groupes",
-    ],
+    nom: "Automatisations",
+    valeur: "Une",
+    suffixe: "seule fois",
+    bouton: { libelle: "Voir les prix", href: "/tarifs#automatisations" },
+    lignes: ["Dès 49\u00a0€ HT d'installation", "L'IA payée à la tâche"],
+    intertitre: "Trois cas",
+    points: ["Sans IA", "Avec IA", "Sur mesure"],
   },
   {
     nom: "Sur mesure",
@@ -326,7 +322,7 @@ export const QUESTIONS = {
     {
       id: "omega",
       q: "Qu'est-ce qu'Omega ?",
-      r: "Omega est un éditeur de logiciels français. Nous développons un logiciel de gestion, c'est-à-dire un ERP : ventes, achats, stock, banque, comptabilité et documents y partagent les mêmes données. L'IA le paramètre pour votre activité, puis des agents y font le travail répétitif : relances, demandes clients, factures fournisseurs, clients inactifs. Sept métiers ont déjà leur module, et nous construisons sur mesure celui qui vous manque.",
+      r: "Omega est un éditeur de logiciels français. Nous développons un logiciel de gestion, c'est-à-dire un ERP : ventes, achats, stock, banque, comptabilité et documents y partagent les mêmes données. L'IA le paramètre pour votre activité, puis des agents y font le travail répétitif : relances, demandes clients, factures fournisseurs, clients inactifs. Si un module vous manque, nous le construisons sur mesure.",
     },
     {
       id: "erp",
@@ -398,6 +394,6 @@ export const ECRANS = {
   reprise:
     "Exemple d'écran : la reprise des clients, des fournisseurs, des articles et des factures du logiciel actuel.",
   nuit: "Exemple d'écran : le travail des quatre agents pendant la nuit, prêt à valider le matin.",
-  modules: "Exemple d'écran : les six modules de gestion actifs et les sept modules métier à ajouter.",
+  modules: "Exemple d'écran : les six modules de gestion actifs et les automatisations à ajouter.",
   planning: "Exemple d'écran : un module construit sur mesure, le planning des équipes de la semaine.",
 };

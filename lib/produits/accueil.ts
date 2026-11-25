@@ -288,7 +288,7 @@ export const CANAUX = {
    fiche ; les demandes sont des exemples, et la dernière montre le
    garde-fou : hors de la base, il transfère au lieu de supposer. */
 export const METIERS = {
-  etiquette: "Pour qui",
+  etiquette: "À toute heure",
   /* Le titre affirme quelque chose qu'un lecteur peut contredire (« si,
      j'ai quelqu'un le soir » — et celui-là n'est pas notre client), et il
      désigne les quatre onglets posés juste dessous. Le 11/09 il a repris un
@@ -310,16 +310,16 @@ export const METIERS = {
   secteurs: [
     {
       cle: "apres-vente",
-      nom: "Après-vente",
+      nom: "Rendez-vous",
       icone: "cle",
       heure: "Samedi 21 h 47",
-      demande: "Un de nos véhicules est immobilisé, vous avez un créneau ?",
+      demande: "Pouvez-vous nous présenter votre offre samedi ?",
       issue: "Créneau réservé, rappel la veille",
       transfert: false,
     },
     {
       cle: "industrie",
-      nom: "Industrie",
+      nom: "Commande",
       icone: "industrie",
       heure: "Dimanche 10 h",
       demande: "Vous pouvez livrer 40 palettes la semaine prochaine ?",
@@ -328,16 +328,16 @@ export const METIERS = {
     },
     {
       cle: "cabinets",
-      nom: "Cabinets",
+      nom: "Tarifs",
       icone: "mallette",
       heure: "Mardi 6 h 30",
-      demande: "Vos honoraires pour un premier rendez-vous ?",
+      demande: "Vos tarifs pour un premier rendez-vous ?",
       issue: "Répondu depuis la base construite avec vous",
       transfert: false,
     },
     {
       cle: "reseaux",
-      nom: "Réseaux",
+      nom: "Stock",
       icone: "boutique",
       heure: "Jeudi 23 h 05",
       demande: "Vous avez ce modèle en stock à l'entrepôt ?",
@@ -365,7 +365,7 @@ export const JOURNEE = {
     {
       heure: "6 h 30",
       canal: "Mail",
-      texte: "Quel délai pour une révision ?",
+      texte: "Quel délai de livraison pour 200 cartons ?",
       issue: "Répondu à 6 h 31",
       dehors: true,
       transfert: false,
@@ -373,7 +373,7 @@ export const JOURNEE = {
     {
       heure: "21 h 47",
       canal: "WhatsApp",
-      texte: "Un de nos véhicules est immobilisé, vous avez un créneau ?",
+      texte: "Pouvez-vous nous présenter votre offre samedi ?",
       issue: `Rendez-vous posé samedi 9 h 30`,
       dehors: true,
       transfert: false,
@@ -381,7 +381,7 @@ export const JOURNEE = {
     {
       heure: "23 h 05",
       canal: "WhatsApp",
-      texte: "Mon pare-brise est fissuré, c'est urgent.",
+      texte: "Notre livraison n'est pas arrivée, c'est urgent.",
       issue: "Transféré : l'astreinte est appelée",
       dehors: true,
       transfert: true,
@@ -505,7 +505,7 @@ export const FRANCAIS = {
       cle: "Langue",
       titre: "Écrit et parlé en français",
       texte:
-        "Les réponses emploient le vocabulaire de votre métier, et le suivi se fait au téléphone.",
+        "Les réponses emploient le vocabulaire de votre entreprise, et notre équipe assure le suivi en français, par téléphone.",
     },
   ],
   lien: { libelle: "Où vont vos données", href: "/vos-donnees" },
@@ -520,13 +520,13 @@ export const CONVERSATION = {
     {
       de: "client",
       heure: "21:47",
-      texte: "Bonsoir, un de nos utilitaires est immobilisé. Vous avez un créneau samedi ?",
+      texte: "Bonsoir, nous équipons de nouveaux bureaux. Pouvons-nous en parler samedi ?",
     },
     {
       de: "moteur",
       heure: "21:47",
       texte:
-        "Bonsoir ! Oui, l'atelier reçoit samedi de 8 h à 13 h. Comptez environ 45 minutes pour un diagnostic. Je peux vous réserver samedi 9 h 30 ?",
+        "Bonsoir. Notre équipe commerciale reçoit le samedi de 9 h à 12 h, pour un premier rendez-vous de 30 minutes. Puis-je vous réserver samedi à 9 h 30 ?",
     },
     { de: "client", heure: "21:52", texte: "Parfait pour 9h30 👍" },
     {

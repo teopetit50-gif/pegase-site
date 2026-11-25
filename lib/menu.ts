@@ -1,4 +1,3 @@
-import { SECTEURS } from "@/lib/secteurs";
 /* ══════════════════════════════════════════════════════════════════════
    Le menu principal — une seule source pour les deux surfaces (11/09/2026)
 
@@ -102,6 +101,13 @@ import { SECTEURS } from "@/lib/secteurs";
      rubriques au lieu de cinq. Seul le contenu change : aucun composant
      ni aucune feuille de style du menu n'est touché.
 
+   · 25/11 — plus aucun métier dans le menu (Teo : « arrête de parler ou
+     montrer comme exemple les trucs BTP etc, les SaaS métier ; focus sur
+     l'ERP, les agents qu'on vend »). La colonne « Pour votre métier » et
+     « Tous les métiers » sortent ; « Logiciel » se range en deux colonnes,
+     le logiciel (Gestion, Sur mesure) et les agents. Les pages /secteurs
+     restent en ligne, plus rien ne les met en avant.
+
    ─ Les textes ─
 
    Ils ne sont pas écrits ici : ce sont ceux des cartes de /offres
@@ -141,9 +147,6 @@ export type Rubrique = {
 /* l'intitulé de la rubrique du logiciel : UnSeulAudit la retrouve par lui */
 export const RUBRIQUE_LOGICIEL = "Logiciel";
 
-/* 22/11 — les métiers montrés dans le panneau ; les autres restent sur /secteurs */
-const METIERS_AU_MENU = ["btp", "avocats", "architectes", "groupes"];
-
 export const MENU: Rubrique[] = [
   {
     label: RUBRIQUE_LOGICIEL,
@@ -152,65 +155,46 @@ export const MENU: Rubrique[] = [
       label: "Tous les modules",
       texte: "Tout se combine, sur un seul audit.",
     },
-    racines: ["/secteurs"],
     entrees: [
       {
         href: "/gestion",
         label: "Gestion",
         texte: "Ventes, achats, stock, banque, comptabilité",
-        colonne: "Pour toutes les entreprises",
+        colonne: "Le logiciel",
+      },
+      {
+        href: "/offres/sur-mesure",
+        label: "Sur mesure",
+        texte: "Le module propre à votre organisation",
+        colonne: "Le logiciel",
       },
       {
         href: "/offres/relances-impayes",
         label: "Relances",
         marque: "CASHD",
         texte: "Relance des devis et des factures échues",
-        colonne: "Pour toutes les entreprises",
+        colonne: "Les agents",
       },
       {
         href: "/offres/nouvelles-affaires",
         label: "Clients inactifs",
         marque: "OFFLOAD",
         texte: "Reprise de contact avec vos anciens clients",
-        colonne: "Pour toutes les entreprises",
+        colonne: "Les agents",
       },
       {
         href: "/offres/demandes-clients",
         label: "Demandes clients",
         marque: "REPUT",
         texte: "Chaque demande traitée, à toute heure",
-        colonne: "Pour toutes les entreprises",
+        colonne: "Les agents",
       },
       {
         href: "/offres/factures-fournisseurs",
         label: "Factures fournisseurs",
         marque: "FILED",
         texte: "Chaque facture lue, contrôlée et transmise",
-        colonne: "Pour toutes les entreprises",
-      },
-      {
-        href: "/offres/sur-mesure",
-        label: "Sur mesure",
-        texte: "Le module propre à votre organisation",
-        colonne: "Pour toutes les entreprises",
-      },
-      /* Le métier en intitulé, une ligne courte dessous (`ligne`) : le
-         visiteur cherche « BTP », pas « Daliro ». 25/09, trois passes le
-         même jour (Teo) : « un peu trop chargé » (22 lignes de gris à lire),
-         puis « quand même une ligne descriptive par métier », puis
-         « enlève les noms à côté » — le nom du logiciel ne figure plus dans
-         le menu, il reste sur la page du métier. */
-      ...SECTEURS.filter((s) => METIERS_AU_MENU.includes(s.slug)).map((s) => ({
-        href: `/secteurs/${s.slug}`,
-        label: s.metier,
-        texte: s.ligne,
-        colonne: "Pour votre métier",
-      })),
-      {
-        href: "/secteurs",
-        label: "Tous les métiers",
-        texte: "Sept métiers, chacun avec son module",
-        colonne: "Pour votre métier",
+        colonne: "Les agents",
       },
     ],
   },
