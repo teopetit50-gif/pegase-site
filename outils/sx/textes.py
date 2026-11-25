@@ -37,8 +37,8 @@ Commencer
 Ouvrir le menu"""
 
 B["hero"] = """Audit de 30 minutes offert, sans engagement.
-À partir de
-34,90 € HT par personne et par mois
+Nouveau
+Des agents sur mesure
 L'ERP qui se configure avec l'IA
 Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez.
 Réserver un audit
@@ -884,6 +884,9 @@ sortie["__images__"] = IMAGES
 sortie["__defile__"] = DEFILE
 sortie["__curseur__"] = CURSEUR
 sortie["__mot_symbole__"] = "OMEGA"
+# Teo, 25/11 : le prix « dans la phrase, juste en dessous, en plus petit, mais
+# qu'il se voie ». Ligne ajoutée sous le chapô du héros (convertir.py).
+sortie["__prix_hero__"] = {"avant": typo("À partir de "), "prix": typo("34,90 € HT"), "apres": typo(" par personne et par mois.")}
 if soucis:
     sys.exit("textes-fr.json NON écrit : %d bloc(s) décalé(s)" % soucis)
 json.dump(sortie, open(os.path.join(ICI, "textes-fr.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)

@@ -287,6 +287,17 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         for e in enfants:
             lignes += rendre(e, prof + 1, dans_main, dans_defile, dans_facturation)
     lignes.append(ind + "</" + tag_rendu + ">")
+    prix = DICO.get("__prix_hero__")
+    if prix and etat["bloc"] == "hero" and tag == "p" and cls.startswith("font-tight text-[14px] leading-[25.5px]"):
+        # Le prix, sous la phrase du héros (absent de la référence) : un cran plus
+        # petit que le chapô, mais à pleine encre et le montant en gras.
+        lignes += [
+            ind + '<p className={"font-tight -mt-[6px] text-[13px] leading-[20px] tracking-[-0.2px] text-[#121212] ipad:text-[15px] ipad:leading-[22px] ipad:tracking-[-0.3px]"}>',
+            ind + "  {" + json.dumps(prix["avant"], ensure_ascii=False) + "}",
+            ind + '  <strong className={"font-bold"}>{' + json.dumps(prix["prix"], ensure_ascii=False) + '}</strong>',
+            ind + "  {" + json.dumps(prix["apres"], ensure_ascii=False) + "}",
+            ind + "</p>",
+        ]
     return lignes
 
 def composant(nom, noeud):

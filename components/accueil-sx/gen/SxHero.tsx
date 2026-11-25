@@ -41,10 +41,10 @@ export default function SxHero() {
                 <div className={"flex w-full flex-col items-center gap-[12px] desktop-sm:items-start"}>
                   <span className={"ft-eyebrow mb-0!"}>
                     <b>
-                      {"À partir de"}
+                      {"Nouveau"}
                     </b>
                     <span>
-                      {"34,90 € HT par personne et par mois"}
+                      {"Des agents sur mesure"}
                     </span>
                   </span>
                   <h1 className={"w-full desktop-sm:w-[550px] font-instrument-serif text-[42px] leading-[1.1] tracking-[-0.42px] text-black ipad:text-[62px] ipad:tracking-[-0.62px]"}>
@@ -53,6 +53,11 @@ export default function SxHero() {
                 </div>
                 <p className={"font-tight text-[14px] leading-[25.5px] tracking-[-0.28px] text-[#121212] opacity-80 ipad:text-[17px] ipad:tracking-[-0.34px]"}>
                   {"Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez."}
+                </p>
+                <p className={"font-tight -mt-[6px] text-[13px] leading-[20px] tracking-[-0.2px] text-[#121212] ipad:text-[15px] ipad:leading-[22px] ipad:tracking-[-0.3px]"}>
+                  {"À partir de "}
+                  <strong className={"font-bold"}>{"34,90 € HT"}</strong>
+                  {" par personne et par mois."}
                 </p>
                 <div className={"flex flex-wrap items-center justify-center gap-[16px] desktop-sm:flex-nowrap desktop-sm:justify-start"}>
                   <Link href={"/reserver-un-audit"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)]  text-center"} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>

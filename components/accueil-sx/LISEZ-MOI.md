@@ -74,8 +74,11 @@ pseudo-éléments, les positions).
     mets-le comme le blanc, partout »). La référence les fait d'un gris
     translucide ; `convertir.py` remplace `bg-[rgba(0,0,0,0.02)]` par
     `bg-white` sur les liens et boutons, le liseré reste le sien.
-11. **La pastille du héros porte le prix** (« À partir de · 34,90 € HT par
-    personne et par mois », Teo, 25/11) à la place de l'annonce du gabarit.
+11. **Le prix est sous la phrase du héros** (Teo, 25/11 : « dans la phrase,
+    juste en dessous, en plus petit, mais qu'il se voie ») : « À partir de
+    **34,90 € HT** par personne et par mois. », ligne ajoutée par
+    `convertir.py` (clé `__prix_hero__` de `textes.py`), absente de la
+    référence. La pastille garde « Nouveau · Des agents sur mesure ».
 
 ## Ce qui n'est pas porté
 
