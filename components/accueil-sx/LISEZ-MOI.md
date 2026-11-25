@@ -82,6 +82,15 @@ pseudo-éléments, les positions).
     **34,90 € HT** par personne et par mois. », ligne ajoutée par
     `convertir.py` (clé `__prix_hero__` de `textes.py`), absente de la
     référence. La pastille garde « Nouveau · Des agents sur mesure ».
+12. **Au téléphone, quatre défauts de la référence sont corrigés** (Teo,
+    25/11 : « la version mobile est moche et buggée ») : montants de la fiche
+    qui se recouvraient, en-tête de fiche sous ses icônes, infobulle et
+    étiquettes du graphique de trésorerie empilées. Plus deux défauts venus
+    de notre texte : « Partager » (le CSS masquait `aria-label=Share`) et la
+    rangée « Intégrations / Parler à l'équipe » trop large. Tout est dans
+    `sx.css`, « 7. LE TÉLÉPHONE », sous 600 px (900 pour « Partager »).
+    Pour revérifier : `node outils/sx/defauts.mjs <url> 390` sur la
+    référence puis sur nous.
 
 ## Ce qui n'est pas porté
 

@@ -481,7 +481,7 @@ Notion
 Tout est relié.
 Rien n'est ressaisi.
 Omega se branche sur les outils que vos équipes utilisent déjà.
-Voir les intégrations
+Intégrations
 Parler à l'équipe
 Outils de gestion
 QuickBooks

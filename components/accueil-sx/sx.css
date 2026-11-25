@@ -1547,7 +1547,7 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 .sx .sx-menu ul a{display:flex;align-items:center;min-height:54px;font-size:17px;line-height:25.5px;letter-spacing:-.34px;color:#000}
 .sx .sx-menu-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .sx .sx-menu-actions a{display:flex;align-items:center;justify-content:center;height:46px;font-weight:700;letter-spacing:-.03em}
-.sx .sx-menu-second{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:14px}
+.sx .sx-menu-second{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:16px}
 .sx .sx-menu-premier{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:16px}
 .sx .sx-menu a:focus-visible{outline:2px solid #121212;outline-offset:2px}
 @media (min-width:768px){.sx .sx-menu{padding-inline:48px}}
@@ -1558,3 +1558,47 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
       tout utilitaire) : le bouton, devenu blanc le 25/11, héritait du blanc
       du pied. On lui rend l'encre des autres boutons. */
 .sx .sgf-action a{color:#121212}
+
+/* 7. LE TÉLÉPHONE (25/11, Teo : « la version mobile est moche et buggée,
+      calque-la en 1:1 sur le modèle »). Relevé avec outils/sx/defauts.mjs
+      (textes rognés, hors fenêtre, superposés) à 375, 390 et 430 px, sur
+      la référence puis sur nous. Au style calculé, les deux pages étaient
+      déjà identiques ; restaient des défauts de deux natures.
+
+      a) VENUS DE NOTRE TEXTE — écarts à la référence, donc corrigés :
+         · le bouton « Share » de la fiche est masqué sous 900 px par
+           `button[aria-label=Share]` ; traduit en « Partager », il ne l'était
+           plus et recouvrait le fil d'Ariane. Même règle, sur son nom français.
+         · la rangée de boutons des intégrations faisait 384 px pour 332 chez
+           la référence et touchait les deux bords : le libellé est raccourci
+           (« Intégrations », textes.py) et la rangée peut passer à la ligne
+           sur un écran plus étroit que 375.
+
+      b) PRÉSENTS CHEZ LA RÉFÉRENCE AUSSI — ses cartes d'interface sont
+         dessinées pour 1440 et elle ne les reprend pas au téléphone. Ce sont
+         des défauts visibles, pas des choix de dessin : corrigés ici, la
+         géométrie de la section ne bouge pas.
+         · fiche : « Facturé / Encaissé à ce jour » — deux montants en
+           `whitespace-nowrap` dans des colonnes `min-width:0` se recouvraient
+           (« 3 0192 066… ») ; ils passent l'un sous l'autre, et « Voir la
+           facture » s'efface.
+         · fiche : l'en-tête ne garde que « Clients » et « Demander à l'IA » ;
+           le fil d'Ariane tombait à 0 px sous les icônes.
+         · trésorerie : l'infobulle de démonstration et les étiquettes du
+           flux (« 32,0 k€ », « 100 % ») tenaient dans une bande de 65 px et
+           s'empilaient ; restent les barres, leurs parts et le flux.
+
+      Rien ici au-dessus de 600 px, sauf la règle « Partager » (900, comme
+      celle de la référence). */
+@media (max-width:900px){
+  .sx .sb-record-header .platform-payroll-tools>button[aria-label=Partager]{display:none}
+}
+@media (max-width:600px){
+  .sx .sb-earnings [data-slot=pay-breakdown-chart-figure]{min-width:auto;flex:1 1 auto}
+  .sx .sb-earnings [data-slot=pay-breakdown-chart-manage]{display:none}
+  .sx .sb-record-header .platform-payroll-tools>:not(:last-child){display:none}
+  .sx .sb-record-header .sb-breadcrumb{flex:1 1 auto;min-width:0;overflow:hidden}
+  .sx .sb-record-header .sb-breadcrumb>:is(:nth-child(-n+2),:nth-child(n+4)){display:none}
+  .sx [data-slot=budget-flow-chart-plot] :is([data-slot=budget-flow-chart-tooltip],[data-slot=budget-flow-chart-from-label],[data-slot=budget-flow-chart-to-label]){display:none!important}
+  .sx div:has(> a[href="/integrations"] + a[href="/contact"]){flex-wrap:wrap;justify-content:center;row-gap:12px}
+}
