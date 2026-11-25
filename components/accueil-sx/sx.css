@@ -1548,7 +1548,13 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 .sx .sx-menu-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
 .sx .sx-menu-actions a{display:flex;align-items:center;justify-content:center;height:46px;font-weight:700;letter-spacing:-.03em}
 .sx .sx-menu-second{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:14px}
-.sx .sx-menu-premier{border-radius:12px;background:#202020;color:#fff;font-size:16px}
+.sx .sx-menu-premier{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:16px}
 .sx .sx-menu a:focus-visible{outline:2px solid #121212;outline-offset:2px}
 @media (min-width:768px){.sx .sx-menu{padding-inline:48px}}
 @media (min-width:1280px){.sx .sx-menu{display:none}}
+
+/* 6. LE BOUTON DU PIED. Le pied impose sa couleur à ses liens
+      (`:where(.sgf) a{color:inherit}`, règle hors couche, donc plus forte que
+      tout utilitaire) : le bouton, devenu blanc le 25/11, héritait du blanc
+      du pied. On lui rend l'encre des autres boutons. */
+.sx .sgf-action a{color:#121212}

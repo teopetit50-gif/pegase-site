@@ -70,10 +70,13 @@ pseudo-éléments, les positions).
    référence est inerte, ce qui laisserait un visiteur au téléphone sans
    navigation. Le bouton est le sien, au pixel ; le panneau est le nôtre.
 
-10. **Les boutons secondaires sont blancs** (Teo, 25/11 : « le bouton gris,
-    mets-le comme le blanc, partout »). La référence les fait d'un gris
-    translucide ; `convertir.py` remplace `bg-[rgba(0,0,0,0.02)]` par
-    `bg-white` sur les liens et boutons, le liseré reste le sien.
+10. **Tous les boutons sont blancs** (Teo, 25/11, en deux temps : « le bouton
+    gris, mets-le comme le blanc, partout », puis, capture à l'appui, le bouton
+    « Commencer »). La référence a des boutons gris translucides et des
+    boutons sombres en dégradé ; `convertir.py` les rend tous au dessin du
+    bouton blanc : fond blanc, liseré `rgba(0,0,0,.1)`, encre `#121212`,
+    rayon 10, sans ombre (`BOUTON_BLANC`, `SOMBRE_EN_BLANC`). Les boutons des
+    écrans d'exemple gardent leur dessin.
 11. **Le prix est sous la phrase du héros** (Teo, 25/11 : « dans la phrase,
     juste en dessous, en plus petit, mais qu'il se voie ») : « À partir de
     **34,90 € HT** par personne et par mois. », ligne ajoutée par

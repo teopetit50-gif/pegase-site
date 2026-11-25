@@ -92,6 +92,32 @@ RENOMMER = lambda classes: re.sub(r"(?<![\w-])synnax-", "sx-", classes)
 # (`bg-[rgba(0,0,0,0.02)]`) ; en mode Omega ils sont blancs, même liseré.
 BOUTON_BLANC = lambda classes: " ".join("bg-white" if c == "bg-[rgba(0,0,0,0.02)]" else c for c in classes.split(" "))
 
+# 25/11 (Teo, 2e passe : « le bouton gris, mets-le comme le blanc », en
+# désignant « Commencer ») : les boutons SOMBRES de la référence (fond #292929
+# en dégradé, texte blanc, ombre portée) prennent eux aussi le dessin du
+# bouton blanc : fond blanc, liseré rgba(0,0,0,.1), encre #121212, sans ombre.
+# Les boutons des écrans d'exemple (maquettes) ne sont pas concernés.
+SOMBRE_REMPLACE = {
+    "text-white": "text-[#121212]",
+    "border-transparent": "border-[rgba(0,0,0,0.1)]",
+    "border-[rgba(255,255,255,0.15)]": "border-[rgba(0,0,0,0.1)]",
+    "border-t-[0.954px]": "border-[0.954px]",
+    "desktop-sm:border-t": "desktop-sm:border",
+    "rounded-[12px]": "rounded-[10px]",
+    "rounded-[11.452px]": "rounded-[9.543px]",
+    "desktop-sm:rounded-[12px]": "desktop-sm:rounded-[10px]",
+}
+def SOMBRE_EN_BLANC(classes):
+    out = []
+    for c in classes.split(" "):
+        if c.startswith(("border-t-[rgba(255", "[text-shadow:", "shadow-[", "desktop-sm:shadow-[")):
+            continue
+        out.append(SOMBRE_REMPLACE.get(c, c))
+    return " ".join(out + ["bg-white"])
+def est_sombre(n):
+    st = attr(n, "style") or ""
+    return n["tag"] in ("a", "button") and ("rgb(41,41,41)" in st.replace(" ", "") or "#292929" in st)
+
 def camel(nom):
     p = nom.split("-")
     return p[0] + "".join(x[:1].upper() + x[1:] for x in p[1:])
@@ -192,6 +218,8 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
     cls = attr(n, "class") or ""
     if tag in ("script", "style", "link", "template", "meta"):
         return []
+    if OMEGA and etat.get("sombre") and tag == "span" and "shadow-[inset_0px_0.954px_0.954px_0px_rgba(255,255,255,0.3)]" in cls:
+        return []
     if tag == "svg" and cls == "sgf-svg":
         besoins.add("SxMotSymbole")
         mot = DICO.get("__mot_symbole__")
@@ -221,6 +249,8 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         return [ind + '<span className={"block font-sans text-[16.8px] leading-[16.8px] font-semibold tracking-[-0.04em] whitespace-nowrap text-[#121212] opacity-70 ipad:text-[19.6px] ipad:leading-[19.6px]"}>{' + json.dumps(mot, ensure_ascii=False) + "}</span>"]
     if tag == "img": besoins.add("img")
     dans_main = dans_main or tag == "main"
+    sombre = OMEGA and est_sombre(n)
+    if sombre: etat["sombre"] = etat.get("sombre", 0) + 1
     dans_defile = dans_defile or "logo-marquee" in cls.split()
     if "pr-billing" in cls.split(): dans_facturation = {"n": 0}
 
@@ -242,6 +272,8 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         kl = k.lower()
         if lien is not None and kl in ("href", "type"): continue
         if kl == "style":
+            if sombre and v:
+                v = ";".join(d for d in decoupe_style(v) if not d.strip().lower().startswith(("background-image", "box-shadow")))
             if curseur: v = "--fill:" + curseur["fill"]
             if v: morceaux.append("style=" + style_objet(v)); besoins.add("CSSProperties")
             continue
@@ -259,6 +291,7 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         if v is None: v = ""
         if kl == "class": v = RENOMMER(v)
         if kl == "class" and OMEGA and tag in ("a", "button"): v = BOUTON_BLANC(v)
+        if kl == "class" and sombre: v = SOMBRE_EN_BLANC(v)
         # un <button> centre son texte d'office, un lien non : on le dit
         if kl == "class" and lien is not None and tag == "button": v = v + " text-center"
         if kl in LISIBLES: v = traduire(v, attribut=True)
@@ -266,6 +299,7 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
             morceaux.append(nom + "={" + v + "}"); continue
         if tag == "img" and kl == "src":
             v = IMG.get(v, (IMAGES + v) if v.startswith("/") else v)
+            if etat.get("sombre") and v.endswith("chevron-clair.svg"): v = v.replace("chevron-clair.svg", "chevron-sombre.svg")
         if tag == "img" and kl == "srcset":
             continue
         morceaux.append(nom + "={" + json.dumps(v, ensure_ascii=False) + "}")
@@ -278,6 +312,7 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         txt = "".join(e for e in enfants if isinstance(e, str))
         return [ind + ouvre + (" defaultValue={" + json.dumps(txt, ensure_ascii=False) + "}" if txt else "") + " />"]
     if not enfants:
+        if sombre: etat["sombre"] -= 1
         return [ind + ouvre + " />"]
     lignes = [ind + ouvre + ">"]
     if attr(n, "data-slot") == "pay-breakdown-chart-meter":
@@ -287,6 +322,7 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         for e in enfants:
             lignes += rendre(e, prof + 1, dans_main, dans_defile, dans_facturation)
     lignes.append(ind + "</" + tag_rendu + ">")
+    if sombre: etat["sombre"] -= 1
     prix = DICO.get("__prix_hero__")
     if prix and etat["bloc"] == "hero" and tag == "p" and cls.startswith("font-tight text-[14px] leading-[25.5px]"):
         # Le prix, sous la phrase du héros (absent de la référence) : un cran plus
