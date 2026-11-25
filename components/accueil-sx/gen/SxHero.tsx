@@ -2,7 +2,6 @@
    Balisage porté depuis le relevé de la référence, contenu posé par
    outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
    régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
-/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import RubanFibre from "../RubanFibre";
@@ -53,7 +52,7 @@ export default function SxHero() {
                   </h1>
                 </div>
                 <p className={"font-tight text-[14px] leading-[25.5px] tracking-[-0.28px] text-[#121212] opacity-80 ipad:text-[17px] ipad:tracking-[-0.34px]"}>
-                  {"Ventes, achats, stock, banque et comptabilité au même endroit. L'IA adapte Omega à votre activité et fait le travail répétitif. Vous validez."}
+                  {"Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez."}
                 </p>
                 <div className={"flex flex-wrap items-center justify-center gap-[16px] desktop-sm:flex-nowrap desktop-sm:justify-start"}>
                   <Link href={"/reserver-un-audit"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)]  text-center"} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>

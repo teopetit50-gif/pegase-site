@@ -382,7 +382,7 @@ export default function SxFiche() {
                               {" Résumé de l'IA"}
                             </div>
                             <p>
-                              {"Anne-Marie Roux a signé son devis le 3 nov. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov., la visite de fin de chantier a lieu le 3 fév."}
+                              {"Anne-Marie Roux a signé son devis le 28 oct. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov. et la visite de fin de chantier suit le 3 fév."}
                             </p>
                           </div>
                         </div>
@@ -598,7 +598,7 @@ export default function SxFiche() {
                             </span>
                           </div>
                           <div aria-hidden={"true"} data-slot={"pay-breakdown-chart-divider"} className={"h-px origin-left bg-border-soft"} />
-                          <div role={"slider"} tabIndex={0} aria-label={"Encaissé à ce jour, par poste"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Pose, 3–6 nov. · 32 h : 1 006,08 €, 33,3 % du facturé"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
+                          <div role={"slider"} tabIndex={0} aria-label={"Encaissé à ce jour, par poste"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Pose, 3–6 nov. · 32 h : 1 006,08 €"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
                             <SxBarres
                               categories={[
                                 { cle: "normal-hours", etiquette: "Pose", part: "75 %", couleur: "purple", montants: [1006.08, 1257.6] },
@@ -783,7 +783,7 @@ export default function SxFiche() {
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Location : 1,3 k€"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Location : 1,2 k€"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "97.902px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -800,7 +800,7 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "101.902px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"1336"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
-                                    {"1,3 k€"}
+                                    {"1,2 k€"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
@@ -1018,7 +1018,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Vos outils se parlent enfin."}
+                {"Vos outils sont tous reliés."}
               </strong>
               {" Banque et comptabilité restent à jour."}
             </p>
@@ -1031,7 +1031,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Il connaît vos règles."}
+                {"Omega connaît vos règles."}
               </strong>
               {" TVA et plan comptable réglés pour vous."}
             </p>
@@ -1044,7 +1044,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Demandez, c'est là."}
+                {"Omega vous répond."}
               </strong>
               {" Une fiche ou une réponse en une seconde."}
             </p>

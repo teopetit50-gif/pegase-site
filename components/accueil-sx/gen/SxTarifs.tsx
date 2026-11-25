@@ -2,7 +2,6 @@
    Balisage porté depuis le relevé de la référence, contenu posé par
    outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
    régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
-/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
@@ -59,7 +58,7 @@ export default function SxTarifs() {
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Pour savoir ce qu'Omega peut faire chez vous, et à quel prix."}
+              {"Nous voyons ce qu'Omega peut faire chez vous, et à quel prix."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -183,7 +182,7 @@ export default function SxTarifs() {
               </span>
             </div>
             <p className={"pr-desc"}>
-              {"Toute votre gestion au même endroit, adaptée à votre activité par l'IA."}
+              {"Votre gestion tient au même endroit, adaptée à votre activité par l'IA."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -301,7 +300,7 @@ export default function SxTarifs() {
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Quatre agents prêts, et ceux que nous construisons pour vous."}
+              {"Quatre agents sont prêts, et nous construisons les vôtres."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -422,7 +421,7 @@ export default function SxTarifs() {
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Un module ou un agent construit pour ce qui n'existe que chez vous."}
+              {"Nous construisons le module ou l'agent qui n'existe que chez vous."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -505,7 +504,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Sept modules métier déjà prêts"}
+                    {"Sept modules métier comme base"}
                   </span>
                 </li>
               </ul>

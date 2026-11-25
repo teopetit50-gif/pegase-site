@@ -2,7 +2,6 @@
    Balisage porté depuis le relevé de la référence, contenu posé par
    outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
    régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
-/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
@@ -43,7 +42,7 @@ export default function SxSecurite() {
                     </text>
                   </g>
                 </svg>
-                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Rétention de 30 jours au plus"}>
+                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Rétention fournisseur : 30 jours"}>
                   <rect x={"71.5"} y={"71.5"} width={"1357"} height={"1357"} rx={"320"} fill={"#efeff1"} stroke={"#fff"} strokeWidth={"91"} />
                   <g fill={"#202322"} fontFamily={"var(--font-google-sans), Arial, sans-serif"} textAnchor={"middle"}>
                     <text x={"750"} y={"800"} fontSize={"400"} fontWeight={"700"} letterSpacing={"6"}>
@@ -104,7 +103,7 @@ export default function SxSecurite() {
                     </b>
                   </span>
                 </span>
-                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Chaque action est journalisée"}>
+                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Journal des actions"}>
                   <rect x={"71.5"} y={"71.5"} width={"1357"} height={"1357"} rx={"320"} fill={"#efeff1"} stroke={"#fff"} strokeWidth={"91"} />
                   <path d={"M750 345L1101 547.5V952.5L750 1155L399 952.5V547.5Z"} fill={"#202322"} />
                   <path d={"M3 10.4167C3 7.21907 3 5.62028 3.37752 5.08241C3.75503 4.54454 5.25832 4.02996 8.26491 3.00079L8.83772 2.80472C10.405 2.26824 11.1886 2 12 2C12.8114 2 13.595 2.26824 15.1623 2.80472L15.7351 3.00079C18.7417 4.02996 20.245 4.54454 20.6225 5.08241C21 5.62028 21 7.21907 21 10.4167C21 10.8996 21 11.4234 21 11.9914C21 17.6294 16.761 20.3655 14.1014 21.5273C13.38 21.8424 13.0193 22 12 22C10.9807 22 10.62 21.8424 9.89856 21.5273C7.23896 20.3655 3 17.6294 3 11.9914C3 11.4234 3 10.8996 3 10.4167Z"} transform={"translate(544 599) scale(18)"} fill={"#efeff1"} />
@@ -299,7 +298,7 @@ export default function SxSecurite() {
                 <p className={"sec-uptime-foot"}>
                   <span>
                     <i />
-                    {"Chaque action est enregistrée"}
+                    {"Tout est journalisé"}
                   </span>
                   <span>
                     {"90 derniers jours"}

@@ -214,6 +214,7 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         # marque tierce, aucun « ils nous font confiance »).
         mot = DEFILE[etat["defile"] % len(DEFILE)]; etat["defile"] += 1
         return [ind + '<span className={"block font-sans text-[16.8px] leading-[16.8px] font-semibold tracking-[-0.04em] whitespace-nowrap text-[#121212] opacity-70 ipad:text-[19.6px] ipad:leading-[19.6px]"}>{' + json.dumps(mot, ensure_ascii=False) + "}</span>"]
+    if tag == "img": besoins.add("img")
     dans_main = dans_main or tag == "main"
     dans_defile = dans_defile or "logo-marquee" in cls.split()
     if "pr-billing" in cls.split(): dans_facturation = {"n": 0}
@@ -298,8 +299,7 @@ def composant(nom, noeud):
         "   Balisage porté depuis le relevé de la référence, contenu posé par",
         "   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis",
         "   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */",
-        "/* eslint-disable @next/next/no-img-element */",
-    ] + imports + ["", "export default function " + nom + "() {", "  return ("]
+    ] + (["/* eslint-disable @next/next/no-img-element */"] if "img" in besoins else []) + imports + ["", "export default function " + nom + "() {", "  return ("]
     return "\n".join(tete + corps + ["  );", "}", ""])
 
 racine = lire(open(SRC, encoding="utf-8").read())

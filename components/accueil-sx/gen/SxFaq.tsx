@@ -2,7 +2,6 @@
    Balisage porté depuis le relevé de la référence, contenu posé par
    outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
    régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
-/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
@@ -70,7 +69,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a1"} role={"region"} aria-labelledby={"_R_ltavb_-q1"} inert={true}>
               <div>
                 <p>
-                  {"Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement."}
+                  {"Pour les agents, le remboursement est intégral pendant 30 jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement."}
                 </p>
               </div>
             </div>
@@ -108,7 +107,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a3"} role={"region"} aria-labelledby={"_R_ltavb_-q3"} inert={true}>
               <div>
                 <p>
-                  {"Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un courriel. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment."}
+                  {"Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment."}
                 </p>
               </div>
             </div>

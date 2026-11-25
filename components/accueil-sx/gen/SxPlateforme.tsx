@@ -1677,7 +1677,7 @@ export default function SxPlateforme() {
                         </time>
                       </span>
                       <p>
-                        {"Peut-on payer les fournisseurs de novembre sans toucher à la réserve de 532,4 k€ ?"}
+                        {"Peut-on payer les charges de novembre sans toucher à la réserve de 532,4 k€ ?"}
                       </p>
                     </div>
                     <span data-slot={"avatar"} className={"platform-requester-avatar"}>
@@ -1710,7 +1710,7 @@ export default function SxPlateforme() {
                         </time>
                       </span>
                       <p className={"platform-answer-text"}>
-                        {"Oui. Les acomptes reçus, les factures encaissées et une partie des abonnements couvrent les "}
+                        {"Oui. Les acomptes reçus, les factures encaissées et les abonnements du mois couvrent les "}
                         <strong>
                           {"68,4 k€ à payer"}
                         </strong>

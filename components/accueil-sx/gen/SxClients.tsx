@@ -2,7 +2,6 @@
    Balisage porté depuis le relevé de la référence, contenu posé par
    outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
    régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
-/* eslint-disable @next/next/no-img-element */
 
 export default function SxClients() {
   return (
@@ -22,7 +21,7 @@ export default function SxClients() {
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Des situations que nos agents et nos modules métier prennent en charge chaque jour. Vous gardez la décision."}
+            {"Nos agents et nos modules métier prennent ces situations en charge chaque jour. Vous gardez la décision."}
           </p>
         </header>
         <div className={"ts-grid"}>
@@ -32,7 +31,7 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque relance oubliée, chaque demande sans réponse, c'est un client qui signe ailleurs pendant que vous êtes occupé. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent."}
+                {"Chaque devis en attente et chaque facture échue reçoivent leur relance à la bonne date, et chaque demande sa réponse. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
@@ -103,7 +102,7 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux, la situation de travaux est préparée."}
+                {"Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux et la situation de travaux est préparée."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>

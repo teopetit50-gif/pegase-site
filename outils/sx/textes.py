@@ -40,7 +40,7 @@ B["hero"] = """Audit de 30 minutes offert, sans engagement.
 Nouveau
 Des agents sur mesure
 L'ERP qui se configure avec l'IA
-Ventes, achats, stock, banque et comptabilité au même endroit. L'IA adapte Omega à votre activité et fait le travail répétitif. Vous validez.
+Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez.
 Réserver un audit
 Voir le logiciel
 Les modules d'Omega
@@ -216,9 +216,9 @@ a demandé à
 Omega
 =
 À l'instant
-Peut-on payer les fournisseurs de novembre sans toucher à la réserve de 532,4 k€ ?
+Peut-on payer les charges de novembre sans toucher à la réserve de 532,4 k€ ?
 a répondu à
-Oui. Les acomptes reçus, les factures encaissées et une partie des abonnements couvrent les
+Oui. Les acomptes reçus, les factures encaissées et les abonnements du mois couvrent les
 68,4 k€ à payer
 , et la réserve de 532,4 k€ reste intacte.
 Trésorerie de novembre
@@ -314,7 +314,7 @@ Devis
 Factures
 Activité
 Résumé de l'IA
-Anne-Marie Roux a signé son devis le 3 nov. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov., la visite de fin de chantier a lieu le 3 fév.
+Anne-Marie Roux a signé son devis le 28 oct. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov. et la visite de fin de chantier suit le 3 fév.
 À venir
 À venir
 À facturer
@@ -355,7 +355,7 @@ Encaissé à ce jour
 2 066,95 €
 Voir la facture
 Encaissé à ce jour, par poste
-Pose, 3–6 nov. · 32 h : 1 006,08 €, 33,3 % du facturé
+Pose, 3–6 nov. · 32 h : 1 006,08 €
 Pose
 75 %
 Fournitures
@@ -380,8 +380,8 @@ Visserie : 450 €
 450 €
 Renfort : 2,2 k€
 2,2 k€
-Location : 1,3 k€
-1,3 k€
+Location : 1,2 k€
+1,2 k€
 Bois
 Visserie
 Renfort
@@ -409,11 +409,11 @@ prévue le 3 fév.
 Agenda · 6 nov.
 Tout s'enregistre.
 Devis, stock et écritures se mettent à jour seuls.
-Vos outils se parlent enfin.
+Vos outils sont tous reliés.
 Banque et comptabilité restent à jour.
-Il connaît vos règles.
+Omega connaît vos règles.
 TVA et plan comptable réglés pour vous.
-Demandez, c'est là.
+Omega vous répond.
 Une fiche ou une réponse en une seconde."""
 
 B["s3 Agents"] = """Nouveau
@@ -446,7 +446,7 @@ Découvrir
 Détails
 Détails
 Régler l'agent de relance
-Garder l'agent de relance
+Ajouter l'agent de relance
 =
 =
 Numéro de TVA relevé
@@ -454,23 +454,23 @@ RIB vérifié
 Factures fournisseurs
 Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée, classée, puis transmise à la comptabilité.
 Régler l'agent des factures
-Garder l'agent des factures
+Ajouter l'agent des factures
 Quels clients faut-il recontacter ?
 Clients sans commande depuis 90 jours
 Contrats à renouveler ce mois-ci
 Commandes restées en plan
 Échéances de la semaine
 Clients inactifs
-Les clients sans nouvelles sont recontactés, échéances et commandes en plan reprises. Vous validez chaque message.
+L'agent recontacte vos clients inactifs et reprend échéances et commandes en plan. Vous validez chaque message.
 Régler l'agent des clients inactifs
-Garder l'agent des clients inactifs
+Ajouter l'agent des clients inactifs
 =
 Gabriel Meyer
 Avez-vous un créneau pour une pose cette semaine ?
 Demandes clients
 Une demande arrive par mail ou WhatsApp, à toute heure. Sa réponse est rédigée aussitôt, puis elle part seule si vous l'avez autorisé, ou attend votre accord.
 Régler l'agent des demandes
-Garder l'agent des demandes"""
+Ajouter l'agent des demandes"""
 
 B["s4 Intégrations"] = """Outils du quotidien
 Google Agenda
@@ -539,7 +539,7 @@ Novembre 2026
 Client
 Maya Martin
 Date du devis
-25 nov. 2026
+12 nov. 2026
 Chantier
 Cuisine sur mesure
 Validité
@@ -605,12 +605,12 @@ Un espace dédié à votre entreprise, chiffré, hébergé dans l'Union europée
 Données chiffrées en transit et au repos
 TLS
 CHIFFRÉ
-Rétention de 30 jours au plus
+Rétention fournisseur : 30 jours
 30 J
 MAXI
 Hébergement dans l'Union européenne
 UE
-Chaque action est journalisée
+Journal des actions
 Quatre engagements écrits
 Base à Francfort, sans réplication hors de l'Union européenne. Aucune donnée ne sert à entraîner un modèle.
 Où vont vos données
@@ -620,7 +620,7 @@ Relances
 Factures fournisseurs
 100 % contrôlées
 Demandes clients
-Chaque action est enregistrée
+Tout est journalisé
 90 derniers jours
 Chaque action est tracée
 Qui a validé, quoi et quand : le journal garde tout. Hébergement, sauvegardes et surveillance sont compris.
@@ -639,8 +639,8 @@ Voir les agents"""
 B["s7 Clients"] = """Situations
 Ce qu'Omega reprend, cas par cas.
 Du chantier au cabinet, du site unique au groupe.
-Des situations que nos agents et nos modules métier prennent en charge chaque jour. Vous gardez la décision.
-Chaque relance oubliée, chaque demande sans réponse, c'est un client qui signe ailleurs pendant que vous êtes occupé. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent.
+Nos agents et nos modules métier prennent ces situations en charge chaque jour. Vous gardez la décision.
+Chaque devis en attente et chaque facture échue reçoivent leur relance à la bonne date, et chaque demande sa réponse. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent.
 Relances
 Agent · relances et encaissements
 Daliro, le module du BTP
@@ -653,7 +653,7 @@ tamila
 avocats
 Lorani, le module des architectes
 LORANI
-Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux, la situation de travaux est préparée.
+Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux et la situation de travaux est préparée.
 Daliro
 Module métier · BTP"""
 
@@ -669,7 +669,7 @@ Nombre de personnes
 10 personnes
 10 personnes
 Audit
-Pour savoir ce qu'Omega peut faire chez vous, et à quel prix.
+Nous voyons ce qu'Omega peut faire chez vous, et à quel prix.
 0 €
 offert
 30 minutes
@@ -685,7 +685,7 @@ Votre tarif, écrit à la fin
 Aucun engagement
 Gestion
 Dès la première personne
-Toute votre gestion au même endroit, adaptée à votre activité par l'IA.
+Votre gestion tient au même endroit, adaptée à votre activité par l'IA.
 34,90 €
 349,00 €
 Parler à l'équipe
@@ -697,7 +697,7 @@ Vérifié par votre expert-comptable
 50 Go de documents compris
 Un interlocuteur dans notre équipe
 Agents IA
-Quatre agents prêts, et ceux que nous construisons pour vous.
+Quatre agents sont prêts, et nous construisons les vôtres.
 dès 69 €
 Prix fixé
 Voir les tarifs
@@ -709,7 +709,7 @@ Mensuel, sans engagement
 Remboursé pendant 30 jours
 Export complet de vos données
 Sur mesure
-Un module ou un agent construit pour ce qui n'existe que chez vous.
+Nous construisons le module ou l'agent qui n'existe que chez vous.
 Sur devis
 Son prix est écrit
 avant de commencer
@@ -720,7 +720,7 @@ Un module ajouté à votre logiciel
 Vos logiciels métier raccordés
 Données d'un autre logiciel reprises
 Ce qu'il fait, écrit avant de commencer
-Sept modules métier déjà prêts"""
+Sept modules métier comme base"""
 
 B["s9 Bande"] = ""
 
@@ -732,11 +732,11 @@ Une question manque ? Notre équipe vous répond le jour même.
 Combien coûte Omega ?
 Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 69 € HT par mois. L'installation se paie une seule fois.
 Que se passe-t-il si l'offre ne convient pas ?
-Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.
+Pour les agents, le remboursement est intégral pendant 30 jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.
 Qui s'occupe de l'installation ?
 Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation.
 Un agent peut-il envoyer quelque chose sans mon accord ?
-Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un courriel. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment.
+Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment.
 Où sont mes données ?
 Dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne et jamais mélangé à celui d'un autre client. L'IA ne reçoit que le strict nécessaire à chaque tâche, et rien n'est réutilisé à d'autres fins.
 Faut-il changer nos outils ?

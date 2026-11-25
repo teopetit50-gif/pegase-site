@@ -309,7 +309,7 @@ export default function SxMarque() {
                         {"Date du devis"}
                       </dt>
                       <dd>
-                        {"25 nov. 2026"}
+                        {"12 nov. 2026"}
                       </dd>
                     </div>
                     <div>
