@@ -47,7 +47,11 @@ METIERS_COMP="architectes|architectes-nivara|avocats|btp|dentaire|groupes|hotell
 METIERS_APP="architectes|architectes-nivara|avocats|btp|dentaire|groupes|hotellerie|location-automobile"
 METIERS_PUB="architectes|architectes-nivara|avocats|btp|dentaire|groupes|hotellerie|location"
 # la vitrine Omega seule : pages et composants qui n'existent pas sur un site dédié
-OMEGA='^(app/(blog|commencer|contact|espace3|formation|integrations|modeles|offres|omega|reserver|tarifs|vos-donnees)/|components/(offres|accueil|modeles|formation|blog|tarifs)/|docs/|outils/|\.claude/|\.github/|public/(accueil-secteurs|apercus-secteurs|modeles|formation|blog)/)'
+# 25/11/2026 — ajoutés : l'accueil « sx » (app/page.tsx, sa police, components/accueil-sx,
+# public/accueil-sx) et le kit de la vitrine components/charte. Sur un site dédié,
+# « / » est réécrit vers /secteurs/<métier> : rien de tout cela n'y est servi. Sans
+# eux, chaque retouche de l'accueil reconstruisait les six sites dédiés pour rien.
+OMEGA='^(app/(blog|commencer|contact|espace3|formation|integrations|modeles|offres|omega|reserver|tarifs|vos-donnees)/|app/page\.tsx$|app/_polices/google-sans-accueil\.ts$|components/(offres|accueil|accueil-sx|charte|modeles|formation|blog|tarifs)/|docs/|outils/|\.claude/|\.github/|public/(accueil-secteurs|accueil-sx|apercus-secteurs|modeles|formation|blog)/)'
 
 while IFS= read -r f; do
   [ -z "$f" ] && continue
