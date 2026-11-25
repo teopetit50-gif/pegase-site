@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
-import { ArrowRight } from "lucide-react";
+import { Chevron } from "@/components/charte/Bouton";
 import MenuSobre from "@/app/reserver-un-audit/MenuSobre";
 import { EDITEUR } from "@/components/espace2/portail";
 import {
@@ -55,9 +55,10 @@ function dateDecalee(annee: number, mois: number, jour: number, decalage: number
   return { annee: d.getUTCFullYear(), mois: d.getUTCMonth() + 1, jour: d.getUTCDate() };
 }
 
-/* `retard` : le formulaire arrive en bloc après le chapô, sur la cadence que la
-   page pose (cascade d'entrée, o-bloc-apparait). */
-export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
+/* 25/11/2026 — charte de l'accueil : plus de cascade d'entrée (le `retard`
+   et o-bloc-apparait sont partis), et le bouton d'envoi est le bouton blanc
+   de la vitrine (`ch-btn`, chevron du kit) au lieu du bouton noir de 40 px. */
+export default function FormulaireFormat() {
   const formulaire = useRef<HTMLFormElement>(null);
   const [manquants, setManquants] = useState<string[]>([]);
   const [mailFaux, setMailFaux] = useState(false);
@@ -188,8 +189,7 @@ export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
       ref={formulaire}
       noValidate
       onSubmit={envoyer}
-      className="rdv-formulaire o-bloc-apparait"
-      style={{ "--o-mot-d": `${retard}ms` } as React.CSSProperties}
+      className="rdv-formulaire"
     >
       <div className="rdv-champs">
         <Saisie nom="prenom" libelle="Prénom" autoComplete="given-name" erreur={erreur("prenom")} />
@@ -269,11 +269,9 @@ export default function FormulaireFormat({ retard = 0 }: { retard?: number }) {
         </p>
       ) : null}
 
-      <button type="submit" className="rdv-bouton" disabled={bloque}>
+      <button type="submit" className="ch-btn ch-btn--chevron rdv-envoyer" disabled={bloque}>
         {envoi === "envoi" ? "Réservation en cours…" : envoi === "ok" ? "Demande envoyée" : "Continuer"}
-        <span aria-hidden className="rdv-bouton-icone">
-          <ArrowRight strokeWidth={1.8} size={18} />
-        </span>
+        <Chevron />
       </button>
 
 

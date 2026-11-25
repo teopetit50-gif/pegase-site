@@ -1,6 +1,9 @@
 import { Boxes, FileSignature, Gauge, UserCheck } from "lucide-react";
 import type { ComponentType } from "react";
-import { cn } from "@/lib/cn";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Pastille from "@/components/charte/Pastille";
+import { GrilleCartes, Scene } from "@/components/charte/Cartes";
 
 /* ══════════════════════════════════════════════════════════════════════
    ReglesFacturation — « Ce que nous ne facturons jamais » (14/09/2026)
@@ -57,97 +60,50 @@ type Icone = ComponentType<{ className?: string; strokeWidth?: number }>;
    Les numéros disent maintenant un ORDRE, ce que le rail suggérait déjà. */
 const ICONES: Icone[] = [Boxes, Gauge, UserCheck, FileSignature];
 
+/* 25/11/2026 — CHARTE DE L'ACCUEIL (docs/charte-accueil.md, § 4.2,
+   ligne 5). L'en-tête centré devient l'en-tête de section de l'accueil
+   (pastille, h2 en 450, chapô gris à droite, filet dessous) ; les quatre
+   cartes blanches deviennent une grille de cartes jointives (GrilleCartes
+   du kit) : une scène #eeeee8 qui porte l'icône, puis « Règle N » en
+   pastille, le titre, le texte et les points. Le rail de pastilles
+   numérotées et le survol qui soulève la carte partent (le calme de
+   l'accueil). Textes inchangés. */
 export default function ReglesFacturation({
+  id,
   titre,
   chapo,
   regles,
-  className,
 }: {
+  id?: string;
   titre: string;
   chapo: string;
   regles: Regle[];
-  className?: string;
 }) {
   return (
-    <div className={cn("r-wrap py-14 sm:py-20", className)}>
-      {/* ——— en-tête centré ——— */}
-      <div className="mx-auto mb-14 max-w-3xl text-center">
-        <h2 className="r-h2 text-balance">{titre}</h2>
-        <p className="mx-auto mt-4 max-w-2xl text-balance text-[17px] leading-[26px] text-[#616161]">
-          {chapo}
-        </p>
-      </div>
-
-      {/* ——— le rail de pastilles numérotées : caché tant que les cartes
-             ne sont pas en ligne, sinon le filet relie une colonne à
-             elle-même ——— */}
-      <div className="relative mx-auto mb-8 hidden w-full xl:block">
-        {/* le filet va du centre de la 1re pastille au centre de la 4e :
-            une colonne vaut (100 % − 3 × 24 px) / 4, sa moitié
-            12,5 % − 9 px. Sans ce retrait, la gouttière décale les
-            pastilles des cartes qu'elles surmontent. Le rail et la sous-grille
-            n'apparaissent qu'à partir de xl : à 1024 px quatre colonnes de
-            210 px hachent les titres en trois lignes, les cartes restent
-            donc en 2 × 2 jusque-là. */}
-        <div
-          aria-hidden
-          className="absolute left-[calc(12.5%_-_9px)] right-[calc(12.5%_-_9px)] top-1/2 h-px -translate-y-1/2 bg-[#e3e3e3]"
-        />
-        <div className="relative grid grid-cols-4 gap-6">
-          {regles.map((r, i) => (
-            <div
-              key={r.titre}
-              aria-hidden
-              className="flex size-8 items-center justify-center justify-self-center rounded-full bg-[#ececec] text-sm font-semibold text-[#050505] ring-4 ring-[#f5f5f5]"
-            >
-              {i + 1}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ——— les quatre cartes ——— */}
-      {/* dès lg les quatre cartes partagent leurs rangées (sous-grille) :
-          sans elle, une règle dont le texte fait trois lignes décale sa
-          liste de points de 23 px par rapport à ses voisines */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 xl:grid-rows-[auto_auto_auto_1fr] xl:gap-y-0">
+    <Section id={id}>
+      <EnTeteSection pastille="Facturation" titre={titre} chapo={chapo} />
+      <GrilleCartes colonnes={4}>
         {regles.map((r, i) => {
           const Icone = ICONES[i % ICONES.length];
           return (
-            <div
-              key={r.titre}
-              data-reveal
-              className="rounded-2xl border border-[#e3e3e3] bg-white p-6 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#050505]/30 hover:shadow-lg xl:row-span-4 xl:grid xl:grid-rows-subgrid"
-            >
-              <div>
-                <div className="mb-4 flex size-12 items-center justify-center rounded-lg bg-[#f5f5f5] text-[#050505]">
-                  <Icone className="size-6" strokeWidth={1.75} />
-                </div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#616161] xl:hidden">
-                  Règle {i + 1}
-                </p>
+            <article key={r.titre} className="ch-carte tf-regle">
+              <Scene basse className="tf-regle-scene">
+                <Icone className="size-7" strokeWidth={1.5} />
+              </Scene>
+              <div className="ch-carte-texte">
+                <Pastille>Règle {i + 1}</Pastille>
+                <h3>{r.titre}</h3>
+                <p>{r.texte}</p>
+                <ul className="tf-regle-points">
+                  {r.points.map((point) => (
+                    <li key={point}>{point}</li>
+                  ))}
+                </ul>
               </div>
-              <h3 className="mb-2 mt-2 font-[family-name:var(--font-jakarta)] text-xl font-medium tracking-[-0.01em] text-[#050505] xl:mt-0">
-                {r.titre}
-              </h3>
-              <p className="mb-6 text-[15px] leading-[23px] text-[#3d3d3d]">{r.texte}</p>
-              <ul className="space-y-3">
-                {r.points.map((point) => (
-                  <li key={point} className="flex items-start gap-3">
-                    <span
-                      aria-hidden
-                      className="mt-[6px] flex size-4 flex-none items-center justify-center rounded-full bg-[#050505]/12"
-                    >
-                      <span className="size-2 rounded-full bg-[#050505]" />
-                    </span>
-                    <span className="text-[14px] leading-[21px] text-[#616161]">{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            </article>
           );
         })}
-      </div>
-    </div>
+      </GrilleCartes>
+    </Section>
   );
 }

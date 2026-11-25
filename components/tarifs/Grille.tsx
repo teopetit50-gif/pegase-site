@@ -180,18 +180,29 @@
    La charte est la partie III de OMEGA/DOCTRINE-TEXTES-SAAS.md.
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* ═══ 25/11/2026 — LA CHARTE DE L'ACCUEIL (docs/charte-accueil.md, § 4.2,
+   ligne 5). Le dessin change, la mécanique non : sélection exclusive entre
+   paliers, quotas, URL de l'audit, bascule des deux mondes, textes.
+     · le héros centré (HeroSection) devient l'en-tête de page de l'accueil
+       (EnTeteSection niveau 1, disposition « côte ») : pastille « Tarifs »,
+       titre en deux tons, chapô à droite, bouton blanc ;
+     · les trois prix publics et les quatre cartes d'agents deviennent des
+       colonnes jointives séparées par des filets, sur le modèle de la
+       grille de prix de l'accueil (nom en 22 / 450, description grise,
+       pied à filet) — plus de cartes blanches espacées ni d'ombres ;
+     · les pastilles de palier passent dans la rangée du nom (la sombre
+       pour la carte phare), les icônes de tête partent ;
+     · tous les boutons sont les `ch-btn` blancs du kit ; le sélecteur
+       PME | Groupes prend la piste #eeeee8 de l'accueil, l'état actif en
+       blanc. Le dessin vit dans components/charte/pages/tarifs.css. ═══ */
+
 import Link from "next/link";
-import { useState, type ComponentType } from "react";
-import { Boxes, Check, Layers, Plus, Sparkles, Star, X, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { HeroSection } from "@/components/ui/hero-section-dark";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState } from "react";
+import { Check, Plus, Star, X } from "lucide-react";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Bouton from "@/components/charte/Bouton";
+import Pastille from "@/components/charte/Pastille";
 import { cn } from "@/lib/cn";
 import { lienAudit, lienContact } from "@/lib/reservation";
 import { useChoisirMonde, useMonde } from "@/components/tarifs/monde";
@@ -210,10 +221,6 @@ import {
 
 /* le prix en euros, sans centimes — le format que NumberFlow anime */
 
-/* l'icône de tête de chaque carte — la référence en pose une par palier,
-   en 32 px. Trois icônes neutres qui montent : un poste, trois postes,
-   tout. Pas de logo de moteur (voir l'écart 5 de l'en-tête). */
-type Icone = ComponentType<{ className?: string; strokeWidth?: number }>;
 /* 25/11/2026 — les cartes se nomment par agents, plus par postes : « Tout
    Omega » se lisait comme un forfait unique, alors que chaque agent a son
    prix. Les noms de PALIERS restent ceux de /reserver et /installation. */
@@ -221,12 +228,6 @@ const NOM_AFFICHE: Record<Palier["id"], string> = {
   un: "Un agent",
   trois: "Trois agents",
   complet: "Les quatre agents",
-};
-
-const ICONE_PALIER: Record<Palier["id"], Icone> = {
-  un: Zap,
-  trois: Layers,
-  complet: Boxes,
 };
 
 /* 15/09, dernière passe — LA PÉRIODICITÉ NE PILOTE PLUS RIEN ICI. Elle
@@ -249,26 +250,26 @@ const ICONE_PALIER: Record<Palier["id"], Icone> = {
    le focus clavier se voit ici. */
 function Marqueur({ etat }: { etat: "coche" | "vide" | "non" | "plus" }) {
   const commun =
-    "mr-3 mt-px grid size-[18px] flex-none place-content-center rounded-full transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#050505]";
+    "mr-2.5 mt-px grid size-[18px] flex-none place-content-center rounded-full transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#202322]";
   if (etat === "coche")
     return (
-      <span aria-hidden className={cn(commun, "bg-[#050505] text-white")}>
+      <span aria-hidden className={cn(commun, "bg-[#202322] text-white")}>
         <Check className="size-3" strokeWidth={3} />
       </span>
     );
   if (etat === "non")
     return (
-      <span aria-hidden className={cn(commun, "text-[#9a9a9a]")}>
+      <span aria-hidden className={cn(commun, "text-[#a3a69e]")}>
         <X className="size-3.5" strokeWidth={2.5} />
       </span>
     );
   if (etat === "plus")
     return (
-      <span aria-hidden className={cn(commun, "border border-[#050505] text-[#050505]")}>
+      <span aria-hidden className={cn(commun, "border border-[#202322] text-[#202322]")}>
         <Plus className="size-3" strokeWidth={2.5} />
       </span>
     );
-  return <span aria-hidden className={cn(commun, "border border-[#c7c7c7] bg-white")} />;
+  return <span aria-hidden className={cn(commun, "border border-[#c4c4bf] bg-white")} />;
 }
 
 /* ——— la quatrième carte : sur mesure (15/09/2026, voir l'en-tête) ———
@@ -285,51 +286,38 @@ function CarteSurMesure({ monde }: { monde: Monde }) {
   const devis = monde === "structure";
 
   return (
-    <Card
-      className={cn(
-        "relative flex h-full flex-col rounded-xl border-[#e3e3e3] shadow-none transition-all duration-300",
-        "hover:border-[#050505]/30 hover:shadow-md",
-        "md:row-span-4 md:grid md:grid-rows-subgrid",
-      )}
-    >
-      <CardHeader className="items-center pt-8 text-center">
-        <div className="mb-4 flex justify-center">
-          <Sparkles className="size-8 text-[#050505]" strokeWidth={1.5} />
+    <article className="tf-tier">
+      <div className="tf-tier-tete">
+        <div className="tf-tier-nom">
+          <h3>{c.nom}</h3>
         </div>
-        <CardTitle className="font-[family-name:var(--font-jakarta)] text-2xl">{c.nom}</CardTitle>
-        <CardDescription className="text-[#616161]">{c.promesse}</CardDescription>
-      </CardHeader>
-
-      <div className="px-6">
-        <div className="text-center">
-          {/* même hauteur de bloc que le prix des voisines : le grand mot,
-              puis la ligne qui remplace « par mois », puis la note */}
-          {/* le grand mot ne survit que côté PME, où cette carte est la
-              SEULE à le porter — et c'est justement ce qui la distingue.
-              Côté Groupes, les trois voisines viennent de le perdre : le
-              garder ici en ferait la quatrième répétition du hero. */}
-          {devis ? null : <p className="text-4xl font-bold text-[#050505]">{c.prixTexte}</p>}
-          <p className={cn("text-sm text-[#616161]", devis ? "" : "mt-1")}>
-            {devis ? GRANDE_STRUCTURE.sousPrix : c.sousPrix}
-          </p>
-          <div className="mt-3">
-            <p className="text-xs text-[#767676]">{c.note}</p>
-          </div>
-        </div>
+        <p className="tf-tier-desc">{c.promesse}</p>
       </div>
 
-      <div className="px-6">
-        <div className="border-t border-[#e3e3e3] pt-5 text-left text-sm">
-          <h4 className="mb-3 font-semibold text-[#050505]">{c.casTitre}</h4>
-          <ul className="space-y-2.5">
-            {c.cas.map((t) => (
-              <li key={t} className="flex items-start">
-                <Marqueur etat="plus" />
-                <span className="text-[#3d3d3d]">{t}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div className="tf-tier-prix">
+        {/* même hauteur de bloc que le prix des voisines : le grand mot,
+            puis la ligne qui remplace « par mois », puis la note */}
+        {/* le grand mot ne survit que côté PME, où cette carte est la
+            SEULE à le porter — et c'est justement ce qui la distingue.
+            Côté Groupes, les trois voisines viennent de le perdre : le
+            garder ici en ferait la quatrième répétition du hero. */}
+        {devis ? null : <p className="tf-tier-grand">{c.prixTexte}</p>}
+        <p className={cn("tf-tier-ligne", devis ? "" : "mt-2")}>
+          {devis ? GRANDE_STRUCTURE.sousPrix : c.sousPrix}
+        </p>
+        <p className="tf-tier-note">{c.note}</p>
+      </div>
+
+      <div className="tf-tier-liste">
+        <h4 className="tf-tier-legende">{c.casTitre}</h4>
+        <ul className="space-y-2.5">
+          {c.cas.map((t) => (
+            <li key={t} className="flex items-start">
+              <Marqueur etat="plus" />
+              <span>{t}</span>
+            </li>
+          ))}
+        </ul>
 
         {/* 15/09, passe de compression — la seconde liste (« Inclus dans le
             devis ») part comme « Inclus dans le palier » sur les trois
@@ -339,21 +327,20 @@ function CarteSurMesure({ monde }: { monde: Monde }) {
             au-dessus — le périmètre concerné. */}
       </div>
 
-      <CardFooter className="mt-auto flex-col items-stretch pt-6 md:mt-0">
-        <Button asChild variant="outline" className="h-11 w-full text-[15px]">
-          {devis ? (
-            <Link href={GRANDE_STRUCTURE.href}>{GRANDE_STRUCTURE.cta}</Link>
-          ) : (
-            <a href={lienContact("avant")}>{c.cta}</a>
-          )}
-        </Button>
-        <p className="mt-3 text-center text-xs text-[#767676]">
-          <Link href={c.href} className="r-lien !text-xs">
+      <div className="tf-tier-pied">
+        <Bouton
+          href={devis ? GRANDE_STRUCTURE.href : lienContact("avant")}
+          plein
+        >
+          {devis ? GRANDE_STRUCTURE.cta : c.cta}
+        </Bouton>
+        <p className="tf-tier-plus">
+          <Link href={c.href} className="ch-lien">
             {c.enSavoirPlus}
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+    </article>
   );
 }
 
@@ -370,12 +357,10 @@ function SelecteurMonde({
   monde: Monde;
   choisir: (m: Monde) => void;
 }) {
+  /* 25/11/2026 — la piste de l'accueil (`.pr-billing`) : fond #eeeee8,
+     l'état actif en blanc, plus de segment noir (tarifs.css, `.tf-monde`) */
   return (
-    <div
-      role="radiogroup"
-      aria-label="À qui s'adresse la grille"
-      className="inline-flex rounded-md border border-[#e3e3e3] bg-white p-1"
-    >
+    <div role="radiogroup" aria-label="À qui s'adresse la grille" className="tf-monde">
       {MONDES.map((m) => {
         const actif = m.id === monde;
         return (
@@ -385,11 +370,7 @@ function SelecteurMonde({
             role="radio"
             aria-checked={actif}
             onClick={() => choisir(m.id)}
-            className={cn(
-              "cursor-pointer rounded-sm px-4 py-1.5 text-sm font-medium transition-colors",
-              "outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#050505]/70",
-              actif ? "bg-[#050505] text-white" : "text-[#3d3d3d] hover:text-[#050505]",
-            )}
+            className="tf-monde-btn"
           >
             {m.label}
           </button>
@@ -435,134 +416,105 @@ function CartePalier({
      que comme une phrase du message, pour que l'entretien parte des
      chiffres du visiteur. */
   const href = lienAudit((p.aChoisir === null ? POSTES.map((x) => x.id) : choisis).map(cleUrlDuPoste), 0);
-  const Icone = ICONE_PALIER[p.id];
 
   return (
-    <Card
+    <article
       className={cn(
-        "relative flex h-full flex-col rounded-xl border-[#e3e3e3] shadow-none transition-all duration-300",
-        "hover:border-[#050505]/30 hover:shadow-md",
-        /* dès md, la carte devient une SOUS-GRILLE de quatre rangées : tête,
-           prix, listes, pied. Les cartes d'une même bande partagent donc
-           les mêmes lignes — sans elle, la promesse de « Tout Omega » fait
-           quatre lignes contre trois et son prix descend de 20 px */
-        "md:row-span-4 md:grid md:grid-rows-subgrid",
-        phare && "border-[#050505] shadow-md ring-1 ring-[#050505]/15",
+        "tf-tier",
+        phare && "tf-tier--phare",
       )}
     >
-      {/* la pastille à cheval sur le filet, comme la référence */}
-      {p.badge ? (
-        <div
-          className={cn(
-            "absolute inset-x-0 -top-3 mx-auto w-fit rounded-full px-3 py-1 text-xs font-medium",
-            /* 15/09 (Teo) — la pastille phare n'est plus PLEINE : fond blanc,
-               filet d'encre, texte et étoile en noir. Le fond reste opaque,
-               pas transparent : la pastille est posée à cheval sur le filet
-               de la carte, qui la traverserait de part en part. */
-            phare
-              ? "border border-[#050505] bg-white text-[#050505] shadow-sm"
-              : "border border-[#e3e3e3] bg-white text-[#050505] shadow-sm",
-          )}
-        >
-          <span className="inline-flex items-center gap-1.5">
-            {phare ? <Star aria-hidden className="size-3 fill-current" /> : null}
-            {p.badge}
-          </span>
+      <div className="tf-tier-tete">
+        <div className="tf-tier-nom">
+          <h3>{NOM_AFFICHE[p.id]}</h3>
+          {/* la pastille du palier, dans la rangée du nom (la grille de prix
+              de l'accueil) : la sombre pour la carte phare */}
+          {p.badge ? (
+            <Pastille ton={phare ? "sombre" : "neutre"}>
+              {phare ? <Star aria-hidden className="size-3 fill-current" /> : null}
+              {p.badge}
+            </Pastille>
+          ) : null}
         </div>
-      ) : null}
-
-      <CardHeader className="items-center pt-8 text-center">
-        <div className="mb-4 flex justify-center">
-          <Icone className="size-8 text-[#050505]" strokeWidth={1.5} />
-        </div>
-        <CardTitle className="font-[family-name:var(--font-jakarta)] text-2xl">{NOM_AFFICHE[p.id]}</CardTitle>
-        <CardDescription className="text-[#616161]">{p.promesse}</CardDescription>
-      </CardHeader>
-
-      <div className="px-6">
-        {/* le prix, centré. NumberFlow anime les chiffres à la bascule : il
-            ne faut SURTOUT PAS le remonter par une clé ; seules les lignes
-            qui l'entourent rejouent leur fondu */}
-        <div className="text-center">
-          {/* côté grande structure, le grand chiffre laisse la place au
-              mot : pas de NumberFlow, rien à animer ni à remiser */}
-          {devis ? (
-            /* 15/09, dernière passe — CÔTÉ « GROUPES », PLUS DE GRAND
-               « SUR DEVIS ». Les quatre cartes portaient le même mot en
-               36 px, sous un hero qui venait de l'écrire : quatre
-               répétitions d'une phrase déjà lue. Il ne reste que la ligne
-               qui, elle, distingue — d'où sort le montant. */
-            <>
-              <p className="text-sm text-[#616161]">{GRANDE_STRUCTURE.sousPrix}</p>
-              <p className="mt-2 text-xs text-[#767676]">{GRANDE_STRUCTURE.note}</p>
-            </>
-          ) : (
-            /* 25/09 — le comparateur parti, la carte n'a plus de cas dont
-               tirer des heures : elle garde la seule ligne qui ne dépend
-               que d'elle, son plafond. */
-            /* 25/11/2026 — le plafond de pièces part : il dessinait un
-               barème que le client ne voit plus. La carte dit la remise
-               (−10 % dès 3 agents) ou que le prix sort de l'audit. */
-            <p className="text-sm text-[#616161]">
-              {p.aChoisir === 1 ? "Prix fixé à l'audit" : "−10\u00a0% sur chaque agent"}
-            </p>
-          )}
-        </div>
-
+        <p className="tf-tier-desc">{p.promesse}</p>
       </div>
 
-      <div className="px-6">
+      <div className="tf-tier-prix">
+        {/* côté grande structure, le grand chiffre laisse la place au
+            mot : pas de NumberFlow, rien à animer ni à remiser */}
+        {devis ? (
+          /* 15/09, dernière passe — CÔTÉ « GROUPES », PLUS DE GRAND
+             « SUR DEVIS ». Les quatre cartes portaient le même mot en
+             36 px, sous un hero qui venait de l'écrire : quatre
+             répétitions d'une phrase déjà lue. Il ne reste que la ligne
+             qui, elle, distingue — d'où sort le montant. */
+          <>
+            <p className="tf-tier-ligne">{GRANDE_STRUCTURE.sousPrix}</p>
+            <p className="tf-tier-note">{GRANDE_STRUCTURE.note}</p>
+          </>
+        ) : (
+          /* 25/09 — le comparateur parti, la carte n'a plus de cas dont
+             tirer des heures : elle garde la seule ligne qui ne dépend
+             que d'elle, son plafond. */
+          /* 25/11/2026 — le plafond de pièces part : il dessinait un
+             barème que le client ne voit plus. La carte dit la remise
+             (−10 % dès 3 agents) ou que le prix sort de l'audit. */
+          <p className="tf-tier-ligne">
+            {p.aChoisir === 1 ? "Prix fixé à l'audit" : "−10 % sur chaque agent"}
+          </p>
+        )}
+      </div>
+
+      <div className="tf-tier-liste">
         {/* « Aperçu » de la référence : le choix des postes */}
-        <div className="border-t border-[#e3e3e3] pt-5 text-left text-sm">
-          {p.aChoisir !== null ? (
-            /* min-w-0 : un fieldset a min-inline-size: min-content par
-               défaut ; sans lui il dépasse de son bloc dans les cartes
-               étroites */
-            <fieldset className="min-w-0">
-              <legend className="mb-3 font-semibold text-[#050505]">
-                {p.aChoisir === 1 ? "Sélectionnez un poste" : `Sélectionnez ${p.aChoisir} postes`}
-              </legend>
-              <ul className="space-y-2.5">
-                {POSTES.map((x) => {
-                  const actif = choisis.includes(x.id);
-                  const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
-                  return (
-                    <li key={x.id}>
-                      <label
-                        className={cn(
-                          "flex items-start",
-                          plein ? "cursor-not-allowed" : "cursor-pointer",
-                        )}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={actif}
-                          disabled={plein}
-                          onChange={() => bascule(x.id)}
-                          className="peer sr-only"
-                        />
-                        <Marqueur etat={actif ? "coche" : plein ? "non" : "vide"} />
-                        <span className={plein ? "text-[#9a9a9a]" : "text-[#3d3d3d]"}>{x.nom}</span>
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            </fieldset>
-          ) : (
-            <div>
-              <h4 className="mb-3 font-semibold text-[#050505]">Les quatre postes inclus</h4>
-              <ul className="space-y-2.5">
-                {POSTES.map((x) => (
-                  <li key={x.id} className="flex items-start">
-                    <Marqueur etat="coche" />
-                    <span className="text-[#3d3d3d]">{x.nom}</span>
+        {p.aChoisir !== null ? (
+          /* min-w-0 : un fieldset a min-inline-size: min-content par
+             défaut ; sans lui il dépasse de son bloc dans les cartes
+             étroites */
+          <fieldset className="min-w-0">
+            <legend className="tf-tier-legende">
+              {p.aChoisir === 1 ? "Sélectionnez un poste" : `Sélectionnez ${p.aChoisir} postes`}
+            </legend>
+            <ul className="space-y-2.5">
+              {POSTES.map((x) => {
+                const actif = choisis.includes(x.id);
+                const plein = !actif && p.aChoisir !== 1 && choisis.length >= (p.aChoisir ?? 0);
+                return (
+                  <li key={x.id}>
+                    <label
+                      className={cn(
+                        "flex items-start",
+                        plein ? "cursor-not-allowed" : "cursor-pointer",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={actif}
+                        disabled={plein}
+                        onChange={() => bascule(x.id)}
+                        className="peer sr-only"
+                      />
+                      <Marqueur etat={actif ? "coche" : plein ? "non" : "vide"} />
+                      <span className={plein ? "tf-tier-eteint" : undefined}>{x.nom}</span>
+                    </label>
                   </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+                );
+              })}
+            </ul>
+          </fieldset>
+        ) : (
+          <div>
+            <h4 className="tf-tier-legende">Les quatre postes inclus</h4>
+            <ul className="space-y-2.5">
+              {POSTES.map((x) => (
+                <li key={x.id} className="flex items-start">
+                  <Marqueur etat="coche" />
+                  <span>{x.nom}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* 15/09, passe de compression — LE BLOC « INCLUS DANS LE PALIER »
             EST PARTI. Ses trois points par carte disaient, dans l'ordre :
@@ -577,30 +529,20 @@ function CartePalier({
       </div>
 
       {/* le bouton en pied (écart 1) : les CTA tombent sur la même ligne,
-          et la commande reste sous le choix qui l'active. `mt-auto`
-          bottom-aligne le pied tant que la carte est une pile (mobile) ;
-          dès la sous-grille il le DÉCALERAIT — 15/09 : la note d'une
-          seule ligne de la carte sur-mesure faisait descendre son bouton
-          de 16 px sous les trois autres — d'où `md:mt-0`, qui accroche
-          tous les pieds au HAUT de la même rangée. */}
-      <CardFooter className="mt-auto flex-col items-stretch pt-6 md:mt-0">
+          et la commande reste sous le choix qui l'active. Le bouton éteint
+          garde le dessin blanc du kit, à opacité réduite. */}
+      <div className="tf-tier-pied">
         {pret ? (
-          <Button
-            asChild
-            variant={phare ? "default" : "outline"}
-            className="h-11 w-full text-[15px]"
-          >
-            <Link href={devis ? GRANDE_STRUCTURE.href : href}>
-              {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
-            </Link>
-          </Button>
+          <Bouton href={devis ? GRANDE_STRUCTURE.href : href} plein>
+            {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
+          </Bouton>
         ) : (
-          <Button disabled variant="outline" className="h-11 w-full text-[15px]">
+          <button type="button" disabled className="ch-btn ch-btn--plein tf-btn-eteint">
             {manque === 1 ? "Sélectionnez 1 poste" : `Sélectionnez encore ${manque} postes`}
-          </Button>
+          </button>
         )}
-      </CardFooter>
-    </Card>
+      </div>
+    </article>
   );
 }
 
@@ -639,8 +581,6 @@ export default function Grille() {
 
   return (
     <>
-      {/* ═══ 1. en-tête centré, interrupteur de périodicité, trois cartes
-             cernées — le modèle « pricing-module » ═══ */}
       {/* ═══ 1. le hero, puis le sélecteur des deux mondes ═══
 
              15/09, dernière passe (Teo : « et ça c'est trop compliqué,
@@ -662,51 +602,53 @@ export default function Grille() {
       {/* 25/11/2026 — LES PRIX DEVIENNENT PUBLICS (« Nos prix », v7). Le
           hero ne dépend plus du monde : le logiciel coûte le même prix à
           tous. Le sélecteur PME | Groupes descend au-dessus des agents,
-          les seuls dont le chiffrage diffère d'un monde à l'autre. */}
-      <section data-monde="clair" className="pb-10 sm:pb-14">
-        <HeroSection
-          annonce="Tarifs"
-          titre={{ debut: "Le logiciel de gestion coûte", accent: "34,90\u00a0€ par personne et par mois." }}
-          description={"Ce prix comprend les six modules de gestion, des ventes à la comptabilité, et il s'applique dès la première personne. Les agents font le travail répétitif, et chacun a son propre prix, à partir de 69\u00a0€ par mois. Prix hors taxes."}
-          ctaTexte="Réserver un audit"
-          ctaHref="/reserver-un-audit"
-          souscta="30 minutes, gratuit, sans engagement"
+          les seuls dont le chiffrage diffère d'un monde à l'autre.
+          Même jour, charte de l'accueil : le héros est l'en-tête de page
+          (h1 en deux tons), et les trois prix publics tombent dessous,
+          dans la même section, en colonnes à filets. Disposition « pile »
+          et non « côte » : en côte, la colonne du titre (≈ 860 px à 1440)
+          coupait « 34,90 € par personne et par mois. » avant « mois ». */}
+      <Section>
+        <EnTeteSection
+          niveau={1}
+          haut
+          disposition="pile"
+          pastille="Tarifs"
+          titre="Le logiciel de gestion coûte"
+          suite={"34,90 € par personne et par mois."}
+          chapo={"Ce prix comprend les six modules de gestion, des ventes à la comptabilité, et il s'applique dès la première personne. Les agents font le travail répétitif, et chacun a son propre prix, à partir de 69 € par mois. Prix hors taxes."}
+          actions={
+            <>
+              <Bouton href="/reserver-un-audit" icone="calendrier">
+                Réserver un audit
+              </Bouton>
+              <p className="tf-souscta">30 minutes, gratuit, sans engagement</p>
+            </>
+          }
         />
-      </section>
-
-      <section data-monde="clair" className="r-wrap pb-12 sm:pb-16">
         <TroisPrix />
-      </section>
+      </Section>
 
-      <section data-monde="clair" className="r-wrap pb-10 sm:pb-14">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-[#050505] sm:text-[32px]">
-            Choisissez vos agents
-          </h2>
-          <p className="mt-3 text-[15px] leading-relaxed text-[#616161]">
-            {devis
+      {/* ═══ 2. les agents : en-tête de section, sélecteur, quatre colonnes ═══ */}
+      <Section>
+        <EnTeteSection
+          pastille="Agents IA"
+          titre="Choisissez vos agents"
+          chapo={
+            devis
               ? GRANDE_STRUCTURE.chapo
-              : "Chaque agent prend en charge un poste. Son prix dépend du volume qu'il traite chaque mois, et il est écrit au devis avant que vous signiez."}
-          </p>
-        </div>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
-          <SelecteurMonde monde={monde} choisir={choisirMonde} />
-        </div>
+              : "Chaque agent prend en charge un poste. Son prix dépend du volume qu'il traite chaque mois, et il est écrit au devis avant que vous signiez."
+          }
+          actions={<SelecteurMonde monde={monde} choisir={choisirMonde} />}
+        />
 
-        {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px.
-            15/09 — QUATRE CARTES, DONC DEUX GABARITS (voir l'en-tête) :
-            · de 768 à 1279 px, deux colonnes de deux, et un gabarit de
-              HUIT rangées — chaque carte en occupe quatre, la seconde
-              bande tombe donc sur les rangées 5 à 8 ; `gap-y-8` sépare
-              les deux bandes, que `gap-y-0` annule quand tout revient
-              sur une seule ligne ;
-            · à partir de 1280 px, quatre colonnes et quatre rangées.
-            Pourquoi pas quatre colonnes dès 1024 px : la colonne utile y
-            vaut 928 px, soit 208 px par carte — deux mots par ligne. */}
-        <div
-          id="grille"
-          className="mx-auto mt-10 grid max-w-md scroll-mt-32 gap-6 pt-4 md:max-w-3xl md:grid-cols-2 md:grid-rows-[auto_auto_1fr_auto_auto_auto_1fr_auto] md:gap-x-6 md:gap-y-10 xl:max-w-none xl:grid-cols-4 xl:grid-rows-[auto_auto_1fr_auto] xl:gap-x-6 xl:gap-y-0"
-        >
+        {/* la grille. 15/09 — QUATRE CARTES, DONC DEUX GABARITS (voir
+            l'en-tête) : de 768 à 1279 px, deux colonnes de deux, sur un
+            gabarit de HUIT rangées (chaque carte en occupe quatre) ; à
+            partir de 1280 px, quatre colonnes et quatre rangées.
+            25/11 : les colonnes sont jointives, séparées par des filets
+            (tarifs.css, `.tf-agents`). */}
+        <div id="grille" className="tf-agents scroll-mt-32">
           {PALIERS.map((p) => (
             <CartePalier
               key={p.id}
@@ -725,8 +667,7 @@ export default function Grille() {
             heures des cartes et le tableau « Comparer les paliers » : les
             cartes ne gardent que leur plafond, et le tableau, qui ne
             s'affichait qu'après le choix d'un cas, part avec lui. */}
-      </section>
-
+      </Section>
     </>
   );
 }

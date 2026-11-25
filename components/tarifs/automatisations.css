@@ -1,0 +1,113 @@
+/* /tarifs — la section des automatisations (components/tarifs/Automatisations.tsx).
+   Dans la grammaire de la charte (components/charte/charte.css) : cartes
+   jointives, scènes #eeeee8 de rayon 12, boutons blancs. */
+
+.charte .ch-auto-scene { min-height: 260px; padding: 28px 24px; }
+.charte .ch-auto-bulle {
+  display: grid;
+  gap: 10px;
+  max-width: 340px;
+  padding: 14px 16px;
+  border: 1px solid #e2e2df;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #202322;
+}
+.charte .ch-auto-qui { font-size: 12px; font-weight: 600; color: #84877f; }
+.charte .ch-auto-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.charte .ch-auto-btns span {
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  color: #121212;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.charte .ch-auto-planchers {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 300px;
+}
+.charte .ch-auto-planchers li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #e2e2df;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  color: #84877f;
+}
+.charte .ch-auto-planchers b { color: #202322; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.charte .ch-auto-origine { display: block; margin-bottom: 8px; color: #84877f; font-size: 12px; }
+.charte .ch-auto-paiements {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #dcdcda;
+}
+.charte .ch-auto-paiements dt { color: #84877f; font-size: 12px; }
+.charte .ch-auto-paiements dd {
+  margin: 2px 0 0;
+  color: #202322;
+  font-size: 20px;
+  font-weight: 450;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.charte .ch-auto-paiements dd.is-vide { font-size: 15px; color: #84877f; letter-spacing: -0.01em; }
+
+.charte .ch-auto-recharge {
+  min-height: 0;
+  padding: 32px 24px;
+  place-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.charte .ch-auto-pieces { color: #84877f; font-size: 14px; }
+.charte .ch-auto-montant {
+  color: #202322;
+  font-size: 40px;
+  font-weight: 450;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+.charte .ch-auto-unite { color: #202322; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.charte .ch-auto-bas {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px 64px;
+}
+@media (max-width: 1000px) {
+  .charte .ch-auto-bas { grid-template-columns: minmax(0, 1fr); }
+}
+.charte .ch-auto-regles { display: grid; gap: 12px; color: #84877f; font-size: 15px; line-height: 1.5; }
+.charte .ch-auto-regles li { padding-left: 18px; position: relative; }
+.charte .ch-auto-regles li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 6px; height: 6px; border-radius: 2px; background: #c5c9bd; }
+.charte .ch-auto-regles b { color: #202322; font-weight: 600; }
+.charte .ch-auto-exemple {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 20px 22px;
+  border: 1px solid #e6e6e0;
+  border-radius: 12px;
+  background: #eeeee8;
+  color: #84877f;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.charte .ch-auto-exemple .ch-pastille { justify-self: start; margin-bottom: 4px; background: #fff; }
+.charte .ch-auto-exemple b { color: #202322; font-weight: 600; font-variant-numeric: tabular-nums; }

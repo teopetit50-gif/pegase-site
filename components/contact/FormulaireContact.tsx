@@ -211,7 +211,11 @@ export default function FormulaireContact() {
       ) : null}
 
       <div className="mt-7 flex flex-wrap items-center gap-4">
-        <button type="submit" disabled={!champsOk || etat === "envoi"} className={`r-btn w-full sm:w-auto ${champsOk && etat !== "envoi" ? "r-btn--noir" : "rv-btn--attente"}`}>
+        {/* 25/11/2026 — charte de l'accueil : le bouton blanc de la vitrine
+            (`ch-btn`), comme tous les boutons ; éteint (opacité) tant que
+            le formulaire n'est pas complet, au lieu du noir / gris d'avant.
+            Seul /contact monte ce formulaire. */}
+        <button type="submit" disabled={!champsOk || etat === "envoi"} className="ch-btn ct-envoyer w-full sm:w-auto">
           {etat === "envoi" ? (
             <>
               <Loader aria-hidden="true" />

@@ -1,0 +1,218 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /reserver-un-audit dans la charte de l'accueil — 25/11/2026
+   (docs/charte-accueil.md, § 4.2, ligne 3)
+
+   La page garde sa feuille (app/reserver-un-audit/reserver.css, monde
+   `.rdv`) pour la mécanique du formulaire ; cette feuille-ci la fait passer
+   aux finitions de l'accueil. Tout est sous `.charte .rdv` : la classe
+   `.rdv` n'existe que sur cette page, et une feuille importée par une page
+   reste chargée après une navigation, d'où la double portée.
+
+   Ce qui change :
+     · le fond blanc de `.rdv` s'efface devant le #f5f5f2 du cadre ;
+     · le corps de page devient deux cellules jointives : le formulaire, puis
+       la carte, séparés par un filet #dcdcda (un seul bloc sous 1024 px) ;
+     · la carte gris bleu devient une scène de l'accueil (#eeeee8, rayon 12) ;
+     · les champs : blancs, liseré #dcdcda, rayon 10, 46 px, comme les
+       boutons ; le bouton d'envoi est le `ch-btn` blanc du kit ;
+     · les étiquettes en chasse fixe et capitales passent en Google Sans.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.charte .rdv {
+  background: transparent;
+  color: var(--ch-encre-section);
+  font-family: inherit;
+}
+
+/* ─── le corps : formulaire | carte, jointifs ─────────────────────── */
+.charte .rdv .rdv-corps {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1024px) {
+  .charte .rdv .rdv-corps {
+    grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  }
+}
+
+/* la cellule du formulaire : les retraits de l'en-tête (`.ch-intro`), pour
+   que les champs tombent à l'aplomb de la pastille et du titre */
+.charte .rdv .rdv-corps-form {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .rdv .rdv-corps-form {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .rdv .rdv-corps-form {
+    padding: 28px 20px 40px;
+  }
+}
+
+/* la cellule de la carte : un filet au-dessus (empilé) ou à gauche (côte à
+   côte), et la scène dedans, en retrait de 12 px comme les cartes de
+   l'accueil */
+.charte .rdv .rdv-corps-carte {
+  display: flex;
+  min-width: 0;
+  padding: 12px;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 1024px) {
+  .charte .rdv .rdv-corps-carte {
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+
+/* les blocs du formulaire n'ont plus leurs marges de grille d'avant */
+.charte .rdv .rdv-notes,
+.charte .rdv .rdv-formulaire {
+  grid-column: auto;
+  padding: 0;
+}
+.charte .rdv .rdv-notes .r-note {
+  color: #777c76;
+}
+.charte .rdv .rdv-notes strong {
+  color: var(--ch-encre-section);
+}
+
+/* ─── la scène : la citation, un filet, les outils ───────────────── */
+.charte .rdv .rdv-scene {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  min-height: 0;
+  padding: 40px;
+  place-items: stretch;
+}
+@media (max-width: 760px) {
+  .charte .rdv .rdv-scene {
+    padding: 32px 20px;
+  }
+}
+.charte .rdv .rdv-citation p {
+  color: var(--ch-encre-section);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.36;
+  letter-spacing: -0.03em;
+  text-wrap: pretty;
+}
+@media (min-width: 768px) {
+  .charte .rdv .rdv-citation p {
+    font-size: 24px;
+  }
+}
+.charte .rdv .rdv-signature {
+  margin-top: 28px;
+  color: var(--ch-encre-section);
+  font-weight: 500;
+}
+.charte .rdv .rdv-signature span:last-child {
+  color: var(--ch-gris);
+}
+.charte .rdv .rdv-filet {
+  background: var(--ch-filet);
+}
+.charte .rdv .rdv-logos-bloc {
+  gap: 28px;
+}
+.charte .rdv .rdv-logos-bloc .ch-pastille {
+  margin-bottom: 0;
+}
+.charte .rdv .rdv-marque {
+  background: var(--ch-encre-section);
+}
+.charte .rdv .rdv-marque-nom {
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: #777c76;
+}
+
+/* ─── les champs : blancs, liseré #dcdcda, rayon 10, 46 px ─────────── */
+.charte .rdv .rdv-champ {
+  height: 46px;
+  border: 1px solid var(--ch-filet);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ch-encre);
+  font: 400 15px/20px var(--font-google-sans), Arial, sans-serif;
+  letter-spacing: -0.01em;
+}
+.charte .rdv .rdv-champ::placeholder,
+.charte .rdv .rdv-menu-vide {
+  color: #74776f;
+}
+.charte .rdv .rdv-champ:hover {
+  border-color: #c4c4bf;
+}
+.charte .rdv .rdv-champ:focus,
+.charte .rdv .rdv-menu-bouton[aria-expanded="true"] {
+  border-color: var(--ch-encre);
+}
+.charte .rdv .rdv-champ--erreur,
+.charte .rdv .rdv-champ--erreur:hover {
+  border-color: #c0392b;
+}
+.charte .rdv .rdv-menu-fleche {
+  color: var(--ch-encre-section);
+}
+.charte .rdv .rdv-menu-liste {
+  border-color: #e6e6e0;
+  border-radius: 10px;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+}
+.charte .rdv .rdv-menu-option {
+  color: var(--ch-encre-section);
+  font-size: 15px;
+}
+.charte .rdv .rdv-menu-option:hover,
+.charte .rdv .rdv-menu-option:focus {
+  background: var(--ch-fond);
+}
+
+/* Le libellé de chaque champ est pour les lecteurs d'écran ; à l'écran,
+   c'est le texte gris dans le champ (FormulaireFormat, « Saisie »). La
+   classe n'avait jamais reçu sa règle : les libellés s'affichaient en
+   double au-dessus des champs. */
+.charte .rdv .rdv-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.charte .rdv .rdv-petit {
+  color: #777c76;
+  font-size: 13px;
+}
+
+/* le bouton d'envoi : le blanc du kit ; éteint pendant l'envoi */
+.charte .rdv .rdv-envoyer:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+.charte .rdv .rdv-confirmation {
+  color: var(--ch-encre-section);
+  font-size: 14px;
+  line-height: 21px;
+}

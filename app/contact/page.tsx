@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
+import Cadre from "@/components/charte/Cadre";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Appel from "@/components/charte/Appel";
+import Bouton from "@/components/charte/Bouton";
+import Pastille from "@/components/charte/Pastille";
+import { Scene } from "@/components/charte/Cartes";
 import FormulaireContact from "@/components/contact/FormulaireContact";
 import { AttendreContact, BesoinsContact } from "@/components/contact/VoiesContact";
 import { COURRIEL, LIEN_TELEPHONE, TELEPHONE_AFFICHE, lienCourriel } from "@/lib/reservation";
 import { EDITEUR, MARQUE_SITE, titreSite } from "@/components/espace2/portail";
+import "@/components/charte/pages/contact.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /contact — le service client (08/09/2026)
@@ -47,6 +53,19 @@ import { EDITEUR, MARQUE_SITE, titreSite } from "@/components/espace2/portail";
    Monde clair .resa, mêmes classes que /application (.ap-*, globals.css).
    Qui mène ici : le pied de page (« Service client »), les mentions
    légales, le bandeau d'orientation de /tarifs.
+
+   25/11/2026 — LA CHARTE DE L'ACCUEIL (docs/charte-accueil.md, § 4.2,
+   ligne 4). La page passe dans <Cadre> ; l'étiquette « Service client »
+   devient la pastille du h1 (EnTeteSection niveau 1). Le formulaire et les
+   deux canaux directs sont deux cellules jointives, séparées par un filet ;
+   les sections suivantes prennent l'en-tête de section de l'accueil, la
+   bande blanche disparaît, « Selon votre besoin » prend la composition de
+   la FAQ de l'accueil, et l'encart « Pas encore client ? » devient le
+   bandeau d'appel (<Appel>). Tous les boutons sont les `ch-btn` blancs.
+   Plus de PageMotion. Les textes sont ceux d'avant, mot pour mot ; seules
+   les pastilles « Contact », « Réponse », « Tarifs » reprennent des mots
+   déjà présents sur la page. Le dessin propre à la page :
+   components/charte/pages/contact.css (règles sous `.charte .ct-page`).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -94,108 +113,117 @@ export default function ContactPage() {
 
   return (
     <PageShell>
-      <PageMotion />
-      <div className="resa">
-        {/* ═══ 1 — premier écran ═══ */}
-        <section data-monde="clair" className="r-wrap pb-14 pt-14 sm:pb-20 sm:pt-20">
-          <div data-arrivee="titre">
-            <p className="ap-kicker">Service client</p>
-            <h1 className="r-h1 mt-4 max-w-[16ch]">Écrivez-nous, nous vous répondons.</h1>
-          </div>
-          <p data-arrivee="chapo" className="r-lead mt-5 max-w-[52ch]">
-            Une question sur votre installation, votre abonnement ou un poste qui ne fonctionne pas comme prévu&nbsp;? Écrivez-nous ci-dessous ou par e-mail&nbsp;: une seule équipe vous répond.
-          </p>
-        </section>
+      <Cadre>
+        <div className="resa ct-page">
+          {/* ═══ 1 — le titre de page, puis le formulaire et les deux
+                 canaux directs, côte à côte, séparés par un filet ═══ */}
+          <Section>
+            <EnTeteSection
+              niveau={1}
+              haut
+              pastille="Service client"
+              titre="Écrivez-nous, nous vous répondons."
+              chapo={
+                <>
+                  Une question sur votre installation, votre abonnement ou un poste qui ne fonctionne pas comme prévu&nbsp;? Écrivez-nous ci-dessous ou par e-mail&nbsp;: une seule équipe vous répond.
+                </>
+              }
+            />
 
-        {/* ═══ 1 bis — le formulaire ═══ */}
-        <section id="ecrire" data-monde="clair" className="r-wrap scroll-mt-24 pb-16 sm:pb-24">
-          <div data-arrivee="bloc" className="max-w-[760px]">
-            <FormulaireContact />
-          </div>
-        </section>
-
-        {/* ═══ 2 — les deux canaux, ou directement ═══ */}
-        <section data-monde="clair" className="r-wrap pb-16 sm:pb-24">
-          <h2 data-reveal className="r-h3 max-w-[18ch]">
-            Ou directement
-          </h2>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2">
-            <article data-reveal className="ap-carte">
-              <h3 className="r-h4">E-mail</h3>
-              <p className="ap-sous">Pour ce qui mérite d&apos;être écrit</p>
-              <p className="mt-3 text-[15px] leading-[24px] text-[#3d3d3d]">
-                Une demande détaillée, une pièce à joindre, une question sur une facture ou sur
-                votre abonnement.
-              </p>
-              <p className="num mt-4 select-all text-[17px] font-semibold text-[#050505]">{COURRIEL}</p>
-              <div className="mt-4">
-                <a href={courriel} className="r-btn r-btn--fil w-full sm:w-auto">
-                  Écrire à {COURRIEL}
-                </a>
+            <div className="ct-corps">
+              {/* ═══ 1 bis — le formulaire ═══ */}
+              <div id="ecrire" className="ct-ecrire scroll-mt-24">
+                <FormulaireContact />
               </div>
-            </article>
 
-            {/* 15/09/2026 — le téléphone revient. Il n'était plus affiché
-                qu'en mentions légales ; la page retirée, le site n'avait plus
-                aucun numéro. C'est un lien d'APPEL, pas une conversation :
-                WhatsApp n'est plus une porte du site (voir lib/reservation). */}
-            <article data-reveal className="ap-carte">
-              <h3 className="r-h4">Téléphone</h3>
-              <p className="ap-sous">Pour ce qui va plus vite de vive voix</p>
-              <p className="mt-3 text-[15px] leading-[24px] text-[#3d3d3d]">
-                Une question courte, une installation en cours, un point à caler. Aux heures
-                ouvrées ; en dehors, laissez un message et nous rappelons.
-              </p>
-              <p className="num mt-4 select-all text-[17px] font-semibold text-[#050505]">
-                {TELEPHONE_AFFICHE}
-              </p>
-              <div className="mt-4">
-                <a href={LIEN_TELEPHONE} className="r-btn r-btn--fil w-full sm:w-auto">
-                  Appeler {TELEPHONE_AFFICHE}
-                </a>
+              {/* ═══ 2 — les deux canaux, ou directement ═══ */}
+              <div className="ct-directement" data-gutter-guide="top">
+                <div className="ct-directement-tete">
+                  <Pastille>Contact</Pastille>
+                  <h2 className="ch-titre">Ou directement</h2>
+                </div>
+
+                <article className="ct-voie">
+                  <h3 className="ct-voie-titre">E-mail</h3>
+                  <p className="ct-voie-sous">Pour ce qui mérite d&apos;être écrit</p>
+                  <p className="ct-voie-texte">
+                    Une demande détaillée, une pièce à joindre, une question sur une facture ou sur
+                    votre abonnement.
+                  </p>
+                  <Scene basse className="ct-voie-scene">
+                    <p className="num ct-voie-valeur select-all">{COURRIEL}</p>
+                    <Bouton href={courriel} className="w-full sm:w-auto">
+                      Écrire à {COURRIEL}
+                    </Bouton>
+                  </Scene>
+                </article>
+
+                {/* 15/09/2026 — le téléphone revient. Il n'était plus affiché
+                    qu'en mentions légales ; la page retirée, le site n'avait plus
+                    aucun numéro. C'est un lien d'APPEL, pas une conversation :
+                    WhatsApp n'est plus une porte du site (voir lib/reservation). */}
+                <article className="ct-voie">
+                  <h3 className="ct-voie-titre">Téléphone</h3>
+                  <p className="ct-voie-sous">Pour ce qui va plus vite de vive voix</p>
+                  <p className="ct-voie-texte">
+                    Une question courte, une installation en cours, un point à caler. Aux heures
+                    ouvrées ; en dehors, laissez un message et nous rappelons.
+                  </p>
+                  <Scene basse className="ct-voie-scene">
+                    <p className="num ct-voie-valeur select-all">{TELEPHONE_AFFICHE}</p>
+                    <Bouton href={LIEN_TELEPHONE} className="w-full sm:w-auto">
+                      Appeler {TELEPHONE_AFFICHE}
+                    </Bouton>
+                  </Scene>
+                </article>
               </div>
-            </article>
-          </div>
-        </section>
-
-        {/* ═══ 3 — ce que vous pouvez attendre ═══ */}
-        <div className="r-blanc">
-          <section data-monde="clair" className="r-wrap py-14 sm:py-20">
-            <h2 data-reveal className="r-h3 max-w-[18ch]">
-              Ce que vous pouvez attendre
-            </h2>
-            <AttendreContact temps={ATTENDRE} className="mt-10" />
-          </section>
-        </div>
-
-        {/* ═══ 4 — selon votre besoin ═══ */}
-        <section data-monde="clair" className="r-wrap py-14 sm:py-20">
-          <div className="grid gap-8 lg:grid-cols-[379px_1fr] lg:gap-16">
-            <h2 data-reveal className="r-h3 lg:sticky lg:top-28 lg:self-start">
-              Selon votre besoin
-            </h2>
-            <BesoinsContact besoins={BESOINS} />
-          </div>
-          <div data-reveal className="ap-encart mt-12">
-            <h2 className="r-h4">Pas encore client&nbsp;?</h2>
-            <p className="mt-3 max-w-[60ch] text-[15px] leading-[24px] text-[#3d3d3d]">
-              Décrivez votre situation en deux lignes, par e-mail ou dans le formulaire ci-dessus&nbsp;: votre
-              activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
-            </p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {MARQUE_SITE ? (
-                <Link href="/#audit" className="r-btn r-btn--fil">
-                  Réserver un audit
-                </Link>
-              ) : (
-                <Link href="/tarifs" className="r-btn r-btn--fil">
-                  Voir les tarifs
-                </Link>
-              )}
             </div>
-          </div>
-        </section>
-      </div>
+          </Section>
+
+          {/* ═══ 3 — ce que vous pouvez attendre ═══ */}
+          <Section>
+            <EnTeteSection pastille="Réponse" titre="Ce que vous pouvez attendre" />
+            <AttendreContact temps={ATTENDRE} />
+          </Section>
+
+          {/* ═══ 4 — selon votre besoin : le titre à gauche (collant), les
+                 rangées à droite, comme la FAQ de l'accueil ═══ */}
+          <section className="ch-section">
+            <div className="ct-besoins" data-gutter-guide="bottom">
+              <header className="ch-intro">
+                <div className="ct-besoins-intro">
+                  <Pastille>Service client</Pastille>
+                  <h2 className="ch-titre">Selon votre besoin</h2>
+                </div>
+              </header>
+              <BesoinsContact besoins={BESOINS} />
+            </div>
+          </section>
+
+          {/* ═══ 5 — pas encore client : le bandeau d'appel de fin ═══ */}
+          <Appel
+            pastille="Tarifs"
+            titre={<>Pas encore client&nbsp;?</>}
+            chapo={
+              <>
+                Décrivez votre situation en deux lignes, par e-mail ou dans le formulaire ci-dessus&nbsp;: votre
+                activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
+              </>
+            }
+            actions={
+              MARQUE_SITE ? (
+                <Bouton href="/#audit" icone="calendrier">
+                  Réserver un audit
+                </Bouton>
+              ) : (
+                <Bouton href="/tarifs" icone="chevron">
+                  Voir les tarifs
+                </Bouton>
+              )
+            }
+          />
+        </div>
+      </Cadre>
     </PageShell>
   );
 }

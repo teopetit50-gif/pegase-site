@@ -1,20 +1,13 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowRight } from "lucide-react";
 
-import Lien from "@/components/Lien";
+import Appel from "@/components/charte/Appel";
+import Bouton from "@/components/charte/Bouton";
 import { Calendar } from "@/components/ui/calendar";
 import { Loader } from "@/components/ui/loader";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-} from "@/components/ui/card";
 import {
   DUREES_RDV,
   aujourdhuiGp,
@@ -166,125 +159,122 @@ export default function AppelFinal() {
 
   const calendrierVisible = !chargement && agenda !== null;
 
+  /* 25/11/2026 — CHARTE DE L'ACCUEIL (docs/charte-accueil.md, § 4.2,
+     ligne 5) : la carte shadcn devient le bandeau d'appel centré du kit
+     (<Appel>), pastille « Audit ». L'agenda reste — c'est une fonction,
+     pas un décor : il occupe une rangée entière des actions (tarifs.css,
+     `.tf-agenda`), dans un cadre blanc de rayon 12, et les deux boutons
+     blancs tombent dessous. Le jour choisi n'est plus noir : fond de
+     pastille et liseré d'encre. Textes inchangés. */
   return (
-    <div className="r-wrap py-16 sm:py-20">
-      <Card data-reveal className="mx-auto w-full max-w-4xl overflow-hidden">
-        <CardHeader className="border-b border-neutral-200 p-6 sm:p-8">
-          <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-[#050505] sm:text-[32px]">
-            {devis ? GRANDE_STRUCTURE.appel.titre : "Votre prix, écrit avant de signer"}
-          </h2>
-          <CardDescription
-            key={devis ? "structure" : "pme"}
-            className="rv-fondu max-w-[62ch] text-[15px] leading-relaxed text-[#616161]"
-          >
-            {devis ? (
-              GRANDE_STRUCTURE.appel.chapo
-            ) : (
-              <>
-                L&apos;audit passe votre activité en revue&nbsp;: qui fait quoi, sur quels logiciels,
-                et le volume que vos agents auraient à traiter. Vous repartez avec le périmètre, le
-                prix de vos agents et le plan de mise en service. Ce prix devient ferme, avec celui de
-                votre installation, une fois vos fichiers analysés et avant que vous signiez.
-                L&apos;audit est gratuit, et aucune donnée n&apos;est enregistrée sur cette page.
-              </>
-            )}
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="p-6 pt-6 sm:p-8">
-          {chargement ? (
-            <div className="flex h-[320px] flex-col items-center justify-center gap-3 rounded-md border border-[#e3e3e3] text-[15px] text-[#616161]">
-              <Loader size="md" aria-hidden="true" />
-              Chargement de l&apos;agenda…
-            </div>
-          ) : calendrierVisible ? (
-            <>
-              <div className="flex justify-center rounded-md border border-[#e3e3e3] bg-white p-2 sm:p-4">
-                <Calendar
-                  mode="single"
-                  locale={fr}
-                  weekStartsOn={1}
-                  numberOfMonths={nbMois}
-                  month={mois}
-                  onMonthChange={setMois}
-                  startMonth={new Date(auj.annee, auj.mois - 1, 1)}
-                  endMonth={new Date(fin.annee, fin.mois - 1, 1)}
-                  today={new Date(auj.annee, auj.mois - 1, auj.jour)}
-                  selected={jour}
-                  onSelect={setJour}
-                  disabled={(d) =>
-                    !libres.has(clef(d.getFullYear(), d.getMonth() + 1, d.getDate()))
-                  }
-                  showOutsideDays={false}
-                  formatters={{
-                    formatWeekdayName: (d) => format(d, "EEEEE", { locale: fr }).toUpperCase(),
-                    formatCaption: (d) => {
-                      const m = format(d, "LLLL yyyy", { locale: fr });
-                      return m.charAt(0).toUpperCase() + m.slice(1);
-                    },
-                  }}
-                  className="bg-transparent p-0"
-                  /* les deux mois sont centrés ENSEMBLE et ne s'étirent plus :
-                     `month: w-full` (le défaut du composant) laissait chaque
-                     grille collée à droite de sa moitié, avec un vide à gauche */
-                  classNames={{ months: "justify-center gap-4 sm:gap-10", month: "w-fit" }}
-                />
-              </div>
-
-              {/* ce que dit le jour cliqué — une information, pas un bouton :
-                  le créneau se bloque dans le tunnel d'audit */}
-              <p className="mt-4 text-[15px] leading-relaxed text-[#616161] first-letter:uppercase">
-                {jour === undefined ? (
-                  <>
-                    Les jours en clair sont ouverts à la réservation&nbsp;; les jours grisés
-                    sont complets ou fermés.
-                  </>
-                ) : creneaux.length === 0 ? (
-                  <>Plus aucun créneau ce jour-là.</>
-                ) : (
-                  <>
-                    <span className="font-medium text-[#050505]">
-                      {jourGpLabel(jour.getFullYear(), jour.getMonth() + 1, jour.getDate())}
-                    </span>{" "}
-                    — {creneaux.length} créneau{creneaux.length > 1 ? "x" : ""} libre
-                    {creneaux.length > 1 ? "s" : ""}, de{" "}
-                    <span className="num">{heureGp(creneaux[0])}</span> à{" "}
-                    <span className="num">{heureGp(creneaux[creneaux.length - 1])}</span>, heure de
-                    Guadeloupe.{" "}
-                    {devis
-                      ? GRANDE_STRUCTURE.appel.jour
-                      : "Réservez l'audit pour bloquer l'un d'eux."}
-                  </>
-                )}
-              </p>
-            </>
+    <Appel
+      pastille="Audit"
+      titre={devis ? GRANDE_STRUCTURE.appel.titre : "Votre prix, écrit avant de signer"}
+      chapo={
+        <span key={devis ? "structure" : "pme"} className="rv-fondu block">
+          {devis ? (
+            GRANDE_STRUCTURE.appel.chapo
           ) : (
-            <p className="text-[15px] leading-relaxed text-[#616161]">
-              L&apos;agenda est momentanément indisponible. Ouvrez la réservation&nbsp;: les
-              créneaux s&apos;affichent à l&apos;étape suivante.
-            </p>
+            <>
+              L&apos;audit passe votre activité en revue&nbsp;: qui fait quoi, sur quels logiciels,
+              et le volume que vos agents auraient à traiter. Vous repartez avec le périmètre, le
+              prix de vos agents et le plan de mise en service. Ce prix devient ferme, avec celui de
+              votre installation, une fois vos fichiers analysés et avant que vous signiez.
+              L&apos;audit est gratuit, et aucune donnée n&apos;est enregistrée sur cette page.
+            </>
           )}
-
-          <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-            <Link
-              href={devis ? GRANDE_STRUCTURE.href : "/reserver-un-audit"}
-              className="r-btn r-btn--noir w-full sm:w-auto"
-            >
-              {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
-              <ArrowRight aria-hidden className="size-4" />
-            </Link>
-            <Lien href={lienContact("avant")} className="r-btn r-btn--fil w-full sm:w-auto">
-              Nous écrire
-            </Lien>
+        </span>
+      }
+      actions={
+        <>
+          <div className="tf-agenda">
+            {chargement ? (
+              <div className="tf-agenda-cadre tf-agenda-attente">
+                <Loader size="md" aria-hidden="true" />
+                Chargement de l&apos;agenda…
+              </div>
+            ) : calendrierVisible ? (
+              <>
+                <div className="tf-agenda-cadre">
+                  <Calendar
+                    mode="single"
+                    locale={fr}
+                    weekStartsOn={1}
+                    numberOfMonths={nbMois}
+                    month={mois}
+                    onMonthChange={setMois}
+                    startMonth={new Date(auj.annee, auj.mois - 1, 1)}
+                    endMonth={new Date(fin.annee, fin.mois - 1, 1)}
+                    today={new Date(auj.annee, auj.mois - 1, auj.jour)}
+                    selected={jour}
+                    onSelect={setJour}
+                    disabled={(d) =>
+                      !libres.has(clef(d.getFullYear(), d.getMonth() + 1, d.getDate()))
+                    }
+                    showOutsideDays={false}
+                    formatters={{
+                      formatWeekdayName: (d) => format(d, "EEEEE", { locale: fr }).toUpperCase(),
+                      formatCaption: (d) => {
+                        const m = format(d, "LLLL yyyy", { locale: fr });
+                        return m.charAt(0).toUpperCase() + m.slice(1);
+                      },
+                    }}
+                    className="bg-transparent p-0"
+                    /* les deux mois sont centrés ENSEMBLE et ne s'étirent plus :
+                       `month: w-full` (le défaut du composant) laissait chaque
+                       grille collée à droite de sa moitié, avec un vide à gauche */
+                    classNames={{ months: "justify-center gap-4 sm:gap-10", month: "w-fit" }}
+                  />
+                </div>
+                {/* ce que dit le jour cliqué — une information, pas un bouton :
+                    le créneau se bloque dans le tunnel d'audit */}
+                <p className="tf-agenda-jour first-letter:uppercase">
+                  {jour === undefined ? (
+                    <>
+                      Les jours en clair sont ouverts à la réservation&nbsp;; les jours grisés
+                      sont complets ou fermés.
+                    </>
+                  ) : creneaux.length === 0 ? (
+                    <>Plus aucun créneau ce jour-là.</>
+                  ) : (
+                    <>
+                      <span className="tf-agenda-fort">
+                        {jourGpLabel(jour.getFullYear(), jour.getMonth() + 1, jour.getDate())}
+                      </span>{" "}
+                      — {creneaux.length} créneau{creneaux.length > 1 ? "x" : ""} libre
+                      {creneaux.length > 1 ? "s" : ""}, de{" "}
+                      <span className="num">{heureGp(creneaux[0])}</span> à{" "}
+                      <span className="num">{heureGp(creneaux[creneaux.length - 1])}</span>, heure de
+                      Guadeloupe.{" "}
+                      {devis
+                        ? GRANDE_STRUCTURE.appel.jour
+                        : "Réservez l'audit pour bloquer l'un d'eux."}
+                    </>
+                  )}
+                </p>
+              </>
+            ) : (
+              <p className="tf-agenda-jour">
+                L&apos;agenda est momentanément indisponible. Ouvrez la réservation&nbsp;: les
+                créneaux s&apos;affichent à l&apos;étape suivante.
+              </p>
+            )}
           </div>
-        </CardContent>
 
-        {/* 15/09 (soir) — LE PIED EST RETIRÉ. Il renvoyait à /installation
-            « pour qui a déjà fait son audit » ; ce parcours-là demande une
-            connexion, et Teo : « plus rien sur le site ne doit renvoyer à
-            une page de connexion ». L'installation se réserve par le lien
-            que nous envoyons après l'audit, plus depuis la vitrine. */}
-      </Card>
-    </div>
+          <Bouton href={devis ? GRANDE_STRUCTURE.href : "/reserver-un-audit"} icone="calendrier">
+            {devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
+          </Bouton>
+          <Bouton href={lienContact("avant")} icone="chevron">
+            Nous écrire
+          </Bouton>
+
+          {/* 15/09 (soir) — LE PIED EST RETIRÉ. Il renvoyait à /installation
+              « pour qui a déjà fait son audit » ; ce parcours-là demande une
+              connexion, et Teo : « plus rien sur le site ne doit renvoyer à
+              une page de connexion ». L'installation se réserve par le lien
+              que nous envoyons après l'audit, plus depuis la vitrine. */}
+        </>
+      }
+    />
   );
 }

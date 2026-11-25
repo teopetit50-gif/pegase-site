@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
+import Cadre from "@/components/charte/Cadre";
 import Grille from "@/components/tarifs/Grille";
 import AppelFinal from "@/components/tarifs/AppelFinal";
 import FaqTarifs from "@/components/tarifs/FaqTarifs";
 import ReglesFacturation, { type Regle } from "@/components/tarifs/ReglesFacturation";
+import Automatisations from "@/components/tarifs/Automatisations";
 import { MondeProvider } from "@/components/tarifs/monde";
+import "@/components/charte/pages/tarifs.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs — v4 « La grille publique » (28/08/2026)
@@ -237,8 +239,14 @@ const CHIFFRAGE: Regle[] = [
 export default function TarifsPage() {
   return (
     <PageShell>
-      <PageMotion />
-
+      {/* 25/11/2026 — la charte de l'accueil (docs/charte-accueil.md, § 4.2,
+          ligne 5) : la page passe dans <Cadre> (fond #f5f5f2, Google Sans,
+          marges hachurées), les sections sont jointives et séparées par des
+          filets, la FAQ et l'appel final passent aux composants du kit.
+          Plus de PageMotion : aucune apparition au défilement. Le dessin
+          propre à la page : components/charte/pages/tarifs.css, sous
+          `.charte .tf-page`. */}
+      <Cadre>
       {/* 15/09, seconde passe — LE SÉLECTEUR DES DEUX MONDES COMMANDE
           TOUTE LA PAGE, plus seulement la grille. Il est né le 15/09 dans
           components/tarifs/Grille avec son état ; le Chèque TIC et l'appel
@@ -248,40 +256,39 @@ export default function TarifsPage() {
           en `children`, et le monde s'y lit par useSyncExternalStore
           (instantané serveur « pme »), donc /tarifs reste STATIQUE. */}
       <MondeProvider>
-      <div className="resa">
-        {/* ═══ 1 à 3 — titre, paliers, orientation, comparatif ═══ */}
+      <div className="resa tf-page">
+        {/* ═══ 1 et 2 — titre et prix publics, puis les agents ═══ */}
         <Grille />
 
-        {/* ═══ 3bis — ce qu'on ne facture jamais — 14/09, seconde passe :
-               la composition « how-it-works » (en-tête centré, rail de
-               pastilles numérotées, cartes à tuile d'icône et points)
-               ═══ */}
-        <section id="chiffrage" data-monde="clair">
-          <ReglesFacturation
-            titre="Comment nous chiffrons"
-            chapo={"Quatre règles, du logiciel à l'installation\u00a0: ce que vous payez, et ce qui fixe chaque prix."}
-            regles={CHIFFRAGE}
-          />
-        </section>
+        {/* ═══ 2 bis — les automatisations : installation une fois, puis
+               l'IA à la pièce en recharges (Teo, 25/11, document « Prix des
+               automatisations » ; détail dans le composant) ═══ */}
+        <Automatisations />
 
-        {/* ═══ 7 — CTA final — la carte sombre encadrée (14/09, reprise
-               call-to-action de @mokshithgujjeti) ═══ */}
-        <section id="reserver" data-monde="clair">
+        {/* ═══ 3 — comment nous chiffrons : quatre règles, en grille de
+               cartes jointives ═══ */}
+        <ReglesFacturation
+          id="chiffrage"
+          titre="Comment nous chiffrons"
+          chapo={"Quatre règles, du logiciel à l'installation : ce que vous payez, et ce qui fixe chaque prix."}
+          regles={CHIFFRAGE}
+        />
+
+        {/* ═══ 4 — l'appel final, avec l'agenda des créneaux d'audit ═══ */}
+        <div id="reserver">
           <AppelFinal />
-        </section>
+        </div>
 
-        {/* ═══ 8 — la FAQ tarifs, en dernier — deux colonnes, accordéon
-               Radix (14/09, reprise faqs-02 de @ln-dev7) ═══ */}
+        {/* ═══ 5 — la FAQ tarifs, en dernier (elle porte l'ancre #faq) ═══ */}
         {/* la FAQ ne bascule PAS : sa dernière question s'adresse
             explicitement aux structures à validation répartie et les nomme
             depuis le côté PME — c'est une passerelle vers l'autre monde,
             pas un texte à traduire. Les règles de facturation non plus :
             leurs quatre règles valent aux deux, et aucune ne nomme l'audit. */}
-        <section id="faq" data-monde="clair">
-          <FaqTarifs items={FAQ_TARIFS} />
-        </section>
+        <FaqTarifs items={FAQ_TARIFS} />
       </div>
       </MondeProvider>
+      </Cadre>
     </PageShell>
   );
 }

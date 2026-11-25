@@ -19,7 +19,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { Check } from "lucide-react";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Scene } from "@/components/charte/Cartes";
 import { cn } from "@/lib/cn";
 
 type Chiffre = { avant: string | null; entier: string; centimes: string | null };
@@ -90,65 +90,62 @@ export const NOTE_TVA =
   "Prix hors taxes. La TVA s'y ajoute au taux qui s'applique à votre entreprise.";
 
 /* le grand chiffre à la Odoo : « dès » en petit, l'entier en très gros,
-   les centimes et l'euro en exposant, l'unité sous les centimes */
+   les centimes et l'euro en exposant, l'unité sous les centimes.
+   25/11/2026 — charte de l'accueil : graisse 450 au lieu du gras, les
+   cotes du prix de la grille de l'accueil (tarifs.css, `.tf-chiffre`). */
 function GrandChiffre({ p }: { p: Prix }) {
   const c = p.chiffre;
   return (
-    <p className="mt-4 flex items-start gap-1.5">
+    <p className="tf-chiffre">
       <span className="sr-only">{p.lu}</span>
       {c.avant ? (
-        <span aria-hidden className="self-end pb-1.5 text-base text-[#616161]">
+        <span aria-hidden className="tf-chiffre-avant">
           {c.avant}
         </span>
       ) : null}
-      <span aria-hidden className="text-6xl font-bold leading-none tracking-[-0.03em] text-[#050505]">
+      <span aria-hidden className="tf-chiffre-entier">
         {c.entier}
       </span>
-      <span aria-hidden className="flex flex-col items-start pt-1">
-        <span className="text-2xl font-bold leading-none text-[#050505]">
-          {c.centimes ? `${c.centimes}\u00a0€` : "€"}
-        </span>
-        {p.unite ? <span className="mt-1.5 whitespace-nowrap text-xs leading-tight text-[#616161]">{p.unite}</span> : null}
+      <span aria-hidden className="tf-chiffre-suite">
+        <span className="tf-chiffre-cts">{c.centimes ? `${c.centimes} €` : "€"}</span>
+        {p.unite ? <span className="tf-chiffre-unite">{p.unite}</span> : null}
       </span>
     </p>
   );
 }
 
+/* 25/11/2026 — charte de l'accueil : trois colonnes jointives séparées
+   par des filets (la grille de prix de l'accueil), le prix posé dans une
+   scène #eeeee8 de rayon 12 — tramée pour le logiciel, l'offre mise en
+   avant —, puis le texte et les points. Plus de cartes blanches. Les
+   textes et PRIX_PUBLICS ne changent pas. */
 export default function TroisPrix() {
   return (
-    <div className="mx-auto max-w-md md:max-w-none">
-      <div className="grid gap-6 md:grid-cols-3">
+    <div className="tf-prix">
+      <div className="tf-prix-grille">
         {PRIX_PUBLICS.map((p) => (
-          <Card
-            key={p.nom}
-            className={cn(
-              "flex h-full flex-col rounded-xl border-[#e3e3e3] shadow-none",
-              p.fort && "border-[#050505] shadow-md ring-1 ring-[#050505]/15",
-            )}
-          >
-            <CardHeader className="pb-4 pt-7">
-              <CardTitle className="font-[family-name:var(--font-jakarta)] text-xl">{p.nom}</CardTitle>
+          <article key={p.nom} className={cn("tf-prix-col", p.fort && "tf-prix-col--fort")}>
+            <h3 className="tf-prix-nom">{p.nom}</h3>
+            <Scene basse trame={p.fort} className="tf-prix-scene">
               <GrandChiffre p={p} />
-              <p className="mt-2 text-sm text-[#616161]">{p.sous}</p>
-              <CardDescription className="pt-3 text-[15px] leading-relaxed text-[#3d3d3d]">
-                {p.texte}
-              </CardDescription>
-            </CardHeader>
-            <div className="mt-auto px-6 pb-7">
-              <ul className="space-y-2.5 border-t border-[#e3e3e3] pt-5 text-sm">
-                {p.points.map((t) => (
-                  <li key={t} className="flex items-start gap-2.5">
-                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-[#050505]" strokeWidth={2} />
-                    <span className="text-[#3d3d3d]">{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </Card>
+              <p className="tf-prix-sous">{p.sous}</p>
+            </Scene>
+            <p className="tf-prix-texte">{p.texte}</p>
+            <ul className="tf-prix-points">
+              {p.points.map((t) => (
+                <li key={t}>
+                  <Check aria-hidden strokeWidth={2} />
+                  <span>{t}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
         ))}
       </div>
-      <p className="mt-6 text-center text-sm text-[#3d3d3d]">{NOTE_INSTALLATION}</p>
-      <p className="mt-2 text-center text-xs text-[#767676]">{NOTE_TVA}</p>
+      <div className="tf-prix-notes">
+        <p>{NOTE_INSTALLATION}</p>
+        <p className="tf-prix-tva">{NOTE_TVA}</p>
+      </div>
     </div>
   );
 }

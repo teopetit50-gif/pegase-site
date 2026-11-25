@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
-import { MotsReveles } from "@/components/ui/hero-section";
+import Cadre from "@/components/charte/Cadre";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Appel from "@/components/charte/Appel";
+import Pastille from "@/components/charte/Pastille";
+import { Scene } from "@/components/charte/Cartes";
 import {
   EstimationRetenue,
   ModeleRetenu,
@@ -12,6 +16,7 @@ import { POSTES } from "@/lib/paliers";
 import FormulaireFormat from "./FormulaireFormat";
 import { NOM_SITE, titreSite } from "@/components/espace2/portail";
 import "./reserver.css";
+import "@/components/charte/pages/reserver-un-audit.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /reserver-un-audit — « Réserver un audit » (refonte du 18/10/2026)
@@ -54,6 +59,17 @@ import "./reserver.css";
 
    LES RAPPELS (modèle, formule de site, estimation) restent en tête du
    formulaire : ils viennent de l'URL et portent le choix fait ailleurs.
+
+   25/11/2026 — LA CHARTE DE L'ACCUEIL (docs/charte-accueil.md, § 4.2,
+   ligne 3). La page passe dans <Cadre> : fond #f5f5f2, Google Sans, marges
+   hachurées. Le titre prend le h1 de l'accueil (EnTeteSection niveau 1),
+   avec la pastille « Audit » ; le formulaire et la carte deviennent deux
+   cellules jointives séparées par un filet, la carte gris bleu devient une
+   scène #eeeee8 ; la bande noire de fin devient le bandeau d'appel centré
+   (<Appel>), même phrase. Plus de cascade d'entrée mot à mot (MotsReveles,
+   o-bloc-apparait) ni de PageMotion : la charte est calme. Les textes sont
+   ceux d'avant, mot pour mot. Le dessin propre à la page vit dans
+   components/charte/pages/reserver-un-audit.css (règles sous `.charte`).
    ══════════════════════════════════════════════════════════════════════ */
 
 export const metadata: Metadata = {
@@ -115,101 +131,77 @@ function Marque({ nom, fichier, largeur }: { nom: string; fichier: string; large
   );
 }
 
-/* ─── L'entrée au chargement : la cadence du hero de l'accueil ───
-   Le titre se peint mot à mot (.o-mot, hero-section.css), départ 220 ms et
-   pas de 70 ms, comme app/page.tsx. Le chapô part 140 ms après le dernier mot
-   du titre, comme les sections de l'accueil (components/accueil/Apparition.tsx).
-   La colonne de droite part avec lui ; les rappels et le formulaire, 160 ms
-   plus tard. Tout est en CSS : sans JavaScript ou en mouvement réduit, le
-   texte est là sans attendre. */
-const TITRE = "Un audit à la mesure de votre organisation";
-const DEPART_TITRE = 220;
-const PAS_MOT = 70;
-const DELAI_CHAPO = DEPART_TITRE + PAS_MOT * (TITRE.split(/\s+/).length - 1) + 140;
-const DELAI_SUITE = DELAI_CHAPO + 160;
-
 export default function ReserverUnAuditPage() {
   return (
     <PageShell>
-      {/* couche motion commune : lenis + reveals GSAP */}
-      <PageMotion />
+      <Cadre>
+        <div className="rdv">
+          {/* ═══ 1 — tête : le titre de page, puis le formulaire et la carte,
+                 deux cellules jointives séparées par un filet ═══ */}
+          <Section>
+            <EnTeteSection
+              niveau={1}
+              haut
+              pastille="Audit"
+              titre="Un audit à la mesure de votre organisation"
+              chapo={
+                <>
+                  Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
+                  d&apos;abord, et le devis est établi à partir de vos volumes. Trois
+                  formats, du cadrage de 45 minutes à la journée dans vos locaux.
+                </>
+              }
+            />
 
-      <div className="rdv">
-        {/* ═══ 1 — tête : titre, chapô, formulaire de format, carte ═══ */}
-        <section data-monde="clair" className="rdv-hero">
-          <div className="rdv-wrap">
-            <div className="rdv-hero-grille">
-              <div className="rdv-hero-gauche">
-                <div className="rdv-entete">
-                  <h1 className="rdv-h1">
-                    <MotsReveles lignes={TITRE} depart={DEPART_TITRE} pas={PAS_MOT} />
-                  </h1>
-                  <p
-                    className="rdv-lead o-bloc-apparait"
-                    style={{ "--o-mot-d": `${DELAI_CHAPO}ms` } as React.CSSProperties}
-                  >
-                    Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
-                    d&apos;abord, et le devis est établi à partir de vos volumes. Trois
-                    formats, du cadrage de 45 minutes à la journée dans vos locaux.
-                  </p>
-                </div>
-
-                <div
-                  className="rdv-notes o-bloc-apparait"
-                  style={{ "--o-mot-d": `${DELAI_SUITE}ms` } as React.CSSProperties}
-                >
+            <div className="rdv-corps">
+              <div className="rdv-corps-form">
+                <div className="rdv-notes">
                   <ModeleRetenu noms={NOMS_MODELES} />
                   <SiteRetenu />
                   <EstimationRetenue noms={NOMS_POSTES} />
                 </div>
 
-                <FormulaireFormat retard={DELAI_SUITE} />
+                <FormulaireFormat />
               </div>
 
-              <div
-                className="rdv-carte o-bloc-apparait"
-                style={{ "--o-mot-d": `${DELAI_CHAPO}ms` } as React.CSSProperties}
-              >
-                <blockquote className="rdv-citation">
-                  <p>
-                    Un système ne se justifie que si la difficulté qu&apos;il traite coûte
-                    plus cher que lui. Nous chiffrons avant de recommander, jamais
-                    l&apos;inverse.
-                  </p>
-                  <footer className="rdv-signature">
-                    <span>{NOM_SITE}</span>
-                    <span>Le principe de l&apos;audit</span>
-                  </footer>
-                </blockquote>
+              <div className="rdv-corps-carte" data-gutter-guide="top">
+                <Scene className="rdv-scene">
+                  <blockquote className="rdv-citation">
+                    <p>
+                      Un système ne se justifie que si la difficulté qu&apos;il traite coûte
+                      plus cher que lui. Nous chiffrons avant de recommander, jamais
+                      l&apos;inverse.
+                    </p>
+                    <footer className="rdv-signature">
+                      <span>{NOM_SITE}</span>
+                      <span>Le principe de l&apos;audit</span>
+                    </footer>
+                  </blockquote>
 
-                <hr className="rdv-filet" />
+                  <hr className="rdv-filet" />
 
-                <div className="rdv-logos-bloc">
-                  <p className="rdv-mono rdv-centre">Nous travaillons avec</p>
-                  {RANGEES.map((rangee, n) => (
-                    <ul key={n} className="rdv-logos">
-                      {rangee.map((m) => (
-                        <li key={m.nom}>
-                          <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
-                        </li>
-                      ))}
-                    </ul>
-                  ))}
-                </div>
+                  <div className="rdv-logos-bloc">
+                    <Pastille>Nous travaillons avec</Pastille>
+                    {RANGEES.map((rangee, n) => (
+                      <ul key={n} className="rdv-logos">
+                        {rangee.map((m) => (
+                          <li key={m.nom}>
+                            <Marque nom={m.nom} fichier={m.fichier} largeur={m.largeur} />
+                          </li>
+                        ))}
+                      </ul>
+                    ))}
+                  </div>
+                </Scene>
               </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ═══ 2 — bande de fin : la phrase, en très grand, blanc sur noir.
-           C'est le pied de page de la référence (scale.com/demo) ramené à sa
-           phrase ; Teo, 18/10 : « sur cette page seulement ». ═══ */}
-        <section className="rdv-bande" aria-label="Le principe de l'audit, en une phrase">
-          <div className="rdv-wrap">
-            <p className="rdv-bande-phrase">Chiffrer d&apos;abord, recommander ensuite.</p>
-          </div>
-        </section>
-      </div>
+          {/* ═══ 2 — la phrase de fin, en bandeau d'appel centré (elle était
+                 blanche sur une bande noire, « sur cette page seulement ») ═══ */}
+          <Appel pastille="Le principe de l'audit" titre="Chiffrer d'abord, recommander ensuite." />
+        </div>
+      </Cadre>
     </PageShell>
   );
 }

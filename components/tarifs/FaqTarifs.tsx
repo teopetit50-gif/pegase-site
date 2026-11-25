@@ -1,10 +1,9 @@
 "use client";
 
-import * as Accordion from "@radix-ui/react-accordion";
-import { ArrowRight, ChevronDown, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { COURRIEL, lienContact } from "@/lib/reservation";
-import { Button } from "@/components/ui/button";
-import "./faq-tarifs.css";
+import Faq from "@/components/charte/Faq";
+import Bouton from "@/components/charte/Bouton";
 
 /* ══════════════════════════════════════════════════════════════════════
    FaqTarifs — la FAQ des prix (14/09/2026)
@@ -47,37 +46,41 @@ import "./faq-tarifs.css";
       coûterait plus que la ressemblance.
    ══════════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════════
+   25/11/2026 — CHARTE DE L'ACCUEIL (docs/charte-accueil.md, § 4.2,
+   ligne 5) : la FAQ des prix passe au composant `Faq` du kit — l'intro à
+   gauche (collante), les questions à droite, une seule réponse ouverte à
+   la fois. Le surtitre « Questions fréquentes » devient la pastille, le
+   chapô, le bouton « Nous écrire » (blanc, `ch-btn`) et la ligne e-mail
+   vont dans l'aparté de l'intro. Les deux accordéons Radix et leur
+   feuille (faq-tarifs.css, qui n'est plus importée) partent. Textes
+   inchangés ; une réponse en plusieurs paragraphes garde ses paragraphes
+   (des <span> en bloc : le kit rend la réponse dans un <p>).
+   ══════════════════════════════════════════════════════════════════════ */
+
 type Item = { q: string; r: string[] };
 
 export default function FaqTarifs({ items }: { items: Item[] }) {
-  /* moitié / moitié — l'impair va à gauche, comme la référence répartit
-     ses cinq et cinq */
-  const coupe = Math.ceil(items.length / 2);
-  const colonnes: Item[][] = [items.slice(0, coupe), items.slice(coupe)];
-
   return (
-    <div className="tf-faq r-wrap py-14 sm:py-20">
-      {/* ——— en-tête centré ——— */}
-      <div className="mx-auto mb-12 max-w-2xl text-center">
-        <p className="mb-2 text-sm font-medium tracking-wide text-[#616161]">
-          Questions fréquentes
-        </p>
-        <h2 className="r-h3 mb-3">Questions sur la facturation</h2>
-        <p className="mx-auto mb-6 max-w-xl text-[15px] leading-[23px] text-[#616161]">
+    <Faq
+      pastille="Questions fréquentes"
+      titre="Questions sur la facturation"
+      aparte={
+        <>
           Les points qui reviennent le plus souvent sur la tarification et les modalités. Si
           une question manque, décrivez votre situation&nbsp;: un membre de l&apos;équipe vous
           répond le jour même.
-        </p>
-        <Button asChild className="h-11 rounded-full px-6 text-[15px]">
-          <a href={lienContact("avant")}>
+        </>
+      }
+      action={
+        <>
+          <Bouton href={lienContact("avant")} icone="chevron">
             Nous écrire
-            <ArrowRight aria-hidden className="ml-2 size-4" />
-          </a>
-        </Button>
-        <p className="mt-4 text-xs leading-4 text-[#616161]">
-          <Mail aria-hidden className="mr-1 inline size-3" />
-          Ou par e-mail&nbsp;:{" "}
-          {/* 15/09/2026 — l'adresse reste AFFICHÉE, elle n'est plus un lien.
+          </Bouton>
+          <p className="tf-faq-mail">
+            <Mail aria-hidden className="mr-1 inline size-3" />
+            Ou par e-mail&nbsp;:{" "}
+            {/* 15/09/2026 — l'adresse reste AFFICHÉE, elle n'est plus un lien.
                 Un `mailto:` sort du site vers un client mail (et ne fait
                 rien du tout sur un téléphone sans compte configuré) : c'est
                 la dernière famille de portes sortantes après WhatsApp. En
@@ -85,51 +88,22 @@ export default function FaqTarifs({ items }: { items: Item[] }) {
                 bouton juste au-dessus y mène déjà. Reste donc le texte, à
                 copier par qui préfère écrire depuis sa propre boîte.
                 Le `mailto:` ne subsiste que là où il est la bonne réponse : la carte « Écrire » de /contact, que le visiteur a choisie, et les voies de SECOURS (formulaire ou agenda en panne). */}
-          <span className="font-medium text-[#050505]">{COURRIEL}</span>
-        </p>
-      </div>
-
-      {/* ——— les questions, en deux colonnes ——— */}
-      <div className="grid grid-cols-1 gap-x-12 text-left md:grid-cols-2">
-        {colonnes.map((colonne, c) => (
-          <Accordion.Root
-            key={c}
-            type="single"
-            collapsible
-            className="border-t border-[#e3e3e3]"
-          >
-            {colonne.map((f, i) => (
-              <Accordion.Item
-                key={f.q}
-                value={`q-${c}-${i}`}
-                className="border-b border-[#e3e3e3]"
-              >
-                <Accordion.Header className="flex tracking-[-0.01em]">
-                  <Accordion.Trigger className="group flex flex-1 cursor-pointer items-start justify-between gap-6 py-5 text-left text-[16px] font-medium leading-[24px] text-[#050505] transition-colors hover:text-[#3d3d3d]">
-                    {f.q}
-                    <ChevronDown
-                      aria-hidden
-                      className="mt-1 size-4 shrink-0 text-[#616161] transition-transform duration-300 group-data-[state=open]:rotate-180"
-                    />
-                  </Accordion.Trigger>
-                </Accordion.Header>
-                <Accordion.Content className="tf-faq-contenu overflow-hidden">
-                  <div className="pb-6 pr-8">
-                    {f.r.map((par, j) => (
-                      <p
-                        key={j}
-                        className={`text-[15px] leading-[24px] text-[#3d3d3d] ${j > 0 ? "mt-3" : ""}`}
-                      >
-                        {par}
-                      </p>
-                    ))}
-                  </div>
-                </Accordion.Content>
-              </Accordion.Item>
+            <span className="tf-faq-adresse">{COURRIEL}</span>
+          </p>
+        </>
+      }
+      questions={items.map((f) => ({
+        q: f.q,
+        r: (
+          <>
+            {f.r.map((par, j) => (
+              <span key={j} className="tf-faq-par">
+                {par}
+              </span>
             ))}
-          </Accordion.Root>
-        ))}
-      </div>
-    </div>
+          </>
+        ),
+      }))}
+    />
   );
 }
