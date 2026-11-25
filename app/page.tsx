@@ -60,13 +60,15 @@ export default function Home() {
         <SxFilets />
         <SxHero />
         <SxPlateforme />
+        {/* 25/11 (Teo) : les tarifs montent juste au-dessus de « Prêt dès
+            le jour J » — déplacés, pas échangés : le reste garde son ordre. */}
+        <SxTarifs />
         <SxFiche />
         <SxAgents />
         <SxIntegrations />
         <SxMarque />
         <SxSecurite />
         <SxClients />
-        <SxTarifs />
         <SxBande />
         <SxFaq />
         <SxAppel />

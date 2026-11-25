@@ -23,21 +23,21 @@ export default function SxIntegrations() {
           </div>
         </div>
         <div className={"relative mx-auto w-full max-w-[402px] ipad:max-w-[744px] desktop-sm:max-w-[1440px] z-10 flex flex-col items-center gap-8 py-16 ipad:py-20 desktop-sm:flex-row desktop-sm:justify-center desktop-sm:gap-[calc(56px*var(--k))] desktop-sm:[--k:.82] laptop:[--k:1] desktop-sm:py-[96px]"}>
-          <ul aria-label={"Outils du quotidien"} className={"relative h-[calc(240px*var(--k))] w-[calc(240px*var(--k))] shrink-0 [--k:.62] ipad:[--k:.78] desktop-sm:[--k:.82] laptop:[--k:1]"}>
+          <ul aria-label={"Les modèles d'IA"} className={"relative h-[calc(240px*var(--k))] w-[calc(240px*var(--k))] shrink-0 [--k:.62] ipad:[--k:.78] desktop-sm:[--k:.82] laptop:[--k:1]"}>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + -72px * var(--k))", "top": "calc(50% + -72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-agenda.svg"} alt={"Google Agenda"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-claude.svg"} alt={"Claude"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + 72px * var(--k))", "top": "calc(50% + -72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-whatsapp.svg"} alt={"WhatsApp"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-chatgpt.svg"} alt={"ChatGPT"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + 0px * var(--k))", "top": "calc(50% + 0px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-gmail.svg"} alt={"Gmail"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-anthropic.svg"} alt={"Anthropic"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + -72px * var(--k))", "top": "calc(50% + 72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-sheets.svg"} alt={"Google Sheets"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(79.88px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-gemini.svg"} alt={"Gemini"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(79.88px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + 72px * var(--k))", "top": "calc(50% + 72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-notion.svg"} alt={"Notion"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(97.53px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-openai.svg"} alt={"OpenAI"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(97.53px * var(--k))", "rotate": "-19.87deg" } as CSSProperties} />
             </li>
           </ul>
           <div className={"relative z-20"}>
@@ -45,18 +45,18 @@ export default function SxIntegrations() {
               <div className={"flex shrink-0 flex-col items-center gap-[24.87px] ipad:gap-[30.538px] desktop-sm:gap-[32px]"}>
                 <div className={"flex flex-col items-center gap-[9.326px] text-center text-[#121212] ipad:gap-[11.452px] desktop-sm:gap-[12px]"}>
                   <h2 className={"text-[30px] ipad:text-[clamp(28px,3.2vw,40px)] font-[450] leading-[1.16] tracking-[-0.045em] whitespace-nowrap"}>
-                    {"Tout est relié."}
+                    {"Les meilleures IA."}
                     <br />
-                    {"Rien n'est ressaisi."}
+                    {"Une seule gestion."}
                   </h2>
                   <p className={"w-[309.324px] font-tight text-[16px] leading-[normal] tracking-[-0.32px] opacity-60 ipad:w-[379.822px] ipad:text-[17px] ipad:leading-[21.95px] ipad:tracking-[-0.34px] desktop-sm:w-[398px] desktop-sm:text-[18px] desktop-sm:leading-[23px] desktop-sm:tracking-[-0.36px]"}>
-                    {"Omega se branche sur les outils que vos équipes utilisent déjà."}
+                    {"Omega travaille avec les plus grands noms de l'IA."}
                   </p>
                 </div>
                 <div className={"flex items-center gap-[15.269px] desktop-sm:gap-[16px]"}>
                   <Button asChild variant={"link"}>
-                    <Link href={"/integrations"}>
-                      {"Intégrations"}
+                    <Link href={"/offres"}>
+                      {"Voir les agents"}
                       <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
                     </Link>
                   </Button>
@@ -70,21 +70,21 @@ export default function SxIntegrations() {
               </div>
             </div>
           </div>
-          <ul aria-label={"Outils de gestion"} className={"relative h-[calc(240px*var(--k))] w-[calc(240px*var(--k))] shrink-0 [--k:.62] ipad:[--k:.78] desktop-sm:[--k:.82] laptop:[--k:1]"}>
+          <ul aria-label={"Les laboratoires d'IA"} className={"relative h-[calc(240px*var(--k))] w-[calc(240px*var(--k))] shrink-0 [--k:.62] ipad:[--k:.78] desktop-sm:[--k:.82] laptop:[--k:1]"}>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + 72px * var(--k))", "top": "calc(50% + -72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-quickbooks.svg"} alt={"QuickBooks"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-google.svg"} alt={"Google"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + -72px * var(--k))", "top": "calc(50% + -72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-stripe.svg"} alt={"Stripe"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-mistral.svg"} alt={"Mistral AI"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + 0px * var(--k))", "top": "calc(50% + 0px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-sage.svg"} alt={"Sage"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(75.17px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-lechat.svg"} alt={"Le Chat"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(75.17px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + 72px * var(--k))", "top": "calc(50% + 72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-drive.svg"} alt={"Google Drive"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(91.40px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-deepmind.svg"} alt={"DeepMind"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(91.40px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
             </li>
             <li className={"absolute -translate-x-1/2 -translate-y-1/2 [filter:drop-shadow(0_1px_1px_rgb(0_0_0/0.14))_drop-shadow(0_8px_14px_rgb(0_0_0/0.06))]"} style={{ "left": "calc(50% + -72px * var(--k))", "top": "calc(50% + 72px * var(--k))" } as CSSProperties}>
-              <img src={"/accueil-sx/outil-shopify.svg"} alt={"Shopify"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
+              <img src={"/accueil-sx/ia-gpt.svg"} alt={"GPT"} draggable={"false"} className={"block max-w-none select-none "} style={{ "width": "calc(92.93px * var(--k))", "rotate": "19.87deg" } as CSSProperties} />
             </li>
           </ul>
         </div>

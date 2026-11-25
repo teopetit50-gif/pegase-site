@@ -472,23 +472,23 @@ Une demande arrive par mail ou WhatsApp, à toute heure. Sa réponse est rédig�
 Régler l'agent des demandes
 Ajouter l'agent des demandes"""
 
-B["s4 Intégrations"] = """Outils du quotidien
-Google Agenda
-WhatsApp
-Gmail
-Google Sheets
-Notion
-Tout est relié.
-Rien n'est ressaisi.
-Omega se branche sur les outils que vos équipes utilisent déjà.
-Intégrations
+B["s4 Intégrations"] = """Les modèles d'IA
+Claude
+ChatGPT
+Anthropic
+Gemini
+OpenAI
+Les meilleures IA.
+Une seule gestion.
+Omega travaille avec les plus grands noms de l'IA.
+Voir les agents
 Parler à l'équipe
-Outils de gestion
-QuickBooks
-Stripe
-Sage
-Google Drive
-Shopify"""
+Les laboratoires d'IA
+Google
+Mistral AI
+Le Chat
+DeepMind
+GPT"""
 
 B["s5 Marque"] = """Modules métier
 Un module fait pour votre métier.
@@ -806,7 +806,7 @@ LIENS = {
                   "Deploy##2": "/offres/factures-fournisseurs", "Details##2": "/offres/factures-fournisseurs",
                   "Deploy##3": "/offres/nouvelles-affaires", "Details##3": "/offres/nouvelles-affaires",
                   "Deploy##4": "/offres/demandes-clients", "Details##4": "/offres/demandes-clients"},
-    "s4 Intégrations": {"See integrations": "/integrations", "Talk to sales": "/contact"},
+    "s4 Intégrations": {"See integrations": "/offres", "Talk to sales": "/contact"},
     "s6 Sécurité": {"Visit the trust centre": "/vos-donnees", "View system status": "/espace2", "Explore enterprise": "/offres"},
     "s8 Tarifs": {"Choose Payroll": AUDIT, "Choose People": "/contact", "Choose Autopilot": "/tarifs", "Talk to sales": "/offres/sur-mesure"},
     "s10 FAQ": {"Talk to sales": "/contact"},
@@ -828,16 +828,16 @@ IMAGES = {
     "/integrations/arrow-light.svg": "/accueil-sx/chevron-clair.svg",
     "/integrations/arrow-dark.svg": "/accueil-sx/chevron-sombre.svg",
     "/integrations/backdrop-ellipse.svg": "/accueil-sx/halo.svg",
-    "/integrations/sticker-calendar.svg": "/accueil-sx/outil-agenda.svg",
-    "/integrations/sticker-teams.svg": "/accueil-sx/outil-whatsapp.svg",
-    "/integrations/sticker-gmail.svg": "/accueil-sx/outil-gmail.svg",
-    "/integrations/sticker-slack.svg": "/accueil-sx/outil-sheets.svg",
-    "/integrations/sticker-notion.svg": "/accueil-sx/outil-notion.svg",
-    "/integrations/sticker-quickbooks.svg": "/accueil-sx/outil-quickbooks.svg",
-    "/integrations/sticker-xero.svg": "/accueil-sx/outil-stripe.svg",
-    "/integrations/sticker-sage.svg": "/accueil-sx/outil-sage.svg",
-    "/integrations/sticker-drive.svg": "/accueil-sx/outil-drive.svg",
-    "/integrations/sticker-wise.svg": "/accueil-sx/outil-shopify.svg",
+    "/integrations/sticker-calendar.svg": "/accueil-sx/ia-claude.svg",
+    "/integrations/sticker-teams.svg": "/accueil-sx/ia-chatgpt.svg",
+    "/integrations/sticker-gmail.svg": "/accueil-sx/ia-anthropic.svg",
+    "/integrations/sticker-slack.svg": "/accueil-sx/ia-gemini.svg",
+    "/integrations/sticker-notion.svg": "/accueil-sx/ia-openai.svg",
+    "/integrations/sticker-quickbooks.svg": "/accueil-sx/ia-google.svg",
+    "/integrations/sticker-xero.svg": "/accueil-sx/ia-mistral.svg",
+    "/integrations/sticker-sage.svg": "/accueil-sx/ia-lechat.svg",
+    "/integrations/sticker-drive.svg": "/accueil-sx/ia-deepmind.svg",
+    "/integrations/sticker-wise.svg": "/accueil-sx/ia-gpt.svg",
     "/employees/akin-balogun.jpg": "/accueil-sx/avatar-ab.svg",
     "/employees/amy-mckinnon.jpg": "/accueil-sx/avatar-am.svg",
     "/employees/anne-marie-myburg.jpg": "/accueil-sx/avatar-ar.svg",

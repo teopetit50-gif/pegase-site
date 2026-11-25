@@ -1595,5 +1595,34 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
   .sx .sb-record-header .sb-breadcrumb{flex:1 1 auto;min-width:0;overflow:hidden}
   .sx .sb-record-header .sb-breadcrumb>:is(:nth-child(-n+2),:nth-child(n+4)){display:none}
   .sx [data-slot=budget-flow-chart-plot] :is([data-slot=budget-flow-chart-tooltip],[data-slot=budget-flow-chart-from-label],[data-slot=budget-flow-chart-to-label]){display:none!important}
-  .sx div:has(> a[href="/integrations"] + a[href="/contact"]){flex-wrap:wrap;justify-content:center;row-gap:12px}
+  .sx div:has(> a[href="/offres"] + a[href="/contact"]){flex-wrap:wrap;justify-content:center;row-gap:12px}
 }
+
+/* 8. LES MODULES MÉTIER, EN SOBRE (25/11, Teo, capture du sélecteur, du
+      téléphone et du devis à l'appui : « change le design en plus pro,
+      c'est trop enfantin »). Le bloc est le kit « marque blanche » de la
+      référence : quatre pastilles à lettres de couleurs vives, une palette
+      de six pastilles, un réglage « Doux / Vifs », une carte turquoise à
+      bulle décorative et un devis penché. On garde sa géométrie et on lui
+      retire le jouet :
+        · une seule encre, celle de la page (#121212), à la place du
+          turquoise, partout où le bloc la reprend (carte, onglet actif,
+          jauge, liseré du devis, « Reste à payer ») ;
+        · les vrais signes de nos logiciels (public/logos/*-mark.png, noirs
+          sur blanc, cerclés d'un filet) à la place des lettres colorées ;
+        · plus de rangées « Couleur » ni « Angles » : des réglages sans
+          effet, qui faisaient démonstration de gabarit ;
+        · la carte du téléphone sans sa bulle, le devis droit. */
+.sx .wl-grid{--wl-brand:#121212 !important;--wl-radius:10px !important}
+.sx .wl-kit-row{display:none}
+.sx .wl-mark{background:#fff url(/logos/daliro-mark.png) center/62% no-repeat !important;color:transparent !important;box-shadow:inset 0 0 0 1px #e4e4e1}
+.sx .wl-kit-brand:nth-child(2) .wl-mark{background-image:url(/logos/tamila-mark.png) !important}
+.sx .wl-kit-brand:nth-child(3) .wl-mark{background-image:url(/logos/lorani-mark.png) !important}
+.sx .wl-kit-brand:nth-child(4) .wl-mark{background-image:url(/logos/varelo-mark.png) !important}
+.sx .wl-kit-brand[aria-pressed=true]{background:#f6f6f4;box-shadow:inset 0 0 0 1px #e4e4e1}
+.sx .wl-pay-card{background:linear-gradient(165deg,#262626 0%,#111 70%)}
+.sx .wl-pay-card:after{display:none}
+.sx .wl-app-actions li span{background:#f3f3f1;color:#404040}
+.sx .wl-payslip{transform:translateY(8px)}
+.sx .wl-slip-net{background:#f4f4f2;color:#121212}
+.sx .wl-chip.is-brand{background:#f1f1ef;color:#404040}

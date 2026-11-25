@@ -95,6 +95,21 @@ pseudo-éléments, les positions).
     Pour revérifier : `node outils/sx/defauts.mjs <url> 390` sur la
     référence puis sur nous.
 
+13. **« Les meilleures IA. Une seule gestion. »** (Teo, 25/11 : Omega est un
+    ERP, il ne « se branche » plus ; « mets les gros noms de l'IA, on
+    travaille avec eux », confirmé pour Anthropic, OpenAI, Google et
+    Mistral). Le bloc des intégrations garde sa géométrie ; ses dix
+    vignettes sont des mots-symboles typographiques (`ia-*.svg`, dessinés
+    par `outils/sx/dessiner.mjs`), jamais les logos des marques. Le
+    premier bouton mène à `/offres` (« Voir les agents »).
+14. **Les modules métier en sobre** (Teo, 25/11 : « trop enfantin ») :
+    une seule encre, les vrais signes de nos logiciels à la place des
+    lettres colorées, plus de rangées « Couleur » ni « Angles », carte du
+    téléphone sans bulle, devis droit. `sx.css`, « 8. ».
+15. **Les tarifs sont juste au-dessus de « Prêt dès le jour J »** (Teo,
+    25/11 : « tu ne les échanges pas, tu les mets au-dessus ») : déplacés
+    dans `app/page.tsx`, entre la plateforme et la fiche.
+
 ## Ce qui n'est pas porté
 
 Les micro-interactions des écrans d'exemple de la référence : survol et

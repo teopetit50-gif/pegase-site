@@ -40,6 +40,21 @@ for (const [cle, nom] of Object.entries(OUTILS)) {
 </svg>`);
 }
 
+/* vignettes des IA (25/11, Teo : « mets les gros noms de l'IA, on travaille
+   avec eux ») : même gabarit que les vignettes d'outils, mais un MOT-SYMBOLE
+   typographique à l'encre de la page, jamais le logo de la marque (pas de
+   droit d'usage ; règle maison). Corps calé sur la longueur du nom. */
+const IA = { claude: 'Claude', anthropic: 'Anthropic', chatgpt: 'ChatGPT', openai: 'OpenAI', gemini: 'Gemini',
+             google: 'Google', mistral: 'Mistral AI', lechat: 'Le Chat', deepmind: 'DeepMind', gpt: 'GPT' };
+for (const [cle, nom] of Object.entries(IA)) {
+  const corps = Math.min(230, Math.round(1350 / nom.length));
+  ecrire(`ia-${cle}.svg`, `
+<svg xmlns="http://www.w3.org/2000/svg" width="1280.35" height="1280.35" viewBox="0 0 1280.35 1280.35" fill="none">
+  <rect x="171.73" y="171.73" width="936.90" height="936.90" rx="220.85" fill="#f5f5f5" stroke="#fefefd" stroke-width="63.1"/>
+  <text x="640.175" y="652" text-anchor="middle" dominant-baseline="middle" font-family="-apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="${corps}" font-weight="600" letter-spacing="${(-corps * 0.035).toFixed(1)}" fill="#121212">${nom}</text>
+</svg>`);
+}
+
 ecrire('menu.svg', `
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
   <path d="M3.75 6h16.5M3.75 12h16.5M3.75 18h16.5" stroke="FILL" stroke-width="1.5" stroke-linecap="round"/>
