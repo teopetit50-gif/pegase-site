@@ -1535,3 +1535,20 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 :where(.sx) .sx-navbar-sticky[data-compact=true] .sx-navbar-desktop>div>a{height:36px;min-height:36px}
 :where(.sx) .sx-navbar-sticky[data-compact=true] .sx-navbar-desktop>div>a:first-child{border-radius:8px;padding-left:16px;padding-right:10px;font-size:13px}
 :where(.sx) .sx-navbar-sticky[data-compact=true] .sx-navbar-desktop>div>a:last-child{border-radius:10px;padding-inline:19px;font-size:14px}
+
+/* 5. LE MENU MOBILE (components/accueil-sx/SxMenuMobile.tsx). La référence
+      n'en a pas : son bouton « menu » est inerte. Panneau fixe sous la
+      barre, dans les teintes et les corps de celle-ci ; il n'existe pas à
+      partir de 1280 px, où la barre montre ses liens. */
+.sx .sx-menu{position:fixed;left:0;right:0;top:64px;z-index:49;max-height:calc(100dvh - 64px);overflow-y:auto;background:#f5f5f2;border-bottom:1px solid #dcdcda;padding:4px 32px 24px;box-shadow:0 24px 40px -28px rgba(0,0,0,.28)}
+.sx .sx-menu[hidden]{display:none}
+.sx .sx-menu ul{display:flex;flex-direction:column}
+.sx .sx-menu li+li{border-top:1px solid #dcdcda}
+.sx .sx-menu ul a{display:flex;align-items:center;min-height:54px;font-size:17px;line-height:25.5px;letter-spacing:-.34px;color:#000}
+.sx .sx-menu-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.sx .sx-menu-actions a{display:flex;align-items:center;justify-content:center;height:46px;font-weight:700;letter-spacing:-.03em}
+.sx .sx-menu-second{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:rgba(0,0,0,.02);color:#121212;font-size:14px}
+.sx .sx-menu-premier{border-radius:12px;background:#202020;color:#fff;font-size:16px}
+.sx .sx-menu a:focus-visible{outline:2px solid #121212;outline-offset:2px}
+@media (min-width:768px){.sx .sx-menu{padding-inline:48px}}
+@media (min-width:1280px){.sx .sx-menu{display:none}}

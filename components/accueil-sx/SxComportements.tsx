@@ -353,6 +353,62 @@ export default function SxComportements() {
       });
     }
 
+    /* 10. Le menu mobile : le bouton « menu » de la barre (inerte chez la
+           référence) ouvre le panneau de SxMenuMobile, calé sous la barre
+           même quand elle est resserrée. Échap, un lien ou le passage en
+           grand écran le referment. */
+    const burger = racine.querySelector<HTMLButtonElement>(".sx-navbar > button");
+    const menu = racine.querySelector<HTMLElement>("#sx-menu");
+    const rail = racine.querySelector<HTMLElement>(".sx-navbar");
+    if (burger && menu && rail) {
+      burger.setAttribute("aria-controls", "sx-menu");
+      burger.setAttribute("aria-expanded", "false");
+      const caler = () => {
+        const bas = Math.round(rail.getBoundingClientRect().bottom);
+        menu.style.top = bas + "px";
+        menu.style.maxHeight = `calc(100dvh - ${bas}px)`;
+      };
+      const fermer = () => {
+        menu.hidden = true;
+        burger.setAttribute("aria-expanded", "false");
+        burger.setAttribute("aria-label", "Ouvrir le menu");
+      };
+      const basculer = () => {
+        if (!menu.hidden) return fermer();
+        caler();
+        menu.hidden = false;
+        burger.setAttribute("aria-expanded", "true");
+        burger.setAttribute("aria-label", "Fermer le menu");
+      };
+      const touche = (e: KeyboardEvent) => {
+        if (e.key === "Escape") fermer();
+      };
+      const surLien = (e: MouseEvent) => {
+        if ((e.target as HTMLElement).closest("a")) fermer();
+      };
+      const suivreBarre = () => {
+        if (!menu.hidden) caler();
+      };
+      const large = window.matchMedia("(min-width: 1280px)");
+      const surLarge = () => {
+        if (large.matches) fermer();
+      };
+      burger.addEventListener("click", basculer);
+      menu.addEventListener("click", surLien);
+      document.addEventListener("keydown", touche);
+      window.addEventListener("scroll", suivreBarre, { passive: true });
+      rail.addEventListener("transitionend", suivreBarre);
+      large.addEventListener("change", surLarge);
+      menage.push(() => {
+        burger.removeEventListener("click", basculer);
+        menu.removeEventListener("click", surLien);
+        document.removeEventListener("keydown", touche);
+        window.removeEventListener("scroll", suivreBarre);
+        rail.removeEventListener("transitionend", suivreBarre);
+        large.removeEventListener("change", surLarge);
+      });
+    }
+
     return () => menage.forEach((f) => f());
   }, []);
 

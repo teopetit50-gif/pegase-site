@@ -16,7 +16,8 @@ Référence : `https://synnax-ai-native-software-landing-template-v1.21st.app/`
 | `SxRegles.tsx` | les hachures des marges, mesurées dans le navigateur. |
 | `SxBarres.tsx` | la jauge à barres de la fiche (nombre de barres = largeur mesurée). |
 | `SxMotSymbole.tsx` | le mot géant du pied, dessiné lettre par lettre (« OMEGA »). |
-| `SxComportements.tsx` | tout ce qui bouge : barre resserrée, apparitions, FAQ, onglets, compteurs, tarifs, graphiques mesurés. |
+| `SxMenuMobile.tsx` | le panneau du bouton « menu », sous 1280 px (absent de la référence). |
+| `SxComportements.tsx` | tout ce qui bouge : barre resserrée, apparitions, FAQ, onglets, compteurs, tarifs, graphiques mesurés, menu mobile. |
 
 Le contenu vit dans **`outils/sx/textes.py`** (753 textes alignés sur ceux de
 la référence). Pour changer une phrase :
@@ -65,6 +66,9 @@ pseudo-éléments, les positions).
    de la référence) n'a pas d'équivalent dans OMEGA.
 7. **Google Sans** (SIL OFL) pour cette page seule : `app/_polices/google-sans-accueil.ts`.
 8. L'en-tête du site ne se monte pas sur « / » (`components/Header.tsx`).
+9. **Un menu mobile existe** (`SxMenuMobile.tsx`) : le bouton « menu » de la
+   référence est inerte, ce qui laisserait un visiteur au téléphone sans
+   navigation. Le bouton est le sien, au pixel ; le panneau est le nôtre.
 
 ## Ce qui n'est pas porté
 

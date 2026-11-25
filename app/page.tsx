@@ -16,6 +16,7 @@ import SxBande from "@/components/accueil-sx/gen/SxBande";
 import SxFaq from "@/components/accueil-sx/gen/SxFaq";
 import SxAppel from "@/components/accueil-sx/gen/SxAppel";
 import SxPied from "@/components/accueil-sx/gen/SxPied";
+import SxMenuMobile from "@/components/accueil-sx/SxMenuMobile";
 import SxComportements from "@/components/accueil-sx/SxComportements";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -71,6 +72,8 @@ export default function Home() {
         <SxAppel />
       </div>
       <SxPied />
+      {/* le panneau du bouton « menu » : absent de la référence, voir le composant */}
+      <SxMenuMobile />
       <SxComportements />
     </div>
   );
