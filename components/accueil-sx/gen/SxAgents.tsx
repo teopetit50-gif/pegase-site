@@ -1,7 +1,10 @@
 /* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxAgents ».
-   Balisage porté tel quel depuis le relevé de la référence : ne pas
-   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+   Balisage porté depuis le relevé de la référence, contenu posé par
+   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
+   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
+/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
 export default function SxAgents() {
   return (
@@ -11,17 +14,17 @@ export default function SxAgents() {
           <div className={"ft-intro-copy"}>
             <span className={"ft-eyebrow"}>
               <b>
-                {"New"}
+                {"Nouveau"}
               </b>
               <span>
-                {"Build custom agents"}
+                {"Des agents sur mesure"}
               </span>
             </span>
             <h2>
-              {"Pick an agent, tune it, put it to work."}
+              {"Choisissez un agent et réglez-le."}
             </h2>
             <p>
-              {"Pre-built agents for the busywork of People Ops. Each one follows your policies, asks before it acts and logs every step on the employee’s record."}
+              {"Quatre agents prêts pour le travail répétitif. Chacun suit vos règles, attend votre accord avant d'envoyer et enregistre chaque action."}
             </p>
           </div>
           <div className={"ft-finder"}>
@@ -30,30 +33,30 @@ export default function SxAgents() {
                 <path d={"M11.5 2.75C6.66751 2.75 2.75 6.66751 2.75 11.5C2.75 16.3325 6.66751 20.25 11.5 20.25C16.3325 20.25 20.25 16.3325 20.25 11.5C20.25 6.66751 16.3325 2.75 11.5 2.75ZM1.25 11.5C1.25 5.83908 5.83908 1.25 11.5 1.25C17.1609 1.25 21.75 5.83908 21.75 11.5C21.75 14.0605 20.8111 16.4017 19.2589 18.1982L22.5303 21.4697C22.8232 21.7626 22.8232 22.2374 22.5303 22.5303C22.2374 22.8232 21.7626 22.8232 21.4697 22.5303L18.1982 19.2589C16.4017 20.8111 14.0605 21.75 11.5 21.75C5.83908 21.75 1.25 17.1609 1.25 11.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
               </svg>
               <span>
-                {"Search agents and tags…"}
+                {"Chercher un agent…"}
               </span>
               <button type={"button"}>
-                {"Search"}
+                {"Chercher"}
               </button>
             </div>
             <ul className={"ft-tags"}>
               <li>
-                {"Payroll"}
+                {"Relances"}
               </li>
               <li>
-                {"Onboarding"}
+                {"Factures"}
               </li>
               <li>
-                {"Time off"}
+                {"Demandes"}
               </li>
               <li>
-                {"Compliance"}
+                {"Clients"}
               </li>
               <li>
-                {"Benefits"}
+                {"Sur mesure"}
               </li>
               <li className={"ft-more-item"}>
-                <button type={"button"} className={"ft-more"} aria-label={"More tags"}>
+                <button type={"button"} className={"ft-more"} aria-label={"Plus d'étiquettes"}>
                   <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                     <path d={"M4.43057 8.5119C4.70014 8.19741 5.17361 8.16099 5.48811 8.43056L12 14.0122L18.5119 8.43056C18.8264 8.16099 19.2999 8.19741 19.5695 8.51191C19.839 8.8264 19.8026 9.29987 19.4881 9.56944L12.4881 15.5694C12.2072 15.8102 11.7928 15.8102 11.5119 15.5694L4.51192 9.56944C4.19743 9.29987 4.161 8.8264 4.43057 8.5119Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                   </svg>
@@ -68,37 +71,37 @@ export default function SxAgents() {
               <ul className={"ft-approvals"}>
                 <li>
                   <span data-slot={"avatar"} className={"ft-avatar"}>
-                    <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/prateek-gupta.jpg"} alt={""} />
+                    <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-pg.svg"} alt={""} />
                     <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                       {"P"}
                     </span>
                   </span>
                   <div>
                     <strong>
-                      {"Prateek Gupta"}
+                      {"Paul Girard"}
                     </strong>
                     <p>
-                      {"Annual leave · 4 days, 14–17 Dec"}
+                      {"Devis sans réponse · J+7"}
                     </p>
                   </div>
                   <span className={"ft-meta"}>
-                    {"2h"}
+                    {"2 h"}
                     <i />
                   </span>
                 </li>
                 <li className={"is-active"}>
                   <span data-slot={"avatar"} className={"ft-avatar"}>
-                    <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/maryam-malek.jpg"} alt={""} />
+                    <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-mm.svg"} alt={""} />
                     <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                       {"M"}
                     </span>
                   </span>
                   <div>
                     <strong>
-                      {"Maryam Malek"}
+                      {"Maya Martin"}
                     </strong>
                     <p>
-                      {"Overtime · 6 h, within policy"}
+                      {"Facture échue · J+3"}
                     </p>
                   </div>
                   <span className={"ft-meta"}>
@@ -113,27 +116,27 @@ export default function SxAgents() {
                       <path d={"M2.2 1.6 13.6 7.1 8.6 8.5 6.3 13.4Z"} fill={"#111"} stroke={"#fff"} strokeWidth={"1.2"} strokeLinejoin={"round"} />
                     </svg>
                     <b>
-                      {"You"}
+                      {"Vous"}
                     </b>
                   </span>
                 </li>
                 <li>
                   <span data-slot={"avatar"} className={"ft-avatar"}>
-                    <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/akin-balogun.jpg"} alt={""} />
+                    <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-ab.svg"} alt={""} />
                     <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                       {"A"}
                     </span>
                   </span>
                   <div>
                     <strong>
-                      {"Akin Balogun"}
+                      {"Adam Benali"}
                     </strong>
                     <p>
-                      {"Expense · $86 client lunch"}
+                      {"Facture échue · 860 €"}
                     </p>
                   </div>
                   <span className={"ft-meta"}>
-                    {"3h"}
+                    {"3 h"}
                     <i />
                   </span>
                 </li>
@@ -141,28 +144,28 @@ export default function SxAgents() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Approvals agent"}
+                {"Agent de relance"}
               </h3>
               <p>
-                {"Leave, overtime and expenses arrive pre-checked against your policies. You approve the edge cases; the agent clears the routine ones."}
+                {"Les devis sans réponse et les factures échues sont relancés à J+3, J+7 et J+21, dans votre ton. Vous validez la liste du matin, puis les relances partent."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <button type={"button"} className={"ft-chip"}>
-                {"Deploy"}
-              </button>
-              <a href={"#agents"} className={"ft-link"} aria-label={"Details"}>
+              <Link href={"/offres/relances-impayes"} className={"ft-chip text-center"}>
+                {"Découvrir"}
+              </Link>
+              <Link href={"/offres/relances-impayes"} className={"ft-link"} aria-label={"Détails"}>
                 <span aria-hidden={"true"}>
-                  {"Details"}
+                  {"Détails"}
                 </span>
-              </a>
+              </Link>
               <span className={"ft-tools"}>
-                <button type={"button"} aria-label={"Customise Approvals agent"}>
+                <button type={"button"} aria-label={"Régler l'agent de relance"}>
                   <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
                   </svg>
                 </button>
-                <button type={"button"} aria-label={"Save Approvals agent"}>
+                <button type={"button"} aria-label={"Garder l'agent de relance"}>
                   <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-bookmark-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                     <path d={"M9 5.25C8.58579 5.25 8.25 5.58579 8.25 6C8.25 6.41421 8.58579 6.75 9 6.75H15C15.4142 6.75 15.75 6.41421 15.75 6C15.75 5.58579 15.4142 5.25 15 5.25H9Z"} fill={"currentColor"} />
                     <path d={"M11.9425 1.25C9.86994 1.24999 8.23716 1.24997 6.96128 1.42337C5.65122 1.60141 4.60609 1.97468 3.78484 2.80484C2.96469 3.63387 2.59692 4.68702 2.4213 6.00741C2.24998 7.29551 2.24999 8.94462 2.25 11.0411V16.139C2.24999 17.6466 2.24998 18.8402 2.34601 19.7388C2.44091 20.6269 2.64447 21.428 3.22584 21.9638C3.69226 22.3937 4.28211 22.6646 4.91165 22.7367C5.69912 22.8268 6.43439 22.4508 7.15868 21.9377C7.89163 21.4185 8.78075 20.6321 9.90254 19.6399L9.93905 19.6076C10.4591 19.1476 10.8112 18.8372 11.105 18.6224C11.3889 18.4148 11.5623 18.3397 11.7084 18.3103C11.9009 18.2715 12.0991 18.2715 12.2916 18.3103C12.4377 18.3397 12.6111 18.4148 12.895 18.6224C13.1888 18.8372 13.5409 19.1476 14.061 19.6076L14.0975 19.64C15.2193 20.6321 16.1084 21.4186 16.8413 21.9377C17.5656 22.4508 18.3009 22.8268 19.0883 22.7367C19.7179 22.6646 20.3077 22.3937 20.7742 21.9638C21.3555 21.428 21.5591 20.6269 21.654 19.7388C21.75 18.8402 21.75 17.6466 21.75 16.139V11.041C21.75 8.94462 21.75 7.2955 21.5787 6.00741C21.4031 4.68702 21.0353 3.63387 20.2152 2.80484C19.3939 1.97468 18.3488 1.60141 17.0387 1.42337C15.7628 1.24997 14.1301 1.24999 12.0575 1.25H11.9425ZM4.8512 3.85977C5.34797 3.35762 6.02251 3.06474 7.16328 2.90971C8.32645 2.75163 9.85725 2.75 12 2.75C14.1427 2.75 15.6736 2.75163 16.8367 2.90971C17.9775 3.06474 18.652 3.35762 19.1488 3.85977C19.6467 4.36303 19.9379 5.04819 20.0918 6.20518C20.2484 7.38292 20.25 8.93223 20.25 11.0975V16.0909C20.25 17.6572 20.249 18.7702 20.1625 19.5794C20.0739 20.4088 19.9104 20.72 19.7576 20.8608C19.5238 21.0763 19.2298 21.2107 18.9178 21.2464C18.7182 21.2692 18.3835 21.192 17.7083 20.7137C17.0497 20.2472 16.2211 19.5157 15.0547 18.484L15.0286 18.4609C14.5413 18.0299 14.1372 17.6725 13.7804 17.4116C13.4074 17.1388 13.0312 16.9292 12.5878 16.8398C12.1998 16.7617 11.8002 16.7617 11.4122 16.8398C10.9688 16.9292 10.5926 17.1388 10.2196 17.4116C9.86283 17.6725 9.45871 18.0299 8.97146 18.4609L8.94527 18.484C7.77887 19.5157 6.95026 20.2472 6.29165 20.7137C5.61646 21.192 5.28182 21.2692 5.08218 21.2464C4.77019 21.2107 4.47617 21.0763 4.24237 20.8608C4.08963 20.72 3.92614 20.4088 3.83752 19.5794C3.75104 18.7702 3.75 17.6572 3.75 16.0909V11.0975C3.75 8.93223 3.75156 7.38292 3.90821 6.20518C4.06209 5.04819 4.35333 4.36303 4.8512 3.85977Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
@@ -182,7 +185,7 @@ export default function SxAgents() {
                   </span>
                   <span className={"ft-ring"}>
                     <span data-slot={"avatar"} className={"ft-avatar"}>
-                      <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/franki-esposito.jpg"} alt={""} />
+                      <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-fe.svg"} alt={""} />
                       <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                         {"F"}
                       </span>
@@ -208,7 +211,7 @@ export default function SxAgents() {
                     </span>
                     <div>
                       <p>
-                        {"Tax number captured"}
+                        {"Numéro de TVA relevé"}
                       </p>
                       <i className={"ft-skeleton"} style={{ "width": "62%" } as CSSProperties} />
                     </div>
@@ -221,7 +224,7 @@ export default function SxAgents() {
                     </span>
                     <div>
                       <p>
-                        {"Bank details verified"}
+                        {"RIB vérifié"}
                       </p>
                       <i className={"ft-skeleton"} style={{ "width": "74%" } as CSSProperties} />
                     </div>
@@ -230,7 +233,7 @@ export default function SxAgents() {
                         <path d={"M2.2 1.6 13.6 7.1 8.6 8.5 6.3 13.4Z"} fill={"#111"} stroke={"#fff"} strokeWidth={"1.2"} strokeLinejoin={"round"} />
                       </svg>
                       <b>
-                        {"You"}
+                        {"Vous"}
                       </b>
                     </span>
                   </div>
@@ -250,28 +253,28 @@ export default function SxAgents() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Document intelligence"}
+                {"Factures fournisseurs"}
               </h3>
               <p>
-                {"Drop in contracts, IDs and payslips. Synnax pulls out the fields that matter and files them on the right employee record."}
+                {"Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée, classée, puis transmise à la comptabilité."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <button type={"button"} className={"ft-chip"}>
-                {"Deploy"}
-              </button>
-              <a href={"#agents"} className={"ft-link"} aria-label={"Details"}>
+              <Link href={"/offres/factures-fournisseurs"} className={"ft-chip text-center"}>
+                {"Découvrir"}
+              </Link>
+              <Link href={"/offres/factures-fournisseurs"} className={"ft-link"} aria-label={"Détails"}>
                 <span aria-hidden={"true"}>
-                  {"Details"}
+                  {"Détails"}
                 </span>
-              </a>
+              </Link>
               <span className={"ft-tools"}>
-                <button type={"button"} aria-label={"Customise Document intelligence"}>
+                <button type={"button"} aria-label={"Régler l'agent des factures"}>
                   <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
                   </svg>
                 </button>
-                <button type={"button"} aria-label={"Save Document intelligence"}>
+                <button type={"button"} aria-label={"Garder l'agent des factures"}>
                   <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-bookmark-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                     <path d={"M9 5.25C8.58579 5.25 8.25 5.58579 8.25 6C8.25 6.41421 8.58579 6.75 9 6.75H15C15.4142 6.75 15.75 6.41421 15.75 6C15.75 5.58579 15.4142 5.25 15 5.25H9Z"} fill={"currentColor"} />
                     <path d={"M11.9425 1.25C9.86994 1.24999 8.23716 1.24997 6.96128 1.42337C5.65122 1.60141 4.60609 1.97468 3.78484 2.80484C2.96469 3.63387 2.59692 4.68702 2.4213 6.00741C2.24998 7.29551 2.24999 8.94462 2.25 11.0411V16.139C2.24999 17.6466 2.24998 18.8402 2.34601 19.7388C2.44091 20.6269 2.64447 21.428 3.22584 21.9638C3.69226 22.3937 4.28211 22.6646 4.91165 22.7367C5.69912 22.8268 6.43439 22.4508 7.15868 21.9377C7.89163 21.4185 8.78075 20.6321 9.90254 19.6399L9.93905 19.6076C10.4591 19.1476 10.8112 18.8372 11.105 18.6224C11.3889 18.4148 11.5623 18.3397 11.7084 18.3103C11.9009 18.2715 12.0991 18.2715 12.2916 18.3103C12.4377 18.3397 12.6111 18.4148 12.895 18.6224C13.1888 18.8372 13.5409 19.1476 14.061 19.6076L14.0975 19.64C15.2193 20.6321 16.1084 21.4186 16.8413 21.9377C17.5656 22.4508 18.3009 22.8268 19.0883 22.7367C19.7179 22.6646 20.3077 22.3937 20.7742 21.9638C21.3555 21.428 21.5591 20.6269 21.654 19.7388C21.75 18.8402 21.75 17.6466 21.75 16.139V11.041C21.75 8.94462 21.75 7.2955 21.5787 6.00741C21.4031 4.68702 21.0353 3.63387 20.2152 2.80484C19.3939 1.97468 18.3488 1.60141 17.0387 1.42337C15.7628 1.24997 14.1301 1.24999 12.0575 1.25H11.9425ZM4.8512 3.85977C5.34797 3.35762 6.02251 3.06474 7.16328 2.90971C8.32645 2.75163 9.85725 2.75 12 2.75C14.1427 2.75 15.6736 2.75163 16.8367 2.90971C17.9775 3.06474 18.652 3.35762 19.1488 3.85977C19.6467 4.36303 19.9379 5.04819 20.0918 6.20518C20.2484 7.38292 20.25 8.93223 20.25 11.0975V16.0909C20.25 17.6572 20.249 18.7702 20.1625 19.5794C20.0739 20.4088 19.9104 20.72 19.7576 20.8608C19.5238 21.0763 19.2298 21.2107 18.9178 21.2464C18.7182 21.2692 18.3835 21.192 17.7083 20.7137C17.0497 20.2472 16.2211 19.5157 15.0547 18.484L15.0286 18.4609C14.5413 18.0299 14.1372 17.6725 13.7804 17.4116C13.4074 17.1388 13.0312 16.9292 12.5878 16.8398C12.1998 16.7617 11.8002 16.7617 11.4122 16.8398C10.9688 16.9292 10.5926 17.1388 10.2196 17.4116C9.86283 17.6725 9.45871 18.0299 8.97146 18.4609L8.94527 18.484C7.77887 19.5157 6.95026 20.2472 6.29165 20.7137C5.61646 21.192 5.28182 21.2692 5.08218 21.2464C4.77019 21.2107 4.47617 21.0763 4.24237 20.8608C4.08963 20.72 3.92614 20.4088 3.83752 19.5794C3.75104 18.7702 3.75 17.6572 3.75 16.0909V11.0975C3.75 8.93223 3.75156 7.38292 3.90821 6.20518C4.06209 5.04819 4.35333 4.36303 4.8512 3.85977Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
@@ -288,7 +291,7 @@ export default function SxAgents() {
                     <path d={"M11.5 2.75C6.66751 2.75 2.75 6.66751 2.75 11.5C2.75 16.3325 6.66751 20.25 11.5 20.25C16.3325 20.25 20.25 16.3325 20.25 11.5C20.25 6.66751 16.3325 2.75 11.5 2.75ZM1.25 11.5C1.25 5.83908 5.83908 1.25 11.5 1.25C17.1609 1.25 21.75 5.83908 21.75 11.5C21.75 14.0605 20.8111 16.4017 19.2589 18.1982L22.5303 21.4697C22.8232 21.7626 22.8232 22.2374 22.5303 22.5303C22.2374 22.8232 21.7626 22.8232 21.4697 22.5303L18.1982 19.2589C16.4017 20.8111 14.0605 21.75 11.5 21.75C5.83908 21.75 1.25 17.1609 1.25 11.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"What would you like to know about your team?"}
+                    {"Quels clients faut-il recontacter ?"}
                   </span>
                   <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-microphone-2-outline ft-mic"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                     <path d={"M6.25 8C6.25 4.82436 8.82436 2.25 12 2.25C15.1756 2.25 17.75 4.82436 17.75 8V11C17.75 14.1756 15.1756 16.75 12 16.75C8.82436 16.75 6.25 14.1756 6.25 11V8ZM7.81597 7.25H9C9.41421 7.25 9.75 7.58579 9.75 8C9.75 8.41421 9.41421 8.75 9 8.75H7.75V10.25H9C9.41421 10.25 9.75 10.5858 9.75 11C9.75 11.4142 9.41421 11.75 9 11.75H7.81597C8.1702 13.7395 9.9087 15.25 12 15.25C14.0913 15.25 15.8298 13.7395 16.184 11.75L13.5 11.75C13.0858 11.75 12.75 11.4142 12.75 11C12.75 10.5858 13.0858 10.25 13.5 10.25L16.25 10.25V8.75H13.5C13.0858 8.75 12.75 8.41421 12.75 8C12.75 7.58579 13.0858 7.25 13.5 7.25H16.184C15.8298 5.26049 14.0913 3.75 12 3.75C9.9087 3.75 8.1702 5.26049 7.81597 7.25ZM4 9.25C4.41421 9.25 4.75 9.58579 4.75 10V11C4.75 15.0041 7.99594 18.25 12 18.25C16.0041 18.25 19.25 15.0041 19.25 11V10C19.25 9.58579 19.5858 9.25 20 9.25C20.4142 9.25 20.75 9.58579 20.75 10V11C20.75 15.5798 17.2314 19.3379 12.75 19.7183V22C12.75 22.4142 12.4142 22.75 12 22.75C11.5858 22.75 11.25 22.4142 11.25 22V19.7183C6.7686 19.3379 3.25 15.5798 3.25 11V10C3.25 9.58579 3.58579 9.25 4 9.25Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
@@ -297,7 +300,7 @@ export default function SxAgents() {
                 <ul>
                   <li className={"is-active"}>
                     <span>
-                      {"Overtime cost by team this quarter"}
+                      {"Clients sans commande depuis 90 jours"}
                     </span>
                     <span className={"ft-ask-go"}>
                       <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-arrow-right-up-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -309,13 +312,13 @@ export default function SxAgents() {
                         <path d={"M2.2 1.6 13.6 7.1 8.6 8.5 6.3 13.4Z"} fill={"#111"} stroke={"#fff"} strokeWidth={"1.2"} strokeLinejoin={"round"} />
                       </svg>
                       <b>
-                        {"You"}
+                        {"Vous"}
                       </b>
                     </span>
                   </li>
                   <li>
                     <span>
-                      {"Who's on leave next week"}
+                      {"Contrats à renouveler ce mois-ci"}
                     </span>
                     <span className={"ft-ask-go"}>
                       <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-arrow-right-up-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -325,7 +328,7 @@ export default function SxAgents() {
                   </li>
                   <li>
                     <span>
-                      {"Contracts ending in 60 days"}
+                      {"Commandes restées en plan"}
                     </span>
                     <span className={"ft-ask-go"}>
                       <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-arrow-right-up-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -335,7 +338,7 @@ export default function SxAgents() {
                   </li>
                   <li>
                     <span>
-                      {"Headcount by entity"}
+                      {"Échéances de la semaine"}
                     </span>
                     <span className={"ft-ask-go"}>
                       <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-arrow-right-up-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -348,28 +351,28 @@ export default function SxAgents() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Ask Synnax"}
+                {"Clients inactifs"}
               </h3>
               <p>
-                {"Ask about pay, leave or headcount in plain language, and get answers from live payroll data with the sources attached."}
+                {"Les clients sans nouvelles sont recontactés, échéances et commandes en plan reprises. Vous validez chaque message."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <button type={"button"} className={"ft-chip"}>
-                {"Deploy"}
-              </button>
-              <a href={"#agents"} className={"ft-link"} aria-label={"Details"}>
+              <Link href={"/offres/nouvelles-affaires"} className={"ft-chip text-center"}>
+                {"Découvrir"}
+              </Link>
+              <Link href={"/offres/nouvelles-affaires"} className={"ft-link"} aria-label={"Détails"}>
                 <span aria-hidden={"true"}>
-                  {"Details"}
+                  {"Détails"}
                 </span>
-              </a>
+              </Link>
               <span className={"ft-tools"}>
-                <button type={"button"} aria-label={"Customise Ask Synnax"}>
+                <button type={"button"} aria-label={"Régler l'agent des clients inactifs"}>
                   <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
                   </svg>
                 </button>
-                <button type={"button"} aria-label={"Save Ask Synnax"}>
+                <button type={"button"} aria-label={"Garder l'agent des clients inactifs"}>
                   <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-bookmark-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                     <path d={"M9 5.25C8.58579 5.25 8.25 5.58579 8.25 6C8.25 6.41421 8.58579 6.75 9 6.75H15C15.4142 6.75 15.75 6.41421 15.75 6C15.75 5.58579 15.4142 5.25 15 5.25H9Z"} fill={"currentColor"} />
                     <path d={"M11.9425 1.25C9.86994 1.24999 8.23716 1.24997 6.96128 1.42337C5.65122 1.60141 4.60609 1.97468 3.78484 2.80484C2.96469 3.63387 2.59692 4.68702 2.4213 6.00741C2.24998 7.29551 2.24999 8.94462 2.25 11.0411V16.139C2.24999 17.6466 2.24998 18.8402 2.34601 19.7388C2.44091 20.6269 2.64447 21.428 3.22584 21.9638C3.69226 22.3937 4.28211 22.6646 4.91165 22.7367C5.69912 22.8268 6.43439 22.4508 7.15868 21.9377C7.89163 21.4185 8.78075 20.6321 9.90254 19.6399L9.93905 19.6076C10.4591 19.1476 10.8112 18.8372 11.105 18.6224C11.3889 18.4148 11.5623 18.3397 11.7084 18.3103C11.9009 18.2715 12.0991 18.2715 12.2916 18.3103C12.4377 18.3397 12.6111 18.4148 12.895 18.6224C13.1888 18.8372 13.5409 19.1476 14.061 19.6076L14.0975 19.64C15.2193 20.6321 16.1084 21.4186 16.8413 21.9377C17.5656 22.4508 18.3009 22.8268 19.0883 22.7367C19.7179 22.6646 20.3077 22.3937 20.7742 21.9638C21.3555 21.428 21.5591 20.6269 21.654 19.7388C21.75 18.8402 21.75 17.6466 21.75 16.139V11.041C21.75 8.94462 21.75 7.2955 21.5787 6.00741C21.4031 4.68702 21.0353 3.63387 20.2152 2.80484C19.3939 1.97468 18.3488 1.60141 17.0387 1.42337C15.7628 1.24997 14.1301 1.24999 12.0575 1.25H11.9425ZM4.8512 3.85977C5.34797 3.35762 6.02251 3.06474 7.16328 2.90971C8.32645 2.75163 9.85725 2.75 12 2.75C14.1427 2.75 15.6736 2.75163 16.8367 2.90971C17.9775 3.06474 18.652 3.35762 19.1488 3.85977C19.6467 4.36303 19.9379 5.04819 20.0918 6.20518C20.2484 7.38292 20.25 8.93223 20.25 11.0975V16.0909C20.25 17.6572 20.249 18.7702 20.1625 19.5794C20.0739 20.4088 19.9104 20.72 19.7576 20.8608C19.5238 21.0763 19.2298 21.2107 18.9178 21.2464C18.7182 21.2692 18.3835 21.192 17.7083 20.7137C17.0497 20.2472 16.2211 19.5157 15.0547 18.484L15.0286 18.4609C14.5413 18.0299 14.1372 17.6725 13.7804 17.4116C13.4074 17.1388 13.0312 16.9292 12.5878 16.8398C12.1998 16.7617 11.8002 16.7617 11.4122 16.8398C10.9688 16.9292 10.5926 17.1388 10.2196 17.4116C9.86283 17.6725 9.45871 18.0299 8.97146 18.4609L8.94527 18.484C7.77887 19.5157 6.95026 20.2472 6.29165 20.7137C5.61646 21.192 5.28182 21.2692 5.08218 21.2464C4.77019 21.2107 4.47617 21.0763 4.24237 20.8608C4.08963 20.72 3.92614 20.4088 3.83752 19.5794C3.75104 18.7702 3.75 17.6572 3.75 16.0909V11.0975C3.75 8.93223 3.75156 7.38292 3.90821 6.20518C4.06209 5.04819 4.35333 4.36303 4.8512 3.85977Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
@@ -398,23 +401,23 @@ export default function SxAgents() {
                       <path d={"M2.2 1.6 13.6 7.1 8.6 8.5 6.3 13.4Z"} fill={"#111"} stroke={"#fff"} strokeWidth={"1.2"} strokeLinejoin={"round"} />
                     </svg>
                     <b>
-                      {"You"}
+                      {"Vous"}
                     </b>
                   </span>
                 </div>
                 <div className={"ft-message"}>
                   <span data-slot={"avatar"} className={"ft-avatar"}>
-                    <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/guilermo-mendez.jpg"} alt={""} />
+                    <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-gm.svg"} alt={""} />
                     <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                       {"G"}
                     </span>
                   </span>
                   <div>
                     <strong>
-                      {"Guilermo Mendez"}
+                      {"Gabriel Meyer"}
                     </strong>
                     <p>
-                      {"When does my overtime show on my payslip?"}
+                      {"Avez-vous un créneau pour une pose cette semaine ?"}
                     </p>
                     <div className={"ft-reply"}>
                       <i className={"ft-skeleton"} style={{ "width": "92%" } as CSSProperties} />
@@ -428,28 +431,28 @@ export default function SxAgents() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Employee helpdesk"}
+                {"Demandes clients"}
               </h3>
               <p>
-                {"An assistant in Slack and the employee app that answers pay, leave and policy questions from your handbook, so People Ops doesn't have to."}
+                {"Une demande arrive par mail ou WhatsApp, à toute heure. Sa réponse est rédigée aussitôt, puis elle part seule si vous l'avez autorisé, ou attend votre accord."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <button type={"button"} className={"ft-chip"}>
-                {"Deploy"}
-              </button>
-              <a href={"#agents"} className={"ft-link"} aria-label={"Details"}>
+              <Link href={"/offres/demandes-clients"} className={"ft-chip text-center"}>
+                {"Découvrir"}
+              </Link>
+              <Link href={"/offres/demandes-clients"} className={"ft-link"} aria-label={"Détails"}>
                 <span aria-hidden={"true"}>
-                  {"Details"}
+                  {"Détails"}
                 </span>
-              </a>
+              </Link>
               <span className={"ft-tools"}>
-                <button type={"button"} aria-label={"Customise Employee helpdesk"}>
+                <button type={"button"} aria-label={"Régler l'agent des demandes"}>
                   <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
                   </svg>
                 </button>
-                <button type={"button"} aria-label={"Save Employee helpdesk"}>
+                <button type={"button"} aria-label={"Garder l'agent des demandes"}>
                   <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-bookmark-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                     <path d={"M9 5.25C8.58579 5.25 8.25 5.58579 8.25 6C8.25 6.41421 8.58579 6.75 9 6.75H15C15.4142 6.75 15.75 6.41421 15.75 6C15.75 5.58579 15.4142 5.25 15 5.25H9Z"} fill={"currentColor"} />
                     <path d={"M11.9425 1.25C9.86994 1.24999 8.23716 1.24997 6.96128 1.42337C5.65122 1.60141 4.60609 1.97468 3.78484 2.80484C2.96469 3.63387 2.59692 4.68702 2.4213 6.00741C2.24998 7.29551 2.24999 8.94462 2.25 11.0411V16.139C2.24999 17.6466 2.24998 18.8402 2.34601 19.7388C2.44091 20.6269 2.64447 21.428 3.22584 21.9638C3.69226 22.3937 4.28211 22.6646 4.91165 22.7367C5.69912 22.8268 6.43439 22.4508 7.15868 21.9377C7.89163 21.4185 8.78075 20.6321 9.90254 19.6399L9.93905 19.6076C10.4591 19.1476 10.8112 18.8372 11.105 18.6224C11.3889 18.4148 11.5623 18.3397 11.7084 18.3103C11.9009 18.2715 12.0991 18.2715 12.2916 18.3103C12.4377 18.3397 12.6111 18.4148 12.895 18.6224C13.1888 18.8372 13.5409 19.1476 14.061 19.6076L14.0975 19.64C15.2193 20.6321 16.1084 21.4186 16.8413 21.9377C17.5656 22.4508 18.3009 22.8268 19.0883 22.7367C19.7179 22.6646 20.3077 22.3937 20.7742 21.9638C21.3555 21.428 21.5591 20.6269 21.654 19.7388C21.75 18.8402 21.75 17.6466 21.75 16.139V11.041C21.75 8.94462 21.75 7.2955 21.5787 6.00741C21.4031 4.68702 21.0353 3.63387 20.2152 2.80484C19.3939 1.97468 18.3488 1.60141 17.0387 1.42337C15.7628 1.24997 14.1301 1.24999 12.0575 1.25H11.9425ZM4.8512 3.85977C5.34797 3.35762 6.02251 3.06474 7.16328 2.90971C8.32645 2.75163 9.85725 2.75 12 2.75C14.1427 2.75 15.6736 2.75163 16.8367 2.90971C17.9775 3.06474 18.652 3.35762 19.1488 3.85977C19.6467 4.36303 19.9379 5.04819 20.0918 6.20518C20.2484 7.38292 20.25 8.93223 20.25 11.0975V16.0909C20.25 17.6572 20.249 18.7702 20.1625 19.5794C20.0739 20.4088 19.9104 20.72 19.7576 20.8608C19.5238 21.0763 19.2298 21.2107 18.9178 21.2464C18.7182 21.2692 18.3835 21.192 17.7083 20.7137C17.0497 20.2472 16.2211 19.5157 15.0547 18.484L15.0286 18.4609C14.5413 18.0299 14.1372 17.6725 13.7804 17.4116C13.4074 17.1388 13.0312 16.9292 12.5878 16.8398C12.1998 16.7617 11.8002 16.7617 11.4122 16.8398C10.9688 16.9292 10.5926 17.1388 10.2196 17.4116C9.86283 17.6725 9.45871 18.0299 8.97146 18.4609L8.94527 18.484C7.77887 19.5157 6.95026 20.2472 6.29165 20.7137C5.61646 21.192 5.28182 21.2692 5.08218 21.2464C4.77019 21.2107 4.47617 21.0763 4.24237 20.8608C4.08963 20.72 3.92614 20.4088 3.83752 19.5794C3.75104 18.7702 3.75 17.6572 3.75 16.0909V11.0975C3.75 8.93223 3.75156 7.38292 3.90821 6.20518C4.06209 5.04819 4.35333 4.36303 4.8512 3.85977Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />

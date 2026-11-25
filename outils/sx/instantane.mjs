@@ -17,7 +17,7 @@ try {
       for (let y = 0; y < H(); y += Math.round(innerHeight * 0.6)) { scrollTo(0, y); await dormir(160); }
       scrollTo(0, H()); await dormir(300); scrollTo(0, 0); await dormir(1200);
     }
-    const barre = document.querySelector('.synnax-navbar-sticky');
+    const barre = document.querySelector('.synnax-navbar-sticky, .sx-navbar-sticky');
     return {
       enveloppe: barre ? barre.parentElement.outerHTML : null,
       pied: (document.querySelector('footer.sgf') || {}).outerHTML || null,

@@ -1,7 +1,10 @@
 /* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxFiche ».
-   Balisage porté tel quel depuis le relevé de la référence : ne pas
-   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+   Balisage porté depuis le relevé de la référence, contenu posé par
+   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
+   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
+/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import RubanFibre from "../RubanFibre";
 import SxBarres from "../SxBarres";
 
@@ -12,30 +15,30 @@ export default function SxFiche() {
         <header className={"platform-intro platform-intro-split sb-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Self-building"}
+              {"Configuration par l'IA"}
             </span>
             <h2>
-              {"Live from day one."}
+              {"Prêt dès le jour J."}
               <br />
               <span>
-                {"Synnax builds itself around how you work."}
+                {"Omega se règle sur votre activité."}
               </span>
             </h2>
           </div>
           <div>
             <p className={"platform-lede"}>
-              {"Bring your payroll and policies. Synnax turns them into pay rules and records that match how you already pay."}
+              {"Décrivez votre activité. L'IA règle les modules, la TVA et le plan comptable, et nous reprenons vos données."}
             </p>
             <div className={"sb-ctas"}>
-              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)] "} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>
-                {"Start a migration"}
-              </button>
-              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] "}>
-                {"Book a demo"}
+              <Link href={"/reserver-un-audit"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)]  text-center"} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>
+                {"Audit offert"}
+              </Link>
+              <Link href={"/gestion"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212]  text-center"}>
+                {"Voir la gestion"}
                 <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
                   <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
                 </svg>
-              </button>
+              </Link>
             </div>
           </div>
         </header>
@@ -65,13 +68,13 @@ export default function SxFiche() {
                     </span>
                   </div>
                 </div>
-                <aside className={"sb-sidebar"} aria-label={"App navigation"}>
+                <aside className={"sb-sidebar"} aria-label={"Navigation du logiciel"}>
                   <div className={"sb-workspace"}>
                     <span className={"sb-workspace-mark"}>
                       {"L"}
                     </span>
                     <strong>
-                      {"Lumen & Co."}
+                      {"Laurent & Fils"}
                     </strong>
                     <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-sort-vertical-bold"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                       <path d={"M12 13.125C12.3012 13.125 12.5732 13.3052 12.6907 13.5827C12.8081 13.8601 12.7481 14.1808 12.5384 14.3971L8.53841 18.5221C8.39716 18.6678 8.2029 18.75 7.99999 18.75C7.79708 18.75 7.60282 18.6678 7.46156 18.5221L3.46156 14.3971C3.25185 14.1808 3.19189 13.8601 3.30931 13.5827C3.42673 13.3052 3.69874 13.125 3.99999 13.125H7.24999V6C7.24999 5.58579 7.58577 5.25 7.99999 5.25C8.4142 5.25 8.74999 5.58579 8.74999 6V13.125H12Z"} fill={"currentColor"} />
@@ -83,7 +86,7 @@ export default function SxFiche() {
                       <path d={"M11.5 2.75C6.66751 2.75 2.75 6.66751 2.75 11.5C2.75 16.3325 6.66751 20.25 11.5 20.25C16.3325 20.25 20.25 16.3325 20.25 11.5C20.25 6.66751 16.3325 2.75 11.5 2.75ZM1.25 11.5C1.25 5.83908 5.83908 1.25 11.5 1.25C17.1609 1.25 21.75 5.83908 21.75 11.5C21.75 14.0605 20.8111 16.4017 19.2589 18.1982L22.5303 21.4697C22.8232 21.7626 22.8232 22.2374 22.5303 22.5303C22.2374 22.8232 21.7626 22.8232 21.4697 22.5303L18.1982 19.2589C16.4017 20.8111 14.0605 21.75 11.5 21.75C5.83908 21.75 1.25 17.1609 1.25 11.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                     </svg>
                     <span>
-                      {"Search or ask"}
+                      {"Rechercher"}
                     </span>
                     <kbd>
                       {"⌘K"}
@@ -95,7 +98,7 @@ export default function SxFiche() {
                         <path d={"M2.5192 7.82274C2 8.77128 2 9.91549 2 12.2039V13.725C2 17.6258 2 19.5763 3.17157 20.7881C4.34315 22 6.22876 22 10 22H14C17.7712 22 19.6569 22 20.8284 20.7881C22 19.5763 22 17.6258 22 13.725V12.2039C22 9.91549 22 8.77128 21.4808 7.82274C20.9616 6.87421 20.0131 6.28551 18.116 5.10812L16.116 3.86687C14.1106 2.62229 13.1079 2 12 2C10.8921 2 9.88939 2.62229 7.88403 3.86687L5.88403 5.10813C3.98695 6.28551 3.0384 6.87421 2.5192 7.82274ZM9.44661 15.3975C9.11385 15.1508 8.64413 15.2206 8.39747 15.5534C8.15082 15.8862 8.22062 16.3559 8.55339 16.6025C9.5258 17.3233 10.715 17.75 12 17.75C13.285 17.75 14.4742 17.3233 15.4466 16.6025C15.7794 16.3559 15.8492 15.8862 15.6025 15.5534C15.3559 15.2206 14.8862 15.1508 14.5534 15.3975C13.825 15.9373 12.9459 16.25 12 16.25C11.0541 16.25 10.175 15.9373 9.44661 15.3975Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Home"}
+                        {"Accueil"}
                       </span>
                     </li>
                     <li>
@@ -105,7 +108,7 @@ export default function SxFiche() {
                         <path d={"M12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12L22 12.25L18.7055 12.2499C17.933 12.2491 17.3211 12.2485 16.7708 12.5016C16.2204 12.7547 15.8227 13.2197 15.3206 13.8067L14.6278 14.6151C13.9941 15.3544 13.8162 15.5373 13.6025 15.6356C13.3887 15.734 13.1341 15.75 12.1603 15.75H11.8397C10.8659 15.75 10.6113 15.734 10.3975 15.6356C10.1838 15.5373 10.0059 15.3544 9.37216 14.6151L8.67941 13.8067C8.17729 13.2197 7.77961 12.7547 7.22924 12.5016C6.67886 12.2485 6.06705 12.2491 5.29454 12.2499L2.00001 12.25L2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2ZM9.25 10.5C9.25 10.0858 9.58579 9.75 10 9.75H14C14.4142 9.75 14.75 10.0858 14.75 10.5C14.75 10.9142 14.4142 11.25 14 11.25H10C9.58579 11.25 9.25 10.9142 9.25 10.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Inbox"}
+                        {"À valider"}
                       </span>
                       <em className={"is-badge"}>
                         {"3"}
@@ -116,12 +119,12 @@ export default function SxFiche() {
                         <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Ask Synnax"}
+                        {"Demander à Omega"}
                       </span>
                     </li>
                   </ul>
                   <p className={"sb-nav-label"}>
-                    {"Workspace"}
+                    {"Gestion"}
                   </p>
                   <ul className={"sb-nav"}>
                     <li className={"is-active"}>
@@ -132,7 +135,7 @@ export default function SxFiche() {
                         <path d={"M14.999 3.00098C16.6557 3.00118 17.999 4.34425 17.999 6.00098C17.9989 7.6576 16.6556 9.00078 14.999 9.00098C14.6378 9.00098 14.2914 8.93633 13.9707 8.81934C14.4435 7.98748 14.7138 7.02523 14.7139 6C14.7139 4.97534 14.444 4.0132 13.9717 3.18164C14.2921 3.06489 14.6382 3.00098 14.999 3.00098Z"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"People"}
+                        {"Ventes"}
                       </span>
                       <em>
                         {"42"}
@@ -145,7 +148,7 @@ export default function SxFiche() {
                         <path d={"M7.77668 4.02439L9.73549 2.58126C10.7874 1.80625 12.2126 1.80625 13.2645 2.58126L15.2336 4.03197C14.4103 3.99995 13.4909 3.99998 12.4829 4H10.3123C9.39123 3.99998 8.5441 3.99996 7.77668 4.02439Z"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Payroll"}
+                        {"Achats"}
                       </span>
                     </li>
                     <li>
@@ -154,7 +157,7 @@ export default function SxFiche() {
                         <path d={"M22 12C22 11.161 22 10.4153 21.9871 9.75H2.0129C2 10.4153 2 11.161 2 12V14C2 17.7712 2 19.6569 3.17157 20.8284C4.34315 22 6.22876 22 10 22H14C17.7712 22 19.6569 22 20.8284 20.8284C22 19.6569 22 17.7712 22 14V12ZM14 12.25C13.0335 12.25 12.25 13.0335 12.25 14V16C12.25 16.9665 13.0335 17.75 14 17.75C14.9665 17.75 15.75 16.9665 15.75 16V14C15.75 13.0335 14.9665 12.25 14 12.25ZM14 13.75C13.8619 13.75 13.75 13.8619 13.75 14V16C13.75 16.1381 13.8619 16.25 14 16.25C14.1381 16.25 14.25 16.1381 14.25 16V14C14.25 13.8619 14.1381 13.75 14 13.75ZM10.787 12.3071C11.0673 12.4232 11.25 12.6967 11.25 13V17C11.25 17.4142 10.9142 17.75 10.5 17.75C10.0858 17.75 9.75 17.4142 9.75 17V14.8107L9.53033 15.0303C9.23744 15.3232 8.76256 15.3232 8.46967 15.0303C8.17678 14.7374 8.17678 14.2626 8.46967 13.9697L9.96967 12.4697C10.1842 12.2552 10.5068 12.191 10.787 12.3071Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Time off"}
+                        {"Stock"}
                       </span>
                     </li>
                     <li>
@@ -162,7 +165,7 @@ export default function SxFiche() {
                         <path d={"M3.37752 5.08241C3 5.62028 3 7.21907 3 10.4167V11.9914C3 17.6294 7.23896 20.3655 9.89856 21.5273C10.62 21.8424 10.9807 22 12 22C13.0193 22 13.38 21.8424 14.1014 21.5273C16.761 20.3655 21 17.6294 21 11.9914V10.4167C21 7.21907 21 5.62028 20.6225 5.08241C20.245 4.54454 18.7417 4.02996 15.7351 3.00079L15.1623 2.80472C13.595 2.26824 12.8114 2 12 2C11.1886 2 10.405 2.26824 8.83772 2.80472L8.26491 3.00079C5.25832 4.02996 3.75503 4.54454 3.37752 5.08241ZM15.0595 10.4995C15.3353 10.1905 15.3085 9.71642 14.9995 9.44055C14.6905 9.16467 14.2164 9.19151 13.9405 9.50049L10.9286 12.8739L10.0595 11.9005C9.78358 11.5915 9.30947 11.5647 9.00049 11.8405C8.69151 12.1164 8.66467 12.5905 8.94055 12.8995L10.3691 14.4995C10.5114 14.6589 10.7149 14.75 10.9286 14.75C11.1422 14.75 11.3457 14.6589 11.488 14.4995L15.0595 10.4995Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Compliance"}
+                        {"Banque"}
                       </span>
                     </li>
                     <li>
@@ -173,7 +176,7 @@ export default function SxFiche() {
                         <path d={"M3 21.25C2.58579 21.25 2.25 21.5858 2.25 22C2.25 22.4142 2.58579 22.75 3 22.75H21C21.4142 22.75 21.75 22.4142 21.75 22C21.75 21.5858 21.4142 21.25 21 21.25H3Z"} fill={"currentColor"} />
                       </svg>
                       <span>
-                        {"Insights"}
+                        {"Comptabilité"}
                       </span>
                     </li>
                     <li>
@@ -186,25 +189,25 @@ export default function SxFiche() {
                     </li>
                   </ul>
                   <p className={"sb-nav-label"}>
-                    {"Entities"}
+                    {"Sociétés"}
                   </p>
                   <ul className={"sb-nav"}>
                     <li>
                       <i className={"sb-entity-dot"} style={{ "background": "#16a34a" } as CSSProperties} />
                       <span>
-                        {"Lumen SA (Pty) Ltd"}
+                        {"Laurent Menuiserie SAS"}
                       </span>
                     </li>
                     <li>
                       <i className={"sb-entity-dot"} style={{ "background": "#2d00f7" } as CSSProperties} />
                       <span>
-                        {"Lumen UK Ltd"}
+                        {"Laurent Pose SARL"}
                       </span>
                     </li>
                     <li>
                       <i className={"sb-entity-dot"} style={{ "background": "#f06a00" } as CSSProperties} />
                       <span>
-                        {"Lumen Inc."}
+                        {"Laurent Négoce"}
                       </span>
                     </li>
                   </ul>
@@ -215,23 +218,23 @@ export default function SxFiche() {
                           <path d={"M12.4277 2C11.3139 2 10.2995 2.6007 8.27081 3.80211L7.58466 4.20846C5.55594 5.40987 4.54158 6.01057 3.98466 7C3.42773 7.98943 3.42773 9.19084 3.42773 11.5937V12.4063C3.42773 14.8092 3.42773 16.0106 3.98466 17C4.54158 17.9894 5.55594 18.5901 7.58466 19.7915L8.27081 20.1979C10.2995 21.3993 11.3139 22 12.4277 22C13.5416 22 14.5559 21.3993 16.5847 20.1979L17.2708 19.7915C19.2995 18.5901 20.3139 17.9894 20.8708 17C21.4277 16.0106 21.4277 14.8092 21.4277 12.4063V11.5937C21.4277 9.19084 21.4277 7.98943 20.8708 7C20.3139 6.01057 19.2995 5.40987 17.2708 4.20846L16.5847 3.80211C14.5559 2.6007 13.5416 2 12.4277 2ZM8.67773 12C8.67773 9.92893 10.3567 8.25 12.4277 8.25C14.4988 8.25 16.1777 9.92893 16.1777 12C16.1777 14.0711 14.4988 15.75 12.4277 15.75C10.3567 15.75 8.67773 14.0711 8.67773 12Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                         </svg>
                         <span>
-                          {"Settings"}
+                          {"Réglages"}
                         </span>
                       </li>
                     </ul>
                     <div className={"sb-user"}>
                       <span data-slot={"avatar"} className={"sb-user-avatar"}>
-                        <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/amy-mckinnon.jpg"} alt={""} />
+                        <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-am.svg"} alt={""} />
                         <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                           {"A"}
                         </span>
                       </span>
                       <div>
                         <strong>
-                          {"Amy Mckinnon"}
+                          {"Alice Morel"}
                         </strong>
                         <small>
-                          {"People Ops admin"}
+                          {"Administration"}
                         </small>
                       </div>
                     </div>
@@ -240,39 +243,39 @@ export default function SxFiche() {
                 <div className={"sb-app-main"}>
                   <div className={"sb-record"}>
                     <div className={"platform-panel-header sb-record-header"}>
-                      <ol className={"sb-breadcrumb"} aria-label={"Breadcrumb"}>
+                      <ol className={"sb-breadcrumb"} aria-label={"Fil d'Ariane"}>
                         <li>
-                          {"People"}
+                          {"Ventes"}
                         </li>
                         <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-alt-arrow-right-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                           <path d={"M8.51192 4.43056C8.82641 4.16099 9.29989 4.19741 9.56946 4.5119L15.5695 11.5119C15.8102 11.7928 15.8102 12.2072 15.5695 12.4881L9.56946 19.4881C9.29989 19.8026 8.82641 19.839 8.51192 19.5694C8.19743 19.2999 8.161 18.8264 8.43057 18.5119L14.0122 12L8.43057 5.48809C8.161 5.1736 8.19743 4.70012 8.51192 4.43056Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                         </svg>
                         <li>
-                          {"Design"}
+                          {"Clients"}
                         </li>
                         <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-alt-arrow-right-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                           <path d={"M8.51192 4.43056C8.82641 4.16099 9.29989 4.19741 9.56946 4.5119L15.5695 11.5119C15.8102 11.7928 15.8102 12.2072 15.5695 12.4881L9.56946 19.4881C9.29989 19.8026 8.82641 19.839 8.51192 19.5694C8.19743 19.2999 8.161 18.8264 8.43057 18.5119L14.0122 12L8.43057 5.48809C8.161 5.1736 8.19743 4.70012 8.51192 4.43056Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                         </svg>
                         <li aria-current={"page"}>
-                          {"Anne-Marie Myburg"}
+                          {"Anne-Marie Roux"}
                         </li>
                       </ol>
                       <div className={"platform-payroll-tools"}>
-                        <div role={"group"} data-slot={"avatar-group"} data-size={"xs"} className={"platform-header-avatars"} aria-label={"4 collaborators"}>
+                        <div role={"group"} data-slot={"avatar-group"} data-size={"xs"} className={"platform-header-avatars"} aria-label={"4 collaborateurs"}>
                           <span data-slot={"avatar"}>
-                            <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/akin-balogun.jpg"} alt={"Akin Balogun"} />
+                            <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-ab.svg"} alt={"Adam Benali"} />
                             <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                               {"A"}
                             </span>
                           </span>
                           <span data-slot={"avatar"}>
-                            <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/amy-mckinnon.jpg"} alt={"Amy Mckinnon"} />
+                            <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-am.svg"} alt={"Alice Morel"} />
                             <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                               {"A"}
                             </span>
                           </span>
                           <span data-slot={"avatar"}>
-                            <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/anne-marie-myburg.jpg"} alt={"Anne-Marie Myburg"} />
+                            <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-ar.svg"} alt={"Anne-Marie Roux"} />
                             <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                               {"A"}
                             </span>
@@ -280,18 +283,18 @@ export default function SxFiche() {
                           <span data-slot={"avatar-group-count"}>
                             {"+1"}
                             <span className={"sr-only"}>
-                              {" additional collaborator"}
+                              {" collaborateur de plus"}
                             </span>
                           </span>
                         </div>
-                        <button type={"button"} aria-label={"Share"}>
+                        <button type={"button"} aria-label={"Partager"}>
                           <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-square-share-line-outline"} style={{ "width": "17px", "height": "17px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                             <path d={"M10.7521 1.99364C10.7556 2.40784 10.4226 2.74646 10.0084 2.74997C8.29884 2.76447 7.03889 2.82006 6.06281 3.01125C5.10767 3.19835 4.47982 3.50532 3.99518 3.98996C3.42533 4.55981 3.09834 5.33078 2.92642 6.60954C2.75159 7.90987 2.75 9.61855 2.75 11.9974C2.75 14.3762 2.75159 16.0849 2.92642 17.3852C3.09834 18.664 3.42533 19.435 3.99518 20.0048C4.56503 20.5747 5.336 20.9017 6.61476 21.0736C7.91509 21.2484 9.62377 21.25 12.0026 21.25C14.3814 21.25 16.0901 21.2484 17.3905 21.0736C18.6692 20.9017 19.4402 20.5747 20.01 20.0048C20.4947 19.5202 20.8017 18.8923 20.9887 17.9372C21.1799 16.9611 21.2355 15.7012 21.25 13.9916C21.2535 13.5774 21.5922 13.2444 22.0064 13.2479C22.4206 13.2515 22.7535 13.5901 22.75 14.0043C22.7355 15.7087 22.6819 17.0968 22.4608 18.2255C22.2356 19.3752 21.8272 20.309 21.0707 21.0655C20.1757 21.9605 19.0354 22.3659 17.5903 22.5602C16.1785 22.75 14.369 22.75 12.06 22.75H11.9452C9.63623 22.75 7.82673 22.75 6.41488 22.5602C4.96979 22.3659 3.82952 21.9605 2.93452 21.0655C2.03952 20.1705 1.63408 19.0302 1.43979 17.5851C1.24998 16.1733 1.24999 14.3638 1.25 12.0548V11.94C1.24999 9.63101 1.24998 7.82151 1.43979 6.40967C1.63408 4.96458 2.03952 3.8243 2.93452 2.9293C3.69102 2.1728 4.62478 1.76443 5.77447 1.53923C6.90322 1.31813 8.29131 1.26448 9.99573 1.25003C10.4099 1.24652 10.7485 1.57944 10.7521 1.99364ZM16.4697 1.46967C16.7626 1.17678 17.2374 1.17678 17.5303 1.46967L22.5303 6.46967C22.8232 6.76256 22.8232 7.23744 22.5303 7.53033L17.5303 12.5303C17.2374 12.8232 16.7626 12.8232 16.4697 12.5303C16.1768 12.2374 16.1768 11.7626 16.4697 11.4697L20.1893 7.75H14C12.4485 7.75 11.5328 8.50701 11.212 8.82933L11.0199 9.02244L10.8293 9.21204C10.507 9.53279 9.75 10.4485 9.75 12V15C9.75 15.4142 9.41421 15.75 9 15.75C8.58579 15.75 8.25 15.4142 8.25 15V12C8.25 9.91622 9.27703 8.64063 9.77125 8.14881C9.77125 8.14881 9.77125 8.14881 9.77125 8.14881L9.96178 7.9592L10.1488 7.77125C10.6406 7.27703 11.9162 6.25 14 6.25H20.1893L16.4697 2.53033C16.1768 2.23744 16.1768 1.76256 16.4697 1.46967Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                           </svg>
-                          {"Share"}
+                          {"Partager"}
                         </button>
                         <span className={"platform-tool-divider"} aria-hidden={"true"} />
-                        <button type={"button"} aria-label={"Chat"}>
+                        <button type={"button"} aria-label={"Discussion"}>
                           <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-dialog-2-outline"} style={{ "width": "18px", "height": "18px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                             <path d={"M13.3365 1.25H15.6634C16.8583 1.24999 17.8086 1.24999 18.5706 1.32244C19.352 1.39674 20.0127 1.55247 20.6012 1.91312C21.2067 2.28418 21.7158 2.79326 22.0868 3.39876C22.4475 3.9873 22.6032 4.64796 22.6775 5.42935C22.75 6.19141 22.75 7.14162 22.7499 8.33653V9.15226C22.75 10.0028 22.75 10.6794 22.7125 11.2279C22.6742 11.7891 22.5943 12.2709 22.4074 12.7221C21.9507 13.8247 21.0746 14.7008 19.972 15.1575C19.5929 15.3146 19.1887 15.397 18.7308 15.4419C18.7255 15.5812 18.7188 15.7137 18.7102 15.8397C18.6695 16.4357 18.5848 16.9436 18.3884 17.4178C17.9063 18.5817 16.9816 19.5064 15.8177 19.9885C15.2209 20.2357 14.5625 20.3081 13.7346 20.3346C13.2892 20.3489 13.0044 20.3587 12.7881 20.385C12.5837 20.41 12.5069 20.4433 12.4654 20.4679C12.4193 20.4951 12.3557 20.5451 12.2447 20.6979C12.1249 20.863 11.9891 21.0907 11.7742 21.4539L11.5147 21.8922C10.8378 23.0359 9.16217 23.0359 8.48523 21.8922L8.2258 21.4539C8.01082 21.0907 7.87511 20.863 7.75524 20.6979C7.64427 20.5451 7.58064 20.4951 7.53453 20.4679C7.49305 20.4433 7.41631 20.41 7.21182 20.3851C6.99552 20.3587 6.71078 20.3489 6.26533 20.3346C5.43745 20.3081 4.77912 20.2357 4.18225 19.9885C3.01837 19.5064 2.09367 18.5817 1.61157 17.4178C1.41517 16.9436 1.33047 16.4357 1.2898 15.8397C1.24999 15.2563 1.25 14.5361 1.25 13.6274V12.7613C1.24999 11.4848 1.24999 10.4732 1.32705 9.6627C1.40595 8.83288 1.57089 8.13673 1.94996 7.51814C2.34162 6.879 2.87899 6.34163 3.51813 5.94996C4.13672 5.57089 4.83287 5.40595 5.66269 5.32705C5.87363 5.30699 6.0982 5.29216 6.33751 5.28118C6.41754 4.56134 6.57708 3.94704 6.91307 3.39877C7.28412 2.79326 7.7932 2.28418 8.3987 1.91312C8.98723 1.55247 9.64789 1.39674 10.4293 1.32244C11.1913 1.24999 12.1416 1.24999 13.3365 1.25ZM7.85331 5.2512C8.1401 5.25 8.44243 5.25 8.7613 5.25H11.2387C12.5153 5.24999 13.5268 5.24999 14.3373 5.32705C15.1671 5.40595 15.8633 5.57089 16.4819 5.94996C17.121 6.34163 17.6584 6.879 18.05 7.51814C18.4291 8.13673 18.5941 8.83288 18.673 9.6627C18.75 10.4732 18.75 11.4847 18.75 12.7613V13.6274C18.75 13.7307 18.75 13.8316 18.7499 13.9301C19.0253 13.8944 19.2262 13.8428 19.398 13.7717C20.1331 13.4672 20.7171 12.8832 21.0216 12.1481C21.1201 11.9101 21.1829 11.6106 21.216 11.1258C21.2495 10.6343 21.2499 10.0089 21.2499 9.12503V8.37503C21.2499 7.13296 21.2492 6.25408 21.1842 5.57133C21.1204 4.89973 20.9998 4.49574 20.8079 4.18251C20.5605 3.77884 20.2211 3.43945 19.8174 3.19208C19.5042 3.00013 19.1002 2.87956 18.4286 2.81571C17.7459 2.75079 16.867 2.75 15.6249 2.75H13.3749C12.1329 2.75 11.254 2.75079 10.5713 2.81571C9.89967 2.87956 9.49568 3.00013 9.18245 3.19208C8.77879 3.43945 8.4394 3.77884 8.19203 4.18251C8.03147 4.44453 7.92229 4.76687 7.85331 5.2512ZM5.80467 6.82031C5.08465 6.88877 4.64517 7.01855 4.30188 7.22892C3.86458 7.4969 3.4969 7.86458 3.22892 8.30189C3.01855 8.64518 2.88877 9.08466 2.82031 9.80468C2.75079 10.5359 2.75 11.4761 2.75 12.8V13.6C2.75 14.5422 2.75041 15.2112 2.78632 15.7376C2.82178 16.2573 2.88931 16.5828 2.99739 16.8438C3.32725 17.6401 3.95994 18.2728 4.75628 18.6027C5.09046 18.7411 5.52102 18.81 6.31328 18.8354L6.34438 18.8364C6.74979 18.8493 7.1024 18.8606 7.39344 18.8961C7.70371 18.9339 8.00853 19.0055 8.29822 19.1768C8.58327 19.3454 8.78917 19.569 8.96888 19.8164C9.13514 20.0453 9.30644 20.3347 9.50062 20.6629L9.77606 21.1282C9.82147 21.2049 9.90074 21.25 9.99998 21.25C10.0992 21.25 10.1785 21.2049 10.2239 21.1282L10.4994 20.6628C10.6935 20.3347 10.8648 20.0453 11.0311 19.8164C11.2108 19.569 11.4167 19.3454 11.7018 19.1768C11.9914 19.0055 12.2963 18.9339 12.6065 18.8961C12.8976 18.8606 13.2502 18.8493 13.6556 18.8364L13.6867 18.8354C14.479 18.81 14.9095 18.7411 15.2437 18.6027C16.0401 18.2728 16.6728 17.6401 17.0026 16.8438C17.1107 16.5828 17.1782 16.2573 17.2137 15.7376C17.2496 15.2112 17.25 14.5422 17.25 13.6V12.8C17.25 11.4761 17.2492 10.5359 17.1797 9.80468C17.1112 9.08466 16.9814 8.64518 16.7711 8.30189C16.5031 7.86458 16.1354 7.4969 15.6981 7.22892C15.3548 7.01855 14.9154 6.88877 14.1953 6.82031C13.4641 6.75079 12.5239 6.75 11.2 6.75H8.8C7.47611 6.75 6.53585 6.75079 5.80467 6.82031Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                             <path d={"M7.5 13C7.5 13.5523 7.05229 14 6.5 14C5.94772 14 5.5 13.5523 5.5 13C5.5 12.4477 5.94772 12 6.5 12C7.05229 12 7.5 12.4477 7.5 13Z"} fill={"currentColor"} />
@@ -299,14 +302,14 @@ export default function SxFiche() {
                             <path d={"M14.5 13C14.5 13.5523 14.0523 14 13.5 14C12.9477 14 12.5 13.5523 12.5 13C12.5 12.4477 12.9477 12 13.5 12C14.0523 12 14.5 12.4477 14.5 13Z"} fill={"currentColor"} />
                           </svg>
                         </button>
-                        <button type={"button"} aria-label={"Help"}>
+                        <button type={"button"} aria-label={"Aide"}>
                           <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-question-circle-outline"} style={{ "width": "18px", "height": "18px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
                             <path d={"M12 15C12.5523 15 13 15.4477 13 16C13 16.5523 12.5523 17 12 17C11.4477 17 11 16.5523 11 16C11 15.4477 11.4477 15 12 15Z"} fill={"currentColor"} />
                             <path d={"M12 6.25C13.4497 6.25 14.625 7.42525 14.625 8.875C14.625 9.83834 14.1054 10.68 13.335 11.1357C13.1384 11.2521 12.9759 11.3793 12.8701 11.5039C12.7676 11.6248 12.75 11.7036 12.75 11.75V13C12.75 13.4142 12.4142 13.75 12 13.75C11.5858 13.75 11.25 13.4142 11.25 13V11.75C11.25 11.2442 11.4715 10.8338 11.7266 10.5332C11.9785 10.2363 12.2928 10.0095 12.5713 9.84473C12.9043 9.64773 13.125 9.28655 13.125 8.875C13.125 8.25368 12.6213 7.75 12 7.75C11.3787 7.75 10.875 8.25368 10.875 8.875C10.875 9.28921 10.5392 9.625 10.125 9.625C9.71079 9.625 9.375 9.28921 9.375 8.875C9.375 7.42525 10.5503 6.25 12 6.25Z"} fill={"currentColor"} />
                             <path d={"M12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C6.06294 22.75 1.25 17.9371 1.25 12C1.25 6.06294 6.06294 1.25 12 1.25ZM12 2.75C6.89137 2.75 2.75 6.89137 2.75 12C2.75 17.1086 6.89137 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                           </svg>
                         </button>
-                        <button type={"button"} aria-label={"More options"}>
+                        <button type={"button"} aria-label={"Plus d'options"}>
                           <svg xmlns={"http://www.w3.org/2000/svg"} width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} color={"currentColor"} className={""}>
                             <path d={"M12 12V11.5M12 5V4.5M12 19V18.5M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12ZM13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5ZM13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z"} stroke={"currentColor"} strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={"1.5"} />
                           </svg>
@@ -317,14 +320,14 @@ export default function SxFiche() {
                             <path d={"M12 21.5C17.2467 21.5 21.5 17.2467 21.5 12C21.5 6.75329 17.2467 2.5 12 2.5C6.75329 2.5 2.5 6.75329 2.5 12C2.5 13.3377 2.66372 14.5604 3.1189 15.6954C3.81756 17.4374 3.68195 18.9241 2.5 20.5C3.86146 21.1644 6 21 7 20.0725C8.45323 20.9748 10.1636 21.5 12 21.5Z"} stroke={"currentColor"} strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={"1.5"} />
                             <path d={"M12 10.125V12M12 12V13.875M12 12H10.5M12 12H13.5M15 12L13.6987 11.5662C13.1015 11.3672 12.6328 10.8985 12.4338 10.3013L12 9L11.5662 10.3013C11.3672 10.8985 10.8985 11.3672 10.3013 11.5662L9 12L10.3013 12.4338C10.8985 12.6328 11.3672 13.1015 11.5662 13.6987L12 15L12.4338 13.6987C12.6328 13.1015 13.1015 12.6328 13.6987 12.4338L15 12Z"} stroke={"currentColor"} strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={"1.5"} />
                           </svg>
-                          {"Ask AI"}
+                          {"Demander à l'IA"}
                         </button>
                       </div>
                     </div>
                     <div className={"sb-record-bar"}>
                       <div className={"sb-record-identity"}>
                         <span data-slot={"avatar"} className={"sb-record-avatar"}>
-                          <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/anne-marie-myburg.jpg"} alt={""} />
+                          <img data-slot={"avatar-image"} src={"/accueil-sx/avatar-ar.svg"} alt={""} />
                           <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
                             {"A"}
                           </span>
@@ -332,36 +335,36 @@ export default function SxFiche() {
                         <div>
                           <div className={"sb-record-name"}>
                             <strong>
-                              {"Anne-Marie Myburg"}
+                              {"Anne-Marie Roux"}
                             </strong>
                             <span className={"platform-status  "}>
                               <i />
-                              {"Active"}
+                              {"À jour"}
                             </span>
                           </div>
                           <p>
-                            {"Design Lead · Cape Town · Lumen SA (Pty) Ltd"}
+                            {"Hôtel des Quais · Bordeaux · Laurent Menuiserie SAS"}
                           </p>
                         </div>
                       </div>
-                      <nav className={"sb-record-tabs"} aria-label={"Record sections"}>
+                      <nav className={"sb-record-tabs"} aria-label={"Sections de la fiche"}>
                         <span className={"is-active"}>
-                          {"Overview"}
+                          {"Vue d'ensemble"}
                         </span>
                         <span>
-                          {"Resume"}
+                          {"Devis"}
                         </span>
                         <span>
-                          {"Pay"}
+                          {"Factures"}
                         </span>
                         <span>
                           {"Documents"}
                         </span>
                         <span>
-                          {"Time off"}
+                          {"Stock"}
                         </span>
                         <span>
-                          {"Activity"}
+                          {"Activité"}
                         </span>
                       </nav>
                     </div>
@@ -376,16 +379,16 @@ export default function SxFiche() {
                               <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
                                 <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
                               </svg>
-                              {" AI summary"}
+                              {" Résumé de l'IA"}
                             </div>
                             <p>
-                              {"Anne-Marie joined Design on 3 Nov. Her contract is signed, passport verified and payroll is set up. The first pay run is on 27 Nov, and her probation review is booked for 3 Feb."}
+                              {"Anne-Marie Roux a signé son devis le 3 nov. L'acompte est encaissé, le bois commandé et la pose planifiée. La facture part le 27 nov., la visite de fin de chantier a lieu le 3 fév."}
                             </p>
                           </div>
                         </div>
-                        <section className={"sb-block"} aria-label={"Upcoming"}>
+                        <section className={"sb-block"} aria-label={"À venir"}>
                           <h3>
-                            {"Upcoming"}
+                            {"À venir"}
                           </h3>
                           <ul className={"sb-upcoming"}>
                             <li>
@@ -400,14 +403,14 @@ export default function SxFiche() {
                               </span>
                               <div>
                                 <strong>
-                                  {"First pay date"}
+                                  {"À facturer"}
                                 </strong>
                                 <p>
-                                  {"Fri 27 Nov · $5,450 gross"}
+                                  {"Ven. 27 nov. · 5 450 € HT"}
                                 </p>
                               </div>
                               <span className={"sb-when"}>
-                                {"In 13 days"}
+                                {"Dans 13 jours"}
                               </span>
                             </li>
                             <li>
@@ -418,25 +421,25 @@ export default function SxFiche() {
                               </span>
                               <div>
                                 <strong>
-                                  {"Probation review"}
+                                  {"Fin de chantier"}
                                 </strong>
                                 <p>
-                                  {"Tue 3 Feb · with Roger Lin"}
+                                  {"Mar. 3 fév. · avec Rémi Lambert"}
                                 </p>
                               </div>
                               <span className={"sb-when"}>
-                                {"In 81 days"}
+                                {"Dans 81 jours"}
                               </span>
                             </li>
                           </ul>
                         </section>
                         <div className={"sb-cards"}>
-                          <section className={"sb-card"} aria-label={"Contract"}>
+                          <section className={"sb-card"} aria-label={"Devis"}>
                             <h3>
                               <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-document-text-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                                 <path d={"M10.9436 1.25H13.0564C14.8942 1.24998 16.3498 1.24997 17.489 1.40314C18.6614 1.56076 19.6104 1.89288 20.3588 2.64124C21.1071 3.38961 21.4392 4.33856 21.5969 5.51098C21.75 6.65019 21.75 8.10583 21.75 9.94359V14.0564C21.75 15.8942 21.75 17.3498 21.5969 18.489C21.4392 19.6614 21.1071 20.6104 20.3588 21.3588C19.6104 22.1071 18.6614 22.4392 17.489 22.5969C16.3498 22.75 14.8942 22.75 13.0564 22.75H10.9436C9.10583 22.75 7.65019 22.75 6.51098 22.5969C5.33856 22.4392 4.38961 22.1071 3.64124 21.3588C2.89288 20.6104 2.56076 19.6614 2.40314 18.489C2.24997 17.3498 2.24998 15.8942 2.25 14.0564V9.94358C2.24998 8.10582 2.24997 6.65019 2.40314 5.51098C2.56076 4.33856 2.89288 3.38961 3.64124 2.64124C4.38961 1.89288 5.33856 1.56076 6.51098 1.40314C7.65019 1.24997 9.10582 1.24998 10.9436 1.25ZM6.71085 2.88976C5.70476 3.02502 5.12511 3.27869 4.7019 3.7019C4.27869 4.12511 4.02502 4.70476 3.88976 5.71085C3.75159 6.73851 3.75 8.09318 3.75 10V14C3.75 15.9068 3.75159 17.2615 3.88976 18.2892C4.02502 19.2952 4.27869 19.8749 4.7019 20.2981C5.12511 20.7213 5.70476 20.975 6.71085 21.1102C7.73851 21.2484 9.09318 21.25 11 21.25H13C14.9068 21.25 16.2615 21.2484 17.2892 21.1102C18.2952 20.975 18.8749 20.7213 19.2981 20.2981C19.7213 19.8749 19.975 19.2952 20.1102 18.2892C20.2484 17.2615 20.25 15.9068 20.25 14V10C20.25 8.09318 20.2484 6.73851 20.1102 5.71085C19.975 4.70476 19.7213 4.12511 19.2981 3.7019C18.8749 3.27869 18.2952 3.02502 17.2892 2.88976C16.2615 2.75159 14.9068 2.75 13 2.75H11C9.09318 2.75 7.73851 2.75159 6.71085 2.88976ZM7.25 8C7.25 7.58579 7.58579 7.25 8 7.25H16C16.4142 7.25 16.75 7.58579 16.75 8C16.75 8.41421 16.4142 8.75 16 8.75H8C7.58579 8.75 7.25 8.41421 7.25 8ZM7.25 12C7.25 11.5858 7.58579 11.25 8 11.25H16C16.4142 11.25 16.75 11.5858 16.75 12C16.75 12.4142 16.4142 12.75 16 12.75H8C7.58579 12.75 7.25 12.4142 7.25 12ZM7.25 16C7.25 15.5858 7.58579 15.25 8 15.25H13C13.4142 15.25 13.75 15.5858 13.75 16C13.75 16.4142 13.4142 16.75 13 16.75H8C7.58579 16.75 7.25 16.4142 7.25 16Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                               </svg>
-                              {"Contract"}
+                              {"Devis"}
                             </h3>
                             <div className={"sb-doc"}>
                               <span className={"sb-doc-thumb"} aria-hidden={"true"}>
@@ -447,60 +450,60 @@ export default function SxFiche() {
                               </span>
                               <div>
                                 <strong>
-                                  {"Employment contract.pdf"}
+                                  {"Devis signé.pdf"}
                                 </strong>
                                 <p>
-                                  {"Signed 28 Oct · 6 pages"}
+                                  {"Signé le 28 oct. · 6 pages"}
                                 </p>
                               </div>
                             </div>
                             <dl className={"sb-terms"}>
                               <div>
                                 <dt>
-                                  {"Start date"}
+                                  {"Début"}
                                 </dt>
                                 <dd>
-                                  {"3 Nov 2026"}
+                                  {"3 nov. 2026"}
                                 </dd>
                               </div>
                               <div>
                                 <dt>
-                                  {"Probation"}
+                                  {"Durée"}
                                 </dt>
                                 <dd>
-                                  {"3 months"}
+                                  {"3 mois"}
                                 </dd>
                               </div>
                               <div>
                                 <dt>
-                                  {"Notice"}
+                                  {"Acompte"}
                                 </dt>
                                 <dd>
-                                  {"1 month"}
+                                  {"30 %"}
                                 </dd>
                               </div>
                               <div>
                                 <dt>
-                                  {"Hours"}
+                                  {"Paiement"}
                                 </dt>
                                 <dd>
-                                  {"40 per week"}
+                                  {"À 30 jours"}
                                 </dd>
                               </div>
                             </dl>
                           </section>
-                          <section className={"sb-card"} aria-label={"November KPIs"}>
+                          <section className={"sb-card"} aria-label={"Indicateurs de novembre"}>
                             <h3>
                               <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-target-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                                 <path d={"M9.25 12C9.25 11.5858 9.58579 11.25 10 11.25H11.25V10C11.25 9.58579 11.5858 9.25 12 9.25C12.4142 9.25 12.75 9.58579 12.75 10V11.25H14C14.4142 11.25 14.75 11.5858 14.75 12C14.75 12.4142 14.4142 12.75 14 12.75H12.75V14C12.75 14.4142 12.4142 14.75 12 14.75C11.5858 14.75 11.25 14.4142 11.25 14V12.75H10C9.58579 12.75 9.25 12.4142 9.25 12Z"} fill={"currentColor"} />
                                 <path d={"M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM11.25 2.77997C6.7395 3.14188 3.14188 6.7395 2.77997 11.25H5C5.41421 11.25 5.75 11.5858 5.75 12C5.75 12.4142 5.41421 12.75 5 12.75H2.77997C3.14188 17.2605 6.7395 20.8581 11.25 21.22V19C11.25 18.5858 11.5858 18.25 12 18.25C12.4142 18.25 12.75 18.5858 12.75 19V21.22C17.2605 20.8581 20.8581 17.2605 21.22 12.75H19C18.5858 12.75 18.25 12.4142 18.25 12C18.25 11.5858 18.5858 11.25 19 11.25H21.22C20.8581 6.7395 17.2605 3.14188 12.75 2.77997V5C12.75 5.41421 12.4142 5.75 12 5.75C11.5858 5.75 11.25 5.41421 11.25 5V2.77997Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                               </svg>
-                              {"November KPIs"}
+                              {"Indicateurs de novembre"}
                             </h3>
                             <dl className={"sb-terms sb-kpis"}>
                               <div>
                                 <dt>
-                                  {"Onboarding steps done"}
+                                  {"Étapes faites"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -513,7 +516,7 @@ export default function SxFiche() {
                               </div>
                               <div>
                                 <dt>
-                                  {"Team 1:1s held"}
+                                  {"Situations facturées"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -526,7 +529,7 @@ export default function SxFiche() {
                               </div>
                               <div>
                                 <dt>
-                                  {"Design reviews led"}
+                                  {"Avenants signés"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -539,7 +542,7 @@ export default function SxFiche() {
                               </div>
                               <div>
                                 <dt>
-                                  {"System tickets closed"}
+                                  {"Réserves levées"}
                                 </dt>
                                 <dd>
                                   <span className={"sb-kpi-bar"}>
@@ -553,34 +556,34 @@ export default function SxFiche() {
                             </dl>
                             <div className={"sb-total"}>
                               <span>
-                                {"Month to date "}
+                                {"Mois en cours "}
                                 <span className={"platform-status  "}>
                                   <i />
-                                  {"On track"}
+                                  {"Dans les temps"}
                                 </span>
                               </span>
                               <strong>
-                                {"76%"}
+                                {"76 %"}
                               </strong>
                             </div>
                           </section>
                         </div>
-                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-earnings"} role={"group"} aria-label={"Earnings to date"}>
+                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-earnings"} role={"group"} aria-label={"Facturé à ce jour"}>
                           <div className={"flex flex-wrap items-center gap-x-6 gap-y-4"}>
                             <div data-slot={"pay-breakdown-chart-figure"} className={"flex min-w-[200px] flex-1 flex-col gap-2.5"}>
                               <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
-                                {"Gross earnings to date"}
+                                {"Facturé à ce jour"}
                               </p>
                               <p data-slot={"pay-breakdown-chart-revenue"} className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
-                                {"$3,019.50"}
+                                {"3 019,50 €"}
                               </p>
                             </div>
                             <div data-slot={"pay-breakdown-chart-figure"} className={"flex min-w-[200px] flex-1 flex-col gap-2.5"}>
                               <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
-                                {"Nett earnings to date"}
+                                {"Encaissé à ce jour"}
                               </p>
                               <p data-slot={"pay-breakdown-chart-expenses"} className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
-                                {"$2,066.95"}
+                                {"2 066,95 €"}
                               </p>
                             </div>
                             <span data-slot={"pay-breakdown-chart-manage"} className={"flex shrink-0"}>
@@ -589,26 +592,26 @@ export default function SxFiche() {
                                   <path fillRule={"evenodd"} clipRule={"evenodd"} d={"M6.49499 14.3695L6.05998 13.4056C5.90499 13.0615 5.64323 12.7748 5.31236 12.5867C4.9813 12.3985 4.59832 12.3184 4.21822 12.3577L3.15385 12.4693C2.83704 12.5022 2.51737 12.4438 2.23351 12.3014C1.94965 12.1589 1.71377 11.9385 1.5544 11.6667C1.39498 11.395 1.31903 11.0835 1.33577 10.7701C1.3525 10.4567 1.4612 10.1548 1.64868 9.90104L2.27886 9.04793C2.5036 8.74343 2.62463 8.37658 2.62456 8.00008C2.62463 7.62358 2.5036 7.25674 2.27886 6.95223L1.64868 6.09912C1.4612 5.84537 1.3525 5.54347 1.33577 5.23004C1.31903 4.91662 1.39498 4.60514 1.5544 4.33341C1.71361 4.06152 1.94947 3.84097 2.23337 3.69851C2.51727 3.55606 2.83702 3.4978 3.15385 3.53082L4.22153 3.64245C4.60162 3.68178 4.98461 3.60164 5.31567 3.41349C5.64531 3.2248 5.90586 2.93814 6.05998 2.5946L6.49499 1.63067C6.62431 1.34374 6.83535 1.09994 7.10252 0.928841C7.36969 0.757742 7.68151 0.666697 8.00016 0.666748C8.31881 0.666697 8.63063 0.757742 8.8978 0.928841C9.16497 1.09994 9.37602 1.34374 9.50533 1.63067L9.94365 2.5946C10.0978 2.93814 10.3583 3.2248 10.688 3.41349C11.019 3.60164 11.402 3.68178 11.7821 3.64245L12.8465 3.53082C13.1633 3.4978 13.4831 3.55606 13.767 3.69851C14.0509 3.84097 14.2867 4.06152 14.4459 4.33341C14.6053 4.60514 14.6813 4.91662 14.6646 5.23004C14.6478 5.54347 14.5391 5.84537 14.3516 6.09912L13.7215 6.95223C13.4967 7.25674 13.3757 7.62358 13.3758 8.00008C13.3739 8.37761 13.4938 8.74598 13.7182 9.05201L14.3483 9.90512C14.5358 10.1589 14.6445 10.4608 14.6612 10.7742C14.678 11.0876 14.602 11.3991 14.4426 11.6708C14.2834 11.9427 14.0476 12.1633 13.7637 12.3057C13.4798 12.4482 13.16 12.5064 12.8432 12.4734L11.7788 12.3618C11.3987 12.3225 11.0157 12.4026 10.6847 12.5907C10.3557 12.7784 10.0952 13.0635 9.94034 13.4056L9.50533 14.3695C9.37602 14.6564 9.16497 14.9002 8.8978 15.0713C8.63063 15.2424 8.31881 15.3335 8.00016 15.3334C7.68151 15.3335 7.36969 15.2424 7.10252 15.0713C6.83535 14.9002 6.62431 14.6564 6.49499 14.3695ZM10.0002 8.00008C10.0002 9.10465 9.10473 10.0001 8.00016 10.0001C6.89559 10.0001 6.00016 9.10465 6.00016 8.00008C6.00016 6.89551 6.89559 6.00008 8.00016 6.00008C9.10473 6.00008 10.0002 6.89551 10.0002 8.00008Z"} />
                                 </svg>
                                 <span data-slot={"chart-button-label"} className={"hug-w px-0.5"}>
-                                  {"View payslip"}
+                                  {"Voir la facture"}
                                 </span>
                               </button>
                             </span>
                           </div>
                           <div aria-hidden={"true"} data-slot={"pay-breakdown-chart-divider"} className={"h-px origin-left bg-border-soft"} />
-                          <div role={"slider"} tabIndex={0} aria-label={"Nett earnings to date by category"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Normal hours, 3–6 Nov · 32 h: $1,006.08, 33.3% of gross earnings"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
+                          <div role={"slider"} tabIndex={0} aria-label={"Encaissé à ce jour, par poste"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Pose, 3–6 nov. · 32 h : 1 006,08 €, 33,3 % du facturé"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
                             <SxBarres
                               categories={[
-                                { cle: "normal-hours", etiquette: "Normal hours", part: "75%", couleur: "purple", montants: [1006.08, 1257.6] },
-                                { cle: "overtime", etiquette: "Overtime", part: "10%", couleur: "blue", montants: [188.64, 125.76] },
-                                { cle: "benefits", etiquette: "Benefits", part: "9%", couleur: "orange", montants: [150, 64.29, 51.42] },
-                                { cle: "employer-contributions", etiquette: "Employer contributions", part: "6%", couleur: "green", montants: [128.57, 22.64, 24.5] },
+                                { cle: "normal-hours", etiquette: "Pose", part: "75 %", couleur: "purple", montants: [1006.08, 1257.6] },
+                                { cle: "overtime", etiquette: "Fournitures", part: "10 %", couleur: "blue", montants: [188.64, 125.76] },
+                                { cle: "benefits", etiquette: "Déplacements", part: "9 %", couleur: "orange", montants: [150, 64.29, 51.42] },
+                                { cle: "employer-contributions", etiquette: "Options", part: "6 %", couleur: "green", montants: [128.57, 22.64, 24.5] },
                               ]}
                             />
                           </div>
                         </div>
                       </div>
                       <div className={"sb-record-side"}>
-                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-spend"} role={"group"} aria-label={"Spend on Anne-Marie"}>
+                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-spend"} role={"group"} aria-label={"Dépenses du chantier"}>
                           <div className={"flex items-center justify-between gap-4"}>
                             <div className={"flex min-w-0 items-center gap-3"}>
                               <span data-slot={"chart-icon-tile"} className={"relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[13.2px] bg-primary-orange-500 text-fg-white [&_svg]:size-6 shadow-[0_8.8px_7.92px_-6.6px_rgb(0_0_0/0.16),0_4.4px_7.92px_rgb(1_1_1/0.08)]"}>
@@ -627,14 +630,14 @@ export default function SxFiche() {
                               </span>
                               <div className={"flex min-w-0 flex-col gap-1.5"}>
                                 <p className={"typo-heading-01-semibold -my-0.5 truncate py-0.5 text-fg-loud"}>
-                                  {"Spend on Anne-Marie"}
+                                  {"Dépenses du chantier"}
                                 </p>
                                 <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
-                                  {"$7,048.50 since her offer · 28 Oct"}
+                                  {"7 048,50 € depuis le devis · 28 oct."}
                                 </p>
                               </div>
                             </div>
-                            <button type={"button"} data-slot={"chart-button"} data-variant={"secondary"} className={"relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 typo-label-03-medium whitespace-nowrap outline-none select-none transition-colors duration-200 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 bg-surface-white text-fg-loud [&_svg]:text-icon-soft shadow-[0_1px_2px_rgb(40_40_40/0.08),0_0_0_1px_#ececec] hover:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] data-[state=open]:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] rounded-full size-9 p-0 focus-visible:ring-primary-orange-500/40"} aria-label={"More options"}>
+                            <button type={"button"} data-slot={"chart-button"} data-variant={"secondary"} className={"relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 typo-label-03-medium whitespace-nowrap outline-none select-none transition-colors duration-200 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 bg-surface-white text-fg-loud [&_svg]:text-icon-soft shadow-[0_1px_2px_rgb(40_40_40/0.08),0_0_0_1px_#ececec] hover:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] data-[state=open]:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] rounded-full size-9 p-0 focus-visible:ring-primary-orange-500/40"} aria-label={"Plus d'options"}>
                               <svg width={"24"} height={"24"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"} strokeLinecap={"round"} strokeLinejoin={"round"} aria-hidden={"true"} data-slot={"icon"}>
                                 <path d={"M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12ZM6 12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11C5.55228 11 6 11.4477 6 12Z"} />
                               </svg>
@@ -642,14 +645,14 @@ export default function SxFiche() {
                           </div>
                           <div data-slot={"spend-column-chart-born"} className={"flex flex-col items-start gap-2.5"}>
                             <p className={"typo-label-03-medium hug-w whitespace-nowrap text-fg-soft"}>
-                              {"Direct compensation"}
+                              {"Main-d'œuvre"}
                             </p>
                             <p className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
-                              {"$2,578.08 · 37%"}
+                              {"2 578,08 € · 37 %"}
                             </p>
                           </div>
                           <div className={"flex flex-col gap-2"}>
-                            <div role={"group"} aria-label={"Spend on Anne-Marie by age"} data-slot={"spend-column-chart-plot"} className={"relative isolate flex gap-2"} style={{ "height": "208.921px" } as CSSProperties}>
+                            <div role={"group"} aria-label={"Dépenses du chantier, par poste"} data-slot={"spend-column-chart-plot"} className={"relative isolate flex gap-2"} style={{ "height": "208.921px" } as CSSProperties}>
                               <svg aria-hidden={"true"} className={"pointer-events-none absolute size-0 overflow-hidden"}>
                                 <defs>
                                   <linearGradient id={"_R_ruhtavb_-grey-right"} gradientUnits={"userSpaceOnUse"} x1={"35.8613"} y1={"8.0502"} x2={"35.8613"} y2={"188.448"}>
@@ -670,7 +673,7 @@ export default function SxFiche() {
                                   </linearGradient>
                                 </defs>
                               </svg>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Pay: $2.6k"} aria-pressed={"true"} tabIndex={0} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Pose : 2,6 k€"} aria-pressed={"true"} tabIndex={0} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "188.921px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -687,12 +690,12 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "192.921px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"2578.08"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-semibold text-primary-orange-500"}>
-                                    {"$2.6k"}
+                                    {"2,6 k€"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Payroll: $65"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Vernis : 65 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "4.773px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -709,12 +712,12 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "8.773px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"65.14"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
-                                    {"$65"}
+                                    {"65 €"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Health: $394"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Bois : 394 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "28.893px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -731,12 +734,12 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "32.893px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"394.28"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
-                                    {"$394"}
+                                    {"394 €"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Training: $450"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Visserie : 450 €"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "32.976px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -753,12 +756,12 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "36.976px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"450"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
-                                    {"$450"}
+                                    {"450 €"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Hiring: $2.2k"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Renfort : 2,2 k€"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "163.047px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -775,12 +778,12 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "167.047px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"2225"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
-                                    {"$2.2k"}
+                                    {"2,2 k€"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
                               </button>
-                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Tech: $1.3k"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Location : 1,3 k€"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
                                 <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "97.902px" } as CSSProperties}>
                                   <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
                                     <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
@@ -797,7 +800,7 @@ export default function SxFiche() {
                                 </svg>
                                 <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "101.902px" } as CSSProperties}>
                                   <span data-slot={"spend-column-chart-value-text"} data-value={"1336"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
-                                    {"$1.3k"}
+                                    {"1,3 k€"}
                                   </span>
                                 </span>
                                 <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
@@ -808,44 +811,44 @@ export default function SxFiche() {
                               <span data-slot={"spend-column-chart-pill"} className={"absolute inset-y-0 rounded-lg bg-surface-muted"} style={{ "left": "calc(0 * ((100% - 40px) / 6 + 8px))", "width": "calc((100% - 40px) / 6)" } as CSSProperties} />
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-semibold text-fg-white"}>
-                                  {"Pay"}
+                                  {"Pose"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Payroll"}
+                                  {"Vernis"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Health"}
+                                  {"Bois"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Training"}
+                                  {"Visserie"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Hiring"}
+                                  {"Renfort"}
                                 </span>
                               </span>
                               <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
                                 <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
-                                  {"Tech"}
+                                  {"Location"}
                                 </span>
                               </span>
                             </div>
                           </div>
                         </div>
-                        <section className={"sb-block"} aria-label={"Activity"}>
+                        <section className={"sb-block"} aria-label={"Activité"}>
                           <div className={"sb-activity-head"}>
                             <h3>
                               <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-history-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                                 <path d={"M5.07868 5.06897C8.87402 1.27899 15.0437 1.31929 18.8622 5.13784C22.6824 8.95803 22.7211 15.1313 18.9262 18.9263C15.1312 22.7212 8.95793 22.6825 5.13774 18.8623C2.87389 16.5984 1.93904 13.51 2.34047 10.5813C2.39672 10.1709 2.775 9.88383 3.18537 9.94008C3.59575 9.99633 3.88282 10.3746 3.82658 10.785C3.4866 13.2653 4.27782 15.8811 6.1984 17.8016C9.44288 21.0461 14.6664 21.0647 17.8655 17.8656C21.0646 14.6665 21.046 9.44298 17.8015 6.1985C14.5587 2.95568 9.33889 2.93545 6.13935 6.12963L6.88705 6.13339C7.30126 6.13547 7.63535 6.47294 7.63327 6.88715C7.63119 7.30136 7.29372 7.63545 6.87951 7.63337L4.33396 7.62058C3.92269 7.61851 3.58981 7.28562 3.58774 6.87436L3.57495 4.3288C3.57286 3.9146 3.90696 3.57713 4.32117 3.57505C4.73538 3.57296 5.07285 3.90706 5.07493 4.32127L5.07868 5.06897ZM11.9999 7.24998C12.4141 7.24998 12.7499 7.58577 12.7499 7.99998V11.6893L15.0302 13.9697C15.3231 14.2625 15.3231 14.7374 15.0302 15.0303C14.7373 15.3232 14.2624 15.3232 13.9696 15.0303L11.2499 12.3106V7.99998C11.2499 7.58577 11.5857 7.24998 11.9999 7.24998Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                               </svg>
-                              {"Activity"}
+                              {"Activité"}
                             </h3>
                           </div>
                           <ol className={"sb-timeline"}>
@@ -859,12 +862,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Contract signed"}
+                                    {"Devis signé"}
                                   </strong>
-                                  {" by Anne-Marie and Roger"}
+                                  {" par Anne-Marie Roux et Rémi"}
                                 </p>
                                 <small>
-                                  {"E-signature · 28 Oct"}
+                                  {"Signature électronique · 28 oct."}
                                 </small>
                               </div>
                             </li>
@@ -879,12 +882,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Passport verified"}
+                                    {"Acompte rapproché"}
                                   </strong>
-                                  {" against the contract"}
+                                  {" avec le devis"}
                                 </p>
                                 <small>
-                                  {"Synnax agent · 30 Oct"}
+                                  {"Agent Omega · 30 oct."}
                                 </small>
                               </div>
                             </li>
@@ -900,12 +903,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Added to Design"}
+                                    {"Chantier ouvert"}
                                   </strong>
-                                  {", reporting to Roger Lin"}
+                                  {", suivi par Rémi Lambert"}
                                 </p>
                                 <small>
-                                  {"HRIS · 31 Oct"}
+                                  {"Ventes · 31 oct."}
                                 </small>
                               </div>
                             </li>
@@ -919,12 +922,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Bank account"}
+                                    {"Commande de bois"}
                                   </strong>
-                                  {" verified with a test deposit"}
+                                  {" passée chez Roux Matériaux"}
                                 </p>
                                 <small>
-                                  {"Bank · 2 Nov"}
+                                  {"Achats · 2 nov."}
                                 </small>
                               </div>
                             </li>
@@ -937,12 +940,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Leave balance"}
+                                    {"Stock réservé"}
                                   </strong>
-                                  {" set to 18 days by policy"}
+                                  {" pour 18 panneaux, selon le devis"}
                                 </p>
                                 <small>
-                                  {"Handbook · 3 Nov"}
+                                  {"Stock · 3 nov."}
                                 </small>
                               </div>
                             </li>
@@ -955,12 +958,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Laptop expense"}
+                                    {"Facture de location"}
                                   </strong>
-                                  {" of $1,240 approved and coded"}
+                                  {" de 1 240 € validée et saisie"}
                                 </p>
                                 <small>
-                                  {"Accounting · 5 Nov"}
+                                  {"Comptabilité · 5 nov."}
                                 </small>
                               </div>
                             </li>
@@ -973,12 +976,12 @@ export default function SxFiche() {
                               <div>
                                 <p>
                                   <strong>
-                                    {"Probation review"}
+                                    {"Fin de chantier"}
                                   </strong>
-                                  {" booked for 3 Feb"}
+                                  {" prévue le 3 fév."}
                                 </p>
                                 <small>
-                                  {"Calendar · 6 Nov"}
+                                  {"Agenda · 6 nov."}
                                 </small>
                               </div>
                             </li>
@@ -1001,9 +1004,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"It logs itself."}
+                {"Tout s'enregistre."}
               </strong>
-              {" Contracts, time, leave and expenses are captured automatically."}
+              {" Devis, stock et écritures se mettent à jour seuls."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1015,9 +1018,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Your tools finally talk."}
+                {"Vos outils se parlent enfin."}
               </strong>
-              {" Accounting, bank and Slack stay in sync."}
+              {" Banque et comptabilité restent à jour."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1028,9 +1031,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"It learns your policies."}
+                {"Il connaît vos règles."}
               </strong>
-              {" It reads your handbook and past runs."}
+              {" TVA et plan comptable réglés pour vous."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1041,9 +1044,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Ask, and it’s there."}
+                {"Demandez, c'est là."}
               </strong>
-              {" Any record or answer in a second."}
+              {" Une fiche ou une réponse en une seconde."}
             </p>
           </li>
         </ul>

@@ -1,6 +1,8 @@
 /* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxClients ».
-   Balisage porté tel quel depuis le relevé de la référence : ne pas
-   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+   Balisage porté depuis le relevé de la référence, contenu posé par
+   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
+   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
+/* eslint-disable @next/next/no-img-element */
 
 export default function SxClients() {
   return (
@@ -9,18 +11,18 @@ export default function SxClients() {
         <header className={"platform-intro platform-intro-split ts-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Customers"}
+              {"Situations"}
             </span>
             <h2>
-              {"Teams that trust us with payday."}
+              {"Ce qu'Omega reprend, cas par cas."}
               <br />
               <span>
-                {"From small practices to cross-border fleets."}
+                {"Du chantier au cabinet, du site unique au groupe."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"People and finance teams on what changed once payroll, leave and compliance moved to Synnax."}
+            {"Des situations que nos agents et nos modules métier prennent en charge chaque jour. Vous gardez la décision."}
           </p>
         </header>
         <div className={"ts-grid"}>
@@ -30,26 +32,26 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Payroll used to mean three days of spreadsheets, a bureau on the phone and someone always waiting on a correction. Now the run is ready a week early, the agent flags the four changes that matter, and I approve it before lunch."}
+                {"Chaque relance oubliée, chaque demande sans réponse, c'est un client qui signe ailleurs pendant que vous êtes occupé. Chaque matin, les relances sont écrites dans votre ton. Vous validez, elles partent."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
               <strong>
-                {"Thandi Mokoena"}
+                {"Relances"}
               </strong>
               <span>
-                {"Head of People, Tidewater Coffee"}
+                {"Agent · relances et encaissements"}
               </span>
             </figcaption>
           </figure>
           <div className={"ts-cell ts-logo is-shaded"} data-gutter-guide={"bottom"}>
-            <span className={"ts-wordmark"} role={"img"} aria-label={"Moreno Architects"}>
+            <span className={"ts-wordmark"} role={"img"} aria-label={"Daliro, le module du BTP"}>
               <span className={"is-moreno"}>
                 <b>
-                  {"MORENO"}
+                  {"DALIRO"}
                 </b>
                 <small>
-                  {"ARCHITECTS"}
+                  {"BÂTIMENT"}
                 </small>
               </span>
             </span>
@@ -57,40 +59,40 @@ export default function SxClients() {
           <figure className={"ts-cell ts-quote is-short"} data-gutter-guide={"bottom"}>
             <blockquote>
               <p>
-                {"“Payroll was my Sunday night. Now it’s a two-minute approval on a Thursday.”"}
+                {"« L'IA prépare, vous validez. Chaque action laisse une trace. »"}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
               <span>
-                {"Juniper Dental"}
+                {"Omega · notre méthode"}
               </span>
             </figcaption>
           </figure>
           <div className={"ts-cell ts-logo"} data-gutter-guide={"bottom"}>
-            <span className={"ts-wordmark"} role={"img"} aria-label={"Marula Health"}>
+            <span className={"ts-wordmark"} role={"img"} aria-label={"Tamila, le module des avocats"}>
               <span className={"is-marula"}>
                 <svg viewBox={"0 0 24 24"} aria-hidden={"true"}>
                   <circle cx={"12"} cy={"12"} r={"11"} fill={"currentColor"} />
                   <path d={"M7.5 16.5c0-5 3.4-8.6 9.5-9 0 6-3.6 9.4-9.5 9Z"} fill={"#f5f5f2"} />
                 </svg>
                 <b>
-                  {"marula"}
+                  {"tamila"}
                 </b>
                 <span>
-                  {"health"}
+                  {"avocats"}
                 </span>
               </span>
             </span>
           </div>
           <div className={"ts-cell ts-logo"} data-gutter-guide={"bottom"}>
-            <span className={"ts-wordmark"} role={"img"} aria-label={"Saltpan Studio"}>
+            <span className={"ts-wordmark"} role={"img"} aria-label={"Lorani, le module des architectes"}>
               <span className={"is-saltpan"}>
                 <svg viewBox={"0 0 24 24"} aria-hidden={"true"}>
                   <rect x={"2.25"} y={"2.25"} width={"19.5"} height={"19.5"} rx={"3"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.5"} />
                   <path d={"M3.5 20.5 20.5 3.5V18a2.5 2.5 0 0 1-2.5 2.5Z"} fill={"currentColor"} />
                 </svg>
                 <b>
-                  {"SALTPAN"}
+                  {"LORANI"}
                 </b>
               </span>
             </span>
@@ -101,15 +103,15 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"We pay 136 drivers across two countries, and every month used to end with someone underpaid. We ran one payroll on Synnax next to our old bureau and it matched to the cent. Since we switched, overtime, leave and tax land on the right payslip without anyone chasing them."}
+                {"Chaque chantier est suivi du premier appel au décompte final. Le devis se dicte, l'avenant est signé avant les travaux, la situation de travaux est préparée."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
               <strong>
-                {"Daniel Okafor"}
+                {"Daliro"}
               </strong>
               <span>
-                {"Finance Director, Atlas Freight"}
+                {"Module métier · BTP"}
               </span>
             </figcaption>
           </figure>

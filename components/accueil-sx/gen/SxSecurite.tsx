@@ -1,7 +1,10 @@
 /* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxSecurite ».
-   Balisage porté tel quel depuis le relevé de la référence : ne pas
-   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+   Balisage porté depuis le relevé de la référence, contenu posé par
+   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
+   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
+/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
 export default function SxSecurite() {
   return (
@@ -10,49 +13,49 @@ export default function SxSecurite() {
         <header className={"platform-intro platform-intro-split sec-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Security and compliance"}
+              {"Vos données"}
             </span>
             <h2>
-              {"Payroll-grade security."}
+              {"Elles restent les vôtres."}
               <br />
               <span>
-                {"Compliance and control built in."}
+                {"Validation et traçabilité comprises."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Every record encrypted, every change logged, and every agent action approved by a person. Synnax meets the standards your security team asks for."}
+            {"Un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne. Chaque action d'un agent attend votre accord et laisse une trace."}
           </p>
         </header>
         <div className={"sec-grid"}>
           <article className={"sec-card"} data-gutter-guide={"bottom"}>
             <div className={"ft-stage"} aria-hidden={"true"}>
               <div className={"sec-seals"}>
-                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"AICPA SOC for Service Organizations"}>
+                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Données chiffrées en transit et au repos"}>
                   <rect x={"71.5"} y={"71.5"} width={"1357"} height={"1357"} rx={"320"} fill={"#efeff1"} stroke={"#fff"} strokeWidth={"91"} />
                   <g fill={"#202322"} fontFamily={"var(--font-google-sans), Arial, sans-serif"} textAnchor={"middle"}>
                     <text x={"760"} y={"688"} fontSize={"300"} fontWeight={"400"} letterSpacing={"4"}>
-                      {"AICPA"}
+                      {"TLS"}
                     </text>
                     <rect x={"330"} y={"760"} width={"866"} height={"5"} />
                     <text x={"760"} y={"1028"} fontSize={"300"} fontWeight={"400"} letterSpacing={"6"}>
-                      {"SOC"}
+                      {"CHIFFRÉ"}
                     </text>
                   </g>
                 </svg>
-                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"ISO 27001"}>
+                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Rétention de 30 jours au plus"}>
                   <rect x={"71.5"} y={"71.5"} width={"1357"} height={"1357"} rx={"320"} fill={"#efeff1"} stroke={"#fff"} strokeWidth={"91"} />
                   <g fill={"#202322"} fontFamily={"var(--font-google-sans), Arial, sans-serif"} textAnchor={"middle"}>
                     <text x={"750"} y={"800"} fontSize={"400"} fontWeight={"700"} letterSpacing={"6"}>
-                      {"ISO"}
+                      {"30 J"}
                     </text>
                     <rect x={"390"} y={"862"} width={"720"} height={"5"} />
                     <text x={"750"} y={"1030"} fontSize={"165"} fontWeight={"500"} letterSpacing={"4"}>
-                      {"27001"}
+                      {"MAXI"}
                     </text>
                   </g>
                 </svg>
-                <span className={"sec-logo sec-gdpr "} role={"img"} aria-label={"GDPR"}>
+                <span className={"sec-logo sec-gdpr "} role={"img"} aria-label={"Hébergement dans l'Union européenne"}>
                   <svg viewBox={"0 0 1500 1500"} className={"sec-gdpr-discs"} aria-hidden={"true"}>
                     <rect x={"71.5"} y={"71.5"} width={"1357"} height={"1357"} rx={"320"} fill={"#efeff1"} stroke={"#fff"} strokeWidth={"91"} />
                   </svg>
@@ -97,13 +100,13 @@ export default function SxSecurite() {
                       <path d={"M5.25 10.0546V8C5.25 4.27208 8.27208 1.25 12 1.25C15.7279 1.25 18.75 4.27208 18.75 8V10.0546C19.8648 10.1379 20.5907 10.348 21.1213 10.8787C22 11.7574 22 13.1716 22 16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H8C5.17157 22 3.75736 22 2.87868 21.1213C2 20.2426 2 18.8284 2 16C2 13.1716 2 11.7574 2.87868 10.8787C3.40931 10.348 4.13525 10.1379 5.25 10.0546ZM6.75 8C6.75 5.10051 9.10051 2.75 12 2.75C14.8995 2.75 17.25 5.10051 17.25 8V10.0036C16.867 10 16.4515 10 16 10H8C7.54849 10 7.13301 10 6.75 10.0036V8ZM14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14C13.1046 14 14 14.8954 14 16Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                     </svg>
                     <b>
-                      {"GDPR"}
+                      {"UE"}
                     </b>
                   </span>
                 </span>
-                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"POPIA"}>
+                <svg viewBox={"0 0 1500 1500"} className={"sec-logo"} role={"img"} aria-label={"Chaque action est journalisée"}>
                   <rect x={"71.5"} y={"71.5"} width={"1357"} height={"1357"} rx={"320"} fill={"#efeff1"} stroke={"#fff"} strokeWidth={"91"} />
-                  <path d={"M990 385L1005 383L1088 397L1101 460L1123 512L1122 604L1095 592L1084 598L1064 631L1064 652L1088 679L1112 683L1123 683L1124 654L1170 656L1144 752L1091 803L1021 916L913 1017L849 1055L808 1056L800 1072L767 1070L758 1082L700 1071L679 1076L642 1072L626 1076L603 1093L539 1099L513 1117L476 1108L477 1100L465 1092L452 1093L448 1077L437 1077L430 1089L426 1076L431 1055L403 1011L404 999L411 1001L426 985L420 941L376 865L356 805L330 759L346 749L352 730L361 725L377 739L381 763L415 774L469 777L488 756L511 749L511 535L534 557L552 602L553 616L544 632L547 654L598 656L644 614L659 575L668 567L685 565L710 583L754 596L790 590L797 584L814 534L838 526L861 504L874 466L908 444L931 414L963 402L978 386Z"} fill={"#202322"} />
+                  <path d={"M750 345L1101 547.5V952.5L750 1155L399 952.5V547.5Z"} fill={"#202322"} />
                   <path d={"M3 10.4167C3 7.21907 3 5.62028 3.37752 5.08241C3.75503 4.54454 5.25832 4.02996 8.26491 3.00079L8.83772 2.80472C10.405 2.26824 11.1886 2 12 2C12.8114 2 13.595 2.26824 15.1623 2.80472L15.7351 3.00079C18.7417 4.02996 20.245 4.54454 20.6225 5.08241C21 5.62028 21 7.21907 21 10.4167C21 10.8996 21 11.4234 21 11.9914C21 17.6294 16.761 20.3655 14.1014 21.5273C13.38 21.8424 13.0193 22 12 22C10.9807 22 10.62 21.8424 9.89856 21.5273C7.23896 20.3655 3 17.6294 3 11.9914C3 11.4234 3 10.8996 3 10.4167Z"} transform={"translate(544 599) scale(18)"} fill={"#efeff1"} />
                   <path d={"M5.25 10.0546V8C5.25 4.27208 8.27208 1.25 12 1.25C15.7279 1.25 18.75 4.27208 18.75 8V10.0546C19.8648 10.1379 20.5907 10.348 21.1213 10.8787C22 11.7574 22 13.1716 22 16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H8C5.17157 22 3.75736 22 2.87868 21.1213C2 20.2426 2 18.8284 2 16C2 13.1716 2 11.7574 2.87868 10.8787C3.40931 10.348 4.13525 10.1379 5.25 10.0546ZM6.75 8C6.75 5.10051 9.10051 2.75 12 2.75C14.8995 2.75 17.25 5.10051 17.25 8V10.0036C16.867 10 16.4515 10 16 10H8C7.54849 10 7.13301 10 6.75 10.0036V8ZM14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14C13.1046 14 14 14.8954 14 16Z"} transform={"translate(670 720) scale(7.5)"} fill={"#202322"} fillRule={"evenodd"} clipRule={"evenodd"} />
                 </svg>
@@ -111,21 +114,21 @@ export default function SxSecurite() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Audited against four standards"}
+                {"Quatre engagements écrits"}
               </h3>
               <p>
-                {"SOC 2 Type II, ISO 27001, GDPR and POPIA. Independently audited every year, with penetration tests twice a year."}
+                {"Base à Francfort, sans réplication hors de l'Union européenne. Aucune donnée ne sert à entraîner un modèle."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <a href={"#security"} className={"ft-link sec-link"} aria-label={"Visit the trust centre"}>
+              <Link href={"/vos-donnees"} className={"ft-link sec-link"} aria-label={"Où vont vos données"}>
                 <span aria-hidden={"true"}>
-                  {"Visit the trust centre"}
+                  {"Où vont vos données"}
                 </span>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-arrow-right-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                   <path d={"M13.4697 5.46967C13.7626 5.17678 14.2374 5.17678 14.5303 5.46967L20.5303 11.4697C20.8232 11.7626 20.8232 12.2374 20.5303 12.5303L14.5303 18.5303C14.2374 18.8232 13.7626 18.8232 13.4697 18.5303C13.1768 18.2374 13.1768 17.7626 13.4697 17.4697L18.1893 12.75H4C3.58579 12.75 3.25 12.4142 3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H18.1893L13.4697 6.53033C13.1768 6.23744 13.1768 5.76256 13.4697 5.46967Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                 </svg>
-              </a>
+              </Link>
             </div>
           </article>
           <article className={"sec-card"} data-gutter-guide={"bottom"}>
@@ -134,17 +137,17 @@ export default function SxSecurite() {
                 <div className={"sec-uptime-row"}>
                   <p>
                     <strong>
-                      {"Payroll engine"}
+                      {"Relances"}
                     </strong>
                     <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                       <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                        {"100% uptime"}
+                        {"100 % validées"}
                       </span>
                       <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                        {"100% uptime"}
+                        {"100 % validées"}
                       </span>
                       <span className={"sr-only"}>
-                        {"100% uptime"}
+                        {"100 % validées"}
                       </span>
                     </span>
                   </p>
@@ -188,17 +191,17 @@ export default function SxSecurite() {
                 <div className={"sec-uptime-row"}>
                   <p>
                     <strong>
-                      {"API and integrations"}
+                      {"Factures fournisseurs"}
                     </strong>
                     <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                       <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                        {"99.99% uptime"}
+                        {"100 % contrôlées"}
                       </span>
                       <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                        {"99.99% uptime"}
+                        {"100 % contrôlées"}
                       </span>
                       <span className={"sr-only"}>
-                        {"99.99% uptime"}
+                        {"100 % contrôlées"}
                       </span>
                     </span>
                   </p>
@@ -242,17 +245,17 @@ export default function SxSecurite() {
                 <div className={"sec-uptime-row"}>
                   <p>
                     <strong>
-                      {"Synnax agents"}
+                      {"Demandes clients"}
                     </strong>
                     <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                       <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                        {"100% uptime"}
+                        {"100 % validées"}
                       </span>
                       <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                        {"100% uptime"}
+                        {"100 % validées"}
                       </span>
                       <span className={"sr-only"}>
-                        {"100% uptime"}
+                        {"100 % validées"}
                       </span>
                     </span>
                   </p>
@@ -296,31 +299,31 @@ export default function SxSecurite() {
                 <p className={"sec-uptime-foot"}>
                   <span>
                     <i />
-                    {"All systems operational"}
+                    {"Chaque action est enregistrée"}
                   </span>
                   <span>
-                    {"Last 90 days"}
+                    {"90 derniers jours"}
                   </span>
                 </p>
               </div>
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Payroll that runs on time"}
+                {"Chaque action est tracée"}
               </h3>
               <p>
-                {"A 99.99% uptime SLA, with automatic backups and failover. Keep employee records in South Africa, the EU or the US."}
+                {"Qui a validé, quoi et quand : le journal garde tout. Hébergement, sauvegardes et surveillance sont compris."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <a href={"#security"} className={"ft-link sec-link"} aria-label={"View system status"}>
+              <Link href={"/espace2"} className={"ft-link sec-link"} aria-label={"Voir l'espace client"}>
                 <span aria-hidden={"true"}>
-                  {"View system status"}
+                  {"Voir l'espace client"}
                 </span>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-arrow-right-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                   <path d={"M13.4697 5.46967C13.7626 5.17678 14.2374 5.17678 14.5303 5.46967L20.5303 11.4697C20.8232 11.7626 20.8232 12.2374 20.5303 12.5303L14.5303 18.5303C14.2374 18.8232 13.7626 18.8232 13.4697 18.5303C13.1768 18.2374 13.1768 17.7626 13.4697 17.4697L18.1893 12.75H4C3.58579 12.75 3.25 12.4142 3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H18.1893L13.4697 6.53033C13.1768 6.23744 13.1768 5.76256 13.4697 5.46967Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                 </svg>
-              </a>
+              </Link>
             </div>
           </article>
           <article className={"sec-card"} data-gutter-guide={"bottom"}>
@@ -343,40 +346,40 @@ export default function SxSecurite() {
                 </svg>
                 <ul className={"sec-chips"}>
                   <li>
-                    {"SSO / SAML"}
+                    {"Validation humaine"}
                   </li>
                   <li>
-                    {"SCIM"}
+                    {"Brouillons"}
                   </li>
                   <li>
-                    {"RBAC"}
+                    {"Journal"}
                   </li>
                   <li>
-                    {"Field-level permissions"}
+                    {"Un compte par personne"}
                   </li>
                   <li>
-                    {"Audit logs"}
+                    {"Export complet"}
                   </li>
                 </ul>
               </div>
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Access controlled at every layer"}
+                {"Vous décidez de ce qui part"}
               </h3>
               <p>
-                {"SSO and SCIM from your identity provider, role-based access on every field, and a named approver for every agent action."}
+                {"Au départ, tout ce qui sort passe par votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages."}
               </p>
             </div>
             <div className={"ft-actions"}>
-              <a href={"#security"} className={"ft-link sec-link"} aria-label={"Explore enterprise"}>
+              <Link href={"/offres"} className={"ft-link sec-link"} aria-label={"Voir les agents"}>
                 <span aria-hidden={"true"}>
-                  {"Explore enterprise"}
+                  {"Voir les agents"}
                 </span>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-arrow-right-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
                   <path d={"M13.4697 5.46967C13.7626 5.17678 14.2374 5.17678 14.5303 5.46967L20.5303 11.4697C20.8232 11.7626 20.8232 12.2374 20.5303 12.5303L14.5303 18.5303C14.2374 18.8232 13.7626 18.8232 13.4697 18.5303C13.1768 18.2374 13.1768 17.7626 13.4697 17.4697L18.1893 12.75H4C3.58579 12.75 3.25 12.4142 3.25 12C3.25 11.5858 3.58579 11.25 4 11.25H18.1893L13.4697 6.53033C13.1768 6.23744 13.1768 5.76256 13.4697 5.46967Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
                 </svg>
-              </a>
+              </Link>
             </div>
           </article>
         </div>

@@ -1,7 +1,10 @@
 /* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxTarifs ».
-   Balisage porté tel quel depuis le relevé de la référence : ne pas
-   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+   Balisage porté depuis le relevé de la référence, contenu posé par
+   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
+   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
+/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
 export default function SxTarifs() {
   return (
@@ -10,41 +13,41 @@ export default function SxTarifs() {
         <header className={"platform-intro pr-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Pricing"}
+              {"Tarifs"}
             </span>
             <h2>
-              {"One price per employee."}
+              {"Un prix par personne."}
               <br />
               <span>
-                {"Move up a plan as your team grows."}
+                {"Des agents payés au travail qu'ils font."}
               </span>
             </h2>
             <p className={"platform-lede"}>
-              {"Every plan includes pay runs, payslips and tax filings, with the payroll agent preparing each run. Higher plans add the HR around it and the rest of the agents."}
+              {"Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois."}
             </p>
           </div>
           <div className={"pr-controls"}>
-            <div className={"pr-billing"} role={"group"} aria-label={"Billing period"}>
-              <button type={"button"} aria-pressed={"false"}>
-                {"Monthly"}
-              </button>
+            <div className={"pr-billing"} role={"group"} aria-label={"Type de prix"}>
               <button type={"button"} aria-pressed={"true"}>
-                {"Yearly "}
+                {"Chaque mois"}
+              </button>
+              <button type={"button"} aria-pressed={"false"}>
+                {"Installation "}
                 <em>
-                  {"Save up to 25%"}
+                  {"Une seule fois"}
                 </em>
               </button>
             </div>
             <label className={"pr-team"}>
               <span className={"pr-team-row"}>
                 <span>
-                  {"Team size"}
+                  {"Nombre de personnes"}
                 </span>
                 <b>
-                  {"50 people"}
+                  {"10 personnes"}
                 </b>
               </span>
-              <input type={"range"} className={"pr-range"} min={"0"} max={"18"} step={"1"} aria-valuetext={"50 people"} style={{ "--fill": "44.44444444444444%" } as CSSProperties} defaultValue={"8"} />
+              <input type={"range"} className={"pr-range"} min={"1"} max={"50"} step={"1"} aria-valuetext={"10 personnes"} style={{ "--fill": "18.3673%" } as CSSProperties} defaultValue={"10"} />
             </label>
           </div>
         </header>
@@ -52,61 +55,61 @@ export default function SxTarifs() {
           <article className={"pr-tier"} data-gutter-guide={"bottom"}>
             <div className={"pr-name"}>
               <h3>
-                {"Payroll"}
+                {"Audit"}
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Pay runs, payslips and tax filings for one country, right every month."}
+              {"Pour savoir ce qu'Omega peut faire chez vous, et à quel prix."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
                 <strong>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"$6"}
+                      {"0 €"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"$6"}
+                      {"0 €"}
                     </span>
                     <span className={"sr-only"}>
-                      {"$6"}
+                      {"0 €"}
                     </span>
                   </span>
                 </strong>
                 <span>
-                  {"per employee"}
+                  {"offert"}
                   <br />
-                  {"a month"}
+                  {"30 minutes"}
                 </span>
               </p>
               <p className={"pr-total"}>
                 <b>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"$300"}
+                      {"Offert"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"$300"}
+                      {"Offert"}
                     </span>
                     <span className={"sr-only"}>
-                      {"$300"}
+                      {"Offert"}
                     </span>
                   </span>
                 </b>
-                {" a month for 50 people, billed yearly"}
+                {" et sans engagement"}
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full"}>
-                {"Choose Payroll"}
+              <Link href={"/reserver-un-audit"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full text-center"}>
+                {"Réserver l'audit"}
                 <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
                   <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
                 </svg>
-              </button>
+              </Link>
             </div>
             <div className={"pr-features"}>
               <h4>
-                {"What's included"}
+                {"Ce qui est compris"}
               </h4>
               <ul>
                 <li className={"is-ai"}>
@@ -124,7 +127,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2d9ktavb_)"} />
                   </svg>
                   <span>
-                    {"Payroll agent that prepares each run"}
+                    {"Votre activité, passée en revue"}
                   </span>
                 </li>
                 <li>
@@ -132,7 +135,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Payslips and the employee app"}
+                    {"Les modules et agents utiles"}
                   </span>
                 </li>
                 <li>
@@ -140,7 +143,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Tax filings and year-end certificates"}
+                    {"Une proposition écrite, prix compris"}
                   </span>
                 </li>
                 <li>
@@ -148,7 +151,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Direct deposit to local banks"}
+                    {"Le calendrier de démarrage"}
                   </span>
                 </li>
                 <li>
@@ -156,7 +159,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Expenses and reimbursements"}
+                    {"Votre tarif, écrit à la fin"}
                   </span>
                 </li>
                 <li>
@@ -164,7 +167,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"One entity in one country"}
+                    {"Aucun engagement"}
                   </span>
                 </li>
               </ul>
@@ -173,61 +176,61 @@ export default function SxTarifs() {
           <article className={"pr-tier is-featured"} data-gutter-guide={"bottom"}>
             <div className={"pr-name"}>
               <h3>
-                {"People"}
+                {"Gestion"}
               </h3>
               <span className={"pr-tag"}>
-                {"Most teams start here"}
+                {"Dès la première personne"}
               </span>
             </div>
             <p className={"pr-desc"}>
-              {"Payroll plus the HR around it, from someone's first day to their last."}
+              {"Toute votre gestion au même endroit, adaptée à votre activité par l'IA."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
                 <strong>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"$10"}
+                      {"34,90 €"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"$10"}
+                      {"34,90 €"}
                     </span>
                     <span className={"sr-only"}>
-                      {"$10"}
+                      {"34,90 €"}
                     </span>
                   </span>
                 </strong>
                 <span>
-                  {"per employee"}
+                  {"HT par personne"}
                   <br />
-                  {"a month"}
+                  {"par mois"}
                 </span>
               </p>
               <p className={"pr-total"}>
                 <b>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"$500"}
+                      {"349,00 €"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"$500"}
+                      {"349,00 €"}
                     </span>
                     <span className={"sr-only"}>
-                      {"$500"}
+                      {"349,00 €"}
                     </span>
                   </span>
                 </b>
-                {" a month for 50 people, billed yearly"}
+                {" HT par mois pour 10 personnes"}
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)] w-full"} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>
-                {"Choose People"}
-              </button>
+              <Link href={"/contact"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)] w-full text-center"} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>
+                {"Parler à l'équipe"}
+              </Link>
             </div>
             <div className={"pr-features"}>
               <h4>
-                {"On top of Payroll"}
+                {"Ce qui est compris"}
               </h4>
               <ul>
                 <li className={"is-ai"}>
@@ -245,7 +248,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2daktavb_)"} />
                   </svg>
                   <span>
-                    {"Approvals agent and Ask Synnax"}
+                    {"Les six modules de gestion"}
                   </span>
                 </li>
                 <li>
@@ -253,7 +256,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Onboarding with e-signatures"}
+                    {"Sans minimum de personnes"}
                   </span>
                 </li>
                 <li>
@@ -261,7 +264,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Time off and leave policies"}
+                    {"Vos données actuelles reprises"}
                   </span>
                 </li>
                 <li>
@@ -269,7 +272,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Documents on every record"}
+                    {"Vérifié par votre expert-comptable"}
                   </span>
                 </li>
                 <li>
@@ -277,7 +280,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Org chart and reporting lines"}
+                    {"50 Go de documents compris"}
                   </span>
                 </li>
                 <li>
@@ -285,7 +288,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Slack and Teams notifications"}
+                    {"Un interlocuteur dans notre équipe"}
                   </span>
                 </li>
               </ul>
@@ -294,61 +297,61 @@ export default function SxTarifs() {
           <article className={"pr-tier"} data-gutter-guide={"bottom"}>
             <div className={"pr-name"}>
               <h3>
-                {"Autopilot"}
+                {"Agents IA"}
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Every agent switched on, for teams across entities and countries."}
+              {"Quatre agents prêts, et ceux que nous construisons pour vous."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
                 <strong>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"$16"}
+                      {"dès 69 €"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"$16"}
+                      {"dès 69 €"}
                     </span>
                     <span className={"sr-only"}>
-                      {"$16"}
+                      {"dès 69 €"}
                     </span>
                   </span>
                 </strong>
                 <span>
-                  {"per employee"}
+                  {"HT par agent"}
                   <br />
-                  {"a month"}
+                  {"par mois"}
                 </span>
               </p>
               <p className={"pr-total"}>
                 <b>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"$800"}
+                      {"Prix fixé"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"$800"}
+                      {"Prix fixé"}
                     </span>
                     <span className={"sr-only"}>
-                      {"$800"}
+                      {"Prix fixé"}
                     </span>
                   </span>
                 </b>
-                {" a month for 50 people, billed yearly"}
+                {" à l'audit, selon le volume traité"}
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full"}>
-                {"Choose Autopilot"}
+              <Link href={"/tarifs"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full text-center"}>
+                {"Voir les tarifs"}
                 <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
                   <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
                 </svg>
-              </button>
+              </Link>
             </div>
             <div className={"pr-features"}>
               <h4>
-                {"On top of People"}
+                {"Pour chaque agent"}
               </h4>
               <ul>
                 <li className={"is-ai"}>
@@ -366,7 +369,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2dbktavb_)"} />
                   </svg>
                   <span>
-                    {"Document intelligence and the helpdesk agent"}
+                    {"Jamais un pourcentage de vos encaissements"}
                   </span>
                 </li>
                 <li>
@@ -374,7 +377,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Compliance checks and filing reminders"}
+                    {"Remise de 10 % dès 3 agents, de 15 % dès 5"}
                   </span>
                 </li>
                 <li>
@@ -382,7 +385,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Insights and custom reports"}
+                    {"Aucun débit avant la fin de l'installation"}
                   </span>
                 </li>
                 <li>
@@ -390,7 +393,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Several entities and countries"}
+                    {"Mensuel, sans engagement"}
                   </span>
                 </li>
                 <li>
@@ -398,7 +401,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Approval chains you design"}
+                    {"Remboursé pendant 30 jours"}
                   </span>
                 </li>
                 <li>
@@ -406,7 +409,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"API access and webhooks"}
+                    {"Export complet de vos données"}
                   </span>
                 </li>
               </ul>
@@ -415,36 +418,36 @@ export default function SxTarifs() {
           <article className={"pr-tier"} data-gutter-guide={"bottom"}>
             <div className={"pr-name"}>
               <h3>
-                {"Enterprise"}
+                {"Sur mesure"}
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"For large organisations and partners that need their own setup."}
+              {"Un module ou un agent construit pour ce qui n'existe que chez vous."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
                 <strong>
-                  {"Custom"}
+                  {"Sur devis"}
                 </strong>
               </p>
               <p className={"pr-total"}>
-                {"Volume pricing from "}
+                {"Son prix est écrit "}
                 <b>
-                  {"250 people"}
+                  {"avant de commencer"}
                 </b>
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full"}>
-                {"Talk to sales"}
+              <Link href={"/offres/sur-mesure"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full text-center"}>
+                {"Découvrir le sur-mesure"}
                 <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
                   <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
                 </svg>
-              </button>
+              </Link>
             </div>
             <div className={"pr-features"}>
               <h4>
-                {"On top of Autopilot"}
+                {"Construit pour vous"}
               </h4>
               <ul>
                 <li className={"is-ai"}>
@@ -462,7 +465,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2dcktavb_)"} />
                   </svg>
                   <span>
-                    {"Agents tuned to your own policies"}
+                    {"Votre organisation, étudiée avec vous"}
                   </span>
                 </li>
                 <li>
@@ -470,7 +473,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"White labeling in your brand"}
+                    {"Un module ajouté à votre logiciel"}
                   </span>
                 </li>
                 <li>
@@ -478,7 +481,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Data residency in South Africa, the EU or the US"}
+                    {"Vos logiciels métier raccordés"}
                   </span>
                 </li>
                 <li>
@@ -486,7 +489,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"SSO, SCIM and audit evidence exports"}
+                    {"Données d'un autre logiciel reprises"}
                   </span>
                 </li>
                 <li>
@@ -494,7 +497,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"99.99% uptime SLA"}
+                    {"Ce qu'il fait, écrit avant de commencer"}
                   </span>
                 </li>
                 <li>
@@ -502,7 +505,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"A named success manager"}
+                    {"Sept modules métier déjà prêts"}
                   </span>
                 </li>
               </ul>

@@ -23,7 +23,7 @@ import SxComportements from "@/components/accueil-sx/SxComportements";
 
    Teo : « refaire celle-là en 1:1, sans faute […] l'arc de la première
    section en bleu, c'est le seul changement ». Référence :
-   synnax-ai-native-software-landing-template-v1.21st.app.
+   un gabarit de page « logiciel IA » publié sur 21st.dev (adresse dans outils/sx/LISEZ-MOI.md).
 
    Méthode (skill methode-site), dans l'ordre :
      1. le HTML rendu de la référence est porté MÉCANIQUEMENT en TSX par

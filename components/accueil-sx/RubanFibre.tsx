@@ -2,7 +2,7 @@
 
 /* ══════════════════════════════════════════════════════════════════════
    LE RUBAN DE FIBRES — décalque du « Fibre Arc » de la référence
-   (synnax-ai-native-software-landing-template-v1.21st.app), 25/11/2026.
+   (un gabarit de page « logiciel IA » publié sur 21st.dev), 25/11/2026.
 
    Un seul shader, deux usages :
      · variante « arc »   — l'anneau vu en perspective du héros, qui suit

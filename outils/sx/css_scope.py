@@ -72,6 +72,9 @@ libres = traiter([b for b in B if not tete(b).startswith("@layer")])
 def joli(regles):
     return "\n".join(regles)
 
+# aucune trace du nom de la référence dans le CSS servi
+renommer = lambda t: [re.sub(r"\.synnax-", ".sx-", x) for x in t]
+ui_parts, libres = renommer(ui_parts), renommer(libres)
 sortie = "@layer sx-ui-sdk{\n" + joli(ui_parts) + "\n}\n\n" + joli(libres) + "\n"
 open(OUT, "w", encoding="utf-8").write(sortie)
 print("ui-sdk :", len(ui_parts), "règles ; hors couche :", len(libres), "blocs ;", len(sortie), "octets")

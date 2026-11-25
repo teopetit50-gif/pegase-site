@@ -1,7 +1,10 @@
 /* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxAppel ».
-   Balisage porté tel quel depuis le relevé de la référence : ne pas
-   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+   Balisage porté depuis le relevé de la référence, contenu posé par
+   outils/sx/textes-fr.json. Pour changer un TEXTE : le dictionnaire, puis
+   régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
+/* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
+import Link from "next/link";
 
 export default function SxAppel() {
   return (
@@ -12,42 +15,42 @@ export default function SxAppel() {
           <div className={"absolute inset-y-0 left-1/2 w-[1440px] -translate-x-1/2"}>
             <div className={"absolute h-[960.5px] w-[1358px]"} style={{ "left": "66px", "top": "-33.5px" } as CSSProperties}>
               <span className={"absolute inset-[-11.66%_-8.25%]"}>
-                <img src={"https://synnax-ai-native-software-landing-template-v1.21st.app/integrations/backdrop-ellipse.svg"} alt={""} className={"block size-full max-w-none"} />
+                <img src={"/accueil-sx/halo.svg"} alt={""} className={"block size-full max-w-none"} />
               </span>
             </div>
           </div>
         </div>
         <span className={"platform-eyebrow"}>
-          {"Get started"}
+          {"Commencer"}
         </span>
         <h2>
-          {"Run your next payroll on Synnax."}
+          {"Un audit de 30 minutes, offert."}
           <br />
           <span>
-            {"You approve every change."}
+            {"Vous repartez avec un prix écrit."}
           </span>
         </h2>
         <p className={"platform-lede"}>
-          {"Set up in an afternoon, bring your current payroll across, and let the agent prepare your first run."}
+          {"En 30 minutes, nous vous disons ce qu'Omega peut reprendre chez vous et ce que cela coûte. Sans engagement."}
         </p>
         <div className={"cta-actions"}>
-          <button type={"button"} className={"relative inline-flex shrink-0 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap font-lato font-semibold transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[0.954px] overflow-clip rounded-[11.452px] border-t-[0.954px] border-solid border-[rgba(255,255,255,0.15)] pl-[22.904px] pr-[13.361px] py-[13.361px] text-[16px] leading-[1.5] tracking-[-0.32px] text-white shadow-[0px_60.123px_17.178px_0px_rgba(16,16,16,0),0px_38.173px_15.269px_0px_rgba(11,11,11,0.01),0px_21.95px_13.361px_0px_rgba(8,8,8,0.05),0px_9.543px_9.543px_0px_rgba(5,5,5,0.09),0px_2.863px_5.726px_0px_rgba(0,0,0,0.1)] desktop-sm:gap-px desktop-sm:rounded-[12px] desktop-sm:border-t desktop-sm:pl-[24px] desktop-sm:pr-[14px] desktop-sm:py-[14px] desktop-sm:shadow-[0px_63px_18px_0px_rgba(16,16,16,0),0px_40px_16px_0px_rgba(11,11,11,0.01),0px_23px_14px_0px_rgba(8,8,8,0.05),0px_10px_10px_0px_rgba(5,5,5,0.09),0px_3px_6px_0px_rgba(0,0,0,0.1)] "} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, rgb(41,41,41) 0%, rgb(41,41,41) 100%)" } as CSSProperties}>
-            {"Get started"}
+          <Link href={"/reserver-un-audit"} className={"relative inline-flex shrink-0 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap font-lato font-semibold transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[0.954px] overflow-clip rounded-[11.452px] border-t-[0.954px] border-solid border-[rgba(255,255,255,0.15)] pl-[22.904px] pr-[13.361px] py-[13.361px] text-[16px] leading-[1.5] tracking-[-0.32px] text-white shadow-[0px_60.123px_17.178px_0px_rgba(16,16,16,0),0px_38.173px_15.269px_0px_rgba(11,11,11,0.01),0px_21.95px_13.361px_0px_rgba(8,8,8,0.05),0px_9.543px_9.543px_0px_rgba(5,5,5,0.09),0px_2.863px_5.726px_0px_rgba(0,0,0,0.1)] desktop-sm:gap-px desktop-sm:rounded-[12px] desktop-sm:border-t desktop-sm:pl-[24px] desktop-sm:pr-[14px] desktop-sm:py-[14px] desktop-sm:shadow-[0px_63px_18px_0px_rgba(16,16,16,0),0px_40px_16px_0px_rgba(11,11,11,0.01),0px_23px_14px_0px_rgba(8,8,8,0.05),0px_10px_10px_0px_rgba(5,5,5,0.09),0px_3px_6px_0px_rgba(0,0,0,0.1)]  text-center"} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, rgb(41,41,41) 0%, rgb(41,41,41) 100%)" } as CSSProperties}>
+            {"Réserver un audit offert"}
             <span aria-hidden={"true"} className={"relative block shrink-0 size-[20.995px] desktop-sm:size-[22px]"}>
               <span className={"absolute inset-[28.66%_35.71%_23.78%_35.72%]"}>
-                <img src={"https://synnax-ai-native-software-landing-template-v1.21st.app/integrations/arrow-light.svg"} alt={""} className={"block size-full max-w-none"} />
+                <img src={"/accueil-sx/chevron-clair.svg"} alt={""} className={"block size-full max-w-none"} />
               </span>
             </span>
             <span aria-hidden={"true"} className={"pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0px_0.954px_0.954px_0px_rgba(255,255,255,0.3)] desktop-sm:shadow-[inset_0px_1px_1px_0px_rgba(255,255,255,0.3)]"} />
-          </button>
-          <button type={"button"} className={"relative inline-flex shrink-0 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap font-lato font-semibold transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[9.543px] rounded-[9.543px] border-[0.954px] border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pl-[22.904px] pr-[13.361px] py-[13.361px] text-[14px] leading-[1.5] tracking-[-0.42px] text-[#121212] desktop-sm:gap-[10px] desktop-sm:rounded-[10px] desktop-sm:border desktop-sm:pl-[24px] desktop-sm:pr-[14px] desktop-sm:py-[14px] "}>
-            {"Talk to sales"}
+          </Link>
+          <Link href={"/contact"} className={"relative inline-flex shrink-0 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap font-lato font-semibold transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[9.543px] rounded-[9.543px] border-[0.954px] border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pl-[22.904px] pr-[13.361px] py-[13.361px] text-[14px] leading-[1.5] tracking-[-0.42px] text-[#121212] desktop-sm:gap-[10px] desktop-sm:rounded-[10px] desktop-sm:border desktop-sm:pl-[24px] desktop-sm:pr-[14px] desktop-sm:py-[14px]  text-center"}>
+            {"Parler à l'équipe"}
             <span aria-hidden={"true"} className={"relative block shrink-0 size-[20.995px] desktop-sm:size-[22px]"}>
               <span className={"absolute inset-[28.66%_35.71%_23.78%_35.72%]"}>
-                <img src={"https://synnax-ai-native-software-landing-template-v1.21st.app/integrations/arrow-dark.svg"} alt={""} className={"block size-full max-w-none"} />
+                <img src={"/accueil-sx/chevron-sombre.svg"} alt={""} className={"block size-full max-w-none"} />
               </span>
             </span>
-          </button>
+          </Link>
         </div>
       </div>
       <div className={"relative shrink-0 z-20 [--cell:25%] [--row:46px] ipad:[--cell:16.6667%] ipad:[--row:56px] desktop-sm:[--cell:8.3333%] h-[46px] ipad:h-[56px]"}>

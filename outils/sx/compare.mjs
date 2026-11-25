@@ -63,7 +63,7 @@ const RELEVER = `(async () => {
   /* défiler pour déclencher les apparitions, puis remonter */
   const H = () => document.documentElement.scrollHeight;
   /* attendre l'hydratation : les hachures de marge n'existent qu'une fois le JavaScript monté */
-  for (let i = 0; i < 80 && !document.querySelector('.synnax-navbar-sticky ~ div span.absolute.inset-x-0'); i++) await dormir(250);
+  for (let i = 0; i < 80 && !document.querySelector('.synnax-navbar-sticky ~ div span.absolute.inset-x-0, .sx-navbar-sticky ~ div span.absolute.inset-x-0'); i++) await dormir(250);
   await dormir(400);
   for (let y = 0; y < H(); y += Math.round(innerHeight * 0.5)) { scrollTo(0, y); await dormir(260); }
   for (const b of document.querySelectorAll('[data-in-view="false"]')) { b.scrollIntoView({ block: 'center' }); for (let i = 0; i < 12 && b.getAttribute('data-in-view') !== 'true'; i++) await dormir(150); }
@@ -78,7 +78,7 @@ const RELEVER = `(async () => {
   }
   dispatchEvent(new Event('resize')); await dormir(700);
   const PROPS = ${JSON.stringify(PROPS)}, PSEUDO = ${JSON.stringify(PSEUDO)};
-  const barre = document.querySelector('.synnax-navbar-sticky');
+  const barre = document.querySelector('.synnax-navbar-sticky, .sx-navbar-sticky');
   if (!barre) return { erreur: 'barre introuvable', titre: document.title };
   const env = barre.parentElement, pied = document.querySelector('footer.sgf');
   /* Chrome sans écran rend parfois une valeur périmée (0px) pour la marge « auto » d'un élément flex
@@ -135,7 +135,9 @@ const nous = await relever(NOUS, 'sxnous');
 writeFileSync(`${CACHE}/nous-${largeur}.json`, JSON.stringify(nous));
 
 /* valeurs équivalentes à l'écran, écrites autrement après un second passage par le minifieur */
-const equiv = (v) => String(v).replace(/\b0px 0px\b/g, '0% 0%').replace('matrix(1, 0, 0, 1, 0, 0)', 'none');
+const equiv = (v) => String(v).replace(/\b0px 0px\b/g, '0% 0%').replace('matrix(1, 0, 0, 1, 0, 0)', 'none').replace(/url\("#[^"]*"\)/g, 'url(#id)');
+/* un <button> de la référence rendu en vrai lien chez nous reste le même élément */
+const memeBalise = (x, y) => x === y || (x === 'button' && y === 'a');
 const ecarts = [];
 const parProp = new Map();
 console.log(`\n══ ${largeur} px — page : réf ${ref.largeurPage}×${ref.hauteurPage} · nous ${nous.largeurPage}×${nous.hauteurPage}`);
@@ -145,7 +147,7 @@ for (const nom of Object.keys(ref.blocs)) {
   let n = Math.min(A.length, B.length), touches = 0, decale = -1;
   for (let i = 0; i < n; i++) {
     const a = A[i], b = B[i];
-    if (a.t !== b.t) { decale = i; break; }
+    if (!memeBalise(a.t, b.t)) { decale = i; break; }
     const liste = [];
     if (a.s !== b.s) {
       const sa = a.s.split('¦'), sb = b.s.split('¦');
@@ -163,7 +165,7 @@ for (const nom of Object.keys(ref.blocs)) {
       }
     });
     if (!SANS_RECT) ['x', 'y', 'l', 'h'].forEach((p, k) => { if (Math.abs(a.r[k] - b.r[k]) > 0.5) liste.push(['rect.' + p, a.r[k], b.r[k]]); });
-    if (a.a !== b.a) liste.push(['attributs', a.a.slice(0, 160), b.a.slice(0, 160)]);
+    if (!SANS_RECT && a.a !== b.a) liste.push(['attributs', a.a.slice(0, 160), b.a.slice(0, 160)]);
     if (liste.length) {
       touches++;
       for (const [p, va, vb] of liste) {
@@ -172,7 +174,8 @@ for (const nom of Object.keys(ref.blocs)) {
       }
     }
   }
-  console.log(`${nom.padEnd(8)} ${String(A.length).padStart(5)} / ${String(B.length).padEnd(5)}      ${String(touches).padStart(5)}${decale >= 0 ? `   ⚠ arbres décalés à l'élément ${decale} : <${A[decale].t}> ≠ <${B[decale].t}>` : ''}${A.length !== B.length ? '   ⚠ nombre différent' : ''}`);
+  const hA = A[0] ? A[0].r[3] : 0, hB = B[0] ? B[0].r[3] : 0;
+  console.log(`${nom.padEnd(8)} ${String(A.length).padStart(5)} / ${String(B.length).padEnd(5)}      ${String(touches).padStart(5)}   h ${hA} → ${hB}${hA !== hB ? ' (' + (hB > hA ? '+' : '') + (hB - hA) + ')' : ''}${decale >= 0 ? `   ⚠ arbres décalés à l'élément ${decale} : <${A[decale].t}> ≠ <${B[decale].t}>` : ''}${A.length !== B.length ? '   ⚠ nombre différent' : ''}`);
 }
 writeFileSync(`${CACHE}/ecarts-${largeur}.json`, JSON.stringify(ecarts));
 const tri = [...parProp.entries()].sort((a, b) => b[1] - a[1]);
