@@ -1,0 +1,588 @@
+/* ══════════════════════════════════════════════════════════════════════
+   LA CHARTE DE LA VITRINE — 25/11/2026
+
+   Teo : « que les autres pages soient un peu semblables à l'accueil […] pas
+   copier-coller, mais qu'il y ait des similitudes : les finitions, la
+   manière de faire, les sections ». Analyse et plan : docs/charte-accueil.md.
+
+   Ce fichier RECOPIE les valeurs de l'accueil (components/accueil-sx/sx.css,
+   relevées au pixel sur la référence) dans des classes `ch-*`, scopées sous
+   la racine `.charte` : rien sur `:root`, rien dans globals.css. L'espace
+   client et les sites dédiés ne le voient pas. sx.css, lui, ne bouge pas
+   (il est généré).
+
+   Correspondances, pour retrouver une valeur à la source :
+     .ch-intro / .ch-pastille / .ch-titre / .ch-chapo  ← .platform-intro, -eyebrow, h2, -lede
+     .ch-grille / .ch-carte / .ch-scene / .ch-lien      ← .ft-grid, .ft-card, .ft-stage, .ft-link
+     .ch-faq-*                                          ← .faq-*
+     .ch-appel                                          ← .cta-band
+     .ch-btn                                            ← le bouton blanc de SxNav (25/11 : TOUS
+                                                          les boutons sont blancs)
+     .ch-barre                                          ← .sx-navbar (Header.tsx)
+     .ch-pied                                           ← .sgf, sans le mot géant (PiedSite.tsx)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.charte {
+  --ch-fond: #f5f5f2;
+  --ch-encre: #121212;
+  --ch-encre-section: #202322;
+  --ch-filet: #dcdcda;
+  --ch-gris: #84877f;
+  --ch-pastille: #eeeee7;
+  --ch-pastille-bord: #dddcd4;
+  --ch-scene: #eeeee8;
+  --ch-scene-bord: #e6e6e0;
+  --ch-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* retrait du contenu à partir de 1280 (sx.css, --platform-content-inset) */
+  --ch-retrait: 0px;
+  /* Les ~160 règles `font-family: var(--font-X)` du site pointent sur ces
+     alias, résolus sur :root vers General Sans (app/polices.css). Dans la
+     charte, ils pointent sur Google Sans, la police de l'accueil. */
+  --font-omega: var(--font-google-sans);
+  --font-inter: var(--font-google-sans);
+  --font-inter-tight: var(--font-google-sans);
+  --font-jakarta: var(--font-google-sans);
+  --font-dm-sans: var(--font-google-sans);
+  --font-hanken: var(--font-google-sans);
+  --font-figtree: var(--font-google-sans);
+  --font-geist: var(--font-google-sans);
+  --police-texte: var(--font-google-sans);
+  --police-geist: var(--font-google-sans);
+  font-family: var(--font-google-sans), Arial, sans-serif;
+  color: var(--ch-encre-section);
+  background: var(--ch-fond);
+}
+@media (min-width: 1280px) {
+  .charte {
+    --ch-retrait: max(0px, calc(min(100vw, 1920px) * 0.06333 - 72px));
+  }
+}
+
+/* ─── le calme : aucune apparition au défilement (décision 5) ──────────
+   PageMotion et Arrivee font monter et fondre [data-reveal], [data-arrivee],
+   [data-intertitre] et [data-claire] par styles en ligne (GSAP). Dans la
+   charte, ces éléments sont là d'emblée : un !important de feuille de style
+   l'emporte sur un style en ligne ordinaire. Lenis (le défilement doux)
+   reste. */
+.charte [data-reveal],
+.charte [data-arrivee],
+.charte [data-intertitre],
+.charte [data-claire] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  visibility: visible !important;
+}
+
+/* ─── le cadre : 1920 px au plus, marges de 32 / 52 / 72 px ─────────── */
+.charte .ch-section {
+  position: relative;
+  width: 100%;
+  max-width: 1920px;
+  margin-inline: auto;
+  padding-inline: 32px;
+}
+@media (min-width: 768px) {
+  .charte .ch-section { padding-inline: 52px; }
+}
+@media (min-width: 1280px) {
+  .charte .ch-section { padding-inline: 72px; }
+}
+/* le bloc intérieur d'une section : c'est son filet bas qui sépare les
+   sections (elles sont jointives, pas de bande de vide) */
+.charte .ch-bloc {
+  position: relative;
+  border-bottom: 1px solid var(--ch-filet);
+}
+.charte .ch-bloc--sans-filet { border-bottom: 0; }
+/* un contenu libre posé dans un bloc reçoit les mêmes retraits que l'en-tête */
+.charte .ch-contenu {
+  padding: 40px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .ch-contenu { padding-left: max(clamp(24px, 4vw, 64px), var(--ch-retrait)); }
+}
+@media (max-width: 760px) {
+  .charte .ch-contenu { padding: 28px 20px 40px; }
+}
+
+/* ─── l'en-tête de section ─────────────────────────────────────────── */
+.charte .ch-intro {
+  padding: 72px clamp(24px, 4vw, 64px) 36px;
+  border-bottom: 1px solid var(--ch-filet);
+}
+@media (min-width: 1280px) {
+  .charte .ch-intro { padding-left: var(--ch-retrait); }
+}
+@media (max-width: 1000px) {
+  .charte .ch-intro { padding-bottom: 24px; }
+}
+@media (max-width: 760px) {
+  .charte .ch-intro { padding: 48px 20px 18px; }
+}
+.charte .ch-intro--haut { padding-top: 85px; }
+@media (max-width: 760px) {
+  .charte .ch-intro--haut { padding-top: 56px; }
+}
+.charte .ch-intro--cote {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  align-items: end;
+  gap: 20px 40px;
+}
+@media (max-width: 1399px) {
+  .charte .ch-intro--cote { grid-template-columns: minmax(0, 1fr); }
+}
+.charte .ch-intro--cote .ch-chapo { margin-top: 0; padding-bottom: 4px; }
+.charte .ch-intro--centre {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+@media (min-width: 1280px) {
+  .charte .ch-intro--centre { padding-left: clamp(24px, 4vw, 64px); }
+}
+.charte .ch-intro--centre .ch-chapo { margin-inline: auto; }
+.charte .ch-intro--centre .ch-actions { justify-content: center; }
+
+.charte .ch-pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 24px;
+  padding: 5px 10px;
+  border: 1px solid var(--ch-pastille-bord);
+  border-radius: 5px;
+  background: var(--ch-pastille);
+  color: var(--ch-encre-section);
+  font-size: 12px;
+  line-height: 1.2;
+}
+.charte .ch-pastille--sombre {
+  border-color: transparent;
+  border-radius: 999px;
+  background: #202322;
+  color: #fff;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.charte .ch-titre {
+  max-width: 1000px;
+  color: var(--ch-encre-section);
+  font-size: clamp(28px, 3.2vw, 40px);
+  font-weight: 450;
+  line-height: 1.16;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+.charte .ch-titre > span { color: var(--ch-gris); }
+@media (max-width: 760px) {
+  .charte .ch-titre { font-size: 30px; }
+}
+/* le titre de PAGE (h1) : les cotes du h1 de l'accueil, 42 puis 62 px */
+.charte .ch-titre--page {
+  font-size: 42px;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: #000;
+}
+@media (min-width: 768px) {
+  .charte .ch-titre--page { font-size: 62px; }
+}
+
+.charte .ch-chapo {
+  max-width: 520px;
+  margin-top: 20px;
+  color: var(--ch-gris);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  text-wrap: pretty;
+}
+.charte .ch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+/* ─── le bouton : un seul dessin, le blanc ──────────────────────────── */
+.charte .ch-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  min-height: 44px;
+  padding: 0 24px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ch-encre);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+.charte .ch-btn--chevron { gap: 10px; padding-right: 14px; }
+.charte .ch-btn--plein { width: 100%; }
+.charte .ch-btn svg { display: block; flex-shrink: 0; }
+@media (hover: hover) and (pointer: fine) {
+  .charte .ch-btn:hover { opacity: 0.9; }
+}
+.charte .ch-btn:active { transform: scale(0.97); }
+.charte .ch-btn:focus-visible { outline: 2px solid #121212; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .charte .ch-btn:active { transform: none; }
+}
+/* le troisième niveau : le lien souligné */
+.charte .ch-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ch-encre-section);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── les grilles de cartes jointives ───────────────────────────────── */
+.charte .ch-grille {
+  display: grid;
+  grid-template-columns: repeat(var(--ch-colonnes, 2), minmax(0, 1fr));
+}
+.charte .ch-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px 12px 24px;
+  border-bottom: 1px solid var(--ch-filet);
+  border-left: 1px solid var(--ch-filet);
+}
+.charte .ch-grille[data-colonnes="1"] > .ch-carte,
+.charte .ch-grille[data-colonnes="2"] > .ch-carte:nth-child(2n + 1),
+.charte .ch-grille[data-colonnes="3"] > .ch-carte:nth-child(3n + 1),
+.charte .ch-grille[data-colonnes="4"] > .ch-carte:nth-child(4n + 1) {
+  border-left: 0;
+}
+@media (min-width: 1280px) {
+  .charte .ch-grille > .ch-carte:first-child,
+  .charte .ch-grille[data-colonnes="1"] > .ch-carte,
+  .charte .ch-grille[data-colonnes="2"] > .ch-carte:nth-child(2n + 1),
+  .charte .ch-grille[data-colonnes="3"] > .ch-carte:nth-child(3n + 1),
+  .charte .ch-grille[data-colonnes="4"] > .ch-carte:nth-child(4n + 1) {
+    padding-left: max(12px, calc(var(--ch-retrait) - 12px));
+  }
+}
+@media (max-width: 1000px) {
+  .charte .ch-grille[data-colonnes="3"],
+  .charte .ch-grille[data-colonnes="4"] { --ch-colonnes: 2; }
+  .charte .ch-grille[data-colonnes="3"] > .ch-carte,
+  .charte .ch-grille[data-colonnes="4"] > .ch-carte { border-left: 1px solid var(--ch-filet); }
+  .charte .ch-grille[data-colonnes="3"] > .ch-carte:nth-child(2n + 1),
+  .charte .ch-grille[data-colonnes="4"] > .ch-carte:nth-child(2n + 1) { border-left: 0; }
+}
+@media (max-width: 760px) {
+  .charte .ch-grille { --ch-colonnes: 1 !important; }
+  .charte .ch-grille > .ch-carte { border-left: 0 !important; }
+}
+.charte .ch-scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+  padding: 40px 32px;
+  overflow: hidden;
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 12px;
+  background: var(--ch-scene);
+}
+.charte .ch-scene--trame {
+  background: #edeee8 radial-gradient(#c5c9bd66 0.6px, #0000 0.6px) 0 0 / 12px 12px;
+}
+.charte .ch-scene--basse { min-height: 0; }
+@media (max-width: 760px) {
+  .charte .ch-scene { min-height: 300px; padding: 32px 16px; }
+  .charte .ch-scene--basse { min-height: 0; }
+}
+.charte .ch-carte-texte {
+  flex: 1;
+  padding: 28px 12px 0;
+}
+@media (max-width: 760px) {
+  .charte .ch-carte-texte { padding: 22px 8px 0; }
+}
+.charte .ch-carte-texte h3 {
+  color: var(--ch-encre-section);
+  font-size: 22px;
+  font-weight: 450;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+.charte .ch-carte-texte p {
+  max-width: 460px;
+  margin-top: 10px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+.charte .ch-carte-texte .ch-lien { margin-top: 16px; }
+
+/* ─── la FAQ en deux colonnes, intro collante ───────────────────────── */
+.charte .ch-faq {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  border-bottom: 1px solid var(--ch-filet);
+}
+.charte .ch-faq > .ch-intro {
+  position: relative;
+  padding-bottom: 48px;
+  border-bottom: 0;
+  border-right: 1px solid var(--ch-filet);
+}
+@media (min-width: 1280px) {
+  .charte .ch-faq > .ch-intro { padding-right: 48px; }
+}
+.charte .ch-faq-intro { position: sticky; top: 112px; }
+.charte .ch-faq-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  max-width: 400px;
+  margin-top: 32px;
+}
+.charte .ch-faq-aside p {
+  color: var(--ch-gris);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.charte .ch-faq-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding-inline: clamp(24px, 3vw, 48px);
+  border-bottom: 1px solid var(--ch-filet);
+}
+.charte .ch-faq-item:last-child { border-bottom: 0; }
+.charte .ch-faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  padding: 24px 0;
+  color: var(--ch-encre-section);
+  font-size: 19px;
+  font-weight: 450;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  text-align: left;
+  cursor: pointer;
+}
+.charte .ch-faq-q:focus-visible { outline: 2px solid #202322; outline-offset: 4px; border-radius: 4px; }
+.charte .ch-faq-icone {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e3e3dd;
+  border-radius: 9px;
+  background: var(--ch-scene);
+  color: var(--ch-encre-section);
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+.charte .ch-faq-icone svg { transition: transform 0.4s var(--ch-ease); }
+.charte .ch-faq-q:hover .ch-faq-icone { background: #e7e7e0; }
+.charte .ch-faq-item.is-open .ch-faq-icone { border-color: #292929; background: #292929; color: #fff; }
+.charte .ch-faq-item.is-open .ch-faq-icone svg { transform: rotate(180deg); }
+.charte .ch-faq-panneau {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s var(--ch-ease);
+}
+.charte .ch-faq-item.is-open .ch-faq-panneau { grid-template-rows: 1fr; }
+.charte .ch-faq-panneau > div { min-height: 0; overflow: hidden; }
+.charte .ch-faq-panneau p {
+  max-width: 640px;
+  padding: 0 56px 28px 0;
+  color: var(--ch-gris);
+  font-size: 16px;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s, transform 0.45s var(--ch-ease);
+}
+.charte .ch-faq-item.is-open .ch-faq-panneau p { opacity: 1; transform: none; transition-delay: 50ms; }
+@media (max-width: 1000px) {
+  .charte .ch-faq { grid-template-columns: minmax(0, 1fr); }
+  .charte .ch-faq > .ch-intro { padding-bottom: 36px; border-right: 0; border-bottom: 1px solid var(--ch-filet); }
+  .charte .ch-faq-intro { position: static; }
+  .charte .ch-faq-aside { max-width: 520px; margin-top: 24px; }
+  .charte .ch-faq-item { padding-inline: clamp(24px, 4vw, 64px); }
+}
+@media (max-width: 760px) {
+  .charte .ch-faq-item { padding-inline: 20px; }
+  .charte .ch-faq-q { gap: 16px; padding: 20px 0; font-size: 17px; }
+  .charte .ch-faq-panneau p { padding-right: 0; font-size: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .charte .ch-faq-panneau,
+  .charte .ch-faq-panneau p,
+  .charte .ch-faq-icone,
+  .charte .ch-faq-icone svg { transition: none; }
+}
+
+/* ─── le bandeau d'appel, centré, sans halo ─────────────────────────── */
+.charte .ch-appel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 96px clamp(24px, 4vw, 64px) 104px;
+  color: var(--ch-encre-section);
+  text-align: center;
+}
+.charte .ch-appel .ch-titre { max-width: 760px; }
+.charte .ch-appel .ch-chapo { margin-inline: auto; }
+.charte .ch-appel .ch-actions { justify-content: center; margin-top: 36px; }
+@media (max-width: 760px) {
+  .charte .ch-appel { padding: 64px 20px 72px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LA BARRE DU SITE (components/Header.tsx) — les cotes de la barre de
+   l'accueil (.sx-navbar) : 64 px, puis 52 dès 32 px de défilement ;
+   1920 px au plus ; marges 32 / 48 / 74,5 ; fond #f5f5f2 et filet bas.
+   Les menus déroulants (MenuPrincipal) sont gardés.
+   ══════════════════════════════════════════════════════════════════════ */
+.ch-barre {
+  --ch-nav-dur: 0.45s;
+  --ch-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  font-family: var(--font-google-sans), Arial, sans-serif;
+}
+.ch-barre *:not(svg):not(svg *) { font-family: inherit; }
+/* le filet est sur la rangée, comme sur l'accueil : 64 px filet compris,
+   et il s'arrête aux 1920 px du cadre */
+.ch-barre-rangee {
+  height: 64px;
+  border-bottom: 1px solid #dcdcda;
+  max-width: 1920px;
+  margin-inline: auto;
+  padding-inline: 32px;
+  transition: height var(--ch-nav-dur) var(--ch-ease);
+}
+@media (min-width: 768px) {
+  .ch-barre-rangee { padding-inline: 48px; }
+}
+@media (min-width: 1280px) {
+  .ch-barre-rangee { padding-inline: 74.5px; }
+}
+.ch-barre[data-compact="true"] .ch-barre-rangee { height: 52px; }
+.ch-barre-marque img {
+  width: 17px;
+  height: 17px;
+  transition: width var(--ch-nav-dur) var(--ch-ease), height var(--ch-nav-dur) var(--ch-ease);
+}
+.ch-barre-marque span {
+  color: #121212;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 25.5px;
+  letter-spacing: -0.4px;
+  white-space: nowrap;
+  transition: font-size var(--ch-nav-dur) var(--ch-ease);
+}
+.ch-barre[data-compact="true"] .ch-barre-marque img { width: 15px; height: 15px; }
+.ch-barre[data-compact="true"] .ch-barre-marque span { font-size: 18px; }
+/* les entrées du menu : 17 px, encre noire, comme les liens de l'accueil */
+.ch-barre .omenu [data-slot="navigation-menu-trigger"],
+.ch-barre .omenu [data-slot="navigation-menu-link"].group {
+  height: 44px;
+  padding-inline: 10px;
+  color: #000;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: -0.34px;
+  transition: font-size var(--ch-nav-dur) var(--ch-ease), background-color 0.2s;
+}
+.ch-barre[data-compact="true"] .omenu [data-slot="navigation-menu-trigger"],
+.ch-barre[data-compact="true"] .omenu [data-slot="navigation-menu-link"].group {
+  font-size: 15px;
+}
+/* les deux boutons de la barre, blancs. Pas de `display` ici : c'est
+   Tailwind (`hidden lg:inline-flex`) qui décide de leur présence. */
+.ch-barre .ch-btn {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  min-height: 44px;
+  padding: 0 24px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  color: #121212;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  transition-property: font-size, height, min-height, padding, border-radius, opacity, transform;
+  transition-duration: var(--ch-nav-dur), var(--ch-nav-dur), var(--ch-nav-dur), var(--ch-nav-dur), var(--ch-nav-dur), 0.2s, 0.2s;
+  transition-timing-function: var(--ch-ease);
+}
+.ch-barre .ch-btn--chevron { gap: 10px; padding: 0 12px 0 20px; font-size: 14px; }
+@media (hover: hover) and (pointer: fine) {
+  .ch-barre .ch-btn:hover { opacity: 0.9; }
+}
+.ch-barre .ch-btn:active { transform: scale(0.97); }
+.ch-barre .ch-btn:focus-visible { outline: 2px solid #121212; outline-offset: 2px; }
+.ch-barre[data-compact="true"] .ch-btn { height: 36px; min-height: 36px; padding-inline: 19px; font-size: 14px; }
+.ch-barre[data-compact="true"] .ch-btn--chevron { border-radius: 8px; padding: 0 10px 0 16px; font-size: 13px; }
+@media (prefers-reduced-motion: reduce) {
+  .ch-barre,
+  .ch-barre * { transition: none !important; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LE PIED DU SITE (components/charte/PiedSite.tsx) — le pied sombre de
+   l'accueil, à quatre colonnes de liens, sans le mot géant. Règles de
+   .sgf (sx.css, « 2. LE PIED »), recopiées.
+   ══════════════════════════════════════════════════════════════════════ */
+.ch-pied {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  container-type: inline-size;
+  color: #fff;
+  background: linear-gradient(180deg, #2a2a2a 0%, #0a0a0a 24%);
+  font-family: var(--font-google-sans), Arial, sans-serif;
+  font-size: clamp(11px, 1.12cqw, 13.5px);
+  line-height: 1.18;
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+}
+.ch-pied ::selection { background: #fff; color: #0a0a0a; }
+:where(.ch-pied) a { color: inherit; text-decoration: none; }
+:where(.ch-pied) ul { list-style: none; margin: 0; padding: 0; }
+:where(.ch-pied) p { margin: 0; }
+.ch-pied svg { max-width: none; }
