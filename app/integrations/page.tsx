@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
 import { type Outil } from "@/components/integrations/FamilleOutils";
 import OrbiteOutils from "@/components/integrations/OrbiteOutils";
 import GrilleOutils from "@/components/integrations/GrilleOutils";
 import FriseRaccordement from "@/components/integrations/FriseRaccordement";
 import CartesSystemes from "@/components/integrations/CartesSystemes";
-import AppelOutil from "@/components/integrations/AppelOutil";
-import { Chevron, OUTILS } from "@/components/offres/MediaMoteurs";
+import { OUTILS } from "@/components/offres/MediaMoteurs";
+import Cadre from "@/components/charte/Cadre";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Appel from "@/components/charte/Appel";
+import Bouton from "@/components/charte/Bouton";
+import { Scene } from "@/components/charte/Cartes";
+import "@/components/charte/pages/integrations.css";
 import {
   FAMILLES_OUTILS,
   MOTEUR_OUTILS,
@@ -107,88 +111,77 @@ const TOTAL = PAR_FAMILLE.reduce((n, g) => n + g.outils.length, 0);
 export default function Integrations() {
   return (
     <PageShell>
-      <PageMotion />
-
-      <div className="offres">
-        {/* ════════ 1 · HERO — centré sur fond gris pointillé ════════ */}
-        <section
-          data-monde="clair"
-          className="o-gris relative overflow-hidden pb-[90px] pt-[60px] sm:pb-[110px] sm:pt-[90px]"
-        >
-          <div
-            aria-hidden
-            className="o-dots o-dots-fade pointer-events-none absolute inset-x-0 top-0 h-[700px]"
-          />
-          <div className="o-wrap relative flex flex-col items-center text-center">
-            <div data-reveal>
-              <span className="o-pill o-pill--xs">INTÉGRATIONS</span>
+      <Cadre>
+        <div className="offres it-page">
+          {/* ════════ 1 · LE TITRE DE PAGE, puis l'orbite des outils ════════ */}
+          <Section>
+            <EnTeteSection
+              niveau={1}
+              haut
+              pastille="Intégrations"
+              titre="Omega se branche sur vos outils et reprend vos données."
+              chapo={
+                <>
+                  Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : Omega lit et écrit dans les outils où vos équipes travaillent déjà. Si Omega devient votre logiciel de gestion, nous reprenons vos données. Elles restent dans un espace dédié, chiffré, hébergé dans l&apos;Union européenne.
+                </>
+              }
+              actions={
+                <>
+                  <Bouton href="/reserver-un-audit" icone="calendrier">
+                    Réserver un audit offert
+                  </Bouton>
+                  <Bouton href="/gestion" icone="chevron">
+                    Voir le logiciel
+                  </Bouton>
+                </>
+              }
+            />
+            <div className="it-cellule">
+              {/* 14/09 — les outils du client gravitent autour du noyau. La
+                  ligne ci-dessous est sa légende. */}
+              <Scene trame className="it-orbite">
+                <OrbiteOutils />
+              </Scene>
+              <p className="it-legende">{TOTAL} outils raccordés à ce jour</p>
             </div>
-            {/* .o-h2 sur un h1 : c'est l'échelle de la référence (48/67,2) */}
-            <h1 data-reveal className="o-h2 mt-4 max-w-[720px]">
-              Omega se branche sur vos outils et reprend vos données.
-            </h1>
-            <p data-reveal className="o-lead mt-5 max-w-[640px]">
-              Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : Omega lit et écrit dans les outils où vos équipes travaillent déjà. Si Omega devient votre logiciel de gestion, nous reprenons vos données. Elles restent dans un espace dédié, chiffré, hébergé dans l&apos;Union européenne.
-            </p>
-            <div data-reveal className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link href="/reserver-un-audit" className="o-btn o-btn--primary">
-                Réserver un audit offert
-              </Link>
-              <Link href="/gestion" className="o-btn o-btn--ghost">
-                Voir le logiciel
-                <Chevron taille={13} />
-              </Link>
-            </div>
-            {/* 14/09 — l'objet qui manquait : les outils du client gravitent
-                autour du noyau. La ligne ci-dessous devient sa légende. */}
-            <OrbiteOutils className="mt-14" />
-            <p data-reveal className="o-small mt-6">
-              {TOTAL} outils raccordés à ce jour
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 2 · LA GRILLE, PAR FAMILLE ════════ */}
-        <section data-monde="clair" className="py-[100px]">
-          <div className="o-wrap">
-            <GrilleOutils groupes={PAR_FAMILLE} />
-          </div>
-        </section>
-
-        {/* ════════ 3 · LE RACCORDEMENT ════════ */}
-        <section data-monde="clair" className="pb-[110px]">
-          <div className="o-wrap">
-            <div className="flex flex-col items-center text-center">
-              <div data-reveal>
-                <span className="o-pill o-pill--xs">LE RACCORDEMENT</span>
-              </div>
-              <h2 data-reveal className="o-h2 mt-4 max-w-[600px]">
-                Comment se passe le raccordement.
-              </h2>
-              <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Toujours dans le même ordre : Omega lit d&apos;abord, écrit ensuite. Vous décidez de ce qui part.
-              </p>
+          {/* ════════ 2 · LA GRILLE, PAR FAMILLE ════════ */}
+          <Section>
+            <div className="it-cellule it-grille">
+              <GrilleOutils groupes={PAR_FAMILLE} />
             </div>
-            <FriseRaccordement className="mt-16" />
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 4 · CE QUE CONSOMME CHAQUE MOTEUR ════════ */}
-        <section data-monde="clair" className="pb-[110px]">
-          <div className="o-wrap">
-            <div className="flex flex-col items-center text-center">
-              <div data-reveal>
-                <span className="o-pill o-pill--xs">PAR AGENT</span>
-              </div>
-              <h2 data-reveal className="o-h2 mt-4 max-w-[620px]">
-                Les outils dont chaque agent a besoin.
-              </h2>
-              <p data-reveal className="o-lead mt-4 max-w-[650px]">
-                Les quatre agents et les outils qu&apos;ils utilisent le plus souvent. Un agent n&apos;a pas besoin de tous vos logiciels : seulement de ceux où se trouve l&apos;information.
-              </p>
+          {/* ════════ 3 · LE RACCORDEMENT ════════ */}
+          <Section>
+            <EnTeteSection
+              pastille="Le raccordement"
+              titre="Comment se passe le raccordement."
+              chapo={
+                <>
+                  Toujours dans le même ordre : Omega lit d&apos;abord, écrit ensuite. Vous décidez de ce qui part.
+                </>
+              }
+            />
+            <div className="it-cellule">
+              <FriseRaccordement />
             </div>
+          </Section>
+
+          {/* ════════ 4 · CE QUE CONSOMME CHAQUE AGENT ════════ */}
+          <Section>
+            <EnTeteSection
+              pastille="Par agent"
+              titre="Les outils dont chaque agent a besoin."
+              chapo={
+                <>
+                  Les quatre agents et les outils qu&apos;ils utilisent le plus souvent. Un agent n&apos;a pas besoin de tous vos logiciels : seulement de ceux où se trouve l&apos;information.
+                </>
+              }
+            />
             <CartesSystemes
-              className="mt-16"
+              className="it-agents"
               systemes={MOTEUR_OUTILS.map((m) => ({
                 slug: m.slug,
                 role: m.role,
@@ -204,12 +197,27 @@ export default function Integrations() {
                 }),
               }))}
             />
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 5 · L'OUTIL MANQUANT ════════ */}
-        <AppelOutil />
-      </div>
+          {/* ════════ 5 · L'OUTIL MANQUANT ════════
+              Les textes de <AppelOutil>, mot pour mot, dans le bandeau
+              d'appel de l'accueil. */}
+          <Appel
+            pastille="Audit"
+            titre={<>Votre outil n&apos;est pas dans la liste&nbsp;?</>}
+            chapo={
+              <>
+                Cette liste n&apos;est pas une limite. Dès qu&apos;un outil donne accès à ses données, nous construisons le raccordement sur mesure. Sinon, nous vous le disons pendant l&apos;audit, pas après.
+              </>
+            }
+            actions={
+              <Bouton href="/reserver-un-audit" icone="calendrier">
+                En parler pendant l&apos;audit
+              </Bouton>
+            }
+          />
+        </div>
+      </Cadre>
     </PageShell>
   );
 }

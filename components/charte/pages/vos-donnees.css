@@ -1,0 +1,62 @@
+/* /vos-donnees dans la charte de l'accueil (25/11/2026). Le monde `.vd`
+   (globals.css) garde sa composition — héros photo qui se replie, carte
+   des lieux, schéma du trajet, tableau — ; ces règles, scopées sous
+   `.charte .ch-donnees`, n'en changent que ce qui l'éloignait de l'accueil. */
+
+.charte .ch-donnees {
+  --vd-soft: #eeeee8;
+  --vd-line: #dcdcda;
+  --vd-r-lg: 12px;
+  --vd-r-md: 12px;
+  --vd-r-sm: 10px;
+  background: transparent;
+}
+
+/* les titres : graisse et interlettrage de l'accueil */
+.charte .ch-donnees .vd-h1,
+.charte .ch-donnees .vd-h2,
+.charte .ch-donnees .vd-h3 {
+  font-weight: 450;
+  letter-spacing: -0.045em;
+  line-height: 1.16;
+}
+.charte .ch-donnees .vd-h4 { font-weight: 450; letter-spacing: -0.03em; }
+.charte .ch-donnees .vd-lead { color: #84877f; }
+
+/* l'étiquette à chasse fixe devient la pastille de l'accueil */
+.charte .ch-donnees .vd-eyebrow {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 10px;
+  border: 1px solid #dddcd4;
+  border-radius: 5px;
+  background: #eeeee7;
+  color: #202322;
+  font-family: var(--font-google-sans), Arial, sans-serif;
+  font-size: 12px;
+}
+.charte .ch-donnees .vd-sur-image .vd-eyebrow { background: rgba(255, 255, 255, 0.9); }
+
+/* le bouton : le blanc de l'accueil */
+.charte .ch-donnees .vd-cta {
+  height: 46px;
+  gap: 10px;
+  padding: 0 14px 0 24px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  color: #121212;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.charte .ch-donnees .vd-carte { border: 1px solid #e6e6e0; }
+
+/* le calme : les colonnes et le schéma sont là d'emblée */
+.charte .ch-donnees [data-anime] .vd-monte,
+.charte .ch-donnees [data-anime] .vd-ap {
+  opacity: 1 !important;
+  transform: none !important;
+  animation: none !important;
+}
+.charte .ch-donnees [data-anime] .vd-trace { stroke-dashoffset: 0 !important; animation: none !important; }
+.charte .ch-donnees [data-anime] .vd-pointe { opacity: 1 !important; animation: none !important; }

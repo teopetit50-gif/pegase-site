@@ -1,4 +1,7 @@
 import "./PageLegale.css";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import "@/components/charte/pages/mentions-legales.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    <PageLegale> — la mise en page des pages de texte légal (15/09/2026)
@@ -70,19 +73,18 @@ export default function PageLegale({
   sections: readonly SectionLegale[];
 }) {
   return (
-    <div className="resa">
-      {/* ═══ 1 — le titre, sur le gris de page ═══ */}
-      <section data-monde="clair" className="r-wrap pb-12 pt-12 sm:pb-16 sm:pt-20">
-        <div data-arrivee="titre" className="leg-cadre">
-          <h1 className="r-h1">{titre}</h1>
-          <p className="leg-maj">{maj}</p>
-        </div>
-      </section>
+    /* 25/11/2026 — dans la charte de l'accueil (la page est enveloppée dans
+       <Cadre> par app/mentions-legales/page.tsx) : le titre de page de
+       l'accueil, puis le document dans une section à filet, sans la bande
+       blanche. Sommaire, sections et fiche de l'éditeur inchangés. */
+    <div className="resa ch-legale">
+      <Section>
+        <EnTeteSection niveau={1} haut disposition="pile" titre={titre} chapo={maj} />
+      </Section>
 
-      {/* ═══ 2 — le document, sur la bande blanche ═══ */}
-      <div className="r-blanc">
-        <section data-monde="clair" className="r-wrap pb-20 pt-12 sm:pb-28 sm:pt-16">
-          <div className="leg-cadre leg-grille">
+      <Section filet="aucun">
+        <div className="ch-contenu">
+          <div className="leg-grille">
             <nav aria-label="Sommaire" className="leg-sommaire">
               <p className="leg-sommaire-titre">Sommaire</p>
               <ol className="leg-sommaire-liste">
@@ -120,8 +122,8 @@ export default function PageLegale({
               ))}
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </Section>
     </div>
   );
 }

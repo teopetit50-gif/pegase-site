@@ -1,0 +1,638 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /offres dans la charte de l'accueil — 25/11/2026
+   (docs/charte-accueil.md, § 4.2, ligne 6)
+
+   La page garde la racine `.ofd` (app/offres/nos-offres.css) pour le
+   dessin des pièces qu'elle réemploie : le bandeau d'outils, le schéma du
+   cycle et l'enveloppe `Ajuste`. Tout le reste est ici, sous
+   `.charte .of-page` : une feuille importée par une page reste chargée
+   après une navigation, et `.ofd` n'existe que sur cette route.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* `.ofd` sortait du cadre en 100vw, sur fond blanc, en Geist : c'est le
+   #f5f5f2 du cadre et Google Sans qui restent */
+.charte .of-page {
+  width: auto;
+  margin-inline: 0;
+  background: transparent;
+  color: var(--ch-encre-section);
+  font-family: inherit;
+  letter-spacing: normal;
+}
+.charte .of-page .of-ancre {
+  scroll-margin-top: 64px;
+}
+
+/* une cellule de contenu libre, à l'aplomb du titre (retraits de .ch-intro) */
+.charte .of-page .of-cellule {
+  padding: 40px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-cellule {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-cellule {
+    padding: 24px 20px 32px;
+  }
+}
+
+/* ─── la photo, dans un cadre de rayon 12 ──────────────────────────── */
+.charte .of-page .of-photo {
+  position: relative;
+  overflow: hidden;
+  height: clamp(240px, 36vw, 560px);
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 12px;
+  background: var(--ch-scene);
+}
+.charte .of-page .of-photo__media {
+  object-fit: cover;
+}
+
+/* ─── 2 · le bandeau d'outils ──────────────────────────────────────── */
+.charte .of-page .of-outils {
+  padding: 32px 0;
+}
+.charte .of-page .of-outils .ofd-outils svg {
+  fill: var(--ch-encre-section);
+}
+.charte .of-page .of-outils .ofd-outil span {
+  color: var(--ch-encre-section);
+  font-weight: 500;
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-outils {
+    padding: 24px 0;
+  }
+}
+
+/* ─── 3 · le globe et les quatre arguments ─────────────────────────── */
+.charte .of-page .of-arguments {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-arguments {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.charte .of-page .of-arguments__globe {
+  padding: 12px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-arguments__globe {
+    padding-left: max(12px, calc(var(--ch-retrait) - 12px));
+  }
+}
+.charte .of-page .of-globe-scene {
+  height: 100%;
+  min-height: 520px;
+  padding: 32px;
+}
+.charte .of-page .of-globe {
+  width: 100%;
+  max-width: 480px;
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-globe-scene {
+    min-height: 300px;
+    padding: 24px 16px;
+  }
+}
+.charte .of-page .of-arguments__cartes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 600px) {
+  .charte .of-page .of-arguments__cartes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-arguments__cartes {
+    grid-template-rows: 1fr 1fr;
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+.charte .of-page .of-argument {
+  display: flex;
+  min-width: 0;
+  min-height: 200px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 28px clamp(20px, 2.4vw, 36px) 32px;
+  border-bottom: 1px solid var(--ch-filet);
+}
+@media (min-width: 600px) {
+  .charte .of-page .of-argument:nth-child(2n) {
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-argument:nth-child(n + 3) {
+    border-bottom: 0;
+  }
+}
+@media (max-width: 599px) {
+  .charte .of-page .of-argument {
+    min-height: 0;
+    padding: 24px 20px 28px;
+  }
+  .charte .of-page .of-argument:last-child {
+    border-bottom: 0;
+  }
+}
+@media (min-width: 600px) and (max-width: 1000px) {
+  .charte .of-page .of-argument:nth-child(n + 3) {
+    border-bottom: 0;
+  }
+}
+.charte .of-page .of-argument__tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.charte .of-page .of-argument h3 {
+  color: var(--ch-encre-section);
+  font-size: 22px;
+  font-weight: 450;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+.charte .of-page .of-argument__puce svg {
+  display: block;
+  width: 10px;
+  height: 10px;
+}
+.charte .of-page .of-argument p {
+  max-width: 380px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+/* ─── 4 · le sur-mesure : le rouge dans son cadre, l'énoncé à côté ──── */
+.charte .of-page .of-duo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-duo {
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  }
+}
+.charte .of-page .of-duo__visuel {
+  padding: 12px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-duo__visuel {
+    padding-left: max(12px, calc(var(--ch-retrait) - 12px));
+  }
+}
+.charte .of-page .of-duo__marque {
+  display: flex;
+  height: 100%;
+  min-height: 280px;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  border-radius: 12px;
+  background: #e7131a;
+}
+@media (min-width: 768px) {
+  .charte .of-page .of-duo__marque {
+    min-height: 400px;
+  }
+}
+/* Mot-symbole en serif blanc sur le rouge : aucune serif n'est chargée
+   sur le site, la pile système rend le dessin (nos-offres.css, § 7). */
+.charte .of-page .of-duo__signe {
+  display: block;
+  color: #fff;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  font-size: clamp(2.5rem, 1rem + 4.2vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.charte .of-page .of-duo__texte {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 48px clamp(24px, 4vw, 64px) 52px;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-duo__texte {
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-duo__texte {
+    padding: 36px 20px 40px;
+  }
+}
+
+/* ─── 5a · la fenêtre d'exemple | le journal ───────────────────────── */
+.charte .of-page .of-scinde {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-scinde {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+}
+.charte .of-page .of-scinde__media {
+  min-width: 0;
+  padding: 12px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-scinde__media {
+    padding-left: max(12px, calc(var(--ch-retrait) - 12px));
+  }
+}
+.charte .of-page .of-scinde__scene {
+  height: 100%;
+  min-height: 420px;
+  padding: 48px 40px;
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-scinde__scene {
+    min-height: 0;
+    padding: 24px 12px;
+  }
+}
+/* l'écran d'exemple de l'accueil : blanc, rayon 10, liseré, ombre douce */
+.charte .of-page .of-fenetre {
+  display: flex;
+  width: 100%;
+  max-width: 649px;
+  overflow: hidden;
+  aspect-ratio: 649 / 402;
+  border: 1px solid #d9ddd3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+}
+.charte .of-page .of-scinde__texte {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px clamp(24px, 3vw, 48px) 48px;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-scinde__texte {
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-scinde__texte {
+    padding: 28px 20px 36px;
+  }
+}
+.charte .of-page .of-scinde__texte h3 {
+  color: var(--ch-encre-section);
+  font-size: 22px;
+  font-weight: 450;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+.charte .of-page .of-scinde__sous {
+  margin-top: 8px;
+  color: var(--ch-encre-section);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.charte .of-page .of-scinde__corps {
+  max-width: 460px;
+  margin-top: 16px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+}
+
+/* ─── 5b · le schéma du cycle, puis ses quatre temps ───────────────── */
+.charte .of-page .of-schema {
+  display: block;
+  place-items: normal;
+  min-height: 0;
+  padding: 8px 16px;
+}
+.charte .of-page .of-schema .ofd-cy {
+  padding: 40px 24px;
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-schema {
+    padding: 4px;
+  }
+}
+.charte .of-page .of-schema__note {
+  margin-top: 14px;
+  color: #777c76;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.charte .of-page .of-rangee {
+  border-top: 1px solid var(--ch-filet);
+}
+.charte .of-page .of-rangee__tete {
+  padding: 28px clamp(24px, 4vw, 64px) 4px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-rangee__tete {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-rangee__tete {
+    padding: 24px 20px 0;
+  }
+}
+.charte .of-page .of-rangee__grille {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 600px) {
+  .charte .of-page .of-rangee__grille {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-rangee__grille {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.charte .of-page .of-entree {
+  min-width: 0;
+  padding: 4px 24px 36px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-entree:first-child {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (min-width: 600px) {
+  .charte .of-page .of-entree + .of-entree {
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+@media (min-width: 600px) and (max-width: 1000px) {
+  .charte .of-page .of-entree:nth-child(3) {
+    border-left: 0;
+  }
+  .charte .of-page .of-entree {
+    padding-top: 20px;
+  }
+}
+@media (max-width: 599px) {
+  .charte .of-page .of-entree {
+    padding: 20px 20px 24px;
+  }
+  .charte .of-page .of-entree + .of-entree {
+    border-top: 1px solid var(--ch-filet);
+  }
+}
+.charte .of-page .of-entree__icone {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  margin-top: 20px;
+  border: 1px solid #e3e3dd;
+  border-radius: 9px;
+  background: var(--ch-scene);
+  color: var(--ch-encre-section);
+}
+.charte .of-page .of-entree h3 {
+  margin-top: 20px;
+  color: var(--ch-encre-section);
+  font-size: 19px;
+  font-weight: 450;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+.charte .of-page .of-entree p {
+  max-width: 300px;
+  margin-top: 8px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+/* ─── 5c et 5c bis · les fiches du catalogue ───────────────────────── */
+.charte .of-page .of-fiche {
+  color: inherit;
+  text-decoration: none;
+}
+.charte .of-page .of-fiche .ch-carte-texte {
+  padding-top: 20px;
+}
+.charte .of-page .of-fiche h3 {
+  margin-top: 28px;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .charte .of-page .of-fiche:hover h3 {
+    text-decoration-color: currentColor;
+  }
+}
+.charte .of-page .of-fiche:focus-visible {
+  outline: 2px solid #121212;
+  outline-offset: -2px;
+}
+.charte .of-page .of-fiche__icone {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 10px;
+  background: var(--ch-scene);
+  color: var(--ch-encre-section);
+}
+.charte .of-page .of-fiche ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.charte .of-page .of-fiche li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+.charte .of-page .of-fiche li svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--ch-encre-section);
+}
+/* le signe du logiciel, en masque alpha (public/logos/<nom>-mark.png) */
+.charte .of-page .of-fiche__signe::before {
+  content: "";
+  width: 22px;
+  height: 22px;
+  background: currentColor;
+  -webkit-mask: var(--of-signe) center / contain no-repeat;
+  mask: var(--of-signe) center / contain no-repeat;
+}
+.charte .of-page .of-fiche--metier h3 {
+  margin-top: 24px;
+}
+.charte .of-page .ch-carte-texte .of-fiche__saas {
+  margin-top: 2px;
+  color: #777c76;
+  font-size: 14px;
+  line-height: 1.4;
+}
+/* sept logiciels : seule sur sa rangée, la dernière fiche prend la rangée */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .charte .of-page .of-metiers .ch-grille > .ch-carte:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-metiers .ch-grille > .ch-carte:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+}
+.charte .of-page .of-metiers__pied {
+  padding-top: 28px;
+  padding-bottom: 32px;
+}
+
+/* ─── 5d · les ressources ──────────────────────────────────────────── */
+.charte .of-page .of-ressource {
+  color: inherit;
+  text-decoration: none;
+}
+.charte .of-page .of-ressource__scene {
+  min-height: 220px;
+  color: var(--ch-encre-section);
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-ressource__scene {
+    min-height: 180px;
+  }
+}
+.charte .of-page .of-ressource .ch-carte-texte {
+  padding-top: 20px;
+}
+.charte .of-page .ch-carte-texte .of-ressource__cat {
+  margin: 0 0 6px;
+  color: #777c76;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.charte .of-page .of-ressource h3 {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .charte .of-page .of-ressource:hover h3 {
+    text-decoration-color: currentColor;
+  }
+}
+.charte .of-page .of-ressource:focus-visible {
+  outline: 2px solid #121212;
+  outline-offset: -2px;
+}
+
+/* ─── 5e · le problème qu'ils règlent | la façade ──────────────────── */
+.charte .of-page .of-citation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-citation {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+}
+.charte .of-page .of-citation__texte {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 72px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .of-page .of-citation__texte {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .of-page .of-citation__texte {
+    padding: 48px 20px 36px;
+  }
+}
+.charte .of-page .of-citation__phrase {
+  max-width: 760px;
+  color: var(--ch-encre-section);
+  font-size: clamp(26px, 2.6vw, 36px);
+  font-weight: 450;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  text-wrap: pretty;
+}
+.charte .of-page .of-citation__signature {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 32px;
+}
+.charte .of-page .of-citation__signature p {
+  max-width: 520px;
+  color: var(--ch-gris);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.charte .of-page .of-citation__signature .ch-pastille {
+  margin-bottom: 0;
+}
+.charte .of-page .of-citation__photo {
+  min-width: 0;
+  padding: 12px;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 1001px) {
+  .charte .of-page .of-citation__photo {
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+.charte .of-page .of-photo--cellule {
+  height: 100%;
+  min-height: 300px;
+}

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import Appel from "@/components/charte/Appel";
+import Bouton from "@/components/charte/Bouton";
 import type { Post } from "@/lib/content";
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -111,27 +113,19 @@ export function BlogCard({ post }: { post: Post }) {
 
 /* ——— bandeau CTA de fin de page (gris doux, arrondi 16, centré) ——— */
 export function BlogCta() {
+  /* 25/11/2026 — l'appel final du blog prend le bandeau d'appel de la
+     charte (components/charte/Appel.tsx) et son bouton blanc. Ne sert
+     qu'aux pages du blog, toutes deux dans <Cadre>. Texte inchangé ; le
+     lien va droit à l'audit (/commencer y redirigeait). */
   return (
-    <div
-      data-reveal
-      className="rounded-[16px] bg-[#fafafa] px-6 py-12 text-center sm:px-10 sm:py-[60px]"
-    >
-      <h2
-        className="text-[24px] font-bold leading-[1.4] tracking-[-0.04em] text-[#09090b] sm:text-[28px]"
-        style={{ fontFamily: "var(--font-jakarta), ui-sans-serif, system-ui, sans-serif" }}
-      >
-        Et pour votre entreprise ?
-      </h2>
-      <p className="o-lead mx-auto mt-3 max-w-[560px]">
-        Les analyses valent pour un secteur. L&apos;audit vaut pour votre situation, et trente minutes suffisent à chiffrer ce que votre processus le plus coûteux représente réellement.
-      </p>
-      <Link
-        href="/commencer"
-        className="mt-7 inline-flex items-center gap-2 rounded-[10px] bg-[#2e2e2e] px-[25px] py-[14px] text-[16px] leading-none text-white transition-[background-color,transform] duration-200 hover:bg-[#3f3f46] active:scale-[0.97]"
-      >
-        Commencer
-        <span aria-hidden>→</span>
-      </Link>
-    </div>
+    <Appel
+      titre="Et pour votre entreprise ?"
+      chapo="Les analyses valent pour un secteur. L'audit vaut pour votre situation, et trente minutes suffisent à chiffrer ce que votre processus le plus coûteux représente réellement."
+      actions={
+        <Bouton href="/reserver-un-audit" icone="chevron">
+          Commencer
+        </Bouton>
+      }
+    />
   );
 }

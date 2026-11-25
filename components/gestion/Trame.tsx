@@ -76,8 +76,11 @@ export function Hachure() {
 /* ── les boutons ── leur composant Button, variantes « primary » et
    « outline » : 36 px de haut, rayon 10 px, ombre 0 1px à 5 % */
 const BOUTON =
-  "inline-flex shrink-0 items-center justify-center rounded-[10px] border bg-clip-padding whitespace-nowrap transition-all outline-none select-none focus-visible:ring-2 focus-visible:ring-[#4b4038]/40 active:translate-y-px shadow-2xs h-9 gap-1.5 px-3.5";
-const BOUTON_PLEIN = "border-transparent bg-[#403630] font-normal text-white hover:bg-[#342d27]";
+  "inline-flex shrink-0 items-center justify-center rounded-[10px] border bg-clip-padding whitespace-nowrap transition-all outline-none select-none focus-visible:ring-2 focus-visible:ring-[#4b4038]/40 active:translate-y-px shadow-2xs h-9 gap-1.5 px-3.5 ge-btn";
+/* 25/11/2026 — `ge-btn` / `ge-btn-plein` : des repères sans style, que la charte de
+   l'accueil (components/charte/pages/gestion.css) habille en bouton blanc de 46 px
+   sur omegaai.fr. Ailleurs (un site dédié), rien ne change. */
+const BOUTON_PLEIN = "border-transparent bg-[#403630] font-normal text-white hover:bg-[#342d27] ge-btn-plein";
 const BOUTON_FILET =
   "border-stone-200 bg-white font-medium text-stone-700 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900";
 

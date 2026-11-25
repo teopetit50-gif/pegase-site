@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  ArrowRight,
   Bell,
   Check,
   FileClock,
@@ -20,10 +19,17 @@ import { ChatMessages } from "@/components/ui/chat-messages";
 import PageShell from "@/components/PageShell";
 import Ajuste from "@/components/surmesure/Ajuste";
 import Cycle from "@/components/offres/Cycle";
-import PageMotion from "@/components/PageMotion";
+import Cadre from "@/components/charte/Cadre";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Appel from "@/components/charte/Appel";
+import Bouton from "@/components/charte/Bouton";
+import Pastille from "@/components/charte/Pastille";
+import { GrilleCartes, Scene } from "@/components/charte/Cartes";
 import { POSTS } from "@/lib/content";
 import { SECTEURS } from "@/lib/secteurs";
 import "./nos-offres.css";
+import "@/components/charte/pages/offres.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /offres — « Nos offres »
@@ -446,69 +452,6 @@ const RESSOURCES = [
    Briques
    ───────────────────────────────────────────────────────────────────── */
 
-/* Le bouton de la référence (« FlatCta ») : un voile `currentColor` qui
-   monte du bas au survol, et le libellé qui rentre à 0.9. Le voile est un
-   enfant absolu, pas un `background` — voir nos-offres.css § 3. */
-function Cta({
-  href,
-  children,
-  variante = "noir",
-}: {
-  href: string;
-  children: React.ReactNode;
-  variante?: "noir" | "blanc" | "trait" | "trait-blanc";
-}) {
-  return (
-    <Link href={href} className={`ofd-cta ofd-cta--${variante}`}>
-      <span aria-hidden className="ofd-cta__voile" />
-      <span className="ofd-cta__lbl">{children}</span>
-    </Link>
-  );
-}
-
-/* La variante à pastille du hero et du pied d'appel : la flèche défile
-   dans sa fenêtre (deux exemplaires translatés de 50 %). */
-function CtaPastille({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="ofd-cta ofd-cta--blanc ofd-cta--pastille">
-      <span aria-hidden className="ofd-cta__voile" />
-      <span className="ofd-cta__lbl">
-        {children}
-        <span aria-hidden className="ofd-pastille">
-          <span className="ofd-pastille__rail">
-            <span>
-              <ArrowRight size={16} strokeWidth={1.75} />
-            </span>
-            <span>
-              <ArrowRight size={16} strokeWidth={1.75} />
-            </span>
-          </span>
-        </span>
-      </span>
-    </Link>
-  );
-}
-
-function TeteSection({
-  etiquette,
-  titre,
-  chapo,
-  large = false,
-}: {
-  etiquette: string;
-  titre: string;
-  chapo?: string;
-  large?: boolean;
-}) {
-  return (
-    <div data-reveal className={`ofd-tete${large ? " ofd-tete--large" : ""}`}>
-      <p className="ofd-etiquette">{etiquette}</p>
-      <h2 className="ofd-h2">{titre}</h2>
-      {chapo ? <p className="ofd-chapo">{chapo}</p> : null}
-    </div>
-  );
-}
-
 /* Le coin plein des cartes du bloc 3 — relevé TEL QUEL dans le DOM de la
    référence : un viewBox de 6×6, un triangle à angle droit aux sommets
    arrondis, peint en `currentColor`. La couleur vient de la carte. */
@@ -530,440 +473,357 @@ function CoinPlein() {
 export default function OffresPage() {
   return (
     <PageShell>
-      <PageMotion />
-
-      <div className="ofd">
-        {/* ═══ 1 · HERO — image pleine, coins à 24, texte calé en bas ═══
-            data-monde="clair" : le header caméléon du site doit passer en
-            verre clair au-dessus de la marge blanche qui borde la carte. */}
-        <section data-monde="clair" className="ofd-pleine ofd-pleine--haut">
-          <div className="ofd-hero">
-            <Image
-              src="/photos/tarifs-hero-atrium.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="ofd-hero__media"
+      {/* 25/11/2026 — la charte de l'accueil (docs/charte-accueil.md, § 4.2,
+          ligne 6). La page passe dans <Cadre> ; les blocs du décalque de
+          scale.com deviennent des sections jointives séparées par des
+          filets, chacune sous l'en-tête de section de l'accueil (pastille,
+          h2 à gauche, chapô gris). Les étiquettes à chasse fixe deviennent
+          les pastilles, mot pour mot. Les visuels restent : la photo de
+          l'atrium sous le h1 (le texte blanc sur photo part), le globe
+          `cobe` dans une scène, le mot-symbole rouge dans un cadre de
+          rayon 12, la fenêtre d'exemple, le schéma du cycle, la façade à
+          côté de la citation. Le pied d'appel passe au bandeau <Appel>.
+          Plus de PageMotion. Tous les boutons sont les `ch-btn` blancs.
+          `.ofd` reste à la racine pour le dessin des pièces réemployées
+          (bandeau d'outils, cycle, `Ajuste`) ; le dessin propre à la page :
+          components/charte/pages/offres.css, sous `.charte .of-page`. */}
+      <Cadre>
+        <div className="ofd of-page">
+          {/* ═══ 1 · LE TITRE DE PAGE, puis la photo dans son cadre ═══ */}
+          <Section>
+            <EnTeteSection
+              niveau={1}
+              haut
+              pastille="Logiciel"
+              titre="Le logiciel"
+              chapo="Votre gestion dans un seul outil. Les agents préparent, vous validez."
+              actions={
+                <Bouton href="/reserver-un-audit" icone="chevron">
+                  Commencer
+                </Bouton>
+              }
             />
-            <div aria-hidden className="ofd-hero-voile" />
-            <div className="ofd-hero__col">
-              {/* 16/09 (Teo, « on a aussi trop de texte, je veux la même
-                  chose qu'eux ») — leur hero tient en TROIS éléments : le
-                  nom de la page sur UNE ligne (« Data Engine », 11 signes),
-                  une promesse d'une ligne (70), un bouton. Le nôtre portait
-                  un titre de 50 signes qui passait sur deux lignes à 64 px.
-                  « Nos offres » est l'exact pendant de leur « Data Engine » :
-                  le nom de la page, et le chapô porte la promesse. */}
-              <h1 data-reveal className="ofd-h1">
-                Le logiciel
-              </h1>
-              <p data-reveal className="ofd-lead">
-                Votre gestion dans un seul outil. Les agents préparent, vous validez.
-              </p>
-              <div data-reveal className="ofd-hero__actions">
-                <CtaPastille href="/reserver-un-audit">Commencer</CtaPastille>
+            <div className="of-cellule">
+              <div className="of-photo">
+                <Image
+                  src="/photos/tarifs-hero-atrium.jpg"
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1280px) 1260px, 100vw"
+                  className="of-photo__media"
+                />
               </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ═══ 2 · BANDE D'OUTILS ═══ */}
-        <section data-monde="clair" className="ofd-sec ofd-sec--haut">
-          <div className="ofd-wrap ofd-wrap--plein">
-            {/* hors écran : la rangée garde un intitulé pour les lecteurs
-                d'écran, la référence n'en affiche aucun. */}
-            <p className="ofd-outils__legende">Se branche sur les outils déjà en place</p>
-            {/* 16/09 (Teo) — « va récupérer le composant sur 21st.dev et
-                fais en sorte que ce soit un truc qui défile ». La rangée
-                défile désormais en continu ; le moteur vient de « Logo
-                Marquee » (ddoemonn, 21st.dev), son habillage non — nos
-                logotypes gardent le leur, réglé le matin même. Voir
-                components/offres/BandeauOutils.tsx pour les écarts. */}
-            <BandeauOutils
-              outils={OUTILS.map(({ marque, nom }) => ({
-                nom,
-                chemin: marque.path,
-                titre: marque.title,
-              }))}
+          {/* ═══ 2 · BANDE D'OUTILS ═══ */}
+          <Section>
+            <div className="of-outils">
+              {/* hors écran : la rangée garde un intitulé pour les lecteurs
+                  d'écran, la référence n'en affiche aucun. */}
+              <p className="ofd-outils__legende">Se branche sur les outils déjà en place</p>
+              {/* Le moteur vient de « Logo Marquee » (ddoemonn, 21st.dev) :
+                  voir components/offres/BandeauOutils.tsx pour les écarts. */}
+              <BandeauOutils
+                outils={OUTILS.map(({ marque, nom }) => ({
+                  nom,
+                  chemin: marque.path,
+                  titre: marque.title,
+                }))}
+              />
+            </div>
+          </Section>
+
+          {/* ═══ 3 · OÙ QUE VOUS TRAVAILLIEZ : le globe dans sa scène, les
+                 quatre arguments en cellules jointives ═══ */}
+          <Section>
+            <EnTeteSection
+              pastille="En ligne"
+              titre="Où que vous travailliez."
+              chapo={
+                <>
+                  Le logiciel tourne en ligne, pas sur un poste. Vos équipes le retrouvent où
+                  qu&apos;elles soient.
+                </>
+              }
             />
-          </div>
-        </section>
+            <div className="of-arguments">
+              <div className="of-arguments__globe">
+                {/* Le globe `cobe` (components/ui/cobe-globe-cdn), sans
+                    pastilles de région, sans compteurs, sans arcs ni
+                    marqueurs : des points, une rotation, manipulable. */}
+                <Scene className="of-globe-scene">
+                  <GlobeCdn markers={[]} arcs={[]} libelles={false} trafic={false} className="of-globe" />
+                </Scene>
+              </div>
+              <div className="of-arguments__cartes">
+                {ARGUMENTS.map(({ teinte, titre, texte }) => (
+                  <article key={titre} className="of-argument">
+                    <div className="of-argument__tete">
+                      <h3>{titre}</h3>
+                      <span className="of-argument__puce" style={{ color: teinte }}>
+                        <CoinPlein />
+                      </span>
+                    </div>
+                    <p>{texte}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </Section>
 
-        {/* ═══ 3 · PANNEAU DOUX + LES QUATRE ARGUMENTS ═══ */}
-        <section data-monde="clair" className="ofd-sec">
-          <div className="ofd-wrap ofd-wrap--plein">
-            <div className="ofd-panneau">
-              <div className="ofd-panneau__grille">
-                <div className="ofd-panneau__gauche">
-                  <div data-reveal className="ofd-panneau__intro">
-                    {/* 16/09 (Teo, « les tailles de section ne sont pas les
-                        mêmes, les cartes non plus ») — et c'était vrai : le
-                        panneau faisait 860 contre 810, les cartes 362 contre
-                        337. Toute la différence venait d'ICI. La colonne de
-                        gauche est ce qui dicte la hauteur du panneau (le
-                        globe y pose 560 fixes), et ce titre passait sur DEUX
-                        lignes là où « The Best In The Business » tient sur
-                        une : 100 px au lieu de 50, reportés tels quels sur
-                        le panneau puis sur les quatre cartes.
-                        Le titre doit donc tenir en UNE ligne dans les 460 px
-                        de `.ofd-panneau__intro`. Mesuré à 40 px : la version
-                        d'avant faisait 600 px, « Rien ne change chez vous. »
-                        488, « Vos outils ne changent pas. » 502 — le
-                        français passe tout juste au-dessus à chaque fois.
-                        Celle-ci fait 404 et tient. Ne pas la rallonger sans
-                        remesurer : deux mots de plus et les huit blocs de la
-                        colonne de droite se décalent. */}
-                    {/* 17/09 (Teo, « on a mis un globe, tu penses pas qu'il
-                        faudrait changer le texte ? — genre en mode on est
-                        partout dans le monde ») — le bloc disait « Ce qui ne
-                        change pas » au-dessus d'une mappemonde : le texte
-                        parlait des outils du client, l'image d'une présence
-                        mondiale. Le titre porte donc désormais ce que le globe
-                        montre, et il le fait SANS revendiquer de bureaux
-                        ailleurs : ce qui est partout, ce sont les systèmes
-                        (ils tournent en ligne), pas nous.
-                        L'argument « vos outils ne bougent pas » n'est pas
-                        perdu pour autant — la carte « Intégration », à droite
-                        dans ce même panneau, le porte déjà mot pour mot.
-                        Mesuré à 40 px dans les 460 px de la colonne :
-                        celle-ci 400, « Partout où vous travaillez. » 448 (trop
-                        serré pour la police de secours), « Où que soit votre
-                        équipe. » 440. Le corps tient les DEUX lignes de
-                        l'ancien : une troisième ajouterait 24 px à la colonne
-                        de gauche et décalerait les quatre cartes. */}
-                    <h2 className="ofd-h3">Où que vous travailliez.</h2>
-                    <p className="ofd-body">
-                      Le logiciel tourne en ligne, pas sur un poste. Vos équipes le
-                      retrouvent où qu&apos;elles soient.
-                    </p>
-                  </div>
-                  {/* 16/09 (Teo) — le motif à points calculé laisse la
-                      place au globe `cobe` (components/ui/cobe-globe-cdn).
-                      Pastilles de région et compteurs de débit ÉTEINTS :
-                      les valeurs par défaut de la fiche nomment les
-                      régions d'un hébergeur et affichent des débits
-                      inventés. Il ne reste que des points et des arcs. */}
-                  <div className="ofd-panneau__motif">
-                    {/* Ni arcs ni marqueurs : à l'écran, les arcs de la
-                        fiche rayaient la sphère comme des griffes et les
-                        marqueurs faisaient des pâtés noirs sur le bord.
-                        La référence, à cette place, pose un planisphère en
-                        points — rien d'autre. Le globe garde sa rotation
-                        et reste manipulable à la souris, ce que le
-                        planisphère ne faisait pas. */}
-                    <GlobeCdn
-                      markers={[]}
-                      arcs={[]}
-                      libelles={false}
-                      trafic={false}
-                      className="ofd-globe"
+          {/* ═══ 4 · LE SUR-MESURE : le mot-symbole rouge dans son cadre,
+                 l'énoncé à côté ═══ */}
+          <Section>
+            <div className="of-duo">
+              <div className="of-duo__visuel">
+                <div aria-hidden className="of-duo__marque">
+                  {/* Mot-symbole en serif blanc sur le rouge de la référence
+                      (#E7131A). UN SEUL MOT — Teo, 16/09 : « c'est un mot
+                      qu'il faut mettre ». */}
+                  <span className="of-duo__signe">Omega</span>
+                </div>
+              </div>
+              <div className="of-duo__texte" data-gutter-guide="top">
+                <Pastille>Sur mesure</Pastille>
+                <h2 className="ch-titre">
+                  Il vous manque un module&nbsp;?
+                  <br />
+                  <span>Nous le construisons et l&apos;ajoutons à votre logiciel.</span>
+                </h2>
+                <div className="ch-actions">
+                  <Bouton href="/offres/sur-mesure" icone="chevron">
+                    Découvrir le sur-mesure
+                  </Bouton>
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* ═══ 5a · CONTRÔLE HUMAIN : la fenêtre d'exemple dans sa scène,
+                 le journal à côté ═══ */}
+          <Section>
+            <EnTeteSection
+              pastille="Contrôle humain"
+              titre="Vous décidez de ce qui part."
+              chapo="Le logiciel propose, vous tranchez."
+            />
+            <div className="of-scinde">
+              <div className="of-scinde__media">
+                <Scene trame className="of-scinde__scene">
+                  <div className="of-fenetre">
+                    <ChatMessages
+                      titre="À valider"
+                      question={VALIDATION.question}
+                      libelleValidation={VALIDATION.libelle}
+                      propositions={VALIDATION.propositions}
+                      envoi={VALIDATION.envoi}
                     />
                   </div>
-                </div>
-
-                <div className="ofd-quatre">
-                  {ARGUMENTS.map(({ teinte, titre, texte }) => (
-                    <article key={titre} data-reveal className="ofd-carte">
-                      <div className="ofd-carte__tete">
-                        <h3 className="ofd-h5">{titre}</h3>
-                        <span className="ofd-carte__puce" style={{ color: teinte }}>
-                          <CoinPlein />
-                        </span>
-                      </div>
-                      <p className="ofd-body">{texte}</p>
-                    </article>
-                  ))}
+                </Scene>
+              </div>
+              <div className="of-scinde__texte" data-gutter-guide="top">
+                <h3>Le journal</h3>
+                <p className="of-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
+                <p className="of-scinde__corps">
+                  Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui
+                  l&apos;a validé. Au départ, tout passe par vous. Ensuite, vous pouvez laisser partir seuls certains envois, et
+                  revenir en arrière à tout moment.
+                </p>
+                <div className="ch-actions">
+                  <Bouton href="/reserver-un-audit" icone="chevron">
+                    Commencer
+                  </Bouton>
+                  <Bouton href="/integrations" icone="chevron">
+                    Vérifier la compatibilité
+                  </Bouton>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ═══ 4 · PANNEAU DE COULEUR + ÉNONCÉ ═══ */}
-        <section data-monde="clair" className="ofd-sec">
-          <div className="ofd-wrap ofd-wrap--plein">
-            <div className="ofd-duo">
-              <div aria-hidden className="ofd-duo__marque">
-                {/* le rouge est porté par cet enfant, pas par le cadre :
-                    la sonde de couleur de l'entête traverse le cadre
-                    transparent et lit le blanc de la page. Voir le
-                    commentaire de `.ofd-duo__marque` dans nos-offres.css. */}
-                <span className="ofd-duo__fond" />
-                {/* Mot-symbole en serif blanc sur le rouge de la référence
-                    (#E7131A). UN SEUL MOT — Teo, 16/09 : « c'est un mot
-                    qu'il faut mettre ». « Sur mesure » passait sur deux
-                    lignes et mangeait le champ rouge ; leur logotype à eux
-                    est un mot de quatre lettres. */}
-                <span className="ofd-duo__signe">Omega</span>
+          {/* ═══ 5b · CE QUE FAIT UN AGENT : le schéma du cycle dans sa
+                 scène, puis ses quatre temps en cellules jointives ═══ */}
+          <Section>
+            <EnTeteSection
+              pastille="Ce que fait un agent"
+              titre="Un agent par tâche, de bout en bout."
+              chapo="De la demande reçue au message parti."
+            />
+            <div className="of-cellule">
+              {/* `Ajuste` rend le cycle à sa largeur naturelle (1408) puis le
+                  RÉDUIT pour tenir dans la scène. La note d'astérisque reste
+                  HORS du cadre, sinon elle rétrécirait avec lui. */}
+              <div className="ch-scene of-schema">
+                <Ajuste largeur={1408}>
+                  <Cycle />
+                </Ajuste>
               </div>
-              <div className="ofd-duo__texte">
-                <div data-reveal>
-                  <p className="ofd-mono">Sur mesure</p>
-                  <h3 className="ofd-h3">
-                    Il vous manque un module&nbsp;? Nous le construisons et l&apos;ajoutons à votre logiciel.
-                  </h3>
-                </div>
-                <div data-reveal>
-                  <Cta href="/offres/sur-mesure">Découvrir le sur-mesure</Cta>
-                </div>
-              </div>
+              <p className="of-schema__note">{SCHEMA.note}</p>
             </div>
-          </div>
-        </section>
-
-        {/* ═══ 5 · LA ZONE DOUCE — tout ce qui suit vit sur #f2f2f2 ═══ */}
-        <div className="ofd-zone-douce">
-          {/* ─── 5a · bloc scindé : l'énoncé à droite, la fenêtre à gauche ─── */}
-          <section data-monde="clair" className="ofd-sec ofd-sec--plein">
-            <div className="ofd-wrap">
-              <TeteSection
-                etiquette="Contrôle humain"
-                titre="Vous décidez de ce qui part."
-                chapo="Le logiciel propose, vous tranchez."
-                large
-              />
-
-              <div className="ofd-scinde">
-                <div data-reveal className="ofd-scinde__texte">
-                  <p className="ofd-h4">Le journal</p>
-                  <p className="ofd-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
-                  <p className="ofd-scinde__corps">
-                    Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui
-                    l&apos;a validé. Au départ, tout passe par vous. Ensuite, vous pouvez laisser partir seuls certains envois, et
-                    revenir en arrière à tout moment.
-                  </p>
-                  <div className="ofd-scinde__actions">
-                    <Cta href="/reserver-un-audit">Commencer</Cta>
-                    <Cta href="/integrations" variante="trait">
-                      Vérifier la compatibilité
-                    </Cta>
+            <div className="of-rangee" data-gutter-guide="top">
+              <div className="of-rangee__tete">
+                <Pastille>Le cycle, temps par temps</Pastille>
+              </div>
+              <div className="of-rangee__grille">
+                {CYCLE.map(({ titre, texte }) => (
+                  <div key={titre} className="of-entree">
+                    <span aria-hidden className="of-entree__icone">
+                      <Check size={18} strokeWidth={2} />
+                    </span>
+                    <h3>{titre}</h3>
+                    <p>{texte}</p>
                   </div>
-                </div>
-
-                <div data-reveal className="ofd-scinde__media">
-                  <ChatMessages
-                    titre="À valider"
-                    question={VALIDATION.question}
-                    libelleValidation={VALIDATION.libelle}
-                    propositions={VALIDATION.propositions}
-                    envoi={VALIDATION.envoi}
-                  />
-                </div>
+                ))}
               </div>
             </div>
-          </section>
+          </Section>
 
-          {/* ─── 5b · grande console, légende mono, rangée ─── */}
-          <section data-monde="clair" className="ofd-sec">
-            <div className="ofd-wrap">
-              <TeteSection
-                etiquette="Ce que fait un agent"
-                titre="Un agent par tâche, de bout en bout."
-                chapo="De la demande reçue au message parti."
-              />
-
-              <div className="ofd-large">
-                {/* `Ajuste` rend le cycle à sa largeur naturelle (1408, celle
-                    pour laquelle il est dessiné) puis le RÉDUIT pour tenir
-                    dans la colonne. C'est le composant de
-                    /offres/sur-mesure, réemployé tel quel : le dessin est
-                    rigoureusement le même à toutes les largeurs, il est
-                    seulement plus petit. La note d'astérisque reste HORS
-                    du cadre, sinon elle rétrécirait avec lui. */}
-                <div data-reveal className="ofd-schema">
-                  <Ajuste largeur={1408}>
-                    <Cycle />
-                  </Ajuste>
-                  <p className="ofd-schema__note">{SCHEMA.note}</p>
-                </div>
-
-                <div className="ofd-rangee">
-                  <p className="ofd-mono ofd-rangee__legende">Le cycle, temps par temps</p>
-                  <div className="ofd-rangee__grille">
-                    {CYCLE.map(({ titre, texte }) => (
-                      <div key={titre} data-reveal className="ofd-entree">
-                        <span aria-hidden className="ofd-entree__icone">
-                          <Check size={22} strokeWidth={2} />
-                        </span>
-                        <div>
-                          <h3 className="ofd-h5">{titre}</h3>
-                          <p className="ofd-body">{texte}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* ─── 5c · les quatre cartes à liste ─── */}
-          <section id="catalogue" data-monde="clair" className="ofd-sec ofd-ancre">
-            <div className="ofd-wrap">
-              {/* 25/09 (Teo) — le catalogue a désormais deux parties, les
-                  mêmes que les deux colonnes du menu : ce qui sert à toute
-                  entreprise, puis le logiciel de chaque métier (5c bis). */}
-              <TeteSection
-                etiquette="Pour toutes les entreprises"
-                titre="Quatre agents pour le travail répétitif."
-              />
-
-              <div className="ofd-cartes4">
-                {PAQUETS.map(({ icone: Icone, titre, href, lignes }) => (
-                  <Link key={titre} href={href} data-reveal className="ofd-fiche">
-                    <div className="ofd-fiche__tete">
-                      <span aria-hidden className="ofd-fiche__icone">
-                        <Icone size={24} strokeWidth={1.5} />
-                      </span>
-                      <h3 className="ofd-h5">{titre}</h3>
-                    </div>
+          {/* ═══ 5c · LES QUATRE AGENTS, en grille de cartes jointives ═══ */}
+          <Section id="catalogue" className="of-ancre">
+            {/* 25/09 (Teo) — le catalogue a deux parties, les mêmes que les
+                deux colonnes du menu : ce qui sert à toute entreprise, puis
+                le logiciel de chaque métier (5c bis). */}
+            <EnTeteSection pastille="Pour toutes les entreprises" titre="Quatre agents pour le travail répétitif." />
+            <GrilleCartes colonnes={4}>
+              {PAQUETS.map(({ icone: Icone, titre, href, lignes }) => (
+                <Link key={titre} href={href} className="ch-carte of-fiche">
+                  <div className="ch-carte-texte">
+                    <span aria-hidden className="of-fiche__icone">
+                      <Icone size={22} strokeWidth={1.5} />
+                    </span>
+                    <h3>{titre}</h3>
                     <ul>
                       {lignes.map((l) => (
-                        <li key={l} className="ofd-body">
+                        <li key={l}>
                           <Check size={16} strokeWidth={2} />
                           <span>{l}</span>
                         </li>
                       ))}
                     </ul>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
+                  </div>
+                </Link>
+              ))}
+            </GrilleCartes>
+          </Section>
 
-          {/* ─── 5c bis · le logiciel de chaque métier ───
+          {/* ═══ 5c bis · LE LOGICIEL DE CHAQUE MÉTIER ═══
               25/09 (Teo) — « on peut aussi bien prendre le SaaS BTP et vouloir
-              prendre CASHD ». Les logiciels métier vivaient dans une rubrique
-              à part (« Secteurs ») : deux catalogues côte à côte, qu'on
-              lisait comme un choix. Ils rejoignent ici le catalogue, sous le
-              titre qui dit qu'ils s'ajoutent aux quatre. Le métier en titre,
-              le logiciel en dessous : on cherche « BTP », pas « Daliro ». */}
-          <section id="metiers" data-monde="clair" className="ofd-sec ofd-ancre">
-            <div className="ofd-wrap">
-              <TeteSection
-                etiquette="Pour votre métier"
-                titre="Un module par métier, combiné aux agents."
-                chapo="Un seul audit pour l'ensemble."
-              />
-
-              <div className="ofd-cartes3">
+              prendre CASHD ». Le métier en titre, le logiciel en dessous : on
+              cherche « BTP », pas « Daliro ». */}
+          <Section id="metiers" className="of-ancre">
+            <EnTeteSection
+              pastille="Pour votre métier"
+              titre="Un module par métier, combiné aux agents."
+              chapo="Un seul audit pour l'ensemble."
+            />
+            <div className="of-metiers">
+              <GrilleCartes colonnes={3}>
                 {SECTEURS.map((s) => (
-                  <Link
-                    key={s.slug}
-                    href={`/secteurs/${s.slug}`}
-                    data-reveal
-                    className="ofd-fiche ofd-fiche--metier"
-                  >
-                    <div className="ofd-fiche__tete">
+                  <Link key={s.slug} href={`/secteurs/${s.slug}`} className="ch-carte of-fiche of-fiche--metier">
+                    <div className="ch-carte-texte">
                       <span
                         aria-hidden
-                        className="ofd-fiche__icone ofd-fiche__signe"
+                        className="of-fiche__icone of-fiche__signe"
                         style={
                           {
-                            "--ofd-signe": `url(/logos/${s.saas.toLowerCase()}-mark.png)`,
+                            "--of-signe": `url(/logos/${s.saas.toLowerCase()}-mark.png)`,
                           } as React.CSSProperties
                         }
                       />
-                      <h3 className="ofd-h5">{s.metier}</h3>
-                      <p className="ofd-fiche__saas">{s.saas}</p>
-                    </div>
-                    <p className="ofd-body">{s.texte}</p>
-                  </Link>
-                ))}
-              </div>
-
-              <div data-reveal className="ofd-metiers__pied">
-                <Cta href="/secteurs" variante="trait">
-                  Voir tous les métiers
-                </Cta>
-              </div>
-            </div>
-          </section>
-
-          {/* ─── 5d · les ressources ─── */}
-          <section data-monde="clair" className="ofd-sec">
-            <div className="ofd-wrap">
-              <TeteSection etiquette="Ressources" titre="Pour aller plus loin" />
-
-              <div className="ofd-ressources">
-                {RESSOURCES.map(({ slug, libelle, icone: Icone, post }) => (
-                  <Link
-                    key={slug}
-                    href={`/blog/${slug}`}
-                    data-reveal
-                    className="ofd-ressource"
-                    aria-label={post.title}
-                    title={post.title}
-                  >
-                    <div aria-hidden className="ofd-ressource__vignette">
-                      <Icone size={96} strokeWidth={1} />
-                    </div>
-                    <div className="ofd-ressource__texte">
-                      <p className="ofd-ressource__cat">{post.cat}</p>
-                      <h3 className="ofd-ressource__titre">{libelle}</h3>
+                      <h3>{s.metier}</h3>
+                      <p className="of-fiche__saas">{s.saas}</p>
+                      <p>{s.texte}</p>
                     </div>
                   </Link>
                 ))}
-              </div>
+              </GrilleCartes>
             </div>
-          </section>
+            <div className="of-cellule of-metiers__pied">
+              <Bouton href="/secteurs" icone="chevron">
+                Voir tous les métiers
+              </Bouton>
+            </div>
+          </Section>
 
-          {/* ─── 5e · le panneau ardoise ─── */}
-          <section data-monde="clair" className="ofd-sec">
-            <div className="ofd-wrap">
-              <div className="ofd-ardoise">
-                <div className="ofd-ardoise__grille">
-                  <p className="ofd-ardoise__label">{"Le problème\nqu'ils règlent"}</p>
-                  <div className="ofd-ardoise__corps">
-                    <p data-reveal className="ofd-citation">
-                      «&nbsp;Une entreprise ne perd pas son chiffre d&apos;un coup. Elle le perd par un
-                      devis sans réponse, un appel manqué, une facture jamais relancée.&nbsp;»
-                    </p>
-                    <div data-reveal className="ofd-ardoise__signature">
-                      <p>
-                        Des demandes plus rapides que leur traitement, des relances suspendues à une
-                        personne.
-                      </p>
-                      <span className="ofd-ardoise__tag">Ce que les quatre agents reprennent</span>
-                    </div>
+          {/* ═══ 5d · LES RESSOURCES : le pictogramme au trait dans sa
+                 scène, le titre court dessous ═══ */}
+          <Section>
+            <EnTeteSection pastille="Ressources" titre="Pour aller plus loin" />
+            <GrilleCartes colonnes={4}>
+              {RESSOURCES.map(({ slug, libelle, icone: Icone, post }) => (
+                <Link
+                  key={slug}
+                  href={`/blog/${slug}`}
+                  className="ch-carte of-ressource"
+                  aria-label={post.title}
+                  title={post.title}
+                >
+                  <div aria-hidden className="ch-scene of-ressource__scene">
+                    <Icone size={72} strokeWidth={1} />
                   </div>
-                </div>
-              </div>
-            </div>
-          </section>
+                  <div className="ch-carte-texte">
+                    <p className="of-ressource__cat">{post.cat}</p>
+                    <h3>{libelle}</h3>
+                  </div>
+                </Link>
+              ))}
+            </GrilleCartes>
+          </Section>
 
-          {/* ─── 5f · le pied d'appel ─── */}
-          <section data-monde="clair" className="ofd-pleine ofd-sec">
-            <div className="ofd-hero">
-              <Image
-                /* 16/09 (Teo, « prends une image mieux, plus pro et
-                   nette ») — la façade au coucher de soleil lisait
-                   « photo de banque d'images ». Celle-ci est un
-                   mur-rideau de verre : graphique, net, et elle répond à
-                   l'atrium du hero sans le répéter. */
-                src="/photos/tarifs-abonnement-facade.jpg"
-                alt=""
-                fill
-                sizes="100vw"
-                className="ofd-hero__media"
-              />
-              <div aria-hidden className="ofd-hero-voile" />
-              <div className="ofd-hero__col">
-                <h2 data-reveal className="ofd-h1">
-                  Un prix écrit avant tout engagement.
-                </h2>
-                <div data-reveal className="ofd-hero__actions">
-                  <CtaPastille href="/reserver-un-audit">Commencer</CtaPastille>
-                  <Cta href="/offres/sur-mesure" variante="trait-blanc">
-                    Découvrir le sur-mesure
-                  </Cta>
+          {/* ═══ 5e · LE PROBLÈME QU'ILS RÈGLENT : la phrase, et la façade
+                 dans son cadre ═══ */}
+          <Section>
+            <div className="of-citation">
+              <div className="of-citation__texte">
+                <Pastille>Le problème qu&apos;ils règlent</Pastille>
+                <p className="of-citation__phrase">
+                  «&nbsp;Une entreprise ne perd pas son chiffre d&apos;un coup. Elle le perd par un
+                  devis sans réponse, un appel manqué, une facture jamais relancée.&nbsp;»
+                </p>
+                <div className="of-citation__signature">
+                  <p>
+                    Des demandes plus rapides que leur traitement, des relances suspendues à une
+                    personne.
+                  </p>
+                  <Pastille>Ce que les quatre agents reprennent</Pastille>
+                </div>
+              </div>
+              <div className="of-citation__photo" data-gutter-guide="top">
+                {/* 16/09 (Teo, « prends une image mieux, plus pro et
+                    nette ») — un mur-rideau de verre, qui répond à l'atrium
+                    du haut de page sans le répéter. */}
+                <div className="of-photo of-photo--cellule">
+                  <Image
+                    src="/photos/tarifs-abonnement-facade.jpg"
+                    alt=""
+                    fill
+                    sizes="(min-width: 1001px) 50vw, 100vw"
+                    className="of-photo__media"
+                  />
                 </div>
               </div>
             </div>
-          </section>
+          </Section>
+
+          {/* ═══ 5f · LE PIED D'APPEL ═══ */}
+          <Appel
+            pastille="Prix"
+            titre="Un prix écrit avant tout engagement."
+            actions={
+              <>
+                <Bouton href="/reserver-un-audit" icone="chevron">
+                  Commencer
+                </Bouton>
+                <Bouton href="/offres/sur-mesure" icone="chevron">
+                  Découvrir le sur-mesure
+                </Bouton>
+              </>
+            }
+          />
         </div>
-      </div>
+      </Cadre>
     </PageShell>
   );
 }

@@ -1,0 +1,318 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /secteurs (le carrefour) dans la charte de l'accueil — 25/11/2026
+   (docs/charte-accueil.md, § 2.4 et § 4.2, ligne 7)
+
+   Le carrefour a quitté `.sct` : app/secteurs/arrondis.css, chargé par le
+   layout des pages métier, ne le vise plus. Tout est ici, sous
+   `.charte .sc-page` — jamais `.sct`, que les pages métier partagent.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.charte .sc-page {
+  color: var(--ch-encre-section);
+}
+
+/* une cellule de contenu libre, à l'aplomb du titre (retraits de .ch-intro) */
+.charte .sc-page .sc-cellule {
+  padding: 40px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .sc-page .sc-cellule {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .sc-page .sc-cellule {
+    padding: 24px 20px 32px;
+  }
+}
+
+/* ─── 1 · les documents de chaque métier, dans une scène ───────────── */
+.charte .sc-page .sc-vitrine {
+  display: block;
+  place-items: normal;
+  min-height: 0;
+  padding: 40px;
+}
+@media (max-width: 760px) {
+  .charte .sc-page .sc-vitrine {
+    padding: 16px;
+  }
+}
+.charte .sc-page .sc-vitrine__grille {
+  --sc-par-rangee: 2;
+  --sc-ecart: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sc-ecart);
+}
+@media (min-width: 1001px) {
+  .charte .sc-page .sc-vitrine__grille {
+    --sc-par-rangee: 4;
+    --sc-ecart: 20px;
+  }
+}
+.charte .sc-page .sc-fenetre {
+  width: calc((100% - (var(--sc-par-rangee) - 1) * var(--sc-ecart)) / var(--sc-par-rangee));
+}
+/* sous 1001 px : quatre fenêtres, deux rangées, pas plus ; sous 600, deux
+   fenêtres l'une sous l'autre (à deux de front, le document ne se lisait
+   plus). Au-delà de 1000, la dernière rangée se centre d'elle-même. */
+@media (max-width: 1000px) {
+  .charte .sc-page .sc-fenetre:nth-child(n + 5) {
+    display: none;
+  }
+}
+@media (max-width: 599px) {
+  .charte .sc-page .sc-vitrine__grille {
+    --sc-par-rangee: 1;
+  }
+  .charte .sc-page .sc-fenetre:nth-child(n + 3) {
+    display: none;
+  }
+}
+/* l'écran d'exemple de l'accueil : blanc, rayon 10, liseré, ombre douce */
+.charte .sc-page .sc-fenetre {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid #d9ddd3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+}
+
+/* ─── 2 · les logiciels, en cartes jointives ───────────────────────── */
+.charte .sc-page .sc-carte,
+.charte .sc-page .sc-apercu {
+  color: inherit;
+  text-decoration: none;
+}
+.charte .sc-page .sc-carte .ch-carte-texte {
+  padding-top: 20px;
+}
+.charte .sc-page .sc-carte:focus-visible,
+.charte .sc-page .sc-apercu:focus-visible {
+  outline: 2px solid #121212;
+  outline-offset: -2px;
+}
+.charte .sc-page .sc-carte h3,
+.charte .sc-page .sc-apercu h3 {
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease-out;
+}
+@media (hover: hover) and (pointer: fine) {
+  .charte .sc-page .sc-carte:hover h3,
+  .charte .sc-page .sc-apercu:hover h3 {
+    text-decoration-color: currentColor;
+  }
+}
+.charte .sc-page .sc-carte__tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.charte .sc-page .sc-carte__picto {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 10px;
+  background: var(--ch-scene);
+}
+.charte .sc-page .sc-carte__signe {
+  width: 22px;
+  height: 22px;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.charte .sc-page .sc-carte__nom {
+  color: #777c76;
+  font-size: 14px;
+  line-height: 1.3;
+}
+.charte .sc-page .sc-carte h3 {
+  margin-top: 28px;
+}
+.charte .sc-page .sc-carte p {
+  max-width: 520px;
+}
+/* sept logiciels : seule sur sa rangée, la dernière carte prend la rangée */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .charte .sc-page .ch-grille > .ch-carte:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1001px) {
+  .charte .sc-page .ch-grille > .ch-carte:last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+  .charte .sc-page .sc-cartes .ch-grille > .ch-carte:last-child:nth-child(3n + 1) p {
+    max-width: 760px;
+  }
+}
+
+/* ─── 3 · l'aperçu : la liste du matin, dans une scène ─────────────── */
+.charte .sc-page .sc-apercu__scene {
+  min-height: 300px;
+  padding: 32px;
+}
+@media (max-width: 760px) {
+  .charte .sc-page .sc-apercu__scene {
+    min-height: 0;
+    padding: 20px 16px;
+  }
+}
+.charte .sc-page .sc-apercu__fenetre {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid #d9ddd3;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+}
+.charte .sc-page .sc-apercu .ch-carte-texte {
+  padding-top: 22px;
+}
+.charte .sc-page .ch-carte-texte .sc-apercu__metier {
+  margin: 0 0 6px;
+  color: #777c76;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.charte .sc-page .sc-apercu__nom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.charte .sc-page .sc-apercu__signe {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  -webkit-mask: var(--sct-signe) center / contain no-repeat;
+  mask: var(--sct-signe) center / contain no-repeat;
+}
+/* la carte seule sur sa rangée : la scène à gauche, le texte à droite */
+@media (min-width: 1001px) {
+  .charte .sc-page .sc-apercus .ch-grille > .ch-carte:last-child:nth-child(3n + 1) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    align-items: center;
+  }
+  .charte .sc-page .sc-apercus .ch-grille > .ch-carte:last-child:nth-child(3n + 1) .ch-carte-texte {
+    padding: 0 32px;
+  }
+}
+
+/* ─── 4 · la méthode : la capture | les trois piliers ──────────────── */
+.charte .sc-page .sc-methode {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1001px) {
+  .charte .sc-page .sc-methode {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+.charte .sc-page .sc-methode__visuel {
+  min-width: 0;
+  padding: 12px;
+}
+@media (min-width: 1280px) {
+  .charte .sc-page .sc-methode__visuel {
+    padding-left: max(12px, calc(var(--ch-retrait) - 12px));
+  }
+}
+.charte .sc-page .sc-methode__scene {
+  height: 100%;
+  min-height: 0;
+  padding: 40px 32px;
+}
+@media (max-width: 760px) {
+  .charte .sc-page .sc-methode__scene {
+    padding: 20px 12px;
+  }
+}
+.charte .sc-page .sc-capture {
+  width: 100%;
+  max-width: 620px;
+  overflow: hidden;
+  padding: 8px;
+  border: 1px solid #d9ddd3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+}
+.charte .sc-page .sc-capture img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+.charte .sc-page .sc-piliers {
+  min-width: 0;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 1001px) {
+  .charte .sc-page .sc-piliers {
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+.charte .sc-page .sc-pilier {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 32px clamp(24px, 3vw, 48px);
+  border-bottom: 1px solid var(--ch-filet);
+}
+.charte .sc-page .sc-pilier:last-child {
+  border-bottom: 0;
+}
+@media (max-width: 760px) {
+  .charte .sc-page .sc-pilier {
+    gap: 16px;
+    padding: 24px 20px;
+  }
+}
+.charte .sc-page .sc-pilier__picto {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #fff;
+}
+.charte .sc-page .sc-pilier__picto svg {
+  width: 20px;
+  height: 20px;
+}
+.charte .sc-page .sc-pilier h3 {
+  color: var(--ch-encre-section);
+  font-size: 22px;
+  font-weight: 450;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+.charte .sc-page .sc-pilier p {
+  max-width: 520px;
+  margin-top: 10px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}

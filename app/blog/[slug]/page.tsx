@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
+import Cadre from "@/components/charte/Cadre";
+import "@/components/charte/pages/blog.css";
 import {
   BlogCover,
   BlogCta,
@@ -86,10 +87,10 @@ export default async function ArticlePage({
 
   return (
     <PageShell>
-      {/* couche motion commune : lenis + reveals GSAP */}
-      <PageMotion />
-
-      <div className="offres">
+      {/* 25/11/2026 — dans la charte de l'accueil : fond, Google Sans,
+          titres et boutons de l'accueil (components/charte/pages/blog.css) */}
+      <Cadre>
+      <div className="offres ch-blog ch-article">
         <section data-monde="clair" className="relative">
           <div
             aria-hidden
@@ -197,12 +198,13 @@ export default async function ArticlePage({
             />
           </div>
 
-          {/* ——— CTA final ——— */}
-          <div className="o-wrap pb-[100px] pt-[110px] sm:pb-[120px] sm:pt-[140px]">
+          {/* ——— CTA final : le bandeau d'appel de la charte, pleine largeur ——— */}
+          <div className="mt-[72px] border-t border-[#dcdcda] sm:mt-[96px]" data-gutter-guide="top">
             <BlogCta />
           </div>
         </section>
       </div>
+      </Cadre>
     </PageShell>
   );
 }

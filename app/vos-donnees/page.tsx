@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Cadre from "@/components/charte/Cadre";
+import Footer from "@/components/Footer";
+import "@/components/charte/pages/vos-donnees.css";
 import Apparition from "@/components/donnees/Apparition";
 import { MARQUE_SITE, NOM_SITE, titreSite } from "@/components/espace2/portail";
 import HeroPlein from "@/components/donnees/HeroPlein";
@@ -10,7 +13,6 @@ import CarteLieux from "@/components/donnees/CarteLieux";
 import CartesGaranties from "@/components/donnees/CartesGaranties";
 import {
   Chevron,
-  FlecheCoin,
   Guillemet,
   IconeBarriere,
   IconeCadenas,
@@ -103,7 +105,8 @@ import {
    qu'il soit vraiment identique : sous `.vd` il hériterait de Hanken
    Grotesk et du noir du bloc, alors que tout le reste du site est en Inter.
 
-   Le PIED de page, lui, reste propre à la page (`.vd-pied`) : Teo n'a parlé
+   25/11/2026 : le pied propre à la page (`.vd-pied`) a laissé la place au
+   pied commun du site (charte de l'accueil). Note d'origine : Teo n'a parlé
    que du haut.
 
    ── LE HEADER N'EST PLUS MONTÉ ICI (14/09/2026) ─────────────────────
@@ -279,71 +282,19 @@ const OPTIONS: Option[] = [
 ];
 
 /* ——— pied de page ——— */
-/* 10/11/2026 — sur un site dédié à un logiciel, le pied ne cite que ce qui existe sur ce site (components/espace2/portail.ts) */
-const PIED_SITE_DEDIE = [
-  {
-    label: NOM_SITE,
-    liens: [
-      { label: "Réserver un audit", href: "/reserver-un-audit" },
-      { label: "Service client", href: "/contact" },
-    ],
-  },
-  {
-    label: "Vos données",
-    liens: [
-      { label: "Le trajet d'une donnée", href: "#trajet" },
-      { label: "Les six garanties", href: "#garanties" },
-      { label: "Qui reçoit quoi", href: "#recoit" },
-      { label: "Les deux hébergements", href: "#hebergement" },
-    ],
-  },
-];
-const PIED_OMEGA = [
-  {
-    label: "Omega.AI",
-    liens: [
-      { label: "Nos offres", href: "/offres" },
-      { label: "Modèles de sites", href: "/modeles" },
-      { label: "Intégrations", href: "/integrations" },
-      { label: "Tarifs", href: "/tarifs" },
-    ],
-  },
-  {
-    label: "Vos données",
-    liens: [
-      { label: "Le trajet d'une donnée", href: "#trajet" },
-      { label: "Les six garanties", href: "#garanties" },
-      { label: "Qui reçoit quoi", href: "#recoit" },
-      { label: "Les deux hébergements", href: "#hebergement" },
-    ],
-  },
-  {
-    label: "L'entreprise",
-    liens: [
-      { label: "Blog", href: "/blog" },
-      { label: "Commencer", href: "/commencer" },
-      { label: "Mentions légales", href: "/mentions-legales" },
-    ],
-  },
-  {
-    label: "Aller plus loin",
-    liens: [
-      { label: "RGPD : où sont hébergées vos données", href: "/blog/rgpd-donnees-locales" },
-      { label: "Nos intégrations", href: "/integrations" },
-      { label: "Nous écrire", href: "/contact" },
-    ],
-  },
-];
-const PIED = MARQUE_SITE ? PIED_SITE_DEDIE : PIED_OMEGA;
 /* l'appel à l'action de la page : /commencer n'existe pas sur un site dédié, l'audit le remplace */
-const CTA = MARQUE_SITE ? { href: "/#audit", label: "Réserver un audit" } : { href: "/commencer", label: "Commencer" };
+const CTA = MARQUE_SITE ? { href: "/#audit", label: "Réserver un audit" } : { href: "/reserver-un-audit", label: "Commencer" };
 
 /* ══ la page ══════════════════════════════════════════════════════════ */
 
 export default function VosDonnees() {
   return (
-    <>
-      <div className="vd min-h-screen">
+    /* 25/11/2026 — dans la charte de l'accueil (docs/charte-accueil.md) :
+       fond, Google Sans, titres, pastilles et boutons de l'accueil
+       (components/charte/pages/vos-donnees.css) ; le pied de la page laisse
+       la place au pied commun du site. Textes et visuels inchangés. */
+    <Cadre>
+      <div className="vd ch-donnees min-h-screen">
         <main className="mx-auto max-w-[1440px]">
           {/* ─── HERO ─────────────────────────────────────────────────────
               Plein écran en haut de page, replié dans son cadre dès qu'on
@@ -602,63 +553,8 @@ export default function VosDonnees() {
           </div>
         </main>
 
-        {/* ─── PIED DE PAGE ───────────────────────────────────────────── */}
-        <footer className="vd-pied">
-          <div className="mx-auto max-w-[1440px] px-6 pb-10 pt-16 sm:px-10">
-            <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
-              <Image
-                src="/logo-pegase.png"
-                alt=""
-                width={96}
-                height={96}
-                className="h-6 w-6 shrink-0"
-              />
-              <div className="grid flex-1 grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-4">
-                {PIED.map((col) => (
-                  <div key={col.label}>
-                    <p className="vd-pied-label">{col.label}</p>
-                    <ul className="mt-4 flex flex-col gap-2">
-                      {col.liens.map((l) => (
-                        <li key={l.label}>
-                          {l.href.startsWith("http") ? (
-                            <a
-                              href={l.href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="vd-pied-lien"
-                            >
-                              {l.label}
-                            </a>
-                          ) : l.href.startsWith("#") ? (
-                            <a href={l.href} className="vd-pied-lien">
-                              {l.label}
-                            </a>
-                          ) : (
-                            <Link href={l.href} className="vd-pied-lien">
-                              {l.label}
-                            </Link>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* la signature géante de la référence — même rôle, même place */}
-            <p className="vd-signature mt-24 max-w-[22ch]">
-              Vous restez responsable de traitement, quel que soit l&apos;hébergement retenu
-            </p>
-
-            <div className="mt-16 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-              <p className="vd-pied-label sm:text-right">
-                © 2026 {NOM_SITE}, tous droits réservés
-              </p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
-    </>
+    </Cadre>
   );
 }

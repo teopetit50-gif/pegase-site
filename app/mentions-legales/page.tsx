@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+import Cadre from "@/components/charte/Cadre";
 import PageLegale, { type SectionLegale } from "@/components/legal/PageLegale";
 import { COURRIEL, TELEPHONE_AFFICHE } from "@/lib/reservation";
 import { titreSite } from "@/components/espace2/portail";
@@ -123,11 +124,14 @@ const SECTIONS: SectionLegale[] = [
 export default function MentionsLegalesPage() {
   return (
     <PageShell>
+      {/* 25/11/2026 — la charte de l'accueil (docs/charte-accueil.md) */}
+      <Cadre>
       <PageLegale
         titre="Mentions légales"
         maj="Dernière mise à jour : 23 novembre 2026."
         sections={SECTIONS}
       />
+      </Cadre>
     </PageShell>
   );
 }

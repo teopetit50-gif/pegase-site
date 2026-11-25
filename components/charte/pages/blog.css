@@ -1,0 +1,40 @@
+/* /blog et /blog/<article> dans la charte de l'accueil (25/11/2026).
+   Les deux pages gardent leur monde `.offres` (grille d'articles, couverture,
+   corps de l'article) ; ces règles, scopées sous `.charte .ch-blog`, n'en
+   changent que ce qui les éloignait de l'accueil : le fond blanc, la graisse
+   700 et l'interlettrage serré des titres, les rayons de 16 à 30 px. */
+
+.charte .ch-blog { background: transparent; }
+
+/* les titres : la graisse et l'interlettrage des titres de l'accueil */
+.charte .ch-blog .b-article-h1 {
+  font-family: var(--font-google-sans), Arial, sans-serif;
+  font-weight: 450;
+  font-size: clamp(30px, 3.6vw, 48px);
+  line-height: 1.16;
+  letter-spacing: -0.045em;
+  color: #202322;
+}
+.charte .ch-blog h2:not(.ch-titre),
+.charte .ch-blog h3:not(.ch-titre) {
+  font-weight: 450 !important;
+  letter-spacing: -0.03em !important;
+}
+
+/* la grille d'articles : cartes à rayon 12, titres en 450 */
+.charte .ch-blog .bc-carte { border-radius: 12px; }
+.charte .ch-blog .bc-photo { border-radius: 12px; }
+.charte .ch-blog .bc-titre { font-weight: 450; letter-spacing: -0.03em; }
+
+/* l'article : la pastille de catégorie et la couverture de l'accueil */
+.charte .ch-blog .b-tag-plate {
+  padding: 5px 10px;
+  border: 1px solid #dddcd4;
+  border-radius: 5px;
+  background: #eeeee7;
+  color: #202322;
+  font-size: 12px;
+}
+.charte .ch-blog .b-share { border-radius: 10px; background: #fff; border: 1px solid rgba(0, 0, 0, 0.1); }
+.charte .ch-article [class*="rounded-[30px]"],
+.charte .ch-article [class*="rounded-[24px]"] { border-radius: 12px !important; }

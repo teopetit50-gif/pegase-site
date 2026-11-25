@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
+import Cadre from "@/components/charte/Cadre";
+import "@/components/charte/pages/gestion.css";
 import { NOM_SITE } from "@/components/espace2/portail";
 import { geistAccueil, geistMonoAccueil } from "../_polices/geist-accueil";
 import { Bloc, Filet, GRILLE, Hachure } from "@/components/gestion/Trame";
@@ -65,6 +67,11 @@ export const metadata: Metadata = {
 export default function PageGestion() {
   return (
     <PageShell>
+      {/* 25/11/2026 — la charte de l'accueil, en passe légère : police, fond,
+          filets et boutons (components/charte/pages/gestion.css). La page
+          garde sa trame, ses hachures et ses visuels. Sans les marges
+          hachurées du kit : la trame a déjà les siennes. */}
+      <Cadre gouttieres={false}>
       <div className={`p-gestion w-full ${geistAccueil.variable} ${geistMonoAccueil.variable}`} data-monde="clair">
         <div className="grid overflow-x-clip text-stone-900" style={GRILLE}>
           <Heros />
@@ -98,6 +105,7 @@ export default function PageGestion() {
           <Filet />
         </div>
       </div>
+      </Cadre>
     </PageShell>
   );
 }

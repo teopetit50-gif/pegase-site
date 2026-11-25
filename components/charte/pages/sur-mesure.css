@@ -1,0 +1,320 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /offres/sur-mesure dans la charte de l'accueil — 25/11/2026
+   (docs/charte-accueil.md, § 4.2, ligne 6)
+
+   La page garde la racine `.smd` (app/offres/sur-mesure/sur-mesure.css)
+   pour le dessin des pièces qu'elle réemploie : la trace d'exécution, la
+   nappe, le schéma du cycle, `Ajuste`, les études de cas (`cs-*`), les
+   onglets des agents (`f11-*`), la rangée de marques. Ce qui suit les fait
+   passer aux finitions de l'accueil, sous `.charte .sm-page` : une feuille
+   importée par une page reste chargée après une navigation.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* `.smd` sortait du cadre en 100vw, sur fond blanc, en Geist : c'est le
+   #f5f5f2 du cadre et Google Sans qui restent. Ses jetons passent aux
+   couleurs de la charte, ce qui recolore d'un coup les pièces réemployées. */
+.charte .sm-page {
+  --smd-texte: var(--ch-encre-section);
+  --smd-doux: var(--ch-gris);
+  --smd-etiquette: #777c76;
+  --smd-fond: var(--ch-scene);
+  --smd-ligne: var(--ch-filet);
+  --smd-r-lg: 12px;
+  --smd-r-sm: 10px;
+  width: auto;
+  margin-inline: 0;
+  background: transparent;
+  color: var(--ch-encre-section);
+  font-family: inherit;
+}
+
+/* une cellule de contenu libre, à l'aplomb du titre (retraits de .ch-intro) */
+.charte .sm-page .sm-cellule {
+  padding: 40px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .sm-page .sm-cellule {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .sm-page .sm-cellule {
+    padding: 24px 20px 32px;
+  }
+}
+
+/* ─── les photos, dans un cadre de rayon 12 ────────────────────────── */
+.charte .sm-page .sm-photo {
+  position: relative;
+  overflow: hidden;
+  height: clamp(240px, 36vw, 560px);
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 12px;
+  background: var(--ch-scene);
+}
+.charte .sm-page .sm-photo__media {
+  object-fit: cover;
+}
+.charte .sm-page .sm-photo--cellule {
+  height: 100%;
+  min-height: 300px;
+}
+
+/* ─── 2 · les outils du client : la phrase, puis la rangée ─────────── */
+.charte .sm-page .sm-outils {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 20px 40px;
+  padding: 32px clamp(24px, 4vw, 64px);
+}
+@media (min-width: 1280px) {
+  .charte .sm-page .sm-outils {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .sm-page .sm-outils {
+    padding: 24px 20px;
+  }
+}
+.charte .sm-page .sm-outils__phrase {
+  color: var(--ch-gris);
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.charte .sm-page .sm-outils__phrase .ch-lien {
+  font-size: 16px;
+}
+.charte .sm-page .sm-outils__rangee {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 48px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 1280px) {
+  .charte .sm-page .sm-outils__rangee {
+    justify-content: space-between;
+  }
+}
+.charte .sm-page .smd-marque {
+  color: var(--ch-encre-section);
+  font-size: 22px;
+}
+@media (min-width: 768px) {
+  .charte .sm-page .smd-marque {
+    font-size: 24px;
+  }
+}
+
+/* ─── 3-4 · la trace d'exécution, dans une scène ───────────────────── */
+.charte .sm-page .sm-trace-scene {
+  display: block;
+  place-items: normal;
+  padding: 24px;
+}
+@media (max-width: 760px) {
+  .charte .sm-page .sm-trace-scene {
+    padding: 12px;
+  }
+}
+.charte .sm-page .smd-trace {
+  border-color: #d9ddd3;
+  border-radius: 10px;
+  box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
+}
+.charte .sm-page .sm-note {
+  max-width: 698px;
+  margin-top: 14px;
+  color: #777c76;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ─── 5 · le pari | la façade ──────────────────────────────────────── */
+.charte .sm-page .sm-citation,
+.charte .sm-page .sm-regle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1001px) {
+  .charte .sm-page .sm-citation,
+  .charte .sm-page .sm-regle {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  }
+}
+.charte .sm-page .sm-citation__texte,
+.charte .sm-page .sm-regle__texte {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 72px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .sm-page .sm-citation__texte,
+  .charte .sm-page .sm-regle__texte {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .sm-page .sm-citation__texte,
+  .charte .sm-page .sm-regle__texte {
+    padding: 48px 20px 36px;
+  }
+}
+.charte .sm-page .sm-citation__phrase,
+.charte .sm-page .sm-regle__phrase {
+  max-width: 760px;
+  color: var(--ch-encre-section);
+  font-size: clamp(24px, 2.4vw, 34px);
+  font-weight: 450;
+  line-height: 1.22;
+  letter-spacing: -0.04em;
+  text-wrap: pretty;
+}
+.charte .sm-page .sm-citation__signature {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin-top: 32px;
+}
+.charte .sm-page .sm-citation__nom {
+  color: var(--ch-encre-section);
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.charte .sm-page .sm-citation__signature .ch-pastille {
+  margin-bottom: 0;
+}
+.charte .sm-page .sm-citation__photo,
+.charte .sm-page .sm-regle__visuel {
+  min-width: 0;
+  padding: 12px;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 1001px) {
+  .charte .sm-page .sm-citation__photo,
+  .charte .sm-page .sm-regle__visuel {
+    border-top: 0;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+
+/* ─── 6 · règle par règle : la nappe dans son cadre noir ───────────── */
+.charte .sm-page .sm-regle__texte {
+  justify-content: flex-end;
+}
+.charte .sm-page .sm-nappe {
+  height: 100%;
+  min-height: 260px;
+  border-radius: 12px;
+  aspect-ratio: auto;
+}
+@media (max-width: 1000px) {
+  .charte .sm-page .sm-nappe {
+    height: auto;
+    aspect-ratio: 1214 / 636;
+    min-height: 0;
+  }
+}
+
+/* ─── 7 · le schéma du cycle, dans une scène ───────────────────────── */
+.charte .sm-page .sm-schema {
+  display: block;
+  place-items: normal;
+  min-height: 0;
+  padding: 8px 16px;
+}
+@media (max-width: 760px) {
+  .charte .sm-page .sm-schema {
+    padding: 4px;
+  }
+}
+
+/* ─── 8 · les six périmètres ───────────────────────────────────────── */
+.charte .sm-page .sm-fonction .ch-carte-texte {
+  padding-top: 20px;
+  padding-bottom: 12px;
+}
+.charte .sm-page .sm-fonction__picto {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 10px;
+  background: var(--ch-scene);
+  color: var(--ch-encre-section);
+}
+.charte .sm-page .sm-fonction__picto svg {
+  width: 24px;
+  height: 24px;
+}
+.charte .sm-page .sm-fonction h3 {
+  margin-top: 28px;
+}
+
+/* ─── 9 · les études de cas ────────────────────────────────────────── */
+.charte .sm-page .sm-exemples .cs-visuel {
+  border: 1px solid var(--ch-scene-bord);
+  border-radius: 12px;
+  background: var(--ch-scene);
+}
+.charte .sm-page .sm-exemples .cs-titre {
+  font-weight: 450;
+  letter-spacing: -0.03em;
+}
+.charte .sm-page .sm-exemples .cs-corps {
+  font-size: 15px;
+  line-height: 1.5;
+}
+.charte .sm-page .sm-exemples .cs-mesure__label {
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.charte .sm-page .sm-exemples .cs-mesure__valeur {
+  font-weight: 450;
+  letter-spacing: -0.04em;
+}
+.charte .sm-page .sm-exemples__pied {
+  max-width: 698px;
+  margin-top: 40px;
+  color: var(--ch-gris);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ─── 10 · les onglets des agents ──────────────────────────────────── */
+.charte .sm-page .sm-agents .f11-panneau {
+  border-color: var(--ch-scene-bord);
+  border-radius: 12px;
+  background: var(--ch-scene);
+}
+.charte .sm-page .sm-agents .f11-fiche__role {
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+  display: inline-flex;
+  padding: 5px 10px;
+  border: 1px solid var(--ch-pastille-bord);
+  border-radius: 5px;
+  background: var(--ch-pastille);
+  color: var(--ch-encre-section);
+  line-height: 1.2;
+}
+.charte .sm-page .sm-agents .f11-onglet:hover {
+  background: rgba(0, 0, 0, 0.03);
+}

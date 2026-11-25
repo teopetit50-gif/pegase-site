@@ -1,0 +1,21 @@
+/* /mentions-legales dans la charte de l'accueil (25/11/2026). Le gabarit
+   components/legal/PageLegale garde ses classes `leg-*` (scopées `.resa`) ;
+   ces règles n'en changent que le fond, les cotes et la typographie. */
+.charte .ch-legale { background: transparent; }
+.charte .ch-legale .leg-grille { max-width: 1120px; }
+.charte .ch-legale .leg-sommaire {
+  border-color: #e6e6e0;
+  border-radius: 12px;
+  background: #eeeee8;
+}
+@media (min-width: 1024px) {
+  .charte .ch-legale .leg-sommaire { top: 84px; }
+}
+.charte .ch-legale .leg-titre {
+  color: #202322;
+  font-size: 22px;
+  font-weight: 450;
+  letter-spacing: -0.03em;
+  scroll-margin-top: 84px;
+}
+.charte .ch-legale .leg-fiche { border-color: #e6e6e0; border-radius: 12px; }

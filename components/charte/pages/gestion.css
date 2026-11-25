@@ -1,0 +1,33 @@
+/* /gestion dans la charte de l'accueil (25/11/2026), passe légère. La page
+   garde sa trame bordée, ses hachures et ses visuels ; ces règles, scopées
+   sous `.charte .p-gestion`, alignent sa police, son fond, ses filets et ses
+   boutons sur l'accueil. */
+.charte .p-gestion {
+  font-family: var(--font-google-sans), Arial, sans-serif;
+  background: transparent;
+  color: #202322;
+}
+/* les filets « stone-200 » prennent le filet de l'accueil */
+.charte .p-gestion .border-stone-200,
+.charte .p-gestion .border-stone-300 { border-color: #dcdcda; }
+.charte .p-gestion .bg-stone-200 { background-color: #dcdcda; }
+.charte .p-gestion .bg-stone-100 { background-color: #eeeee8; }
+.charte .p-gestion .bg-stone-50 { background-color: #f5f5f2; }
+/* les titres : graisse et interlettrage de l'accueil */
+.charte .p-gestion h1 { font-weight: 400; letter-spacing: -0.01em; }
+.charte .p-gestion h2 { font-weight: 450; letter-spacing: -0.045em; line-height: 1.16; }
+.charte .p-gestion h3 { font-weight: 450; letter-spacing: -0.03em; }
+/* les boutons : le blanc de l'accueil, 46 px */
+.charte .p-gestion .ge-btn {
+  height: 46px;
+  padding-inline: 24px;
+  border-color: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background: #fff;
+  color: #121212;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  box-shadow: none;
+}
+.charte .p-gestion .ge-btn-plein:hover { background: #fff; opacity: 0.9; }

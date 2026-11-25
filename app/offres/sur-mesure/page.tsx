@@ -2,13 +2,17 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
 import { AgentTrace, type TraceSpan } from "@/components/ui/agent-trace";
 import { HalftoneFlow } from "@/components/ui/halftone-flow";
-import HeroReplie from "@/components/surmesure/HeroReplie";
 import Cycle from "@/components/surmesure/Cycle";
-import Revele from "@/components/surmesure/Revele";
 import Ajuste from "@/components/surmesure/Ajuste";
+import Cadre from "@/components/charte/Cadre";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import Appel from "@/components/charte/Appel";
+import Bouton from "@/components/charte/Bouton";
+import Pastille from "@/components/charte/Pastille";
+import { GrilleCartes, Scene } from "@/components/charte/Cartes";
 import {
   SigneHubspot,
   SigneNotion,
@@ -31,6 +35,7 @@ import Feature11, { type Volet } from "@/components/ui/feature-11";
 import { FICHES } from "@/lib/fiches";
 import type { Fiche } from "@/lib/fiches";
 import "./sur-mesure.css";
+import "@/components/charte/pages/sur-mesure.css";
 
 /* ══════════════════════════════════════════════════════════════════════
    /offres/sur-mesure — décalque de scale.com/generative-ai-data-engine
@@ -481,74 +486,6 @@ const OUTILS = [
   { nom: "Notion", Signe: SigneNotion },
 ];
 
-/* ══ les deux pièces de balisage répétées ═════════════════════════════ */
-
-function Fleche() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M5 12h14m0 0-6-6m6 6-6 6" />
-    </svg>
-  );
-}
-
-/* Le bouton de la référence : un voile `currentColor` traverse le fond,
-   la flèche défile dans sa pastille. Les deux exemplaires de la flèche
-   sont ce qui donne le défilement — ne pas en retirer un. */
-function Bouton({
-  href,
-  children,
-  noir = false,
-}: {
-  href: string;
-  children: React.ReactNode;
-  noir?: boolean;
-}) {
-  return (
-    <Link href={href} className={`smd-cta${noir ? " smd-cta--noir" : ""}`}>
-      <span aria-hidden className="smd-cta__voile" />
-      <span className="smd-cta__lbl">
-        {children}
-        <span aria-hidden className="smd-pastille">
-          <span className="smd-pastille__rail">
-            <span>
-              <Fleche />
-            </span>
-            <span>
-              <Fleche />
-            </span>
-          </span>
-        </span>
-      </span>
-    </Link>
-  );
-}
-
-function Entete({
-  etiquette,
-  titre,
-  chapo,
-}: {
-  etiquette: string;
-  titre: string;
-  chapo?: string;
-}) {
-  return (
-    <div className="smd-entete">
-      <p data-reveal className="smd-etiquette">
-        {etiquette}
-      </p>
-      <h2 data-reveal className="smd-h2">
-        {titre}
-      </h2>
-      {chapo && (
-        <p data-reveal className="smd-chapo">
-          {chapo}
-        </p>
-      )}
-    </div>
-  );
-}
-
 /* ══ la page ══════════════════════════════════════════════════════════ */
 
 export default function SurMesurePage() {
@@ -587,7 +524,7 @@ export default function SurMesurePage() {
       <div className="f11-fiche">
         <p className="f11-fiche__role">{fr(p.role)}</p>
         <p className="f11-fiche__corps">{fr(p.job)}</p>
-        <Link href={p.href} className="smd-lien">
+        <Link href={p.href} className="ch-lien">
           Voir {agentPaquet(p.system)}
         </Link>
       </div>
@@ -596,393 +533,260 @@ export default function SurMesurePage() {
 
   return (
     <PageShell>
-      <PageMotion />
-      <div className="smd">
-        {/* ════════ 1 · HERO PLEINE IMAGE ════════
-            16/09, Teo, capture contre capture : « notre titre n'est pas
-            assez long comme eux, je veux la même longueur, la même police
-            et les mêmes majuscules ; la phrase en dessous est trop longue,
-            la leur est plus courte ; et change l'image de fond. »
-
-            LE TITRE. Leur « Generative AI Data Engine » fait 25 signes et
-            quatre mots, en capitales de titre. « Sur mesure » en faisait
-            dix. « Système Métier Sur Mesure » fait 25 signes, quatre mots.
-            Les capitales sur « Sur » et « Mesure » ne sont PAS la
-            typographie française — c'est voulu, et c'est le seul endroit
-            de la page où on se le permet : chez eux comme ici, ce titre
-            n'est pas une phrase, c'est le NOM du produit, et un nom de
-            produit porte ses capitales. Le reste de la page garde la
-            règle française (« Le système qui n'existe pas encore. »).
-
-            LA PHRASE. Leur « Powering the Next Frontier of AI. » fait 33
-            signes. Le pitch de la fiche en fait 63 et tenait sur deux
-            lignes là où la leur en tient une. Coupé à 32 — c'est la
-            seconde moitié du pitch de Teo, mot pour mot ; la première
-            moitié est déjà le titre de l'aperçu, 900 px plus bas.
-
-            L'IMAGE. L'atrium partait de /tarifs et ne disait rien du
-            sur-mesure. Le plateau de bureaux dit l'endroit où vit le
-            processus qu'on vient reprendre — et la page parle à des
-            directions, pas à un atelier. Crédits dans
-            public/photos/CREDITS.txt. */}
-        {/* `HeroReplie` : en haut de page l'image est pleine, au premier
-            défilement elle rentre dans son cadre. La scène garde une
-            hauteur fixe dans le flux — voir le bloc « le hero qui se
-            replie » de sur-mesure.css pour la raison. Le cadre perd son
-            `padding-inline`, c'est la scène qui le porte désormais. */}
-        <div className="smd-cadre--hero">
-          <HeroReplie>
-          <section className="smd-plein">
-            <Image
-              src="/photos/tarifs-installation-bureau.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
+      {/* 25/11/2026 — la charte de l'accueil (docs/charte-accueil.md, § 4.2,
+          ligne 6). La page passe dans <Cadre> ; chaque bloc du décalque
+          devient une section jointive sous l'en-tête de section de
+          l'accueil (pastille, h2 à gauche, chapô gris), et les étiquettes
+          à chasse fixe deviennent les pastilles, mot pour mot.
+          Ce qui part : PageMotion ; le hero qui se repliait au défilement
+          (`HeroReplie`) et la révélation de la citation (`Revele`) — aucun
+          mouvement lié au défilement dans la charte. La photo du bureau
+          reste sous le h1, dans un cadre de rayon 12 ; la façade de
+          l'appel passe à côté de la citation, dans le même cadre ; la
+          plaque verte de la citation part avec son animation.
+          Ce qui reste : la trace d'exécution, la nappe `HalftoneFlow`
+          (WebGL) dans son cadre noir de rayon 12, le schéma du cycle dans
+          une scène, les études de cas, les onglets des agents.
+          `.smd` reste à la racine pour le dessin de ces pièces ; le dessin
+          propre à la page : components/charte/pages/sur-mesure.css, sous
+          `.charte .sm-page`. */}
+      <Cadre>
+        <div className="smd sm-page">
+          {/* ════════ 1 · LE TITRE DE PAGE, puis la photo ════════
+              16/09 — « Votre Module Sur Mesure » est le NOM du produit : il
+              porte ses capitales, c'est le seul endroit de la page où on se
+              le permet. La phrase est la seconde moitié du pitch de Teo,
+              mot pour mot. La photo : le plateau de bureaux, l'endroit où
+              vit le processus qu'on vient reprendre (crédits dans
+              public/photos/CREDITS.txt). */}
+          <Section>
+            <EnTeteSection
+              niveau={1}
+              haut
+              pastille="Sur mesure"
+              titre="Votre Module Sur Mesure"
+              chapo="Nous construisons celui qui manque."
+              actions={
+                <Bouton href="/reserver-un-audit" icone="calendrier">
+                  Parler de votre cas
+                </Bouton>
+              }
             />
-            <div aria-hidden className="smd-voile smd-voile--clair" />
-            <div className="smd-plein__texte">
-              <h1 data-arrivee className="smd-h1">
-                Votre Module Sur Mesure
-              </h1>
-              <p data-arrivee className="smd-lead">
-                Nous construisons celui qui manque.
-              </p>
-              <div data-arrivee>
-                <Bouton href="/reserver-un-audit">Parler de votre cas</Bouton>
+            <div className="sm-cellule">
+              <div className="sm-photo">
+                <Image
+                  src="/photos/tarifs-installation-bureau.jpg"
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1280px) 1260px, 100vw"
+                  className="sm-photo__media"
+                />
               </div>
             </div>
-          </section>
-          </HeroReplie>
-        </div>
+          </Section>
 
-        {/* ════════ 2 · LES OUTILS DU CLIENT ════════
-            L'emplacement de leur bandeau « Trusted by » — écart nº 1. */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            {/* UNE SEULE LIGNE, comme la référence. Leur phrase fait 46
-                signes (« Trusted by the world’s most ambitious AI teams. »)
-                et tient avec son lien dans les 698 px de la colonne. La
-                nôtre en faisait 78 et passait à deux lignes : c'est le
-                budget de texte qui se relève, pas la largeur qui
-                s'élargit. */}
-            <p data-reveal className="smd-chapo mx-auto mb-12 max-w-[698px] !text-base !text-black/70 text-center">
-              <span className="mr-2">Un module sur mesure se branche sur vos outils.</span>
-              <Link href="/integrations" className="smd-lien !text-base">
-                Voir nos intégrations
-                <span aria-hidden>→</span>
-              </Link>
-            </p>
-            {/* la rangée de la référence est dans leur `.container` : 720 à
-                768, 976 à 1024, 1280 au-delà. Notre colonne rend les deux
-                premiers d'elle-même, le plafond de 1280 pose le troisième.
-
-                16/09 au soir (Teo) — « sur mobile cette bande défile chez
-                eux, pas chez nous ». Vrai, et la cause était le
-                `flex-wrap` : sous 390 px la rangée passait à la ligne au
-                lieu de sortir du cadre. Mesuré sur la référence à 390 : sa
-                liste fait 801 px dans une fenêtre de 390, en
-                `min-width: max-content`, et son parent est en
-                `overflow-x: auto`. Elle ne défile donc pas TOUTE SEULE —
-                `animation-name: none`, `transform: none` — elle se fait
-                glisser au doigt. C'est ce comportement-là qui est repris,
-                pas une marquise : le cadre `.smd-bandeau` défile, la
-                rangée reste d'un seul tenant. */}
-            <div className="smd-bandeau">
-            <ul
-              data-reveal
-              className="smd-bandeau__rangee mx-auto flex max-w-[1280px] items-center justify-center gap-x-14 sm:justify-around"
-            >
-              {OUTILS.map(({ nom, Signe }) => (
-                <li key={nom} className="smd-marque">
-                  <Signe />
-                  {nom}
-                </li>
-              ))}
-            </ul>
+          {/* ════════ 2 · LES OUTILS DU CLIENT ════════
+              ⚠ CE NE SONT PAS DES CLIENTS, et la phrase est ce qui
+              l'empêche de se lire ainsi. Ne pas la retirer ni la raccourcir. */}
+          <Section>
+            <div className="sm-outils">
+              <p className="sm-outils__phrase">
+                <span>Un module sur mesure se branche sur vos outils.</span>{" "}
+                <Link href="/integrations" className="ch-lien">
+                  Voir nos intégrations
+                  <span aria-hidden>→</span>
+                </Link>
+              </p>
+              {/* la rangée se fait glisser au doigt sous 640 px (le cadre
+                  `.smd-bandeau` défile, la rangée reste d'un seul tenant) */}
+              <div className="smd-bandeau sm-outils__bandeau">
+                <ul className="smd-bandeau__rangee sm-outils__rangee">
+                  {OUTILS.map(({ nom, Signe }) => (
+                    <li key={nom} className="smd-marque">
+                      <Signe />
+                      {nom}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 3 · APERÇU ════════ */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <Entete
-              etiquette="Aperçu"
+          {/* ════════ 3 et 4 · APERÇU, puis une exécution étape par étape ════
+              Le déroulé d'une exécution, qu'on peut rejouer à la main —
+              voir `TRACE` plus haut pour ce qu'il montre et ce qu'il ne
+              montre pas. Il a son propre fond blanc et son propre filet :
+              il est posé dans une scène, comme un écran d'exemple. */}
+          <Section>
+            <EnTeteSection
+              pastille="Aperçu"
               titre="Le module qui vous manque."
               chapo={fr(FICHE.sections?.pointsChapo ?? "")}
             />
-          </div>
-        </section>
-
-        {/* ════════ 4 · UNE EXÉCUTION, ÉTAPE PAR ÉTAPE ════════
-            L'emplacement de leur grand schéma. Depuis le 16/09 il porte
-            le déroulé d'une exécution, qu'on peut rejouer à la main —
-            voir `TRACE` plus haut pour ce qu'il montre et ce qu'il ne
-            montre pas. Le composant est enveloppé dans le même cadre que
-            les autres pièces, mais SANS `smd-panneau` : il a son propre
-            fond blanc et son propre filet. */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <div data-reveal>
-              <AgentTrace
-                spans={TRACE}
-                duration={TRACE_TOTAL}
-                runId="traitement_4821"
-                defaultTime={TRACE_TOTAL * 0.62}
-                autoPlay={false}
-                loop
-                showTokens={false}
-                labelWidth={208}
-              />
-              <p className="smd-body mt-4 !text-[0.8125rem]">
+            <div className="sm-cellule">
+              <Scene trame basse className="sm-trace-scene">
+                <AgentTrace
+                  spans={TRACE}
+                  duration={TRACE_TOTAL}
+                  runId="traitement_4821"
+                  defaultTime={TRACE_TOTAL * 0.62}
+                  autoPlay={false}
+                  loop
+                  showTokens={false}
+                  labelWidth={208}
+                />
+              </Scene>
+              <p className="sm-note">
                 Exemple de déroulé, sur des durées réalistes. Les étapes et leur
                 enchaînement sont ceux d’un module en service&nbsp;; les valeurs ne
                 sont pas celles d’un client.
               </p>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 5 · LE PARI ════════
-            L'emplacement de leur citation signée — écart nº 2 : personne
-            n'est cité, la page porte sa propre position. */}
-        <section className="smd-sec">
-          {/* `smd-large` et NON `smd-wrap` : sur la référence cette carte
-              sort de la colonne de 1472 et suit la vue jusqu'à 1888 —
-              voir le relevé en tête de sur-mesure.css. */}
-          <div className="smd-large">
-            {/* ⚠ PAS DE `data-reveal` ICI, ET C'EST LE FOND DU REPROCHE
-                « le zoom dézoom apparaît trop tard » (Teo, 16/09 au
-                soir). `[data-reveal]` est repris par PageMotion (GSAP),
-                qui tient le bloc à `opacity: 0` jusqu'à ce que son bord
-                haut passe 88 % de la fenêtre, puis le fait apparaître en
-                750 ms. La plaque, elle, s'élargit dès que ce même bord
-                entre par le bas : les deux tiers de l'excursion se
-                jouaient donc sur une carte INVISIBLE, et ce qu'on voyait
-                arriver était une bande déjà presque à sa largeur finale.
-                Sur la référence rien ne masque le panneau — il entre
-                visible et s'élargit sous nos yeux. Son entrée, c'est la
-                plaque qui s'ouvre et le texte qui monte, pas un fondu.
-
-                La colonne de texte, elle, ne bouge plus : la grille la
-                pose à 902 (colonnes 5 à 11) comme sur la référence, et
-                la plaque s'élargit DERRIÈRE. Le texte monte dans son
-                cadre à l'entrée (`Revele`) ; le nom suit 180 ms après. */}
-            <div className="smd-citation">
-              <div className="smd-citation__plaque" aria-hidden="true" />
-              <div className="smd-citation__grille">
-                {/* L'étiquette et le corps sont sur la MÊME rangée de
-                    grille, sinon l'étiquette se place sur une rangée à
-                    elle et remonte en haut de la carte — sur la
-                    référence elle est en bas à gauche, à la hauteur du
-                    nom. Colonnes 2-3 pour elle, 5 à 11 pour la
-                    citation : elles ne se touchent pas. */}
-                <p className="smd-citation__label">
-                  Ce que le logiciel{"\n"}ne couvre pas
+          {/* ════════ 5 · LE PARI ════════
+              L'emplacement de leur citation signée : personne n'est cité,
+              la page porte sa propre position. La citation est celle de
+              `FICHE.fonctionnement[0]`, MOT POUR MOT. À côté, la façade de
+              verre qui fermait la page. */}
+          <Section>
+            <div className="sm-citation">
+              <div className="sm-citation__texte">
+                <Pastille>Ce que le logiciel ne couvre pas</Pastille>
+                <p className="sm-citation__phrase">
+                  «&nbsp;Le sur-mesure commence là où le logiciel et ses modules
+                  s&apos;arrêtent&nbsp;: quand la tâche qui coûte le plus cher est
+                  propre à votre métier, à votre organisation ou à votre système
+                  d&apos;information, et qu&apos;aucun produit sur étagère ne la
+                  traite sans le déformer.&nbsp;»
                 </p>
-                <div className="smd-citation__colonne">
-                  <div className="smd-citation__corps">
-                    <Revele>
-                      {/* La citation est celle de `FICHE.fonctionnement[0]`,
-                          MOT POUR MOT. Je l'avais raccourcie en la posant :
-                          elle tombait à 197 signes contre 235 chez eux,
-                          donc quatre lignes au lieu de cinq, donc une carte
-                          plus basse. Le texte complet de Teo fait la bonne
-                          longueur — la coupe n'avait rien gagné. */}
-                      <span className="smd-citation__texte">
-                        «&nbsp;Le sur-mesure commence là où le logiciel et ses modules
-                        s&apos;arrêtent&nbsp;: quand la tâche qui coûte le plus cher est
-                        propre à votre métier, à votre organisation ou à votre système
-                        d&apos;information, et qu&apos;aucun produit sur étagère ne la
-                        traite sans le déformer.&nbsp;»
-                      </span>
-                    </Revele>
-                  </div>
-                  <Revele delai={180}>
-                    <span className="flex flex-wrap items-center justify-between gap-4 lg:justify-end lg:gap-6">
-                      <span className="smd-citation__nom">Omega.AI</span>
-                      <span className="smd-citation__jeton">Audit avant devis</span>
-                    </span>
-                  </Revele>
+                <div className="sm-citation__signature">
+                  <span className="sm-citation__nom">Omega.AI</span>
+                  <Pastille>Audit avant devis</Pastille>
+                </div>
+              </div>
+              <div className="sm-citation__photo" data-gutter-guide="top">
+                <div className="sm-photo sm-photo--cellule">
+                  <Image
+                    src="/photos/tarifs-abonnement-facade.jpg"
+                    alt=""
+                    fill
+                    loading="lazy"
+                    sizes="(min-width: 1001px) 45vw, 100vw"
+                    className="sm-photo__media"
+                  />
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 6 · RÈGLE PAR RÈGLE ════════ */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-16">
-              <h3 data-reveal className="smd-h3">
-                {fr(FICHE.controle ?? "")}
-              </h3>
-              {/* 16/09, Teo : « remplace le truc noir du modèle de base
-                  par ce composant ». La référence pose ici une carte NOIRE
-                  avec un rendu abstrait coloré — un de leurs actifs. À sa
-                  place, la nappe de points animée : même cadre, même noir,
-                  même rapport de forme, et rien d'emprunté.
-
-                  Les couleurs ne sont pas celles du composant d'origine
-                  (rouge et orange) : elles descendent du vert de la
-                  citation, pour que le bloc appartienne à la page. Trois
-                  triplets à changer si Teo veut une autre teinte.
-
-                  Ce panneau remplace la carte « Niveau d'autonomie »
-                  (`PanneauReglages`, désormais orpheline dans
-                  Panneaux.tsx). Rien ne se perd : ses trois niveaux
-                  RÉPÉTAIENT la phrase de gauche, qui les énumère déjà. */}
-              <div data-reveal className="smd-nappe">
-                <HalftoneFlow className="smd-nappe__toile" />
+          {/* ════════ 6 · RÈGLE PAR RÈGLE ════════
+              La nappe de points animée (`HalftoneFlow`, WebGL) reste, dans
+              son cadre noir de rayon 12 : c'est le visuel du bloc. Ses
+              couleurs descendent du vert de l'ancienne citation. */}
+          <Section>
+            <div className="sm-regle">
+              <div className="sm-regle__texte">
+                <Pastille>Autonomie</Pastille>
+                <h2 className="sm-regle__phrase">{fr(FICHE.controle ?? "")}</h2>
+              </div>
+              <div className="sm-regle__visuel" data-gutter-guide="top">
+                <div className="smd-nappe sm-nappe">
+                  <HalftoneFlow className="smd-nappe__toile" />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 7 · L'ESPACE CLIENT ════════
-            Leur deuxième grande capture produit. La nôtre est réelle :
-            l'espace client Omega, alimenté par le jeu de démonstration
-            écrit en dur dans le dépôt du cockpit — aucune donnée client.
-            Voir app/page.tsx pour la route de prise de vue. */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <Entete
-              etiquette="Ce que vous obtenez"
+          {/* ════════ 7 · CE QUE VOUS OBTENEZ ════════
+              Le SCHÉMA EN BOUCLE (components/surmesure/Cycle.tsx), dans une
+              scène. `Ajuste` le rend à sa largeur naturelle (1408) puis le
+              RÉDUIT pour tenir : la mise en page n'a pas de palier. */}
+          <Section>
+            <EnTeteSection
+              pastille="Ce que vous obtenez"
               titre="Un module de plus, dans le même logiciel."
               chapo={fr(
                 "Le module s'ajoute à votre logiciel, à côté des autres. Même validation, même journal, mêmes droits par service."
               )}
             />
-            {/* 16/09, Teo : « cette section n'est pas la même que sur le
-                modèle de base, refais exactement la même ». La capture de
-                l'espace client cède la place au SCHÉMA EN BOUCLE de la
-                référence, à la géométrie près — entrée, quatre étapes qui
-                tournent, sortie, retour en pointillés. Le contenu est le
-                nôtre : la correspondance poste par poste est en tête de
-                components/surmesure/Cycle.tsx. */}
-            {/* `Ajuste` rend le schéma à sa largeur naturelle (1408, celle
-                pour laquelle il est dessiné) puis le RÉDUIT pour tenir.
-                Teo : « sur leur version mobile rien ne bouge, le
-                composant rétrécit mais reste le même ». Leur schéma est
-                une image, donc il se met à l'échelle ; le nôtre est du
-                balisage et se repliait en colonne — ce repli est
-                supprimé, la mise en page n'a plus de palier. */}
-            <div data-reveal className="smd-panneau">
-              <Ajuste largeur={1408}>
-                <Cycle />
-              </Ajuste>
+            <div className="sm-cellule">
+              <div className="ch-scene sm-schema">
+                <Ajuste largeur={1408}>
+                  <Cycle />
+                </Ajuste>
+              </div>
             </div>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 8 · LES SIX PÉRIMÈTRES ════════ */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <Entete
-              etiquette="Usages"
+          {/* ════════ 8 · LES SIX PÉRIMÈTRES, en cellules jointives ════════ */}
+          <Section>
+            <EnTeteSection
+              pastille="Usages"
               titre="Ce que couvre le sur-mesure."
               chapo="Si une tâche suit des règles claires, nous construisons le module qui la fait."
             />
-            <div className="smd-fonctions">
+            <GrilleCartes colonnes={3}>
               {PERIMETRES.map(({ Icone, titre, texte }) => (
-                <div data-reveal key={titre} className="smd-fonction">
-                  <figure>
-                    <Icone />
-                  </figure>
-                  <h4 className="smd-h4">{titre}</h4>
-                  <p className="smd-body">{texte}</p>
+                <div key={titre} className="ch-carte sm-fonction">
+                  <div className="ch-carte-texte">
+                    <figure className="sm-fonction__picto">
+                      <Icone />
+                    </figure>
+                    <h3>{titre}</h3>
+                    <p>{texte}</p>
+                  </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
+            </GrilleCartes>
+          </Section>
 
-        {/* ════════ 9 · TROIS BESOINS TRAITÉS ════════
-            L'emplacement de leurs vidéos de démonstration — écart nº 3. */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <Entete etiquette="Exemples" titre="Trois exemples de modules sur mesure." />
-            <div data-reveal>
+          {/* ════════ 9 · TROIS BESOINS TRAITÉS ════════ */}
+          <Section>
+            <EnTeteSection pastille="Exemples" titre="Trois exemples de modules sur mesure." />
+            <div className="sm-cellule sm-exemples">
               <Casestudies cas={EXEMPLES} />
+              <p className="sm-exemples__pied">
+                {FICHE.demo.type === "list" ? fr(FICHE.demo.footer ?? "") : ""}
+              </p>
             </div>
-            <p data-reveal className="smd-body mt-10 max-w-[698px]">
-              {FICHE.demo.type === "list" ? fr(FICHE.demo.footer ?? "") : ""}
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* ════════ 10 · LE CATALOGUE ════════
-            L'emplacement de leurs études de cas. Les nôtres sont les
-            quatre pages produit : de la vraie navigation, pas une
-            référence client. */}
-        <section className="smd-sec">
-          <div className="smd-wrap">
-            <Entete
-              etiquette="Les agents"
+          {/* ════════ 10 · LE CATALOGUE ════════
+              Les quatre pages produit en onglets (`feature-11`) : de la
+              vraie navigation, pas une référence client. */}
+          <Section>
+            <EnTeteSection
+              pastille="Les agents"
               titre="Les quatre agents du logiciel."
               chapo={fr(
                 "Relances, demandes clients, factures fournisseurs et clients inactifs : quatre agents s'en chargent."
               )}
             />
-            <Feature11 volets={volets} />
-          </div>
-        </section>
-
-        {/* ════════ 11 · L'APPEL ════════ */}
-        <div className="smd-cadre smd-cadre--appel">
-          <section className="smd-plein">
-            {/* 16/09, Teo : « change la photo de fond en une plus pro et
-                nette ». L'ancienne (tarifs-cloture-facade) est un
-                contre-jour de couchant : voile orange, halo au centre,
-                et au fond une voiture et des vélos qui la font lire
-                comme un parking. Celle-ci est nette d'un bord à l'autre,
-                froide, sans sujet anecdotique, et sa trame régulière
-                tient le cadre sans concurrencer le titre.
-
-                ⚠ Elle sert AUSSI au bloc « L'abonnement » de /tarifs.
-                Les deux pages ne se croisent pas dans un parcours, mais
-                si /tarifs change de photo, vérifier qu'elle ne prend pas
-                celle d'ici. Crédits dans public/photos/CREDITS.txt. */}
-            {/* LA PLAQUE EST UN CALQUE, LE TEXTE NE BOUGE PAS.
-
-                C'est la construction de la référence, relevée le 16/09 :
-                chez elle le fond est un calque posé derrière le contenu,
-                et le contenu vit dans une colonne qui ne bouge jamais —
-                titre à x=80, largeur 1152, identique à toutes les
-                positions de défilement.
-
-                La première version animait `.smd-plein` lui-même, donc
-                le texte, qui est dedans, voyageait avec : x passait de
-                165 à 88 pendant qu'on défilait. Mesuré en prod, c'est ce
-                qui donnait le sentiment d'un bloc qui dérive. */}
-            <div aria-hidden className="smd-appel-plaque">
-              <Image
-                src="/photos/tarifs-abonnement-facade.jpg"
-                alt=""
-                fill
-                loading="lazy"
-                sizes="100vw"
-                className="object-cover"
-              />
-              <div className="smd-voile" />
+            <div className="sm-cellule sm-agents">
+              <Feature11 volets={volets} />
             </div>
-            <div className="smd-plein__texte">
-              <h2 data-reveal className="smd-h1">
-                Parler de votre cas.
-              </h2>
-              <p data-reveal className="smd-lead max-w-[42rem]">
+          </Section>
+
+          {/* ════════ 11 · L'APPEL ════════ */}
+          <Appel
+            pastille="Audit"
+            titre="Parler de votre cas."
+            chapo={
+              <>
                 Trente minutes pour regarder comment vous travaillez aujourd&apos;hui.
                 Le module et son prix sont écrits avant de commencer.
-              </p>
-              <div data-reveal>
-                <Bouton href="/reserver-un-audit">Réserver un audit</Bouton>
-              </div>
-            </div>
-          </section>
+              </>
+            }
+            actions={
+              <Bouton href="/reserver-un-audit" icone="calendrier">
+                Réserver un audit
+              </Bouton>
+            }
+          />
         </div>
-      </div>
+      </Cadre>
     </PageShell>
   );
 }

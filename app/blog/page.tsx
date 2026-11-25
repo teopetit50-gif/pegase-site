@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import PageShell from "@/components/PageShell";
-import PageMotion from "@/components/PageMotion";
+import Cadre from "@/components/charte/Cadre";
+import Section from "@/components/charte/Section";
+import EnTeteSection from "@/components/charte/EnTeteSection";
+import "@/components/charte/pages/blog.css";
 import { BlogCta } from "@/components/blog/BlogKit";
 import CartesArticles from "@/components/blog/CartesArticles";
 import { POSTS } from "@/lib/content";
@@ -34,38 +37,31 @@ export const metadata: Metadata = {
    ══════════════════════════════════════════════════════════════════════ */
 
 export default function BlogPage() {
+  /* 25/11/2026 — passe à la charte de l'accueil (docs/charte-accueil.md) :
+     titre de page de l'accueil à gauche, sections jointives à filets, la
+     grille d'articles gardée, l'appel final au kit, plus d'apparition au
+     défilement. Textes inchangés. */
   return (
     <PageShell>
-      {/* couche motion commune : lenis + reveals GSAP */}
-      <PageMotion />
-
-      <div className="offres">
-        {/* ——— hero : « Blog » centré sur le fond pointillé ——— */}
-        <section data-monde="clair" className="relative">
-          <div
-            aria-hidden
-            className="o-dots o-dots-fade pointer-events-none absolute inset-x-0 top-0 h-[440px]"
-          />
-          <div className="o-wrap relative pt-[100px] text-center sm:pt-[130px]">
-            <h1 data-reveal className="b-h1">
-              Blog
-            </h1>
-            <p data-reveal className="o-lead mx-auto mt-3 max-w-[560px]">
-              Nos analyses, à l&apos;attention des dirigeants.
-            </p>
-          </div>
-
-          {/* ——— la grille de cartes ——— */}
-          <div className="o-wrap relative mt-[90px] sm:mt-[150px]">
-            <CartesArticles articles={POSTS} />
-          </div>
-
-          {/* ——— CTA final ——— */}
-          <div className="o-wrap pb-[100px] pt-[110px] sm:pb-[120px] sm:pt-[140px]">
-            <BlogCta />
-          </div>
-        </section>
-      </div>
+      <Cadre>
+        <div className="offres ch-blog">
+          <Section>
+            <EnTeteSection
+              niveau={1}
+              haut
+              disposition="pile"
+              titre="Blog"
+              chapo="Nos analyses, à l'attention des dirigeants."
+            />
+          </Section>
+          <Section>
+            <div className="ch-contenu">
+              <CartesArticles articles={POSTS} />
+            </div>
+          </Section>
+          <BlogCta />
+        </div>
+      </Cadre>
     </PageShell>
   );
 }

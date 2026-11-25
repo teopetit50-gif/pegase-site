@@ -1,0 +1,232 @@
+/* ══════════════════════════════════════════════════════════════════════
+   /integrations dans la charte de l'accueil — 25/11/2026
+   (docs/charte-accueil.md, § 4.2, ligne 8)
+
+   La page garde la racine `.offres` pour le dessin de ses composants
+   (orbite, grille, frise, cartes par agent). Le monde `.offres` et ses
+   boutons `o-btn` servent aussi /blog et /tarifs/site : TOUT ce qui suit
+   est sous `.charte .it-page`, rien ne touche `.offres` ailleurs.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* `.offres` peignait #fff jusqu'aux bords (ombre de 50vw), en Inter Tight
+   et en zinc : c'est le #f5f5f2 du cadre, Google Sans et les couleurs de
+   la charte qui restent. Les jetons `--o-*` recolorent d'un coup les
+   composants de la page. */
+.charte .it-page {
+  --o-text: var(--ch-encre-section);
+  --o-muted: var(--ch-gris);
+  --o-muted-strong: #777c76;
+  --o-line: var(--ch-filet);
+  --o-soft: var(--ch-scene);
+  --o-dot: rgba(32, 35, 34, 0.12);
+  background: transparent;
+  box-shadow: none;
+  clip-path: none;
+  color: var(--ch-encre-section);
+  font-family: inherit;
+}
+
+/* une cellule de contenu libre, à l'aplomb du titre (retraits de .ch-intro) */
+.charte .it-page .it-cellule {
+  padding: 40px clamp(24px, 4vw, 64px) 56px;
+}
+@media (min-width: 1280px) {
+  .charte .it-page .it-cellule {
+    padding-left: var(--ch-retrait);
+  }
+}
+@media (max-width: 760px) {
+  .charte .it-page .it-cellule {
+    padding: 24px 20px 32px;
+  }
+}
+
+/* ─── 1 · l'orbite des outils, dans une scène ──────────────────────── */
+.charte .it-page .it-orbite {
+  min-height: 0;
+  padding: 48px 24px;
+}
+@media (max-width: 760px) {
+  .charte .it-page .it-orbite {
+    padding: 24px 0;
+  }
+  /* la scène est plus étroite que la colonne d'avant : l'orbite descend
+     d'un cran pour que les satellites du grand anneau restent dedans */
+  .charte .it-page .it-orbite .orb-bloc {
+    --orb-carre: 260px;
+    --orb-pastille: 30px;
+    --orb-rayon-int: 70px;
+    --orb-rayon-ext: 112px;
+    --orb-noyau: 48px;
+    --orb-marque: 24px;
+    --orb-logo: 14px;
+  }
+}
+.charte .it-page .it-legende {
+  margin-top: 14px;
+  color: #777c76;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ─── 2 · la grille des outils ─────────────────────────────────────── */
+.charte .it-page .it-grille {
+  padding-top: 48px;
+}
+@media (max-width: 760px) {
+  .charte .it-page .it-grille {
+    padding-top: 32px;
+  }
+}
+/* les puces de filtre : la pastille de l'accueil, l'active en blanc */
+.charte .it-page .go-puce {
+  min-height: 34px;
+  border-color: var(--ch-pastille-bord);
+  border-radius: 5px;
+  background: var(--ch-pastille);
+  box-shadow: none;
+  color: var(--ch-encre-section);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+@media (hover: hover) {
+  .charte .it-page .go-puce:hover {
+    border-color: #c9c8bf;
+    color: var(--ch-encre-section);
+  }
+}
+.charte .it-page .go-puce[aria-checked="true"] {
+  border-color: rgba(0, 0, 0, 0.1);
+  background: #fff;
+  color: var(--ch-encre);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--ch-encre-section);
+}
+.charte .it-page .go-compte {
+  color: #777c76;
+  font-family: inherit;
+  letter-spacing: 0;
+}
+/* les cartes d'outils : la scène de l'accueil, rayon 12 */
+.charte .it-page .go-grille {
+  gap: 12px;
+}
+.charte .it-page .go-carte {
+  border-color: var(--ch-scene-bord);
+  border-radius: 12px;
+  background: var(--ch-scene);
+}
+.charte .it-page .go-logo {
+  border-color: var(--ch-scene-bord);
+}
+.charte .it-page .go-nom {
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 450;
+  letter-spacing: -0.02em;
+}
+.charte .it-page .go-role {
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+}
+
+/* ─── 3 · la frise du raccordement, pleine d'emblée ────────────────── */
+/* Le rail se remplissait au défilement (`--frs-p`, posé en ligne par le
+   composant). La charte n'a pas de mouvement lié au défilement : il est
+   plein, comme sans JavaScript. */
+.charte .it-page .frs-cadre {
+  --frs-p: 1 !important;
+}
+.charte .it-page .frs-jalon-off,
+.charte .it-page .frs-jalon-on {
+  font-family: inherit;
+}
+.charte .it-page .frs-corps .o-h5 {
+  color: var(--ch-encre-section);
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 450;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+}
+.charte .it-page .frs-corps .frs-texte {
+  color: var(--ch-gris);
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
+/* ─── 4 · les quatre agents : une grille jointive à filets ─────────── */
+.charte .it-page .it-agents {
+  gap: 0;
+}
+.charte .it-page .it-agents .csy-lavis {
+  display: none;
+}
+.charte .it-page .it-agents .csy-porte {
+  border-radius: 0;
+  border-bottom: 1px solid var(--ch-filet);
+}
+.charte .it-page .it-agents .csy-porte:focus-visible {
+  outline-offset: -2px;
+}
+@media (min-width: 640px) {
+  .charte .it-page .it-agents .csy-porte:nth-child(2n) {
+    border-left: 1px solid var(--ch-filet);
+  }
+  .charte .it-page .it-agents .csy-porte:nth-child(n + 3) {
+    border-bottom: 0;
+  }
+}
+@media (min-width: 1024px) {
+  .charte .it-page .it-agents .csy-porte {
+    border-bottom: 0;
+  }
+  .charte .it-page .it-agents .csy-porte + .csy-porte {
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+@media (max-width: 639px) {
+  .charte .it-page .it-agents .csy-porte:last-child {
+    border-bottom: 0;
+  }
+}
+@media (min-width: 1280px) {
+  .charte .it-page .it-agents .csy-porte:first-child .csy-carte {
+    padding-left: max(28px, var(--ch-retrait));
+  }
+}
+.charte .it-page .it-agents .csy-carte,
+.charte .it-page .it-agents .csy-carte[data-actif="true"] {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.charte .it-page .it-agents .csy-tete span {
+  color: var(--ch-encre-section) !important;
+  font-size: 22px !important;
+  font-weight: 450 !important;
+  letter-spacing: -0.03em !important;
+}
+.charte .it-page .it-agents .csy-role {
+  color: var(--ch-gris) !important;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+}
+.charte .it-page .it-agents .o-link {
+  color: var(--ch-encre-section);
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .charte .it-page .it-agents .csy-porte:hover .csy-tete span {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
