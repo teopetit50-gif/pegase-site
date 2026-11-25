@@ -4,6 +4,8 @@
    régénérer. Ne pas retoucher une classe sans repasser outils/sx/compare.mjs. */
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function SxTarifs() {
   return (
@@ -99,12 +101,12 @@ export default function SxTarifs() {
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <Link href={"/reserver-un-audit"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-white pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full text-center"}>
-                {"Réserver l'audit"}
-                <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
-                  <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
-                </svg>
-              </Link>
+              <Button asChild variant={"link"}>
+                <Link href={"/reserver-un-audit"}>
+                  {"Réserver l'audit"}
+                  <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
+                </Link>
+              </Button>
             </div>
             <div className={"pr-features"}>
               <h4>
@@ -223,9 +225,12 @@ export default function SxTarifs() {
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <Link href={"/contact"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full bg-white text-center"}>
-                {"Parler à l'équipe"}
-              </Link>
+              <Button asChild variant={"link"}>
+                <Link href={"/contact"}>
+                  {"Parler à l'équipe"}
+                  <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
+                </Link>
+              </Button>
             </div>
             <div className={"pr-features"}>
               <h4>
@@ -341,12 +346,12 @@ export default function SxTarifs() {
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <Link href={"/tarifs"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-white pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full text-center"}>
-                {"Voir les tarifs"}
-                <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
-                  <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
-                </svg>
-              </Link>
+              <Button asChild variant={"link"}>
+                <Link href={"/tarifs"}>
+                  {"Voir les tarifs"}
+                  <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
+                </Link>
+              </Button>
             </div>
             <div className={"pr-features"}>
               <h4>
@@ -437,12 +442,12 @@ export default function SxTarifs() {
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
-              <Link href={"/offres/sur-mesure"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-white pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] w-full text-center"}>
-                {"Découvrir le sur-mesure"}
-                <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
-                  <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
-                </svg>
-              </Link>
+              <Button asChild variant={"link"}>
+                <Link href={"/offres/sur-mesure"}>
+                  {"Découvrir le sur-mesure"}
+                  <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
+                </Link>
+              </Button>
             </div>
             <div className={"pr-features"}>
               <h4>

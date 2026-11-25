@@ -5,6 +5,8 @@
 /* eslint-disable @next/next/no-img-element */
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function SxAppel() {
   return (
@@ -34,22 +36,18 @@ export default function SxAppel() {
           {"En 30 minutes, nous vous disons ce qu'Omega peut reprendre chez vous et ce que cela coûte. Sans engagement."}
         </p>
         <div className={"cta-actions"}>
-          <Link href={"/reserver-un-audit"} className={"relative inline-flex shrink-0 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap font-lato font-semibold transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[0.954px] overflow-clip rounded-[9.543px] border-[0.954px] border-solid border-[rgba(0,0,0,0.1)] pl-[22.904px] pr-[13.361px] py-[13.361px] text-[16px] leading-[1.5] tracking-[-0.32px] text-[#121212] desktop-sm:gap-px desktop-sm:rounded-[10px] desktop-sm:border desktop-sm:pl-[24px] desktop-sm:pr-[14px] desktop-sm:py-[14px]  bg-white text-center"}>
-            {"Réserver un audit offert"}
-            <span aria-hidden={"true"} className={"relative block shrink-0 size-[20.995px] desktop-sm:size-[22px]"}>
-              <span className={"absolute inset-[28.66%_35.71%_23.78%_35.72%]"}>
-                <img src={"/accueil-sx/chevron-sombre.svg"} alt={""} className={"block size-full max-w-none"} />
-              </span>
-            </span>
-          </Link>
-          <Link href={"/contact"} className={"relative inline-flex shrink-0 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap font-lato font-semibold transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[9.543px] rounded-[9.543px] border-[0.954px] border-solid border-[rgba(0,0,0,0.1)] bg-white pl-[22.904px] pr-[13.361px] py-[13.361px] text-[14px] leading-[1.5] tracking-[-0.42px] text-[#121212] desktop-sm:gap-[10px] desktop-sm:rounded-[10px] desktop-sm:border desktop-sm:pl-[24px] desktop-sm:pr-[14px] desktop-sm:py-[14px]  text-center"}>
-            {"Parler à l'équipe"}
-            <span aria-hidden={"true"} className={"relative block shrink-0 size-[20.995px] desktop-sm:size-[22px]"}>
-              <span className={"absolute inset-[28.66%_35.71%_23.78%_35.72%]"}>
-                <img src={"/accueil-sx/chevron-sombre.svg"} alt={""} className={"block size-full max-w-none"} />
-              </span>
-            </span>
-          </Link>
+          <Button asChild variant={"link"}>
+            <Link href={"/reserver-un-audit"}>
+              {"Réserver un audit offert"}
+              <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
+            </Link>
+          </Button>
+          <Button asChild variant={"link"}>
+            <Link href={"/contact"}>
+              {"Parler à l'équipe"}
+              <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
+            </Link>
+          </Button>
         </div>
       </div>
       <div className={"relative shrink-0 z-20 [--cell:25%] [--row:46px] ipad:[--cell:16.6667%] ipad:[--row:56px] desktop-sm:[--cell:8.3333%] h-[46px] ipad:h-[56px]"}>

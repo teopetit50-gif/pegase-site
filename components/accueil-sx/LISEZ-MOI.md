@@ -70,13 +70,16 @@ pseudo-éléments, les positions).
    référence est inerte, ce qui laisserait un visiteur au téléphone sans
    navigation. Le bouton est le sien, au pixel ; le panneau est le nôtre.
 
-10. **Tous les boutons sont blancs** (Teo, 25/11, en deux temps : « le bouton
-    gris, mets-le comme le blanc, partout », puis, capture à l'appui, le bouton
-    « Commencer »). La référence a des boutons gris translucides et des
-    boutons sombres en dégradé ; `convertir.py` les rend tous au dessin du
-    bouton blanc : fond blanc, liseré `rgba(0,0,0,.1)`, encre `#121212`,
-    rayon 10, sans ombre (`BOUTON_BLANC`, `SOMBRE_EN_BLANC`). Les boutons des
-    écrans d'exemple gardent leur dessin.
+10. **Les boutons d'appel sont le bouton originui, variante « link »**
+    (Teo, 25/11, capture de « Parler à l'équipe › / Commencer » à l'appui :
+    « remplace tous les boutons similaires par le code que je t'ai donné »).
+    Les seize liens au dessin de bouton (barre, héros, sections, tarifs,
+    FAQ, appel final, pied) sont rendus par `convertir.py` en
+    `<Button asChild variant="link">` (components/ui/button.tsx) avec un
+    `ChevronRight` lucide de 16 px à 60 % ; le menu mobile suit. Avant :
+    tous blancs (fond blanc, liseré, rayon 10), et avant encore gris et
+    sombres comme la référence. Les boutons des écrans d'exemple gardent
+    leur dessin.
 11. **Le prix est sous la phrase du héros** (Teo, 25/11 : « dans la phrase,
     juste en dessous, en plus petit, mais qu'il se voie ») : « À partir de
     **34,90 € HT** par personne et par mois. », ligne ajoutée par

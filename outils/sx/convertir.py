@@ -265,6 +265,37 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
         tag_rendu = "Link" if lien.startswith("/") else "a"
         if tag_rendu == "Link": besoins.add("Link")
 
+    # 25/11 (Teo, capture de « Parler à l'équipe › / Commencer » à l'appui :
+    # « remplace tous les boutons similaires par le code que je t'ai donné ») :
+    # chaque bouton d'appel de la page — un lien réel au dessin de bouton
+    # (`inline-flex`, 46 px ou `touch-manipulation`) — devient le bouton
+    # originui de components/ui/button.tsx, variante « link », avec le
+    # chevron lucide de sa démo (16 px, trait 2, 60 % d'opacité). La démo
+    # met un ChevronLeft avant « Go back » ; un appel va de l'avant, donc
+    # ChevronRight après le texte. Les textes de l'élément d'origine passent
+    # tous par `traduire`, dans l'ordre, pour que les compteurs d'occurrences
+    # du dictionnaire restent alignés sur le reste du bloc.
+    if lien is not None and "inline-flex" in cls.split() and ("h-[46px]" in cls or "touch-manipulation" in cls):
+        textes = []
+        def rec(x, dans_svg):
+            for e in x["enfants"]:
+                if isinstance(e, str):
+                    t = traduire(e).strip()
+                    if t and not dans_svg: textes.append(t)
+                elif e["tag"] not in ("script", "style", "link", "template", "meta"):
+                    rec(e, dans_svg or e["tag"] == "svg")
+        rec(n, False)
+        if sombre: etat["sombre"] -= 1
+        besoins.update({"Button", "ChevronRight"})
+        return [
+            ind + '<Button asChild variant={"link"}>',
+            ind + "  <" + tag_rendu + " href={" + json.dumps(lien) + "}>",
+            ind + "    {" + json.dumps(" ".join(textes), ensure_ascii=False) + "}",
+            ind + '    <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />',
+            ind + "  </" + tag_rendu + ">",
+            ind + "</Button>",
+        ]
+
     morceaux = []
     est_champ = tag in ("input", "textarea", "select")
     curseur = OMEGA and tag == "input" and "pr-range" in cls.split() and DICO.get("__curseur__")
@@ -343,6 +374,8 @@ def composant(nom, noeud):
     imports = []
     if "CSSProperties" in besoins: imports.append('import type { CSSProperties } from "react";')
     if "Link" in besoins: imports.append('import Link from "next/link";')
+    if "ChevronRight" in besoins: imports.append('import { ChevronRight } from "lucide-react";')
+    if "Button" in besoins: imports.append('import { Button } from "@/components/ui/button";')
     if "RubanFibre" in besoins: imports.append('import RubanFibre from "../RubanFibre";')
     if "SxMotSymbole" in besoins: imports.append('import SxMotSymbole from "../SxMotSymbole";')
     if "SxBarres" in besoins: imports.append('import SxBarres from "../SxBarres";')

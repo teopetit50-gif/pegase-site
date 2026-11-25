@@ -1527,14 +1527,12 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 :where(.sx) .\[\&_svg\]\:text-icon-soft svg{color:var(--icon-soft)}
 }
 
-/* 4. LA BARRE. Les deux boutons de droite sont ici de VRAIS LIENS (« Parler à
-      l'équipe », « Commencer ») : chez la référence ce sont des <button>
-      sans action. Ses règles de resserrement visent `button` ; les mêmes,
-      mot pour mot, pour nos liens. */
-:where(.sx) .sx-navbar-desktop>div>a{transition-property:font-size,height,min-height,padding,border-radius,opacity,transform;transition-duration:var(--nav-dur), var(--nav-dur), var(--nav-dur), var(--nav-dur), var(--nav-dur), .2s, .2s;transition-timing-function:var(--nav-ease)}
-:where(.sx) .sx-navbar-sticky[data-compact=true] .sx-navbar-desktop>div>a{height:36px;min-height:36px}
-:where(.sx) .sx-navbar-sticky[data-compact=true] .sx-navbar-desktop>div>a:first-child{border-radius:8px;padding-left:16px;padding-right:10px;font-size:13px}
-:where(.sx) .sx-navbar-sticky[data-compact=true] .sx-navbar-desktop>div>a:last-child{border-radius:10px;padding-inline:19px;font-size:14px}
+/* 4. LA BARRE. Ses deux boutons (« Parler à l'équipe », « Commencer ») sont
+      depuis le 25/11 le bouton originui de components/ui/button.tsx,
+      variante « link » (Teo : « remplace tous les boutons similaires par
+      le code que je t'ai donné »). Les règles de resserrement de la
+      référence (hauteur 36, rayons, corps 13/14 en barre compacte) visaient
+      un bouton à fond : elles sont retirées, un lien texte ne se resserre pas. */
 
 /* 5. LE MENU MOBILE (components/accueil-sx/SxMenuMobile.tsx). La référence
       n'en a pas : son bouton « menu » est inerte. Panneau fixe sous la
@@ -1545,19 +1543,16 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 .sx .sx-menu ul{display:flex;flex-direction:column}
 .sx .sx-menu li+li{border-top:1px solid #dcdcda}
 .sx .sx-menu ul a{display:flex;align-items:center;min-height:54px;font-size:17px;line-height:25.5px;letter-spacing:-.34px;color:#000}
-.sx .sx-menu-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-.sx .sx-menu-actions a{display:flex;align-items:center;justify-content:center;height:46px;font-weight:700;letter-spacing:-.03em}
-.sx .sx-menu-second{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:16px}
-.sx .sx-menu-premier{border-radius:10px;border:1px solid rgba(0,0,0,.1);background:#fff;color:#121212;font-size:16px}
+.sx .sx-menu-actions{display:flex;flex-direction:column;align-items:flex-start;gap:2px;margin-top:10px}
 .sx .sx-menu a:focus-visible{outline:2px solid #121212;outline-offset:2px}
 @media (min-width:768px){.sx .sx-menu{padding-inline:48px}}
 @media (min-width:1280px){.sx .sx-menu{display:none}}
 
 /* 6. LE BOUTON DU PIED. Le pied impose sa couleur à ses liens
       (`:where(.sgf) a{color:inherit}`, règle hors couche, donc plus forte que
-      tout utilitaire) : le bouton, devenu blanc le 25/11, héritait du blanc
-      du pied. On lui rend l'encre des autres boutons. */
-.sx .sgf-action a{color:#121212}
+      tout utilitaire). Devenu un lien texte (variante « link ») le 25/11, son
+      bouton est posé sur le fond noir du pied : il prend le blanc. */
+.sx .sgf-action a{color:#fff}
 
 /* 7. LE TÉLÉPHONE (25/11, Teo : « la version mobile est moche et buggée,
       calque-la en 1:1 sur le modèle »). Relevé avec outils/sx/defauts.mjs

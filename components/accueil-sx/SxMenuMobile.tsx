@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /* ══════════════════════════════════════════════════════════════════════
    LE MENU MOBILE — le seul bloc de la page que la référence n'a pas.
@@ -7,8 +9,9 @@ import Link from "next/link";
    fait rien : c'est un gabarit de démonstration. Sur un site en ligne, un
    visiteur au téléphone n'aurait plus aucun moyen d'atteindre les tarifs.
    On garde donc son bouton, au pixel, et on lui donne ce panneau : les
-   quatre entrées et les deux boutons de la barre large, dans les mêmes
-   corps et les mêmes couleurs (sx.css, « 5. LE MENU MOBILE »).
+   quatre entrées et les deux boutons de la barre large, au dessin du
+   bouton originui « link » comme partout sur la page (25/11) — sx.css,
+   « 5. LE MENU MOBILE ».
 
    Fermé par défaut (`hidden`) ; SxComportements l'ouvre et le referme.
    Les destinations sont celles de la barre : outils/sx/textes.py, LIENS.nav.
@@ -33,12 +36,18 @@ export default function SxMenuMobile() {
           ))}
         </ul>
         <div className="sx-menu-actions">
-          <Link href="/contact" className="sx-menu-second">
-            Parler à l&apos;équipe
-          </Link>
-          <Link href="/reserver-un-audit" className="sx-menu-premier">
-            Commencer
-          </Link>
+          <Button asChild variant="link" className="px-0">
+            <Link href="/contact">
+              Parler à l&apos;équipe
+              <ChevronRight className="ms-1 opacity-60" size={16} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          </Button>
+          <Button asChild variant="link" className="px-0">
+            <Link href="/reserver-un-audit">
+              Commencer
+              <ChevronRight className="ms-1 opacity-60" size={16} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          </Button>
         </div>
       </nav>
     </div>
