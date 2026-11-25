@@ -660,7 +660,7 @@ Module métier · BTP"""
 B["s8 Tarifs"] = """Tarifs
 Un prix par personne.
 Des agents payés au travail qu'ils font.
-Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois.
+Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT.
 Type de prix
 Chaque mois
 Installation
@@ -711,8 +711,8 @@ Export complet de vos données
 Sur mesure
 Nous construisons le module ou l'agent qui n'existe que chez vous.
 Sur devis
-Son prix est écrit
-avant de commencer
+Une automatisation dès 490 € HT, un agent dès
+1 190 € HT
 Découvrir le sur-mesure
 Construit pour vous
 Votre organisation, étudiée avec vous
@@ -730,7 +730,7 @@ Ce qu'on nous demande avant l'audit.
 Une question manque ? Notre équipe vous répond le jour même.
 Écrire à l'équipe
 Combien coûte Omega ?
-Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 69 € HT par mois. L'installation se paie une seule fois.
+Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 69 € HT par mois. L'installation se paie une seule fois. Une automatisation s'installe dès 49 € HT, une fois ; quand l'IA y travaille, chaque tâche se paie ensuite à la pièce, de 0,15 à 0,10 € HT selon la recharge.
 Que se passe-t-il si l'offre ne convient pas ?
 Pour les agents, le remboursement est intégral pendant 30 jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.
 Qui s'occupe de l'installation ?

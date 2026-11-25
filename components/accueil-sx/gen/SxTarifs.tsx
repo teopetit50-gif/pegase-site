@@ -24,7 +24,7 @@ export default function SxTarifs() {
               </span>
             </h2>
             <p className={"platform-lede"}>
-              {"Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois."}
+              {"Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT."}
             </p>
           </div>
           <div className={"pr-controls"}>
@@ -435,9 +435,9 @@ export default function SxTarifs() {
                 </strong>
               </p>
               <p className={"pr-total"}>
-                {"Son prix est écrit "}
+                {"Une automatisation dès 490 € HT, un agent dès "}
                 <b>
-                  {"avant de commencer"}
+                  {"1 190 € HT"}
                 </b>
               </p>
             </div>

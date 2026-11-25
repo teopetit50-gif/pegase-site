@@ -52,7 +52,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a0"} role={"region"} aria-labelledby={"_R_ltavb_-q0"}>
               <div>
                 <p>
-                  {"Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 69 € HT par mois. L'installation se paie une seule fois."}
+                  {"Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 69 € HT par mois. L'installation se paie une seule fois. Une automatisation s'installe dès 49 € HT, une fois ; quand l'IA y travaille, chaque tâche se paie ensuite à la pièce, de 0,15 à 0,10 € HT selon la recharge."}
                 </p>
               </div>
             </div>
