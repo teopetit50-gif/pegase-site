@@ -398,6 +398,17 @@ export const PRIX_INTRO = {
    logiciel à 34,90 € par personne, les agents de 69 à 890 € fixés à
    l'audit. Le paiement à l'année n'est plus proposé tant qu'il n'est pas
    tranché. */
+/* 25/11/2026 — le curseur « Nombre de personnes » de l'accueil (modèle
+   21st.dev « pricing section » à curseur, choisi par Teo). Il ne recalcule
+   QUE le logiciel (34,90 € × personnes) : les agents ont leur prix, fixé à
+   l'audit, et logiciel et agents ne s'additionnent jamais en un total. */
+export const CURSEUR = {
+  libelle: "Nombre de personnes",
+  min: 1,
+  max: 50,
+  defaut: 10,
+};
+
 export const PRIX = [
   {
     nom: "Audit",
@@ -413,6 +424,8 @@ export const PRIX = [
     bouton: "Réserver l'audit",
     href: AUDIT,
     fort: false,
+    parPersonne: null,
+    badge: null,
   },
   {
     nom: "Logiciel de gestion",
@@ -430,6 +443,11 @@ export const PRIX = [
     bouton: "Parler à l'équipe",
     href: "/contact",
     fort: true,
+    parPersonne: 34.9,
+    /* pas de mention « ★ Recommandé » (relecture du 25/11) : recommander une
+       carte avant l'audit fait le travail de l'audit, et l'étoile parle
+       le langage des avis clients. La carte reste en avant par sa forme. */
+    badge: null,
   },
   {
     nom: "Agents",
@@ -448,6 +466,8 @@ export const PRIX = [
     bouton: "Voir les tarifs",
     href: "/tarifs",
     fort: false,
+    parPersonne: null,
+    badge: null,
   },
 ];
 

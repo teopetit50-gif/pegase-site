@@ -7,7 +7,6 @@ import {
   ArrowUpRight,
   Bot,
   BriefcaseBusiness,
-  Check,
   CheckCheck,
   LayoutDashboard,
   Mail,
@@ -39,7 +38,6 @@ import {
   METIERS_INTRO,
   MODULES,
   PIED,
-  PRIX,
   PRIX_INTRO,
   VENTE,
   type Agent,
@@ -59,6 +57,7 @@ import {
 } from "@/components/accueil-v3/interactifs";
 import { COURRIEL, LIEN_TELEPHONE } from "@/lib/reservation";
 import CycleVente from "@/components/essai/CycleVente";
+import TarifsCurseur from "@/components/accueil-v3/TarifsCurseur";
 import MetiersOnglets from "@/components/essai/MetiersOnglets";
 import OngletsGestion from "@/components/essai/OngletsGestion";
 import { RECITS_METIERS } from "@/components/essai/recits";
@@ -642,71 +641,18 @@ export default function Home() {
                   {PRIX_INTRO.texte}
                 </Apparition>
               </GroupeApparition>
+              {/* 25/11/2026 — le curseur « Nombre de personnes » et les trois
+                  cartes (modèle 21st.dev choisi par Teo) : seul le logiciel
+                  suit le curseur. Voir components/accueil-v3/TarifsCurseur. */}
               <div className="px-6 md:px-12 pb-12 md:pb-16">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-[6px]">
-                  {PRIX.map((p, k) => (
-                    <Apparition
-                      key={p.nom}
-                      delai={k * 120}
-                      className={`relative flex flex-col rounded-2xl border overflow-hidden ${
-                        p.fort
-                          ? "border-white/[0.18] bg-gradient-to-b from-white/[0.06] to-white/[0.02]"
-                          : "border-white/[0.08] bg-white/[0.02]"
-                      }`}
-                    >
-                      <div className="flex flex-col gap-6 p-8 md:p-10 h-full">
-                        <div className="flex flex-col gap-2">
-                          <h3 className={`text-xl font-medium ${p.fort ? "text-white" : "text-white/85"}`}>{p.nom}</h3>
-                          <p className="text-sm text-white/55 leading-relaxed min-h-[40px]">{p.texte}</p>
-                        </div>
-                        <div className="flex flex-col gap-1 pb-6 border-b border-white/[0.06]">
-                          <div className="flex items-baseline gap-2">
-                            <span
-                              className={`text-4xl md:text-5xl font-normal tracking-tight ${
-                                p.fort ? "text-white" : "text-white/85"
-                              }`}
-                            >
-                              {p.prix}
-                            </span>
-                          </div>
-                          <p className="text-xs text-white/45">{p.sous}</p>
-                        </div>
-                        <ul className="flex flex-col gap-3 flex-1">
-                          {p.points.map((pt) => (
-                            <li key={pt} className="flex items-start gap-2.5">
-                              <div
-                                className={`shrink-0 w-4 h-4 rounded-full flex items-center justify-center mt-0.5 ${
-                                  p.fort ? "bg-white/15" : "bg-white/[0.06]"
-                                }`}
-                              >
-                                <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />
-                              </div>
-                              <span className="text-sm text-white/70 leading-relaxed">{pt}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <Link
-                          className={`inline-flex items-center justify-center gap-1.5 rounded-[10px] px-5 py-2.5 font-medium text-sm transition-colors mt-2 ${
-                            p.fort
-                              ? "bg-white text-neutral-950 hover:bg-neutral-200"
-                              : "border border-white/[0.12] bg-white/[0.02] text-white hover:bg-white/[0.06]"
-                          }`}
-                          href={p.href}
-                        >
-                          {p.bouton}
-                          <ArrowRight className="w-4 h-4" />
-                        </Link>
-                      </div>
-                    </Apparition>
-                  ))}
-                </div>
+                <TarifsCurseur />
               </div>
               <div className="px-6 md:px-12 pb-16 md:pb-20 flex items-center justify-center">
                 <Link
                   className="group inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors"
                   href="/tarifs"
                 >
-                  Voir le détail de la tarification et le calculateur
+                  Voir le détail de nos tarifs
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </div>
