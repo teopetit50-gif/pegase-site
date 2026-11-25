@@ -1627,3 +1627,16 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 .sx .wl-payslip{transform:translateY(8px)}
 .sx .wl-slip-net{background:#f4f4f2;color:#121212}
 .sx .wl-chip.is-brand{background:#f1f1ef;color:#404040}
+
+/* 9. LES ÉCRANS D'EXEMPLE, EN MINIATURE (25/11, Teo : « la version mobile
+      est mal faite, les tableaux de l'accueil sont trop gros, trop
+      zoomés »). La référence garde ses écrans à la taille de l'ordinateur
+      dans une colonne de 292 px : au téléphone, le tableau des relances ne
+      montrait que la colonne « Client » et la fiche client faisait
+      2 027 px de haut. `zoom` les met en page sur une largeur plus grande
+      puis les réduit, sans rien rogner : à 390 px, le tableau montre ses
+      quatre premières colonnes et la fiche tombe à 1 068 px.
+      ≥ 1024 px : rien ne change, le décalque reste au pixel. */
+@media (max-width:1023px){.sx .platform-app{zoom:.72}}
+@media (max-width:767px){.sx .wl-grid{zoom:.8}.sx .platform-insights{zoom:.85}}
+@media (max-width:479px){.sx .platform-app{zoom:.58}.sx .wl-grid{zoom:.7}.sx .platform-insights{zoom:.72}}

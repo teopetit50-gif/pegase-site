@@ -121,6 +121,10 @@ pseudo-éléments, les positions).
     et le pied mènent aux agents et à la gestion, plus à /secteurs.
     Textes : `outils/sx/textes.py` ; menu : `SxMenuMobile.tsx` ; pastilles :
     `sx.css`, « 8. ».
+17. **Les écrans d'exemple sont en miniature sous 1024 px** (Teo, 25/11 :
+    « les tableaux de l'accueil sont trop gros, trop zoomés »). `zoom` sur
+    les écrans (`.platform-app`), la trésorerie et la section des
+    documents : 0,72 sous 1024 px, 0,58 sous 480 px. `sx.css`, « 9. ».
 
 ## Ce qui n'est pas porté
 
