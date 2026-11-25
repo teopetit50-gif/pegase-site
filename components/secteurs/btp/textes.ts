@@ -148,7 +148,7 @@ export const LU = {
 export type Valeur = boolean | string;
 export const FORMULES = {
   titre: "Le prix dépend du nombre de chantiers que vous suivez",
-  sous: "Les trois formules se distinguent par le nombre de chantiers suivis et les étapes du fil ouvertes, de l'appel au décompte. Le prix est fixé pendant l'audit, une fois vos chantiers en cours examinés. Jamais par utilisateur.",
+  sous: "Les trois formules se distinguent par le nombre de chantiers suivis et les étapes du fil ouvertes, de l'appel au décompte. Le prix est fixé pendant l'audit, une fois vos chantiers en cours examinés.",
   comparer: ["Comparer", "les formules"],
   prix: "Prix fixé à l'audit,",
   prixSous: "selon vos chantiers ouverts",

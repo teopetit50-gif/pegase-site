@@ -195,6 +195,7 @@ import {
 import { cn } from "@/lib/cn";
 import { lienAudit, lienContact } from "@/lib/reservation";
 import { useChoisirMonde, useMonde } from "@/components/tarifs/monde";
+import TroisPrix from "@/components/tarifs/TroisPrix";
 
 import {
   CARTE_SUR_MESURE,
@@ -213,6 +214,15 @@ import {
    en 32 px. Trois icônes neutres qui montent : un poste, trois postes,
    tout. Pas de logo de moteur (voir l'écart 5 de l'en-tête). */
 type Icone = ComponentType<{ className?: string; strokeWidth?: number }>;
+/* 25/11/2026 — les cartes se nomment par agents, plus par postes : « Tout
+   Omega » se lisait comme un forfait unique, alors que chaque agent a son
+   prix. Les noms de PALIERS restent ceux de /reserver et /installation. */
+const NOM_AFFICHE: Record<Palier["id"], string> = {
+  un: "Un agent",
+  trois: "Trois agents",
+  complet: "Les quatre agents",
+};
+
 const ICONE_PALIER: Record<Palier["id"], Icone> = {
   un: Zap,
   trois: Layers,
@@ -465,7 +475,7 @@ function CartePalier({
         <div className="mb-4 flex justify-center">
           <Icone className="size-8 text-[#050505]" strokeWidth={1.5} />
         </div>
-        <CardTitle className="font-[family-name:var(--font-jakarta)] text-2xl">{p.nom}</CardTitle>
+        <CardTitle className="font-[family-name:var(--font-jakarta)] text-2xl">{NOM_AFFICHE[p.id]}</CardTitle>
         <CardDescription className="text-[#616161]">{p.promesse}</CardDescription>
       </CardHeader>
 
@@ -490,8 +500,11 @@ function CartePalier({
             /* 25/09 — le comparateur parti, la carte n'a plus de cas dont
                tirer des heures : elle garde la seule ligne qui ne dépend
                que d'elle, son plafond. */
+            /* 25/11/2026 — le plafond de pièces part : il dessinait un
+               barème que le client ne voit plus. La carte dit la remise
+               (−10 % dès 3 agents) ou que le prix sort de l'audit. */
             <p className="text-sm text-[#616161]">
-              Jusqu&apos;à {p.plafond.toLocaleString("fr-FR")} pièces traitées par mois
+              {p.aChoisir === 1 ? "Prix fixé à l'audit" : "−10\u00a0% sur chaque agent"}
             </p>
           )}
         </div>
@@ -646,30 +659,40 @@ export default function Grille() {
              descendues d'un cran : elles vivent dans « Comment nous
              chiffrons », le comparatif et la FAQ, qui sont faits pour ça.
              ═══ */}
+      {/* 25/11/2026 — LES PRIX DEVIENNENT PUBLICS (« Nos prix », v7). Le
+          hero ne dépend plus du monde : le logiciel coûte le même prix à
+          tous. Le sélecteur PME | Groupes descend au-dessus des agents,
+          les seuls dont le chiffrage diffère d'un monde à l'autre. */}
       <section data-monde="clair" className="pb-10 sm:pb-14">
         <HeroSection
-          annonce={devis ? "Structures à validation répartie" : "Tarification à l'usage"}
-          titre={
-            devis
-              ? { debut: "Le devis sort du", accent: "diagnostic." }
-              : { debut: "Le tarif est arrêté", accent: "à l'audit." }
-          }
-          description={
-            devis
-              ? GRANDE_STRUCTURE.chapo
-              : "Le montant est indexé sur le nombre de pièces que le système traite pour vous, et sur la part d'entre elles qui revient à un opérateur. Ces deux variables ne se lisent pas depuis une page : elles se relèvent sur vos exports, en trente minutes."
-          }
-          ctaTexte={devis ? GRANDE_STRUCTURE.cta : "Réserver un audit"}
-          ctaHref={devis ? GRANDE_STRUCTURE.href : "/reserver-un-audit"}
+          annonce="Tarifs"
+          titre={{ debut: "Deux prix par mois,", accent: "une installation." }}
+          description="Le logiciel de gestion se paie par personne. Chaque agent a son propre prix, fixé à l'audit selon le travail qu'il fait. L'installation se paie une seule fois, à part."
+          ctaTexte="Réserver un audit"
+          ctaHref="/reserver-un-audit"
           souscta="30 minutes, gratuit, sans engagement"
         />
+      </section>
 
-        <div className="r-wrap mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
-          <SelecteurMonde monde={monde} choisir={choisirMonde} />
-        </div>
+      <section data-monde="clair" className="r-wrap pb-12 sm:pb-16">
+        <TroisPrix />
       </section>
 
       <section data-monde="clair" className="r-wrap pb-10 sm:pb-14">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-[#050505] sm:text-[32px]">
+            Choisissez vos agents
+          </h2>
+          <p className="mt-3 text-[15px] leading-relaxed text-[#616161]">
+            {devis
+              ? GRANDE_STRUCTURE.chapo
+              : "Chaque agent prend en charge un poste. Son prix dépend du volume qu'il traite chaque mois, et il est écrit au devis avant que vous signiez."}
+          </p>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-4">
+          <SelecteurMonde monde={monde} choisir={choisirMonde} />
+        </div>
+
         {/* la grille. `pt-4` laisse passer les pastilles posées à -12 px.
             15/09 — QUATRE CARTES, DONC DEUX GABARITS (voir l'en-tête) :
             · de 768 à 1279 px, deux colonnes de deux, et un gabarit de

@@ -171,7 +171,7 @@ export default function AppelFinal() {
       <Card data-reveal className="mx-auto w-full max-w-4xl overflow-hidden">
         <CardHeader className="border-b border-neutral-200 p-6 sm:p-8">
           <h2 className="font-[family-name:var(--font-jakarta)] text-[26px] font-medium leading-[1.15] tracking-[-0.01em] text-[#050505] sm:text-[32px]">
-            {devis ? GRANDE_STRUCTURE.appel.titre : "Votre tarif est arrêté en trente minutes"}
+            {devis ? GRANDE_STRUCTURE.appel.titre : "Votre prix, écrit avant de signer"}
           </h2>
           <CardDescription
             key={devis ? "structure" : "pme"}
@@ -181,11 +181,11 @@ export default function AppelFinal() {
               GRANDE_STRUCTURE.appel.chapo
             ) : (
               <>
-                L&apos;audit relève votre volumétrie réelle à partir de vos propres
-                exports&nbsp;: ce qui est traité chaque mois, la part qui revient à un opérateur,
-                et ce qui n&apos;est pas comptabilisé aujourd&apos;hui. Vous repartez avec le
-                périmètre, le tarif et le plan de mise en service, écrits avant tout engagement.
-                Il est gratuit, et aucune donnée n&apos;est enregistrée sur cette page.
+                L&apos;audit passe votre activité en revue&nbsp;: qui fait quoi, sur quels logiciels,
+                et le volume que vos agents auraient à traiter. Vous repartez avec le périmètre, le
+                prix de vos agents et le plan de mise en service. Ce prix devient ferme, avec celui de
+                votre installation, une fois vos fichiers analysés et avant que vous signiez.
+                L&apos;audit est gratuit, et aucune donnée n&apos;est enregistrée sur cette page.
               </>
             )}
           </CardDescription>

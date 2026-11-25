@@ -269,7 +269,7 @@ export const OFFRE: Colonne[] = [
     valeur: "6",
     suffixe: "modules",
     bouton: { libelle: "Voir les tarifs", href: TARIFS },
-    lignes: ["Une saisie, à jour partout", "Prix sur devis"],
+    lignes: ["Une saisie, à jour partout", "34,90\u00a0€ HT par personne et par mois"],
     intertitre: "Vos six modules",
     points: ["Ventes", "Achats", "Stock", "Banque", "Comptabilité", "Documents"],
   },
@@ -350,8 +350,8 @@ export const QUESTIONS = {
     },
     {
       id: "prix",
-      q: "Pourquoi aucun prix n'est-il affiché ?",
-      r: "Le prix du logiciel de gestion dépend des modules que vous activez. Nous le calculons avec vous pendant l'audit offert de 30 minutes : vous repartez avec un tarif écrit, avant tout engagement.",
+      q: "Combien coûte le logiciel de gestion\u00a0?",
+      r: "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Les six modules sont compris, et nous ne prenons jamais de pourcentage sur vos encaissements. Son installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT. Vos agents ont leur propre prix, fixé pendant l'audit offert de 30 minutes.",
     },
   ],
 };
@@ -370,7 +370,7 @@ export const APPEL = {
     },
     {
       fort: "Ou par les tarifs.",
-      texte: "Le logiciel de gestion est sur devis : son prix dépend des modules que vous activez.",
+      texte: "Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première.",
       bouton: { libelle: "Voir les tarifs", href: TARIFS } as Bouton,
     },
   ],

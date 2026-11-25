@@ -6,11 +6,6 @@ import AppelFinal from "@/components/tarifs/AppelFinal";
 import FaqTarifs from "@/components/tarifs/FaqTarifs";
 import ReglesFacturation, { type Regle } from "@/components/tarifs/ReglesFacturation";
 import { MondeProvider } from "@/components/tarifs/monde";
-import { REMISE_ANNUELLE } from "@/lib/paliers";
-
-/* 03/09 — le taux de la remise annuelle écrit en toutes lettres dans les
-   textes de la page : dérivé de la constante, jamais recopié à la main. */
-const REMISE_PCT = Math.round(REMISE_ANNUELLE * 100);
 
 /* ══════════════════════════════════════════════════════════════════════
    /tarifs — v4 « La grille publique » (28/08/2026)
@@ -88,7 +83,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    `Les agents sont facturés à l'usage, sur le volume traité ; le logiciel de gestion sur devis, selon les modules activés. Le montant est arrêté à l'audit.`,
+    "Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois. Chaque agent IA coûte de 69 à 890\u00a0€ HT par mois, et son prix est fixé à l'audit. L'installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent.",
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -115,46 +110,49 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
      vocabulaire de facturation — unité facturable, volumétrie, échéance,
      résiliation, réversibilité. Aucun fait nouveau, aucune promesse de
      plus : seul le registre change. */
+  /* 25/11/2026 — LES PRIX DEVIENNENT PUBLICS (« Nos prix », v7, et sa note
+     du 24/11). Les questions « Pourquoi aucun tarif fixe » et « Quand
+     connaîtrai-je le montant » partent : le logiciel a désormais un prix
+     écrit, seuls les agents et l'installation sortent de l'audit. Le
+     paiement à l'année n'est plus proposé tant que les associés ne l'ont
+     pas tranché. */
   {
-    q: "Pourquoi aucun tarif fixe n'est-il affiché ?",
+    q: "Combien coûte Omega\u00a0?",
     r: [
-      "Parce que l'abonnement est indexé sur un volume, et qu'aucun volume n'est identique d'une entreprise à l'autre. Deux sociétés du même secteur et du même effectif n'émettent pas le même nombre de factures et ne reçoivent pas le même nombre de demandes. Un tarif unique reviendrait à faire financer par les unes la volumétrie des autres.",
-      "Ce que nous publions à la place, c'est la règle de calcul complète : le montant suit le nombre de pièces traitées et la part d'entre elles qui revient à un opérateur, jamais le nombre d'utilisateurs ni un pourcentage sur vos encaissements. Renseignez votre volumétrie en haut de page : le volume s'affiche, poste par poste. L'audit le relève ensuite sur vos exports, et le tarif figure au devis avant tout engagement.",
+      "Vous payez chaque mois deux prix, celui du logiciel et celui de vos agents, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte de 69 à 890\u00a0€ HT par mois, selon le travail qu'il fait pour vous. L'installation coûte dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent.",
+      "Exemple\u00a0: une entreprise de 10 personnes paie 349\u00a0€ HT par mois pour le logiciel de gestion. S'y ajoute le prix de ses agents, écrit au devis.",
     ],
   },
   {
-    q: "Quand connaîtrai-je le montant ?",
+    q: "Quand connaîtrai-je le prix de mes agents\u00a0?",
     r: [
-      "À l'issue de l'audit, et il figure au devis. Nous ne l'affichons pas ici parce qu'il dépend de deux chiffres qu'aucune page ne peut connaître d'avance : votre volumétrie réelle, et la part des pièces qui revient à un opérateur. Cette seconde variable dépend de l'état de vos données, et elle fait varier le coût du simple au sextuple.",
-      "Le volume que cette page calcule est un ordre de grandeur, à la précision de vos déclarations. L'audit travaille sur vos exports : il relève la volumétrie réelle, ce taux de reprise, et ce qui n'est pas comptabilisé aujourd'hui. Le montant qui en sort est celui du devis, et il ne varie plus.",
-    ],
-  },
-  /* 22/11 (Teo, « on part sur le sujet ERP ») — la page chiffre les agents ;
-     le logiciel de gestion, lui, n'a pas de règle de calcul publiée. Cette
-     question le dit, pour que l'absence de barème ne se lise pas comme un
-     oubli. */
-  {
-    q: "Comment le logiciel de gestion est-il chiffré ?",
-    r: [
-      "Sur devis. Son tarif dépend des modules activés et du périmètre de votre activité ; il est arrêté à l'audit et figure au devis, avant tout engagement.",
-      "La règle de calcul détaillée sur cette page s'applique aux agents, facturés à la pièce traitée. Un seul audit cadre à la fois le logiciel de gestion et les agents.",
+      "Il est fixé pendant l'audit. Le prix d'un agent dépend du volume qu'il traite\u00a0: factures lues, demandes reçues, relances envoyées. Deux entreprises de même taille n'ont pas le même volume, et ce prix se fixe donc sur vos chiffres.",
+      "Avant que vous signiez, l'IA analyse vos fichiers et l'état de vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix de vos agents et de votre installation devient alors ferme.",
     ],
   },
   {
-    q: "Le palier est-il modifiable en cours de contrat ?",
+    q: "Comment le logiciel de gestion est-il chiffré\u00a0?",
     r: [
-      "Oui, à tout moment et sans frais de changement : le montant suit les postes en service et le volume qu'ils traitent. L'ajout d'un poste se décide sur les chiffres du premier, et c'est la trajectoire que nous recommandons.",
+      "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Les six modules de gestion sont compris, et nous ne prenons jamais de pourcentage sur vos encaissements.",
+      "Chaque personne a son propre compte. En comptabilité, il faut savoir qui a validé chaque facture\u00a0: un compte partagé ferait perdre cette trace. 50\u00a0Go de documents sont compris\u00a0; au-delà, chaque tranche de 25\u00a0Go coûte 15\u00a0€ HT par mois.",
     ],
   },
   {
-    q: "Quelles sont les modalités de paiement ?",
+    q: "Que se passe-t-il si un agent dépasse son forfait\u00a0?",
     r: [
-      "Aucun paiement n'est possible depuis cette page, et aucun montant n'y est affiché : le tarif est arrêté à l'audit, sur vos chiffres réels. Le moyen de paiement, carte ou prélèvement SEPA, est enregistré ensuite sur une page sécurisée, au moment de réserver la réunion d'installation. Aucun débit n'intervient avant la fin de celle-ci : la première échéance part le jour de la mise en service.",
-      `En formule mensuelle, sans engagement : la résiliation prend effet à la fin du mois en cours, date à laquelle les envois cessent. En formule annuelle, les douze mois sont facturés en une fois le jour de la mise en service, à −${REMISE_PCT} %.`,
+      "Vous êtes prévenu quand il atteint 75\u00a0%, puis 90\u00a0% de son forfait. Au-delà du forfait, chaque pièce est facturée à part\u00a0: 0,12\u00a0€ HT le mail, 0,90\u00a0€ HT la facture, 1,20\u00a0€ HT la relance, 6\u00a0€ HT le document.",
+      "L'agent ne change de palier qu'après trois mois de suite au-dessus de son forfait. Vous pouvez ajouter un agent à tout moment, et la remise est de 10\u00a0% dès 3 agents, de 15\u00a0% dès 5. Nos prix sont revus une fois par an, jamais en cours d'année.",
     ],
   },
   {
-    q: "Que comprend l'abonnement ?",
+    q: "Quelles sont les modalités de paiement\u00a0?",
+    r: [
+      "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée, au moment de réserver la réunion d'installation. Aucun débit n'intervient avant la fin de celle-ci\u00a0: la première échéance part le jour de la mise en service.",
+      "Les agents sont facturés au mois, sans engagement\u00a0: la résiliation prend effet à la fin du mois en cours. Nos prix sont hors taxes, et la TVA s'y ajoute au taux qui s'applique à votre entreprise.",
+    ],
+  },
+  {
+    q: "Que comprend l'abonnement des agents\u00a0?",
     r: [
       "L'exploitation des postes retenus, le rapport quotidien, les règles de validation avant envoi, la prise en compte de vos corrections et le suivi. La réunion d'installation est comprise dans le forfait d'installation : nous raccordons vos outils ensemble, en visioconférence, écran partagé.",
       "Un raccordement spécifique, tel qu'un logiciel métier peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement, jamais découvert en cours de projet.",
@@ -163,7 +161,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Que se passe-t-il si l'offre ne convient pas ?",
     r: [
-      "Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir, en formule mensuelle comme annuelle. Au-delà, la formule mensuelle reste résiliable à tout moment et l'annuelle court jusqu'à son terme. Dans les deux cas, l'export complet de vos données vous est remis, sans condition et sans frais.",
+      "Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis, sans condition et sans frais.",
       "Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
     ],
   },
@@ -176,7 +174,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Plusieurs services valident chez nous : cette grille s'applique-t-elle ?",
     r: [
-      "En partie seulement. Les quatre postes et la règle de calcul sont identiques ; ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
+      "En partie seulement. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par personne et par mois pour le logiciel, de 69 à 890\u00a0€ HT par mois pour chaque agent. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
       "Votre point d'entrée est le diagnostic, dans un format plus long : nous relevons votre volumétrie service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
@@ -195,40 +193,43 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
    chiffres de coût, pas ceux du client, et les publier inviterait à
    négocier sur une moyenne de marché plutôt que sur SA mesure. */
 const CHIFFRAGE: Regle[] = [
+  /* 25/11/2026 — les quatre règles suivent désormais les prix publics :
+     le logiciel par personne, les agents au travail fait, le prix ferme
+     avant de signer, l'installation payée une fois. */
   {
-    titre: "Nous comptons des pièces",
+    titre: "Le logiciel se paie par personne",
     texte:
-      "L'unité facturée est la pièce : une facture lue, une demande reçue, une relance envoyée, une reprise de contact.",
+      "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Le prix est le même pour tous.",
     points: [
-      "Jamais un montant par utilisateur\u00a0: un compte de plus n'entraîne aucun surcoût",
+      "Les six modules de gestion compris",
       "Jamais un pourcentage sur les sommes que vous encaissez",
     ],
   },
   {
-    titre: "Nous relevons votre volume réel",
+    titre: "Chaque agent est payé au travail qu'il fait",
     texte:
-      "Le calculateur en donne l'ordre de grandeur, sur des chiffres que vous donnez de mémoire. L'audit le relève sur vos exports.",
+      "Il coûte de 69 à 890\u00a0€ HT par mois, selon le volume qu'il traite\u00a0: factures lues, demandes reçues, relances envoyées.",
     points: [
-      "Deux entreprises de même taille n'émettent pas le même nombre de pièces",
-      "Si le volume réel est inférieur à votre estimation, c'est lui qui s'applique",
+      "Deux entreprises de même taille n'ont pas le même volume",
+      "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
     ],
   },
   {
-    titre: "Nous mesurons ce qui revient à un opérateur",
+    titre: "Le prix est ferme avant de signer",
     texte:
-      "Toutes les pièces ne se traitent pas seules : une adresse manquante, une pièce jointe illisible, un montant au-dessus de votre seuil de validation repassent par un humain.",
+      "L'audit fixe le prix de vos agents selon votre volume. L'IA analyse ensuite vos fichiers et l'état de vos données\u00a0: le prix de vos agents et de votre installation devient alors ferme.",
     points: [
-      "Cette part dépend de l'état de vos données, et varie fortement d'une entreprise à l'autre",
-      "C'est elle qui déplace le montant le plus, bien avant le volume",
+      "Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez",
+      "Vous êtes prévenu quand un agent atteint 75\u00a0%, puis 90\u00a0% de son forfait",
     ],
   },
   {
-    titre: "Le montant figure au devis",
+    titre: "L'installation se paie une fois",
     texte:
-      "Il découle des deux mesures précédentes, et il est écrit avant tout engagement. Aucun débit n'intervient avant la fin de l'installation.",
+      "Pour le logiciel, elle coûte 1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT selon la taille de votre entreprise\u00a0; pour chaque agent, 290, 590 ou 1\u00a0190\u00a0€ HT. Aucun débit n'intervient avant la fin de l'installation.",
     points: [
-      "L'installation est facturée à part, une seule fois, et peut relever du Chèque TIC",
-      `Mensuel sans engagement, ou annuel à −${REMISE_PCT}\u00a0% de remise`,
+      "Elle peut relever du Chèque TIC, porté par la Région Guadeloupe, pour les entreprises qui y sont immatriculées",
+      "Les agents restent mensuels, sans engagement",
     ],
   },
 ];
@@ -258,7 +259,7 @@ export default function TarifsPage() {
         <section id="chiffrage" data-monde="clair">
           <ReglesFacturation
             titre="Comment nous chiffrons"
-            chapo="Quatre étapes, de l'unité que nous comptons au montant qui figure à votre devis."
+            chapo={"Quatre règles, du logiciel à l'installation\u00a0: ce que vous payez, et ce qui fixe chaque prix."}
             regles={CHIFFRAGE}
           />
         </section>

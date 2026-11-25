@@ -387,14 +387,17 @@ export const SITUATIONS = [
 
 export const PRIX_INTRO = {
   surtitre: "Tarifs",
-  titre: "Un tarif écrit avant tout engagement",
+  titre: "Deux prix par mois, une installation",
   texte:
-    "Le prix dépend des modules que vous choisissez et du nombre de pièces que les agents traitent pour vous. Nous le calculons avec vous pendant l'audit.",
+    "Le logiciel de gestion se paie par personne. Chaque agent a son propre prix, fixé à l'audit selon le travail qu'il fait. L'installation se paie une seule fois. Prix hors taxes.",
 };
 
 /* 22/11 — la carte du milieu, la carte forte, devient le logiciel de
-   gestion ; les agents gardent leur formule à l'usage, en troisième. Aucun
-   montant, comme avant : tout tarif est arrêté à l'audit. */
+   gestion ; les agents gardent leur formule à l'usage, en troisième.
+   25/11/2026 — les prix deviennent publics (« Nos prix », v7) : le
+   logiciel à 34,90 € par personne, les agents de 69 à 890 € fixés à
+   l'audit. Le paiement à l'année n'est plus proposé tant qu'il n'est pas
+   tranché. */
 export const PRIX = [
   {
     nom: "Audit",
@@ -414,11 +417,12 @@ export const PRIX = [
   {
     nom: "Logiciel de gestion",
     texte: "Toute votre gestion au même endroit, adaptée à votre activité par l'IA.",
-    prix: "Sur devis",
-    sous: "selon les modules choisis",
+    prix: "34,90\u00a0€",
+    sous: "HT par personne et par mois, dès la première",
     points: [
       "Ventes, achats, stock, banque, comptabilité",
-      "Sept modules métier, et du sur-mesure",
+      "Sans minimum de personnes",
+      "Sept modules métier et du sur-mesure, chiffrés à l'audit",
       "Vos données reprises de votre logiciel actuel",
       "Réglages vérifiés par votre expert-comptable",
       "Un interlocuteur dans notre équipe",
@@ -429,14 +433,15 @@ export const PRIX = [
   },
   {
     nom: "Agents",
-    texte: "Un à quatre agents travaillent pour vous. Vous suivez tout au même endroit.",
-    prix: "À l'usage",
-    sous: "facturé à la pièce traitée",
+    texte: "Quatre agents, et ceux que nous construisons pour vous. Vous suivez tout au même endroit.",
+    prix: "69 à 890\u00a0€",
+    sous: "HT par agent et par mois, fixé à l'audit",
     points: [
-      "Jamais de prix par utilisateur",
+      "Un prix fixé selon le volume traité",
       "Jamais un pourcentage de vos encaissements",
+      "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
       "Aucun débit avant la fin de l'installation",
-      "Mensuel sans engagement, ou annuel −15 %",
+      "Mensuel, sans engagement",
       "Remboursé pendant 30 jours",
       "Export complet de vos données",
     ],
@@ -482,14 +487,14 @@ export const FAQ: Question[] = [
   {
     id: "prix",
     cat: "Tarifs",
-    q: "Pourquoi aucun prix n'est-il affiché ?",
-    r: "Le montant dépend des modules que vous activez, du nombre de pièces traitées chaque mois et de la part qui revient à un opérateur. Ces chiffres se relèvent sur vos exports pendant l'audit : vous repartez avec un tarif écrit, avant tout engagement.",
+    q: "Combien coûte Omega\u00a0?",
+    r: "Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte de 69 à 890\u00a0€ HT par mois\u00a0: son prix dépend du travail qu'il fait, et il est fixé à l'audit. L'installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent. Une entreprise de 10 personnes paie ainsi 349\u00a0€ HT par mois de logiciel, plus ses agents.",
   },
   {
     id: "utilisateur",
     cat: "Tarifs",
-    q: "Faut-il payer par utilisateur ?",
-    r: "Pas pour les agents : l'unité facturée est la pièce traitée : une facture lue, une demande reçue, une relance envoyée. Le tarif du logiciel de gestion dépend des modules activés et vous est remis écrit à l'audit. Nous ne prenons jamais de pourcentage sur vos encaissements.",
+    q: "Faut-il payer par personne\u00a0?",
+    r: "Pour le logiciel de gestion, oui\u00a0: 34,90\u00a0€ HT par personne et par mois, sans minimum. Chaque personne a son compte, et vous savez ainsi qui a validé quoi. Nous ne prenons jamais de pourcentage sur vos encaissements. Vos agents, eux, sont payés au travail qu'ils font\u00a0: une facture lue, une demande reçue, une relance envoyée.",
   },
   {
     id: "remboursement",
