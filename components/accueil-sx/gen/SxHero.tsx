@@ -41,10 +41,10 @@ export default function SxHero() {
                 <div className={"flex w-full flex-col items-center gap-[12px] desktop-sm:items-start"}>
                   <span className={"ft-eyebrow mb-0!"}>
                     <b>
-                      {"Nouveau"}
+                      {"À partir de"}
                     </b>
                     <span>
-                      {"Des agents sur mesure"}
+                      {"34,90 € HT par personne et par mois"}
                     </span>
                   </span>
                   <h1 className={"w-full desktop-sm:w-[550px] font-instrument-serif text-[42px] leading-[1.1] tracking-[-0.42px] text-black ipad:text-[62px] ipad:tracking-[-0.62px]"}>
@@ -59,7 +59,7 @@ export default function SxHero() {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 20" fill="currentColor" aria-hidden="true" className={"h-[20px] w-[17px] shrink-0"}><path fillRule="evenodd" clipRule="evenodd" d="M4.6 1a1 1 0 0 1 1 1v.9h5.8V2a1 1 0 1 1 2 0v.9h.5A3.1 3.1 0 0 1 17 6v9.9A3.1 3.1 0 0 1 13.9 19H3.1A3.1 3.1 0 0 1 0 15.9V6a3.1 3.1 0 0 1 3.1-3.1h.5V2a1 1 0 0 1 1-1ZM2 8.6v7.3c0 .6.5 1.1 1.1 1.1h10.8c.6 0 1.1-.5 1.1-1.1V8.6H2Zm9.6 2.2a1 1 0 0 1 .1 1.4l-3.2 3.6a1 1 0 0 1-1.5 0l-1.6-1.7a1 1 0 0 1 1.5-1.4l.8.9 2.5-2.7a1 1 0 0 1 1.4-.1Z" /></svg>
                     {"Réserver un audit"}
                   </Link>
-                  <Link href={"/offres"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212]  text-center"}>
+                  <Link href={"/offres"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-white pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212]  text-center"}>
                     {"Voir le logiciel"}
                     <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
                       <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />

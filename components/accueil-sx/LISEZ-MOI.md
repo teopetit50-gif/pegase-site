@@ -70,6 +70,13 @@ pseudo-éléments, les positions).
    référence est inerte, ce qui laisserait un visiteur au téléphone sans
    navigation. Le bouton est le sien, au pixel ; le panneau est le nôtre.
 
+10. **Les boutons secondaires sont blancs** (Teo, 25/11 : « le bouton gris,
+    mets-le comme le blanc, partout »). La référence les fait d'un gris
+    translucide ; `convertir.py` remplace `bg-[rgba(0,0,0,0.02)]` par
+    `bg-white` sur les liens et boutons, le liseré reste le sien.
+11. **La pastille du héros porte le prix** (« À partir de · 34,90 € HT par
+    personne et par mois », Teo, 25/11) à la place de l'annonce du gabarit.
+
 ## Ce qui n'est pas porté
 
 Les micro-interactions des écrans d'exemple de la référence : survol et

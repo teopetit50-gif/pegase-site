@@ -87,6 +87,11 @@ HEXAGONE = "M750 345L1101 547.5V952.5L750 1155L399 952.5V547.5Z"
 # « synnax-* » sont renommées « sx-* » (et de même dans sx.css).
 RENOMMER = lambda classes: re.sub(r"(?<![\w-])synnax-", "sx-", classes)
 
+# 25/11 (Teo, « pour le bouton gris, mets-le comme le blanc, partout ») : les
+# boutons secondaires de la référence sont un gris translucide
+# (`bg-[rgba(0,0,0,0.02)]`) ; en mode Omega ils sont blancs, même liseré.
+BOUTON_BLANC = lambda classes: " ".join("bg-white" if c == "bg-[rgba(0,0,0,0.02)]" else c for c in classes.split(" "))
+
 def camel(nom):
     p = nom.split("-")
     return p[0] + "".join(x[:1].upper() + x[1:] for x in p[1:])
@@ -253,6 +258,7 @@ def rendre(n, prof, dans_main=False, dans_defile=False, dans_facturation=None):
             morceaux.append(nom + "={true}" if nom not in ("hidden",) else "hidden"); continue
         if v is None: v = ""
         if kl == "class": v = RENOMMER(v)
+        if kl == "class" and OMEGA and tag in ("a", "button"): v = BOUTON_BLANC(v)
         # un <button> centre son texte d'office, un lien non : on le dit
         if kl == "class" and lien is not None and tag == "button": v = v + " text-center"
         if kl in LISIBLES: v = traduire(v, attribut=True)

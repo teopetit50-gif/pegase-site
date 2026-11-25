@@ -37,8 +37,8 @@ Commencer
 Ouvrir le menu"""
 
 B["hero"] = """Audit de 30 minutes offert, sans engagement.
-Nouveau
-Des agents sur mesure
+À partir de
+34,90 € HT par personne et par mois
 L'ERP qui se configure avec l'IA
 Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez.
 Réserver un audit
