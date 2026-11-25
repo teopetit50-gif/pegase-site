@@ -88,7 +88,19 @@ function estClair(couleur: string) {
   return 0.2126 * r + 0.7152 * v + 0.0722 * b > 0.5;
 }
 
+/* 25/11/2026 — l'accueil est un décalque 1:1 d'une référence qui porte sa
+   propre barre (components/accueil-sx/gen/SxNav.tsx). L'en-tête du site ne
+   s'y monte donc pas : deux barres se superposeraient. Le test vit dans
+   cette enveloppe, AVANT le composant, pour ne pas poser un `return`
+   au milieu de ses hooks. Rétablir l'en-tête du site sur l'accueil =
+   supprimer la ligne `if`, et retirer <SxNav /> d'app/page.tsx. */
 export default function Header() {
+  const chemin = usePathname();
+  if (chemin === "/") return null;
+  return <HeaderDuSite />;
+}
+
+function HeaderDuSite() {
   /* 30/07 — la barre ne DEVINE plus sa couleur, elle la PRÉLÈVE.
      Elle portait deux couleurs codées en dur : #f6f6f5 en clair et le noir
      de bg-panel sinon. Or le monde .offres est en #ffffff pur et ses bandes

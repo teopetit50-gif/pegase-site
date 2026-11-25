@@ -1,4 +1,23 @@
+/* 25/11/2026 — accueil « sx » (components/accueil-sx/sx.css). La référence
+   pose sa couche `ui-sdk` SOUS le preflight : une couche se classe à sa
+   première déclaration, et seule une déclaration `@layer` a le droit de
+   précéder un `@import`. Cette ligne ne produit aucune règle. */
+@layer sx-ui-sdk;
 @import "tailwindcss";
+
+/* 25/11/2026 — les trois points d'arrêt NOMMÉS de la même référence
+   (`ipad:`, `desktop-sm:`, `laptop:`), portés par ~280 classes du balisage
+   de components/accueil-sx/gen. Posés au thème plutôt qu'en
+   `@custom-variant` pour que Tailwind les TRIE par largeur avec `sm:` et
+   `md:`, comme sur la référence. Aucune page du site n'emploie
+   l'utilitaire `container`, seul à dépendre de la liste des points
+   d'arrêt (vérifié : 0 occurrence). */
+@theme {
+  --breakpoint-ipad: 768px;
+  --breakpoint-desktop-sm: 1280px;
+  --breakpoint-laptop: 1440px;
+}
+
 
 /* ══════════════════════════════════════════════════════════════════════
    11/09/2026 — les quatre pages produit rapatriées des sites SaaS
@@ -189,15 +208,20 @@ body {
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
-/* Press feedback : tous les CTA pilule répondent au clic */
-a.rounded-full,
-button.rounded-full {
+/* Press feedback : tous les CTA pilule répondent au clic.
+   25/11/2026 — sauf dans l'accueil « sx » : ce décalque porte des boutons
+   `rounded-full` dont la transition vient de leurs propres utilitaires, et
+   cette règle hors couche les écrasait (mesuré : `transform 160ms` au lieu
+   de `transition-colors 200ms`). `:where()` garde la spécificité d'avant
+   pour toutes les autres pages. */
+a.rounded-full:where(:not(.sx *)),
+button.rounded-full:where(:not(.sx *)) {
   transition:
     transform 160ms var(--ease-out-strong),
     background-color 160ms ease;
 }
-a.rounded-full:active,
-button.rounded-full:active {
+a.rounded-full:where(:not(.sx *)):active,
+button.rounded-full:where(:not(.sx *)):active {
   transform: scale(0.97);
 }
 

@@ -1,0 +1,1054 @@
+/* GÉNÉRÉ par outils/sx/convertir.py — bloc « SxFiche ».
+   Balisage porté tel quel depuis le relevé de la référence : ne pas
+   « corriger » une classe à la main sans repasser outils/sx/compare.mjs. */
+import type { CSSProperties } from "react";
+import RubanFibre from "../RubanFibre";
+import SxBarres from "../SxBarres";
+
+export default function SxFiche() {
+  return (
+    <section className={"relative mx-auto w-full max-w-[1920px] px-[32px] ipad:px-[52px] desktop-sm:px-[72px] py-0"}>
+      <div id={"self-building"} className={"platform-section sb-section"} data-gutter-guide={"top"}>
+        <header className={"platform-intro platform-intro-split sb-intro"} data-gutter-guide={"bottom"}>
+          <div>
+            <span className={"platform-eyebrow"}>
+              {"Self-building"}
+            </span>
+            <h2>
+              {"Live from day one."}
+              <br />
+              <span>
+                {"Synnax builds itself around how you work."}
+              </span>
+            </h2>
+          </div>
+          <div>
+            <p className={"platform-lede"}>
+              {"Bring your payroll and policies. Synnax turns them into pay rules and records that match how you already pay."}
+            </p>
+            <div className={"sb-ctas"}>
+              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[8px] rounded-[12px] border border-solid border-transparent border-t-[rgba(255,255,255,0.15)] pt-0 pr-[24px] pb-0 pl-[24px] text-[16px] text-white [text-shadow:0px_1px_1px_rgba(0,0,0,0.15),0px_3px_3px_rgba(0,0,0,0.05)] "} style={{ "backgroundImage": "linear-gradient(180deg, rgba(255,255,255,0.2) 4.0988%, rgba(255,255,255,0) 43.902%), linear-gradient(90deg, #292929 0%, #292929 100%)", "boxShadow": "inset 0px 1px 1px 0px rgba(255,255,255,0.3), 0px 63px 18px 0px rgba(16,16,16,0), 0px 40px 16px 0px rgba(11,11,11,0.01), 0px 23px 14px 0px rgba(8,8,8,0.05), 0px 10px 10px 0px rgba(5,5,5,0.09), 0px 3px 6px 0px rgba(0,0,0,0.1)" } as CSSProperties}>
+                {"Start a migration"}
+              </button>
+              <button type={"button"} className={"relative inline-flex h-[46px] min-h-11 cursor-pointer touch-manipulation items-center justify-center whitespace-nowrap leading-none [&>svg]:block [&>svg]:shrink-0 font-lato font-bold tracking-[-0.03em] transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] active:scale-[0.97] motion-reduce:active:scale-100 [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 gap-[10px] rounded-[10px] border border-solid border-[rgba(0,0,0,0.1)] bg-[rgba(0,0,0,0.02)] pt-0 pr-[14px] pb-0 pl-[24px] text-[16px] text-[#121212] "}>
+                {"Book a demo"}
+                <svg width={"22"} height={"22"} viewBox={"0 0 22 22"} fill={"none"} aria-hidden={"true"} focusable={"false"} className={"block shrink-0"}>
+                  <path d={"M8.16385 16.4621C7.75528 16.0535 7.75528 15.3903 8.16385 14.9802L11.6147 11.5309L8.16385 8.08005C7.76785 7.66991 7.77256 7.01619 8.17799 6.61234C8.58185 6.20691 9.23556 6.20219 9.64571 6.59819L13.8367 10.7892C14.2453 11.1993 14.2453 11.8625 13.8367 12.2711L9.64571 16.4621C9.23714 16.8706 8.57399 16.8706 8.16385 16.4621Z"} fill={"currentColor"} />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+        <div className={"platform-illustration sb-stage"}>
+          <span className={"sb-stage-guide is-top"} data-gutter-guide={"top"} aria-hidden={"true"} />
+          <span className={"sb-stage-guide is-bottom"} data-gutter-guide={"top"} aria-hidden={"true"} />
+          <div className={"sb-visual"}>
+            <div className={"platform-glass sb-glass"}>
+              <div className={"platform-app sb-app"}>
+                <div className={"sb-topbar"}>
+                  <div className={"sb-window-controls"}>
+                    <span className={"sb-traffic"} aria-hidden={"true"}>
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-panel-right-outline sb-topbar-toggle"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                      <path d={"M9.94358 2.25C8.10583 2.24998 6.65019 2.24997 5.51098 2.40314C4.33856 2.56076 3.38961 2.89288 2.64124 3.64124C1.89288 4.38961 1.56076 5.33856 1.40314 6.51098C1.24997 7.65019 1.24998 9.10582 1.25 10.9436V13.0564C1.24998 14.8942 1.24997 16.3498 1.40314 17.489C1.56076 18.6614 1.89288 19.6104 2.64124 20.3588C3.38961 21.1071 4.33856 21.4392 5.51098 21.5969C6.65018 21.75 8.1058 21.75 9.94354 21.75H14.0564C14.3706 21.75 14.6738 21.75 14.966 21.7492C14.9773 21.7497 14.9886 21.75 15 21.75C15.0129 21.75 15.0257 21.7497 15.0384 21.749C16.4224 21.7448 17.5607 21.7217 18.489 21.5969C19.6614 21.4392 20.6104 21.1071 21.3588 20.3588C22.1071 19.6104 22.4392 18.6614 22.5969 17.489C22.75 16.3498 22.75 14.8942 22.75 13.0565V10.9436C22.75 9.10585 22.75 7.65018 22.5969 6.51098C22.4392 5.33856 22.1071 4.38961 21.3588 3.64124C20.6104 2.89288 19.6614 2.56076 18.489 2.40314C17.5607 2.27833 16.4224 2.25523 15.0384 2.25096C15.0257 2.25032 15.0129 2.25 15 2.25C14.9886 2.25 14.9773 2.25025 14.966 2.25076C14.6737 2.25 14.3707 2.25 14.0564 2.25H9.94358ZM14.25 3.75002C14.1677 3.75 14.0844 3.75 14 3.75H10C8.09318 3.75 6.73851 3.75159 5.71085 3.88976C4.70476 4.02503 4.12511 4.27869 3.7019 4.7019C3.27869 5.12511 3.02503 5.70476 2.88976 6.71085C2.75159 7.73851 2.75 9.09318 2.75 11V13C2.75 14.9068 2.75159 16.2615 2.88976 17.2892C3.02503 18.2952 3.27869 18.8749 3.7019 19.2981C4.12511 19.7213 4.70476 19.975 5.71085 20.1102C6.73851 20.2484 8.09318 20.25 10 20.25H14C14.0844 20.25 14.1677 20.25 14.25 20.25L14.25 3.75002ZM15.75 20.2443C16.7836 20.2334 17.6082 20.2018 18.2892 20.1102C19.2952 19.975 19.8749 19.7213 20.2981 19.2981C20.7213 18.8749 20.975 18.2952 21.1102 17.2892C21.2484 16.2615 21.25 14.9068 21.25 13V11C21.25 9.09318 21.2484 7.73851 21.1102 6.71085C20.975 5.70476 20.7213 5.12511 20.2981 4.7019C19.8749 4.27869 19.2952 4.02503 18.2892 3.88976C17.6082 3.79821 16.7836 3.76662 15.75 3.75573L15.75 20.2443Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                    </svg>
+                    <span className={"sb-history"} aria-hidden={"true"}>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-left-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M15.4881 4.43056C15.8026 4.70012 15.839 5.1736 15.5694 5.48809L9.98781 12L15.5694 18.5119C15.839 18.8264 15.8026 19.2999 15.4881 19.5694C15.1736 19.839 14.7001 19.8026 14.4306 19.4881L8.43056 12.4881C8.18981 12.2072 8.18981 11.7928 8.43056 11.5119L14.4306 4.5119C14.7001 4.19741 15.1736 4.16099 15.4881 4.43056Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-right-outline is-disabled"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M8.51192 4.43056C8.82641 4.16099 9.29989 4.19741 9.56946 4.5119L15.5695 11.5119C15.8102 11.7928 15.8102 12.2072 15.5695 12.4881L9.56946 19.4881C9.29989 19.8026 8.82641 19.839 8.51192 19.5694C8.19743 19.2999 8.161 18.8264 8.43057 18.5119L14.0122 12L8.43057 5.48809C8.161 5.1736 8.19743 4.70012 8.51192 4.43056Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+                <aside className={"sb-sidebar"} aria-label={"App navigation"}>
+                  <div className={"sb-workspace"}>
+                    <span className={"sb-workspace-mark"}>
+                      {"L"}
+                    </span>
+                    <strong>
+                      {"Lumen & Co."}
+                    </strong>
+                    <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-sort-vertical-bold"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                      <path d={"M12 13.125C12.3012 13.125 12.5732 13.3052 12.6907 13.5827C12.8081 13.8601 12.7481 14.1808 12.5384 14.3971L8.53841 18.5221C8.39716 18.6678 8.2029 18.75 7.99999 18.75C7.79708 18.75 7.60282 18.6678 7.46156 18.5221L3.46156 14.3971C3.25185 14.1808 3.19189 13.8601 3.30931 13.5827C3.42673 13.3052 3.69874 13.125 3.99999 13.125H7.24999V6C7.24999 5.58579 7.58577 5.25 7.99999 5.25C8.4142 5.25 8.74999 5.58579 8.74999 6V13.125H12Z"} fill={"currentColor"} />
+                      <path d={"M20 10.875C20.3012 10.875 20.5732 10.6948 20.6907 10.4173C20.8081 10.1399 20.7481 9.81916 20.5384 9.60289L16.5384 5.47789C16.3972 5.33222 16.2029 5.25 16 5.25C15.7971 5.25 15.6028 5.33222 15.4616 5.47789L11.4616 9.60289C11.2519 9.81916 11.1919 10.1399 11.3093 10.4173C11.4267 10.6948 11.6987 10.875 12 10.875H15.25V18C15.25 18.4142 15.5858 18.75 16 18.75C16.4142 18.75 16.75 18.4142 16.75 18L16.75 10.875H20Z"} fill={"currentColor"} />
+                    </svg>
+                  </div>
+                  <div className={"sb-search"}>
+                    <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-magnifier-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                      <path d={"M11.5 2.75C6.66751 2.75 2.75 6.66751 2.75 11.5C2.75 16.3325 6.66751 20.25 11.5 20.25C16.3325 20.25 20.25 16.3325 20.25 11.5C20.25 6.66751 16.3325 2.75 11.5 2.75ZM1.25 11.5C1.25 5.83908 5.83908 1.25 11.5 1.25C17.1609 1.25 21.75 5.83908 21.75 11.5C21.75 14.0605 20.8111 16.4017 19.2589 18.1982L22.5303 21.4697C22.8232 21.7626 22.8232 22.2374 22.5303 22.5303C22.2374 22.8232 21.7626 22.8232 21.4697 22.5303L18.1982 19.2589C16.4017 20.8111 14.0605 21.75 11.5 21.75C5.83908 21.75 1.25 17.1609 1.25 11.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                    </svg>
+                    <span>
+                      {"Search or ask"}
+                    </span>
+                    <kbd>
+                      {"⌘K"}
+                    </kbd>
+                  </div>
+                  <ul className={"sb-nav"}>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-home-smile-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M2.5192 7.82274C2 8.77128 2 9.91549 2 12.2039V13.725C2 17.6258 2 19.5763 3.17157 20.7881C4.34315 22 6.22876 22 10 22H14C17.7712 22 19.6569 22 20.8284 20.7881C22 19.5763 22 17.6258 22 13.725V12.2039C22 9.91549 22 8.77128 21.4808 7.82274C20.9616 6.87421 20.0131 6.28551 18.116 5.10812L16.116 3.86687C14.1106 2.62229 13.1079 2 12 2C10.8921 2 9.88939 2.62229 7.88403 3.86687L5.88403 5.10813C3.98695 6.28551 3.0384 6.87421 2.5192 7.82274ZM9.44661 15.3975C9.11385 15.1508 8.64413 15.2206 8.39747 15.5534C8.15082 15.8862 8.22062 16.3559 8.55339 16.6025C9.5258 17.3233 10.715 17.75 12 17.75C13.285 17.75 14.4742 17.3233 15.4466 16.6025C15.7794 16.3559 15.8492 15.8862 15.6025 15.5534C15.3559 15.2206 14.8862 15.1508 14.5534 15.3975C13.825 15.9373 12.9459 16.25 12 16.25C11.0541 16.25 10.175 15.9373 9.44661 15.3975Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Home"}
+                      </span>
+                    </li>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-inbox-line-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M3.46447 20.5355C4.92893 22 7.28595 22 12 22C16.714 22 19.0711 22 20.5355 20.5355C21.8063 19.2647 21.9744 17.3219 21.9966 13.75H18.8397C17.8659 13.75 17.6113 13.766 17.3975 13.8644C17.1838 13.9627 17.0059 14.1456 16.3722 14.8849L15.6794 15.6933C15.1773 16.2803 14.7796 16.7453 14.2292 16.9984C13.6789 17.2515 13.067 17.2509 12.2945 17.2501H11.7055C10.933 17.2509 10.3211 17.2515 9.77076 16.9984C9.22038 16.7453 8.82271 16.2803 8.32058 15.6933L7.62784 14.8849C6.9941 14.1456 6.81622 13.9627 6.60245 13.8644C6.38869 13.766 6.13407 13.75 5.16026 13.75H2.00339C2.02561 17.3219 2.19367 19.2647 3.46447 20.5355Z"} fill={"currentColor"} />
+                        <path d={"M7.25 7C7.25 6.58579 7.58579 6.25 8 6.25H16C16.4142 6.25 16.75 6.58579 16.75 7C16.75 7.41421 16.4142 7.75 16 7.75H8C7.58579 7.75 7.25 7.41421 7.25 7Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                        <path d={"M12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12L22 12.25L18.7055 12.2499C17.933 12.2491 17.3211 12.2485 16.7708 12.5016C16.2204 12.7547 15.8227 13.2197 15.3206 13.8067L14.6278 14.6151C13.9941 15.3544 13.8162 15.5373 13.6025 15.6356C13.3887 15.734 13.1341 15.75 12.1603 15.75H11.8397C10.8659 15.75 10.6113 15.734 10.3975 15.6356C10.1838 15.5373 10.0059 15.3544 9.37216 14.6151L8.67941 13.8067C8.17729 13.2197 7.77961 12.7547 7.22924 12.5016C6.67886 12.2485 6.06705 12.2491 5.29454 12.2499L2.00001 12.25L2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2ZM9.25 10.5C9.25 10.0858 9.58579 9.75 10 9.75H14C14.4142 9.75 14.75 10.0858 14.75 10.5C14.75 10.9142 14.4142 11.25 14 11.25H10C9.58579 11.25 9.25 10.9142 9.25 10.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Inbox"}
+                      </span>
+                      <em className={"is-badge"}>
+                        {"3"}
+                      </em>
+                    </li>
+                    <li className={"sb-nav-ai"}>
+                      <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
+                        <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Ask Synnax"}
+                      </span>
+                    </li>
+                  </ul>
+                  <p className={"sb-nav-label"}>
+                    {"Workspace"}
+                  </p>
+                  <ul className={"sb-nav"}>
+                    <li className={"is-active"}>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-users-group-rounded-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M9 13.001C12.866 13.001 16 14.7918 16 17.001C16 19.2101 12.866 21.001 9 21.001C5.13401 21.001 2 19.2101 2 17.001C2 14.7918 5.13401 13.001 9 13.001Z"} fill={"currentColor"} />
+                        <path d={"M16.4756 14.001C18.9605 14.0011 20.9987 15.3434 20.999 17C20.999 18.6569 18.9628 20 16.4775 20C17.2097 19.1997 17.7138 18.1955 17.7139 17.002C17.7139 15.8071 17.209 14.8017 16.4756 14.001Z"} fill={"currentColor"} />
+                        <path d={"M9 2C11.2091 2 13 3.79086 13 6C13 8.20914 11.2091 10 9 10C6.79086 10 5 8.20914 5 6C5 3.79086 6.79086 2 9 2Z"} fill={"currentColor"} />
+                        <path d={"M14.999 3.00098C16.6557 3.00118 17.999 4.34425 17.999 6.00098C17.9989 7.6576 16.6556 9.00078 14.999 9.00098C14.6378 9.00098 14.2914 8.93633 13.9707 8.81934C14.4435 7.98748 14.7138 7.02523 14.7139 6C14.7139 4.97534 14.444 4.0132 13.9717 3.18164C14.2921 3.06489 14.6382 3.00098 14.999 3.00098Z"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"People"}
+                      </span>
+                      <em>
+                        {"42"}
+                      </em>
+                    </li>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-wallet-money-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M20.4105 9.86058C20.3559 9.8571 20.2964 9.85712 20.2348 9.85715L20.2194 9.85715H17.8015C15.8086 9.85715 14.1033 11.4382 14.1033 13.5C14.1033 15.5618 15.8086 17.1429 17.8015 17.1429H20.2194L20.2348 17.1429C20.2964 17.1429 20.3559 17.1429 20.4105 17.1394C21.22 17.0879 21.9359 16.4495 21.9961 15.5577C22.0001 15.4992 22 15.4362 22 15.3778L22 15.3619V11.6381L22 11.6222C22 11.5638 22.0001 11.5008 21.9961 11.4423C21.9359 10.5506 21.22 9.91209 20.4105 9.86058ZM17.5872 14.4714C18.1002 14.4714 18.5162 14.0365 18.5162 13.5C18.5162 12.9635 18.1002 12.5286 17.5872 12.5286C17.0741 12.5286 16.6581 12.9635 16.6581 13.5C16.6581 14.0365 17.0741 14.4714 17.5872 14.4714Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                        <path d={"M20.2341 18.6C20.3778 18.5963 20.4866 18.7304 20.4476 18.8699C20.2541 19.562 19.947 20.1518 19.4542 20.6485C18.7329 21.3755 17.8183 21.6981 16.6882 21.8512C15.5902 22 14.1872 22 12.4158 22H10.3794C8.60803 22 7.20501 22 6.10697 21.8512C4.97692 21.6981 4.06227 21.3755 3.34096 20.6485C2.61964 19.9215 2.29953 18.9997 2.1476 17.8608C1.99997 16.7541 1.99999 15.3401 2 13.5548V13.4452C1.99998 11.6599 1.99997 10.2459 2.1476 9.13924C2.29953 8.00031 2.61964 7.07848 3.34096 6.35149C4.06227 5.62451 4.97692 5.30188 6.10697 5.14876C7.205 4.99997 8.60802 4.99999 10.3794 5L12.4158 5C14.1872 4.99998 15.5902 4.99997 16.6882 5.14876C17.8183 5.30188 18.7329 5.62451 19.4542 6.35149C19.947 6.84817 20.2541 7.43804 20.4476 8.13012C20.4866 8.26959 20.3778 8.40376 20.2341 8.4L17.8015 8.40001C15.0673 8.40001 12.6575 10.5769 12.6575 13.5C12.6575 16.4231 15.0673 18.6 17.8015 18.6L20.2341 18.6ZM5.61446 8.88572C5.21522 8.88572 4.89157 9.21191 4.89157 9.61429C4.89157 10.0167 5.21522 10.3429 5.61446 10.3429H9.46988C9.86912 10.3429 10.1928 10.0167 10.1928 9.61429C10.1928 9.21191 9.86912 8.88572 9.46988 8.88572H5.61446Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                        <path d={"M7.77668 4.02439L9.73549 2.58126C10.7874 1.80625 12.2126 1.80625 13.2645 2.58126L15.2336 4.03197C14.4103 3.99995 13.4909 3.99998 12.4829 4H10.3123C9.39123 3.99998 8.5441 3.99996 7.77668 4.02439Z"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Payroll"}
+                      </span>
+                    </li>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-calendar-date-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M7.75 2.5C7.75 2.08579 7.41421 1.75 7 1.75C6.58579 1.75 6.25 2.08579 6.25 2.5V4.07926C4.81067 4.19451 3.86577 4.47737 3.17157 5.17157C2.47737 5.86577 2.19451 6.81067 2.07926 8.25H21.9207C21.8055 6.81067 21.5226 5.86577 20.8284 5.17157C20.1342 4.47737 19.1893 4.19451 17.75 4.07926V2.5C17.75 2.08579 17.4142 1.75 17 1.75C16.5858 1.75 16.25 2.08579 16.25 2.5V4.0129C15.5847 4 14.839 4 14 4H10C9.16097 4 8.41527 4 7.75 4.0129V2.5Z"} fill={"currentColor"} />
+                        <path d={"M22 12C22 11.161 22 10.4153 21.9871 9.75H2.0129C2 10.4153 2 11.161 2 12V14C2 17.7712 2 19.6569 3.17157 20.8284C4.34315 22 6.22876 22 10 22H14C17.7712 22 19.6569 22 20.8284 20.8284C22 19.6569 22 17.7712 22 14V12ZM14 12.25C13.0335 12.25 12.25 13.0335 12.25 14V16C12.25 16.9665 13.0335 17.75 14 17.75C14.9665 17.75 15.75 16.9665 15.75 16V14C15.75 13.0335 14.9665 12.25 14 12.25ZM14 13.75C13.8619 13.75 13.75 13.8619 13.75 14V16C13.75 16.1381 13.8619 16.25 14 16.25C14.1381 16.25 14.25 16.1381 14.25 16V14C14.25 13.8619 14.1381 13.75 14 13.75ZM10.787 12.3071C11.0673 12.4232 11.25 12.6967 11.25 13V17C11.25 17.4142 10.9142 17.75 10.5 17.75C10.0858 17.75 9.75 17.4142 9.75 17V14.8107L9.53033 15.0303C9.23744 15.3232 8.76256 15.3232 8.46967 15.0303C8.17678 14.7374 8.17678 14.2626 8.46967 13.9697L9.96967 12.4697C10.1842 12.2552 10.5068 12.191 10.787 12.3071Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Time off"}
+                      </span>
+                    </li>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-shield-check-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M3.37752 5.08241C3 5.62028 3 7.21907 3 10.4167V11.9914C3 17.6294 7.23896 20.3655 9.89856 21.5273C10.62 21.8424 10.9807 22 12 22C13.0193 22 13.38 21.8424 14.1014 21.5273C16.761 20.3655 21 17.6294 21 11.9914V10.4167C21 7.21907 21 5.62028 20.6225 5.08241C20.245 4.54454 18.7417 4.02996 15.7351 3.00079L15.1623 2.80472C13.595 2.26824 12.8114 2 12 2C11.1886 2 10.405 2.26824 8.83772 2.80472L8.26491 3.00079C5.25832 4.02996 3.75503 4.54454 3.37752 5.08241ZM15.0595 10.4995C15.3353 10.1905 15.3085 9.71642 14.9995 9.44055C14.6905 9.16467 14.2164 9.19151 13.9405 9.50049L10.9286 12.8739L10.0595 11.9005C9.78358 11.5915 9.30947 11.5647 9.00049 11.8405C8.69151 12.1164 8.66467 12.5905 8.94055 12.8995L10.3691 14.4995C10.5114 14.6589 10.7149 14.75 10.9286 14.75C11.1422 14.75 11.3457 14.6589 11.488 14.4995L15.0595 10.4995Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Compliance"}
+                      </span>
+                    </li>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-chart-2-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M17.2929 2.29289C17 2.58579 17 3.05719 17 4V17C17 17.9428 17 18.4142 17.2929 18.7071C17.5858 19 18.0572 19 19 19C19.9428 19 20.4142 19 20.7071 18.7071C21 18.4142 21 17.9428 21 17V4C21 3.05719 21 2.58579 20.7071 2.29289C20.4142 2 19.9428 2 19 2C18.0572 2 17.5858 2 17.2929 2.29289Z"} fill={"currentColor"} />
+                        <path d={"M10 7C10 6.05719 10 5.58579 10.2929 5.29289C10.5858 5 11.0572 5 12 5C12.9428 5 13.4142 5 13.7071 5.29289C14 5.58579 14 6.05719 14 7V17C14 17.9428 14 18.4142 13.7071 18.7071C13.4142 19 12.9428 19 12 19C11.0572 19 10.5858 19 10.2929 18.7071C10 18.4142 10 17.9428 10 17V7Z"} fill={"currentColor"} />
+                        <path d={"M3.29289 9.29289C3 9.58579 3 10.0572 3 11V17C3 17.9428 3 18.4142 3.29289 18.7071C3.58579 19 4.05719 19 5 19C5.94281 19 6.41421 19 6.70711 18.7071C7 18.4142 7 17.9428 7 17V11C7 10.0572 7 9.58579 6.70711 9.29289C6.41421 9 5.94281 9 5 9C4.05719 9 3.58579 9 3.29289 9.29289Z"} fill={"currentColor"} />
+                        <path d={"M3 21.25C2.58579 21.25 2.25 21.5858 2.25 22C2.25 22.4142 2.58579 22.75 3 22.75H21C21.4142 22.75 21.75 22.4142 21.75 22C21.75 21.5858 21.4142 21.25 21 21.25H3Z"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Insights"}
+                      </span>
+                    </li>
+                    <li>
+                      <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-document-text-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                        <path d={"M4.17157 3.17157C3 4.34315 3 6.22876 3 10V14C3 17.7712 3 19.6569 4.17157 20.8284C5.34315 22 7.22876 22 11 22H13C16.7712 22 18.6569 22 19.8284 20.8284C21 19.6569 21 17.7712 21 14V10C21 6.22876 21 4.34315 19.8284 3.17157C18.6569 2 16.7712 2 13 2H11C7.22876 2 5.34315 2 4.17157 3.17157ZM7.25 8C7.25 7.58579 7.58579 7.25 8 7.25H16C16.4142 7.25 16.75 7.58579 16.75 8C16.75 8.41421 16.4142 8.75 16 8.75H8C7.58579 8.75 7.25 8.41421 7.25 8ZM7.25 12C7.25 11.5858 7.58579 11.25 8 11.25H16C16.4142 11.25 16.75 11.5858 16.75 12C16.75 12.4142 16.4142 12.75 16 12.75H8C7.58579 12.75 7.25 12.4142 7.25 12ZM8 15.25C7.58579 15.25 7.25 15.5858 7.25 16C7.25 16.4142 7.58579 16.75 8 16.75H13C13.4142 16.75 13.75 16.4142 13.75 16C13.75 15.5858 13.4142 15.25 13 15.25H8Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                      </svg>
+                      <span>
+                        {"Documents"}
+                      </span>
+                    </li>
+                  </ul>
+                  <p className={"sb-nav-label"}>
+                    {"Entities"}
+                  </p>
+                  <ul className={"sb-nav"}>
+                    <li>
+                      <i className={"sb-entity-dot"} style={{ "background": "#16a34a" } as CSSProperties} />
+                      <span>
+                        {"Lumen SA (Pty) Ltd"}
+                      </span>
+                    </li>
+                    <li>
+                      <i className={"sb-entity-dot"} style={{ "background": "#2d00f7" } as CSSProperties} />
+                      <span>
+                        {"Lumen UK Ltd"}
+                      </span>
+                    </li>
+                    <li>
+                      <i className={"sb-entity-dot"} style={{ "background": "#f06a00" } as CSSProperties} />
+                      <span>
+                        {"Lumen Inc."}
+                      </span>
+                    </li>
+                  </ul>
+                  <div className={"sb-sidebar-foot"}>
+                    <ul className={"sb-nav"}>
+                      <li>
+                        <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-settings-minimalistic-bold"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                          <path d={"M12.4277 2C11.3139 2 10.2995 2.6007 8.27081 3.80211L7.58466 4.20846C5.55594 5.40987 4.54158 6.01057 3.98466 7C3.42773 7.98943 3.42773 9.19084 3.42773 11.5937V12.4063C3.42773 14.8092 3.42773 16.0106 3.98466 17C4.54158 17.9894 5.55594 18.5901 7.58466 19.7915L8.27081 20.1979C10.2995 21.3993 11.3139 22 12.4277 22C13.5416 22 14.5559 21.3993 16.5847 20.1979L17.2708 19.7915C19.2995 18.5901 20.3139 17.9894 20.8708 17C21.4277 16.0106 21.4277 14.8092 21.4277 12.4063V11.5937C21.4277 9.19084 21.4277 7.98943 20.8708 7C20.3139 6.01057 19.2995 5.40987 17.2708 4.20846L16.5847 3.80211C14.5559 2.6007 13.5416 2 12.4277 2ZM8.67773 12C8.67773 9.92893 10.3567 8.25 12.4277 8.25C14.4988 8.25 16.1777 9.92893 16.1777 12C16.1777 14.0711 14.4988 15.75 12.4277 15.75C10.3567 15.75 8.67773 14.0711 8.67773 12Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                        </svg>
+                        <span>
+                          {"Settings"}
+                        </span>
+                      </li>
+                    </ul>
+                    <div className={"sb-user"}>
+                      <span data-slot={"avatar"} className={"sb-user-avatar"}>
+                        <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/amy-mckinnon.jpg"} alt={""} />
+                        <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
+                          {"A"}
+                        </span>
+                      </span>
+                      <div>
+                        <strong>
+                          {"Amy Mckinnon"}
+                        </strong>
+                        <small>
+                          {"People Ops admin"}
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
+                <div className={"sb-app-main"}>
+                  <div className={"sb-record"}>
+                    <div className={"platform-panel-header sb-record-header"}>
+                      <ol className={"sb-breadcrumb"} aria-label={"Breadcrumb"}>
+                        <li>
+                          {"People"}
+                        </li>
+                        <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-alt-arrow-right-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                          <path d={"M8.51192 4.43056C8.82641 4.16099 9.29989 4.19741 9.56946 4.5119L15.5695 11.5119C15.8102 11.7928 15.8102 12.2072 15.5695 12.4881L9.56946 19.4881C9.29989 19.8026 8.82641 19.839 8.51192 19.5694C8.19743 19.2999 8.161 18.8264 8.43057 18.5119L14.0122 12L8.43057 5.48809C8.161 5.1736 8.19743 4.70012 8.51192 4.43056Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                        </svg>
+                        <li>
+                          {"Design"}
+                        </li>
+                        <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-alt-arrow-right-outline"} style={{ "width": "12px", "height": "12px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                          <path d={"M8.51192 4.43056C8.82641 4.16099 9.29989 4.19741 9.56946 4.5119L15.5695 11.5119C15.8102 11.7928 15.8102 12.2072 15.5695 12.4881L9.56946 19.4881C9.29989 19.8026 8.82641 19.839 8.51192 19.5694C8.19743 19.2999 8.161 18.8264 8.43057 18.5119L14.0122 12L8.43057 5.48809C8.161 5.1736 8.19743 4.70012 8.51192 4.43056Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                        </svg>
+                        <li aria-current={"page"}>
+                          {"Anne-Marie Myburg"}
+                        </li>
+                      </ol>
+                      <div className={"platform-payroll-tools"}>
+                        <div role={"group"} data-slot={"avatar-group"} data-size={"xs"} className={"platform-header-avatars"} aria-label={"4 collaborators"}>
+                          <span data-slot={"avatar"}>
+                            <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/akin-balogun.jpg"} alt={"Akin Balogun"} />
+                            <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
+                              {"A"}
+                            </span>
+                          </span>
+                          <span data-slot={"avatar"}>
+                            <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/amy-mckinnon.jpg"} alt={"Amy Mckinnon"} />
+                            <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
+                              {"A"}
+                            </span>
+                          </span>
+                          <span data-slot={"avatar"}>
+                            <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/anne-marie-myburg.jpg"} alt={"Anne-Marie Myburg"} />
+                            <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
+                              {"A"}
+                            </span>
+                          </span>
+                          <span data-slot={"avatar-group-count"}>
+                            {"+1"}
+                            <span className={"sr-only"}>
+                              {" additional collaborator"}
+                            </span>
+                          </span>
+                        </div>
+                        <button type={"button"} aria-label={"Share"}>
+                          <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-square-share-line-outline"} style={{ "width": "17px", "height": "17px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                            <path d={"M10.7521 1.99364C10.7556 2.40784 10.4226 2.74646 10.0084 2.74997C8.29884 2.76447 7.03889 2.82006 6.06281 3.01125C5.10767 3.19835 4.47982 3.50532 3.99518 3.98996C3.42533 4.55981 3.09834 5.33078 2.92642 6.60954C2.75159 7.90987 2.75 9.61855 2.75 11.9974C2.75 14.3762 2.75159 16.0849 2.92642 17.3852C3.09834 18.664 3.42533 19.435 3.99518 20.0048C4.56503 20.5747 5.336 20.9017 6.61476 21.0736C7.91509 21.2484 9.62377 21.25 12.0026 21.25C14.3814 21.25 16.0901 21.2484 17.3905 21.0736C18.6692 20.9017 19.4402 20.5747 20.01 20.0048C20.4947 19.5202 20.8017 18.8923 20.9887 17.9372C21.1799 16.9611 21.2355 15.7012 21.25 13.9916C21.2535 13.5774 21.5922 13.2444 22.0064 13.2479C22.4206 13.2515 22.7535 13.5901 22.75 14.0043C22.7355 15.7087 22.6819 17.0968 22.4608 18.2255C22.2356 19.3752 21.8272 20.309 21.0707 21.0655C20.1757 21.9605 19.0354 22.3659 17.5903 22.5602C16.1785 22.75 14.369 22.75 12.06 22.75H11.9452C9.63623 22.75 7.82673 22.75 6.41488 22.5602C4.96979 22.3659 3.82952 21.9605 2.93452 21.0655C2.03952 20.1705 1.63408 19.0302 1.43979 17.5851C1.24998 16.1733 1.24999 14.3638 1.25 12.0548V11.94C1.24999 9.63101 1.24998 7.82151 1.43979 6.40967C1.63408 4.96458 2.03952 3.8243 2.93452 2.9293C3.69102 2.1728 4.62478 1.76443 5.77447 1.53923C6.90322 1.31813 8.29131 1.26448 9.99573 1.25003C10.4099 1.24652 10.7485 1.57944 10.7521 1.99364ZM16.4697 1.46967C16.7626 1.17678 17.2374 1.17678 17.5303 1.46967L22.5303 6.46967C22.8232 6.76256 22.8232 7.23744 22.5303 7.53033L17.5303 12.5303C17.2374 12.8232 16.7626 12.8232 16.4697 12.5303C16.1768 12.2374 16.1768 11.7626 16.4697 11.4697L20.1893 7.75H14C12.4485 7.75 11.5328 8.50701 11.212 8.82933L11.0199 9.02244L10.8293 9.21204C10.507 9.53279 9.75 10.4485 9.75 12V15C9.75 15.4142 9.41421 15.75 9 15.75C8.58579 15.75 8.25 15.4142 8.25 15V12C8.25 9.91622 9.27703 8.64063 9.77125 8.14881C9.77125 8.14881 9.77125 8.14881 9.77125 8.14881L9.96178 7.9592L10.1488 7.77125C10.6406 7.27703 11.9162 6.25 14 6.25H20.1893L16.4697 2.53033C16.1768 2.23744 16.1768 1.76256 16.4697 1.46967Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                          </svg>
+                          {"Share"}
+                        </button>
+                        <span className={"platform-tool-divider"} aria-hidden={"true"} />
+                        <button type={"button"} aria-label={"Chat"}>
+                          <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-dialog-2-outline"} style={{ "width": "18px", "height": "18px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                            <path d={"M13.3365 1.25H15.6634C16.8583 1.24999 17.8086 1.24999 18.5706 1.32244C19.352 1.39674 20.0127 1.55247 20.6012 1.91312C21.2067 2.28418 21.7158 2.79326 22.0868 3.39876C22.4475 3.9873 22.6032 4.64796 22.6775 5.42935C22.75 6.19141 22.75 7.14162 22.7499 8.33653V9.15226C22.75 10.0028 22.75 10.6794 22.7125 11.2279C22.6742 11.7891 22.5943 12.2709 22.4074 12.7221C21.9507 13.8247 21.0746 14.7008 19.972 15.1575C19.5929 15.3146 19.1887 15.397 18.7308 15.4419C18.7255 15.5812 18.7188 15.7137 18.7102 15.8397C18.6695 16.4357 18.5848 16.9436 18.3884 17.4178C17.9063 18.5817 16.9816 19.5064 15.8177 19.9885C15.2209 20.2357 14.5625 20.3081 13.7346 20.3346C13.2892 20.3489 13.0044 20.3587 12.7881 20.385C12.5837 20.41 12.5069 20.4433 12.4654 20.4679C12.4193 20.4951 12.3557 20.5451 12.2447 20.6979C12.1249 20.863 11.9891 21.0907 11.7742 21.4539L11.5147 21.8922C10.8378 23.0359 9.16217 23.0359 8.48523 21.8922L8.2258 21.4539C8.01082 21.0907 7.87511 20.863 7.75524 20.6979C7.64427 20.5451 7.58064 20.4951 7.53453 20.4679C7.49305 20.4433 7.41631 20.41 7.21182 20.3851C6.99552 20.3587 6.71078 20.3489 6.26533 20.3346C5.43745 20.3081 4.77912 20.2357 4.18225 19.9885C3.01837 19.5064 2.09367 18.5817 1.61157 17.4178C1.41517 16.9436 1.33047 16.4357 1.2898 15.8397C1.24999 15.2563 1.25 14.5361 1.25 13.6274V12.7613C1.24999 11.4848 1.24999 10.4732 1.32705 9.6627C1.40595 8.83288 1.57089 8.13673 1.94996 7.51814C2.34162 6.879 2.87899 6.34163 3.51813 5.94996C4.13672 5.57089 4.83287 5.40595 5.66269 5.32705C5.87363 5.30699 6.0982 5.29216 6.33751 5.28118C6.41754 4.56134 6.57708 3.94704 6.91307 3.39877C7.28412 2.79326 7.7932 2.28418 8.3987 1.91312C8.98723 1.55247 9.64789 1.39674 10.4293 1.32244C11.1913 1.24999 12.1416 1.24999 13.3365 1.25ZM7.85331 5.2512C8.1401 5.25 8.44243 5.25 8.7613 5.25H11.2387C12.5153 5.24999 13.5268 5.24999 14.3373 5.32705C15.1671 5.40595 15.8633 5.57089 16.4819 5.94996C17.121 6.34163 17.6584 6.879 18.05 7.51814C18.4291 8.13673 18.5941 8.83288 18.673 9.6627C18.75 10.4732 18.75 11.4847 18.75 12.7613V13.6274C18.75 13.7307 18.75 13.8316 18.7499 13.9301C19.0253 13.8944 19.2262 13.8428 19.398 13.7717C20.1331 13.4672 20.7171 12.8832 21.0216 12.1481C21.1201 11.9101 21.1829 11.6106 21.216 11.1258C21.2495 10.6343 21.2499 10.0089 21.2499 9.12503V8.37503C21.2499 7.13296 21.2492 6.25408 21.1842 5.57133C21.1204 4.89973 20.9998 4.49574 20.8079 4.18251C20.5605 3.77884 20.2211 3.43945 19.8174 3.19208C19.5042 3.00013 19.1002 2.87956 18.4286 2.81571C17.7459 2.75079 16.867 2.75 15.6249 2.75H13.3749C12.1329 2.75 11.254 2.75079 10.5713 2.81571C9.89967 2.87956 9.49568 3.00013 9.18245 3.19208C8.77879 3.43945 8.4394 3.77884 8.19203 4.18251C8.03147 4.44453 7.92229 4.76687 7.85331 5.2512ZM5.80467 6.82031C5.08465 6.88877 4.64517 7.01855 4.30188 7.22892C3.86458 7.4969 3.4969 7.86458 3.22892 8.30189C3.01855 8.64518 2.88877 9.08466 2.82031 9.80468C2.75079 10.5359 2.75 11.4761 2.75 12.8V13.6C2.75 14.5422 2.75041 15.2112 2.78632 15.7376C2.82178 16.2573 2.88931 16.5828 2.99739 16.8438C3.32725 17.6401 3.95994 18.2728 4.75628 18.6027C5.09046 18.7411 5.52102 18.81 6.31328 18.8354L6.34438 18.8364C6.74979 18.8493 7.1024 18.8606 7.39344 18.8961C7.70371 18.9339 8.00853 19.0055 8.29822 19.1768C8.58327 19.3454 8.78917 19.569 8.96888 19.8164C9.13514 20.0453 9.30644 20.3347 9.50062 20.6629L9.77606 21.1282C9.82147 21.2049 9.90074 21.25 9.99998 21.25C10.0992 21.25 10.1785 21.2049 10.2239 21.1282L10.4994 20.6628C10.6935 20.3347 10.8648 20.0453 11.0311 19.8164C11.2108 19.569 11.4167 19.3454 11.7018 19.1768C11.9914 19.0055 12.2963 18.9339 12.6065 18.8961C12.8976 18.8606 13.2502 18.8493 13.6556 18.8364L13.6867 18.8354C14.479 18.81 14.9095 18.7411 15.2437 18.6027C16.0401 18.2728 16.6728 17.6401 17.0026 16.8438C17.1107 16.5828 17.1782 16.2573 17.2137 15.7376C17.2496 15.2112 17.25 14.5422 17.25 13.6V12.8C17.25 11.4761 17.2492 10.5359 17.1797 9.80468C17.1112 9.08466 16.9814 8.64518 16.7711 8.30189C16.5031 7.86458 16.1354 7.4969 15.6981 7.22892C15.3548 7.01855 14.9154 6.88877 14.1953 6.82031C13.4641 6.75079 12.5239 6.75 11.2 6.75H8.8C7.47611 6.75 6.53585 6.75079 5.80467 6.82031Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                            <path d={"M7.5 13C7.5 13.5523 7.05229 14 6.5 14C5.94772 14 5.5 13.5523 5.5 13C5.5 12.4477 5.94772 12 6.5 12C7.05229 12 7.5 12.4477 7.5 13Z"} fill={"currentColor"} />
+                            <path d={"M11 13C11 13.5523 10.5523 14 10 14C9.44772 14 9 13.5523 9 13C9 12.4477 9.44772 12 10 12C10.5523 12 11 12.4477 11 13Z"} fill={"currentColor"} />
+                            <path d={"M14.5 13C14.5 13.5523 14.0523 14 13.5 14C12.9477 14 12.5 13.5523 12.5 13C12.5 12.4477 12.9477 12 13.5 12C14.0523 12 14.5 12.4477 14.5 13Z"} fill={"currentColor"} />
+                          </svg>
+                        </button>
+                        <button type={"button"} aria-label={"Help"}>
+                          <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-question-circle-outline"} style={{ "width": "18px", "height": "18px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                            <path d={"M12 15C12.5523 15 13 15.4477 13 16C13 16.5523 12.5523 17 12 17C11.4477 17 11 16.5523 11 16C11 15.4477 11.4477 15 12 15Z"} fill={"currentColor"} />
+                            <path d={"M12 6.25C13.4497 6.25 14.625 7.42525 14.625 8.875C14.625 9.83834 14.1054 10.68 13.335 11.1357C13.1384 11.2521 12.9759 11.3793 12.8701 11.5039C12.7676 11.6248 12.75 11.7036 12.75 11.75V13C12.75 13.4142 12.4142 13.75 12 13.75C11.5858 13.75 11.25 13.4142 11.25 13V11.75C11.25 11.2442 11.4715 10.8338 11.7266 10.5332C11.9785 10.2363 12.2928 10.0095 12.5713 9.84473C12.9043 9.64773 13.125 9.28655 13.125 8.875C13.125 8.25368 12.6213 7.75 12 7.75C11.3787 7.75 10.875 8.25368 10.875 8.875C10.875 9.28921 10.5392 9.625 10.125 9.625C9.71079 9.625 9.375 9.28921 9.375 8.875C9.375 7.42525 10.5503 6.25 12 6.25Z"} fill={"currentColor"} />
+                            <path d={"M12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C6.06294 22.75 1.25 17.9371 1.25 12C1.25 6.06294 6.06294 1.25 12 1.25ZM12 2.75C6.89137 2.75 2.75 6.89137 2.75 12C2.75 17.1086 6.89137 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                          </svg>
+                        </button>
+                        <button type={"button"} aria-label={"More options"}>
+                          <svg xmlns={"http://www.w3.org/2000/svg"} width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} color={"currentColor"} className={""}>
+                            <path d={"M12 12V11.5M12 5V4.5M12 19V18.5M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12ZM13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5ZM13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z"} stroke={"currentColor"} strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={"1.5"} />
+                          </svg>
+                        </button>
+                        <span className={"platform-tool-divider"} aria-hidden={"true"} />
+                        <button type={"button"} className={"platform-ask-ai"}>
+                          <svg xmlns={"http://www.w3.org/2000/svg"} width={"17"} height={"17"} viewBox={"0 0 24 24"} fill={"none"} color={"currentColor"} className={""}>
+                            <path d={"M12 21.5C17.2467 21.5 21.5 17.2467 21.5 12C21.5 6.75329 17.2467 2.5 12 2.5C6.75329 2.5 2.5 6.75329 2.5 12C2.5 13.3377 2.66372 14.5604 3.1189 15.6954C3.81756 17.4374 3.68195 18.9241 2.5 20.5C3.86146 21.1644 6 21 7 20.0725C8.45323 20.9748 10.1636 21.5 12 21.5Z"} stroke={"currentColor"} strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={"1.5"} />
+                            <path d={"M12 10.125V12M12 12V13.875M12 12H10.5M12 12H13.5M15 12L13.6987 11.5662C13.1015 11.3672 12.6328 10.8985 12.4338 10.3013L12 9L11.5662 10.3013C11.3672 10.8985 10.8985 11.3672 10.3013 11.5662L9 12L10.3013 12.4338C10.8985 12.6328 11.3672 13.1015 11.5662 13.6987L12 15L12.4338 13.6987C12.6328 13.1015 13.1015 12.6328 13.6987 12.4338L15 12Z"} stroke={"currentColor"} strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={"1.5"} />
+                          </svg>
+                          {"Ask AI"}
+                        </button>
+                      </div>
+                    </div>
+                    <div className={"sb-record-bar"}>
+                      <div className={"sb-record-identity"}>
+                        <span data-slot={"avatar"} className={"sb-record-avatar"}>
+                          <img data-slot={"avatar-image"} src={"https://synnax-ai-native-software-landing-template-v1.21st.app/employees/anne-marie-myburg.jpg"} alt={""} />
+                          <span data-slot={"avatar-fallback"} aria-hidden={"true"}>
+                            {"A"}
+                          </span>
+                        </span>
+                        <div>
+                          <div className={"sb-record-name"}>
+                            <strong>
+                              {"Anne-Marie Myburg"}
+                            </strong>
+                            <span className={"platform-status  "}>
+                              <i />
+                              {"Active"}
+                            </span>
+                          </div>
+                          <p>
+                            {"Design Lead · Cape Town · Lumen SA (Pty) Ltd"}
+                          </p>
+                        </div>
+                      </div>
+                      <nav className={"sb-record-tabs"} aria-label={"Record sections"}>
+                        <span className={"is-active"}>
+                          {"Overview"}
+                        </span>
+                        <span>
+                          {"Resume"}
+                        </span>
+                        <span>
+                          {"Pay"}
+                        </span>
+                        <span>
+                          {"Documents"}
+                        </span>
+                        <span>
+                          {"Time off"}
+                        </span>
+                        <span>
+                          {"Activity"}
+                        </span>
+                      </nav>
+                    </div>
+                    <div className={"sb-record-body"}>
+                      <div className={"sb-record-main"}>
+                        <div className={"platform-agent platform-payroll-review platform-shared-review sb-record-summary"}>
+                          <div className={"pointer-events-none absolute inset-0"} aria-hidden={"true"}>
+                            <RubanFibre variante="droit" />
+                          </div>
+                          <div className={"platform-shared-review-content"}>
+                            <div className={"platform-agent-label"}>
+                              <svg viewBox={"0 0 20 20"} fill={"none"} aria-hidden={"true"}>
+                                <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"currentColor"} />
+                              </svg>
+                              {" AI summary"}
+                            </div>
+                            <p>
+                              {"Anne-Marie joined Design on 3 Nov. Her contract is signed, passport verified and payroll is set up. The first pay run is on 27 Nov, and her probation review is booked for 3 Feb."}
+                            </p>
+                          </div>
+                        </div>
+                        <section className={"sb-block"} aria-label={"Upcoming"}>
+                          <h3>
+                            {"Upcoming"}
+                          </h3>
+                          <ul className={"sb-upcoming"}>
+                            <li>
+                              <span className={"sb-icon-tile"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-wallet-money-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M20.9235 11.7502C20.9032 11.75 20.8766 11.75 20.8333 11.75H18.2308C16.8074 11.75 15.75 12.8087 15.75 14C15.75 15.1913 16.8074 16.25 18.2308 16.25H20.8333C20.8766 16.25 20.9032 16.25 20.9235 16.2498C20.9427 16.2496 20.948 16.2492 20.948 16.2492C21.154 16.2367 21.2427 16.0976 21.2495 16.0139C21.2495 16.0139 21.2497 16.0077 21.2498 15.9986C21.25 15.9808 21.25 15.9572 21.25 15.9167V12.0833C21.25 12.0609 21.25 12.0437 21.25 12.0297C21.2499 12.0185 21.2499 12.0093 21.2498 12.0014C21.2497 11.9924 21.2495 11.9861 21.2495 11.9861C21.2427 11.9024 21.154 11.7633 20.9479 11.7508C20.9479 11.7508 20.943 11.7504 20.9235 11.7502ZM20.8499 10.25C20.9163 10.25 20.9803 10.2499 21.0391 10.2535C21.9104 10.3066 22.681 10.9638 22.7458 11.8818C22.7501 11.942 22.75 12.0069 22.75 12.067C22.75 12.0725 22.75 12.0779 22.75 12.0833V15.9167C22.75 15.9221 22.75 15.9275 22.75 15.933C22.75 15.9931 22.7501 16.058 22.7458 16.1182C22.681 17.0362 21.9104 17.6934 21.0391 17.7465C20.9803 17.7501 20.9163 17.75 20.8499 17.75C20.8444 17.75 20.8389 17.75 20.8333 17.75H18.2308C16.0856 17.75 14.25 16.1224 14.25 14C14.25 11.8776 16.0856 10.25 18.2308 10.25H20.8333C20.8389 10.25 20.8444 10.25 20.8499 10.25Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M19 14C19 14.5523 18.5523 15 18 15C17.4477 15 17 14.5523 17 14C17 13.4477 17.4477 13 18 13C18.5523 13 19 13.4477 19 14Z"} fill={"currentColor"} />
+                                  <path d={"M20.8499 10.25C20.9163 10.25 20.9803 10.2499 21.0391 10.2535C21.2645 10.2672 21.4832 10.3214 21.6847 10.4101C21.5777 8.80363 21.2831 7.56563 20.3588 6.64124C19.6104 5.89288 18.6614 5.56076 17.489 5.40313L17.4467 5.39754C17.4362 5.38977 17.4255 5.38223 17.4145 5.37492L13.679 2.89806C12.3758 2.03398 10.6242 2.03398 9.32102 2.89806L5.58554 5.37492C5.57453 5.38223 5.56377 5.38977 5.55327 5.39754L5.51098 5.40313C4.33856 5.56076 3.38961 5.89288 2.64124 6.64124C1.89288 7.38961 1.56076 8.33856 1.40314 9.51098C1.24997 10.6502 1.24998 12.1058 1.25 13.9436V14.0564C1.24998 15.8942 1.24997 17.3498 1.40314 18.489C1.56076 19.6614 1.89288 20.6104 2.64124 21.3588C3.38961 22.1071 4.33856 22.4392 5.51098 22.5969C6.65019 22.75 8.10583 22.75 9.94359 22.75H13.0564C14.8942 22.75 16.3498 22.75 17.489 22.5969C18.6614 22.4392 19.6104 22.1071 20.3588 21.3588C21.2831 20.4344 21.5777 19.1964 21.6847 17.5899C21.4832 17.6786 21.2645 17.7328 21.0391 17.7465C20.9803 17.7501 20.9163 17.75 20.8499 17.75L20.8333 17.75H20.1679C20.0541 19.0915 19.7966 19.7996 19.2981 20.2981C18.8749 20.7213 18.2952 20.975 17.2892 21.1102C16.2615 21.2484 14.9068 21.25 13 21.25H10C8.09318 21.25 6.73851 21.2484 5.71085 21.1102C4.70476 20.975 4.12511 20.7213 3.7019 20.2981C3.27869 19.8749 3.02502 19.2952 2.88976 18.2892C2.75159 17.2615 2.75 15.9068 2.75 14C2.75 12.0932 2.75159 10.7385 2.88976 9.71085C3.02502 8.70476 3.27869 8.12511 3.7019 7.7019C4.12511 7.27869 4.70476 7.02502 5.71085 6.88976C6.73851 6.75159 8.09318 6.75 10 6.75H13C14.9068 6.75 16.2615 6.75159 17.2892 6.88976C18.2952 7.02502 18.8749 7.27869 19.2981 7.7019C19.7966 8.20043 20.0541 8.90854 20.1679 10.25H20.8333L20.8499 10.25ZM9.94358 5.25H13.0564C13.5729 5.24999 14.0592 5.24999 14.5168 5.25339L12.8501 4.14821C12.0493 3.61726 10.9507 3.61726 10.15 4.14821L8.48318 5.25339C8.94077 5.24999 9.42708 5.24999 9.94358 5.25Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M6 9.25C5.58579 9.25 5.25 9.58579 5.25 10C5.25 10.4142 5.58579 10.75 6 10.75H10C10.4142 10.75 10.75 10.4142 10.75 10C10.75 9.58579 10.4142 9.25 10 9.25H6Z"} fill={"currentColor"} />
+                                  <path d={"M19 14C19 14.5523 18.5523 15 18 15C17.4477 15 17 14.5523 17 14C17 13.4477 17.4477 13 18 13C18.5523 13 19 13.4477 19 14Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <strong>
+                                  {"First pay date"}
+                                </strong>
+                                <p>
+                                  {"Fri 27 Nov · $5,450 gross"}
+                                </p>
+                              </div>
+                              <span className={"sb-when"}>
+                                {"In 13 days"}
+                              </span>
+                            </li>
+                            <li>
+                              <span className={"sb-icon-tile"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-calendar-mark-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M7 1.75C7.41421 1.75 7.75 2.08579 7.75 2.5V3.26272C8.41203 3.24999 9.1414 3.24999 9.94358 3.25H14.0564C14.8586 3.24999 15.588 3.24999 16.25 3.26272V2.5C16.25 2.08579 16.5858 1.75 17 1.75C17.4142 1.75 17.75 2.08579 17.75 2.5V3.32709C18.0099 3.34691 18.2561 3.37182 18.489 3.40313C19.6614 3.56076 20.6104 3.89288 21.3588 4.64124C22.1071 5.38961 22.4392 6.33855 22.5969 7.51098C22.6472 7.88567 22.681 8.29459 22.7037 8.74007C22.7337 8.82106 22.75 8.90861 22.75 9C22.75 9.06932 22.7406 9.13644 22.723 9.20016C22.75 10.0021 22.75 10.9128 22.75 11.9436V14.0564C22.75 15.8942 22.75 17.3498 22.5969 18.489C22.4392 19.6614 22.1071 20.6104 21.3588 21.3588C20.6104 22.1071 19.6614 22.4392 18.489 22.5969C17.3498 22.75 15.8942 22.75 14.0564 22.75H9.94359C8.10583 22.75 6.65019 22.75 5.51098 22.5969C4.33856 22.4392 3.38961 22.1071 2.64124 21.3588C1.89288 20.6104 1.56076 19.6614 1.40314 18.489C1.24997 17.3498 1.24998 15.8942 1.25 14.0564V11.9436C1.24999 10.9127 1.24998 10.0021 1.27701 9.20017C1.25941 9.13645 1.25 9.06932 1.25 9C1.25 8.90862 1.26634 8.82105 1.29627 8.74006C1.31895 8.29458 1.35276 7.88566 1.40314 7.51098C1.56076 6.33856 1.89288 5.38961 2.64124 4.64124C3.38961 3.89288 4.33856 3.56076 5.51098 3.40313C5.7439 3.37182 5.99006 3.34691 6.25 3.32709V2.5C6.25 2.08579 6.58579 1.75 7 1.75ZM2.76309 9.75C2.75032 10.4027 2.75 11.146 2.75 12V14C2.75 15.9068 2.75159 17.2615 2.88976 18.2892C3.02502 19.2952 3.27869 19.8749 3.7019 20.2981C4.12511 20.7213 4.70476 20.975 5.71085 21.1102C6.73851 21.2484 8.09318 21.25 10 21.25H14C15.9068 21.25 17.2615 21.2484 18.2892 21.1102C19.2952 20.975 19.8749 20.7213 20.2981 20.2981C20.7213 19.8749 20.975 19.2952 21.1102 18.2892C21.2484 17.2615 21.25 15.9068 21.25 14V12C21.25 11.146 21.2497 10.4027 21.2369 9.75H2.76309ZM21.1683 8.25H2.83168C2.8477 8.06061 2.86685 7.88123 2.88976 7.71085C3.02502 6.70476 3.27869 6.12511 3.7019 5.7019C4.12511 5.27869 4.70476 5.02502 5.71085 4.88976C6.73851 4.75159 8.09318 4.75 10 4.75H14C15.9068 4.75 17.2615 4.75159 18.2892 4.88976C19.2952 5.02502 19.8749 5.27869 20.2981 5.7019C20.7213 6.12511 20.975 6.70476 21.1102 7.71085C21.1331 7.88123 21.1523 8.06061 21.1683 8.25ZM16.5 15.75C16.0858 15.75 15.75 16.0858 15.75 16.5C15.75 16.9142 16.0858 17.25 16.5 17.25C16.9142 17.25 17.25 16.9142 17.25 16.5C17.25 16.0858 16.9142 15.75 16.5 15.75ZM14.25 16.5C14.25 15.2574 15.2574 14.25 16.5 14.25C17.7426 14.25 18.75 15.2574 18.75 16.5C18.75 17.7426 17.7426 18.75 16.5 18.75C15.2574 18.75 14.25 17.7426 14.25 16.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <strong>
+                                  {"Probation review"}
+                                </strong>
+                                <p>
+                                  {"Tue 3 Feb · with Roger Lin"}
+                                </p>
+                              </div>
+                              <span className={"sb-when"}>
+                                {"In 81 days"}
+                              </span>
+                            </li>
+                          </ul>
+                        </section>
+                        <div className={"sb-cards"}>
+                          <section className={"sb-card"} aria-label={"Contract"}>
+                            <h3>
+                              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-document-text-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                                <path d={"M10.9436 1.25H13.0564C14.8942 1.24998 16.3498 1.24997 17.489 1.40314C18.6614 1.56076 19.6104 1.89288 20.3588 2.64124C21.1071 3.38961 21.4392 4.33856 21.5969 5.51098C21.75 6.65019 21.75 8.10583 21.75 9.94359V14.0564C21.75 15.8942 21.75 17.3498 21.5969 18.489C21.4392 19.6614 21.1071 20.6104 20.3588 21.3588C19.6104 22.1071 18.6614 22.4392 17.489 22.5969C16.3498 22.75 14.8942 22.75 13.0564 22.75H10.9436C9.10583 22.75 7.65019 22.75 6.51098 22.5969C5.33856 22.4392 4.38961 22.1071 3.64124 21.3588C2.89288 20.6104 2.56076 19.6614 2.40314 18.489C2.24997 17.3498 2.24998 15.8942 2.25 14.0564V9.94358C2.24998 8.10582 2.24997 6.65019 2.40314 5.51098C2.56076 4.33856 2.89288 3.38961 3.64124 2.64124C4.38961 1.89288 5.33856 1.56076 6.51098 1.40314C7.65019 1.24997 9.10582 1.24998 10.9436 1.25ZM6.71085 2.88976C5.70476 3.02502 5.12511 3.27869 4.7019 3.7019C4.27869 4.12511 4.02502 4.70476 3.88976 5.71085C3.75159 6.73851 3.75 8.09318 3.75 10V14C3.75 15.9068 3.75159 17.2615 3.88976 18.2892C4.02502 19.2952 4.27869 19.8749 4.7019 20.2981C5.12511 20.7213 5.70476 20.975 6.71085 21.1102C7.73851 21.2484 9.09318 21.25 11 21.25H13C14.9068 21.25 16.2615 21.2484 17.2892 21.1102C18.2952 20.975 18.8749 20.7213 19.2981 20.2981C19.7213 19.8749 19.975 19.2952 20.1102 18.2892C20.2484 17.2615 20.25 15.9068 20.25 14V10C20.25 8.09318 20.2484 6.73851 20.1102 5.71085C19.975 4.70476 19.7213 4.12511 19.2981 3.7019C18.8749 3.27869 18.2952 3.02502 17.2892 2.88976C16.2615 2.75159 14.9068 2.75 13 2.75H11C9.09318 2.75 7.73851 2.75159 6.71085 2.88976ZM7.25 8C7.25 7.58579 7.58579 7.25 8 7.25H16C16.4142 7.25 16.75 7.58579 16.75 8C16.75 8.41421 16.4142 8.75 16 8.75H8C7.58579 8.75 7.25 8.41421 7.25 8ZM7.25 12C7.25 11.5858 7.58579 11.25 8 11.25H16C16.4142 11.25 16.75 11.5858 16.75 12C16.75 12.4142 16.4142 12.75 16 12.75H8C7.58579 12.75 7.25 12.4142 7.25 12ZM7.25 16C7.25 15.5858 7.58579 15.25 8 15.25H13C13.4142 15.25 13.75 15.5858 13.75 16C13.75 16.4142 13.4142 16.75 13 16.75H8C7.58579 16.75 7.25 16.4142 7.25 16Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                              </svg>
+                              {"Contract"}
+                            </h3>
+                            <div className={"sb-doc"}>
+                              <span className={"sb-doc-thumb"} aria-hidden={"true"}>
+                                <i />
+                                <i />
+                                <i />
+                                <i />
+                              </span>
+                              <div>
+                                <strong>
+                                  {"Employment contract.pdf"}
+                                </strong>
+                                <p>
+                                  {"Signed 28 Oct · 6 pages"}
+                                </p>
+                              </div>
+                            </div>
+                            <dl className={"sb-terms"}>
+                              <div>
+                                <dt>
+                                  {"Start date"}
+                                </dt>
+                                <dd>
+                                  {"3 Nov 2026"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  {"Probation"}
+                                </dt>
+                                <dd>
+                                  {"3 months"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  {"Notice"}
+                                </dt>
+                                <dd>
+                                  {"1 month"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  {"Hours"}
+                                </dt>
+                                <dd>
+                                  {"40 per week"}
+                                </dd>
+                              </div>
+                            </dl>
+                          </section>
+                          <section className={"sb-card"} aria-label={"November KPIs"}>
+                            <h3>
+                              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-target-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                                <path d={"M9.25 12C9.25 11.5858 9.58579 11.25 10 11.25H11.25V10C11.25 9.58579 11.5858 9.25 12 9.25C12.4142 9.25 12.75 9.58579 12.75 10V11.25H14C14.4142 11.25 14.75 11.5858 14.75 12C14.75 12.4142 14.4142 12.75 14 12.75H12.75V14C12.75 14.4142 12.4142 14.75 12 14.75C11.5858 14.75 11.25 14.4142 11.25 14V12.75H10C9.58579 12.75 9.25 12.4142 9.25 12Z"} fill={"currentColor"} />
+                                <path d={"M12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 17.9371 6.06294 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12C22.75 6.06294 17.9371 1.25 12 1.25ZM11.25 2.77997C6.7395 3.14188 3.14188 6.7395 2.77997 11.25H5C5.41421 11.25 5.75 11.5858 5.75 12C5.75 12.4142 5.41421 12.75 5 12.75H2.77997C3.14188 17.2605 6.7395 20.8581 11.25 21.22V19C11.25 18.5858 11.5858 18.25 12 18.25C12.4142 18.25 12.75 18.5858 12.75 19V21.22C17.2605 20.8581 20.8581 17.2605 21.22 12.75H19C18.5858 12.75 18.25 12.4142 18.25 12C18.25 11.5858 18.5858 11.25 19 11.25H21.22C20.8581 6.7395 17.2605 3.14188 12.75 2.77997V5C12.75 5.41421 12.4142 5.75 12 5.75C11.5858 5.75 11.25 5.41421 11.25 5V2.77997Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                              </svg>
+                              {"November KPIs"}
+                            </h3>
+                            <dl className={"sb-terms sb-kpis"}>
+                              <div>
+                                <dt>
+                                  {"Onboarding steps done"}
+                                </dt>
+                                <dd>
+                                  <span className={"sb-kpi-bar"}>
+                                    <i style={{ "width": "75%" } as CSSProperties} />
+                                  </span>
+                                  <span className={"sb-kpi-count"}>
+                                    {"9/12"}
+                                  </span>
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  {"Team 1:1s held"}
+                                </dt>
+                                <dd>
+                                  <span className={"sb-kpi-bar"}>
+                                    <i style={{ "width": "80%" } as CSSProperties} />
+                                  </span>
+                                  <span className={"sb-kpi-count"}>
+                                    {"4/5"}
+                                  </span>
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  {"Design reviews led"}
+                                </dt>
+                                <dd>
+                                  <span className={"sb-kpi-bar"}>
+                                    <i style={{ "width": "75%" } as CSSProperties} />
+                                  </span>
+                                  <span className={"sb-kpi-count"}>
+                                    {"3/4"}
+                                  </span>
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>
+                                  {"System tickets closed"}
+                                </dt>
+                                <dd>
+                                  <span className={"sb-kpi-bar"}>
+                                    <i style={{ "width": "73.33333333333333%" } as CSSProperties} />
+                                  </span>
+                                  <span className={"sb-kpi-count"}>
+                                    {"11/15"}
+                                  </span>
+                                </dd>
+                              </div>
+                            </dl>
+                            <div className={"sb-total"}>
+                              <span>
+                                {"Month to date "}
+                                <span className={"platform-status  "}>
+                                  <i />
+                                  {"On track"}
+                                </span>
+                              </span>
+                              <strong>
+                                {"76%"}
+                              </strong>
+                            </div>
+                          </section>
+                        </div>
+                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-earnings"} role={"group"} aria-label={"Earnings to date"}>
+                          <div className={"flex flex-wrap items-center gap-x-6 gap-y-4"}>
+                            <div data-slot={"pay-breakdown-chart-figure"} className={"flex min-w-[200px] flex-1 flex-col gap-2.5"}>
+                              <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
+                                {"Gross earnings to date"}
+                              </p>
+                              <p data-slot={"pay-breakdown-chart-revenue"} className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
+                                {"$3,019.50"}
+                              </p>
+                            </div>
+                            <div data-slot={"pay-breakdown-chart-figure"} className={"flex min-w-[200px] flex-1 flex-col gap-2.5"}>
+                              <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
+                                {"Nett earnings to date"}
+                              </p>
+                              <p data-slot={"pay-breakdown-chart-expenses"} className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
+                                {"$2,066.95"}
+                              </p>
+                            </div>
+                            <span data-slot={"pay-breakdown-chart-manage"} className={"flex shrink-0"}>
+                              <button type={"button"} data-slot={"chart-button"} data-variant={"secondary"} className={"relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 typo-label-03-medium whitespace-nowrap outline-none select-none transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary-blue-500/40 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 bg-surface-white p-2.5 [&_svg]:text-icon-soft shadow-[0_1px_2px_rgb(40_40_40/0.08),0_0_0_1px_#ececec] hover:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] data-[state=open]:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] rounded-full text-fg-normal"}>
+                                <svg width={"16"} height={"16"} viewBox={"0 0 16 16"} fill={"currentColor"} aria-hidden={"true"} data-slot={"icon"}>
+                                  <path fillRule={"evenodd"} clipRule={"evenodd"} d={"M6.49499 14.3695L6.05998 13.4056C5.90499 13.0615 5.64323 12.7748 5.31236 12.5867C4.9813 12.3985 4.59832 12.3184 4.21822 12.3577L3.15385 12.4693C2.83704 12.5022 2.51737 12.4438 2.23351 12.3014C1.94965 12.1589 1.71377 11.9385 1.5544 11.6667C1.39498 11.395 1.31903 11.0835 1.33577 10.7701C1.3525 10.4567 1.4612 10.1548 1.64868 9.90104L2.27886 9.04793C2.5036 8.74343 2.62463 8.37658 2.62456 8.00008C2.62463 7.62358 2.5036 7.25674 2.27886 6.95223L1.64868 6.09912C1.4612 5.84537 1.3525 5.54347 1.33577 5.23004C1.31903 4.91662 1.39498 4.60514 1.5544 4.33341C1.71361 4.06152 1.94947 3.84097 2.23337 3.69851C2.51727 3.55606 2.83702 3.4978 3.15385 3.53082L4.22153 3.64245C4.60162 3.68178 4.98461 3.60164 5.31567 3.41349C5.64531 3.2248 5.90586 2.93814 6.05998 2.5946L6.49499 1.63067C6.62431 1.34374 6.83535 1.09994 7.10252 0.928841C7.36969 0.757742 7.68151 0.666697 8.00016 0.666748C8.31881 0.666697 8.63063 0.757742 8.8978 0.928841C9.16497 1.09994 9.37602 1.34374 9.50533 1.63067L9.94365 2.5946C10.0978 2.93814 10.3583 3.2248 10.688 3.41349C11.019 3.60164 11.402 3.68178 11.7821 3.64245L12.8465 3.53082C13.1633 3.4978 13.4831 3.55606 13.767 3.69851C14.0509 3.84097 14.2867 4.06152 14.4459 4.33341C14.6053 4.60514 14.6813 4.91662 14.6646 5.23004C14.6478 5.54347 14.5391 5.84537 14.3516 6.09912L13.7215 6.95223C13.4967 7.25674 13.3757 7.62358 13.3758 8.00008C13.3739 8.37761 13.4938 8.74598 13.7182 9.05201L14.3483 9.90512C14.5358 10.1589 14.6445 10.4608 14.6612 10.7742C14.678 11.0876 14.602 11.3991 14.4426 11.6708C14.2834 11.9427 14.0476 12.1633 13.7637 12.3057C13.4798 12.4482 13.16 12.5064 12.8432 12.4734L11.7788 12.3618C11.3987 12.3225 11.0157 12.4026 10.6847 12.5907C10.3557 12.7784 10.0952 13.0635 9.94034 13.4056L9.50533 14.3695C9.37602 14.6564 9.16497 14.9002 8.8978 15.0713C8.63063 15.2424 8.31881 15.3335 8.00016 15.3334C7.68151 15.3335 7.36969 15.2424 7.10252 15.0713C6.83535 14.9002 6.62431 14.6564 6.49499 14.3695ZM10.0002 8.00008C10.0002 9.10465 9.10473 10.0001 8.00016 10.0001C6.89559 10.0001 6.00016 9.10465 6.00016 8.00008C6.00016 6.89551 6.89559 6.00008 8.00016 6.00008C9.10473 6.00008 10.0002 6.89551 10.0002 8.00008Z"} />
+                                </svg>
+                                <span data-slot={"chart-button-label"} className={"hug-w px-0.5"}>
+                                  {"View payslip"}
+                                </span>
+                              </button>
+                            </span>
+                          </div>
+                          <div aria-hidden={"true"} data-slot={"pay-breakdown-chart-divider"} className={"h-px origin-left bg-border-soft"} />
+                          <div role={"slider"} tabIndex={0} aria-label={"Nett earnings to date by category"} aria-orientation={"horizontal"} aria-valuemin={1} aria-valuemax={10} aria-valuenow={1} aria-valuetext={"Normal hours, 3–6 Nov · 32 h: $1,006.08, 33.3% of gross earnings"} data-slot={"pay-breakdown-chart-meter"} className={"relative shrink-0 cursor-pointer touch-pan-y rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary-blue-500/40"} style={{ "height": "124px" } as CSSProperties}>
+                            <SxBarres
+                              categories={[
+                                { cle: "normal-hours", etiquette: "Normal hours", part: "75%", couleur: "purple", montants: [1006.08, 1257.6] },
+                                { cle: "overtime", etiquette: "Overtime", part: "10%", couleur: "blue", montants: [188.64, 125.76] },
+                                { cle: "benefits", etiquette: "Benefits", part: "9%", couleur: "orange", montants: [150, 64.29, 51.42] },
+                                { cle: "employer-contributions", etiquette: "Employer contributions", part: "6%", couleur: "green", montants: [128.57, 22.64, 24.5] },
+                              ]}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className={"sb-record-side"}>
+                        <div data-slot={"chart-card"} data-charts={""} className={"relative flex flex-col gap-6 overflow-hidden rounded-3xl bg-surface-white p-5 font-rounded text-fg-loud antialiased w-full sb-spend"} role={"group"} aria-label={"Spend on Anne-Marie"}>
+                          <div className={"flex items-center justify-between gap-4"}>
+                            <div className={"flex min-w-0 items-center gap-3"}>
+                              <span data-slot={"chart-icon-tile"} className={"relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-[13.2px] bg-primary-orange-500 text-fg-white [&_svg]:size-6 shadow-[0_8.8px_7.92px_-6.6px_rgb(0_0_0/0.16),0_4.4px_7.92px_rgb(1_1_1/0.08)]"}>
+                                <span aria-hidden={"true"} className={"absolute inset-x-0 -top-[19.8px] h-[37.4px] bg-linear-to-b/srgb from-white/60 to-white/0"} />
+                                <span className={"relative flex"}>
+                                  <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-wallet-money-outline"} style={{ "width": "22px", "height": "22px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                    <path d={"M20.9235 11.7502C20.9032 11.75 20.8766 11.75 20.8333 11.75H18.2308C16.8074 11.75 15.75 12.8087 15.75 14C15.75 15.1913 16.8074 16.25 18.2308 16.25H20.8333C20.8766 16.25 20.9032 16.25 20.9235 16.2498C20.9427 16.2496 20.948 16.2492 20.948 16.2492C21.154 16.2367 21.2427 16.0976 21.2495 16.0139C21.2495 16.0139 21.2497 16.0077 21.2498 15.9986C21.25 15.9808 21.25 15.9572 21.25 15.9167V12.0833C21.25 12.0609 21.25 12.0437 21.25 12.0297C21.2499 12.0185 21.2499 12.0093 21.2498 12.0014C21.2497 11.9924 21.2495 11.9861 21.2495 11.9861C21.2427 11.9024 21.154 11.7633 20.9479 11.7508C20.9479 11.7508 20.943 11.7504 20.9235 11.7502ZM20.8499 10.25C20.9163 10.25 20.9803 10.2499 21.0391 10.2535C21.9104 10.3066 22.681 10.9638 22.7458 11.8818C22.7501 11.942 22.75 12.0069 22.75 12.067C22.75 12.0725 22.75 12.0779 22.75 12.0833V15.9167C22.75 15.9221 22.75 15.9275 22.75 15.933C22.75 15.9931 22.7501 16.058 22.7458 16.1182C22.681 17.0362 21.9104 17.6934 21.0391 17.7465C20.9803 17.7501 20.9163 17.75 20.8499 17.75C20.8444 17.75 20.8389 17.75 20.8333 17.75H18.2308C16.0856 17.75 14.25 16.1224 14.25 14C14.25 11.8776 16.0856 10.25 18.2308 10.25H20.8333C20.8389 10.25 20.8444 10.25 20.8499 10.25Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                    <path d={"M19 14C19 14.5523 18.5523 15 18 15C17.4477 15 17 14.5523 17 14C17 13.4477 17.4477 13 18 13C18.5523 13 19 13.4477 19 14Z"} fill={"currentColor"} />
+                                    <path d={"M20.8499 10.25C20.9163 10.25 20.9803 10.2499 21.0391 10.2535C21.2645 10.2672 21.4832 10.3214 21.6847 10.4101C21.5777 8.80363 21.2831 7.56563 20.3588 6.64124C19.6104 5.89288 18.6614 5.56076 17.489 5.40313L17.4467 5.39754C17.4362 5.38977 17.4255 5.38223 17.4145 5.37492L13.679 2.89806C12.3758 2.03398 10.6242 2.03398 9.32102 2.89806L5.58554 5.37492C5.57453 5.38223 5.56377 5.38977 5.55327 5.39754L5.51098 5.40313C4.33856 5.56076 3.38961 5.89288 2.64124 6.64124C1.89288 7.38961 1.56076 8.33856 1.40314 9.51098C1.24997 10.6502 1.24998 12.1058 1.25 13.9436V14.0564C1.24998 15.8942 1.24997 17.3498 1.40314 18.489C1.56076 19.6614 1.89288 20.6104 2.64124 21.3588C3.38961 22.1071 4.33856 22.4392 5.51098 22.5969C6.65019 22.75 8.10583 22.75 9.94359 22.75H13.0564C14.8942 22.75 16.3498 22.75 17.489 22.5969C18.6614 22.4392 19.6104 22.1071 20.3588 21.3588C21.2831 20.4344 21.5777 19.1964 21.6847 17.5899C21.4832 17.6786 21.2645 17.7328 21.0391 17.7465C20.9803 17.7501 20.9163 17.75 20.8499 17.75L20.8333 17.75H20.1679C20.0541 19.0915 19.7966 19.7996 19.2981 20.2981C18.8749 20.7213 18.2952 20.975 17.2892 21.1102C16.2615 21.2484 14.9068 21.25 13 21.25H10C8.09318 21.25 6.73851 21.2484 5.71085 21.1102C4.70476 20.975 4.12511 20.7213 3.7019 20.2981C3.27869 19.8749 3.02502 19.2952 2.88976 18.2892C2.75159 17.2615 2.75 15.9068 2.75 14C2.75 12.0932 2.75159 10.7385 2.88976 9.71085C3.02502 8.70476 3.27869 8.12511 3.7019 7.7019C4.12511 7.27869 4.70476 7.02502 5.71085 6.88976C6.73851 6.75159 8.09318 6.75 10 6.75H13C14.9068 6.75 16.2615 6.75159 17.2892 6.88976C18.2952 7.02502 18.8749 7.27869 19.2981 7.7019C19.7966 8.20043 20.0541 8.90854 20.1679 10.25H20.8333L20.8499 10.25ZM9.94358 5.25H13.0564C13.5729 5.24999 14.0592 5.24999 14.5168 5.25339L12.8501 4.14821C12.0493 3.61726 10.9507 3.61726 10.15 4.14821L8.48318 5.25339C8.94077 5.24999 9.42708 5.24999 9.94358 5.25Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                    <path d={"M6 9.25C5.58579 9.25 5.25 9.58579 5.25 10C5.25 10.4142 5.58579 10.75 6 10.75H10C10.4142 10.75 10.75 10.4142 10.75 10C10.75 9.58579 10.4142 9.25 10 9.25H6Z"} fill={"currentColor"} />
+                                    <path d={"M19 14C19 14.5523 18.5523 15 18 15C17.4477 15 17 14.5523 17 14C17 13.4477 17.4477 13 18 13C18.5523 13 19 13.4477 19 14Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  </svg>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_-4.4px_5.94px_rgb(0_0_0/0.08)]"} />
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent bg-linear-to-b/srgb from-primary-orange-500 to-primary-orange-700 bg-origin-border [mask:linear-gradient(#000_0_0)_padding-box_exclude,linear-gradient(#000_0_0)]"} />
+                              </span>
+                              <div className={"flex min-w-0 flex-col gap-1.5"}>
+                                <p className={"typo-heading-01-semibold -my-0.5 truncate py-0.5 text-fg-loud"}>
+                                  {"Spend on Anne-Marie"}
+                                </p>
+                                <p className={"typo-label-03-medium -my-0.5 truncate py-0.5 text-fg-soft"}>
+                                  {"$7,048.50 since her offer · 28 Oct"}
+                                </p>
+                              </div>
+                            </div>
+                            <button type={"button"} data-slot={"chart-button"} data-variant={"secondary"} className={"relative inline-flex shrink-0 cursor-pointer items-center justify-center gap-1 typo-label-03-medium whitespace-nowrap outline-none select-none transition-colors duration-200 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 bg-surface-white text-fg-loud [&_svg]:text-icon-soft shadow-[0_1px_2px_rgb(40_40_40/0.08),0_0_0_1px_#ececec] hover:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] data-[state=open]:bg-[color-mix(in_srgb,var(--surface-white),#000_12%)] rounded-full size-9 p-0 focus-visible:ring-primary-orange-500/40"} aria-label={"More options"}>
+                              <svg width={"24"} height={"24"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"} strokeLinecap={"round"} strokeLinejoin={"round"} aria-hidden={"true"} data-slot={"icon"}>
+                                <path d={"M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12ZM20 12C20 12.5523 19.5523 13 19 13C18.4477 13 18 12.5523 18 12C18 11.4477 18.4477 11 19 11C19.5523 11 20 11.4477 20 12ZM6 12C6 12.5523 5.55228 13 5 13C4.44772 13 4 12.5523 4 12C4 11.4477 4.44772 11 5 11C5.55228 11 6 11.4477 6 12Z"} />
+                              </svg>
+                            </button>
+                          </div>
+                          <div data-slot={"spend-column-chart-born"} className={"flex flex-col items-start gap-2.5"}>
+                            <p className={"typo-label-03-medium hug-w whitespace-nowrap text-fg-soft"}>
+                              {"Direct compensation"}
+                            </p>
+                            <p className={"typo-heading-04-semibold hug-w whitespace-nowrap text-fg-loud"}>
+                              {"$2,578.08 · 37%"}
+                            </p>
+                          </div>
+                          <div className={"flex flex-col gap-2"}>
+                            <div role={"group"} aria-label={"Spend on Anne-Marie by age"} data-slot={"spend-column-chart-plot"} className={"relative isolate flex gap-2"} style={{ "height": "208.921px" } as CSSProperties}>
+                              <svg aria-hidden={"true"} className={"pointer-events-none absolute size-0 overflow-hidden"}>
+                                <defs>
+                                  <linearGradient id={"_R_ruhtavb_-grey-right"} gradientUnits={"userSpaceOnUse"} x1={"35.8613"} y1={"8.0502"} x2={"35.8613"} y2={"188.448"}>
+                                    <stop style={{ "stopColor": "var(--surface-disable)" } as CSSProperties} />
+                                    <stop offset={"1"} style={{ "stopColor": "var(--surface-subdued)" } as CSSProperties} />
+                                  </linearGradient>
+                                  <linearGradient id={"_R_ruhtavb_-grey-left"} gradientUnits={"userSpaceOnUse"} x1={"23.9673"} y1={"0"} x2={"0.181152"} y2={"0"}>
+                                    <stop style={{ "stopColor": "var(--surface-disable)" } as CSSProperties} />
+                                    <stop offset={"1"} style={{ "stopColor": "var(--surface-subdued)" } as CSSProperties} />
+                                  </linearGradient>
+                                  <linearGradient id={"_R_ruhtavb_-lit-right"} gradientUnits={"userSpaceOnUse"} x1={"23.9683"} y1={"0"} x2={"47.7538"} y2={"0"}>
+                                    <stop style={{ "stopColor": "var(--primary-orange-100)" } as CSSProperties} />
+                                    <stop offset={"1"} style={{ "stopColor": "var(--primary-orange-300)" } as CSSProperties} />
+                                  </linearGradient>
+                                  <linearGradient id={"_R_ruhtavb_-lit-left"} gradientUnits={"userSpaceOnUse"} x1={"23.9672"} y1={"0"} x2={"0.181641"} y2={"0"}>
+                                    <stop style={{ "stopColor": "var(--primary-orange-100)" } as CSSProperties} />
+                                    <stop offset={"1"} style={{ "stopColor": "var(--primary-orange-300)" } as CSSProperties} />
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Pay: $2.6k"} aria-pressed={"true"} tabIndex={0} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                                <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "188.921px" } as CSSProperties}>
+                                  <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-surface-subdued"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-grey-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                  <g data-slot={"spend-column-chart-bar-lit"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-100"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-lit-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-primary-orange-100"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-lit-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                </svg>
+                                <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "192.921px" } as CSSProperties}>
+                                  <span data-slot={"spend-column-chart-value-text"} data-value={"2578.08"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-semibold text-primary-orange-500"}>
+                                    {"$2.6k"}
+                                  </span>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
+                              </button>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Payroll: $65"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                                <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "4.773px" } as CSSProperties}>
+                                  <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-surface-subdued"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-grey-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                  <g data-slot={"spend-column-chart-bar-lit"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-lit-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-primary-orange-100"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-lit-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                </svg>
+                                <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "8.773px" } as CSSProperties}>
+                                  <span data-slot={"spend-column-chart-value-text"} data-value={"65.14"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
+                                    {"$65"}
+                                  </span>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
+                              </button>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Health: $394"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                                <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "28.893px" } as CSSProperties}>
+                                  <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-surface-subdued"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-grey-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                  <g data-slot={"spend-column-chart-bar-lit"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-lit-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-primary-orange-100"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-lit-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                </svg>
+                                <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "32.893px" } as CSSProperties}>
+                                  <span data-slot={"spend-column-chart-value-text"} data-value={"394.28"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
+                                    {"$394"}
+                                  </span>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
+                              </button>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Training: $450"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                                <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "32.976px" } as CSSProperties}>
+                                  <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-surface-subdued"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-grey-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                  <g data-slot={"spend-column-chart-bar-lit"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-lit-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-primary-orange-100"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-lit-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                </svg>
+                                <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "36.976px" } as CSSProperties}>
+                                  <span data-slot={"spend-column-chart-value-text"} data-value={"450"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
+                                    {"$450"}
+                                  </span>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
+                              </button>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Hiring: $2.2k"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                                <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "163.047px" } as CSSProperties}>
+                                  <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-surface-subdued"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-grey-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                  <g data-slot={"spend-column-chart-bar-lit"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-lit-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-primary-orange-100"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-lit-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                </svg>
+                                <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "167.047px" } as CSSProperties}>
+                                  <span data-slot={"spend-column-chart-value-text"} data-value={"2225"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
+                                    {"$2.2k"}
+                                  </span>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
+                              </button>
+                              <button type={"button"} data-slot={"spend-column-chart-column"} aria-label={"Tech: $1.3k"} aria-pressed={"false"} tabIndex={-1} className={"group/column relative min-w-0 flex-1 cursor-pointer outline-none"}>
+                                <svg aria-hidden={"true"} data-slot={"spend-column-chart-bar"} viewBox={"0 0 48 188.921"} preserveAspectRatio={"none"} className={"pointer-events-none absolute bottom-0"} style={{ "left": "calc(50% - 24px)", "width": "48px", "height": "97.902px" } as CSSProperties}>
+                                  <g data-slot={"spend-column-chart-bar-grey"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-[0.32]"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-grey-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-surface-subdued"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-grey-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                  <g data-slot={"spend-column-chart-bar-lit"} className={"transition-opacity duration-300 motion-reduce:transition-none opacity-0"}>
+                                    <path d={"M23.9683 15.685L47.0527 8.2763V181.04L23.9683 188.449Z"} fill={"url(#_R_ruhtavb_-lit-right)"} />
+                                    <path d={"M23.9672 0.0161L47.7527 8.05164L23.9672 15.6854L0.181641 8.05164Z"} className={"fill-primary-orange-100"} />
+                                    <path d={"M0.881216 8.2758L23.9672 15.6849V188.449L0.881216 180.6494Z"} fill={"url(#_R_ruhtavb_-lit-left)"} />
+                                    <path d={"M23.6187 15.6855h0.699575v172.764h-0.699575ZM23.9683 16.4893L23.9684 15.6856L47.7527 8.05167L47.7527 8.8553ZM24.1562 16.4884L24.1561 15.6847L0.181752 8.05066L0.181702 8.85444ZM23.9683 0.0161L23.9684 0.81981L47.7527 8.4537L47.7527 7.65007ZM24.1562 0.016L24.1561 0.81974L0.181752 8.45374L0.181702 7.64996ZM24.1994 188.618C23.8191 188.744 23.4483 188.47 23.4484 188.063L47.7536 180.011L47.7536 180.815ZM23.5824 188.628C23.966 188.749 24.3359 188.472 24.3359 188.063L0.180678 180.413L0.18066 181.217Z"} className={"fill-surface-white"} />
+                                  </g>
+                                </svg>
+                                <span aria-hidden={"true"} data-slot={"spend-column-chart-value"} className={"pointer-events-none absolute left-1/2 z-[1] -translate-x-1/2"} style={{ "bottom": "101.902px" } as CSSProperties}>
+                                  <span data-slot={"spend-column-chart-value-text"} data-value={"1336"} className={"hug-w block whitespace-nowrap transition-colors duration-200 typo-label-03-medium text-fg-soft"}>
+                                    {"$1.3k"}
+                                  </span>
+                                </span>
+                                <span aria-hidden={"true"} className={"pointer-events-none absolute -inset-1 z-[1] rounded-xl opacity-0 ring-2 ring-primary-orange-500/40 transition-opacity duration-150 group-focus-visible/column:opacity-100"} />
+                              </button>
+                              <span aria-hidden={"true"} className={"pointer-events-none absolute inset-x-0 bg-linear-to-b/srgb from-surface-white/0 to-surface-white to-[83.58%]"} style={{ "top": "151px", "height": "58px" } as CSSProperties} />
+                            </div>
+                            <div aria-hidden={"true"} className={"relative flex gap-2"}>
+                              <span data-slot={"spend-column-chart-pill"} className={"absolute inset-y-0 rounded-lg bg-surface-muted"} style={{ "left": "calc(0 * ((100% - 40px) / 6 + 8px))", "width": "calc((100% - 40px) / 6)" } as CSSProperties} />
+                              <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
+                                <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-semibold text-fg-white"}>
+                                  {"Pay"}
+                                </span>
+                              </span>
+                              <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
+                                <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
+                                  {"Payroll"}
+                                </span>
+                              </span>
+                              <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
+                                <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
+                                  {"Health"}
+                                </span>
+                              </span>
+                              <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
+                                <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
+                                  {"Training"}
+                                </span>
+                              </span>
+                              <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
+                                <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
+                                  {"Hiring"}
+                                </span>
+                              </span>
+                              <span data-slot={"spend-column-chart-axis-label"} className={"relative flex min-w-0 flex-1 justify-center p-1.5"}>
+                                <span className={"-my-0.5 truncate py-0.5 text-center transition-colors duration-200 typo-label-02-regular text-fg-soft"}>
+                                  {"Tech"}
+                                </span>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <section className={"sb-block"} aria-label={"Activity"}>
+                          <div className={"sb-activity-head"}>
+                            <h3>
+                              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} aria-hidden={"true"} className={"solar solar-history-outline"} style={{ "width": "15px", "height": "15px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"}>
+                                <path d={"M5.07868 5.06897C8.87402 1.27899 15.0437 1.31929 18.8622 5.13784C22.6824 8.95803 22.7211 15.1313 18.9262 18.9263C15.1312 22.7212 8.95793 22.6825 5.13774 18.8623C2.87389 16.5984 1.93904 13.51 2.34047 10.5813C2.39672 10.1709 2.775 9.88383 3.18537 9.94008C3.59575 9.99633 3.88282 10.3746 3.82658 10.785C3.4866 13.2653 4.27782 15.8811 6.1984 17.8016C9.44288 21.0461 14.6664 21.0647 17.8655 17.8656C21.0646 14.6665 21.046 9.44298 17.8015 6.1985C14.5587 2.95568 9.33889 2.93545 6.13935 6.12963L6.88705 6.13339C7.30126 6.13547 7.63535 6.47294 7.63327 6.88715C7.63119 7.30136 7.29372 7.63545 6.87951 7.63337L4.33396 7.62058C3.92269 7.61851 3.58981 7.28562 3.58774 6.87436L3.57495 4.3288C3.57286 3.9146 3.90696 3.57713 4.32117 3.57505C4.73538 3.57296 5.07285 3.90706 5.07493 4.32127L5.07868 5.06897ZM11.9999 7.24998C12.4141 7.24998 12.7499 7.58577 12.7499 7.99998V11.6893L15.0302 13.9697C15.3231 14.2625 15.3231 14.7374 15.0302 15.0303C14.7373 15.3232 14.2624 15.3232 13.9696 15.0303L11.2499 12.3106V7.99998C11.2499 7.58577 11.5857 7.24998 11.9999 7.24998Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                              </svg>
+                              {"Activity"}
+                            </h3>
+                          </div>
+                          <ol className={"sb-timeline"}>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-file-check-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M12.25 2.83416C11.7896 2.75592 11.162 2.74999 10.0298 2.74999C8.11311 2.74999 6.75075 2.75157 5.71785 2.88981C4.70596 3.02524 4.12453 3.27927 3.7019 3.70189C3.27869 4.1251 3.02502 4.70475 2.88976 5.71084C2.75159 6.7385 2.75 8.09317 2.75 9.99999V14C2.75 15.9068 2.75159 17.2615 2.88976 18.2891C3.02502 19.2952 3.27869 19.8749 3.7019 20.2981C4.12511 20.7213 4.70476 20.975 5.71085 21.1102C6.73851 21.2484 8.09318 21.25 10 21.25H14C15.9068 21.25 17.2615 21.2484 18.2892 21.1102C19.2952 20.975 19.8749 20.7213 20.2981 20.2981C20.7213 19.8749 20.975 19.2952 21.1102 18.2891C21.2484 17.2615 21.25 15.9068 21.25 14V13.5629C21.25 12.0269 21.2392 11.2987 21.0762 10.75H17.9463C16.8135 10.75 15.8877 10.75 15.1569 10.6518C14.3929 10.5491 13.7306 10.3268 13.2019 9.79809C12.6732 9.26939 12.4509 8.60706 12.3482 7.8431C12.25 7.11224 12.25 6.18651 12.25 5.05368V2.83416ZM13.75 3.60944V4.99999C13.75 6.1997 13.7516 7.02404 13.8348 7.64323C13.9152 8.24085 14.059 8.53389 14.2626 8.73743C14.4661 8.94097 14.7591 9.0848 15.3568 9.16515C15.976 9.2484 16.8003 9.24999 18 9.24999H20.0195C19.723 8.96244 19.3432 8.61791 18.85 8.17401L14.8912 4.61111C14.4058 4.17427 14.0446 3.85181 13.75 3.60944ZM10.1755 1.24996C11.5601 1.24959 12.4546 1.24935 13.2779 1.56529C14.1012 1.88123 14.7632 2.47728 15.7873 3.39949C15.8226 3.43133 15.8584 3.46355 15.8947 3.49617L19.8534 7.05906C19.8956 7.09699 19.9372 7.13444 19.9783 7.17143C21.162 8.23608 21.9274 8.92452 22.3391 9.84896C22.7508 10.7734 22.7505 11.8029 22.75 13.3949C22.75 13.4502 22.75 13.5062 22.75 13.5629V14.0564C22.75 15.8942 22.75 17.3498 22.5969 18.489C22.4392 19.6614 22.1071 20.6104 21.3588 21.3587C20.6104 22.1071 19.6614 22.4392 18.489 22.5969C17.3498 22.75 15.8942 22.75 14.0564 22.75H9.94359C8.10583 22.75 6.65019 22.75 5.51098 22.5969C4.33856 22.4392 3.38961 22.1071 2.64124 21.3587C1.89288 20.6104 1.56076 19.6614 1.40314 18.489C1.24997 17.3498 1.24998 15.8942 1.25 14.0564V9.94357C1.24998 8.10581 1.24997 6.65018 1.40314 5.51097C1.56076 4.33854 1.89288 3.3896 2.64124 2.64123C3.39019 1.89228 4.34232 1.56053 5.51887 1.40306C6.66283 1.24996 8.1257 1.24997 9.97352 1.24999L10.0298 1.24999C10.0789 1.24999 10.1275 1.24998 10.1755 1.24996Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M10.4983 14.4394C10.8079 14.7146 10.8357 15.1887 10.5606 15.4983L7.89389 18.4983C7.75157 18.6584 7.54756 18.75 7.33333 18.75C7.11911 18.75 6.9151 18.6584 6.77278 18.4983L5.43944 16.9983C5.16426 16.6887 5.19214 16.2146 5.50173 15.9394C5.81132 15.6642 6.28537 15.6921 6.56056 16.0017L7.33333 16.8711L9.43944 14.5017C9.71463 14.1921 10.1887 14.1642 10.4983 14.4394Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Contract signed"}
+                                  </strong>
+                                  {" by Anne-Marie and Roger"}
+                                </p>
+                                <small>
+                                  {"E-signature · 28 Oct"}
+                                </small>
+                              </div>
+                            </li>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-passport-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M12 9.25002C9.92893 9.25002 8.25 10.929 8.25 13C8.25 15.0711 9.92893 16.75 12 16.75C14.0711 16.75 15.75 15.0711 15.75 13C15.75 10.929 14.0711 9.25002 12 9.25002ZM9.75 13C9.75 11.7574 10.7574 10.75 12 10.75C13.2426 10.75 14.25 11.7574 14.25 13C14.25 14.2427 13.2426 15.25 12 15.25C10.7574 15.25 9.75 14.2427 9.75 13Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M10 18.25C9.58579 18.25 9.25 18.5858 9.25 19C9.25 19.4142 9.58579 19.75 10 19.75H14C14.4142 19.75 14.75 19.4142 14.75 19C14.75 18.5858 14.4142 18.25 14 18.25H10Z"} fill={"currentColor"} />
+                                  <path d={"M15.6111 1.5837C17.2678 1.34703 18.75 2.63255 18.75 4.30606V5.68254C19.9395 6.31129 20.75 7.561 20.75 9.00002V19C20.75 21.0711 19.0711 22.75 17 22.75H7C4.92893 22.75 3.25 21.0711 3.25 19V5.00002H3.25136C3.25046 4.97645 3.25 4.95276 3.25 4.92897C3.25 4.02272 3.91638 3.25437 4.81353 3.12621L15.6111 1.5837ZM5.07107 6.75004L5.06244 6.75002H4.75V19C4.75 20.2427 5.75736 21.25 7 21.25H17C18.2426 21.25 19.25 20.2427 19.25 19V9.00002C19.25 7.76058 18.2478 6.75521 17.0096 6.75004H5.07107ZM17.25 5.25004H17.0125L17 5.25002H5.0674C4.89177 5.24805 4.75 5.10507 4.75 4.92897C4.75 4.76919 4.86749 4.63373 5.02566 4.61113L15.8232 3.06862C16.5763 2.96104 17.25 3.54537 17.25 4.30606V5.25004Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Passport verified"}
+                                  </strong>
+                                  {" against the contract"}
+                                </p>
+                                <small>
+                                  {"Synnax agent · 30 Oct"}
+                                </small>
+                              </div>
+                            </li>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-users-group-rounded-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M9 1.25C6.37665 1.25 4.25 3.37665 4.25 6C4.25 8.62335 6.37665 10.75 9 10.75C11.6234 10.75 13.75 8.62335 13.75 6C13.75 3.37665 11.6234 1.25 9 1.25ZM5.75 6C5.75 4.20507 7.20507 2.75 9 2.75C10.7949 2.75 12.25 4.20507 12.25 6C12.25 7.79493 10.7949 9.25 9 9.25C7.20507 9.25 5.75 7.79493 5.75 6Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M15 2.25C14.5858 2.25 14.25 2.58579 14.25 3C14.25 3.41421 14.5858 3.75 15 3.75C16.2426 3.75 17.25 4.75736 17.25 6C17.25 7.24264 16.2426 8.25 15 8.25C14.5858 8.25 14.25 8.58579 14.25 9C14.25 9.41421 14.5858 9.75 15 9.75C17.0711 9.75 18.75 8.07107 18.75 6C18.75 3.92893 17.0711 2.25 15 2.25Z"} fill={"currentColor"} />
+                                  <path d={"M3.67815 13.5204C5.07752 12.7208 6.96067 12.25 9 12.25C11.0393 12.25 12.9225 12.7208 14.3219 13.5204C15.7 14.3079 16.75 15.5101 16.75 17C16.75 18.4899 15.7 19.6921 14.3219 20.4796C12.9225 21.2792 11.0393 21.75 9 21.75C6.96067 21.75 5.07752 21.2792 3.67815 20.4796C2.3 19.6921 1.25 18.4899 1.25 17C1.25 15.5101 2.3 14.3079 3.67815 13.5204ZM4.42236 14.8228C3.26701 15.483 2.75 16.2807 2.75 17C2.75 17.7193 3.26701 18.517 4.42236 19.1772C5.55649 19.8253 7.17334 20.25 9 20.25C10.8267 20.25 12.4435 19.8253 13.5776 19.1772C14.733 18.517 15.25 17.7193 15.25 17C15.25 16.2807 14.733 15.483 13.5776 14.8228C12.4435 14.1747 10.8267 13.75 9 13.75C7.17334 13.75 5.55649 14.1747 4.42236 14.8228Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M18.1607 13.2674C17.7561 13.1787 17.3561 13.4347 17.2674 13.8393C17.1787 14.2439 17.4347 14.6439 17.8393 14.7326C18.6317 14.9064 19.2649 15.2048 19.6829 15.5468C20.1014 15.8892 20.25 16.2237 20.25 16.5C20.25 16.7507 20.1294 17.045 19.7969 17.3539C19.462 17.665 18.9475 17.9524 18.2838 18.1523C17.8871 18.2717 17.6624 18.69 17.7818 19.0867C17.9013 19.4833 18.3196 19.708 18.7162 19.5886C19.5388 19.3409 20.2743 18.9578 20.8178 18.4529C21.3637 17.9457 21.75 17.2786 21.75 16.5C21.75 15.6352 21.2758 14.912 20.6328 14.3859C19.9893 13.8593 19.1225 13.4783 18.1607 13.2674Z"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Added to Design"}
+                                  </strong>
+                                  {", reporting to Roger Lin"}
+                                </p>
+                                <small>
+                                  {"HRIS · 31 Oct"}
+                                </small>
+                              </div>
+                            </li>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-transfer-horizontal-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M10.0068 3.44714C10.3121 3.72703 10.3328 4.20146 10.0529 4.5068L5.70494 9.25H20C20.4142 9.25 20.75 9.58579 20.75 10C20.75 10.4142 20.4142 10.75 20 10.75H4.00002C3.70259 10.75 3.43327 10.5742 3.3135 10.302C3.19374 10.0298 3.24617 9.71246 3.44715 9.49321L8.94715 3.49321C9.22704 3.18787 9.70147 3.16724 10.0068 3.44714Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                  <path d={"M20.6865 13.698C20.5668 13.4258 20.2974 13.25 20 13.25L4.00001 13.25C3.5858 13.25 3.25001 13.5858 3.25001 14C3.25001 14.4142 3.5858 14.75 4.00001 14.75L18.2951 14.75L13.9472 19.4932C13.6673 19.7985 13.6879 20.273 13.9932 20.5529C14.2986 20.8328 14.773 20.8121 15.0529 20.5068L20.5529 14.5068C20.7539 14.2876 20.8063 13.9703 20.6865 13.698Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Bank account"}
+                                  </strong>
+                                  {" verified with a test deposit"}
+                                </p>
+                                <small>
+                                  {"Bank · 2 Nov"}
+                                </small>
+                              </div>
+                            </li>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-clipboard-check-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M7.26279 3.25871C7.38317 2.12953 8.33887 1.25 9.5 1.25H14.5C15.6611 1.25 16.6168 2.12953 16.7372 3.25871C17.5004 3.27425 18.1602 3.31372 18.7236 3.41721C19.4816 3.55644 20.1267 3.82168 20.6517 4.34661C21.2536 4.94853 21.5125 5.7064 21.6335 6.60651C21.75 7.47348 21.75 8.5758 21.75 9.94339V16.0531C21.75 17.4207 21.75 18.523 21.6335 19.39C21.5125 20.2901 21.2536 21.048 20.6517 21.6499C20.0497 22.2518 19.2919 22.5107 18.3918 22.6317C17.5248 22.7483 16.4225 22.7483 15.0549 22.7483H8.94513C7.57754 22.7483 6.47522 22.7483 5.60825 22.6317C4.70814 22.5107 3.95027 22.2518 3.34835 21.6499C2.74643 21.048 2.48754 20.2901 2.36652 19.39C2.24996 18.523 2.24998 17.4207 2.25 16.0531V9.94339C2.24998 8.5758 2.24996 7.47348 2.36652 6.60651C2.48754 5.7064 2.74643 4.94853 3.34835 4.34661C3.87328 3.82168 4.51835 3.55644 5.27635 3.41721C5.83977 3.31372 6.49963 3.27425 7.26279 3.25871ZM7.26476 4.75913C6.54668 4.77447 5.99332 4.81061 5.54735 4.89253C4.98054 4.99664 4.65246 5.16382 4.40901 5.40727C4.13225 5.68403 3.9518 6.07261 3.85315 6.80638C3.75159 7.56173 3.75 8.56285 3.75 9.99826V15.9983C3.75 17.4337 3.75159 18.4348 3.85315 19.1901C3.9518 19.9239 4.13225 20.3125 4.40901 20.5893C4.68577 20.866 5.07435 21.0465 5.80812 21.1451C6.56347 21.2467 7.56458 21.2483 9 21.2483H15C16.4354 21.2483 17.4365 21.2467 18.1919 21.1451C18.9257 21.0465 19.3142 20.866 19.591 20.5893C19.8678 20.3125 20.0482 19.9239 20.1469 19.1901C20.2484 18.4348 20.25 17.4337 20.25 15.9983V9.99826C20.25 8.56285 20.2484 7.56173 20.1469 6.80638C20.0482 6.07261 19.8678 5.68403 19.591 5.40727C19.3475 5.16382 19.0195 4.99664 18.4527 4.89253C18.0067 4.81061 17.4533 4.77447 16.7352 4.75913C16.6067 5.87972 15.655 6.75 14.5 6.75H9.5C8.345 6.75 7.39326 5.87972 7.26476 4.75913ZM9.5 2.75C9.08579 2.75 8.75 3.08579 8.75 3.5V4.5C8.75 4.91421 9.08579 5.25 9.5 5.25H14.5C14.9142 5.25 15.25 4.91421 15.25 4.5V3.5C15.25 3.08579 14.9142 2.75 14.5 2.75H9.5ZM15.5483 10.4883C15.8309 10.7911 15.8146 11.2657 15.5117 11.5483L11.226 15.5483C10.9379 15.8172 10.4907 15.8172 10.2025 15.5483L8.48826 13.9483C8.18545 13.6657 8.16908 13.1911 8.45171 12.8883C8.73433 12.5854 9.20893 12.5691 9.51174 12.8517L10.7143 13.9741L14.4883 10.4517C14.7911 10.1691 15.2657 10.1854 15.5483 10.4883Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Leave balance"}
+                                  </strong>
+                                  {" set to 18 days by policy"}
+                                </p>
+                                <small>
+                                  {"Handbook · 3 Nov"}
+                                </small>
+                              </div>
+                            </li>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-bill-list-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M7.09878 1.24995C7.14683 1.24997 7.19559 1.24999 7.24508 1.24999H16.7551C16.8045 1.24999 16.8533 1.24997 16.9014 1.24995C17.9181 1.2495 18.6178 1.2492 19.2072 1.45425C20.3201 1.84152 21.1842 2.73717 21.5547 3.86549L20.8421 4.09945L21.5547 3.8655C21.7507 4.46262 21.7505 5.17245 21.7501 6.22646C21.7501 6.27362 21.7501 6.32148 21.7501 6.37005V20.3742C21.7501 21.8394 20.0231 22.7117 18.8857 21.6709C18.8062 21.5982 18.694 21.5982 18.6145 21.6709L18.1314 22.113C17.2032 22.9623 15.7969 22.9623 14.8688 22.113C14.5138 21.7881 13.9864 21.7881 13.6314 22.113C12.7032 22.9623 11.2969 22.9623 10.3688 22.113C10.0138 21.7881 9.48637 21.7881 9.13138 22.113C8.20319 22.9623 6.79694 22.9623 5.86875 22.113L5.38566 21.6709C5.30618 21.5982 5.19395 21.5982 5.11448 21.6709C3.97705 22.7117 2.25007 21.8394 2.25007 20.3742V6.37005C2.25007 6.32149 2.25005 6.27363 2.25003 6.22646C2.24965 5.17246 2.24939 4.46262 2.44545 3.86549C2.81591 2.73717 3.68002 1.84152 4.79298 1.45425C5.3823 1.2492 6.08203 1.2495 7.09878 1.24995ZM7.24508 2.74999C6.024 2.74999 5.6034 2.76048 5.28593 2.87094C4.62655 3.10038 4.09919 3.63719 3.8706 4.33341C3.75951 4.67174 3.75007 5.11787 3.75007 6.37005V20.3742C3.75007 20.4933 3.80999 20.566 3.88517 20.6008C3.92434 20.6189 3.96264 20.6236 3.99456 20.6193C4.0227 20.6155 4.05911 20.6034 4.10185 20.5643C4.75453 19.967 5.74561 19.967 6.39828 20.5643L6.88138 21.0064C7.23637 21.3312 7.76377 21.3312 8.11875 21.0064C9.04694 20.157 10.4532 20.157 11.3814 21.0064C11.7364 21.3312 12.2638 21.3312 12.6188 21.0064C13.5469 20.157 14.9532 20.157 15.8814 21.0064C16.2364 21.3312 16.7638 21.3312 17.1188 21.0064L17.6019 20.5643C18.2545 19.967 19.2456 19.967 19.8983 20.5643C19.941 20.6034 19.9774 20.6155 20.0056 20.6193C20.0375 20.6236 20.0758 20.6189 20.115 20.6008C20.1901 20.566 20.2501 20.4933 20.2501 20.3742V6.37005C20.2501 5.11787 20.2406 4.67174 20.1295 4.33341C19.9009 3.63719 19.3736 3.10038 18.7142 2.87094C18.3967 2.76048 17.9761 2.74999 16.7551 2.74999H7.24508ZM6.25007 7.49999C6.25007 7.08578 6.58585 6.74999 7.00007 6.74999H7.50007C7.91428 6.74999 8.25007 7.08578 8.25007 7.49999C8.25007 7.91421 7.91428 8.24999 7.50007 8.24999H7.00007C6.58585 8.24999 6.25007 7.91421 6.25007 7.49999ZM9.75007 7.49999C9.75007 7.08578 10.0859 6.74999 10.5001 6.74999H17.0001C17.4143 6.74999 17.7501 7.08578 17.7501 7.49999C17.7501 7.91421 17.4143 8.24999 17.0001 8.24999H10.5001C10.0859 8.24999 9.75007 7.91421 9.75007 7.49999ZM6.25007 11C6.25007 10.5858 6.58585 10.25 7.00007 10.25H7.50007C7.91428 10.25 8.25007 10.5858 8.25007 11C8.25007 11.4142 7.91428 11.75 7.50007 11.75H7.00007C6.58585 11.75 6.25007 11.4142 6.25007 11ZM9.75007 11C9.75007 10.5858 10.0859 10.25 10.5001 10.25H17.0001C17.4143 10.25 17.7501 10.5858 17.7501 11C17.7501 11.4142 17.4143 11.75 17.0001 11.75H10.5001C10.0859 11.75 9.75007 11.4142 9.75007 11ZM6.25007 14.5C6.25007 14.0858 6.58585 13.75 7.00007 13.75H7.50007C7.91428 13.75 8.25007 14.0858 8.25007 14.5C8.25007 14.9142 7.91428 15.25 7.50007 15.25H7.00007C6.58585 15.25 6.25007 14.9142 6.25007 14.5ZM9.75007 14.5C9.75007 14.0858 10.0859 13.75 10.5001 13.75H17.0001C17.4143 13.75 17.7501 14.0858 17.7501 14.5C17.7501 14.9142 17.4143 15.25 17.0001 15.25H10.5001C10.0859 15.25 9.75007 14.9142 9.75007 14.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Laptop expense"}
+                                  </strong>
+                                  {" of $1,240 approved and coded"}
+                                </p>
+                                <small>
+                                  {"Accounting · 5 Nov"}
+                                </small>
+                              </div>
+                            </li>
+                            <li>
+                              <span className={"sb-timeline-dot"}>
+                                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-calendar-mark-outline"} style={{ "width": "14px", "height": "14px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                                  <path d={"M7 1.75C7.41421 1.75 7.75 2.08579 7.75 2.5V3.26272C8.41203 3.24999 9.1414 3.24999 9.94358 3.25H14.0564C14.8586 3.24999 15.588 3.24999 16.25 3.26272V2.5C16.25 2.08579 16.5858 1.75 17 1.75C17.4142 1.75 17.75 2.08579 17.75 2.5V3.32709C18.0099 3.34691 18.2561 3.37182 18.489 3.40313C19.6614 3.56076 20.6104 3.89288 21.3588 4.64124C22.1071 5.38961 22.4392 6.33855 22.5969 7.51098C22.6472 7.88567 22.681 8.29459 22.7037 8.74007C22.7337 8.82106 22.75 8.90861 22.75 9C22.75 9.06932 22.7406 9.13644 22.723 9.20016C22.75 10.0021 22.75 10.9128 22.75 11.9436V14.0564C22.75 15.8942 22.75 17.3498 22.5969 18.489C22.4392 19.6614 22.1071 20.6104 21.3588 21.3588C20.6104 22.1071 19.6614 22.4392 18.489 22.5969C17.3498 22.75 15.8942 22.75 14.0564 22.75H9.94359C8.10583 22.75 6.65019 22.75 5.51098 22.5969C4.33856 22.4392 3.38961 22.1071 2.64124 21.3588C1.89288 20.6104 1.56076 19.6614 1.40314 18.489C1.24997 17.3498 1.24998 15.8942 1.25 14.0564V11.9436C1.24999 10.9127 1.24998 10.0021 1.27701 9.20017C1.25941 9.13645 1.25 9.06932 1.25 9C1.25 8.90862 1.26634 8.82105 1.29627 8.74006C1.31895 8.29458 1.35276 7.88566 1.40314 7.51098C1.56076 6.33856 1.89288 5.38961 2.64124 4.64124C3.38961 3.89288 4.33856 3.56076 5.51098 3.40313C5.7439 3.37182 5.99006 3.34691 6.25 3.32709V2.5C6.25 2.08579 6.58579 1.75 7 1.75ZM2.76309 9.75C2.75032 10.4027 2.75 11.146 2.75 12V14C2.75 15.9068 2.75159 17.2615 2.88976 18.2892C3.02502 19.2952 3.27869 19.8749 3.7019 20.2981C4.12511 20.7213 4.70476 20.975 5.71085 21.1102C6.73851 21.2484 8.09318 21.25 10 21.25H14C15.9068 21.25 17.2615 21.2484 18.2892 21.1102C19.2952 20.975 19.8749 20.7213 20.2981 20.2981C20.7213 19.8749 20.975 19.2952 21.1102 18.2892C21.2484 17.2615 21.25 15.9068 21.25 14V12C21.25 11.146 21.2497 10.4027 21.2369 9.75H2.76309ZM21.1683 8.25H2.83168C2.8477 8.06061 2.86685 7.88123 2.88976 7.71085C3.02502 6.70476 3.27869 6.12511 3.7019 5.7019C4.12511 5.27869 4.70476 5.02502 5.71085 4.88976C6.73851 4.75159 8.09318 4.75 10 4.75H14C15.9068 4.75 17.2615 4.75159 18.2892 4.88976C19.2952 5.02502 19.8749 5.27869 20.2981 5.7019C20.7213 6.12511 20.975 6.70476 21.1102 7.71085C21.1331 7.88123 21.1523 8.06061 21.1683 8.25ZM16.5 15.75C16.0858 15.75 15.75 16.0858 15.75 16.5C15.75 16.9142 16.0858 17.25 16.5 17.25C16.9142 17.25 17.25 16.9142 17.25 16.5C17.25 16.0858 16.9142 15.75 16.5 15.75ZM14.25 16.5C14.25 15.2574 15.2574 14.25 16.5 14.25C17.7426 14.25 18.75 15.2574 18.75 16.5C18.75 17.7426 17.7426 18.75 16.5 18.75C15.2574 18.75 14.25 17.7426 14.25 16.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                                </svg>
+                              </span>
+                              <div>
+                                <p>
+                                  <strong>
+                                    {"Probation review"}
+                                  </strong>
+                                  {" booked for 3 Feb"}
+                                </p>
+                                <small>
+                                  {"Calendar · 6 Nov"}
+                                </small>
+                              </div>
+                            </li>
+                          </ol>
+                        </section>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ul className={"sb-benefits"} data-gutter-guide={"top"}>
+          <li data-gutter-guide={"top"}>
+            <span className={"sb-benefit-icon"} aria-hidden={"true"}>
+              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-notebook-outline"} style={{ "width": "20px", "height": "20px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                <path d={"M8.94513 1.25H15.0549C16.4225 1.24998 17.5248 1.24996 18.3918 1.36652C19.2919 1.48754 20.0497 1.74643 20.6517 2.34835C21.2536 2.95027 21.5125 3.70814 21.6335 4.60825C21.75 5.47522 21.75 6.57754 21.75 7.94513V16.0549C21.75 17.4225 21.75 18.5248 21.6335 19.3918C21.5125 20.2919 21.2536 21.0497 20.6517 21.6517C20.0497 22.2536 19.2919 22.5125 18.3918 22.6335C17.5248 22.75 16.4225 22.75 15.0549 22.75H8.94513C8.63162 22.75 8.33204 22.75 8.04605 22.7486C8.03082 22.7495 8.01546 22.75 8 22.75C7.98169 22.75 7.96353 22.7493 7.94555 22.7481C7.02806 22.7424 6.25306 22.7202 5.60825 22.6335C4.70814 22.5125 3.95027 22.2536 3.34835 21.6517C2.74643 21.0497 2.48754 20.2919 2.36652 19.3918C2.2704 18.6768 2.25356 17.8018 2.25062 16.75H2C1.58579 16.75 1.25 16.4142 1.25 16C1.25 15.5858 1.58579 15.25 2 15.25H2.25V12.75H2C1.58579 12.75 1.25 12.4142 1.25 12C1.25 11.5858 1.58579 11.25 2 11.25H2.25V8.75H2C1.58579 8.75 1.25 8.41421 1.25 8C1.25 7.58579 1.58579 7.25 2 7.25H2.25062C2.25356 6.19818 2.2704 5.32319 2.36652 4.60825C2.48754 3.70814 2.74643 2.95027 3.34835 2.34835C3.95027 1.74643 4.70814 1.48754 5.60825 1.36652C6.47522 1.24996 7.57754 1.24998 8.94513 1.25ZM3.75 8.75H4C4.41421 8.75 4.75 8.41421 4.75 8C4.75 7.58579 4.41421 7.25 4 7.25H3.75078C3.75398 6.2042 3.77029 5.42437 3.85315 4.80812C3.9518 4.07435 4.13225 3.68577 4.40901 3.40901C4.68577 3.13225 5.07434 2.9518 5.80812 2.85315C6.2098 2.79914 6.68097 2.77341 7.25 2.76115V21.2389C6.68097 21.2266 6.2098 21.2009 5.80812 21.1469C5.07434 21.0482 4.68577 20.8678 4.40901 20.591C4.13225 20.3142 3.9518 19.9257 3.85315 19.1919C3.77029 18.5756 3.75398 17.7958 3.75078 16.75H4C4.41421 16.75 4.75 16.4142 4.75 16C4.75 15.5858 4.41421 15.25 4 15.25H3.75V12.75H4C4.41421 12.75 4.75 12.4142 4.75 12C4.75 11.5858 4.41421 11.25 4 11.25H3.75V8.75ZM8.75 21.25C8.83184 21.25 8.91516 21.25 9 21.25H15C16.4354 21.25 17.4365 21.2484 18.1919 21.1469C18.9257 21.0482 19.3142 20.8678 19.591 20.591C19.8678 20.3142 20.0482 19.9257 20.1469 19.1919C20.2484 18.4365 20.25 17.4354 20.25 16V8C20.25 6.56458 20.2484 5.56347 20.1469 4.80812C20.0482 4.07435 19.8678 3.68577 19.591 3.40901C19.3142 3.13225 18.9257 2.9518 18.1919 2.85315C17.4365 2.75159 16.4354 2.75 15 2.75H9C8.91516 2.75 8.83184 2.75001 8.75 2.75004V21.25ZM10.75 6.5C10.75 6.08579 11.0858 5.75 11.5 5.75H16.5C16.9142 5.75 17.25 6.08579 17.25 6.5C17.25 6.91421 16.9142 7.25 16.5 7.25H11.5C11.0858 7.25 10.75 6.91421 10.75 6.5ZM10.75 10C10.75 9.58579 11.0858 9.25 11.5 9.25H16.5C16.9142 9.25 17.25 9.58579 17.25 10C17.25 10.4142 16.9142 10.75 16.5 10.75H11.5C11.0858 10.75 10.75 10.4142 10.75 10Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+              </svg>
+            </span>
+            <p>
+              <strong>
+                {"It logs itself."}
+              </strong>
+              {" Contracts, time, leave and expenses are captured automatically."}
+            </p>
+          </li>
+          <li data-gutter-guide={"top"}>
+            <span className={"sb-benefit-icon"} aria-hidden={"true"}>
+              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-transfer-horizontal-outline"} style={{ "width": "20px", "height": "20px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                <path d={"M10.0068 3.44714C10.3121 3.72703 10.3328 4.20146 10.0529 4.5068L5.70494 9.25H20C20.4142 9.25 20.75 9.58579 20.75 10C20.75 10.4142 20.4142 10.75 20 10.75H4.00002C3.70259 10.75 3.43327 10.5742 3.3135 10.302C3.19374 10.0298 3.24617 9.71246 3.44715 9.49321L8.94715 3.49321C9.22704 3.18787 9.70147 3.16724 10.0068 3.44714Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                <path d={"M20.6865 13.698C20.5668 13.4258 20.2974 13.25 20 13.25L4.00001 13.25C3.5858 13.25 3.25001 13.5858 3.25001 14C3.25001 14.4142 3.5858 14.75 4.00001 14.75L18.2951 14.75L13.9472 19.4932C13.6673 19.7985 13.6879 20.273 13.9932 20.5529C14.2986 20.8328 14.773 20.8121 15.0529 20.5068L20.5529 14.5068C20.7539 14.2876 20.8063 13.9703 20.6865 13.698Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+              </svg>
+            </span>
+            <p>
+              <strong>
+                {"Your tools finally talk."}
+              </strong>
+              {" Accounting, bank and Slack stay in sync."}
+            </p>
+          </li>
+          <li data-gutter-guide={"top"}>
+            <span className={"sb-benefit-icon"} aria-hidden={"true"}>
+              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-book-bookmark-outline"} style={{ "width": "20px", "height": "20px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                <path d={"M9.94531 1.25H14.0551C15.4227 1.24998 16.525 1.24996 17.3919 1.36652C18.292 1.48754 19.0499 1.74643 19.6518 2.34835C20.2538 2.95027 20.5126 3.70814 20.6337 4.60825C20.7502 5.47522 20.7502 6.57754 20.7502 7.94513V16.0549C20.7502 17.4225 20.7502 18.5248 20.6337 19.3918C20.5126 20.2919 20.2538 21.0497 19.6518 21.6517C19.0499 22.2536 18.292 22.5125 17.3919 22.6335C16.525 22.75 15.4226 22.75 14.0551 22.75H9.94532C8.57773 22.75 7.4754 22.75 6.60844 22.6335C5.70833 22.5125 4.95045 22.2536 4.34854 21.6517C3.74662 21.0497 3.48773 20.2919 3.36671 19.3918C3.32801 19.1039 3.30216 18.7902 3.2849 18.4494C3.24582 18.326 3.23821 18.1912 3.26895 18.0568C3.25016 17.4649 3.25017 16.7991 3.25019 16.0549V7.94513C3.25017 6.57754 3.25015 5.47522 3.36671 4.60825C3.48773 3.70814 3.74662 2.95027 4.34854 2.34835C4.95045 1.74643 5.70833 1.48754 6.60843 1.36652C7.4754 1.24996 8.57772 1.24998 9.94531 1.25ZM4.77694 18.2491C4.79214 18.6029 4.81597 18.914 4.85333 19.1919C4.95199 19.9257 5.13243 20.3142 5.4092 20.591C5.68596 20.8678 6.07453 21.0482 6.80831 21.1469C7.56366 21.2484 8.56477 21.25 10.0002 21.25H14.0002C15.4356 21.25 16.4367 21.2484 17.1921 21.1469C17.9258 21.0482 18.3144 20.8678 18.5912 20.591C18.8679 20.3142 19.0484 19.9257 19.147 19.1919C19.2299 18.5756 19.2462 17.7958 19.2494 16.75H13.7502V19.5309C13.7502 19.5396 13.7502 19.5485 13.7502 19.5578C13.7504 19.6691 13.7506 19.8276 13.7293 19.9638C13.7033 20.1302 13.6177 20.4514 13.2851 20.6468C12.9647 20.8349 12.6513 20.765 12.5024 20.7187C12.3726 20.6783 12.2302 20.6105 12.124 20.56C12.1156 20.556 12.1074 20.5521 12.0995 20.5483L11.0002 20.0261L9.90087 20.5483C9.89294 20.5521 9.88477 20.5559 9.87636 20.56C9.7702 20.6105 9.62782 20.6783 9.49796 20.7187C9.34903 20.765 9.03567 20.8349 8.7153 20.6468C8.38263 20.4514 8.29705 20.1302 8.27104 19.9638C8.24976 19.8276 8.25 19.6691 8.25016 19.5578C8.25017 19.5485 8.25019 19.5396 8.25019 19.5309V16.75H7.89796C6.91971 16.75 6.5777 16.7564 6.31562 16.8267C5.5963 17.0194 5.02286 17.5541 4.77694 18.2491ZM9.75019 16.75V18.9592L10.4995 18.6033C10.5013 18.6024 10.5043 18.6009 10.5083 18.5989C10.5573 18.5738 10.7638 18.4682 11.0002 18.4682C11.2365 18.4682 11.443 18.5738 11.4921 18.5989C11.4961 18.6009 11.499 18.6024 11.5009 18.6033L12.2502 18.9592V16.75H9.75019ZM7.89796 15.25C7.85879 15.25 7.8202 15.25 7.78217 15.25C6.9642 15.2497 6.40605 15.2495 5.92739 15.3778C5.49941 15.4925 5.10242 15.6798 4.75019 15.9259V8C4.75019 6.56458 4.75178 5.56347 4.85333 4.80812C4.95199 4.07435 5.13243 3.68577 5.4092 3.40901C5.68596 3.13225 6.07453 2.9518 6.80831 2.85315C7.56366 2.75159 8.56477 2.75 10.0002 2.75H14.0002C15.4356 2.75 16.4367 2.75159 17.1921 2.85315C17.9258 2.9518 18.3144 3.13225 18.5912 3.40901C18.8679 3.68577 19.0484 4.07435 19.147 4.80812C19.2486 5.56347 19.2502 6.56458 19.2502 8V15.25H7.89796ZM7.25019 7C7.25019 6.58579 7.58597 6.25 8.00019 6.25H16.0002C16.4144 6.25 16.7502 6.58579 16.7502 7C16.7502 7.41421 16.4144 7.75 16.0002 7.75H8.00019C7.58597 7.75 7.25019 7.41421 7.25019 7ZM7.25019 10.5C7.25019 10.0858 7.58597 9.75 8.00019 9.75H13.0002C13.4144 9.75 13.7502 10.0858 13.7502 10.5C13.7502 10.9142 13.4144 11.25 13.0002 11.25H8.00019C7.58597 11.25 7.25019 10.9142 7.25019 10.5Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+              </svg>
+            </span>
+            <p>
+              <strong>
+                {"It learns your policies."}
+              </strong>
+              {" It reads your handbook and past runs."}
+            </p>
+          </li>
+          <li data-gutter-guide={"top"}>
+            <span className={"sb-benefit-icon"} aria-hidden={"true"}>
+              <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-chat-round-line-outline"} style={{ "width": "20px", "height": "20px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                <path d={"M12 2.75C6.89137 2.75 2.75 6.89137 2.75 12C2.75 13.4811 3.09753 14.8788 3.7148 16.1181C3.96254 16.6155 4.05794 17.2103 3.90163 17.7945L3.30602 20.0205C3.19663 20.4293 3.57066 20.8034 3.97949 20.694L6.20553 20.0984C6.78973 19.9421 7.38451 20.0375 7.88191 20.2852C9.12121 20.9025 10.5189 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75ZM1.25 12C1.25 6.06294 6.06294 1.25 12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C10.2817 22.75 8.65552 22.3463 7.21315 21.6279C6.99791 21.5207 6.77814 21.4979 6.59324 21.5474L4.3672 22.143C2.84337 22.5507 1.44927 21.1566 1.857 19.6328L2.4526 17.4068C2.50208 17.2219 2.47933 17.0021 2.37213 16.7869C1.65371 15.3445 1.25 13.7183 1.25 12ZM7.25 10.5C7.25 10.0858 7.58579 9.75 8 9.75H16C16.4142 9.75 16.75 10.0858 16.75 10.5C16.75 10.9142 16.4142 11.25 16 11.25H8C7.58579 11.25 7.25 10.9142 7.25 10.5ZM7.25 14C7.25 13.5858 7.58579 13.25 8 13.25H13.5C13.9142 13.25 14.25 13.5858 14.25 14C14.25 14.4142 13.9142 14.75 13.5 14.75H8C7.58579 14.75 7.25 14.4142 7.25 14Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+              </svg>
+            </span>
+            <p>
+              <strong>
+                {"Ask, and it’s there."}
+              </strong>
+              {" Any record or answer in a second."}
+            </p>
+          </li>
+        </ul>
+        <span className={"sb-guide-end"} data-gutter-guide={"bottom"} aria-hidden={"true"} />
+      </div>
+    </section>
+  );
+}

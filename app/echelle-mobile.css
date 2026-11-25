@@ -240,14 +240,18 @@
      Ces trois règles valent pour le site entier, y compris les pages qui
      n'ont pas de monde à elles. Elles ne peuvent qu'abaisser : aucune
      mention en 12 ou 13 px n'est concernée. */
-  .text-\[17px\] {
+  /* 25/11/2026 — l'accueil « sx » est exclu : c'est un décalque au pixel,
+     dont les tailles mobiles sont celles de sa référence (`text-[17px]`
+     y est la taille des liens de barre, pas du corps). `:where()` ne
+     change pas la spécificité pour les autres pages. */
+  .text-\[17px\]:where(:not(.sx *)) {
     font-size: 15px;
   }
-  .text-\[19px\] {
+  .text-\[19px\]:where(:not(.sx *)) {
     font-size: 17.5px;
   }
-  .leading-\[26px\],
-  .leading-\[27px\] {
+  .leading-\[26px\]:where(:not(.sx *)),
+  .leading-\[27px\]:where(:not(.sx *)) {
     line-height: 1.5;
   }
 }
