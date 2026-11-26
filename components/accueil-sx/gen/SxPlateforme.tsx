@@ -16,15 +16,15 @@ export default function SxPlateforme() {
               {"Logiciel"}
             </span>
             <h2>
-              {"Un seul logiciel pour toute la gestion."}
+              {"Un seul logiciel au lieu de quinze."}
               <br />
               <span>
-                {"Et des agents qui avancent le travail chaque jour."}
+                {"Et des agents IA qui travaillent dedans."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Vos ventes, vos achats et votre comptabilité partagent les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Chaque matin, les agents vous présentent ce qu'ils ont préparé."}
+            {"Fini le logiciel de facturation d'un côté, le tableur de stock de l'autre et la banque dans un troisième onglet. Omega réunit toute la gestion sur les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Les agents IA s'appuient sur ces données pour faire les tâches qui reviennent chaque jour."}
           </p>
         </header>
         <div className={"platform-layout"}>

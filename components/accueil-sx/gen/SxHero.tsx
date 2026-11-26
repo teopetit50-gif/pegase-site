@@ -43,18 +43,18 @@ export default function SxHero() {
                 <div className={"flex w-full flex-col items-center gap-[12px] desktop-sm:items-start"}>
                   <span className={"ft-eyebrow mb-0!"}>
                     <b>
-                      {"Nouveau"}
+                      {"ERX"}
                     </b>
                     <span>
-                      {"Omega devient un ERX"}
+                      {"Enterprise Resource Execution"}
                     </span>
                   </span>
                   <h1 className={"w-full desktop-sm:w-[550px] font-instrument-serif text-[42px] leading-[1.1] tracking-[-0.42px] text-black ipad:text-[62px] ipad:tracking-[-0.62px]"}>
-                    {"Un logiciel de gestion qui fait le travail à votre place"}
+                    {"Omega est un ERX : l'ERP qui fait le travail à votre place"}
                   </h1>
                 </div>
                 <p className={"font-tight text-[14px] leading-[25.5px] tracking-[-0.28px] text-[#121212] opacity-80 ipad:text-[17px] ipad:tracking-[-0.34px]"}>
-                  {"Devis, factures, achats, stock, banque et comptabilité sont dans le même logiciel. Des agents IA s'occupent des relances, de la saisie des factures et des réponses aux clients. Vous relisez avant chaque envoi."}
+                  {"Un ERX, c'est un ERP tout-en-un (ventes, achats, stock, banque, comptabilité) dans lequel des agents IA font le travail : relances, saisie des factures, réponses aux clients. Et c'est notre IA qui l'installe chez vous, bien plus vite et pour bien moins cher qu'un déploiement classique."}
                 </p>
                 <p className={"font-tight -mt-[6px] text-[13px] leading-[20px] tracking-[-0.2px] text-[#121212] ipad:text-[15px] ipad:leading-[22px] ipad:tracking-[-0.3px]"}>
                   {"À partir de "}

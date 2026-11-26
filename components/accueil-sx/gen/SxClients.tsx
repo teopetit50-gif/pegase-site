@@ -21,7 +21,7 @@ export default function SxClients() {
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Voici des tâches que les agents et les modules d'Omega prennent en charge chaque jour. Vous gardez toujours la décision finale."}
+            {"Voici ce que l'ERX fait concrètement, chaque jour. Vous gardez toujours la décision finale."}
           </p>
         </header>
         <div className={"ts-grid"}>

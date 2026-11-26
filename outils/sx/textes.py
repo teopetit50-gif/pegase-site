@@ -37,10 +37,10 @@ Commencer
 Ouvrir le menu"""
 
 B["hero"] = """Audit de 30 minutes offert, sans engagement.
-Nouveau
-Omega devient un ERX
-Un logiciel de gestion qui fait le travail à votre place
-Devis, factures, achats, stock, banque et comptabilité sont dans le même logiciel. Des agents IA s'occupent des relances, de la saisie des factures et des réponses aux clients. Vous relisez avant chaque envoi.
+ERX
+Enterprise Resource Execution
+Omega est un ERX : l'ERP qui fait le travail à votre place
+Un ERX, c'est un ERP tout-en-un (ventes, achats, stock, banque, comptabilité) dans lequel des agents IA font le travail : relances, saisie des factures, réponses aux clients. Et c'est notre IA qui l'installe chez vous, bien plus vite et pour bien moins cher qu'un déploiement classique.
 Réserver un audit
 Voir le logiciel
 Les modules d'Omega
@@ -57,9 +57,9 @@ Les modules d'Omega
 ="""
 
 B["s1 Plateforme"] = """Logiciel
-Un seul logiciel pour toute la gestion.
-Et des agents qui avancent le travail chaque jour.
-Vos ventes, vos achats et votre comptabilité partagent les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Chaque matin, les agents vous présentent ce qu'ils ont préparé.
+Un seul logiciel au lieu de quinze.
+Et des agents IA qui travaillent dedans.
+Fini le logiciel de facturation d'un côté, le tableur de stock de l'autre et la banque dans un troisième onglet. Omega réunit toute la gestion sur les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Les agents IA s'appuient sur ces données pour faire les tâches qui reviennent chaque jour.
 Ce que fait le logiciel
 Relancer les impayés
 Traiter les factures
@@ -260,10 +260,10 @@ Du poste
 19 %
 70 %"""
 
-B["s2 Fiche"] = """Configuration par l'IA
-Une installation faite pour vous.
-Vous décrivez votre activité, l'IA configure le logiciel.
-Vous nous expliquez comment vous travaillez. L'IA en déduit les réglages : modules utiles, taux de TVA, plan comptable. Notre équipe reprend les données de votre ancien logiciel, et votre expert-comptable vérifie avant le démarrage.
+B["s2 Fiche"] = """Déploiement par l'IA
+Installé par notre IA, pas par des consultants.
+Plus vite, et pour bien moins cher.
+Un ERP classique se déploie en plusieurs mois, avec des consultants facturés à la journée. Omega est installé par nos propres modèles d'IA : ils règlent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre expert-comptable vérifie, et vous démarrez.
 Audit offert
 Voir la gestion
 Navigation du logiciel
@@ -418,8 +418,8 @@ Une fiche client ou un chiffre s'affiche en quelques secondes."""
 
 B["s3 Agents"] = """Nouveau
 Des agents sur mesure
-Des agents pour les tâches répétitives.
-Un agent est un assistant IA chargé d'une tâche précise. Il applique vos règles et vous montre son travail avant d'envoyer quoi que ce soit.
+Des agents IA qui font le travail à votre place.
+Un agent est un assistant IA chargé d'une tâche précise dans Omega. Il lit vos données, prépare le travail et vous le montre avant d'envoyer quoi que ce soit.
 Chercher un agent…
 Chercher
 Relances
@@ -639,7 +639,7 @@ Voir les agents"""
 B["s7 Clients"] = """Exemples
 Ce qu'Omega fait concrètement.
 De la vente à la clôture des comptes, pour une société comme pour un groupe.
-Voici des tâches que les agents et les modules d'Omega prennent en charge chaque jour. Vous gardez toujours la décision finale.
+Voici ce que l'ERX fait concrètement, chaque jour. Vous gardez toujours la décision finale.
 Chaque matin, les relances des devis en attente et des factures en retard sont prêtes, écrites dans votre ton, et chaque demande reçue a déjà sa réponse rédigée. Rien ne part sans votre validation.
 Relances
 Agent · relances et encaissements
@@ -734,7 +734,7 @@ Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à
 Que se passe-t-il si l'offre ne convient pas ?
 Pour les agents, le remboursement est intégral pendant 30 jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.
 Qui s'occupe de l'installation ?
-Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation.
+Nos modèles d'IA, supervisés par notre équipe. Ils configurent le logiciel à partir de la description de votre activité et reprennent vos données. C'est pour cela que la mise en place est beaucoup plus rapide et beaucoup moins chère qu'un déploiement d'ERP classique. Votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation.
 Un agent peut-il envoyer quelque chose sans mon accord ?
 Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment.
 Où sont mes données ?
@@ -745,7 +745,7 @@ Pouvez-vous construire un module rien que pour nous ?
 Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement."""
 
 B["s11 Appel"] = """Commencer
-Voyons ensemble ce qu'Omega peut faire chez vous.
+Voyez ce que l'ERX fait chez vous.
 30 minutes, gratuites et sans engagement.
 Nous regardons comment vous travaillez aujourd'hui, quels outils vous utilisez et ce qui vous prend le plus de temps. Vous recevez ensuite une proposition écrite, avec le prix.
 Parler à l'équipe"""

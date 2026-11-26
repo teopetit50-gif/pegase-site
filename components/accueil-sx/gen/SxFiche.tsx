@@ -17,19 +17,19 @@ export default function SxFiche() {
         <header className={"platform-intro platform-intro-split sb-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Configuration par l'IA"}
+              {"Déploiement par l'IA"}
             </span>
             <h2>
-              {"Une installation faite pour vous."}
+              {"Installé par notre IA, pas par des consultants."}
               <br />
               <span>
-                {"Vous décrivez votre activité, l'IA configure le logiciel."}
+                {"Plus vite, et pour bien moins cher."}
               </span>
             </h2>
           </div>
           <div>
             <p className={"platform-lede"}>
-              {"Vous nous expliquez comment vous travaillez. L'IA en déduit les réglages : modules utiles, taux de TVA, plan comptable. Notre équipe reprend les données de votre ancien logiciel, et votre expert-comptable vérifie avant le démarrage."}
+              {"Un ERP classique se déploie en plusieurs mois, avec des consultants facturés à la journée. Omega est installé par nos propres modèles d'IA : ils règlent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre expert-comptable vérifie, et vous démarrez."}
             </p>
             <div className={"sb-ctas"}>
               <Button asChild variant={"link"}>

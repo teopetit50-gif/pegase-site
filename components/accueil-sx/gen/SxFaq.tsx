@@ -52,7 +52,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a7"} role={"region"} aria-labelledby={"_R_ltavb_-q7"}>
               <div>
                 <p>
-                  {"C'est le nom que le cabinet Gartner a donné en 2026 à la nouvelle génération d'ERP. Un ERP classique enregistre les ventes, les achats et la comptabilité. Un ERX fait aussi une partie du travail : ses agents IA relancent, saisissent les factures, contrôlent les paiements et répondent aux clients, toujours sous votre contrôle. Omega est construit sur ce modèle."}
+                  {"ERX veut dire Enterprise Resource Execution, un terme du cabinet Gartner. Un ERP réunit toute la gestion dans un seul logiciel et enregistre ce qui se passe. Un ERX fait en plus le travail : ses agents IA relancent, saisissent les factures, contrôlent les paiements et répondent aux clients, sous votre contrôle. Omega est un ERX."}
                 </p>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a2"} role={"region"} aria-labelledby={"_R_ltavb_-q2"} inert={true}>
               <div>
                 <p>
-                  {"Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation."}
+                  {"Nos modèles d'IA, supervisés par notre équipe. Ils configurent le logiciel à partir de la description de votre activité et reprennent vos données. C'est pour cela que la mise en place est beaucoup plus rapide et beaucoup moins chère qu'un déploiement d'ERP classique. Votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation."}
                 </p>
               </div>
             </div>

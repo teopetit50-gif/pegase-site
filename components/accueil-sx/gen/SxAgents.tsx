@@ -21,10 +21,10 @@ export default function SxAgents() {
               </span>
             </span>
             <h2>
-              {"Des agents pour les tâches répétitives."}
+              {"Des agents IA qui font le travail à votre place."}
             </h2>
             <p>
-              {"Un agent est un assistant IA chargé d'une tâche précise. Il applique vos règles et vous montre son travail avant d'envoyer quoi que ce soit."}
+              {"Un agent est un assistant IA chargé d'une tâche précise dans Omega. Il lit vos données, prépare le travail et vous le montre avant d'envoyer quoi que ce soit."}
             </p>
           </div>
           <div className={"ft-finder"}>

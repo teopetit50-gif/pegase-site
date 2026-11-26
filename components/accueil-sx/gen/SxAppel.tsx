@@ -26,7 +26,7 @@ export default function SxAppel() {
           {"Commencer"}
         </span>
         <h2>
-          {"Voyons ensemble ce qu'Omega peut faire chez vous."}
+          {"Voyez ce que l'ERX fait chez vous."}
           <br />
           <span>
             {"30 minutes, gratuites et sans engagement."}
