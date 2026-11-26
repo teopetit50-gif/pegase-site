@@ -129,14 +129,27 @@ pseudo-éléments, les positions).
     « 9. ». Une miniature par `zoom` avait été essayée puis retirée :
     lisible à peine.
 
+18. **Les graphiques sont vivants** (Teo, 25/11, captures du flux et de la
+    jauge : « c'est censé s'afficher en mode vivant, ça se met au fur et à
+    mesure, là c'est figé »). Les trois graphiques rejouent la chronologie
+    d'entrée de la référence (relevée dans son code : mêmes étapes, mêmes
+    instants, mêmes courbes), une fois, quand un quart en est visible :
+    `entrees.ts` (moteur, sans bibliothèque), `SxComportements.tsx` § 11
+    (flux, colonnes), `SxBarres.tsx` (jauge). Survol du flux : bande et
+    barres visées pleines, le reste pâlit, l'info-bulle glisse et recompte.
+    Survol de la jauge : la ligne se soulève, info-bulle « poste, montant,
+    part du facturé » (la référence y met aussi le libellé de la ligne,
+    que nos textes n'ont pas). Rien ne bouge si le visiteur a demandé moins
+    d'animations.
+
 ## Ce qui n'est pas porté
 
-Les micro-interactions des écrans d'exemple de la référence : survol et
-info-bulles des graphiques, animation d'entrée de leurs barres, boutons des
-démonstrations (« valider », « voir le détail »), filtre des agents,
-sélecteur de métier du bloc « modules métier », effet de brouillage des
-liens du pied. La page est fidèle au repos et sur ses interactions
-principales ; ces gestes-là restent à faire si Teo y tient.
+Les autres micro-interactions des écrans d'exemple de la référence :
+boutons des démonstrations (« valider », « voir le détail »), clic sur une
+bande ou une colonne pour la fixer, navigation au clavier dans les
+graphiques, filtre des agents, effet de brouillage des liens du pied. La
+page est fidèle au repos, à l'entrée et au survol de ses graphiques ; ces
+gestes-là restent à faire si Teo y tient.
 
 ## Hors de ce dossier
 

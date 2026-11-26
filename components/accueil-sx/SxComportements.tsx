@@ -12,6 +12,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect } from "react";
+import { aLEntree, bouger, composer, COURBES, decouper, type Morceau } from "./entrees";
 
 export default function SxComportements() {
   useEffect(() => {
@@ -190,31 +191,6 @@ export default function SxComportements() {
           la largeur, la copie visible, et une copie pour les lecteurs
           d'écran. Hors écran, la copie visible est à zéro ; à l'entrée
           (15 % avant le bord bas, une seule fois) elle monte en 1,4 s. */
-    type Morceau = string | { valeur: number; decimales: number; groupe: boolean };
-    const NOMBRE = /(\d(?:[\d  ]*\d)?(?:,\d+)?)/;
-    const decouper = (t: string): Morceau[] =>
-      t.split(NOMBRE).map((m, i) =>
-        i % 2
-          ? {
-              valeur: Number(m.replace(/[  ]/g, "").replace(",", ".")),
-              decimales: (m.split(",")[1] || "").length,
-              groupe: /[  ]/.test(m),
-            }
-          : m,
-      );
-    const composer = (cible: Morceau[], depuis: Morceau[] | null, p: number) =>
-      cible
-        .map((m, i) => {
-          if (typeof m === "string") return m;
-          const d = depuis?.[i];
-          const v0 = d && typeof d !== "string" ? d.valeur : 0;
-          return (v0 + (m.valeur - v0) * p).toLocaleString("fr-FR", {
-            minimumFractionDigits: m.decimales,
-            maximumFractionDigits: m.decimales,
-            useGrouping: m.groupe,
-          });
-        })
-        .join("");
     type Compte = { gabarit: HTMLElement; visible: HTMLElement; lu: HTMLElement; cible: string; dernier: Morceau[] | null; image: number; vu: boolean };
     const comptes = new Map<HTMLElement, Compte>();
     const jouer = (c: Compte) => {
@@ -408,6 +384,230 @@ export default function SxComportements() {
         large.removeEventListener("change", surLarge);
       });
     }
+
+    /* 11. Les graphiques vivants. La référence anime ses graphiques à
+           l'entrée : une chronologie anime.js jouée une fois, quand un quart
+           du graphique est visible. Mêmes étapes, mêmes instants, mêmes
+           courbes, relevés dans son code (moteur : entrees.ts). La jauge à
+           barres de la fiche fait la sienne dans SxBarres.tsx. */
+    const { outExpo, outQuad, inOutSine, outBack } = COURBES;
+    const tous = <T extends Element = HTMLElement>(el: Element, sel: string) => [...el.querySelectorAll<T>(sel)];
+    const compteur = (els: HTMLElement[], garde?: () => boolean) => {
+      const m = els.map((e) => decouper(e.textContent || ""));
+      return (p: number) => {
+        if (garde?.()) return;
+        els.forEach((e, i) => (e.textContent = composer(m[i], null, p)));
+      };
+    };
+
+    /* 11 a. Le flux de trésorerie (« BudgetFlowChart »). À l'entrée : les
+             chiffres montent, les barres de gauche poussent, les bandes se
+             dévoilent de gauche à droite (le masque SVG glisse), les barres
+             de droite poussent, puis les étiquettes et l'info-bulle. Au
+             survol d'une bande ou de son montant : les autres bandes
+             pâlissent, seules ses deux barres restent pleines, l'info-bulle
+             glisse jusqu'à elle et recompte ses parts. */
+    racine.querySelectorAll<HTMLElement>('[data-slot="budget-flow-chart-plot"]').forEach((cadre) => {
+      const carte = cadre.closest<HTMLElement>('[data-slot="chart-card"]') ?? cadre;
+      const bulle = cadre.querySelector<HTMLElement>('[data-slot="budget-flow-chart-tooltip"]');
+      const jumeau = cadre.querySelector<HTMLElement>(":scope > span.invisible");
+      const masque = cadre.querySelector("mask");
+      const voile = masque?.querySelector("rect");
+      let survole = false;
+      /* les montants, lus AVANT que l'entrée ne les remette à zéro */
+      const sommes = new Map(
+        tous(cadre, "[data-flow-from]").map((b) => [Number(b.getAttribute("data-flow-from")), b.querySelector("[data-count]")?.textContent || ""] as const),
+      );
+
+      menage.push(
+        aLEntree(carte, (c) => {
+          const chiffres = tous(carte, "[data-count]").filter((e) => !e.closest('[data-slot="budget-flow-chart-tooltip"]'));
+          c.ajouter(tous(carte, '[data-slot="chart-icon-tile"]'), { opacity: 0, transform: "scale(.6)" }, { duree: 700, courbe: outBack(1.8), a: 0 })
+            .ajouter(tous(carte, '[data-slot="budget-flow-chart-heading"] > *'), { opacity: 0, transform: "translateY(6px)" }, { duree: 600, courbe: outQuad, a: 100, decale: 80 })
+            .ajouter(tous(carte, '[data-slot="budget-flow-chart-stat"]'), { opacity: 0, transform: "translateY(8px)" }, { duree: 700, courbe: outExpo, a: 150, decale: 90 })
+            .ajouter(tous(carte, '[data-slot="budget-flow-chart-legend-item"]'), { opacity: 0, transform: "translateX(-6px)" }, { duree: 600, courbe: outQuad, a: 300, decale: 60 })
+            .suivre(compteur(chiffres), { duree: 1800, courbe: outExpo, a: 200 })
+            .ajouter(tous(carte, '[data-side="from"] [data-slot="budget-flow-chart-bar"]'), { transform: "scaleY(0)" }, { duree: 900, courbe: outExpo, a: 250, decale: 90 })
+            .suivre(
+              (p) => {
+                const debut = Number(masque?.getAttribute("x")) || 0;
+                voile?.setAttribute("x", String(Math.round(debut * (1 - p) * 1000) / 1000));
+              },
+              { duree: 1300, courbe: inOutSine, a: 450 },
+            )
+            .ajouter(tous(carte, '[data-side="to"] [data-slot="budget-flow-chart-bar"]'), { transform: "scaleY(0)" }, { duree: 900, courbe: outExpo, a: 1240, decale: 90 })
+            .ajouter(tous(carte, '[data-slot="budget-flow-chart-badge"]'), { opacity: 0, transform: "scale(.7)" }, { duree: 500, courbe: outBack(1.7), a: 550, decale: 70 })
+            .ajouter(tous(cadre, '[data-slot="budget-flow-chart-from-label"]'), { opacity: 0, transform: "translateX(-6px)" }, { duree: 600, courbe: outQuad, a: 750, decale: 60 })
+            .ajouter(tous(cadre, '[data-slot="budget-flow-chart-to-label"]'), { opacity: 0, transform: "translateX(6px)" }, { duree: 600, courbe: outQuad, a: 1490, decale: 60 });
+          if (bulle) {
+            c.ajouter([bulle], { opacity: 0, transform: "translateY(6px) scale(.94)" }, { duree: 500, courbe: outBack(1.6), a: 1690 })
+              .suivre(compteur(tous(bulle, "[data-count]"), () => survole), { duree: 900, courbe: outExpo, a: 1690 });
+          }
+        }),
+      );
+
+      if (!bulle) return;
+      /* Ce que dit chaque flux : son montant et ses deux parts sont écrits
+         dans l'étiquette accessible de son montant (« Abonnements vers
+         Loyers : 7,8 k€, 65 % des abonnements, 100 % des loyers »), ses
+         deux extrémités sont des entrées de la légende, dans l'ordre des
+         barres. */
+      const estCouleur = (k: string) => k.startsWith("bg-primary-") || k.startsWith("[--dot-ring:");
+      const legende = tous(carte, '[data-slot="budget-flow-chart-legend-item"]').map((li) => ({
+        nom: (li.lastElementChild?.textContent || "").trim().toLowerCase(),
+        couleurs: [...(li.querySelector('[data-slot="chart-legend-dot"]')?.classList ?? [])].filter(estCouleur),
+      }));
+      const noeud = (nom: string) => legende.findIndex((l) => l.nom === nom.trim().toLowerCase());
+      const bandes = new Map(tous<SVGPathElement>(cadre, "path[data-flow]").map((p) => [Number(p.getAttribute("data-flow")), p] as const));
+      const montants = new Map(tous(cadre, "[data-flow-from]").map((b) => [Number(b.getAttribute("data-flow-from")), b] as const));
+      const parts = new Map(tous(cadre, "[data-flow-to]").map((b) => [Number(b.getAttribute("data-flow-to")), b] as const));
+      const barres = tous(carte, '[data-slot="budget-flow-chart-bar"]');
+      const flux = new Map(
+        [...montants].map(([i, b]) => {
+          const dit = b.getAttribute("aria-label") || "";
+          const bouts = dit.match(/^(.+?) vers (.+?)\s*:/);
+          const pc = [...dit.matchAll(/(\d+)\s*%/g)].map((x) => Number(x[1]));
+          const somme = b.querySelector("[data-count]");
+          return [i, { de: bouts ? noeud(bouts[1]) : -1, vers: bouts ? noeud(bouts[2]) : -1, montant: sommes.get(i) || "", compte: somme?.getAttribute("data-count"), pDe: pc[0] ?? 0, pVers: pc[1] ?? 0 }] as const;
+        }),
+      );
+      const geometrie = (i: number) => {
+        const n = (bandes.get(i)?.getAttribute("d") || "").match(/-?[\d.]+/g)?.map(Number) || [];
+        return { y0: n[1] || 0, y1: n[5] || 0, t: (n[13] || 0) - (n[1] || 0) };
+      };
+      const valeursBulle = tous(bulle, "[data-count]");
+      const valeursJumeau = jumeau ? [...jumeau.children].map((l) => l.lastElementChild as HTMLElement | null) : [];
+      const points = [...bulle.children].filter((l) => !l.hasAttribute("aria-hidden")).map((l) => l.querySelector<HTMLElement>(":scope > span[aria-hidden]"));
+      const parDefaut = [...flux].find(([, f]) => f.compte === bulle.querySelector('[data-kind="amount"]')?.getAttribute("data-count"))?.[0] ?? 0;
+      let actif = parDefaut;
+      const comptes = new Map<HTMLElement, number>();
+
+      const recompter = (el: HTMLElement, texte: string) => {
+        const depuis = decouper(el.textContent || "");
+        const cible = decouper(texte);
+        cancelAnimationFrame(comptes.get(el) || 0);
+        const t0 = performance.now();
+        const pas = (t: number) => {
+          const n = Math.min((t - t0) / 600, 1);
+          el.textContent = composer(cible, depuis, outExpo(n));
+          if (n < 1) comptes.set(el, requestAnimationFrame(pas));
+        };
+        comptes.set(el, requestAnimationFrame(pas));
+      };
+      const avec = (texte: string, v: number) => {
+        let fait = false;
+        return composer(
+          decouper(texte).map((m) => (typeof m !== "string" && !fait ? ((fait = true), { ...m, valeur: v }) : m)),
+          null,
+          1,
+        );
+      };
+      const placer = (i: number, glisser = true) => {
+        const { y0, y1, t } = geometrie(i);
+        const hauteur = bulle.offsetHeight;
+        const centre = (y0 + y1 + t) / 2;
+        const dessus = centre - 18 - hauteur;
+        const haut = Math.round(dessus >= 0 ? dessus : Math.max(0, Math.min(centre + 18, (cadre.clientHeight || 352) - hauteur)));
+        const l = -(Number(masque?.getAttribute("x")) || -556) - 120;
+        const large = (jumeau?.getBoundingClientRect().width || 165) + 24;
+        const gauche = Math.round(Math.min(Math.max(l / 2 - large / 2, 0), Math.max(0, l - large)));
+        const avant = bulle.getBoundingClientRect();
+        bulle.style.left = `${gauche}px`;
+        bulle.style.top = `${haut}px`;
+        bulle.getAnimations().forEach((a) => a.id === "glisse" && a.cancel());
+        const apres = bulle.getBoundingClientRect();
+        const dx = avant.left - apres.left;
+        const dy = avant.top - apres.top;
+        if (glisser && !calme && (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5)) {
+          const a = bouger(bulle, { transform: `translate(${dx}px, ${dy}px)` }, 550, outExpo);
+          if (a) a.id = "glisse";
+        }
+      };
+      const OPACITES = ["opacity-100", "opacity-45", "opacity-40"];
+      const opacite = (el: Element | null | undefined, k: string) => {
+        if (!el || el.classList.contains(k)) return;
+        el.classList.remove(...OPACITES);
+        el.classList.add(k);
+      };
+      const activer = (i: number | null) => {
+        const z = i ?? parDefaut;
+        const f = flux.get(z);
+        bandes.forEach((p, k) => opacite(p.parentElement, i === null || k === z ? "opacity-100" : "opacity-45"));
+        montants.forEach((b, k) => opacite(b, i === null || k === z ? "opacity-100" : "opacity-45"));
+        parts.forEach((b, k) => opacite(b, i === null || k === z ? "opacity-100" : "opacity-45"));
+        barres.forEach((b) => {
+          const r = Number(b.getAttribute("data-bar"));
+          opacite(b.parentElement, i === null || !f || r === f.de || r === f.vers ? "opacity-100" : "opacity-40");
+        });
+        if (z === actif || !f) return;
+        actif = z;
+        survole = true;
+        const textes = [
+          avec(valeursBulle[0]?.textContent || "−0 %", f.pDe),
+          f.montant,
+          avec(valeursBulle[2]?.textContent || "+0 %", f.pVers),
+        ];
+        valeursBulle.forEach((el, k) => (calme ? (el.textContent = textes[k]) : recompter(el, textes[k])));
+        valeursJumeau.forEach((el, k) => el && (el.textContent = textes[k]));
+        [f.de, f.vers].forEach((n, k) => {
+          const point = points[k === 0 ? 0 : 2];
+          if (!point || !legende[n]) return;
+          point.classList.remove(...[...point.classList].filter(estCouleur));
+          point.classList.add(...legende[n].couleurs);
+        });
+        placer(z);
+      };
+      const ecouter = (el: Element, type: string, f: () => void) => {
+        el.addEventListener(type, f);
+        menage.push(() => el.removeEventListener(type, f));
+      };
+      bandes.forEach((p, k) => ecouter(p, "pointerenter", () => activer(k)));
+      montants.forEach((b, k) => {
+        ecouter(b, "pointerenter", () => activer(k));
+        ecouter(b, "focus", () => activer(k));
+        ecouter(b, "blur", () => activer(null));
+      });
+      ecouter(cadre, "pointerleave", () => activer(null));
+      /* la place de l'info-bulle au rendu serveur suppose sa taille par
+         défaut ; on la recale sur sa taille réelle, sans glisser */
+      requestAnimationFrame(() => placer(parDefaut, false));
+      menage.push(() => comptes.forEach((n) => cancelAnimationFrame(n)));
+    });
+
+    /* 11 b. Les colonnes des dépenses (« SpendColumnChart ») : chaque colonne
+             pousse depuis zéro avec son montant au-dessus, l'une après
+             l'autre, puis la pastille de la colonne choisie apparaît. */
+    racine.querySelectorAll<HTMLElement>('[data-slot="spend-column-chart-plot"]').forEach((cadre) => {
+      const carte = cadre.closest<HTMLElement>('[data-slot="chart-card"]') ?? cadre;
+      const colonnes = tous(cadre, '[data-slot="spend-column-chart-column"]');
+      menage.push(
+        aLEntree(carte, (c) => {
+          const ne = carte.querySelector('[data-slot="spend-column-chart-born"]');
+          c.ajouter(tous(carte, '[data-slot="chart-icon-tile"]'), { opacity: 0, transform: "scale(.6)" }, { duree: 700, courbe: outBack(1.8), a: 0 })
+            .ajouter(ne ? [...ne.children] : [], { opacity: 0, transform: "translateY(6px)" }, { duree: 600, courbe: outQuad, a: 100, decale: 80 })
+            .suivre(compteur(ne?.lastElementChild ? [ne.lastElementChild as HTMLElement] : []), { duree: 1400, courbe: outExpo, a: 150 })
+            .ajouter(tous(cadre, '[data-slot="spend-column-chart-value"]'), { opacity: 0 }, { duree: 400, courbe: outQuad, a: 250, decale: 70 })
+            .ajouter(tous(carte, '[data-slot="spend-column-chart-axis-label"] > span'), { opacity: 0, transform: "translateY(4px)" }, { duree: 600, courbe: outQuad, a: 350, decale: 50 });
+          colonnes.forEach((col, r) => {
+            const barre = col.querySelector<HTMLElement>('[data-slot="spend-column-chart-bar"]');
+            const valeur = col.querySelector<HTMLElement>('[data-slot="spend-column-chart-value"]');
+            const texte = col.querySelector<HTMLElement>('[data-slot="spend-column-chart-value-text"]');
+            const h = parseFloat(barre?.style.height || "") || 0;
+            const ecrire = compteur(texte ? [texte] : []);
+            c.suivre(
+              (p) => {
+                if (barre) barre.style.height = `${Math.round(h * p * 1000) / 1000}px`;
+                if (valeur) valeur.style.bottom = `${Math.round((h * p + 4) * 1000) / 1000}px`;
+                ecrire(p);
+              },
+              { duree: 1100, courbe: outExpo, a: 250 + 70 * r },
+            );
+          });
+          const choisie = Math.max(0, colonnes.findIndex((col) => col.querySelector('[data-slot="spend-column-chart-bar-lit"].opacity-100')));
+          c.ajouter(tous(carte, '[data-slot="spend-column-chart-pill"]'), { opacity: 0, transform: "scale(.7)" }, { duree: 500, courbe: outBack(1.7), a: 250 + 70 * choisie + 495 });
+        }),
+      );
+    });
 
     return () => menage.forEach((f) => f());
   }, []);
