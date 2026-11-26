@@ -681,13 +681,13 @@ export default function SxMarque() {
                       <b>
                         <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                           <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                            {"dès 69 €"}
+                            {"dès 199 €"}
                           </span>
                           <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                            {"dès 69 €"}
+                            {"dès 199 €"}
                           </span>
                           <span className={"sr-only"}>
-                            {"dès 69 €"}
+                            {"dès 199 €"}
                           </span>
                         </span>
                       </b>

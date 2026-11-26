@@ -24,7 +24,7 @@ export default function SxTarifs() {
               </span>
             </h2>
             <p className={"platform-lede"}>
-              {"Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT."}
+              {"Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 199 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT."}
             </p>
           </div>
           <div className={"pr-controls"}>
@@ -312,13 +312,13 @@ export default function SxTarifs() {
                 <strong>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"dès 69 €"}
+                      {"dès 199 €"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"dès 69 €"}
+                      {"dès 199 €"}
                     </span>
                     <span className={"sr-only"}>
-                      {"dès 69 €"}
+                      {"dès 199 €"}
                     </span>
                   </span>
                 </strong>
@@ -342,7 +342,7 @@ export default function SxTarifs() {
                     </span>
                   </span>
                 </b>
-                {" à l'audit, selon le volume traité"}
+                {" à l'audit, selon les dossiers suivis"}
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>

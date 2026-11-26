@@ -85,7 +85,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    "Le logiciel de gestion Omega coûte 34,90\u00a0€ HT par personne et par mois, sans minimum. Chaque agent IA coûte à partir de 69\u00a0€ HT par mois, et son prix est fixé à l'audit.",
+    "Le logiciel de gestion Omega coûte 34,90\u00a0€ HT par personne et par mois, sans minimum. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, et son prix est fixé à l'audit.",
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -121,14 +121,21 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Combien coûte Omega\u00a0?",
     r: [
-      "Le logiciel et les agents se paient chacun au mois, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 69\u00a0€ HT par mois, selon le travail qu'il fait pour vous. L'installation coûte dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent.",
+      "Le logiciel et les agents se paient chacun au mois, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, selon le nombre de dossiers qu'il suit. Une automatisation s'installe dès 49\u00a0€ HT, puis l'IA se paie à la pièce. L'installation coûte dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 590\u00a0€ HT par agent.",
       "Exemple\u00a0: une entreprise de 10 personnes paie 349\u00a0€ HT par mois pour le logiciel de gestion. S'y ajoute le prix de ses agents, écrit au devis.",
+    ],
+  },
+  {
+    q: "Quelle différence entre une automatisation et un agent\u00a0?",
+    r: [
+      "Une automatisation suit toujours le même chemin\u00a0: chaque matin, elle rédige les relances, lit les factures reçues ou trie les mails. Elle s'installe une fois, puis chaque tâche de l'IA se paie à la pièce.",
+      "Un agent reçoit un objectif et suit chaque dossier jusqu'au bout\u00a0: il lit les réponses, relance au bon moment et prévient le gérant si un dossier bloque. Il se paie au mois, selon le nombre de dossiers qu'il suit.",
     ],
   },
   {
     q: "Quand connaîtrai-je le prix de mes agents\u00a0?",
     r: [
-      "Il est fixé pendant l'audit. Le prix d'un agent dépend du volume qu'il traite\u00a0: factures lues, demandes reçues, relances envoyées. Deux entreprises de même taille n'ont pas le même volume, et ce prix se fixe donc sur vos chiffres.",
+      "Il est fixé pendant l'audit. Le prix d'un agent dépend du nombre de dossiers qu'il suit chaque mois\u00a0: factures à recouvrer, factures fournisseurs, demandes clients. Deux entreprises de même taille n'ont pas le même volume, et ce prix se fixe donc sur vos chiffres.",
       "Avant que vous signiez, l'IA analyse vos fichiers et l'état de vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix de vos agents et de votre installation devient alors ferme.",
     ],
   },
@@ -142,8 +149,8 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Que se passe-t-il si un agent dépasse son forfait\u00a0?",
     r: [
-      "Vous êtes prévenu quand il atteint 75\u00a0%, puis 90\u00a0% de son forfait. Au-delà du forfait, chaque pièce est facturée à part\u00a0: 0,12\u00a0€ HT le mail, 0,90\u00a0€ HT la facture, 1,20\u00a0€ HT la relance, 6\u00a0€ HT le document.",
-      "L'agent ne change de palier qu'après trois mois de suite au-dessus de son forfait. Vous pouvez ajouter un agent à tout moment, et la remise est de 10\u00a0% dès 3 agents, de 15\u00a0% dès 5. Nos prix sont revus une fois par an, jamais en cours d'année.",
+      "Vous êtes prévenu quand il atteint 75\u00a0%, puis 90\u00a0% de son forfait. Au-delà, chaque dossier supplémentaire est facturé au prix écrit dans votre devis.",
+      "L'agent ne change de palier qu'après trois mois de suite au-dessus de son forfait. Vous pouvez ajouter un agent à tout moment, et la remise est de 10\u00a0% dès 3 agents. Nos prix sont revus une fois par an, jamais en cours d'année.",
     ],
   },
   {
@@ -210,10 +217,10 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "Chaque agent est payé au travail qu'il fait",
     texte:
-      "Il coûte à partir de 69\u00a0€ HT par mois, selon le volume qu'il traite\u00a0: factures lues, demandes reçues, relances envoyées.",
+      "Il coûte à partir de 199\u00a0€ HT par mois, selon le nombre de dossiers qu'il suit\u00a0: factures à recouvrer, factures fournisseurs, demandes clients.",
     points: [
       "Deux entreprises de même taille n'ont pas le même volume",
-      "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
+      "−10\u00a0% dès 3 agents",
     ],
   },
   {
@@ -228,7 +235,7 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "L'installation se paie une fois",
     texte:
-      "Pour le logiciel, elle coûte 1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT selon la taille de votre entreprise\u00a0; pour chaque agent, 290, 590 ou 1\u00a0190\u00a0€ HT. Pour les agents, rien n'est débité avant la fin de leur installation.",
+      "Pour le logiciel, elle coûte 1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT selon la taille de votre entreprise\u00a0; pour chaque agent, 590 ou 1\u00a0190\u00a0€ HT. Pour les agents, rien n'est débité avant la fin de leur installation.",
     points: [
       "Elle peut relever du Chèque TIC, porté par la Région Guadeloupe, pour les entreprises qui y sont immatriculées",
       "Les agents restent mensuels, sans engagement",

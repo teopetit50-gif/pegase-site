@@ -9,7 +9,7 @@ D'où viennent ces phrases. Rien n'est inventé pour remplir une case :
   · titres, chapôs, situations, FAQ : components/accueil-v3/textes.ts
     (l'accueil précédent, validé par Teo) ;
   · prix : components/tarifs/TroisPrix.tsx (34,90 € HT / personne / mois ;
-    agents dès 69 € HT ; installation dès 1 200 € HT et dès 290 € HT) ;
+    agents dès 199 € HT ; installation dès 1 200 € HT et dès 590 € HT) ;
   · sécurité : app/vos-donnees/page.tsx — aucune certification n'est
     attribuée à Omega, jamais « hébergé en France » ;
   · noms d'agents : lib/content.ts (jamais les noms de code).
@@ -589,7 +589,7 @@ Les six modules de gestion
 par personne, par mois
 Agent de relance
 Devis et factures relancés
-dès 69 €
+dès 199 €
 Pour Maison Laurent
 12 personnes × 34,90 €
 418,80 €
@@ -660,7 +660,7 @@ Agent · factures fournisseurs"""
 B["s8 Tarifs"] = """Tarifs
 Un prix par personne.
 Des agents payés au travail qu'ils font.
-Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 69 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT.
+Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 199 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT.
 Type de prix
 Chaque mois
 Installation
@@ -698,7 +698,7 @@ Vérifié par votre expert-comptable
 Un interlocuteur dans notre équipe
 Agents IA
 Quatre agents sont prêts, et nous construisons les vôtres.
-dès 69 €
+dès 199 €
 Prix fixé
 Voir les tarifs
 Pour chaque agent
@@ -730,7 +730,7 @@ Ce qu'on nous demande avant l'audit.
 Une question manque ? Notre équipe vous répond le jour même.
 Écrire à l'équipe
 Combien coûte Omega ?
-Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 69 € HT par mois. L'installation se paie une seule fois. Une automatisation s'installe dès 49 € HT, une fois ; quand l'IA y travaille, chaque tâche se paie ensuite à la pièce, de 0,15 à 0,10 € HT selon la recharge.
+Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 199 € HT par mois. L'installation se paie une seule fois. Une automatisation s'installe dès 49 € HT, une fois ; quand l'IA y travaille, chaque tâche se paie ensuite à la pièce, de 0,15 à 0,10 € HT selon la recharge.
 Que se passe-t-il si l'offre ne convient pas ?
 Pour les agents, le remboursement est intégral pendant 30 jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.
 Qui s'occupe de l'installation ?
@@ -791,7 +791,7 @@ PRECIS = {
         "per employee##2": "HT par personne", "a month##2": "par mois",
         "a month for 50 people, billed yearly##2": "HT par mois pour 10 personnes",
         "per employee##3": "HT par agent", "a month##3": "par mois",
-        "a month for 50 people, billed yearly##3": "à l'audit, selon le volume traité",
+        "a month for 50 people, billed yearly##3": "à l'audit, selon les dossiers suivis",
     },
     "s11 Appel": {"Get started##2": "Réserver un audit offert"},
 }

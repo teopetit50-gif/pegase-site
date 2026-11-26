@@ -7,7 +7,7 @@
 
    Le même jour, L'AFFICHAGE À LA ODOO (relevé sur odoo.com/fr_FR/pricing) :
    un 0 € en première carte (l'audit), le prix d'UNE personne en très gros
-   avec les centimes en exposant, « dès 69 » pour les agents. L'installation
+   avec les centimes en exposant, « dès 199 » pour les agents. L'installation
    sort des cartes : une ligne dessous, le détail dans « Comment nous
    chiffrons » et la FAQ. Pas de prix barré ni d'affichage à l'année.
 
@@ -69,13 +69,13 @@ export const PRIX_PUBLICS: Prix[] = [
   },
   {
     nom: "Agents IA",
-    chiffre: { avant: "dès", entier: "69", centimes: null },
+    chiffre: { avant: "dès", entier: "199", centimes: null },
     unite: "HT / agent / mois",
-    lu: "À partir de 69\u00a0€ HT par agent et par mois",
-    sous: "Prix fixé à l'audit, selon le volume traité",
-    texte: "Chaque agent est payé au travail qu'il fait pour vous\u00a0: une facture lue, une relance envoyée.",
+    lu: "À partir de 199\u00a0€ HT par agent et par mois",
+    sous: "Prix fixé à l'audit, selon les dossiers suivis",
+    texte: "Chaque agent suit un dossier jusqu'au bout\u00a0: une facture jusqu'au paiement, une demande jusqu'au devis signé.",
     points: [
-      "−10\u00a0% dès 3 agents, −15\u00a0% dès 5",
+      "−10\u00a0% dès 3 agents",
       "Vous êtes prévenu à 75\u00a0%, puis à 90\u00a0% du forfait",
       "Mensuel, sans engagement",
       "Remboursé pendant 30 jours",
@@ -84,7 +84,7 @@ export const PRIX_PUBLICS: Prix[] = [
 ];
 
 export const NOTE_INSTALLATION =
-  "L'installation se paie une seule fois\u00a0: dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 290\u00a0€ HT par agent. Pour les agents, rien n'est débité avant la fin de leur installation.";
+  "L'installation se paie une seule fois\u00a0: dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 590\u00a0€ HT par agent. Pour les agents, rien n'est débité avant la fin de leur installation.";
 
 export const NOTE_TVA =
   "Prix hors taxes. La TVA s'y ajoute au taux qui s'applique à votre entreprise.";
