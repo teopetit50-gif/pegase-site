@@ -39,7 +39,7 @@ Ouvrir le menu"""
 B["hero"] = """Audit de 30 minutes offert, sans engagement.
 ERX
 Enterprise Resource Execution
-Omega est un ERX : l'ERP qui fait le travail à votre place
+L'ERX conçu pour piloter toute votre entreprise
 Un ERX, c'est un ERP tout-en-un (ventes, achats, stock, banque, comptabilité) dans lequel des agents IA font le travail : relances, saisie des factures, réponses aux clients. Et c'est notre IA qui l'installe chez vous, bien plus vite et pour bien moins cher qu'un déploiement classique.
 Réserver un audit
 Voir le logiciel
@@ -57,8 +57,8 @@ Les modules d'Omega
 ="""
 
 B["s1 Plateforme"] = """Logiciel
-Un seul logiciel au lieu de quinze.
-Et des agents IA qui travaillent dedans.
+Une plateforme unique pour toute votre gestion.
+Ventes, achats, stock, banque et comptabilité.
 Fini le logiciel de facturation d'un côté, le tableur de stock de l'autre et la banque dans un troisième onglet. Omega réunit toute la gestion sur les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Les agents IA s'appuient sur ces données pour faire les tâches qui reviennent chaque jour.
 Ce que fait le logiciel
 Relancer les impayés
@@ -261,8 +261,8 @@ Du poste
 70 %"""
 
 B["s2 Fiche"] = """Déploiement par l'IA
-Installé par notre IA, pas par des consultants.
-Plus vite, et pour bien moins cher.
+Un déploiement piloté par l'IA.
+Plus rapide et plus économique qu'une intégration classique.
 Un ERP classique se déploie en plusieurs mois, avec des consultants facturés à la journée. Omega est installé par nos propres modèles d'IA : ils règlent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre expert-comptable vérifie, et vous démarrez.
 Audit offert
 Voir la gestion
@@ -418,7 +418,7 @@ Une fiche client ou un chiffre s'affiche en quelques secondes."""
 
 B["s3 Agents"] = """Nouveau
 Des agents sur mesure
-Des agents IA qui font le travail à votre place.
+Des agents IA intégrés à vos processus.
 Un agent est un assistant IA chargé d'une tâche précise dans Omega. Il lit vos données, prépare le travail et vous le montre avant d'envoyer quoi que ce soit.
 Chercher un agent…
 Chercher
@@ -478,8 +478,8 @@ ChatGPT
 Anthropic
 Gemini
 OpenAI
-Les IA des grands laboratoires.
-Au travail dans votre gestion.
+Les modèles d'IA les plus avancés,
+intégrés à l'ERX.
 Omega utilise les modèles des principaux laboratoires d'IA pour faire fonctionner ses agents.
 Voir les agents
 Parler à l'équipe
@@ -491,7 +491,7 @@ DeepMind
 GPT"""
 
 B["s5 Marque"] = """Documents
-Des documents à l'image de votre entreprise.
+Des documents conformes, à votre image.
 Logo, couleurs et mentions légales sur chaque document.
 Devis, factures et relances partent au nom de la bonne société, avec ses mentions légales, ses conditions de paiement et sa numérotation.
 Votre société
@@ -599,7 +599,7 @@ Le prix est écrit avant de commencer.
 Après l'audit, vous recevez une proposition écrite, prix compris."""
 
 B["s6 Sécurité"] = """Vos données
-Protégées et hébergées en Europe.
+Vos données protégées et hébergées en Europe.
 Chaque action d'un agent est enregistrée.
 Vos données sont stockées dans un espace réservé à votre entreprise, chiffré et hébergé dans l'Union européenne. Les agents attendent votre accord pour agir, et chaque action reste consultable dans un journal.
 Données chiffrées en transit et au repos
@@ -637,7 +637,7 @@ Voir les agents
 Voir les agents"""
 
 B["s7 Clients"] = """Exemples
-Ce qu'Omega fait concrètement.
+L'ERX en situation.
 De la vente à la clôture des comptes, pour une société comme pour un groupe.
 Voici ce que l'ERX fait concrètement, chaque jour. Vous gardez toujours la décision finale.
 Chaque matin, les relances des devis en attente et des factures en retard sont prêtes, écrites dans votre ton, et chaque demande reçue a déjà sa réponse rédigée. Rien ne part sans votre validation.
@@ -658,7 +658,7 @@ Factures fournisseurs
 Agent · factures fournisseurs"""
 
 B["s8 Tarifs"] = """Tarifs
-Des prix simples à comprendre.
+Une tarification transparente.
 Le logiciel par personne, les agents selon leur travail.
 Le logiciel coûte 34,90 € HT par mois pour chaque personne qui l'utilise, dès la première. Chaque agent a son propre prix, à partir de 199 € HT par mois, selon le nombre de dossiers qu'il traite. Une automatisation se paie une seule fois, à l'installation, dès 49 € HT.
 Type de prix
@@ -745,8 +745,8 @@ Pouvez-vous construire un module rien que pour nous ?
 Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement."""
 
 B["s11 Appel"] = """Commencer
-Voyez ce que l'ERX fait chez vous.
-30 minutes, gratuites et sans engagement.
+Découvrez l'ERX Omega en 30 minutes.
+Audit offert et sans engagement.
 Nous regardons comment vous travaillez aujourd'hui, quels outils vous utilisez et ce qui vous prend le plus de temps. Vous recevez ensuite une proposition écrite, avec le prix.
 Parler à l'équipe"""
 

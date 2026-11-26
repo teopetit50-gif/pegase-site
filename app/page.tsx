@@ -46,7 +46,7 @@ export const metadata: Metadata = {
      Resource Execution, terme de Gartner, 2026) : un ERP dont les agents IA
      font le travail. Textes en style « explicatif » choisi par Teo :
      outils/sx/refonte-erx.json. */
-  title: "Omega.AI | L'ERX : l'ERP tout-en-un où des agents IA font le travail",
+  title: "Omega.AI | L'ERX conçu pour piloter toute votre entreprise",
   description:
     "Omega est un ERX : un ERP tout-en-un (ventes, achats, stock, banque, comptabilité) où des agents IA font le travail, installé par notre IA bien plus vite qu'un déploiement classique. Audit de 30 minutes offert.",
 };

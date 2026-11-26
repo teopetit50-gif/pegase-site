@@ -16,10 +16,10 @@ export default function SxPlateforme() {
               {"Logiciel"}
             </span>
             <h2>
-              {"Un seul logiciel au lieu de quinze."}
+              {"Une plateforme unique pour toute votre gestion."}
               <br />
               <span>
-                {"Et des agents IA qui travaillent dedans."}
+                {"Ventes, achats, stock, banque et comptabilité."}
               </span>
             </h2>
           </div>

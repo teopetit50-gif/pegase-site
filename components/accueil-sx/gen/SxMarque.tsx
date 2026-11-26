@@ -15,7 +15,7 @@ export default function SxMarque() {
               {"Documents"}
             </span>
             <h2>
-              {"Des documents à l'image de votre entreprise."}
+              {"Des documents conformes, à votre image."}
               <br />
               <span>
                 {"Logo, couleurs et mentions légales sur chaque document."}

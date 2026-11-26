@@ -17,7 +17,7 @@ export default function SxTarifs() {
               {"Tarifs"}
             </span>
             <h2>
-              {"Des prix simples à comprendre."}
+              {"Une tarification transparente."}
               <br />
               <span>
                 {"Le logiciel par personne, les agents selon leur travail."}

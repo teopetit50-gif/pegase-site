@@ -50,7 +50,7 @@ export default function SxHero() {
                     </span>
                   </span>
                   <h1 className={"w-full desktop-sm:w-[550px] font-instrument-serif text-[42px] leading-[1.1] tracking-[-0.42px] text-black ipad:text-[62px] ipad:tracking-[-0.62px]"}>
-                    {"Omega est un ERX : l'ERP qui fait le travail à votre place"}
+                    {"L'ERX conçu pour piloter toute votre entreprise"}
                   </h1>
                 </div>
                 <p className={"font-tight text-[14px] leading-[25.5px] tracking-[-0.28px] text-[#121212] opacity-80 ipad:text-[17px] ipad:tracking-[-0.34px]"}>

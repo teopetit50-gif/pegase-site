@@ -21,7 +21,7 @@ export default function SxAgents() {
               </span>
             </span>
             <h2>
-              {"Des agents IA qui font le travail à votre place."}
+              {"Des agents IA intégrés à vos processus."}
             </h2>
             <p>
               {"Un agent est un assistant IA chargé d'une tâche précise dans Omega. Il lit vos données, prépare le travail et vous le montre avant d'envoyer quoi que ce soit."}

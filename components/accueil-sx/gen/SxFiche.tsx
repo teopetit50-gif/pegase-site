@@ -20,10 +20,10 @@ export default function SxFiche() {
               {"Déploiement par l'IA"}
             </span>
             <h2>
-              {"Installé par notre IA, pas par des consultants."}
+              {"Un déploiement piloté par l'IA."}
               <br />
               <span>
-                {"Plus vite, et pour bien moins cher."}
+                {"Plus rapide et plus économique qu'une intégration classique."}
               </span>
             </h2>
           </div>

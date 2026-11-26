@@ -13,7 +13,7 @@ export default function SxClients() {
               {"Exemples"}
             </span>
             <h2>
-              {"Ce qu'Omega fait concrètement."}
+              {"L'ERX en situation."}
               <br />
               <span>
                 {"De la vente à la clôture des comptes, pour une société comme pour un groupe."}
