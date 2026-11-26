@@ -613,9 +613,11 @@ function InsightsCard({ copy, uid, reduced }: { copy: InkFeatures["insights"]; u
   );
 }
 
-/* Thème clair seul, sur le fond #f5f5f2 de l'accueil et sa police. */
+/* Thème clair seul, sur le fond #f5f5f2 de l'accueil et sa police.
+   26/11 (Teo : « les cartes sont trop grosses ») — le bloc tient dans
+   880 px, la grande carte dans 680 : les schémas se lisent d'un coup d'œil. */
 const IB_CSS = `
-.ib-root{--ib-paper:#f5f5f2;--ib-card:#f1f1ee;--ib-raise:#ffffff;--ib-ink:#151515;--ib-soft:#3d3d3d;--ib-muted:#84877f;--ib-faint:#a8a8a8;--ib-line:#e2e2df;--ib-line-strong:#cfcfcb;--ib-bracket:#c9c9c5;--ib-inv:#161616;--ib-inv-ink:#f5f5f5;--ib-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.12);--ib-sans:inherit;--ib-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;position:relative;width:100%;box-sizing:border-box;color:var(--ib-ink);font-family:var(--ib-sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;container-type:inline-size}
+.ib-root{--ib-paper:#f5f5f2;--ib-card:#f1f1ee;--ib-raise:#ffffff;--ib-ink:#151515;--ib-soft:#3d3d3d;--ib-muted:#84877f;--ib-faint:#a8a8a8;--ib-line:#e2e2df;--ib-line-strong:#cfcfcb;--ib-bracket:#c9c9c5;--ib-inv:#161616;--ib-inv-ink:#f5f5f5;--ib-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px -12px rgba(0,0,0,.12);--ib-sans:inherit;--ib-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;position:relative;width:100%;box-sizing:border-box;color:var(--ib-ink);font-family:var(--ib-sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;container-type:inline-size;max-width:880px;margin:0 auto}
 .ib-root :where(*){box-sizing:border-box}
 .ib-root :focus-visible{outline:2px solid var(--ib-ink);outline-offset:2px}
 .ib-root :where(svg){display:block;max-width:none;flex:none}
@@ -634,7 +636,7 @@ const IB_CSS = `
 .ib-frame-hover:hover>.ib-c-bl{transform:translate(-3px,3px)}
 .ib-frame-hover:hover>.ib-c-br{transform:translate(3px,3px)}
 .ib-bento{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(22px,3cqw,34px)}
-@container (min-width:720px){.ib-bento{grid-template-columns:repeat(2,minmax(0,1fr))}.ib-wide{grid-column:1 / -1;width:min(100%,820px);justify-self:center}}
+@container (min-width:720px){.ib-bento{grid-template-columns:repeat(2,minmax(0,1fr))}.ib-wide{grid-column:1 / -1;width:min(100%,680px);justify-self:center}}
 .ib-card{background:linear-gradient(180deg,var(--ib-raise),var(--ib-card));border:1px solid var(--ib-line);padding:clamp(14px,2cqw,22px);display:flex;flex-direction:column;gap:14px;transition:border-color .3s,box-shadow .35s}
 .ib-card:hover{border-color:var(--ib-line-strong);box-shadow:var(--ib-shadow)}
 .ib-card h3{font-size:15px;font-weight:550;letter-spacing:-.01em}
