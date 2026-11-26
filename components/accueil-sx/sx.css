@@ -1628,15 +1628,47 @@ html:has(.sx)::-webkit-scrollbar-thumb:hover{background:#5c5c5c}
 .sx .wl-slip-net{background:#f4f4f2;color:#121212}
 .sx .wl-chip.is-brand{background:#f1f1ef;color:#404040}
 
-/* 9. LES ÉCRANS D'EXEMPLE, EN MINIATURE (25/11, Teo : « la version mobile
-      est mal faite, les tableaux de l'accueil sont trop gros, trop
-      zoomés »). La référence garde ses écrans à la taille de l'ordinateur
-      dans une colonne de 292 px : au téléphone, le tableau des relances ne
-      montrait que la colonne « Client » et la fiche client faisait
-      2 027 px de haut. `zoom` les met en page sur une largeur plus grande
-      puis les réduit, sans rien rogner : à 390 px, le tableau montre ses
-      quatre premières colonnes et la fiche tombe à 1 068 px.
-      ≥ 1024 px : rien ne change, le décalque reste au pixel. */
-@media (max-width:1023px){.sx .platform-app{zoom:.72}}
-@media (max-width:767px){.sx .wl-grid{zoom:.8}.sx .platform-insights{zoom:.85}}
-@media (max-width:479px){.sx .platform-app{zoom:.58}.sx .wl-grid{zoom:.7}.sx .platform-insights{zoom:.72}}
+/* 9. LES ÉCRANS D'EXEMPLE, EN VERSION TÉLÉPHONE (25/11, Teo : « les
+      tableaux de l'accueil sont trop gros, trop zoomés », puis, devant la
+      miniature : « fais une version plus petite pour mobile mais plus
+      lisible »). La référence garde au téléphone l'écran de l'ordinateur,
+      empilé : 712 à 2 027 px de haut par écran, des tableaux coupés à une
+      colonne. Sous 768 px, chaque écran garde son code et ne montre que
+      l'essentiel, en texte de 12 px ou plus : le titre sans les outils, deux
+      colonnes par tableau (client ou facture, et statut), l'agenda en
+      pastilles, la trésorerie sans légende, la fiche client sans ses blocs
+      secondaires. Rien n'est dessiné à part : ce sont les mêmes écrans. */
+@media (max-width:767px){
+  /* A. en-têtes : le titre seul (avatars, outils, « Demander à l'IA » et filtres sortent) */
+  .sx .platform-app:not(.sb-app) :is(.platform-payroll-tools,.platform-payroll-filters){display:none}
+  .sx .platform-app:not(.sb-app) .platform-panel-header :is(.platform-ask-ai,.platform-header-pill,.platform-tool-divider,.solar-info-circle-outline){display:none}
+  /* B. les deux tableaux tiennent dans la largeur, en mise en page automatique */
+  .sx .platform-app:not(.sb-app) table{table-layout:auto !important;width:100% !important;min-width:0 !important}
+  .sx .platform-app:not(.sb-app) table col{width:auto !important}
+  .sx .platform-app:not(.sb-app) table :is(th,td){padding-left:8px !important;padding-right:8px !important}
+  .sx .platform-payroll table :is(col,th,td):is(:nth-child(1),:nth-child(3),:nth-child(4),:nth-child(5),:nth-child(7)){display:none}
+  .sx .platform-payroll table td:nth-child(2){max-width:150px}
+  .sx .platform-app:not(.platform-payroll):not(.sb-app) table :is(col,th,td):is(:nth-child(2),:nth-child(3),:nth-child(5)){display:none}
+  .sx .platform-app:not(.platform-payroll):not(.sb-app) table td:nth-child(1){max-width:160px}
+  /* C. factures : la carte « Extrait » sort, la bulle de l'étape tient */
+  .sx .platform-passport{display:none}
+  .sx .sx-onboarding-checklist *{max-width:100%}
+  /* D. agenda : une pastille par créneau, le rendez-vous en petit */
+  .sx .platform-available{font-size:0;gap:0;justify-content:center}
+  .sx .platform-calendar .platform-leave-bar{font-size:9.5px;letter-spacing:-.01em;padding-inline:6px}
+  /* E. trésorerie : les deux montants côte à côte, sans légende, le flux réduit */
+  .sx .platform-answer .w-56{width:100%;gap:0}
+  .sx .platform-answer .w-56 > div:first-child{flex-direction:row;gap:24px}
+  .sx .platform-answer .w-56 .typo-heading-04-semibold{font-size:22px;line-height:28px}
+  .sx .platform-answer .w-56 > .py-1{display:none}
+  .sx .platform-answer .basis-\[420px\]{zoom:.62}
+  /* F. fiche client : en-tête, résumé, à venir et facturé ; le reste sort */
+  .sx .sb-record-main > .sb-cards,.sx .sb-record-side{display:none}
+}
+
+/* 10. LE BOUTON DU MOT GÉANT (25/11, Teo, capture du pied : « ça aussi
+       c'est mal fait »). Devenu un lien nu (variante « link »), il se
+       posait en blanc sur le E et ne se lisait plus. La référence pose là
+       un vrai bouton plein ; il reprend le dessin du bouton blanc du site. */
+.sx .sgf-action a{height:46px;padding:0 16px 0 22px;border-radius:10px;background:#fff;color:#121212;border:1px solid rgba(0,0,0,.1);font-weight:600;letter-spacing:-.02em;text-decoration:none;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.sx .sgf-action a:hover{background:#f4f4f2;text-decoration:none}

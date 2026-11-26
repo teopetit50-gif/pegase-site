@@ -74,7 +74,11 @@ const LETTRES: Record<string, Lettre> = {
   J: { w: 72, d: [barre(53, 0, 19, 64), arc(36, 62, 36, 38, 19, 17, 0, 180)] },
   K: { w: 86, d: [barre(0, 0, 19, 100), biais(62, 0, 10, 62, 24), biais(30, 42, 62, 100, 24)] },
   L: { w: 68, d: [barre(0, 0, 19, 100), barre(0, 83, 68, 17)] },
-  M: { w: 112, d: [barre(0, 0, 22, 100), biais(0, 0, 46, 100, 9), biais(68, 0, 40, 100, 22), barre(90, 0, 22, 100)] },
+  /* 25/11 (Teo : « ça aussi c'est mal fait ») — le M avait une diagonale
+     de 9 et une de 22 qui ne se rejoignaient pas : il se lisait « N I ».
+     Deux jambes de 20, deux diagonales de 22 qui se rejoignent au pied,
+     au centre de la lettre. */
+  M: { w: 112, d: [barre(0, 0, 20, 100), biais(0, 0, 45, 100, 22), biais(90, 0, 45, 100, 22), barre(92, 0, 20, 100)] },
   N: { w: 88, d: [barre(0, 0, 19, 100), barre(69, 0, 19, 100), biais(0, 0, 63, 100, 25)] },
   O: { w: 100, d: [anneau(50, 50, 50, 50, 21, 17)] },
   P: { w: 80, d: [barre(0, 0, 19, 100), panse(0, 0, 80, 60, 19, 17)] },
