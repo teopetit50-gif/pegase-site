@@ -46,15 +46,15 @@ export default function SxHero() {
                       {"Nouveau"}
                     </b>
                     <span>
-                      {"Des agents sur mesure"}
+                      {"Omega devient un ERX"}
                     </span>
                   </span>
                   <h1 className={"w-full desktop-sm:w-[550px] font-instrument-serif text-[42px] leading-[1.1] tracking-[-0.42px] text-black ipad:text-[62px] ipad:tracking-[-0.62px]"}>
-                    {"L'ERP qui se configure avec l'IA"}
+                    {"L'ERX, l'ERP doté d'agents IA"}
                   </h1>
                 </div>
                 <p className={"font-tight text-[14px] leading-[25.5px] tracking-[-0.28px] text-[#121212] opacity-80 ipad:text-[17px] ipad:tracking-[-0.34px]"}>
-                  {"Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez."}
+                  {"Omega réunit ventes, achats, stock, banque et comptabilité dans un seul logiciel. Des agents IA y préparent les tâches récurrentes et les soumettent à votre validation."}
                 </p>
                 <p className={"font-tight -mt-[6px] text-[13px] leading-[20px] tracking-[-0.2px] text-[#121212] ipad:text-[15px] ipad:leading-[22px] ipad:tracking-[-0.3px]"}>
                   {"À partir de "}

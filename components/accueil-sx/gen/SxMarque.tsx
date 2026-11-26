@@ -15,15 +15,15 @@ export default function SxMarque() {
               {"Documents"}
             </span>
             <h2>
-              {"Vos documents, à votre image."}
+              {"Des documents au nom de chaque société."}
               <br />
               <span>
-                {"Votre logo, vos couleurs, vos mentions."}
+                {"Logo, couleurs et mentions légales."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Devis, factures et relances partent au nom de chaque société, avec ses mentions légales, ses conditions et sa numérotation."}
+            {"Devis, factures et relances sont émis au nom de chaque société, avec ses mentions légales, ses conditions de paiement et sa numérotation."}
           </p>
         </header>
         <div className={"wl-grid"} style={{ "--wl-brand": "#0f766e", "--wl-radius": "12px" } as CSSProperties}>
@@ -457,10 +457,10 @@ export default function SxMarque() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"À votre image, dès l'installation."}
+                {"Une identité par société."}
               </h3>
               <p>
-                {"Choisissez une société : ses devis, ses factures et ses relances prennent aussitôt son logo et ses couleurs."}
+                {"Chaque société dispose de ses propres modèles de devis, de factures et de relances, avec son logo et ses couleurs."}
               </p>
             </div>
           </article>
@@ -615,10 +615,10 @@ export default function SxMarque() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Tout le groupe sur un seul plan."}
+                {"Gestion multisociété."}
               </h3>
               <p>
-                {"Chaque société garde ses clients, ses fournisseurs et ses contrats. Vous passez de l'une à l'autre sans vous reconnecter."}
+                {"Chaque société conserve ses clients, ses fournisseurs et ses contrats. Un seul compte suffit pour passer de l'une à l'autre."}
               </p>
             </div>
           </article>
@@ -743,10 +743,10 @@ export default function SxMarque() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Un prix écrit d'avance."}
+                {"Un devis avant tout engagement."}
               </h3>
               <p>
-                {"Après l'audit, vous recevez une proposition écrite, prix compris."}
+                {"L'audit se conclut par une proposition écrite et chiffrée."}
               </p>
             </div>
           </article>

@@ -42,11 +42,12 @@ import SxComportements from "@/components/accueil-sx/SxComportements";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-  /* 22/11 (Teo, « on part sur le sujet ERP ») — titre et description
-     inchangés par la refonte du 25/11. */
-  title: "Omega.AI | L'ERP qui se configure avec l'IA",
+  /* 26/11 (Teo, « c'est plus un ERP, c'est un ERX ») — l'ERX : un ERP avec
+     des agents IA intégrés. Textes de la page réécrits dans un ton posé, à
+     la manière d'Odoo et de Pennylane (outils/sx/refonte-erx.json). */
+  title: "Omega.AI | L'ERX, l'ERP doté d'agents IA",
   description:
-    "Omega, le logiciel de gestion (ERP) où l'IA travaille pour vous : ventes, achats, stock, banque et comptabilité au même endroit. L'IA l'adapte à votre activité et fait le travail répétitif. Audit de 30 minutes offert.",
+    "Omega est un ERX : un logiciel de gestion qui réunit ventes, achats, stock, banque et comptabilité, avec des agents IA qui traitent les tâches récurrentes sous votre validation. Audit de 30 minutes offert.",
 };
 
 export default function Home() {

@@ -20,16 +20,16 @@ export default function SxFiche() {
               {"Configuration par l'IA"}
             </span>
             <h2>
-              {"Prêt dès le jour J."}
+              {"Une mise en place guidée par l'IA."}
               <br />
               <span>
-                {"Omega se règle sur votre activité."}
+                {"Configuré pour votre activité."}
               </span>
             </h2>
           </div>
           <div>
             <p className={"platform-lede"}>
-              {"Décrivez votre activité. L'IA règle les modules, la TVA et le plan comptable, et nous reprenons vos données."}
+              {"L'IA paramètre les modules, la TVA et le plan comptable à partir de la description de votre activité. Notre équipe reprend vos données existantes."}
             </p>
             <div className={"sb-ctas"}>
               <Button asChild variant={"link"}>
@@ -1009,9 +1009,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Tout s'enregistre."}
+                {"Données centralisées."}
               </strong>
-              {" Devis, stock et écritures se mettent à jour seuls."}
+              {" Devis, stock et écritures se mettent à jour automatiquement."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1023,9 +1023,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Vos outils sont tous reliés."}
+                {"Outils connectés."}
               </strong>
-              {" Banque et comptabilité restent à jour."}
+              {" Banque et comptabilité mises à jour sans ressaisie."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1036,9 +1036,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Omega connaît vos règles."}
+                {"Règles fiscales intégrées."}
               </strong>
-              {" TVA et plan comptable réglés pour vous."}
+              {" TVA et plan comptable paramétrés dès l'installation."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1049,9 +1049,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Omega vous répond."}
+                {"Assistant intégré."}
               </strong>
-              {" Une fiche ou une réponse en une seconde."}
+              {" Une fiche ou un chiffre retrouvé en quelques secondes."}
             </p>
           </li>
         </ul>

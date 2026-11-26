@@ -16,33 +16,33 @@ export default function SxPlateforme() {
               {"Logiciel"}
             </span>
             <h2>
-              {"La gestion, prise en charge."}
+              {"Toute la gestion, au même endroit."}
               <br />
               <span>
-                {"Les agents préparent. Vous décidez."}
+                {"Des agents IA intégrés aux modules."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Un seul logiciel pour les ventes, les achats et la comptabilité. Les agents préparent le travail, signalent ce qui vous attend, et rien ne part sans votre accord."}
+            {"Ventes, achats et comptabilité partagent les mêmes données. Les agents préparent les tâches récurrentes et les soumettent à votre validation avant tout envoi."}
           </p>
         </header>
         <div className={"platform-layout"}>
           <nav className={"platform-nav"} aria-label={"Ce que fait le logiciel"} data-gutter-guide={"bottom"}>
             <a href={"#platform-payroll"} className={"is-active"} aria-current={"step"}>
-              {"Relancer les impayés"}
+              {"Relances clients"}
             </a>
             <a href={"#platform-onboarding"} className={""}>
-              {"Traiter les factures"}
+              {"Factures fournisseurs"}
             </a>
             <a href={"#platform-time-off"} className={""}>
-              {"Répondre aux demandes"}
+              {"Demandes clients"}
             </a>
             <a href={"#platform-compliance"} className={""}>
-              {"Contrôler les paiements"}
+              {"Contrôle des paiements"}
             </a>
             <a href={"#platform-insights"} className={""}>
-              {"Suivre la trésorerie"}
+              {"Suivi de trésorerie"}
             </a>
           </nav>
           <div className={"platform-stack"}>
@@ -50,7 +50,7 @@ export default function SxPlateforme() {
             <article data-platform-panel={"true"} data-gutter-guide={"bottom"} className={"platform-panel"} style={{ "zIndex": "1" } as CSSProperties}>
               <div className={"platform-panel-copy"}>
                 <p>
-                  {"Chaque matin, l'agent prépare les relances des devis sans réponse et des factures échues. Vous relisez une courte liste et vous validez en un clic."}
+                  {"L'agent repère les devis sans réponse et les factures échues, puis prépare les relances. Vous les validez depuis une liste unique."}
                 </p>
               </div>
               <div className={"platform-illustration"} data-gutter-guide={"top"}>
@@ -658,7 +658,7 @@ export default function SxPlateforme() {
             <article data-platform-panel={"true"} data-gutter-guide={"bottom"} className={"platform-panel"} style={{ "zIndex": "2" } as CSSProperties}>
               <div className={"platform-panel-copy"} data-gutter-guide={"top"}>
                 <p>
-                  {"Chaque facture reçue est lue, contrôlée et rangée sans ressaisie. L'agent rapproche la commande, vérifie les montants et prépare l'écriture."}
+                  {"Chaque facture reçue est lue et rapprochée de sa commande. L'agent contrôle les montants et prépare l'écriture comptable, sans ressaisie."}
                 </p>
               </div>
               <div className={"platform-illustration"} data-gutter-guide={"top"}>
@@ -937,7 +937,7 @@ export default function SxPlateforme() {
             <article data-platform-panel={"true"} data-gutter-guide={"bottom"} className={"platform-panel"} style={{ "zIndex": "3" } as CSSProperties}>
               <div className={"platform-panel-copy"} data-gutter-guide={"top"}>
                 <p>
-                  {"Les demandes arrivent par mail et WhatsApp. L'agent rédige la réponse, vérifie l'agenda de l'équipe et vous la soumet avec le contexte."}
+                  {"Les demandes reçues par e-mail ou WhatsApp sont centralisées. L'agent rédige une réponse à partir de l'historique du client et de l'agenda de l'équipe."}
                 </p>
               </div>
               <div className={"platform-illustration"} data-gutter-guide={"top"}>
@@ -1213,7 +1213,7 @@ export default function SxPlateforme() {
             <article data-platform-panel={"true"} data-gutter-guide={"bottom"} className={"platform-panel"} style={{ "zIndex": "4" } as CSSProperties}>
               <div className={"platform-panel-copy"} data-gutter-guide={"top"}>
                 <p>
-                  {"Avant chaque paiement, l'agent compare la facture à la fiche du fournisseur et à votre historique. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord."}
+                  {"Avant chaque paiement, la facture est comparée à la fiche du fournisseur et à l'historique. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord."}
                 </p>
               </div>
               <div className={"platform-illustration"} data-gutter-guide={"top"}>
@@ -1643,7 +1643,7 @@ export default function SxPlateforme() {
             <article data-platform-panel={"true"} data-gutter-guide={"bottom"} className={"platform-panel"} style={{ "zIndex": "5" } as CSSProperties}>
               <div className={"platform-panel-copy"} data-gutter-guide={"top"}>
                 <p>
-                  {"Posez vos questions sur la trésorerie, les ventes ou les achats. Chaque réponse montre les données et le calcul derrière."}
+                  {"Interrogez vos données de trésorerie, de ventes ou d'achats en langage courant. Chaque réponse indique les chiffres et le calcul utilisés."}
                 </p>
               </div>
               <div className={"platform-illustration"} data-gutter-guide={"top"}>

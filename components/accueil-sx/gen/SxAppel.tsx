@@ -26,14 +26,14 @@ export default function SxAppel() {
           {"Commencer"}
         </span>
         <h2>
-          {"Un audit de 30 minutes, offert."}
+          {"Réservez votre audit offert."}
           <br />
           <span>
-            {"Vous repartez avec un prix écrit."}
+            {"30 minutes pour étudier votre projet."}
           </span>
         </h2>
         <p className={"platform-lede"}>
-          {"En 30 minutes, nous vous disons ce qu'Omega peut reprendre chez vous et ce que cela coûte. Sans engagement."}
+          {"Nous analysons votre organisation et vous remettons une proposition chiffrée, sans engagement."}
         </p>
         <div className={"cta-actions"}>
           <Button asChild variant={"link"}>

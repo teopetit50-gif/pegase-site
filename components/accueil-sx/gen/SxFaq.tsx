@@ -17,19 +17,19 @@ export default function SxFaq() {
               {"FAQ"}
             </span>
             <h2>
-              {"Vos questions."}
+              {"Questions fréquentes."}
               <br />
               <span>
-                {"Ce qu'on nous demande avant l'audit."}
+                {"Ce qu'il faut savoir avant de commencer."}
               </span>
             </h2>
             <div className={"faq-aside"}>
               <p>
-                {"Une question manque ? Notre équipe vous répond le jour même."}
+                {"Vous ne trouvez pas votre réponse ? Notre équipe vous répond dans la journée."}
               </p>
               <Button asChild variant={"link"}>
                 <Link href={"/contact"}>
-                  {"Écrire à l'équipe"}
+                  {"Contacter l'équipe"}
                   <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
                 </Link>
               </Button>
@@ -90,7 +90,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a2"} role={"region"} aria-labelledby={"_R_ltavb_-q2"} inert={true}>
               <div>
                 <p>
-                  {"Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation."}
+                  {"Notre équipe vous accompagne du début à la fin. L'IA paramètre le logiciel à partir de la description de votre activité, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est facturé avant la fin de leur installation."}
                 </p>
               </div>
             </div>
@@ -98,7 +98,7 @@ export default function SxFaq() {
           <li className={"faq-item"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q3"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a3"}>
               <span>
-                {"Un agent peut-il envoyer quelque chose sans mon accord ?"}
+                {"Un agent peut-il envoyer un message sans mon accord ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -109,7 +109,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a3"} role={"region"} aria-labelledby={"_R_ltavb_-q3"} inert={true}>
               <div>
                 <p>
-                  {"Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment."}
+                  {"Non, sauf si vous l'avez autorisé. Par défaut, chaque envoi (relance, réponse, e-mail) est soumis à votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages, et revenir sur ce choix à tout moment."}
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function SxFaq() {
           <li className={"faq-item"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q5"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a5"}>
               <span>
-                {"Faut-il changer nos outils ?"}
+                {"Faut-il remplacer nos outils actuels ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -147,7 +147,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a5"} role={"region"} aria-labelledby={"_R_ltavb_-q5"} inert={true}>
               <div>
                 <p>
-                  {"Vous choisissez. Omega peut devenir votre logiciel de gestion, avec la reprise des données de votre logiciel actuel, ou commencer par des agents branchés sur ce que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et bien d'autres."}
+                  {"Pas nécessairement. Omega peut remplacer votre logiciel de gestion actuel, avec la reprise de vos données, ou démarrer par des agents connectés à vos outils : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot, entre autres."}
                 </p>
               </div>
             </div>
@@ -155,7 +155,7 @@ export default function SxFaq() {
           <li className={"faq-item"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q6"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a6"}>
               <span>
-                {"Pouvez-vous construire un module rien que pour nous ?"}
+                {"Pouvez-vous développer un module spécifique ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -166,7 +166,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a6"} role={"region"} aria-labelledby={"_R_ltavb_-q6"} inert={true}>
               <div>
                 <p>
-                  {"Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement."}
+                  {"Oui, c'est l'offre sur mesure. Pendant l'audit, nous étudions votre organisation : qui fait quoi, sur quels logiciels, et qui valide. Vous recevez ensuite une proposition écrite et chiffrée, avant tout engagement."}
                 </p>
               </div>
             </div>

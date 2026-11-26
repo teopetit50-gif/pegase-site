@@ -1,0 +1,402 @@
+{
+  "hero|SxHero": [
+    [
+      "Des agents sur mesure",
+      "Omega devient un ERX"
+    ],
+    [
+      "L'ERP qui se configure avec l'IA",
+      "L'ERX, l'ERP doté d'agents IA"
+    ],
+    [
+      "Omega réunit ventes, achats, stock, banque et comptabilité. L'IA l'adapte à votre activité et fait le travail répétitif. Vous validez.",
+      "Omega réunit ventes, achats, stock, banque et comptabilité dans un seul logiciel. Des agents IA y préparent les tâches récurrentes et les soumettent à votre validation."
+    ]
+  ],
+  "s1 Plateforme|SxPlateforme": [
+    [
+      "La gestion, prise en charge.",
+      "Toute la gestion, au même endroit."
+    ],
+    [
+      "Les agents préparent. Vous décidez.",
+      "Des agents IA intégrés aux modules."
+    ],
+    [
+      "Un seul logiciel pour les ventes, les achats et la comptabilité. Les agents préparent le travail, signalent ce qui vous attend, et rien ne part sans votre accord.",
+      "Ventes, achats et comptabilité partagent les mêmes données. Les agents préparent les tâches récurrentes et les soumettent à votre validation avant tout envoi."
+    ],
+    [
+      "Relancer les impayés",
+      "Relances clients"
+    ],
+    [
+      "Traiter les factures",
+      "Factures fournisseurs"
+    ],
+    [
+      "Répondre aux demandes",
+      "Demandes clients"
+    ],
+    [
+      "Contrôler les paiements",
+      "Contrôle des paiements"
+    ],
+    [
+      "Suivre la trésorerie",
+      "Suivi de trésorerie"
+    ],
+    [
+      "Chaque matin, l'agent prépare les relances des devis sans réponse et des factures échues. Vous relisez une courte liste et vous validez en un clic.",
+      "L'agent repère les devis sans réponse et les factures échues, puis prépare les relances. Vous les validez depuis une liste unique."
+    ],
+    [
+      "Chaque facture reçue est lue, contrôlée et rangée sans ressaisie. L'agent rapproche la commande, vérifie les montants et prépare l'écriture.",
+      "Chaque facture reçue est lue et rapprochée de sa commande. L'agent contrôle les montants et prépare l'écriture comptable, sans ressaisie."
+    ],
+    [
+      "Les demandes arrivent par mail et WhatsApp. L'agent rédige la réponse, vérifie l'agenda de l'équipe et vous la soumet avec le contexte.",
+      "Les demandes reçues par e-mail ou WhatsApp sont centralisées. L'agent rédige une réponse à partir de l'historique du client et de l'agenda de l'équipe."
+    ],
+    [
+      "Avant chaque paiement, l'agent compare la facture à la fiche du fournisseur et à votre historique. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord.",
+      "Avant chaque paiement, la facture est comparée à la fiche du fournisseur et à l'historique. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord."
+    ],
+    [
+      "Posez vos questions sur la trésorerie, les ventes ou les achats. Chaque réponse montre les données et le calcul derrière.",
+      "Interrogez vos données de trésorerie, de ventes ou d'achats en langage courant. Chaque réponse indique les chiffres et le calcul utilisés."
+    ]
+  ],
+  "s2 Fiche|SxFiche": [
+    [
+      "Prêt dès le jour J.",
+      "Une mise en place guidée par l'IA."
+    ],
+    [
+      "Omega se règle sur votre activité.",
+      "Configuré pour votre activité."
+    ],
+    [
+      "Décrivez votre activité. L'IA règle les modules, la TVA et le plan comptable, et nous reprenons vos données.",
+      "L'IA paramètre les modules, la TVA et le plan comptable à partir de la description de votre activité. Notre équipe reprend vos données existantes."
+    ],
+    [
+      "Tout s'enregistre.",
+      "Données centralisées."
+    ],
+    [
+      "Devis, stock et écritures se mettent à jour seuls.",
+      "Devis, stock et écritures se mettent à jour automatiquement."
+    ],
+    [
+      "Vos outils sont tous reliés.",
+      "Outils connectés."
+    ],
+    [
+      "Banque et comptabilité restent à jour.",
+      "Banque et comptabilité mises à jour sans ressaisie."
+    ],
+    [
+      "Omega connaît vos règles.",
+      "Règles fiscales intégrées."
+    ],
+    [
+      "TVA et plan comptable réglés pour vous.",
+      "TVA et plan comptable paramétrés dès l'installation."
+    ],
+    [
+      "Omega vous répond.",
+      "Assistant intégré."
+    ],
+    [
+      "Une fiche ou une réponse en une seconde.",
+      "Une fiche ou un chiffre retrouvé en quelques secondes."
+    ]
+  ],
+  "s3 Agents|SxAgents": [
+    [
+      "Choisissez un agent et réglez-le.",
+      "Des agents IA pour les tâches récurrentes."
+    ],
+    [
+      "Quatre agents prêts pour le travail répétitif. Chacun suit vos règles, attend votre accord avant d'envoyer et enregistre chaque action.",
+      "Chaque agent applique vos règles de gestion, soumet ses envois à votre validation et consigne ses actions dans un journal."
+    ],
+    [
+      "Les devis sans réponse et les factures échues sont relancés à J+3, J+7 et J+21, dans votre ton. Vous validez la liste du matin, puis les relances partent.",
+      "Relance les devis sans réponse et les factures échues à J+3, J+7 et J+21, dans le ton que vous définissez."
+    ],
+    [
+      "Factures, bons de livraison, attestations : chaque pièce reçue est lue, contrôlée, classée, puis transmise à la comptabilité.",
+      "Lit, contrôle et classe les factures, bons de livraison et attestations reçus, puis les transmet à la comptabilité."
+    ],
+    [
+      "L'agent recontacte vos clients inactifs et reprend échéances et commandes en plan. Vous validez chaque message.",
+      "Repère les clients sans commande récente, les contrats à renouveler et les commandes en attente, puis prépare les messages de suivi."
+    ],
+    [
+      "Une demande arrive par mail ou WhatsApp, à toute heure. Sa réponse est rédigée aussitôt, puis elle part seule si vous l'avez autorisé, ou attend votre accord.",
+      "Rédige une réponse à chaque demande reçue par e-mail ou WhatsApp. L'envoi est automatique ou soumis à validation, selon vos réglages."
+    ]
+  ],
+  "s4 Intégrations|SxIntegrations": [
+    [
+      "Les meilleures IA.",
+      "Les modèles d'IA de référence."
+    ],
+    [
+      "Une seule gestion.",
+      "Intégrés à votre gestion."
+    ],
+    [
+      "Omega travaille avec les plus grands noms de l'IA.",
+      "Omega s'appuie sur les modèles des principaux laboratoires d'IA."
+    ]
+  ],
+  "s5 Marque|SxMarque": [
+    [
+      "Vos documents, à votre image.",
+      "Des documents au nom de chaque société."
+    ],
+    [
+      "Votre logo, vos couleurs, vos mentions.",
+      "Logo, couleurs et mentions légales."
+    ],
+    [
+      "Devis, factures et relances partent au nom de chaque société, avec ses mentions légales, ses conditions et sa numérotation.",
+      "Devis, factures et relances sont émis au nom de chaque société, avec ses mentions légales, ses conditions de paiement et sa numérotation."
+    ],
+    [
+      "À votre image, dès l'installation.",
+      "Une identité par société."
+    ],
+    [
+      "Choisissez une société : ses devis, ses factures et ses relances prennent aussitôt son logo et ses couleurs.",
+      "Chaque société dispose de ses propres modèles de devis, de factures et de relances, avec son logo et ses couleurs."
+    ],
+    [
+      "Tout le groupe sur un seul plan.",
+      "Gestion multisociété."
+    ],
+    [
+      "Chaque société garde ses clients, ses fournisseurs et ses contrats. Vous passez de l'une à l'autre sans vous reconnecter.",
+      "Chaque société conserve ses clients, ses fournisseurs et ses contrats. Un seul compte suffit pour passer de l'une à l'autre."
+    ],
+    [
+      "Un prix écrit d'avance.",
+      "Un devis avant tout engagement."
+    ],
+    [
+      "Après l'audit, vous recevez une proposition écrite, prix compris.",
+      "L'audit se conclut par une proposition écrite et chiffrée."
+    ]
+  ],
+  "s6 Sécurité|SxSecurite": [
+    [
+      "Elles restent les vôtres.",
+      "Protégées et hébergées en Europe."
+    ],
+    [
+      "Validation et traçabilité comprises.",
+      "Validation et traçabilité des actions."
+    ],
+    [
+      "Un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne. Chaque action d'un agent attend votre accord et laisse une trace.",
+      "Chaque entreprise dispose d'un espace dédié et chiffré, hébergé dans l'Union européenne. Les actions des agents sont soumises à validation et enregistrées."
+    ],
+    [
+      "Base à Francfort, sans réplication hors de l'Union européenne. Aucune donnée ne sert à entraîner un modèle.",
+      "Base de données à Francfort, sans réplication hors de l'Union européenne. Vos données ne servent jamais à entraîner un modèle."
+    ],
+    [
+      "Tout est journalisé",
+      "Journal d'activité"
+    ],
+    [
+      "Qui a validé, quoi et quand : le journal garde tout. Hébergement, sauvegardes et surveillance sont compris.",
+      "Le journal enregistre chaque validation, avec son auteur, son objet et sa date. Hébergement, sauvegardes et supervision sont inclus."
+    ],
+    [
+      "Vous décidez de ce qui part",
+      "Validation des envois"
+    ],
+    [
+      "Au départ, tout ce qui sort passe par votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages.",
+      "Par défaut, chaque envoi est soumis à votre validation. Vous pouvez ensuite autoriser un agent à envoyer certains messages automatiquement."
+    ]
+  ],
+  "s7 Clients|SxClients": [
+    [
+      "Situations",
+      "Cas d'usage"
+    ],
+    [
+      "Ce qu'Omega reprend, cas par cas.",
+      "Les opérations prises en charge."
+    ],
+    [
+      "De la vente à la clôture, du site unique au groupe.",
+      "De la vente à la clôture, de la PME au groupe."
+    ],
+    [
+      "Les agents et les modules de l'ERP prennent ces situations en charge chaque jour. Vous gardez la décision.",
+      "Les modules de l'ERX et ses agents traitent ces opérations au quotidien, avec votre accord à chaque étape."
+    ],
+    [
+      "Chaque matin, les relances des devis en attente et des factures échues sont prêtes, écrites dans votre ton, et chaque demande reçue a sa réponse rédigée. Rien ne part sans votre validation.",
+      "Chaque matin, les relances des devis en attente et des factures échues sont préparées, et une réponse est rédigée pour chaque demande reçue. Aucun envoi ne part sans votre validation."
+    ],
+    [
+      "« L'IA prépare, vous validez. Chaque action laisse une trace. »",
+      "« Chaque action d'un agent est validée et tracée. »"
+    ],
+    [
+      "Omega · notre méthode",
+      "Omega · principe de fonctionnement"
+    ],
+    [
+      "Chaque facture reçue est lue et rapprochée de sa commande. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord.",
+      "Chaque facture reçue est lue et rapprochée de sa commande. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord."
+    ]
+  ],
+  "s8 Tarifs|SxTarifs": [
+    [
+      "Un prix par personne.",
+      "Des tarifs clairs."
+    ],
+    [
+      "Des agents payés au travail qu'ils font.",
+      "Un prix par personne, un prix par agent."
+    ],
+    [
+      "Le logiciel de gestion coûte 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix, à partir de 199 € HT par mois. Une automatisation s'installe une fois, dès 49 € HT.",
+      "Le logiciel est facturé 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix mensuel, fixé à l'audit, à partir de 199 € HT. Une automatisation s'installe une seule fois, à partir de 49 € HT."
+    ],
+    [
+      "Nous voyons ce qu'Omega peut faire chez vous, et à quel prix.",
+      "Un premier échange pour définir votre besoin et le chiffrer."
+    ],
+    [
+      "Votre activité, passée en revue",
+      "Analyse de votre organisation"
+    ],
+    [
+      "Les modules et agents utiles",
+      "Modules et agents recommandés"
+    ],
+    [
+      "Une proposition écrite, prix compris",
+      "Proposition écrite et chiffrée"
+    ],
+    [
+      "Le calendrier de démarrage",
+      "Planning de mise en service"
+    ],
+    [
+      "Votre tarif, écrit à la fin",
+      "Tarif remis en fin d'audit"
+    ],
+    [
+      "Votre gestion tient au même endroit, adaptée à votre activité par l'IA.",
+      "Les six modules de gestion, configurés par l'IA pour votre activité."
+    ],
+    [
+      "Quatre agents sont prêts, et nous construisons les vôtres.",
+      "Des agents IA configurés selon vos règles de gestion."
+    ],
+    [
+      "Jamais un pourcentage de vos encaissements",
+      "Aucune commission sur vos encaissements"
+    ],
+    [
+      "Nous construisons le module ou l'agent qui n'existe que chez vous.",
+      "Un module ou un agent développé pour votre organisation."
+    ],
+    [
+      "Votre organisation, étudiée avec vous",
+      "Étude de votre organisation"
+    ],
+    [
+      "Vos outils actuels raccordés",
+      "Raccordement à vos outils actuels"
+    ],
+    [
+      "Données d'un autre logiciel reprises",
+      "Reprise des données de votre ancien logiciel"
+    ],
+    [
+      "Ce qu'il fait, écrit avant de commencer",
+      "Cahier des charges validé avant le développement"
+    ]
+  ],
+  "s10 FAQ|SxFaq": [
+    [
+      "Vos questions.",
+      "Questions fréquentes."
+    ],
+    [
+      "Ce qu'on nous demande avant l'audit.",
+      "Ce qu'il faut savoir avant de commencer."
+    ],
+    [
+      "Une question manque ? Notre équipe vous répond le jour même.",
+      "Vous ne trouvez pas votre réponse ? Notre équipe vous répond dans la journée."
+    ],
+    [
+      "Écrire à l'équipe",
+      "Contacter l'équipe"
+    ],
+    [
+      "Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation.",
+      "Notre équipe vous accompagne du début à la fin. L'IA paramètre le logiciel à partir de la description de votre activité, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est facturé avant la fin de leur installation."
+    ],
+    [
+      "Un agent peut-il envoyer quelque chose sans mon accord ?",
+      "Un agent peut-il envoyer un message sans mon accord ?"
+    ],
+    [
+      "Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment.",
+      "Non, sauf si vous l'avez autorisé. Par défaut, chaque envoi (relance, réponse, e-mail) est soumis à votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages, et revenir sur ce choix à tout moment."
+    ],
+    [
+      "Faut-il changer nos outils ?",
+      "Faut-il remplacer nos outils actuels ?"
+    ],
+    [
+      "Vous choisissez. Omega peut devenir votre logiciel de gestion, avec la reprise des données de votre logiciel actuel, ou commencer par des agents branchés sur ce que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et bien d'autres.",
+      "Pas nécessairement. Omega peut remplacer votre logiciel de gestion actuel, avec la reprise de vos données, ou démarrer par des agents connectés à vos outils : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot, entre autres."
+    ],
+    [
+      "Pouvez-vous construire un module rien que pour nous ?",
+      "Pouvez-vous développer un module spécifique ?"
+    ],
+    [
+      "Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement.",
+      "Oui, c'est l'offre sur mesure. Pendant l'audit, nous étudions votre organisation : qui fait quoi, sur quels logiciels, et qui valide. Vous recevez ensuite une proposition écrite et chiffrée, avant tout engagement."
+    ]
+  ],
+  "s11 Appel|SxAppel": [
+    [
+      "Un audit de 30 minutes, offert.",
+      "Réservez votre audit offert."
+    ],
+    [
+      "Vous repartez avec un prix écrit.",
+      "30 minutes pour étudier votre projet."
+    ],
+    [
+      "En 30 minutes, nous vous disons ce qu'Omega peut reprendre chez vous et ce que cela coûte. Sans engagement.",
+      "Nous analysons votre organisation et vous remettons une proposition chiffrée, sans engagement."
+    ]
+  ],
+  "pied|SxPied": [
+    [
+      "Le travail répétitif",
+      "Tâches récurrentes"
+    ],
+    [
+      "L'ERP",
+      "L'ERX"
+    ]
+  ]
+}
