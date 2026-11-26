@@ -281,8 +281,8 @@ export default function SxComportements() {
         agents: { montant: "dès 199 €", unite: ["HT par agent", "par mois"], gras: "Prix fixé", suite: " à l'audit, selon les dossiers suivis" },
       },
       installation: {
-        logiciel: { montant: "dès 1 200 €", unite: ["HT, pour le logiciel", "une seule fois"], gras: "Payée une fois", suite: ", à la mise en service du logiciel" },
-        agents: { montant: "dès 590 €", unite: ["HT par agent", "une seule fois"], gras: "Aucun débit", suite: " avant la fin de l'installation" },
+        logiciel: { montant: "Sur devis", unite: ["après l'audit", "une seule fois"], gras: "Payée une fois", suite: ", à la mise en service du logiciel" },
+        agents: { montant: "Sur devis", unite: ["après l'audit, par agent", "une seule fois"], gras: "Aucun débit", suite: " avant la fin de l'installation" },
       },
     };
     const grille = racine.querySelector<HTMLElement>(".pr-grid");

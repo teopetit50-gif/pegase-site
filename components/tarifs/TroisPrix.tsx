@@ -84,7 +84,7 @@ export const PRIX_PUBLICS: Prix[] = [
 ];
 
 export const NOTE_INSTALLATION =
-  "L'installation se paie une seule fois\u00a0: dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 590\u00a0€ HT par agent. Pour les agents, rien n'est débité avant la fin de leur installation.";
+  "L'installation se paie une seule fois, au prix écrit dans votre devis après l'audit. Pour les agents, rien n'est débité avant la fin de leur installation.";
 
 export const NOTE_TVA =
   "Prix hors taxes. La TVA s'y ajoute au taux qui s'applique à votre entreprise.";

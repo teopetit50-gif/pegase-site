@@ -9,7 +9,7 @@ D'où viennent ces phrases. Rien n'est inventé pour remplir une case :
   · titres, chapôs, situations, FAQ : components/accueil-v3/textes.ts
     (l'accueil précédent, validé par Teo) ;
   · prix : components/tarifs/TroisPrix.tsx (34,90 € HT / personne / mois ;
-    agents dès 199 € HT ; installation dès 1 200 € HT et dès 590 € HT) ;
+    agents dès 199 € HT ; installation sur devis) ;
   · sécurité : app/vos-donnees/page.tsx — aucune certification n'est
     attribuée à Omega, jamais « hébergé en France » ;
   · noms d'agents : lib/content.ts (jamais les noms de code).

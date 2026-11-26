@@ -347,7 +347,7 @@ export const QUESTIONS = {
     {
       id: "prix",
       q: "Combien coûte le logiciel de gestion\u00a0?",
-      r: "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Les six modules sont compris, et nous ne prenons jamais de pourcentage sur vos encaissements. Son installation se paie une seule fois, dès 1\u00a0200\u00a0€ HT. Vos agents ont leur propre prix, fixé pendant l'audit offert de 30 minutes.",
+      r: "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Les six modules sont compris, et nous ne prenons jamais de pourcentage sur vos encaissements. Son installation se paie une seule fois, au prix écrit dans votre devis. Vos agents ont leur propre prix, fixé pendant l'audit offert de 30 minutes.",
     },
   ],
 };

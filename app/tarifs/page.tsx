@@ -121,7 +121,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Combien coûte Omega\u00a0?",
     r: [
-      "Le logiciel et les agents se paient chacun au mois, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, selon le nombre de dossiers qu'il suit. Une automatisation s'installe dès 49\u00a0€ HT, puis l'IA se paie à la pièce. L'installation coûte dès 1\u00a0200\u00a0€ HT pour le logiciel et dès 590\u00a0€ HT par agent.",
+      "Le logiciel et les agents se paient chacun au mois, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, selon le nombre de dossiers qu'il suit. Une automatisation s'installe dès 49\u00a0€ HT, puis l'IA se paie à la pièce. L'installation du logiciel et des agents se paie une fois, au prix écrit dans votre devis après l'audit.",
       "Exemple\u00a0: une entreprise de 10 personnes paie 349\u00a0€ HT par mois pour le logiciel de gestion. S'y ajoute le prix de ses agents, écrit au devis.",
     ],
   },
@@ -235,7 +235,7 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "L'installation se paie une fois",
     texte:
-      "Pour le logiciel, elle coûte 1\u00a0200, 2\u00a0400 ou 4\u00a0900\u00a0€ HT selon la taille de votre entreprise\u00a0; pour chaque agent, 590 ou 1\u00a0190\u00a0€ HT. Pour les agents, rien n'est débité avant la fin de leur installation.",
+      "Son prix dépend de la taille de votre entreprise, de l'état de vos données et des outils à raccorder\u00a0: il est écrit dans votre devis, après l'audit. Pour les agents, rien n'est débité avant la fin de leur installation.",
     points: [
       "Elle peut relever du Chèque TIC, porté par la Région Guadeloupe, pour les entreprises qui y sont immatriculées",
       "Les agents restent mensuels, sans engagement",
