@@ -48,7 +48,7 @@ export const metadata: Metadata = {
      travaille, qui valide. Correspondances : outils/sx/refonte-erx.json. */
   title: "Omega.AI | Toute votre gestion dans un seul ERP",
   description:
-    "Remplacez votre logiciel de gestion et les outils autour par un seul ERP : ventes, achats, stock, banque, comptabilité. Les agents IA font le travail, vous validez. Déployé par notre IA. Audit de 30 minutes offert.",
+    "Remplacez votre logiciel de gestion et les outils autour par un seul ERP : ventes, achats, stock, banque, comptabilité. Les agents IA font le travail, vous validez. Déployé par notre IA en deux semaines à un mois environ. Audit de 30 minutes offert.",
 };
 
 export default function Home() {

@@ -52,7 +52,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a7"} role={"region"} aria-labelledby={"_R_ltavb_-q7"}>
               <div>
                 <p>
-                  {"Sur trois points. Il remplace votre logiciel de gestion et les outils autour par un seul système. Des agents IA y font le travail : relances, saisie des factures, contrôle des paiements, réponses aux clients, sous votre validation. Et il est déployé par nos modèles d'IA, bien plus vite et pour bien moins cher qu'avec un intégrateur."}
+                  {"Sur trois points. Il remplace votre logiciel de gestion et les outils autour par un seul système. Des agents IA y font le travail : relances, saisie des factures, contrôle des paiements, réponses aux clients, sous votre validation. Et il est déployé par nos modèles d'IA en deux semaines à un mois environ, pour bien moins cher qu'avec un intégrateur."}
                 </p>
               </div>
             </div>

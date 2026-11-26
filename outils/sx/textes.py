@@ -263,7 +263,7 @@ Du poste
 B["s2 Fiche"] = """Déploiement par l'IA
 Déployer un ERP ne devrait pas prendre des mois.
 Omega est déployé par l'IA.
-Nos modèles d'IA paramètrent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre ERP est en service bien plus vite, et pour bien moins cher qu'avec un intégrateur.
+Nos modèles d'IA paramètrent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre ERP est en service en deux semaines à un mois environ, pour bien moins cher qu'avec un intégrateur.
 Audit offert
 Voir la gestion
 Navigation du logiciel

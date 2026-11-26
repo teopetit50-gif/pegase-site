@@ -183,7 +183,7 @@ export const DEMARRAGE = {
   surtitre: "Pas à pas",
   titre: ["Votre mise en service,", "préparée avec vous."],
   texte:
-    "Tout commence par un audit offert de 30 minutes. Nous reprenons vos données, puis votre expert-comptable vérifie le paramétrage avant le démarrage.",
+    "Tout commence par un audit offert de 30 minutes. Nous reprenons vos données, puis votre expert-comptable vérifie le paramétrage. Comptez deux semaines à un mois jusqu'au démarrage.",
   bouton: { libelle: "Voir les tarifs", href: TARIFS } as Bouton,
   cartes: [
     {
@@ -337,7 +337,7 @@ export const QUESTIONS = {
     {
       id: "installation",
       q: "Qui s'occupe de l'installation ?",
-      r: "Nous, du début à la fin. L'IA paramètre l'ERP à partir de ce que vous lui décrivez. Nous reprenons vos données, puis votre expert-comptable vérifie le paramétrage avant le démarrage.",
+      r: "Nous nous en chargeons du début à la fin, en deux semaines à un mois environ. L'IA paramètre l'ERP à partir de ce que vous lui décrivez. Nous reprenons vos données, puis votre expert-comptable vérifie le paramétrage avant le démarrage.",
     },
     {
       id: "donnees",
