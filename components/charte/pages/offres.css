@@ -51,6 +51,32 @@
   object-fit: cover;
 }
 
+/* 26/11/2026 (Teo : « y a plus le petit effet zoom et dézoom ») — l'effet
+   d'entrée des photos pleines d'avant la refonte du 25/11, rebranché sur
+   le nouveau cadre. Ce n'est pas une échelle : le CLIP du cadre se
+   resserre de 5 % à 0 pendant que la photo monte, et se rouvre quand on
+   remonte, donc la photo paraît grandir sans perdre en netteté. Mêmes
+   portée et courbe linéaire que `ofd-pleine-entree` (app/offres/
+   nos-offres.css), au rayon de 12 du cadre. Là où `view()` n'existe pas,
+   ou si le visiteur réduit les animations, la photo reste au repos. */
+@keyframes of-photo-entree {
+  from {
+    clip-path: inset(5% round 12px);
+  }
+  to {
+    clip-path: inset(0% round 12px);
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .charte .of-page .of-photo {
+      animation: of-photo-entree both linear;
+      animation-timeline: view();
+      animation-range: entry 0% cover 55%;
+    }
+  }
+}
+
 /* ─── 2 · le bandeau d'outils ──────────────────────────────────────── */
 .charte .of-page .of-outils {
   padding: 32px 0;
