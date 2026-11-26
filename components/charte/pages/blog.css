@@ -22,8 +22,8 @@
 }
 
 /* la grille d'articles : cartes à rayon 12, titres en 450 */
-.charte .ch-blog .bc-carte { border-radius: 0; }
-.charte .ch-blog .bc-photo { border-radius: 0; }
+.charte .ch-blog .bc-carte { border-radius: 12px; }
+.charte .ch-blog .bc-photo { border-radius: 12px; }
 .charte .ch-blog .bc-titre { font-weight: 450; letter-spacing: -0.03em; }
 
 /* l'article : la pastille de catégorie et la couverture de l'accueil */
@@ -37,4 +37,4 @@
 }
 .charte .ch-blog .b-share { border-radius: 10px; background: #fff; border: 1px solid rgba(0, 0, 0, 0.1); }
 .charte .ch-article [class*="rounded-[30px]"],
-.charte .ch-article [class*="rounded-[24px]"] { border-radius: 0 !important; }
+.charte .ch-article [class*="rounded-[24px]"] { border-radius: 12px !important; }

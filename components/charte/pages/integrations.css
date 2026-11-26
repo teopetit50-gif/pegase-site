@@ -115,7 +115,7 @@
 }
 .charte .it-page .go-carte {
   border-color: var(--ch-scene-bord);
-  border-radius: 0;
+  border-radius: 12px;
   background: var(--ch-scene);
 }
 .charte .it-page .go-logo {

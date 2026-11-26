@@ -306,7 +306,7 @@
   padding: 40px 32px;
   overflow: hidden;
   border: 1px solid var(--ch-scene-bord);
-  border-radius: 0;
+  border-radius: 12px;
   background: var(--ch-scene);
 }
 .charte .ch-scene--trame {
@@ -586,22 +586,3 @@
 :where(.ch-pied) ul { list-style: none; margin: 0; padding: 0; }
 :where(.ch-pied) p { margin: 0; }
 .ch-pied svg { max-width: none; }
-
-/* ── 26/11/2026 — ANGLES DROITS, COMME L'ACCUEIL ──────────────────────
-   Teo : « toute la page offres, les photos, les trucs, ils sont arrondis ;
-   respecte la logique de la page d'accueil, où les coins ne sont pas
-   arrondis, et fais pareil sur les autres pages ». Les cadres propres à
-   la charte (scènes, photos, cartes, fenêtres) sont passés à 0 dans leurs
-   fichiers. Cette règle rattrape les pièces anciennes réemployées dans les
-   pages de la vitrine, qui portent leur arrondi en classes Tailwind : tout
-   arrondi de 12 px et plus (rounded-xl, -2xl, -3xl, rounded-[12px] à
-   [36px]) devient droit. Restent arrondis, exprès : les boutons, liens,
-   champs et étiquettes (rayon de 10 et moins), les pastilles et tout ce
-   qui est rond (rounded-full). */
-.charte :where([class*="rounded-xl"], [class*="rounded-2xl"], [class*="rounded-3xl"],
-  [class*="rounded-[12px]"], [class*="rounded-[13px]"], [class*="rounded-[14px]"], [class*="rounded-[15px]"],
-  [class*="rounded-[16px]"], [class*="rounded-[18px]"], [class*="rounded-[20px]"], [class*="rounded-[22px]"],
-  [class*="rounded-[24px]"], [class*="rounded-[26px]"], [class*="rounded-[28px]"], [class*="rounded-[30px]"],
-  [class*="rounded-[32px]"], [class*="rounded-[36px]"]):not(a, button, input, select, textarea, label) {
-  border-radius: 0 !important;
-}

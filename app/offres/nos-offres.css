@@ -1185,7 +1185,7 @@
   justify-content: center;
   width: var(--cy-carte);
   min-height: var(--cy-haut);
-  border-radius: 0;
+  border-radius: 12px;
   background: #ffffff;
   padding: 16px 18px;
 }

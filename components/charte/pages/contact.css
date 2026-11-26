@@ -51,7 +51,7 @@
   max-width: 760px;
   padding: 28px;
   border: 1px solid var(--ch-filet);
-  border-radius: 0;
+  border-radius: 12px;
   background: #fff;
   box-shadow: none;
 }

@@ -44,7 +44,7 @@
   overflow: hidden;
   height: clamp(240px, 36vw, 560px);
   border: 1px solid var(--ch-scene-bord);
-  border-radius: 0;
+  border-radius: 12px;
   background: var(--ch-scene);
 }
 .charte .of-page .of-photo__media {
@@ -57,14 +57,14 @@
    resserre de 5 % à 0 pendant que la photo monte, et se rouvre quand on
    remonte, donc la photo paraît grandir sans perdre en netteté. Mêmes
    portée et courbe linéaire que `ofd-pleine-entree` (app/offres/
-   nos-offres.css), à angles droits comme le cadre. Là où `view()` n'existe pas,
+   nos-offres.css), au rayon de 12 du cadre. Là où `view()` n'existe pas,
    ou si le visiteur réduit les animations, la photo reste au repos. */
 @keyframes of-photo-entree {
   from {
-    clip-path: inset(5%);
+    clip-path: inset(5% round 12px);
   }
   to {
-    clip-path: inset(0%);
+    clip-path: inset(0% round 12px);
   }
 }
 @supports (animation-timeline: view()) {
@@ -229,7 +229,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  border-radius: 0;
+  border-radius: 12px;
   background: #e7131a;
 }
 @media (min-width: 768px) {
@@ -309,7 +309,7 @@
   overflow: hidden;
   aspect-ratio: 649 / 402;
   border: 1px solid #d9ddd3;
-  border-radius: 0;
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
 }
