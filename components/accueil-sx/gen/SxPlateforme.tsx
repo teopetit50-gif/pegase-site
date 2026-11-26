@@ -16,15 +16,15 @@ export default function SxPlateforme() {
               {"Logiciel"}
             </span>
             <h2>
-              {"Une plateforme unique pour toute votre gestion."}
+              {"Remplacez l'ERP."}
               <br />
               <span>
-                {"Ventes, achats, stock, banque et comptabilité."}
+                {"Oubliez le patchwork d'outils."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Fini le logiciel de facturation d'un côté, le tableur de stock de l'autre et la banque dans un troisième onglet. Omega réunit toute la gestion sur les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Les agents IA s'appuient sur ces données pour faire les tâches qui reviennent chaque jour."}
+            {"Les anciens ERP ont été conçus pour une autre époque, et les outils ajoutés autour n'ont fait que boucher les trous. Omega remplace les deux : ventes, achats, stock, banque et comptabilité dans un seul ERP, sur les mêmes données."}
           </p>
         </header>
         <div className={"platform-layout"}>

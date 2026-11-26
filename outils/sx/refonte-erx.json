@@ -1,36 +1,51 @@
 {
   "hero|SxHero": [
-    ["Omega est un ERX : l'ERP qui fait le travail à votre place", "L'ERX conçu pour piloter toute votre entreprise"]
+    ["ERX", "ERP IA"],
+    ["Enterprise Resource Execution", "Pour les PME et les groupes"],
+    ["L'ERX conçu pour piloter toute votre entreprise", "Toute votre gestion dans un seul ERP."],
+    ["Un ERX, c'est un ERP tout-en-un (ventes, achats, stock, banque, comptabilité) dans lequel des agents IA font le travail : relances, saisie des factures, réponses aux clients. Et c'est notre IA qui l'installe chez vous, bien plus vite et pour bien moins cher qu'un déploiement classique.", "Remplacez votre logiciel de gestion et les outils autour par un seul ERP, pour chacune de vos sociétés. Les agents font le travail. Vous fixez les règles et vous validez."]
   ],
   "s1 Plateforme|SxPlateforme": [
-    ["Un seul logiciel au lieu de quinze.", "Une plateforme unique pour toute votre gestion."],
-    ["Et des agents IA qui travaillent dedans.", "Ventes, achats, stock, banque et comptabilité."]
+    ["Une plateforme unique pour toute votre gestion.", "Remplacez l'ERP."],
+    ["Ventes, achats, stock, banque et comptabilité.", "Oubliez le patchwork d'outils."],
+    ["Fini le logiciel de facturation d'un côté, le tableur de stock de l'autre et la banque dans un troisième onglet. Omega réunit toute la gestion sur les mêmes données : une facture saisie met à jour le stock, la banque et les comptes. Les agents IA s'appuient sur ces données pour faire les tâches qui reviennent chaque jour.", "Les anciens ERP ont été conçus pour une autre époque, et les outils ajoutés autour n'ont fait que boucher les trous. Omega remplace les deux : ventes, achats, stock, banque et comptabilité dans un seul ERP, sur les mêmes données."]
   ],
   "s2 Fiche|SxFiche": [
-    ["Installé par notre IA, pas par des consultants.", "Un déploiement piloté par l'IA."],
-    ["Plus vite, et pour bien moins cher.", "Plus rapide et plus économique qu'une intégration classique."]
+    ["Un déploiement piloté par l'IA.", "Déployer un ERP ne devrait pas prendre des mois."],
+    ["Plus rapide et plus économique qu'une intégration classique.", "Omega est déployé par l'IA."],
+    ["Un ERP classique se déploie en plusieurs mois, avec des consultants facturés à la journée. Omega est installé par nos propres modèles d'IA : ils règlent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre expert-comptable vérifie, et vous démarrez.", "Nos modèles d'IA paramètrent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre ERP est en service bien plus vite, et pour bien moins cher qu'avec un intégrateur."],
+    ["Tout est relié.", "Données unifiées."],
+    ["Votre banque est connectée.", "Banque connectée."],
+    ["Les règles comptables sont intégrées.", "Fiscalité intégrée."],
+    ["Posez vos questions.", "Assistant IA."]
   ],
   "s3 Agents|SxAgents": [
-    ["Des agents IA qui font le travail à votre place.", "Des agents IA intégrés à vos processus."]
+    ["Des agents IA intégrés à vos processus.", "Les agents font le travail."],
+    ["Un agent est un assistant IA chargé d'une tâche précise dans Omega. Il lit vos données, prépare le travail et vous le montre avant d'envoyer quoi que ce soit.", "Vous fixez les règles et vous validez. Relances, factures fournisseurs, demandes clients, contrôle des paiements : chaque agent traite une tâche dans l'ERP et vous soumet ce qu'il envoie."]
   ],
   "s4 Intégrations|SxIntegrations": [
-    ["Les IA des grands laboratoires.", "Les modèles d'IA les plus avancés,"],
-    ["Au travail dans votre gestion.", "intégrés à l'ERX."]
+    ["Les modèles d'IA les plus avancés,", "Les meilleurs modèles d'IA."],
+    ["intégrés à l'ERX.", "Intégrés à votre ERP."]
   ],
   "s5 Marque|SxMarque": [
-    ["Des documents à l'image de votre entreprise.", "Des documents conformes, à votre image."]
+    ["Des documents conformes, à votre image.", "Des documents à votre image."]
   ],
   "s6 Sécurité|SxSecurite": [
-    ["Protégées et hébergées en Europe.", "Vos données protégées et hébergées en Europe."]
+    ["Vos données protégées et hébergées en Europe.", "L'IA, sans perdre le contrôle de vos données."]
   ],
   "s7 Clients|SxClients": [
-    ["Ce qu'Omega fait concrètement.", "L'ERX en situation."]
+    ["L'ERX en situation.", "L'ERP au quotidien."],
+    ["Voici ce que l'ERX fait concrètement, chaque jour. Vous gardez toujours la décision finale.", "Voici ce qu'Omega fait concrètement, chaque jour. Vous gardez toujours la décision finale."]
   ],
   "s8 Tarifs|SxTarifs": [
-    ["Des prix simples à comprendre.", "Une tarification transparente."]
+    ["Une tarification transparente.", "Un prix par utilisateur."],
+    ["Le logiciel par personne, les agents selon leur travail.", "Rien de caché."]
   ],
   "s11 Appel|SxAppel": [
-    ["Voyez ce que l'ERX fait chez vous.", "Découvrez l'ERX Omega en 30 minutes."],
-    ["30 minutes, gratuites et sans engagement.", "Audit offert et sans engagement."]
+    ["Découvrez l'ERX Omega en 30 minutes.", "Passez à Omega."],
+    ["Audit offert et sans engagement.", "Audit offert de 30 minutes, sans engagement."]
+  ],
+  "pied|SxPied": [
+    ["L'ERX", "L'ERP"]
   ]
 }

@@ -42,13 +42,13 @@ import SxComportements from "@/components/accueil-sx/SxComportements";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
-  /* 26/11 (Teo, « c'est plus un ERP, c'est un ERX ») — l'ERX (Enterprise
-     Resource Execution, terme de Gartner, 2026) : un ERP dont les agents IA
-     font le travail. Textes en style « explicatif » choisi par Teo :
-     outils/sx/refonte-erx.json. */
-  title: "Omega.AI | L'ERX conçu pour piloter toute votre entreprise",
+  /* 26/11 (Teo) — on garde le terme ERP ; textes calqués sur la façon
+     d'écrire des ERP IA américains (Light, Campfire, Rillet) et de Dust :
+     titre = la catégorie et le gain, sous-titre = ce qu'on remplace, qui
+     travaille, qui valide. Correspondances : outils/sx/refonte-erx.json. */
+  title: "Omega.AI | Toute votre gestion dans un seul ERP",
   description:
-    "Omega est un ERX : un ERP tout-en-un (ventes, achats, stock, banque, comptabilité) où des agents IA font le travail, installé par notre IA bien plus vite qu'un déploiement classique. Audit de 30 minutes offert.",
+    "Remplacez votre logiciel de gestion et les outils autour par un seul ERP : ventes, achats, stock, banque, comptabilité. Les agents IA font le travail, vous validez. Déployé par notre IA. Audit de 30 minutes offert.",
 };
 
 export default function Home() {

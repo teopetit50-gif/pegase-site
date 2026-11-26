@@ -17,10 +17,10 @@ export default function SxTarifs() {
               {"Tarifs"}
             </span>
             <h2>
-              {"Une tarification transparente."}
+              {"Un prix par utilisateur."}
               <br />
               <span>
-                {"Le logiciel par personne, les agents selon leur travail."}
+                {"Rien de caché."}
               </span>
             </h2>
             <p className={"platform-lede"}>

@@ -26,10 +26,10 @@ export default function SxAppel() {
           {"Commencer"}
         </span>
         <h2>
-          {"Découvrez l'ERX Omega en 30 minutes."}
+          {"Passez à Omega."}
           <br />
           <span>
-            {"Audit offert et sans engagement."}
+            {"Audit offert de 30 minutes, sans engagement."}
           </span>
         </h2>
         <p className={"platform-lede"}>

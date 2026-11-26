@@ -20,16 +20,16 @@ export default function SxFiche() {
               {"Déploiement par l'IA"}
             </span>
             <h2>
-              {"Un déploiement piloté par l'IA."}
+              {"Déployer un ERP ne devrait pas prendre des mois."}
               <br />
               <span>
-                {"Plus rapide et plus économique qu'une intégration classique."}
+                {"Omega est déployé par l'IA."}
               </span>
             </h2>
           </div>
           <div>
             <p className={"platform-lede"}>
-              {"Un ERP classique se déploie en plusieurs mois, avec des consultants facturés à la journée. Omega est installé par nos propres modèles d'IA : ils règlent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre expert-comptable vérifie, et vous démarrez."}
+              {"Nos modèles d'IA paramètrent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre ERP est en service bien plus vite, et pour bien moins cher qu'avec un intégrateur."}
             </p>
             <div className={"sb-ctas"}>
               <Button asChild variant={"link"}>
@@ -1009,7 +1009,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Tout est relié."}
+                {"Données unifiées."}
               </strong>
               {" Un devis signé met à jour le stock, la facturation et la comptabilité."}
             </p>
@@ -1023,7 +1023,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Votre banque est connectée."}
+                {"Banque connectée."}
               </strong>
               {" Les paiements reçus sont rapprochés des factures, sans saisie."}
             </p>
@@ -1036,7 +1036,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Les règles comptables sont intégrées."}
+                {"Fiscalité intégrée."}
               </strong>
               {" TVA et plan comptable sont réglés dès l'installation."}
             </p>
@@ -1049,7 +1049,7 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Posez vos questions."}
+                {"Assistant IA."}
               </strong>
               {" Une fiche client ou un chiffre s'affiche en quelques secondes."}
             </p>

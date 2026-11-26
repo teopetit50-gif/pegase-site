@@ -15,7 +15,7 @@ export default function SxSecurite() {
               {"Vos données"}
             </span>
             <h2>
-              {"Vos données protégées et hébergées en Europe."}
+              {"L'IA, sans perdre le contrôle de vos données."}
               <br />
               <span>
                 {"Chaque action d'un agent est enregistrée."}

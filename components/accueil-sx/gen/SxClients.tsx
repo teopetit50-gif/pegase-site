@@ -13,7 +13,7 @@ export default function SxClients() {
               {"Exemples"}
             </span>
             <h2>
-              {"L'ERX en situation."}
+              {"L'ERP au quotidien."}
               <br />
               <span>
                 {"De la vente à la clôture des comptes, pour une société comme pour un groupe."}
@@ -21,7 +21,7 @@ export default function SxClients() {
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Voici ce que l'ERX fait concrètement, chaque jour. Vous gardez toujours la décision finale."}
+            {"Voici ce qu'Omega fait concrètement, chaque jour. Vous gardez toujours la décision finale."}
           </p>
         </header>
         <div className={"ts-grid"}>

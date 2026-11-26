@@ -21,10 +21,10 @@ export default function SxAgents() {
               </span>
             </span>
             <h2>
-              {"Des agents IA intégrés à vos processus."}
+              {"Les agents font le travail."}
             </h2>
             <p>
-              {"Un agent est un assistant IA chargé d'une tâche précise dans Omega. Il lit vos données, prépare le travail et vous le montre avant d'envoyer quoi que ce soit."}
+              {"Vous fixez les règles et vous validez. Relances, factures fournisseurs, demandes clients, contrôle des paiements : chaque agent traite une tâche dans l'ERP et vous soumet ce qu'il envoie."}
             </p>
           </div>
           <div className={"ft-finder"}>

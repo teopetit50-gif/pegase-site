@@ -41,7 +41,7 @@ export default function SxFaq() {
           <li className={"faq-item is-open"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q7"} aria-expanded={"true"} aria-controls={"_R_ltavb_-a7"}>
               <span>
-                {"Qu'est-ce qu'un ERX ?"}
+                {"En quoi Omega est-il différent d'un ERP classique ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -52,7 +52,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a7"} role={"region"} aria-labelledby={"_R_ltavb_-q7"}>
               <div>
                 <p>
-                  {"ERX veut dire Enterprise Resource Execution, un terme du cabinet Gartner. Un ERP réunit toute la gestion dans un seul logiciel et enregistre ce qui se passe. Un ERX fait en plus le travail : ses agents IA relancent, saisissent les factures, contrôlent les paiements et répondent aux clients, sous votre contrôle. Omega est un ERX."}
+                  {"Sur trois points. Il remplace votre logiciel de gestion et les outils autour par un seul système. Des agents IA y font le travail : relances, saisie des factures, contrôle des paiements, réponses aux clients, sous votre validation. Et il est déployé par nos modèles d'IA, bien plus vite et pour bien moins cher qu'avec un intégrateur."}
                 </p>
               </div>
             </div>
