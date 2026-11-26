@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import MenuPrincipal from "./MenuPrincipal";
+import { ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { googleSansAccueil } from "@/app/_polices/google-sans-accueil";
 import "./charte/charte.css";
 import { GROUPES, NB_RANGEES, enColonnes, type Entree } from "@/lib/menu";
@@ -39,6 +40,14 @@ import { GROUPES, NB_RANGEES, enColonnes, type Entree } from "@/lib/menu";
    cette enveloppe, AVANT le composant, pour ne pas poser un `return`
    au milieu de ses hooks. Rétablir l'en-tête du site sur l'accueil =
    supprimer la ligne `if`, et retirer <SxNav /> d'app/page.tsx. */
+/* les quatre liens de la barre de l'accueil (SxNav.tsx), dans le même ordre */
+const LIENS_BARRE: [string, string][] = [
+  ["Logiciel", "/offres"],
+  ["Agents", "/offres#catalogue"],
+  ["Intégrations", "/integrations"],
+  ["Tarifs", "/tarifs"],
+];
+
 export default function Header() {
   const chemin = usePathname();
   if (chemin === "/") return null;
@@ -226,15 +235,28 @@ function HeaderDuSite() {
           <span>Omega</span>
         </Link>
 
-        {/* 11/09/2026 — le bandeau de navigation. Il vit à partir de `lg`
-            seulement ; sous ce seuil la barre reste ce qu'elle était depuis
-            le 22/07, un burger et rien d'autre. `clairEff` et non `clair` :
-            panneau ouvert, la barre est forcée en clair et les intitulés
-            doivent basculer avec elle — même si, le burger étant caché à
-            partir de `lg`, les deux valeurs s'y confondent en pratique. */}
-        <MenuPrincipal clair={clairEff} pathname={pathname} />
-
-        <div className="flex items-center gap-2 sm:gap-4">
+        {/* 26/11/2026 (Teo : « la barre du haut des pages doit être la même
+            que celle de l'accueil ») — la barre des pages intérieures est
+            maintenant celle de l'accueil, mot pour mot : quatre liens à plat
+            (Logiciel, Agents, Intégrations, Tarifs), puis « Parler à
+            l'équipe » et « Commencer » en liens à chevron, le tout à partir
+            de 1280 px (`desktop-sm`) ; en dessous, le burger. Les classes
+            sont celles de components/accueil-sx/gen/SxNav.tsx : pour changer
+            la barre, changer les deux. Les menus déroulants (MenuPrincipal)
+            ne sont plus montés ici. */}
+        <div className="flex items-center gap-2 sm:gap-4 desktop-sm:gap-[52px]">
+          <ul className="hidden items-center gap-[24px] desktop-sm:flex">
+            {LIENS_BARRE.map(([libelle, href]) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  className="inline-flex min-h-11 cursor-pointer items-center font-tight text-[17px] leading-[25.5px] tracking-[-0.34px] whitespace-nowrap text-black transition-[opacity,transform] duration-200 ease-out [-webkit-tap-highlight-color:transparent] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#121212] [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-60"
+                >
+                  {libelle}
+                </Link>
+              </li>
+            ))}
+          </ul>
           {/* 30/07 — recalibré sur les boutons de la page (.o-btn : rayon 8,
               14 px medium, 34 px de haut). Le header portait du rayon 12 en
               15 px semibold : plus gros et plus rond que TOUT ce qu'il
@@ -252,24 +274,27 @@ function HeaderDuSite() {
               /commencer aiguillait entre plusieurs offres, et il n'y a plus
               qu'un produit. /commencer redirige vers la même page
               (next.config.ts). */}
-          {/* 25/11/2026 — les deux boutons blancs de la barre de l'accueil.
-              « Parler à l'équipe » n'apparaît qu'à partir de 1280 px, comme
-              sur l'accueil : entre 1024 et 1280, les cinq rubriques du menu
-              et deux boutons ne tiennent pas sur une ligne. */}
-          <Link href="/contact" className="ch-btn ch-btn--chevron hidden desktop-sm:inline-flex">
-            Parler à l&apos;équipe
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true" focusable="false">
-              <path d="M9 6.5 13.5 11 9 15.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
-          <Link
-            href="/reserver-un-audit"
-            aria-hidden={!ctaBarre}
-            tabIndex={ctaBarre ? undefined : -1}
-            className={`ch-btn hidden lg:inline-flex ${ctaBarre ? "" : "pointer-events-none opacity-0"}`}
-          >
-            Commencer
-          </Link>
+          {/* 26/11/2026 — les deux boutons de la barre de l'accueil : des
+              liens à chevron (Button « link »), plus les boutons blancs. */}
+          <div className="hidden items-center gap-3 desktop-sm:flex">
+            <Button asChild variant="link">
+              <Link href="/contact">
+                Parler à l&apos;équipe
+                <ChevronRight className="ms-1 opacity-60" size={16} strokeWidth={2} aria-hidden="true" />
+              </Link>
+            </Button>
+            <Button asChild variant="link">
+              <Link
+                href="/reserver-un-audit"
+                aria-hidden={!ctaBarre}
+                tabIndex={ctaBarre ? undefined : -1}
+                className={ctaBarre ? undefined : "pointer-events-none opacity-0"}
+              >
+                Commencer
+                <ChevronRight className="ms-1 opacity-60" size={16} strokeWidth={2} aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
           {/* 15/09/2026 — L'ICÔNE COMPTE EST RETIRÉE. Teo : « plus rien sur
               le site ne doit renvoyer à une page de connexion ». Elle était
               d'abord conditionnée à la présence du cookie de session (même
@@ -287,7 +312,7 @@ function HeaderDuSite() {
             /* 06/08 — panneau ouvert, la croix vit dans un carré arrondi à
                filet clair, comme dans la référence. Le filet était blanc sur
                noir ; il devient noir très dilué sur blanc. */
-            className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors duration-200 md:h-9 md:w-9 lg:hidden ${
+            className={`group -mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-md transition-colors duration-200 md:h-9 md:w-9 desktop-sm:hidden ${
               open
                 ? "border border-black/15 hover:bg-black/[0.04]"
                 : "hover:bg-black/[0.06]"
@@ -347,11 +372,11 @@ function HeaderDuSite() {
            blanc pur, texte noir, et la barre du header bascule avec lui
            (voir `clairEff`). Le panneau n'est toujours pas caméléon : il ne
            dépend pas de la page qu'il recouvre, il impose sa surface. */
-        /* `lg:hidden` : au-delà du seuil c'est le bandeau qui navigue, et
+        /* `desktop-sm:hidden` : au-delà de 1280 px c'est la barre qui navigue, et
            le burger est caché. Sans cette classe, un panneau resté ouvert
            pendant qu'on élargit la fenêtre recouvrirait la page entière
            sans qu'aucun bouton ne permette de le refermer. */
-        className={`fixed inset-x-0 bottom-0 top-[64px] z-40 bg-white lg:hidden ${
+        className={`fixed inset-x-0 bottom-0 top-[64px] z-40 bg-white desktop-sm:hidden ${
           open ? "visible" : "invisible"
         }`}
       >
