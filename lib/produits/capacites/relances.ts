@@ -20,11 +20,11 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que l'agent prend en charge.",
+  titre: "De la facture à l'encaissement.",
   chapo:
-    "Une créance traverse six étapes entre son émission et son encaissement. Voici ce que l'agent tient à chacune d'elles, y compris quand le client conteste, paie en plusieurs fois ou ne répond plus.",
+    "Six étapes entre l'émission et l'encaissement. L'agent les tient toutes, y compris quand le client conteste, paie en plusieurs fois ou ne répond plus.",
   mention:
-    "Le périmètre se règle à l'installation : une organisation n'active que ce dont ses services ont besoin. Quel que soit le réglage, aucun message ne part sans la validation d'une personne.",
+    "Vous n'activez que ce dont vos services ont besoin. Quel que soit le réglage, aucun message ne part sans la validation d'une personne.",
   familles: [
     {
       nom: "Suivi de l'encours",
@@ -116,10 +116,10 @@ export const CATALOGUE: Catalogue = {
 };
 
 export const CAS_LIMITES: BlocCasLimites = {
-  etiquette: "Les cas tordus",
-  titre: "Ce qui arrive vraiment quand on relance un client.",
+  etiquette: "Les cas difficiles",
+  titre: "Les cas qui compliquent une relance.",
   chapo:
-    "Douze situations que vos équipes connaissent, et ce que l'agent en fait. Aucune ne se règle en envoyant la relance quand même.",
+    "Douze situations que vos équipes connaissent, et ce que l'agent en fait. Aucune ne se règle en relançant quand même.",
   cas: [
     {
       q: "Le client a payé hier soir, et la relance était prête.",
@@ -176,43 +176,43 @@ export const ECHELLE: BlocEchelle = {
   etiquette: "À l'échelle d'un groupe",
   titre: "Plusieurs sociétés, plusieurs équipes, un seul encours.",
   chapo:
-    "Ce qui change quand le recouvrement n'est plus tenu par une personne mais par un service crédit, sur plusieurs entités et plusieurs marchés.",
+    "Quand le recouvrement est tenu par un service crédit, sur plusieurs sociétés et plusieurs marchés.",
   cartes: [
     {
       icone: "users",
       titre: "Une entité, un périmètre",
       texte:
-        "Chaque société, filiale ou site a son encours, ses comptes clients et ses règles de gestion. Une direction financière lit le consolidé, un chargé de recouvrement ne voit que son portefeuille.",
+        "Chaque société, filiale ou site a son encours, ses clients et ses règles. La direction financière lit le consolidé, chaque chargé de recouvrement son portefeuille.",
     },
     {
       icone: "route",
       titre: "Des rôles et des délégations",
       texte:
-        "Suivi, validation des relances, gestion des litiges et administration sont quatre rôles distincts. Une délégation se pose pour une absence et s'éteint à la date prévue.",
+        "Suivi, validation, litiges, administration : quatre rôles distincts. Une délégation couvre une absence et s'arrête à la date prévue.",
     },
     {
       icone: "scale",
       titre: "Des seuils de relance par montant",
       texte:
-        "Le montant et le palier décident de qui valide : le chargé de compte, le responsable crédit, la direction financière. La mise en demeure exige toujours une validation explicite.",
+        "Le montant et le palier décident de qui valide : chargé de compte, responsable crédit ou direction financière. La mise en demeure exige toujours une validation explicite.",
     },
     {
       icone: "lock",
       titre: "Un journal opposable",
       texte:
-        "Chaque relance, chaque suspension et chaque décision de litige s'inscrivent dans un journal qui ne se modifie pas, y compris par nous. Le jour où un client affirme n'avoir rien reçu, la preuve est datée.",
+        "Relances, suspensions, décisions de litige : tout s'inscrit dans un journal que personne ne peut modifier, nous compris. La preuve est datée.",
     },
     {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "L'agent lit votre facturation et vos encaissements là où ils vivent déjà, tableur compris. Là où un connecteur manque, l'échange passe par dépôt de fichiers ou par interface de programmation.",
+        "L'agent lit votre facturation et vos encaissements là où ils sont, tableur compris. Sans connecteur, l'échange passe par dépôt de fichiers ou par API.",
     },
     {
       icone: "chart",
       titre: "Des indicateurs par entité",
       texte:
-        "Encours, balance âgée, délai moyen de règlement et prévision d'encaissement se lisent par société et en consolidé, avec un export daté.",
+        "Encours, balance âgée, délai moyen de règlement et prévision d'encaissement, par société et en consolidé. Export daté.",
     },
   ],
 };

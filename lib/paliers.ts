@@ -243,7 +243,7 @@ export const PALIERS: Palier[] = [
     aChoisir: 1,
     teinte: "bleu",
     promesse:
-      "Un poste automatisé de bout en bout, avec validation avant chaque envoi.",
+      "Une tâche prise en charge de bout en bout. Vous validez avant chaque envoi.",
     points: [
       "Un poste au choix parmi les quatre",
       "Jusqu'à 150 pièces traitées par mois",
@@ -262,7 +262,7 @@ export const PALIERS: Palier[] = [
     phare: true,
     badge: "Recommandé",
     promesse:
-      "Trois postes pilotés par le même système, sur une file de validation unique.",
+      "Trois tâches prises en charge, une seule file de validation.",
     points: [
       "Trois postes au choix parmi les quatre",
       "Jusqu'à 400 pièces traitées par mois",
@@ -280,7 +280,7 @@ export const PALIERS: Palier[] = [
     teinte: "nuit",
     badge: "Le plus complet", // 08/09 (associé) : la dernière carte doit attirer
     promesse:
-      "Les quatre postes en service, sur l'administratif comme sur le commercial.",
+      "Les quatre agents, de l'administratif au commercial.",
     points: [
       "Les quatre postes actifs dès la mise en service",
       "Jusqu'à 1 000 pièces traitées par mois",
@@ -734,7 +734,7 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
   id: "sur-mesure",
   nom: "Sur mesure",
   promesse:
-    "Un périmètre hors catalogue, ou plusieurs services aux règles distinctes.",
+    "Pour un besoin hors catalogue, ou plusieurs services aux règles distinctes.",
   prixTexte: "Sur devis",
   sousPrix: "établi après diagnostic",
   note: "Le coût dépend de votre structure de validation, pas de votre chiffre d'affaires.",
@@ -750,7 +750,7 @@ export const CARTE_SUR_MESURE: CarteSurMesure = {
     "La même base technique : vos outils, vos règles, votre validation",
     "Périmètre, installation et tarif écrits avant tout engagement",
   ],
-  cta: "Décrire le besoin",
+  cta: "Décrire votre besoin",
   enSavoirPlus: "Consulter l'offre sur mesure",
   href: SUR_MESURE.href,
 };

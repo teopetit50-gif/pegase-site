@@ -14,11 +14,11 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que l'agent prend en charge.",
+  titre: "De la demande au rendez-vous.",
   chapo:
-    "Une demande entrante traverse cinq étapes avant d'être traitée : elle arrive, elle est comprise, elle reçoit une réponse, elle se transforme en rendez-vous ou elle remonte. Voici ce que l'agent tient à chacune.",
+    "Une demande arrive, elle est comprise, elle reçoit une réponse, puis devient un rendez-vous ou remonte à vos équipes. L'agent tient les cinq étapes.",
   mention:
-    "L'agent ne répond jamais hors de la base de connaissances que vous avez validée. Tout ce qui sort de cette base est transféré à vos équipes, avec le résumé de l'échange.",
+    "L'agent ne répond qu'à partir de la base de connaissances que vous avez validée. Le reste est transféré à vos équipes, avec le résumé de l'échange.",
   familles: [
     {
       nom: "Canaux et réception",
@@ -104,10 +104,10 @@ export const CATALOGUE: Catalogue = {
 };
 
 export const CAS_LIMITES: BlocCasLimites = {
-  etiquette: "Les cas tordus",
-  titre: "Ce qui arrive vraiment sur une ligne d'accueil.",
+  etiquette: "Les cas difficiles",
+  titre: "Les cas qui compliquent l'accueil.",
   chapo:
-    "Douze situations que vos équipes reconnaîtront, et ce que l'agent en fait. Aucune ne se règle en répondant quand même.",
+    "Douze situations que vos équipes connaissent, et ce que l'agent en fait. Aucune ne se règle en répondant quand même.",
   cas: [
     {
       q: "Le client écrit dans une langue étrangère.",
@@ -164,43 +164,43 @@ export const ECHELLE: BlocEchelle = {
   etiquette: "À l'échelle d'un groupe",
   titre: "Plusieurs services, plusieurs sites, une seule porte d'entrée.",
   chapo:
-    "Ce qui change quand les demandes n'arrivent plus sur un téléphone mais sur une organisation, avec des horaires, des astreintes et des engagements de délai.",
+    "Quand les demandes arrivent à une organisation, avec ses horaires, ses astreintes et ses engagements de délai.",
   cartes: [
     {
       icone: "users",
       titre: "Une entité, un périmètre",
       texte:
-        "Chaque société, site ou service a sa base de connaissances, ses horaires et sa signature. Une direction lit le consolidé, un responsable de site ne voit que le sien.",
+        "Chaque société, site ou service a sa base de connaissances, ses horaires et sa signature. La direction lit le consolidé, chaque responsable son site.",
     },
     {
       icone: "route",
       titre: "Des rôles et un routage",
       texte:
-        "Le type de demande décide du service qui la reçoit. Les règles de routage se définissent avec vous, et une demande ne reste jamais sans destinataire.",
+        "Le type de demande décide du service qui la reçoit. Vous fixez les règles. Aucune demande ne reste sans destinataire.",
     },
     {
       icone: "scale",
       titre: "Des délais tenus, pas espérés",
       texte:
-        "Chaque type de demande porte son délai de traitement. Le dépassement fait remonter le dossier, et le manquement se mesure au lieu de se découvrir.",
+        "Chaque type de demande a son délai. Un dépassement fait remonter le dossier, et se mesure au lieu de se découvrir.",
     },
     {
       icone: "lock",
       titre: "Un journal opposable",
       texte:
-        "Chaque message reçu, chaque réponse envoyée et chaque transfert s'inscrivent dans un journal qui ne se modifie pas. Le jour où un client conteste, la preuve est là.",
+        "Messages reçus, réponses, transferts : tout s'inscrit dans un journal que personne ne peut modifier. La preuve est là.",
     },
     {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "L'agent se place derrière vos canaux actuels et écrit dans vos agendas. Vos clients continuent d'écrire au même numéro et à la même adresse qu'hier.",
+        "L'agent se place derrière vos canaux actuels et écrit dans vos agendas. Vos clients écrivent au même numéro et à la même adresse qu'avant.",
     },
     {
       icone: "chart",
       titre: "Des indicateurs par entité",
       texte:
-        "Volume par canal, délai de première réponse, demandes transférées et sujets récurrents se lisent par site et en consolidé, avec un export daté.",
+        "Volume par canal, délai de première réponse, demandes transférées et sujets récurrents, par site et en consolidé. Export daté.",
     },
   ],
 };

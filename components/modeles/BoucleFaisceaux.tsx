@@ -132,35 +132,35 @@ const JALONS = [
     icone: ICONES.formulaire,
     titre: "La demande arrive",
     texte:
-      "Chaque formulaire crée une ligne dans votre espace, horodatée, avec la page d'origine et le terme qui y était cherché. Vos équipes voient ce qui est demandé, par qui, et depuis combien de temps.",
+      "Chaque formulaire crée une ligne horodatée dans votre espace, avec sa page d'origine et le terme cherché. Vos équipes voient ce qui est demandé, par qui, depuis quand.",
   },
   {
     n: "02",
     icone: ICONES.reponse,
     titre: "La réponse part en deux minutes",
     texte:
-      "Le système envoie un accusé de réception sous votre signature, avec le délai de traitement que vous annoncez. Le demandeur sait que sa demande est enregistrée, et vos équipes disposent de ce délai pour répondre.",
+      "Un accusé de réception part sous votre signature, avec le délai que vous annoncez. Le client sait que sa demande est enregistrée. Vos équipes ont ce délai pour répondre.",
   },
   {
     n: "03",
     icone: ICONES.devis,
     titre: "Le devis est relancé",
     texte:
-      "Sans réponse, le devis repart à J+3 puis à J+7, sous votre signature. Chaque message vous est soumis avant l'envoi\u00a0: vous le validez, le corrigez ou vous suspendez la séquence.",
+      "Sans réponse, le devis est relancé à J+3 puis à J+7, sous votre signature. Chaque message vous est soumis\u00a0: vous le validez, le corrigez ou suspendez la séquence.",
   },
   {
     n: "04",
     icone: ICONES.facture,
     titre: "La facture suit le même parcours",
     texte:
-      "Le devis accepté devient une facture, puis l'impayé entre dans la même séquence de relance. Le système suit les règlements poste par poste et signale ce qui reste dû.",
+      "Le devis accepté devient une facture, et l'impayé suit la même séquence de relance. Les règlements sont suivis ligne par ligne, le reste dû est signalé.",
   },
   {
     n: "05",
     icone: ICONES.avis,
     titre: "L'avis est demandé",
     texte:
-      "Une fois la commande livrée ou la prestation terminée, la demande d'avis part au moment où la satisfaction est la plus forte. Les retours reviennent dans votre espace, rattachés à la commande.",
+      "Une fois la commande livrée ou la prestation terminée, la demande d'avis part au bon moment. Les retours arrivent dans votre espace, rattachés à la commande.",
   },
 ];
 
@@ -447,10 +447,8 @@ export default function BoucleFaisceaux() {
           <path d="M20.5 3.5V8h-4.5" />
         </svg>
         <p>
-          <span className="text-[color:var(--m-encre)]">Le site produit aussi de la donnée d&apos;usage.</span>{" "}
-          Ce qui est demandé le plus souvent, ce qui est cherché sans résultat et les pages
-          d&apos;où les visiteurs repartent&nbsp;: votre espace le présente en clair. Un client déjà
-          venu qui revient sur une gamme reçoit une relance adaptée à son historique.
+          <span className="text-[color:var(--m-encre)]">Le site vous apprend aussi des choses.</span>{" "}
+          Ce qui est le plus demandé, ce qui est cherché sans résultat, les pages d&apos;où les visiteurs repartent&nbsp;: votre espace le montre en clair. Un client qui revient sur une gamme reçoit une relance adaptée à son historique.
         </p>
       </figcaption>
     </figure>

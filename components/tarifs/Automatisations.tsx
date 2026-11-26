@@ -96,8 +96,8 @@ export default function Automatisations() {
       <Section id="automatisations">
         <EnTeteSection
           pastille="Automatisations"
-          titre="Chaque automatisation se paie une fois, à l'installation."
-          suite="Quand l'IA y travaille, chaque tâche se paie à la pièce."
+          titre="Une automatisation se paie une fois."
+          suite="Quand l'IA travaille, vous payez à la pièce."
           chapo="Les pièces s'achètent en recharges payées d'avance. Plus la recharge est importante, moins la pièce coûte."
         />
         <GrilleCartes colonnes={3}>
@@ -140,9 +140,9 @@ export default function Automatisations() {
       <Section id="recharges">
         <EnTeteSection
           pastille="Recharges"
-          titre="Les pièces se paient en recharges."
-          suite="Le prix ne dépend pas de la tâche."
-          chapo="Dans une automatisation, une pièce est une tâche de l'IA : une facture lue, une relance rédigée, un mail trié, un résumé."
+          titre="Des recharges payées d'avance."
+          suite="Le même prix pour chaque tâche."
+          chapo="Une pièce, c'est une tâche de l'IA : une facture lue, une relance rédigée, un e-mail trié, un résumé."
         />
         <GrilleCartes colonnes={3}>
           {RECHARGES.map((r) => (

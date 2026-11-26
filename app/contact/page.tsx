@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   /* 10/11/2026 — « | DALIRO » sur un site dédié à un logiciel (components/espace2/portail.ts) */
   title: titreSite("Service client"),
   description:
-    "Une question sur votre installation, votre abonnement ou un poste en service : WhatsApp pour l'urgent, contact@omegaai.fr pour le reste.",
+    "Une question sur votre installation, votre abonnement ou un agent en service ? Écrivez-nous ou appelez-nous.",
 };
 
 const ATTENDRE = [
@@ -81,19 +81,19 @@ const ATTENDRE = [
     n: "01",
     titre: "Sous deux jours ouvrés",
     texte:
-      "Vous recevez une réponse dans les deux jours ouvrés, souvent le jour même. Si votre question demande une vérification, nous vous indiquons quand vous aurez la réponse.",
+      "Réponse sous deux jours ouvrés, souvent le jour même. Si une vérification est nécessaire, nous vous disons quand vous aurez la réponse.",
   },
   {
     n: "02",
-    titre: "Les personnes qui ont installé vos postes",
+    titre: "L'équipe qui a fait votre installation",
     texte:
-      "Les personnes qui ont réalisé votre installation vous répondent, pas un centre d'appels. Elles connaissent vos outils et vos réglages.",
+      "Pas un centre d'appels. Les personnes qui ont fait votre installation vous répondent. Elles connaissent vos outils et vos réglages.",
   },
   {
     n: "03",
     titre: "Un suivi continu",
     texte:
-      "Changement de formule, résiliation, moyen de paiement : écrivez-nous, nous traitons la demande et nous vous confirmons son traitement par e-mail.",
+      "Changement de formule, résiliation, moyen de paiement : écrivez-nous. Nous traitons la demande et vous le confirmons par e-mail.",
   },
 ];
 
@@ -122,10 +122,10 @@ export default function ContactPage() {
               niveau={1}
               haut
               pastille="Service client"
-              titre="Écrivez-nous, nous vous répondons."
+              titre="Parlez à notre équipe."
               chapo={
                 <>
-                  Une question sur votre installation, votre abonnement ou un poste qui ne fonctionne pas comme prévu&nbsp;? Écrivez-nous ci-dessous ou par e-mail&nbsp;: une seule équipe vous répond.
+                  Une question sur votre installation, votre abonnement ou un agent qui ne fonctionne pas comme prévu&nbsp;? Écrivez-nous ci-dessous ou par e-mail. Une seule équipe vous répond.
                 </>
               }
             />
@@ -145,10 +145,9 @@ export default function ContactPage() {
 
                 <article className="ct-voie">
                   <h3 className="ct-voie-titre">E-mail</h3>
-                  <p className="ct-voie-sous">Pour ce qui mérite d&apos;être écrit</p>
+                  <p className="ct-voie-sous">Pour les demandes détaillées</p>
                   <p className="ct-voie-texte">
-                    Une demande détaillée, une pièce à joindre, une question sur une facture ou sur
-                    votre abonnement.
+                    Une pièce à joindre, une question sur une facture ou sur votre abonnement.
                   </p>
                   <Scene basse className="ct-voie-scene">
                     <p className="num ct-voie-valeur select-all">{COURRIEL}</p>
@@ -164,10 +163,9 @@ export default function ContactPage() {
                     WhatsApp n'est plus une porte du site (voir lib/reservation). */}
                 <article className="ct-voie">
                   <h3 className="ct-voie-titre">Téléphone</h3>
-                  <p className="ct-voie-sous">Pour ce qui va plus vite de vive voix</p>
+                  <p className="ct-voie-sous">Pour aller plus vite</p>
                   <p className="ct-voie-texte">
-                    Une question courte, une installation en cours, un point à caler. Aux heures
-                    ouvrées ; en dehors, laissez un message et nous rappelons.
+                    Une question courte, une installation en cours, un point à caler. Aux heures ouvrées. En dehors, laissez un message : nous rappelons.
                   </p>
                   <Scene basse className="ct-voie-scene">
                     <p className="num ct-voie-valeur select-all">{TELEPHONE_AFFICHE}</p>
@@ -182,7 +180,7 @@ export default function ContactPage() {
 
           {/* ═══ 3 — ce que vous pouvez attendre ═══ */}
           <Section>
-            <EnTeteSection pastille="Réponse" titre="Ce que vous pouvez attendre" />
+            <EnTeteSection pastille="Réponse" titre="Ce que vous pouvez attendre de nous" />
             <AttendreContact temps={ATTENDRE} />
           </Section>
 
@@ -206,8 +204,7 @@ export default function ContactPage() {
             titre={<>Pas encore client&nbsp;?</>}
             chapo={
               <>
-                Décrivez votre situation en deux lignes, par e-mail ou dans le formulaire ci-dessus&nbsp;: votre
-                activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
+                Décrivez votre situation en deux lignes, par e-mail ou dans le formulaire&nbsp;: votre activité, ce qui vous prend le plus de temps, ce qui se perd. Nous vous répondons dans les deux jours ouvrés avec le palier adapté, et la réunion d&apos;installation se réserve en ligne.
               </>
             }
             actions={

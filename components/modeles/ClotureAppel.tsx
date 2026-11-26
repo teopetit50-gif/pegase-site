@@ -96,12 +96,12 @@ export default function ClotureAppel() {
               24ch : « Votre vitrine démarre en / deux minutes » en deux lignes
               à partir de lg ; trois sur téléphone, où la colonne fait 286 px. */}
           <h2 data-intertitre className="m-h2 max-w-[24ch] text-white">
-            Mettez votre vitrine en service
+            Mettez votre site en service.
           </h2>
           {/* Cinq lignes à 390 : hérité de la Cloture, où la phrase faisait
               déjà cinq lignes ; le texte est conservé tel quel. */}
           <p className="mt-5 max-w-[52ch] text-[clamp(0.95rem,1.3vw,1.1rem)] leading-relaxed text-white/70">
-            Choisissez un modèle, nous écrivons tout le contenu. Le poste qui va avec conduit chaque demande reçue, du premier clic jusqu&apos;au règlement.
+            Choisissez un modèle, nous écrivons tout le contenu. Chaque demande est suivie du premier clic jusqu&apos;au règlement.
           </p>
         </div>
 
@@ -145,8 +145,7 @@ export default function ClotureAppel() {
           </Link>
 
           <p className="text-[13px] leading-relaxed text-white/55 sm:basis-full lg:max-w-[30ch] lg:basis-auto">
-            Trois formules à prix public, les mêmes pour tout le monde. Plusieurs enseignes
-            ou un besoin hors catalogue&nbsp;: sur devis, après diagnostic.
+            Trois formules à prix public, les mêmes pour tous. Plusieurs enseignes ou un besoin hors catalogue&nbsp;: sur devis, après diagnostic.
           </p>
         </div>
       </div>

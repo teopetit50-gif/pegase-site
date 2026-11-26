@@ -81,8 +81,8 @@ export const MARQUE = {
 } as const;
 
 export const HERO = {
-  etiquette: "Demandes entrantes & avis",
-  titre: "Une demande reçue à 21 h obtient sa réponse à 21 h",
+  etiquette: "Agent des demandes clients",
+  titre: "Reçue à 21 h. Traitée à 21 h.",
   /* Le titre est le meilleur du parc : intact. Le chapô, lui, posait la
      scène en deux morceaux soudés (« Vous êtes sous un capot, ou déjà
      couché. ») puis finissait sur une chute sans verbe principal — c'est la
@@ -91,7 +91,7 @@ export const HERO = {
      phrase complète. Les canaux ont leur section, la minute revient dans
      APPORT. */
   chapo:
-    "Pendant que vos équipes sont en intervention ou que le service est fermé, votre client reçoit sa réponse, et elle ne dit rien que vous n'ayez validé.",
+    "Vos équipes sont en intervention, le service est fermé : votre client reçoit quand même sa réponse. Elle ne dit rien que vous n'ayez validé.",
   principal: { libelle: "Réserver un audit", href: MARQUE.audit },
   secondaire: { libelle: "Voir ce que l'agent répond", href: "#apport" },
 };
@@ -129,20 +129,20 @@ export const BANDEAU = {
    pas. */
 export const APPORT = {
   etiquette: "Le coût de l'attente",
-  titre: "Une demande lue le lundi à 9 h n'est plus une demande",
+  titre: "Lue lundi à 9 h, la demande est déjà perdue.",
   chapo:
-    "Pendant ce temps, le client a écrit à d'autres entreprises, et le premier qui lui a répondu a pris l'affaire.",
+    "Entre-temps, le client a écrit ailleurs. Le premier qui a répondu a pris l'affaire.",
   bouton: { libelle: "Réserver un audit", href: MARQUE.audit },
   faits: [
     {
       chiffre: "< 1 min",
       texte:
-        "C'est ce que votre client attend, le dimanche comme le 15 août.",
+        "Ce que votre client attend, le dimanche comme le 15 août.",
     },
     {
       chiffre: "0",
       texte:
-        "Réponse hors de votre base : quand il ne sait pas, il transfère à vos équipes.",
+        "Hors de votre base, l'agent ne répond pas : il transfère à vos équipes.",
     },
   ],
 };
@@ -172,25 +172,25 @@ export const CAPACITES = {
     {
       teinte: "bg-[#edf4ea]",
       etiquette: "Réception",
-      titre: "La réponse part avant la réouverture",
+      titre: "La réponse part avant la réouverture.",
       texte:
-        "L'agent lit le message dès qu'il arrive, puis répond dans la minute à partir de la base que vous avez construite avec nous. Vos équipes relisent l'échange le lendemain.",
+        "L'agent lit le message dès son arrivée et répond dans la minute, à partir de la base construite avec vous. Vos équipes relisent l'échange le lendemain.",
       panneau: "conversation",
     },
     {
       teinte: "bg-[#ebebfc]",
       etiquette: "Qualification",
-      titre: "Une urgence ne finit pas dans la file d'attente",
+      titre: "Les urgences passent devant.",
       texte:
-        "Chaque demande est d'abord triée par type, puis elle suit le circuit que vous avez défini. Quand elle est urgente, le téléphone de l'astreinte sonne.",
+        "Chaque demande est triée par type et suit le circuit que vous avez défini. Si elle est urgente, le téléphone de l'astreinte sonne.",
       panneau: "tri",
     },
     {
       teinte: "bg-[#f7eff7]",
       etiquette: "Avis",
-      titre: "L'avis se demande quand le client est content",
+      titre: "Des avis demandés au bon moment.",
       texte:
-        "La demande d'avis part dans les trois jours qui suivent le règlement, puis elle est relancée deux fois au maximum. La même personne n'est plus sollicitée avant six mois.",
+        "La demande d'avis part dans les trois jours après le règlement, avec deux relances au maximum. Ensuite, plus rien pendant six mois.",
       panneau: "avis",
     },
   ],
@@ -210,28 +210,28 @@ export const CAPACITES = {
    ce sont des étiquettes de tuile, pas de la prose. */
 export const ETAPES = {
   etiquette: "Installation",
-  titre: "Vous ne changez ni vos numéros, ni vos habitudes",
+  titre: "Mêmes numéros. Mêmes habitudes.",
   chapo:
-    "L'installation demande une heure d'entretien et le branchement de vos canaux. Pendant une semaine, vos équipes relisent chaque réponse.",
+    "Une heure d'entretien et le branchement de vos canaux. La première semaine, vos équipes relisent chaque réponse.",
   bouton: { libelle: "Réserver un audit", href: MARQUE.audit },
   etapes: [
     {
       numero: "01",
       titre: "Une heure d'entretien",
       texte:
-        "Nous construisons ensemble la base de votre entreprise : tarifs, horaires, durées d'intervention, règles internes. Rien d'autre ne sera dit à un client.",
+        "Nous construisons ensemble la base de votre entreprise : tarifs, horaires, durées d'intervention, règles internes. L'agent ne dira rien d'autre.",
     },
     {
       numero: "02",
       titre: "L'intégration",
       texte:
-        "Nous connectons WhatsApp Business, votre messagerie et votre agenda, si bien que vos clients continuent d'écrire au même numéro qu'hier.",
+        "Nous connectons WhatsApp Business, votre messagerie et votre agenda. Vos clients écrivent au même numéro qu'avant.",
     },
     {
       numero: "03",
       titre: "Une semaine en double",
       texte:
-        "Vos équipes reçoivent copie de chaque réponse la première semaine, et nous corrigeons sur des cas réels. Ensuite, vous choisissez les demandes auxquelles l'agent répond seul.",
+        "La première semaine, vos équipes reçoivent copie de chaque réponse, et nous corrigeons sur des cas réels. Ensuite, vous choisissez ce à quoi l'agent répond seul.",
     },
   ],
 };
@@ -260,9 +260,9 @@ export const CANAUX = {
      Contrainte de gabarit : les quatre tuiles de Canaux.tsx sont posées en
      absolu à `top-39` et `top-82`, donc le bloc centré ne doit pas gagner
      de ligne — le chapô tient en deux lignes à `max-w-lg`. */
-  titre: "Vous n'avez aucun logiciel de plus à ouvrir",
+  titre: "Aucun logiciel de plus à ouvrir.",
   chapo:
-    "L'agent se place derrière les canaux que vous utilisez déjà, puis répond à partir de votre base.",
+    "L'agent travaille derrière vos canaux actuels et répond à partir de votre base.",
   bouton: { libelle: "Voir l'installation", href: "#etapes" },
   /* Deux libellés, comme la référence : la pastille flottante est centrée
      sur sa tuile, donc un nom long déborde sur le bouton du centre — les
@@ -303,9 +303,9 @@ export const METIERS = {
      deuxième chance », un aphorisme de plus sur une page qui en comptait
      déjà deux ; elle dit maintenant le mécanisme exact du §17 — le client
      ne laisse pas de message, et il ne rappelle pas. */
-  titre: "Personne ne répond en dehors des heures d'ouverture",
+  titre: "Hors des heures d'ouverture, personne ne répond.",
   citation:
-    "Dans l'urgence, le client ne laisse pas de message : il appelle le suivant sur la liste, et il ne rappelle pas.",
+    "Dans l'urgence, le client ne laisse pas de message. Il appelle le suivant sur la liste, et ne rappelle pas.",
   mention: "Exemples de demandes",
   secteurs: [
     {
@@ -358,7 +358,7 @@ export const JOURNEE = {
      réponse ») : il dit maintenant ce qu'on ne verrait pas sans lui — les
      quatre demandes sont TOUTES hors horaires, ce que le lecteur peut
      vérifier sur les cartes à côté. */
-  titre: "Vos clients écrivent quand le service est fermé",
+  titre: "Vos clients écrivent quand vous êtes fermé.",
   chapo: "Aucune de ces quatre demandes n'est arrivée pendant vos heures d'ouverture.",
   mention: "Exemples de demandes, pas le relevé d'un client",
   demandes: [
@@ -411,27 +411,27 @@ export const QUESTIONS = {
      sans verbe qui ouvrait la cinquième. Le reste vient de la fiche et ne
      se retouche pas ; en particulier « aucun tri des mécontents », qui ne
      s'affaiblit sous aucun prétexte. */
-  titre: "Les objections que nous entendons, et nos réponses",
+  titre: "Questions fréquentes",
   items: [
     {
       q: "Le client comprend-il qu'il ne parle pas à un humain ?",
-      r: "La mention figure dans la première réponse, dans les termes que vous choisissez à l'installation. Un client s'accommode de parler à une machine. Ce qui l'agace, c'est d'attendre jusqu'à lundi.",
+      r: "Oui. La mention figure dans la première réponse, dans les termes que vous choisissez. Un client accepte de parler à une machine. Ce qui l'agace, c'est d'attendre lundi.",
     },
     {
       q: "Et si l'agent invente une réponse ?",
-      r: "L'agent ne peut répondre qu'à partir de la base construite avec vous. Hors de cette base, il ne formule pas d'hypothèse : il transfère la demande à vos équipes, avec le résumé de l'échange.",
+      r: "Il ne répond qu'à partir de la base construite avec vous. Hors de cette base, il ne suppose rien : il transfère la demande à vos équipes, avec le résumé de l'échange.",
     },
     {
       q: "Que se passe-t-il si deux clients demandent le même créneau ?",
-      r: "La réservation s'écrit directement dans votre agenda, en temps réel. Le second créneau n'apparaît plus comme disponible, et le client se voit proposer les suivants.",
+      r: "La réservation s'écrit dans votre agenda en temps réel. Le créneau disparaît, et le second client se voit proposer les suivants.",
     },
     {
       q: "Qui valide ce que l'agent répond ?",
-      r: "Vous validez d'abord la base, et l'agent ne dit rien qui n'y figure. Les premières semaines, chaque réponse vous est soumise avant envoi. Ensuite, vous choisissez les demandes qui attendent votre accord. Chaque échange, transféré ou non, reste archivé et consultable.",
+      r: "Vous. Vous validez d'abord la base, et l'agent ne dit rien qui n'y figure. Les premières semaines, chaque réponse vous est soumise avant envoi. Ensuite, vous choisissez ce qui attend votre accord. Chaque échange reste archivé.",
     },
     {
       q: "Et les avis, comment sont-ils demandés ?",
-      r: "La demande part dans les trois jours qui suivent le règlement, avec deux relances au maximum et six mois de carence par personne. Les messages sont écrits d'avance et identiques pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit par se voir.",
+      r: "Dans les trois jours après le règlement, avec deux relances au maximum et six mois de pause par personne. Le même message pour tout le monde : aucun tri des mécontents. C'est interdit, et cela finit par se voir.",
     },
   ],
 } as const;
@@ -487,25 +487,25 @@ export const FRANCAIS = {
      droit français, hébergement dans l'UNION EUROPÉENNE. Jamais « hébergé en France », jamais « vos données ne
      quittent jamais l'Europe » — les deux sont faux, et ce sont des
      interdits du parc. */
-  titre: "Tout est conçu et suivi depuis la France",
+  titre: "Conçu et suivi en France.",
   faits: [
     {
       cle: "Éditeur",
       titre: "Une entreprise française",
       texte:
-        "L'entreprise est établie en France, donc elle relève du droit français.",
+        "Établie en France, sous droit français.",
     },
     {
       cle: "Données",
       titre: "Hébergées dans l'Union européenne",
       texte:
-        "Chaque entreprise a son espace cloisonné, et rien n'y est jamais revendu.",
+        "Chaque entreprise a son espace isolé. Rien n'est revendu.",
     },
     {
       cle: "Langue",
       titre: "Écrit et parlé en français",
       texte:
-        "Les réponses emploient le vocabulaire de votre entreprise, et notre équipe assure le suivi en français, par téléphone.",
+        "Les réponses reprennent le vocabulaire de votre entreprise. Notre équipe vous suit en français, par téléphone.",
     },
   ],
   lien: { libelle: "Où vont vos données", href: "/vos-donnees" },

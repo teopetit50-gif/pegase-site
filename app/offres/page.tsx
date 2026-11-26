@@ -178,9 +178,9 @@ export const metadata: Metadata = {
      remplace juste le contenu ») — la page ne présente plus quatre systèmes
      à part mais le logiciel de gestion et ses modules. Aucune structure ni
      aucun style ne change : seuls les textes, à longueur égale. */
-  title: "Le logiciel et ses modules | Omega.AI",
+  title: "L'ERP et ses modules | Omega.AI",
   description:
-    "Omega, le logiciel de gestion qui se configure avec l'IA : ventes, achats, stock, banque, comptabilité et documents, avec des agents pour les relances, les clients inactifs, les demandes et les factures fournisseurs. Vous décidez de ce qui part.",
+    "Omega, l'ERP déployé par l'IA : ventes, achats, stock, banque, comptabilité et documents, avec des agents pour les relances, les clients inactifs, les demandes et les factures fournisseurs. Vous validez ce qui part.",
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -237,25 +237,25 @@ const ARGUMENTS = [
     teinte: "#79648c",
     titre: "Intégration",
     texte:
-      "Omega se branche sur vos outils et reprend les données de votre logiciel actuel.",
+      "Branché sur vos outils. Les données de votre ancien logiciel, reprises.",
   },
   {
     teinte: "#a8927c",
     titre: "Contrôle",
     texte:
-      "Les règles s'écrivent avec vous. Les actions sensibles attendent votre accord.",
+      "Vous fixez les règles. Les actions sensibles attendent votre accord.",
   },
   {
     teinte: "#273252",
     titre: "Sécurité",
     texte:
-      "Un environnement cloisonné par client, des données chiffrées, des accès tracés.",
+      "Un espace isolé par client. Des données chiffrées. Des accès tracés.",
   },
   {
     teinte: "#193a29",
     titre: "Financement",
     texte:
-      "Une partie de l'investissement peut relever du Chèque TIC, aide de la Région Guadeloupe aux entreprises qui y sont immatriculées.",
+      "Le Chèque TIC de la Région Guadeloupe peut financer une partie de l'installation, pour les entreprises qui y sont immatriculées.",
   },
 ];
 
@@ -363,7 +363,7 @@ const CYCLE = [
     texte: "La demande arrive dans vos outils, sur son canal d'origine.",
   },
   { titre: "Qualification", texte: "Comprise et rattachée au bon dossier." },
-  { titre: "Rédaction", texte: "Écrit depuis vos règles, pas d'un modèle figé." },
+  { titre: "Rédaction", texte: "Rédigé selon vos règles, au cas par cas." },
   { titre: "Validation", texte: "Votre accord, ou une règle fixée par vous." },
 ];
 
@@ -493,9 +493,9 @@ export default function OffresPage() {
             <EnTeteSection
               niveau={1}
               haut
-              pastille="Logiciel"
-              titre="Le logiciel"
-              chapo="Votre gestion dans un seul outil. Les agents préparent, vous validez."
+              pastille="ERP"
+              titre="Un seul ERP."
+              chapo="Ventes, achats, stock, banque, comptabilité et documents, sur les mêmes données. Les agents font le travail, vous validez."
               actions={
                 <Bouton href="/reserver-un-audit" icone="chevron">
                   Commencer
@@ -521,7 +521,7 @@ export default function OffresPage() {
             <div className="of-outils">
               {/* hors écran : la rangée garde un intitulé pour les lecteurs
                   d'écran, la référence n'en affiche aucun. */}
-              <p className="ofd-outils__legende">Se branche sur les outils déjà en place</p>
+              <p className="ofd-outils__legende">Fonctionne avec vos outils actuels</p>
               {/* Le moteur vient de « Logo Marquee » (ddoemonn, 21st.dev) :
                   voir components/offres/BandeauOutils.tsx pour les écarts. */}
               <BandeauOutils
@@ -539,11 +539,10 @@ export default function OffresPage() {
           <Section>
             <EnTeteSection
               pastille="En ligne"
-              titre="Où que vous travailliez."
+              titre="Accessible partout."
               chapo={
                 <>
-                  Le logiciel tourne en ligne, pas sur un poste. Vos équipes le retrouvent où
-                  qu&apos;elles soient.
+                  Omega fonctionne en ligne, sans rien installer. Vos équipes y accèdent où qu&apos;elles soient.
                 </>
               }
             />
@@ -589,7 +588,7 @@ export default function OffresPage() {
                 <h2 className="ch-titre">
                   Il vous manque un module&nbsp;?
                   <br />
-                  <span>Nous le construisons et l&apos;ajoutons à votre logiciel.</span>
+                  <span>Nous le construisons dans votre ERP.</span>
                 </h2>
                 <div className="ch-actions">
                   <Bouton href="/offres/sur-mesure" icone="chevron">
@@ -606,7 +605,7 @@ export default function OffresPage() {
             <EnTeteSection
               pastille="Contrôle humain"
               titre="Vous décidez de ce qui part."
-              chapo="Le logiciel propose, vous tranchez."
+              chapo="Les agents préparent. Vous tranchez."
             />
             <div className="of-scinde">
               <div className="of-scinde__media">
@@ -623,12 +622,10 @@ export default function OffresPage() {
                 </Scene>
               </div>
               <div className="of-scinde__texte" data-gutter-guide="top">
-                <h3>Le journal</h3>
-                <p className="of-scinde__sous">Tout ce qui part, et qui l&apos;a validé.</p>
+                <h3>Tout est tracé.</h3>
+                <p className="of-scinde__sous">Ce qui part, et qui l&apos;a validé.</p>
                 <p className="of-scinde__corps">
-                  Chaque envoi laisse une trace : ce qui est parti, à qui, sur quelle règle, et qui
-                  l&apos;a validé. Au départ, tout passe par vous. Ensuite, vous pouvez laisser partir seuls certains envois, et
-                  revenir en arrière à tout moment.
+                  Chaque envoi laisse une trace : quoi, à qui, selon quelle règle, validé par qui. Au départ, tout passe par vous. Ensuite, vous laissez partir seuls les envois de votre choix, et vous revenez en arrière quand vous voulez.
                 </p>
                 <div className="ch-actions">
                   <Bouton href="/reserver-un-audit" icone="chevron">
@@ -681,7 +678,7 @@ export default function OffresPage() {
 
           {/* ═══ 5c · LES QUATRE AGENTS, en grille de cartes jointives ═══ */}
           <Section id="catalogue" className="of-ancre">
-            <EnTeteSection pastille="Les agents" titre="Quatre agents pour le travail répétitif." />
+            <EnTeteSection pastille="Les agents" titre="Quatre agents font le travail répétitif." />
             <GrilleCartes colonnes={4}>
               {PAQUETS.map(({ icone: Icone, titre, href, lignes }) => (
                 <Link key={titre} href={href} className="ch-carte of-fiche">
@@ -746,8 +743,7 @@ export default function OffresPage() {
                 </p>
                 <div className="of-citation__signature">
                   <p>
-                    Des demandes plus rapides que leur traitement, des relances suspendues à une
-                    personne.
+                    Des demandes qui arrivent plus vite qu&apos;on ne les traite. Des relances qui dépendent d&apos;une seule personne.
                   </p>
                   <Pastille>Ce que les quatre agents reprennent</Pastille>
                 </div>

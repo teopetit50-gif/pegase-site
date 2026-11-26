@@ -134,37 +134,37 @@ const GARANTIES = [
     icone: IconeLieu,
     titre: "Hébergement européen",
     texte:
-      "Notre base de données est hébergée dans la région eu-central-1, à Francfort, en Allemagne. Aucune réplication n'est effectuée hors de l'Union européenne.",
+      "Notre base est hébergée dans la région eu-central-1, à Francfort. Aucune réplication de la base hors de l'Union européenne.",
   },
   {
     icone: IconeBarriere,
     titre: "Aucun entraînement",
     texte:
-      "Nos fournisseurs de modèles n'utilisent ni les entrées ni les sorties de leurs produits commerciaux pour entraîner leurs modèles. Ce réglage est celui de nos contrats et ne dépend d'aucune démarche de votre part.",
+      "Nos fournisseurs de modèles n'entraînent pas leurs modèles sur vos données, ni en entrée ni en sortie. C'est écrit dans nos contrats. Vous n'avez rien à faire.",
   },
   {
     icone: IconeCadenas,
-    titre: "Chiffrement de bout en bout",
+    titre: "Chiffré en transit et au repos",
     texte:
-      "Les liaisons sont chiffrées en TLS et les données le sont au repos chez notre hébergeur. Les accès reposent sur des jetons nominatifs, que nous révoquons immédiatement à votre demande.",
+      "Liaisons chiffrées en TLS, données chiffrées au repos chez notre hébergeur. Les accès passent par des jetons nominatifs, révoqués sur simple demande.",
   },
   {
     icone: IconeOeil,
     titre: "Validation avant envoi",
     texte:
-      "Le système prépare chaque envoi, puis le soumet à la personne habilitée dans votre organisation. Tant que la validation n'a pas eu lieu, le message reste un brouillon dans votre outil.",
+      "Chaque envoi est soumis à la personne habilitée chez vous. Sans validation, le message reste un brouillon.",
   },
   {
     icone: IconeJournal,
     titre: "Tout est journalisé",
     texte:
-      "Chaque exécution inscrit une ligne au journal : date, système, décision et destinataire. Ce journal reste consultable et exportable à tout moment, y compris pour un contrôle.",
+      "Chaque action laisse une ligne au journal : date, agent, décision, destinataire. Consultable et exportable à tout moment, y compris pour un contrôle.",
   },
   {
     icone: IconeEmporter,
     titre: "Réversibilité",
     texte:
-      "Vos automatisations s'exportent en fichiers lisibles et vos données dans un format de base standard. Aucun format propriétaire n'intervient, ce qui vous permet de reprendre l'ensemble sans conversion.",
+      "Vos automatisations s'exportent en fichiers lisibles, vos données dans un format standard. Aucun format propriétaire. Vous repartez avec tout, sans conversion.",
   },
 ];
 
@@ -240,7 +240,7 @@ const OPTIONS: Option[] = [
     onglet: `Hébergement ${NOM_SITE} · Francfort`,
     titre: "Votre base hébergée à Francfort",
     resume:
-      "Vous n'administrez aucune machine. Notre base est opérée dans la région eu-central-1 et nos automatisations exécutent les systèmes, tandis que vos équipes conservent la validation de ce qui est produit.",
+      "Aucune machine à administrer. Notre base tourne dans la région eu-central-1, nos automatisations font tourner les agents, et vos équipes valident ce qu'ils produisent.",
     image: "/photos/donnees-francfort-datacenter.jpg",
     alt: "Allée d'une salle de serveurs, baies métalliques alignées",
     chiffres: [
@@ -249,7 +249,7 @@ const OPTIONS: Option[] = [
       { valeur: "UE", libelle: "Lieu de la base" },
     ],
     principe:
-      "Votre environnement existant reste en place. Le système s'y connecte, lit les champs dont il a besoin, écrit son résultat dans la base, puis vous le soumet pour validation.",
+      "Vos outils restent en place. Omega s'y connecte, lit ce dont il a besoin, écrit son résultat dans la base et vous le soumet.",
     obtenez: [
       "Une base de données à Francfort, chiffrée au repos",
       "Les sauvegardes et la supervision comprises",
@@ -320,7 +320,7 @@ export default function VosDonnees() {
                   vos données
                 </h1>
                 <p className="vd-lead max-w-[42rem]">
-                  Vos données sont hébergées dans l&apos;Union européenne, à Francfort, ou sur une machine installée dans vos locaux lorsque votre politique interne l&apos;exige. Cette page décrit les deux dispositifs, les sous-traitants concernés et les engagements repris au contrat.
+                  Dans l&apos;Union européenne, à Francfort, ou dans vos locaux si votre politique interne l&apos;exige. Voici les deux options, nos sous-traitants et ce que le contrat garantit.
                 </p>
                 <Link href={CTA.href} className="vd-cta w-fit">
                   {CTA.label}
@@ -339,10 +339,10 @@ export default function VosDonnees() {
                   référence pour cette section-là. Les autres sont centrées. */}
               <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2 lg:gap-20">
                 <h2 className="vd-h2">
-                  Vos données sont hébergées à Francfort, sans réplication ailleurs
+                  Hébergées à Francfort, sans réplication ailleurs.
                 </h2>
                 <p className="vd-body lg:pt-3">
-                  Un système ne duplique ni votre messagerie ni vos fichiers. Il lit les champs nécessaires à la tâche en cours, écrit son résultat, puis laisse le reste à sa place. Le schéma ci-dessous suit une donnée d&apos;un bout à l&apos;autre du traitement.
+                  Omega ne copie ni votre messagerie ni vos fichiers. Il lit les champs utiles à la tâche, écrit son résultat et laisse le reste à sa place. Voici le trajet d&apos;une donnée, de bout en bout.
                 </p>
               </div>
 
@@ -352,10 +352,10 @@ export default function VosDonnees() {
               <Apparition className="vd-ardoise mt-14 grid grid-cols-1 items-center gap-10 lg:mt-16 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16 lg:px-24 lg:pb-28">
                 <div className="vd-monte">
                   <h3 className="text-[clamp(1.25rem,1rem+0.8vw,1.75rem)] leading-tight tracking-[-0.01em] text-white">
-                    Cinq étapes, dont une seule conserve une donnée
+                    Cinq étapes. Une seule conserve une donnée.
                   </h3>
                   <p className="mt-4 text-[15px] leading-[1.6] tracking-[-0.01em] text-white/85">
-                    Le système lit la donnée, le modèle rédige une proposition, puis vos équipes valident avant tout envoi. Seule la dernière étape écrit durablement, et elle se situe en Allemagne.
+                    Omega lit la donnée, le modèle rédige une proposition, vos équipes valident avant tout envoi. Seule la dernière étape écrit durablement, en Allemagne.
                   </p>
                 </div>
                 <SchemaTrajet className="h-auto w-full text-white/85" />
@@ -367,9 +367,9 @@ export default function VosDonnees() {
           <section className="py-16 md:py-24">
             <div className="vd-wrap">
               <div className="mx-auto max-w-[46rem] text-center">
-                <h2 className="vd-h2">Les trois environnements par lesquels passent vos données</h2>
+                <h2 className="vd-h2">Trois environnements. Pas un de plus.</h2>
                 <p className="vd-lead mt-5">
-                  Vos données transitent par votre outil existant, par le système qui exécute la tâche, puis par notre base à Francfort. Aucun quatrième environnement n&apos;intervient et aucune copie de travail n&apos;est conservée ailleurs.
+                  Votre outil actuel, le système qui exécute la tâche, notre base à Francfort. Aucune copie de travail n&apos;est conservée ailleurs.
                 </p>
               </div>
 
@@ -380,7 +380,7 @@ export default function VosDonnees() {
           {/* ─── LES SIX GARANTIES ────────────────────────────────────── */}
           <section id="garanties" className="scroll-mt-24 py-16 md:py-24">
             <div className="vd-wrap">
-              <h2 className="vd-h2 text-center">Ce que cette architecture garantit</h2>
+              <h2 className="vd-h2 text-center">Ce que vous garantit cette architecture</h2>
 
               <CartesGaranties
                 garanties={GARANTIES.map(({ titre, texte }) => ({ titre, texte }))}
@@ -401,7 +401,7 @@ export default function VosDonnees() {
                   <div>
                     <Guillemet className="h-4 w-auto text-white/60" />
                     <blockquote className="mt-5 text-[clamp(1.5rem,1rem+1.6vw,2.25rem)] leading-[1.25] tracking-[-0.01em] text-white">
-                      Aucune de vos données, ni ce que vous nous confiez ni ce que les systèmes produisent, ne sert à entraîner un modèle d&apos;intelligence artificielle.
+                      Aucune de vos données ne sert à entraîner un modèle d&apos;IA. Ni ce que vous nous confiez, ni ce que les agents produisent.
                     </blockquote>
                     <p className="mt-8 text-[15px] leading-[1.5] tracking-[-0.01em] text-white/85">
                       {NOM_SITE}
@@ -442,8 +442,7 @@ export default function VosDonnees() {
             <div className="vd-wrap">
               <h2 className="vd-h2 text-center">Qui reçoit quoi</h2>
               <p className="vd-lead mx-auto mt-5 max-w-[42rem] text-center">
-                Chaque sous-traitant qui intervient dans le traitement figure ci-dessous,
-                avec le périmètre exact des données qui lui parviennent.
+                Chaque sous-traitant, et exactement ce qu&apos;il reçoit.
               </p>
 
               <div className="mt-14 overflow-x-auto">
@@ -480,9 +479,7 @@ export default function VosDonnees() {
               </div>
 
               <p className="vd-small mx-auto mt-8 max-w-[42rem] text-center">
-                Aucun autre tiers n&apos;intervient dans le traitement. La liste nominative
-                de nos prestataires, avec leur pays d&apos;hébergement et leurs garanties, est
-                annexée au contrat et communiquée sur demande.
+                Aucun autre tiers n&apos;intervient. La liste nominative de nos prestataires, avec leur pays et leurs garanties, est annexée au contrat et communiquée sur demande.
               </p>
             </div>
           </section>
@@ -505,10 +502,10 @@ export default function VosDonnees() {
                 </div>
                 <div className="relative z-10 max-w-[38rem]">
                   <h2 className="vd-h4">
-                    Le cloud désigne ici des centres de données identifiés
+                    Le cloud, ici, a une adresse
                   </h2>
                   <p className="vd-body mt-4">
-                    Notre hébergeur les regroupe par région, et la vôtre se situe à Francfort, en Allemagne. Elle figure au contrat sous son identifiant exact&nbsp;:
+                    Votre région est Francfort, en Allemagne. Elle figure au contrat sous son identifiant exact&nbsp;:
                     <span className="whitespace-nowrap"> eu-central-1</span>.
                   </p>
                 </div>
@@ -540,7 +537,7 @@ export default function VosDonnees() {
               <div className="relative z-10 flex w-full max-w-[72rem] flex-col gap-6">
                 <h2 className="vd-h1 vd-titre-degrade">Choisir votre hébergement</h2>
                 <p className="vd-lead max-w-[38rem]">
-                  Un entretien de trente minutes suffit pour déterminer lequel des deux dispositifs convient à votre organisation, ce qu&apos;il implique pour votre système d&apos;information et ce qu&apos;il coûte.
+                  En trente minutes, nous voyons quelle option vous convient, ce qu&apos;elle change pour votre système d&apos;information et ce qu&apos;elle coûte.
                 </p>
                 <Link href={CTA.href} className="vd-cta w-fit">
                   {CTA.label}

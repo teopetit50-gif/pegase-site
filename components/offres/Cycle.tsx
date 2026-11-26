@@ -61,7 +61,7 @@ const REGLES: Boite = {
 const REDACTION: Boite = {
   titre: "Rédaction",
   sous: "(au cas par cas)",
-  texte: "Le message est écrit selon vos règles, pas sur un modèle figé.",
+  texte: "Le message est rédigé selon vos règles, au cas par cas.",
 };
 const JOURNAL: Boite = {
   titre: "Journal",

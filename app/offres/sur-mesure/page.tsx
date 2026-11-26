@@ -152,7 +152,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/offres/sur-mesure" },
   title: "Sur mesure | Omega.AI",
   description:
-    "Il vous manque un module ? Omega.AI le construit, l'ajoute à votre logiciel de gestion ou le branche sur vos outils. Ce qu'il fait et son prix sont écrits avant de commencer.",
+    "Il vous manque un module ? Omega.AI le construit, l'ajoute à votre ERP ou le branche sur vos outils. Ce qu'il fait et son prix sont écrits avant de commencer.",
 };
 
 /* La fiche garde la structure `Fiche` du catalogue, champ pour champ :
@@ -165,7 +165,7 @@ const FICHE: Fiche = {
   sections: {
     pointsTitre: "Ce que couvre le sur-mesure.",
     pointsChapo:
-      "Une tâche interne, une application sur mesure, un pont entre deux outils. Ce que fait le module et son prix sont écrits avant de commencer.",
+      "Une tâche interne, une application, un pont entre deux outils. Le rôle du module et son prix sont écrits avant de commencer.",
     detailChapo:
       "Ce que nous cadrons avant d'écrire une ligne, ce que nous construisons, et ce qui reste sous votre décision.",
     cibleChapo:
@@ -174,9 +174,9 @@ const FICHE: Fiche = {
   },
 
   fonctionnement: [
-    "L'ERP Omega couvre la gestion courante, et ses quatre agents traitent des processus présents dans presque toutes les organisations : les encaissements, la réactivation commerciale, les demandes entrantes et les factures fournisseurs. Ils se déploient vite parce que le besoin est le même partout. Le sur-mesure commence là où cette hypothèse s'arrête : quand le processus qui coûte le plus cher est propre à votre organisation ou à votre système d'information, et qu'aucun produit sur étagère ne le traite sans le déformer.",
-    "Le périmètre n'est pas limité à l'automatisation de messages. Un système sur mesure peut être une application complète avec son interface et sa base de données, un pont entre deux outils qui ne communiquent pas, un calcul ou un contrôle répété que personne n'a le temps de faire, une extraction de données depuis des documents, un tableau de bord alimenté en continu, ou un assistant interne qui répond sur vos propres procédures. Si la tâche s'exécute aujourd'hui à la main et suit des règles qu'on peut écrire, elle peut être reprise.",
-    "La méthode est celle de nos agents : nous partons de votre processus réel, pas d'un modèle. Nous écrivons les règles avec vous, définissons ce qui s'exécute seul et ce qui attend votre validation, puis le résultat devient un module d'Omega ou se branche sur vos outils actuels. La mise en production est progressive : un périmètre restreint d'abord, mesuré, puis élargi une fois qu'il tient.",
+    "L'ERP Omega couvre la gestion courante, et ses quatre agents traitent les processus que presque toutes les entreprises partagent : encaissements, réactivation commerciale, demandes entrantes, factures fournisseurs. Le sur-mesure commence là où votre processus le plus coûteux vous est propre, et où aucun produit standard ne le traite sans le déformer.",
+    "Une application complète avec ses écrans et ses données, un pont entre deux outils, un contrôle que personne n'a le temps de faire, la lecture de documents, un tableau de bord à jour en continu, un assistant qui répond sur vos procédures. Si la tâche se fait à la main et suit des règles écrites, nous construisons le module qui la prend en charge.",
+    "Nous partons de votre processus réel. Nous écrivons les règles avec vous, fixons ce qui s'exécute seul et ce qui attend votre validation, puis le module rejoint votre ERP ou se branche sur vos outils. Un périmètre restreint d'abord, mesuré, puis élargi.",
   ],
 
   points: [
@@ -187,7 +187,7 @@ const FICHE: Fiche = {
   ],
 
   controle:
-    "Le niveau d'autonomie se décide règle par règle : ce qui s'exécute seul, ce qui attend une validation, ce qui ne part jamais sans accord explicite.",
+    "L'autonomie se décide règle par règle : ce qui s'exécute seul, ce qui attend une validation, ce qui ne part jamais sans votre accord.",
 
   /* Le sur-mesure ne se branche pas sur une liste fermée : ces quatre
      entrées sont les FAMILLES d'outils les plus fréquentes, pas une
@@ -257,7 +257,7 @@ const FICHE: Fiche = {
       { text: "Tâche qui demande un jugement au cas par cas", badge: "Écarté", tone: "off" },
     ],
     footer:
-      "Les trois suivent des règles qui s'écrivent. Une tâche qui demande un jugement au cas par cas reste chez vous, et nous vous le disons pendant l'audit.",
+      "Les trois suivent des règles qui s'écrivent. Une tâche qui demande un jugement au cas par cas reste chez vous. Nous vous le disons à l'audit.",
   },
 };
 
@@ -409,9 +409,9 @@ const EXEMPLES: Cas[] = [
     visuel: <CroquisSuivi />,
     titre: FICHE.demo.type === "list" ? FICHE.demo.items[2].text : "",
     texte:
-      "Un module avec ses écrans, ses données et ses droits, ajouté à votre logiciel Omega.",
+      "Un module avec ses écrans, ses données et ses droits, ajouté à votre ERP Omega.",
     legende: "Application sur mesure",
-    sousLegende: "Ajouté à votre logiciel ou branché sur vos outils",
+    sousLegende: "Ajouté à votre ERP ou branché sur vos outils",
     mesures: [
       { value: "1", label: "Module", sub: "Écrans, données et droits" },
       { value: "Semaines", label: "Ordre de grandeur", sub: "Le délai exact est écrit avant de commencer" },
@@ -563,7 +563,7 @@ export default function SurMesurePage() {
               haut
               pastille="Sur mesure"
               titre="Votre Module Sur Mesure"
-              chapo="Nous construisons celui qui manque."
+              chapo="Il vous manque un module ? Nous le construisons."
               actions={
                 <Bouton href="/reserver-un-audit" icone="calendrier">
                   Parler de votre cas
@@ -590,7 +590,7 @@ export default function SurMesurePage() {
           <Section>
             <div className="sm-outils">
               <p className="sm-outils__phrase">
-                <span>Un module sur mesure se branche sur vos outils.</span>{" "}
+                <span>Il se branche sur vos outils.</span>{" "}
                 <Link href="/integrations" className="ch-lien">
                   Voir nos intégrations
                   <span aria-hidden>→</span>
@@ -653,11 +653,7 @@ export default function SurMesurePage() {
               <div className="sm-citation__texte">
                 <Pastille>Ce que le logiciel ne couvre pas</Pastille>
                 <p className="sm-citation__phrase">
-                  «&nbsp;Le sur-mesure commence là où le logiciel et ses modules
-                  s&apos;arrêtent&nbsp;: quand la tâche qui coûte le plus cher est
-                  propre à votre organisation ou à votre système
-                  d&apos;information, et qu&apos;aucun produit sur étagère ne la
-                  traite sans le déformer.&nbsp;»
+                  «&nbsp;Le sur-mesure commence là où l&apos;ERP s&apos;arrête&nbsp;: quand la tâche qui vous coûte le plus est propre à votre entreprise, et qu&apos;aucun produit standard ne la traite sans la déformer.&nbsp;»
                 </p>
                 <div className="sm-citation__signature">
                   <span className="sm-citation__nom">Omega.AI</span>
@@ -704,9 +700,9 @@ export default function SurMesurePage() {
           <Section>
             <EnTeteSection
               pastille="Ce que vous obtenez"
-              titre="Un module de plus, dans le même logiciel."
+              titre="Un module de plus, dans le même ERP."
               chapo={fr(
-                "Le module s'ajoute à votre logiciel, à côté des autres. Même validation, même journal, mêmes droits par service."
+                "Il s'ajoute à côté des autres. Même validation, même journal, mêmes droits par service."
               )}
             />
             <div className="sm-cellule">
@@ -723,7 +719,7 @@ export default function SurMesurePage() {
             <EnTeteSection
               pastille="Usages"
               titre="Ce que couvre le sur-mesure."
-              chapo="Si une tâche suit des règles claires, nous construisons le module qui la fait."
+              chapo="Une tâche qui suit des règles claires ? Nous construisons le module qui la fait."
             />
             <GrilleCartes colonnes={3}>
               {PERIMETRES.map(({ Icone, titre, texte }) => (
@@ -742,7 +738,7 @@ export default function SurMesurePage() {
 
           {/* ════════ 9 · TROIS BESOINS TRAITÉS ════════ */}
           <Section>
-            <EnTeteSection pastille="Exemples" titre="Trois exemples de modules sur mesure." />
+            <EnTeteSection pastille="Exemples" titre="Trois modules sur mesure." />
             <div className="sm-cellule sm-exemples">
               <Casestudies cas={EXEMPLES} />
               <p className="sm-exemples__pied">
@@ -757,9 +753,9 @@ export default function SurMesurePage() {
           <Section>
             <EnTeteSection
               pastille="Les agents"
-              titre="Les quatre agents du logiciel."
+              titre="Les quatre agents de l'ERP."
               chapo={fr(
-                "Relances, demandes clients, factures fournisseurs et clients inactifs : quatre agents s'en chargent."
+                "Relances, demandes clients, factures fournisseurs, clients inactifs : quatre agents s'en chargent."
               )}
             />
             <div className="sm-cellule sm-agents">
@@ -773,8 +769,7 @@ export default function SurMesurePage() {
             titre="Parler de votre cas."
             chapo={
               <>
-                Trente minutes pour regarder comment vous travaillez aujourd&apos;hui.
-                Le module et son prix sont écrits avant de commencer.
+                Trente minutes sur votre façon de travailler. Le module et son prix sont écrits avant de commencer.
               </>
             }
             actions={

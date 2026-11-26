@@ -125,7 +125,7 @@ export default function ModelesPage() {
               {MODELES.length} modèles, un même socle
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              Chaque modèle est un parti pris visuel, indépendant du secteur&nbsp;: vous choisissez l&apos;allure, nous réécrivons tout le contenu pour le vôtre. Le design change&nbsp;; la mécanique derrière — ce que le site reçoit, ce qu&apos;il enregistre, ce qu&apos;il déclenche — ne change pas.
+              Chaque modèle est un style, pas un secteur. Vous choisissez l&apos;allure, nous écrivons tout le contenu pour vous. Le design change&nbsp;; la mécanique derrière — ce que le site reçoit, ce qu&apos;il enregistre, ce qu&apos;il déclenche — ne change pas.
             </p>
           </div>
 
@@ -150,7 +150,7 @@ export default function ModelesPage() {
           >
             <p className="text-[17px]">Plusieurs enseignes, ou rien qui vous convienne&nbsp;?</p>
             <p className="mx-auto mt-3 max-w-[46ch] text-[13.5px] leading-relaxed text-[color:var(--m-doux)]">
-              Le catalogue s&apos;étend, et il ne couvre pas tout&nbsp;: un site dessiné pour vous, le même socle posé sur plusieurs enseignes, un espace client à part. Décrivez ce que vous avez en tête&nbsp;; le périmètre se chiffre après un diagnostic.
+              Un site dessiné pour vous, le même socle sur plusieurs enseignes, un espace client à part&nbsp;: nous le construisons. Décrivez ce que vous avez en tête, le périmètre se chiffre après un diagnostic.
             </p>
             <span className="mt-5 inline-flex items-center justify-center gap-1.5 text-[13.5px] font-medium underline-offset-4 group-hover:underline">
               Décrire votre besoin
@@ -183,7 +183,7 @@ export default function ModelesPage() {
               Ce qui se passe après le clic
             </h2>
             <p className="m-chapo mx-auto mt-5 max-w-2xl">
-              Un site branché sur vos systèmes prend en charge ce qui suit le clic&nbsp;: l&apos;accusé de réception, le devis, la facture et la demande d&apos;avis. Chaque étape part sous votre signature après votre validation, et laisse une trace datée dans votre espace.
+              Accusé de réception, devis, facture, demande d&apos;avis&nbsp;: le site gère tout ce qui suit le clic. Chaque étape part sous votre signature, après votre validation, avec une trace datée dans votre espace.
             </p>
           </div>
 

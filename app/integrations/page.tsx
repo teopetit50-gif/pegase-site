@@ -83,7 +83,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/integrations" },
   title: "Intégrations | Omega.AI",
   description:
-    "Omega se branche sur vos outils (messagerie, tableur, WhatsApp, agenda, paiement, comptabilité) et reprend les données de votre logiciel actuel.",
+    "Omega fonctionne avec vos outils (messagerie, tableur, WhatsApp, agenda, paiement, comptabilité) et reprend les données de votre ancien logiciel.",
 };
 
 /* Regroupement par famille, dans l'ordre déclaré. Un outil sans fiche
@@ -119,10 +119,10 @@ export default function Integrations() {
               niveau={1}
               haut
               pastille="Intégrations"
-              titre="Omega se branche sur vos outils et reprend vos données."
+              titre="Vos outils, branchés. Vos données, reprises."
               chapo={
                 <>
-                  Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : Omega lit et écrit dans les outils où vos équipes travaillent déjà. Si Omega devient votre logiciel de gestion, nous reprenons vos données. Elles restent dans un espace dédié, chiffré, hébergé dans l&apos;Union européenne.
+                  Messagerie, tableur, WhatsApp, agenda, paiement, comptabilité : Omega lit et écrit là où vos équipes travaillent déjà. Si Omega devient votre ERP, nous reprenons vos données. Elles restent dans un espace chiffré, hébergé dans l&apos;Union européenne.
                 </>
               }
               actions={
@@ -157,10 +157,10 @@ export default function Integrations() {
           <Section>
             <EnTeteSection
               pastille="Le raccordement"
-              titre="Comment se passe le raccordement."
+              titre="Le raccordement, en quatre étapes."
               chapo={
                 <>
-                  Toujours dans le même ordre : Omega lit d&apos;abord, écrit ensuite. Vous décidez de ce qui part.
+                  Omega lit d&apos;abord, écrit ensuite. Vous décidez de ce qui part.
                 </>
               }
             />
@@ -173,10 +173,10 @@ export default function Integrations() {
           <Section>
             <EnTeteSection
               pastille="Par agent"
-              titre="Les outils dont chaque agent a besoin."
+              titre="Chaque agent, ses outils."
               chapo={
                 <>
-                  Les quatre agents et les outils qu&apos;ils utilisent le plus souvent. Un agent n&apos;a pas besoin de tous vos logiciels : seulement de ceux où se trouve l&apos;information.
+                  Un agent n&apos;a pas besoin de tous vos logiciels. Seulement de ceux où se trouve l&apos;information.
                 </>
               }
             />
@@ -207,7 +207,7 @@ export default function Integrations() {
             titre={<>Votre outil n&apos;est pas dans la liste&nbsp;?</>}
             chapo={
               <>
-                Cette liste n&apos;est pas une limite. Dès qu&apos;un outil donne accès à ses données, nous construisons le raccordement sur mesure. Sinon, nous vous le disons pendant l&apos;audit, pas après.
+                Cette liste n&apos;est pas une limite. Si un outil donne accès à ses données, nous construisons le raccordement. Sinon, nous vous le disons à l&apos;audit, pas après.
               </>
             }
             actions={

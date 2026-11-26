@@ -64,12 +64,10 @@ export default function FaqTarifs({ items }: { items: Item[] }) {
   return (
     <Faq
       pastille="Questions fréquentes"
-      titre="Questions sur la facturation"
+      titre="Questions sur les prix"
       aparte={
         <>
-          Les points qui reviennent le plus souvent sur la tarification et les modalités. Si
-          une question manque, décrivez votre situation&nbsp;: un membre de l&apos;équipe vous
-          répond le jour même.
+          Une question qui n&apos;est pas ici&nbsp;? Écrivez-nous&nbsp;: un membre de l&apos;équipe vous répond sous deux jours ouvrés, souvent le jour même.
         </>
       }
       action={

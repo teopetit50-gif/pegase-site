@@ -120,7 +120,7 @@ export function BlogCta() {
   return (
     <Appel
       titre="Et pour votre entreprise ?"
-      chapo="Les analyses valent en général. L'audit vaut pour votre situation, et trente minutes suffisent à chiffrer ce que votre processus le plus coûteux représente réellement."
+      chapo="Un article parle en général. L'audit parle de vous : en trente minutes, nous chiffrons ce que vous coûte votre processus le plus lourd."
       actions={
         <Bouton href="/reserver-un-audit" icone="chevron">
           Commencer

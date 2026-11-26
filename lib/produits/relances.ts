@@ -75,7 +75,7 @@ export const HEROS = {
      ternaire nominal, sans un verbe : exactement le tic 4 de la doctrine
      §10. La pastille dit maintenant la même situation avec un sujet et un
      verbe, pour deux signes de plus. */
-  pastille: "Vos factures attendent d'être payées",
+  pastille: "Agent de relance",
   titre: "Quel montant attend d'être encaissé ?",
   /* L'espace avant le « ? » est une FINE insécable (U+202F), la même que
      celle des questions de la FAQ : sur un titre de 26 signes en
@@ -83,7 +83,7 @@ export const HEROS = {
      d'interrogation partir seul à la ligne, et une insécable large
      (U+00A0) l'éloignait visiblement plus que partout ailleurs. */
   chapo:
-    "Des devis attendent une réponse et des factures ont dépassé leur échéance. Chaque matin, une relance est déjà rédigée pour chaque compte, et vos équipes décident si elle part.",
+    "Devis sans réponse, factures échues : chaque matin, l'agent rédige la relance de chaque compte. Vous décidez de ce qui part.",
   /* Libellé changé, et c'est la règle 6 qui l'impose : il disait « Créer mon
      compte » et menait à /creer-un-compte, qui n'existe plus. Un bouton qui
      promet un compte et ouvre une prise de rendez-vous serait faux. */
@@ -107,7 +107,7 @@ export const HEROS = {
    que la fiche maison nomme. J'y avais ajouté Pennylane, Sage, EBP, Qonto
    et Stripe : c'était une promesse d'intégration que rien n'appuie. */
 export const OUTILS = {
-  titre: "Vous ne changez aucun de vos outils",
+  titre: "Fonctionne avec vos outils actuels",
   liste: ["Google Sheets", "Excel", "Gmail", "Outlook", "WhatsApp"],
 } as const;
 
@@ -136,7 +136,7 @@ export const PRINCIPE = {
   sourcil: "Vous livrez d'abord et vous facturez ensuite",
   titre: "À 7 h, vos relances sont déjà écrites.",
   chapo:
-    "Une facture en retard attend que quelqu'un ait le temps de la relancer, et ce temps ne vient jamais. Elle vieillit dans le tableur, si bien que la relance, six mois plus tard, tourne au litige.",
+    "Une facture en retard attend que quelqu'un ait le temps de relancer. Ce temps ne vient jamais. Six mois plus tard, la relance tourne au litige.",
   cartes: [
     {
       cle: "relit",
@@ -157,8 +157,8 @@ export const PRINCIPE = {
     },
     {
       cle: "ecrit",
-      titre: "Vos équipes n'ont plus à réclamer",
-      texte: "Le message est déjà rédigé quand vous ouvrez votre espace, et il ne reste qu'à le relire.",
+      titre: "Chaque relance est prête avant votre arrivée",
+      texte: "Le message est rédigé avant que vous ouvriez votre espace. Il ne reste qu'à le relire.",
       /* PASSE CORRECTRICE — « Le ton suit le montant en jeu » / « Et
          l'ancienneté du retard » était UNE phrase coupée en deux chaînes,
          la seconde ouvrant sur « Et » : la scansion pure que la doctrine
@@ -175,7 +175,7 @@ export const PRINCIPE = {
       cle: "arrete",
       titre: "Vous gardez la main",
       texte:
-        "Tout ce qui doit partir attend votre accord, et rien ne sort par un autre chemin.",
+        "Rien ne part sans votre accord. Rien ne sort par un autre chemin.",
       /* PASSE CORRECTRICE — « Approuver, corriger ou suspendre » était un
          ternaire d'infinitifs ; la bande de chiffres porte déjà ces trois
          gestes en phrase, donc la puce dit ici la règle et non la liste.
@@ -205,7 +205,7 @@ export const PRINCIPE = {
    prix de 3 à 6 signes chacune. `etape` reste un libellé, sans verbe :
    c'est le nom du jalon, pas une phrase. */
 export const PROTOCOLE = {
-  titre: "Une facture pas payée suit ce chemin, jour par jour",
+  titre: "Une facture impayée, jour par jour.",
   jalons: [
     { jalon: "J 0", etape: "Facture émise", precision: "le suivi s'ouvre automatiquement" },
     { jalon: "J+7", etape: "Rappel courtois", precision: "le ton se cale sur l'historique de paiement" },
@@ -220,7 +220,7 @@ export const PROTOCOLE = {
       precision: "elle attend votre signature et ne part jamais seule",
     },
   ],
-  note: "Les devis suivent une cadence plus resserrée, J+3 puis J+7 : un devis qui refroidit se perd plus vite qu'une facture, et se rattrape moins bien.",
+  note: "Les devis vont plus vite : J+3, puis J+7. Un devis qui refroidit se perd plus vite qu'une facture.",
 } as const;
 
 /* « Comment il travaille, précisément » était un intertitre de notice. Le
@@ -246,7 +246,7 @@ export const BENTO = {
      que la frise démontre ligne à ligne, sans rien promettre. */
   titre: "La fermeté monte d'un cran quand le silence dure.",
   chapo:
-    "Le premier rappel part à sept jours, quand un retard ne coûte encore rien à personne. La mise en demeure n'arrive qu'au trentième jour, et seulement si le silence continue.",
+    "Premier rappel à sept jours, quand le retard ne coûte encore rien. Mise en demeure au trentième jour, seulement si le silence continue.",
   cartes: [
     {
       id: "echeancier",
@@ -258,24 +258,24 @@ export const BENTO = {
          manquait, pas le vocabulaire. */
       titre: "Votre encours reste à jour",
       texte:
-        "Chaque ligne porte le client, le montant dû et les jours de retard, et elle se met à jour à chaque relecture. Vous lisez donc l'encours réel sans avoir eu à le tenir.",
+        "Chaque ligne porte le client, le montant dû et les jours de retard, mis à jour à chaque relecture. Vous lisez l'encours réel sans avoir à le tenir.",
     },
     {
       id: "escalade",
       titre: "Un paiement arrête la séquence",
       texte:
-        "Le facturier est relu avant chaque envoi, donc un règlement encaissé la veille coupe la séquence avant qu'elle reparte. Un paiement enregistré arrête donc les relances.",
+        "Le facturier est relu avant chaque envoi. Un règlement encaissé la veille arrête la séquence avant le message suivant.",
     },
     {
       id: "ton",
       titre: "Le ton s'adapte à chaque client",
       texte:
-        "Chaque message est écrit à partir du montant, de l'ancienneté du retard et du palier atteint. Un premier rappel et une mise en demeure ne se ressemblent donc pas.",
+        "Chaque message tient compte du montant, du retard et du palier atteint. Un premier rappel ne ressemble pas à une mise en demeure.",
     },
     {
       id: "journal",
       titre: "Chaque envoi laisse une trace",
-      texte: "L'agent date et archive chaque message, si bien que le jour où un client affirme n'avoir rien reçu, la preuve est disponible.",
+      texte: "Chaque message est daté et archivé. Le jour où un client affirme n'avoir rien reçu, la preuve est là.",
     },
   ],
 } as const;
@@ -292,9 +292,9 @@ export const BENTO = {
    lecteur ou par l'état de la donnée. Les `alt`, eux, ne bougent pas :
    ils sont déjà au bon registre et servent de modèle interne. */
 export const ECRANS = {
-  titre: "Votre espace tient en quatre écrans",
+  titre: "Quatre écrans. Tout votre encours.",
   chapo:
-    "Vous y voyez qui vous doit de l'argent, où en est chaque relance, ce qui est parti hier et ce qui devrait rentrer.",
+    "Qui vous doit de l'argent, où en est chaque relance, ce qui est parti hier, ce qui doit rentrer.",
   onglets: [
     {
       cle: "encours",
@@ -347,12 +347,12 @@ export const ECRANS = {
    sourcil redevient ce qu'il est, une étiquette de section, et il dit ce
    que la bande contient vraiment — pas un contrat, un engagement. */
 export const CHIFFRES = {
-  titre: "Quatre chiffres qui nous engagent",
+  titre: "Quatre chiffres, quatre engagements.",
   liste: [
-    { valeur: "1", unite: "tableur", texte: "Vous gardez celui que vous tenez déjà, donc vous n'avez rien à migrer ni à réapprendre." },
-    { valeur: "3", unite: "canaux", texte: "Une relance part par courriel, par WhatsApp ou par courrier, et vous choisissez le canal client par client." },
-    { valeur: "4", unite: "paliers", texte: "Une facture passe par J 0, J+7, J+21 puis J+30. Un devis suit une cadence plus resserrée, puisqu'il est relancé dès J+3 puis à J+7." },
-    { valeur: "0", unite: "envoi sans vous", texte: "Chaque message vous est proposé, et vous l'approuvez, le corrigez ou le coupez avant qu'il parte." },
+    { valeur: "1", unite: "tableur", texte: "Vous gardez le vôtre. Rien à migrer, rien à réapprendre." },
+    { valeur: "3", unite: "canaux", texte: "E-mail, WhatsApp ou courrier. Vous choisissez le canal, client par client." },
+    { valeur: "4", unite: "paliers", texte: "J 0, J+7, J+21 et J+30 pour une facture. J+3 puis J+7 pour un devis." },
+    { valeur: "0", unite: "envoi sans vous", texte: "Chaque message vous est soumis : vous l'approuvez, le corrigez ou le bloquez." },
   ],
 } as const;
 
@@ -367,7 +367,7 @@ export const FRANCE = {
   sourcil: "D'où vient cet agent",
   titre: "Un produit français",
   chapo:
-    "L'origine d'un logiciel semble secondaire tant que tout va bien. Le jour où un problème survient, elle décide qui vous répond, en quelle langue, et sous quel droit vous êtes.",
+    "Tant que tout va bien, l'origine d'un logiciel compte peu. Le jour d'un problème, elle décide qui vous répond, en quelle langue et sous quel droit.",
   points: [
     {
       titre: "Conçu et développé en France",
@@ -377,17 +377,17 @@ export const FRANCE = {
     {
       titre: "Vos données sont hébergées dans l'Union européenne",
       texte:
-        "Votre entreprise dispose d'un espace chiffré et distinct. Pour rédiger un message, l'agent n'en extrait que le nécessaire, jamais votre facturier entier.",
+        "Un espace chiffré, réservé à votre entreprise. L'agent n'en extrait que le nécessaire, jamais votre facturier entier.",
     },
     {
       titre: "L'assistance se fait en français",
       texte:
-        "Quand vous avez une question, elle est traitée par les personnes qui ont installé l'agent chez vous.",
+        "Vos questions sont traitées par l'équipe qui a installé l'agent chez vous.",
     },
     {
       titre: "Facturation en euros, droit français",
       texte:
-        "Vous êtes facturé en euros, sous TVA française, et le contrat qui nous lie relève du droit français.",
+        "Facturé en euros, TVA française, contrat de droit français.",
     },
   ],
 } as const;
@@ -399,10 +399,10 @@ export const FRANCE = {
    ça / c'est ma femme qui gère ». Elles ajoutent deux lignes repliées au
    mobile, pour les deux arguments les plus décisifs de la page. */
 export const QUESTIONS = {
-  titre: "Les questions posées à chaque installation",
-  chapoAvant: "Les mêmes questions reviennent à chaque fois. Si la vôtre n'y est pas, ",
-  chapoLien: "écrivez-nous",
-  chapoApres: ", et la réponse rejoindra la liste.",
+  titre: "Questions fréquentes",
+  chapoAvant: "Votre question n'y est pas ? ",
+  chapoLien: "Écrivez-nous",
+  chapoApres: ".",
   categories: [
     {
       id: "fonctionnement",
@@ -410,15 +410,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Et si un client paie entre deux relances ?",
-          r: "L'agent relit votre facturier avant chaque action. Un règlement enregistré interrompt la séquence sur-le-champ : un client qui a payé ne reçoit pas de relance.",
+          r: "L'agent relit votre facturier avant chaque action. Un règlement enregistré arrête la séquence : un client qui a payé n'est pas relancé.",
         },
         {
           q: "Qui écrit les messages ?",
-          r: "Les gabarits sont rédigés avec vous à l'installation, puis adaptés par l'agent à chaque situation. Le ton reste le vôtre, et rien ne part sans votre relecture.",
+          r: "Les modèles de messages sont rédigés avec vous à l'installation, puis adaptés par l'agent à chaque cas. Le ton reste le vôtre, et rien ne part sans votre relecture.",
         },
         {
           q: "Mes clients risquent-ils de mal le prendre ?",
-          r: "Un rappel à sept jours ne froisse personne. C'est le silence de six mois, puis l'appel excédé, qui abîme une relation commerciale. Le ton reste le vôtre, le vouvoiement est constant, et vous lisez chaque message avant qu'il parte.",
+          r: "Non. Un rappel à sept jours ne froisse personne. Ce qui abîme une relation, c'est six mois de silence puis un appel excédé. Le ton reste le vôtre, et vous lisez chaque message avant qu'il parte.",
         },
       ],
     },
@@ -428,15 +428,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Puis-je exclure certains clients ?",
-          r: "Oui. Une liste d'exclusion est établie à l'installation et modifiable à tout moment : collectivités, grands comptes, relations personnelles. L'agent ne relance pas ces contacts, et vous seul pouvez les réintégrer.",
+          r: "Oui. Collectivités, grands comptes, relations personnelles : vous fixez la liste d'exclusion à l'installation et la modifiez quand vous voulez. Vous seul pouvez réintégrer un contact.",
         },
         {
           q: "Faut-il changer de logiciel de facturation ?",
-          r: "Non. L'agent lit le tableur ou l'outil où vit déjà votre facturation, avec vos colonnes. Il travaille aussi dans le logiciel de gestion Omega, si vous le choisissez. Vous n'avez aucun compte à ouvrir ni aucune donnée à migrer.",
+          r: "Non. L'agent lit le tableur ou le logiciel où vit déjà votre facturation, avec vos colonnes. Il fonctionne aussi dans l'ERP Omega, si vous le choisissez. Rien à migrer.",
         },
         {
           q: "Une personne s'en occupe déjà chez nous.",
-          r: "L'agent ne remplace personne. Il prépare les relances, puis cette personne les relit et décide de ce qui part. Elle cesse seulement de tenir le compte de qui doit quoi et de courir après les retards.",
+          r: "L'agent ne remplace personne. Il prépare les relances ; cette personne les relit et décide de ce qui part. Elle arrête seulement de tenir le compte de qui doit quoi.",
         },
       ],
     },
@@ -446,15 +446,15 @@ export const QUESTIONS = {
       items: [
         {
           q: "Où vont mes données ?",
-          r: "Elles vont dans un espace chiffré et distinct, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, l'agent transmet à un modèle le strict nécessaire, un client, une facture, un historique, et jamais votre facturier entier.",
+          r: "Dans un espace chiffré, réservé à votre entreprise et hébergé dans l'Union européenne. Pour rédiger un message, l'agent n'envoie au modèle que le strict nécessaire : un client, une facture, un historique.",
         },
         {
           q: "Un message peut-il partir sans moi ?",
-          r: "Non. Tout ce qui doit partir attend votre accord : vous approuvez, vous corrigez ou vous suspendez. La mise en demeure exige en plus une validation explicite, à chaque fois.",
+          r: "Non. Vous approuvez, corrigez ou suspendez chaque envoi. La mise en demeure exige en plus une validation explicite, à chaque fois.",
         },
         {
           q: "Quel est le tarif ?",
-          r: "Vous êtes facturé à l'usage, à la pièce traitée, c'est-à-dire à la relance envoyée. Rien n'est débité avant l'installation, et vous êtes remboursé pendant 30 jours. Écrivez-nous : nous chiffrons votre cas sur vos volumes réels, et vous décidez après.",
+          r: "À partir de 199 € HT par mois, selon le nombre de dossiers suivis. Le prix est fixé à l'audit, sur vos volumes réels, et écrit au devis. Rien n'est débité avant la fin de l'installation, et vous êtes remboursé pendant 30 jours.",
         },
       ],
     },
@@ -470,9 +470,9 @@ export const QUESTIONS = {
    en plus un encours qui « se relance tout seul », ce que la page passe
    dix sections à démentir. */
 export const CLOTURE = {
-  titre: "Ce qui attend dehors ne rentrera pas seul.",
+  titre: "L'argent qui vous est dû ne rentrera pas seul.",
   chapo:
-    "Vous connectez le tableur que vous tenez déjà, puis vos équipes relisent chaque relance avant qu'elle parte : l'agent ne demande rien d'autre.",
+    "Connectez le tableur que vous tenez déjà. Vos équipes relisent chaque relance avant qu'elle parte. C'est tout.",
   /* Même reroutage que le bouton du héros. */
   bouton: "Réserver un audit",
 } as const;

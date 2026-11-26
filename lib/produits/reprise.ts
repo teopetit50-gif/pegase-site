@@ -102,7 +102,7 @@ export const HEROS = {
      chercher. La troisième, l'échéance qui redevient due, est portée par la
      section des fonctionnalités et par la carte du message. */
   chapo:
-    "Un compte qui commandait deux fois par an cesse de commander. Le service s'en aperçoit à la clôture, quand sa ligne a disparu du chiffre. La pièce commandée pour lui dort encore au magasin. L'agent relit votre base clients chaque matin et vous dit à qui écrire.",
+    "Un client qui commandait deux fois par an ne commande plus. Vous le voyez à la clôture, quand sa ligne a disparu du chiffre. L'agent relit votre base clients chaque matin et vous dit à qui écrire.",
   /* 15/09/2026 — LES DEUX BOUTONS DU HÉROS MENAIENT AU MÊME ENDROIT.
      Ils portaient tous les deux « /contact » : le principal et le
      secondaire d'un héros de page produit ouvraient le même formulaire,
@@ -126,7 +126,7 @@ export const OUTILS = {
      de lg. Au-delà de ~150 signes il passe à cinq lignes et fait grandir le
      bandeau. */
   phrase:
-    "Votre historique de ventes vit dans un CRM, un ERP ou un tableur, et vos clients écrivent à votre messagerie. L'agent lit les deux, donc vous ne déployez rien.",
+    "Votre historique de ventes est dans un CRM, un ERP ou un tableur. Vos clients écrivent à votre messagerie. L'agent lit les deux. Rien à déployer.",
   /* Un seul mot par case : les cases font 5 à 7 rem, « Google Sheets » y
      passe à la ligne et chevauche ses voisines. */
   noms: ["Gmail", "Outlook", "Sheets", "Excel", "CSV"],
@@ -140,7 +140,7 @@ export const MANIFESTE = {
      écrite (« parce que »), et la phrase ne contient aucune antithèse — le
      quota de figures de la page est dépensé sous la FAQ. */
   phrase:
-    "Un client ne part presque jamais chez un concurrent : il cesse de penser à vous, parce que personne ne lui a écrit entre-temps.",
+    "Un client part rarement chez un concurrent. Il arrête de penser à vous, parce que personne ne lui a écrit.",
   signature: "Le problème que l'agent règle",
   /* La règle interdit d'inventer une preuve, pas de se taire sur ce qu'on n'a
      pas. La phrase dit qui parle, et rien de plus. */
@@ -154,7 +154,7 @@ export const FONCTIONNALITES = {
      pour toutes ; le reste de la page s'y adosse sans les redire en bloc. */
   titre: "Une relance se lit dans votre historique.",
   suite:
-    "L'agent y cherche le compte qui n'a plus commandé, l'entretien redevenu dû et l'affaire restée en plan.",
+    "Le compte qui ne commande plus, l'entretien redevenu dû, l'affaire restée en plan : l'agent les trouve.",
 
   /* ── Carte 1 · la lecture du fichier ────────────────────────────────── */
   carteCarte: {
@@ -163,7 +163,7 @@ export const FONCTIONNALITES = {
        trois épingles portent les trois relances, dans l'ordre de la suite. */
     titre: "À 7 h 30, votre liste de relances est prête.",
     suite:
-      "L'agent lit votre CRM et votre historique de facturation pendant la nuit. Il ne garde que les comptes dont le silence dépasse votre délai.",
+      "L'agent lit votre CRM et votre facturation pendant la nuit. Il ne garde que les comptes silencieux depuis plus longtemps que votre délai.",
     epingles: [
       /* Le champ `drapeau` portait un numéro de département ; il porte
          maintenant la durée du silence, rendue à gauche de l'étiquette.
@@ -180,7 +180,7 @@ export const FONCTIONNALITES = {
        prose : elles restent nominales, la doctrine l'autorise. La suite, elle,
        porte trois verbes conjugués. */
     suite:
-      "Vous fixez le délai de silence et le montant qui mérite un message, puis tout ce qui sort de ces bornes est écarté avant de vous parvenir.",
+      "Vous fixez le délai de silence et le montant qui mérite un message. Le reste est écarté avant de vous parvenir.",
     intitule: "Règles de vos relances",
     espaceReserve: "Filtrer la base clients…",
     /* `code` est rendu dans une pastille de 5 × 5 en 8 px : au-delà de trois
@@ -214,7 +214,7 @@ export const FONCTIONNALITES = {
   carteLangue: {
     titre: "Vous dictez les règles en français.",
     suite:
-      "Vous n'avez aucune case à cocher : une phrase suffit, et l'agent l'applique ensuite à chaque relance.",
+      "Pas de case à cocher. Une phrase suffit, et l'agent l'applique à chaque relance.",
     /* `role: "moteur"` est une clé technique de composant, pas un mot rendu :
        elle ne se renomme pas (doctrine partie III, §18). */
     echanges: [
@@ -234,7 +234,7 @@ export const FONCTIONNALITES = {
   carteTrace: {
     titre: "Chaque client reçoit son propre message.",
     suite:
-      "L'agent y reprend la date, la référence et le montant de sa dernière ligne de facturation. Aucun message n'est envoyé en série à toute la base.",
+      "L'agent reprend la date, la référence et le montant de son dernier achat. Aucun envoi en série à toute la base.",
     phrase: "Bonjour Martin, je retrouve votre",
     phraseCitee: "passage du 14 mars 2025, réf. 4821, 615 €",
     nbSources: 3,
@@ -285,7 +285,7 @@ export const METIERS = {
      on choisit son cas, on ne le regarde pas défiler. */
   titre: "Personne ne laisse partir un client par négligence.",
   suite:
-    "Cinq situations, cinq façons de perdre un client sans le voir. Ouvrez celle qui vous ressemble.",
+    "Cinq façons de perdre un client sans le voir. Ouvrez celle qui vous ressemble.",
   /* Chaque secteur porte trois blocs, et le troisième — « ce qui reste chez
      vous » — n'est pas une précaution juridique : c'est ce qui rend les deux
      autres crédibles. Une grille toute verte ne se croit pas. Il dit aussi la
@@ -303,9 +303,9 @@ export const METIERS = {
       secteur: "Un devis resté sans suite",
       icone: "devis" as const,
       echappe:
-        "Un client a demandé un devis l'an dernier, puis son projet a été reporté. Personne ne le recontacte, et quand le projet revient, il consulte un concurrent.",
+        "Un client a demandé un devis l'an dernier, puis son projet a été reporté. Personne ne le recontacte. Quand le projet revient, il consulte un concurrent.",
       cherche:
-        "L'agent reprend les devis restés sans suite depuis le délai que vous fixez, puis il demande au client où en est son projet.",
+        "L'agent reprend les devis restés sans suite au-delà de votre délai et demande au client où en est son projet.",
       reste: "Vous gardez le devis, ses conditions et la décision de le mettre à jour.",
     },
     {
@@ -314,11 +314,11 @@ export const METIERS = {
       secteur: "Un compte qui décroche",
       icone: "negoce" as const,
       echappe:
-        "Un compte qui commandait tous les mois espace ses commandes, puis il s'arrête. Personne ne l'appelle, parce que rien n'a été réclamé et que le chiffre global tient encore.",
+        "Un client qui commandait tous les mois espace ses commandes, puis s'arrête. Personne n'appelle : rien n'a été réclamé, et le chiffre global tient encore.",
       cherche:
-        "L'agent mesure dans votre logiciel de gestion la fréquence de commande habituelle de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
+        "L'agent mesure dans votre ERP le rythme de commande habituel de chaque compte. Il signale ceux qui décrochent avant que le trimestre le montre.",
       reste:
-        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre logiciel de gestion, Omega ou l'actuel, parce que l'agent y lit sans jamais y écrire.",
+        "Vos conditions tarifaires, vos encours et l'attribution de vos comptes restent dans votre ERP, Omega ou l'actuel. L'agent y lit sans jamais y écrire.",
     },
     {
       cle: "contrats",
@@ -326,9 +326,9 @@ export const METIERS = {
       secteur: "Un contrat qui s'éteint",
       icone: "contrat" as const,
       echappe:
-        "Un contrat annuel n'est pas renouvelé une année, puis la suivante, et il s'éteint sans que personne l'ait jamais résilié.",
+        "Un contrat annuel n'est pas renouvelé, une année puis la suivante. Il s'éteint sans que personne l'ait résilié.",
       cherche:
-        "L'agent tient la liste de vos contrats et la date à laquelle chacun arrive à échéance, puis il écrit au client un mois avant.",
+        "L'agent tient la liste de vos contrats et de leurs échéances, et écrit au client un mois avant.",
       reste: "Vous gardez les conditions du contrat et le prix que vous facturez.",
     },
     {
@@ -337,9 +337,9 @@ export const METIERS = {
       secteur: "Un projet livré il y a longtemps",
       icone: "projet" as const,
       echappe:
-        "Vous avez livré un projet il y a trois ans. Le client en lance un nouveau cette année, et il consulte quelqu'un d'autre parce qu'il ne vous a plus vu depuis.",
+        "Vous avez livré un projet il y a trois ans. Le client en lance un nouveau et consulte quelqu'un d'autre : il ne vous a pas revu depuis.",
       cherche:
-        "L'agent reprend vos projets livrés, puis il propose un mot aux clients dont le dernier contact remonte à plus longtemps que le délai que vous fixez.",
+        "L'agent reprend vos projets livrés et propose un message aux clients sans contact depuis plus longtemps que votre délai.",
       reste:
         "Vous fixez vos prix, vous choisissez vos équipes et vous décidez de la suite à donner.",
     },
@@ -349,7 +349,7 @@ export const METIERS = {
       secteur: "Une mission close",
       icone: "bureau" as const,
       echappe:
-        "La facture est soldée et le dossier se referme. Six mois plus tard, le client rappelle un concurrent qui, lui, avait écrit.",
+        "La facture est soldée, le dossier se referme. Six mois plus tard, le client appelle un concurrent, qui lui avait écrit.",
       cherche:
         "L'agent repère les missions closes depuis assez longtemps pour qu'une prise de contact se justifie, sans insistance.",
       reste: "Vous choisissez ce que vous souhaitez leur proposer, et à quel prix.",
@@ -362,7 +362,7 @@ export const METIERS = {
    les marchés publics ont été retirées le 15/09 et remplacées par quatre
    questions de relance. */
 export const QUESTIONS = {
-  titre: "Les questions posées à chaque rendez-vous.",
+  titre: "Questions fréquentes",
   /* « Il en manque une ? » est la SEULE figure courte qui reste sur la page,
      et c'est aussi l'unique question rhétorique que la doctrine autorise :
      elle amorce le lien « Écrivez-nous », elle ne cherche pas un effet. Ne
@@ -373,27 +373,27 @@ export const QUESTIONS = {
   items: [
     {
       q: "Que fait cet agent, concrètement ?",
-      r: "L'agent lit votre base clients tous les matins, et il en sort trois listes : les comptes qui n'ont plus commandé depuis le délai que vous fixez, les entretiens qui redeviennent dus, et les affaires restées en plan comme une pièce arrivée que personne n'est venu chercher. Pour chacun, il rédige un message ancré sur son dernier passage, et ce message part de votre adresse une fois validé. L'agent travaille sur vos outils actuels, ou dans le logiciel de gestion Omega si vous le choisissez.",
+      r: "Chaque matin, l'agent lit votre base clients et en sort trois listes : les comptes qui ne commandent plus depuis votre délai, les entretiens redevenus dus, et les affaires restées en plan. Pour chacun, il rédige un message fondé sur son dernier achat, qui part de votre adresse une fois validé. L'agent fonctionne avec vos outils actuels, ou dans l'ERP Omega si vous le choisissez.",
     },
     {
       q: "Nos clients vont-ils se sentir sollicités de trop près ?",
-      r: "C'est précisément ce que le plafond empêche : un message par compte et par trimestre, un seul canal à la fois, jamais les deux. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation revient à votre commercial. Un compte qui ne répond jamais sort du cycle au lieu d'y tourner en boucle, parce qu'une base clients s'épuise vite.",
+      r: "Non. Un message par compte et par trimestre, sur un seul canal. Dès qu'une réponse arrive, même négative, la séquence s'arrête et la conversation revient à votre commercial. Un compte qui ne répond pas sort du cycle.",
     },
     {
       q: "Combien de comptes faut-il dans la base pour que cela se justifie ?",
-      r: "Cela dépend moins du nombre de comptes que de ce que vaut un compte réactivé : deux cents comptes à gros panier ne pèsent pas comme deux mille petits clients. Nous faisons ce calcul avec vos chiffres pendant l'audit, avant tout engagement, et si la relance à la main reste plus simple chez vous, nous vous le disons.",
+      r: "Tout dépend de ce que vaut un compte réactivé : deux cents gros clients ne pèsent pas comme deux mille petits. Nous faisons le calcul avec vos chiffres pendant l'audit. Si la relance à la main reste plus simple chez vous, nous vous le disons.",
     },
     {
       q: "Nos données sont réparties entre un CRM, un ERP et des dossiers papier. Est-ce exploitable ?",
-      r: "Un export CSV de votre CRM ou de votre ERP suffit pour commencer, et un tableur fait aussi l'affaire. Ce qu'il faut sur chaque ligne, c'est un identifiant de compte, une date et un montant, parce que le reste se déduit. Ce qui dort sur papier n'entre pas de lui-même, donc nous arbitrons ensemble ce qui vaut la peine d'être saisi.",
+      r: "Oui. Un export CSV de votre CRM ou de votre ERP suffit, un tableur aussi. Il faut sur chaque ligne un identifiant de compte, une date et un montant. Le papier n'entre pas tout seul : nous décidons ensemble ce qui vaut la peine d'être saisi.",
     },
     {
       q: "L'agent peut-il écrire n'importe quoi à nos clients ?",
-      r: "Non, et c'est la première question qui nous est posée. Vous posez les règles en français, comme le ton, les sujets interdits, les remises ou la longueur, et elles s'appliquent à chaque message : jamais un prix ni un délai inventé, jamais de tutoiement. Vos équipes relisent la première vague nom par nom. Ensuite, une relance ne part sans relecture que si vous avez autorisé ce type d'envoi.",
+      r: "Non. Vous écrivez les règles en français : ton, sujets interdits, remises, longueur. Elles s'appliquent à chaque message. Jamais un prix ni un délai inventé. Vos équipes relisent la première vague nom par nom. Ensuite, un message ne part sans relecture que si vous l'avez autorisé.",
     },
     {
       q: "Que se passe-t-il si quelque chose déraille ?",
-      r: "L'agent s'arrête de lui-même au premier doute. Un compte reçoit une seule relance par vague, et un nom retiré ne revient plus. Chaque envoi est horodaté dans un journal. Nous préférons un mardi sans vague à un mardi où le même client reçoit deux messages.",
+      r: "L'agent s'arrête au premier doute. Un compte reçoit un seul message par vague, et un nom retiré ne revient pas. Chaque envoi est horodaté dans un journal.",
     },
   ],
 };
@@ -414,19 +414,19 @@ export const QUESTIONS = {
 export const FRANCAIS = {
   titre: "Ce produit est écrit en France.",
   suite:
-    "Omega.AI en est l'éditeur et en assure la maintenance. Le contrat précise où vont vos données et ce que nous en faisons.",
+    "Omega.AI l'édite et le maintient. Le contrat dit où vont vos données et ce que nous en faisons.",
   cellules: [
     {
       icone: "editeur" as const,
       titre: "Édité en France",
       texte:
-        "Omega.AI conçoit et maintient ce produit en France, donc quand vous écrivez, une personne de l'équipe vous répond.",
+        "Conçu et maintenu en France. Quand vous écrivez, une personne de l'équipe vous répond.",
     },
     {
       icone: "langue" as const,
       titre: "Écrit en français",
       texte:
-        "Les relances sont rédigées en français, dans le vocabulaire de votre entreprise, et aucune ne part sans votre accord.",
+        "Les messages reprennent le vocabulaire de votre entreprise. Aucun ne part sans votre accord.",
     },
     {
       /* Ancien intitulé : « Vos données restent en Europe ». Il disait la
@@ -437,7 +437,7 @@ export const FRANCAIS = {
       icone: "donnees" as const,
       titre: "Vos clients restent les vôtres",
       texte:
-        "Vos données sont hébergées dans l'Union européenne et ne sont jamais revendues. La liste des prestataires est annexée au contrat, et si vous arrêtez, tout vous est restitué puis effacé.",
+        "Hébergées dans l'Union européenne, jamais revendues. La liste des prestataires est annexée au contrat. Si vous arrêtez, tout vous est rendu, puis effacé.",
     },
   ],
 };
@@ -447,7 +447,7 @@ export const FRANCAIS = {
 export const APPEL = {
   titre: "Reprendre contact avec vos anciens clients",
   texte:
-    "L'agent relit votre base chaque matin, repère les comptes restés silencieux et rédige pour chacun un message ancré sur son dernier passage. Vous validez ce qui part, et vos équipes gardent la main sur chaque échange.",
+    "Chaque matin, l'agent repère les clients silencieux et rédige pour chacun un message fondé sur son dernier achat. Vous validez ce qui part.",
   /* Réaiguillé sur le parcours du site : le site source envoyait sur son
      propre /contact, qui n'existe pas ici sous cette forme. */
   bouton: { texte: "Commencer", lien: "/reserver-un-audit" },

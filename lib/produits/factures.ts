@@ -97,7 +97,7 @@ export const PRINCIPE = {
   titre1: "Vos fournisseurs envoient",
   titre2: "leurs pièces de partout.",
   para:
-    "Vous connectez une messagerie une fois, puis tout ce qui y arrive en ressort classé au bon fournisseur. Vos équipes cessent de ressaisir.",
+    "Connectez une messagerie, une fois. Tout ce qui y arrive ressort classé au bon fournisseur. L'agent saisit chaque pièce à votre place.",
 };
 
 /* Les libellés des quatre cartes ne sont plus ici : la grille a été
@@ -111,21 +111,21 @@ export const FONCTIONNEMENT = {
   titre1: "Vos comptes ne reçoivent",
   titre2: "que des pièces vérifiées.",
   para:
-    "Une pièce mal rangée ne se découvre qu'au bilan. L'agent recoupe donc le HT, la TVA et le TTC de chaque facture. Il ne la classe que si les trois montants tombent juste.",
+    "Une pièce mal rangée se découvre au bilan. L'agent recoupe le HT, la TVA et le TTC de chaque facture, et ne la classe que si les trois tombent juste.",
 };
 
 export const SUIVI = {
   titre1: "Vous savez ce qui va sortir",
   titre2: "avant que le relevé arrive.",
   para:
-    "Chaque pièce lue s'ajoute au total engagé du mois, fournisseur par fournisseur, et ce qui attend encore votre validation reste visible à part. Vous n'avez donc aucun tableur à tenir à côté.",
+    "Chaque pièce lue s'ajoute au total engagé du mois, fournisseur par fournisseur. Ce qui attend votre validation reste à part. Aucun tableur à tenir.",
 };
 
 export const FRANCAIS = {
   titre1: "Un produit français,",
   titre2: "et cela se vérifie.",
   para:
-    "Les quatre faits ci-dessous sont écrits noir sur blanc, et vous pouvez nous les opposer à tout moment. Nous ne promettons rien de plus que ce qui y est écrit.",
+    "Quatre engagements, écrits noir sur blanc. Vous pouvez nous les opposer à tout moment.",
 };
 
 /* Paliers — structure arrêtée, montants à trancher par Teo. */
@@ -217,12 +217,12 @@ export const GARDE_FOUS = {
   titre1: "L'agent lit",
   titre2: "vos comptes sans y toucher.",
   para:
-    "Un agent branché sur votre comptabilité doit d'abord prouver ce qu'il refuse de faire. Les deux limites ci-dessous ne se désactivent nulle part, parce qu'elles tiennent à la façon dont le produit est construit.",
+    "Un agent branché sur votre comptabilité doit d'abord prouver ce qu'il refuse de faire. Ces deux limites ne se désactivent pas : elles tiennent à la construction du produit.",
   cartes: [
     {
       titre: "Il n'écrit à personne.",
       texte:
-        "L'agent n'envoie aucun message en votre nom, ni à vos clients, ni à vos fournisseurs, ni à votre banque. Ses accès s'arrêtent à la lecture, donc il ne peut pas payer à votre place.",
+        "Aucun message en votre nom : ni à vos clients, ni à vos fournisseurs, ni à votre banque. Ses accès s'arrêtent à la lecture. Il ne peut pas payer à votre place.",
       court: "L'agent n'envoie aucun message en votre nom, et ses accès s'arrêtent à la lecture.",
       faits: [
         "Zéro message envoyé en votre nom",
@@ -232,7 +232,7 @@ export const GARDE_FOUS = {
     {
       titre: "Aucune pièce n'est effacée.",
       texte:
-        "Un doublon est mis de côté au lieu d'être effacé, et un montant douteux attend votre validation avant d'être classé. Vos fichiers d'origine restent tels que vous les avez reçus, donc vous pouvez tout récupérer quand vous voulez.",
+        "Un doublon est mis de côté, pas effacé. Un montant douteux attend votre validation. Vos fichiers d'origine restent intacts, récupérables à tout moment.",
       court: "Un doublon est mis de côté au lieu d'être effacé, et vos fichiers d'origine sont conservés.",
       faits: [
         "Chaque pièce gardée dans son format d'origine",
@@ -257,11 +257,11 @@ export const CONFORMITE = {
 export const FAQ = {
   titre1: "Les questions posées",
   titre2: "avant de signer.",
-  para: "Les réponses sont courtes, et si la vôtre n'y est pas, écrivez-nous.",
+  para: "Réponses courtes. Si la vôtre n'y est pas, écrivez-nous.",
   questions: [
     {
       q: "Que faut-il installer ?",
-      r: "Rien. Vous connectez une messagerie, et c'est tout. Aucun logiciel de facturation à connecter, aucun fichier client à importer, aucune extension à installer sur vos postes.",
+      r: "Rien. Vous connectez une messagerie, c'est tout. Pas de logiciel à brancher, pas de fichier à importer, pas d'extension à installer.",
     },
     {
       q: "Et si mon fournisseur envoie une photo prise de travers ?",
@@ -272,7 +272,7 @@ export const FAQ = {
          n'était nulle part : le comptable est le premier frein cité en
          rendez-vous. La réponse vient de la fiche produit. */
       q: "Ma comptabilité doit-elle changer ses outils ?",
-      r: "Non. Elle reçoit un dossier classé dans le format qu'elle utilise déjà, à la date convenue pendant l'installation. Elle gagne du temps sans rien changer à ses méthodes.",
+      r: "Non. Elle reçoit un dossier classé, dans son format habituel, à la date convenue. Elle gagne du temps sans changer de méthode.",
     },
     {
       q: "L'agent écrit-il à mes clients ou à mes fournisseurs ?",
@@ -309,7 +309,7 @@ export const FINAL = {
   titre1: "Ne connectez rien",
   titre2: "si vos pièces sont déjà classées.",
   para:
-    "Si elles arrivent de partout et s'accumulent avant d'être traitées, une messagerie connectée suffit à remettre l'ensemble en ordre.",
+    "Si elles arrivent de partout et s'accumulent, une messagerie connectée suffit à tout remettre en ordre.",
 };
 
 /* ══════════════════════════════════════════════════════════════════════

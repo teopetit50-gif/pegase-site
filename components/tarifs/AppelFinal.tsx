@@ -169,18 +169,15 @@ export default function AppelFinal() {
   return (
     <Appel
       pastille="Audit"
-      titre={devis ? GRANDE_STRUCTURE.appel.titre : "Votre prix, écrit avant de signer"}
+      titre={devis ? GRANDE_STRUCTURE.appel.titre : "Votre prix, avant de signer."}
       chapo={
         <span key={devis ? "structure" : "pme"} className="rv-fondu block">
           {devis ? (
             GRANDE_STRUCTURE.appel.chapo
           ) : (
             <>
-              L&apos;audit passe votre activité en revue&nbsp;: qui fait quoi, sur quels logiciels,
-              et le volume que vos agents auraient à traiter. Vous repartez avec le périmètre, le
-              prix de vos agents et le plan de mise en service. Ce prix devient ferme, avec celui de
-              votre installation, une fois vos fichiers analysés et avant que vous signiez.
-              L&apos;audit est gratuit, et aucune donnée n&apos;est enregistrée sur cette page.
+              En 30 minutes, nous passons en revue qui fait quoi, sur quels logiciels, et le volume
+              à traiter. Vous repartez avec le périmètre, le prix de vos agents et le calendrier de mise en service. L&apos;audit est offert, et aucune donnée n&apos;est enregistrée sur cette page.
             </>
           )}
         </span>

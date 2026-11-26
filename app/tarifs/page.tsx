@@ -85,7 +85,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    "Le logiciel de gestion Omega coûte 34,90\u00a0€ HT par personne et par mois, sans minimum. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, et son prix est fixé à l'audit.",
+    "L'ERP Omega coûte 34,90\u00a0€ HT par utilisateur et par mois, sans minimum. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, prix fixé à l'audit.",
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -121,70 +121,70 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Combien coûte Omega\u00a0?",
     r: [
-      "Le logiciel et les agents se paient chacun au mois, et l'installation une seule fois. Le logiciel de gestion coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, selon le nombre de dossiers qu'il suit. Une automatisation s'installe dès 49\u00a0€ HT, puis l'IA se paie à la pièce. L'installation du logiciel et des agents se paie une fois, au prix écrit dans votre devis après l'audit.",
-      "Exemple\u00a0: une entreprise de 10 personnes paie 349\u00a0€ HT par mois pour le logiciel de gestion. S'y ajoute le prix de ses agents, écrit au devis.",
+      "L'ERP et les agents se paient au mois, l'installation une seule fois. L'ERP coûte 34,90\u00a0€ HT par utilisateur et par mois, dès le premier. Chaque agent coûte à partir de 199\u00a0€ HT par mois, selon le volume traité. Une automatisation s'installe dès 49\u00a0€ HT, puis l'IA se paie à la pièce. L'installation se paie une fois, au prix écrit dans votre devis.",
+      "Exemple\u00a0: une entreprise de 10 utilisateurs paie 349\u00a0€ HT par mois pour l'ERP, plus le prix de ses agents, écrit au devis.",
     ],
   },
   {
     q: "Quelle différence entre une automatisation et un agent\u00a0?",
     r: [
-      "Une automatisation suit toujours le même chemin\u00a0: chaque matin, elle rédige les relances, lit les factures reçues ou trie les mails. Elle s'installe une fois, puis chaque tâche de l'IA se paie à la pièce.",
-      "Un agent reçoit un objectif et suit chaque dossier jusqu'au bout\u00a0: il lit les réponses, relance au bon moment et prévient le gérant si un dossier bloque. Il se paie au mois, selon le nombre de dossiers qu'il suit.",
+      "Une automatisation fait toujours la même chose\u00a0: rédiger les relances du matin, lire les factures reçues, trier les e-mails. Elle s'installe une fois, puis chaque tâche de l'IA se paie à la pièce.",
+      "Un agent reçoit un objectif et traite chaque dossier jusqu'au bout\u00a0: il lit les réponses, relance au bon moment et vous prévient si un dossier bloque. Il se paie au mois, selon le volume traité.",
     ],
   },
   {
     q: "Quand connaîtrai-je le prix de mes agents\u00a0?",
     r: [
-      "Il est fixé pendant l'audit. Le prix d'un agent dépend du nombre de dossiers qu'il suit chaque mois\u00a0: factures à recouvrer, factures fournisseurs, demandes clients. Deux entreprises de même taille n'ont pas le même volume, et ce prix se fixe donc sur vos chiffres.",
-      "Avant que vous signiez, l'IA analyse vos fichiers et l'état de vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix de vos agents et de votre installation devient alors ferme.",
+      "Pendant l'audit. Le prix d'un agent dépend du nombre de dossiers traités chaque mois\u00a0: factures à recouvrer, factures fournisseurs, demandes clients. Il se fixe sur vos chiffres, pas sur votre taille.",
+      "Avant la signature, notre IA analyse vos fichiers et vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix des agents et de l'installation devient alors ferme.",
     ],
   },
   {
-    q: "Comment le logiciel de gestion est-il chiffré\u00a0?",
+    q: "Comment l'ERP est-il facturé\u00a0?",
     r: [
-      "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Les six modules de gestion sont compris, et nous ne prenons jamais de pourcentage sur vos encaissements.",
-      "Chaque personne a son propre compte. En comptabilité, il faut savoir qui a validé chaque facture\u00a0: un compte partagé ferait perdre cette trace. 50\u00a0Go de documents sont compris\u00a0; au-delà, chaque tranche de 25\u00a0Go coûte 15\u00a0€ HT par mois.",
+      "34,90\u00a0€ HT par utilisateur et par mois, dès le premier et sans minimum. Les six modules sont inclus. Aucun pourcentage sur vos encaissements.",
+      "Chaque utilisateur a son propre compte, pour savoir qui a validé chaque facture. 50 Go de documents sont inclus\u00a0; au-delà, 15\u00a0€ HT par mois par tranche de 25 Go.",
     ],
   },
   {
     q: "Que se passe-t-il si un agent dépasse son forfait\u00a0?",
     r: [
-      "Vous êtes prévenu quand il atteint 75\u00a0%, puis 90\u00a0% de son forfait. Au-delà, chaque dossier supplémentaire est facturé au prix écrit dans votre devis.",
-      "L'agent ne change de palier qu'après trois mois de suite au-dessus de son forfait. Vous pouvez ajouter un agent à tout moment, et la remise est de 10\u00a0% dès 3 agents. Nos prix sont revus une fois par an, jamais en cours d'année.",
+      "Vous êtes prévenu à 75\u00a0%, puis à 90\u00a0% du forfait. Au-delà, chaque dossier supplémentaire est facturé au prix écrit dans votre devis.",
+      "Un agent ne change de palier qu'après trois mois de suite au-dessus de son forfait. Vous ajoutez un agent quand vous voulez, avec 10\u00a0% de remise dès 3 agents. Nos prix sont revus une fois par an, jamais en cours d'année.",
     ],
   },
   {
     q: "Quelles sont les modalités de paiement\u00a0?",
     r: [
-      "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée, au moment de réserver la réunion d'installation. Aucun débit n'intervient avant la fin de celle-ci\u00a0: la première échéance part le jour de la mise en service.",
-      "Les agents sont facturés au mois, sans engagement\u00a0: la résiliation prend effet à la fin du mois en cours. Nos prix sont hors taxes, et la TVA s'y ajoute au taux qui s'applique à votre entreprise.",
+      "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée quand vous réservez l'installation. Rien n'est débité avant la fin de l'installation : la première échéance part le jour de la mise en service.",
+      "Les agents sont facturés au mois, sans engagement\u00a0: la résiliation prend effet à la fin du mois en cours. Prix hors taxes, TVA en sus au taux applicable.",
     ],
   },
   {
     q: "Que comprend l'abonnement des agents\u00a0?",
     r: [
-      "L'exploitation des postes retenus, le rapport quotidien, les règles de validation avant envoi, la prise en compte de vos corrections et le suivi. La réunion d'installation est comprise dans le forfait d'installation : nous raccordons vos outils ensemble, en visioconférence, écran partagé.",
-      "Un raccordement spécifique, tel qu'un logiciel peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement, jamais découvert en cours de projet.",
+      "Le fonctionnement des agents retenus, le rapport quotidien, les règles de validation avant envoi, la prise en compte de vos corrections et le suivi. La réunion d'installation est comprise dans l'installation : nous raccordons vos outils ensemble, en visioconférence.",
+      "Un raccordement spécifique, comme un logiciel peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement. Jamais en cours de projet.",
     ],
   },
   {
     q: "Que se passe-t-il si l'offre ne convient pas ?",
     r: [
-      "Pour les agents, le remboursement est intégral pendant trente jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis, sans condition et sans frais.",
-      "Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
+      "Pendant 30 jours après la mise en service, vos agents vous sont remboursés intégralement, sans justification. Ensuite, ils restent résiliables à tout moment, et l'export complet de vos données vous est remis, sans frais.",
+      "Pour l'ERP, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
     ],
   },
   {
     q: "Le Chèque TIC s'applique-t-il ici ?",
     r: [
-      "Le dispositif de la Région Guadeloupe finance de 40 à 80 % d'un projet de transformation numérique, dans la limite de 10 000 €, pour une entreprise éligible. Son assiette est l'installation, jamais l'abonnement. Votre éligibilité est vérifiée à l'audit, et si un dossier se justifie, nous le montons avec vous.",
+      "Le Chèque TIC, porté par la Région Guadeloupe, finance de 40 à 80 % d'un projet numérique, jusqu'à 10 000 €, pour les entreprises qui y sont immatriculées. Il porte sur l'installation, pas sur l'abonnement. Nous vérifions votre éligibilité à l'audit et, si un dossier se justifie, nous le montons avec vous.",
     ],
   },
   {
     q: "Plusieurs services valident chez nous : cette grille s'applique-t-elle ?",
     r: [
-      "En partie seulement. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par personne et par mois pour le logiciel, à partir de 69\u00a0€ HT par mois pour chaque agent. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
-      "Votre point d'entrée est le diagnostic, dans un format plus long : nous relevons votre volumétrie service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
+      "En partie. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par utilisateur et par mois pour l'ERP, à partir de 199\u00a0€ HT par mois pour chaque agent. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
+      "Vous commencez par un diagnostic plus long : nous relevons vos volumes service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
 ];
@@ -206,27 +206,27 @@ const CHIFFRAGE: Regle[] = [
      le logiciel par personne, les agents au travail fait, le prix ferme
      avant de signer, l'installation payée une fois. */
   {
-    titre: "Le logiciel se paie par personne",
+    titre: "L'ERP se paie par utilisateur",
     texte:
-      "Il coûte 34,90\u00a0€ HT par personne et par mois, dès la première personne et sans minimum. Le prix est le même pour tous.",
+      "34,90\u00a0€ HT par utilisateur et par mois, dès le premier et sans minimum. Le même prix pour tout le monde.",
     points: [
-      "Les six modules de gestion compris",
-      "Jamais un pourcentage sur les sommes que vous encaissez",
+      "Les six modules inclus",
+      "Aucun pourcentage sur vos encaissements",
     ],
   },
   {
-    titre: "Chaque agent est payé au travail qu'il fait",
+    titre: "Un agent se paie au volume traité",
     texte:
-      "Il coûte à partir de 199\u00a0€ HT par mois, selon le nombre de dossiers qu'il suit\u00a0: factures à recouvrer, factures fournisseurs, demandes clients.",
+      "À partir de 199\u00a0€ HT par mois, selon le nombre de dossiers traités\u00a0: factures à recouvrer, factures fournisseurs, demandes clients.",
     points: [
       "Deux entreprises de même taille n'ont pas le même volume",
       "−10\u00a0% dès 3 agents",
     ],
   },
   {
-    titre: "Le prix est ferme avant de signer",
+    titre: "Un prix ferme avant la signature",
     texte:
-      "L'audit fixe le prix de vos agents selon votre volume. L'IA analyse ensuite vos fichiers et l'état de vos données\u00a0: le prix de vos agents et de votre installation devient alors ferme.",
+      "L'audit fixe le prix de vos agents sur vos volumes. Notre IA analyse ensuite vos fichiers et vos données\u00a0: le prix des agents et de l'installation devient ferme.",
     points: [
       "Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez",
       "Vous êtes prévenu quand un agent atteint 75\u00a0%, puis 90\u00a0% de son forfait",
@@ -235,10 +235,10 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "L'installation se paie une fois",
     texte:
-      "Son prix dépend de la taille de votre entreprise, de l'état de vos données et des outils à raccorder\u00a0: il est écrit dans votre devis, après l'audit. Pour les agents, rien n'est débité avant la fin de leur installation.",
+      "Son prix dépend de votre taille, de l'état de vos données et des outils à raccorder. Il est écrit au devis, après l'audit. Pour les agents, rien n'est débité avant la fin de leur installation.",
     points: [
       "Elle peut relever du Chèque TIC, porté par la Région Guadeloupe, pour les entreprises qui y sont immatriculées",
-      "Les agents restent mensuels, sans engagement",
+      "Agents au mois, sans engagement",
     ],
   },
 ];
@@ -276,8 +276,8 @@ export default function TarifsPage() {
                cartes jointives ═══ */}
         <ReglesFacturation
           id="chiffrage"
-          titre="Comment nous chiffrons"
-          chapo={"Quatre règles, du logiciel à l'installation : ce que vous payez, et ce qui fixe chaque prix."}
+          titre="Comment nous facturons"
+          chapo={"Quatre règles, et chaque prix écrit avant la signature."}
           regles={CHIFFRAGE}
         />
 

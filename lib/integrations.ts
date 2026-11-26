@@ -203,24 +203,24 @@ export const RACCORDEMENT = [
     n: "01",
     titre: "Nous relevons vos outils",
     texte:
-      "Pendant l'audit, nous relevons les outils que vos équipes utilisent vraiment, et les données à reprendre si Omega devient votre logiciel de gestion.",
+      "Pendant l'audit, nous relevons les outils que vos équipes utilisent vraiment, et les données à reprendre si Omega devient votre ERP.",
   },
   {
     n: "02",
     titre: "Omega lit avant d'écrire",
     texte:
-      "Omega commence par lire : factures, historique, fils de discussion. Rien n'est écrit ni envoyé tant que vous n'avez pas vérifié ce qu'il a lu.",
+      "Omega commence par lire : factures, historique, fils de discussion. Rien n'est écrit ni envoyé avant votre vérification.",
   },
   {
     n: "03",
     titre: "Vos équipes décident de ce qui part",
     texte:
-      "Les agents préparent chaque action et vous la présentent. Vos équipes l'envoient, la corrigent ou l'abandonnent. Elles peuvent ensuite autoriser certains envois à partir seuls.",
+      "Les agents préparent chaque action. Vos équipes l'envoient, la corrigent ou l'abandonnent, puis autorisent certains envois à partir seuls.",
   },
   {
     n: "04",
     titre: "Vos données restent les vôtres",
     texte:
-      "Chaque entreprise a son espace de données chiffré, séparé des autres. Si vous arrêtez, nous vous remettons l'export complet et nous effaçons l'espace à votre demande.",
+      "Chaque entreprise a son espace chiffré, séparé des autres. Si vous arrêtez, vous recevez l'export complet et nous effaçons l'espace à votre demande.",
   },
 ];

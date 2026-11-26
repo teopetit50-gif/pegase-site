@@ -62,7 +62,7 @@ export default function AppelOutil({ className }: { className?: string }) {
                 Votre outil n&apos;est pas dans la liste&nbsp;?
               </h2>
               <p data-reveal className="o-lead mt-5">
-                Cette liste n&apos;est pas une limite. Dès qu&apos;un outil donne accès à ses données, nous construisons le raccordement sur mesure. Sinon, nous vous le disons pendant l&apos;audit, pas après.
+                Cette liste n&apos;est pas une limite. Si un outil donne accès à ses données, nous construisons le raccordement. Sinon, nous vous le disons à l&apos;audit, pas après.
               </p>
             </div>
             <div data-reveal className="shrink-0">

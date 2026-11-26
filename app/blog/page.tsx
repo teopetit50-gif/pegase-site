@@ -51,7 +51,7 @@ export default function BlogPage() {
               haut
               disposition="pile"
               titre="Blog"
-              chapo="Nos analyses, à l'attention des dirigeants."
+              chapo="Analyses et guides pour les dirigeants."
             />
           </Section>
           <Section>

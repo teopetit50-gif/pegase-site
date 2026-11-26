@@ -29,11 +29,11 @@ import type { BlocCasLimites, BlocEchelle, Catalogue } from "./types";
 
 export const CATALOGUE: Catalogue = {
   etiquette: "Le périmètre",
-  titre: "Tout ce que l'agent prend en charge.",
+  titre: "Vos clients inactifs, repérés et relancés.",
   chapo:
-    "Trois relances, un seul système : le compte qui n'a plus commandé, l'échéance qui redevient due et l'affaire restée en plan. Voici ce qu'il lit, ce qu'il écarte et ce qu'il vous laisse décider.",
+    "Le compte qui ne commande plus, l'échéance qui redevient due, l'affaire restée en plan. Ce que l'agent lit, ce qu'il écarte, ce qu'il vous laisse décider.",
   mention:
-    "L'agent lit votre CRM, votre historique de facturation et vos fiches d'intervention, et rien d'autre. Il n'écrit dans aucun de ces outils, ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
+    "L'agent lit votre CRM, votre historique de facturation et vos fiches d'intervention. Rien d'autre. Il ne crée aucun rendez-vous et n'engage aucun prix à votre place.",
   familles: [
     {
       nom: "Lecture de la base clients",
@@ -122,10 +122,10 @@ export const CATALOGUE: Catalogue = {
 };
 
 export const CAS_LIMITES: BlocCasLimites = {
-  etiquette: "Les cas tordus",
-  titre: "Ce qui arrive vraiment quand on réactive une base clients.",
+  etiquette: "Les cas difficiles",
+  titre: "Les cas qui compliquent une réactivation.",
   chapo:
-    "Douze situations que vos commerciaux connaissent, et ce que l'agent en fait. Aucune ne se règle en envoyant le message quand même.",
+    "Douze situations que vos commerciaux connaissent, et ce que l'agent en fait. Aucune ne se règle en écrivant quand même.",
   cas: [
     {
       q: "Le compte a déjà été appelé la semaine dernière par un commercial.",
@@ -182,43 +182,43 @@ export const ECHELLE: BlocEchelle = {
   etiquette: "À l'échelle d'un groupe",
   titre: "Plusieurs entités, plusieurs commerciaux, une seule règle du jeu.",
   chapo:
-    "Ce qui change quand la réactivation ne dépend plus d'une personne mais d'une direction commerciale, sur plusieurs sociétés et plusieurs territoires.",
+    "Quand la réactivation dépend d'une direction commerciale, sur plusieurs sociétés et plusieurs territoires.",
   cartes: [
     {
       icone: "users",
       titre: "Une entité, un périmètre",
       texte:
-        "Chaque société, agence ou territoire a son périmètre, ses comptes et ses commerciaux. Une direction commerciale lit le consolidé, un responsable d'agence ne voit que le sien.",
+        "Chaque société, agence ou territoire a ses comptes et ses commerciaux. La direction lit le consolidé, chaque responsable d'agence le sien.",
     },
     {
       icone: "handshake",
       titre: "Des comptes attribués",
       texte:
-        "Chaque compte porte son commercial. Les comptes stratégiques restent suivis en direct et sortent du cycle automatique, sans exception à demander.",
+        "Chaque compte a son commercial. Les comptes stratégiques restent suivis en direct, hors du cycle automatique.",
     },
     {
       icone: "scale",
       titre: "Des règles de sollicitation",
       texte:
-        "Le plafond par compte, la durée de quarantaine et les segments exclus sont des réglages, pas des habitudes. Chaque changement reste daté et attribué.",
+        "Plafond par compte, quarantaine, segments exclus : des réglages, pas des habitudes. Chaque changement est daté et attribué.",
     },
     {
       icone: "lock",
       titre: "Un journal opposable",
       texte:
-        "Chaque message parti, chaque compte écarté et chaque retrait s'inscrivent dans un journal qui ne se modifie pas. Vous savez ce qui a été dit, à qui, et quand.",
+        "Messages, comptes écartés, retraits : tout s'inscrit dans un journal que personne ne peut modifier. Vous savez ce qui a été dit, à qui et quand.",
     },
     {
       icone: "landmark",
       titre: "Un raccordement au système existant",
       texte:
-        "L'agent lit votre CRM ou votre ERP, et y réécrit l'état de chaque compte. Là où un connecteur manque, l'échange passe par export et dépôt de fichiers.",
+        "L'agent lit votre CRM ou votre ERP, là où vivent vos comptes. Sans connecteur, l'échange passe par export et dépôt de fichiers.",
     },
     {
       icone: "chart",
       titre: "Des indicateurs par entité",
       texte:
-        "Comptes réactivés, chiffre remis en jeu, échéances honorées et commandes reprises se lisent par entité et en consolidé, avec un export daté.",
+        "Comptes réactivés, chiffre remis en jeu, échéances honorées et commandes reprises, par entité et en consolidé. Export daté.",
     },
   ],
 };

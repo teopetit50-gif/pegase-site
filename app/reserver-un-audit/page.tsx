@@ -143,12 +143,10 @@ export default function ReserverUnAuditPage() {
               niveau={1}
               haut
               pastille="Audit"
-              titre="Un audit à la mesure de votre organisation"
+              titre="Un audit à votre mesure."
               chapo={
                 <>
-                  Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons
-                  d&apos;abord, et le devis est établi à partir de vos volumes. Trois
-                  formats, du cadrage de 45 minutes à la journée dans vos locaux.
+                  Plusieurs services, plusieurs validateurs&nbsp;: nous mesurons d&apos;abord, puis le devis part de vos volumes. Trois formats, de 45 minutes à une journée dans vos locaux.
                 </>
               }
             />
@@ -168,9 +166,7 @@ export default function ReserverUnAuditPage() {
                 <Scene className="rdv-scene">
                   <blockquote className="rdv-citation">
                     <p>
-                      Un système ne se justifie que si la difficulté qu&apos;il traite coûte
-                      plus cher que lui. Nous chiffrons avant de recommander, jamais
-                      l&apos;inverse.
+                      Un agent ne se justifie que s&apos;il coûte moins cher que le problème qu&apos;il règle. Nous chiffrons avant de recommander. Jamais l&apos;inverse.
                     </p>
                     <footer className="rdv-signature">
                       <span>{NOM_SITE}</span>

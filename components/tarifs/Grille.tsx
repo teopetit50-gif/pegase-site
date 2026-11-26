@@ -614,9 +614,9 @@ export default function Grille() {
           haut
           disposition="pile"
           pastille="Tarifs"
-          titre="Le logiciel de gestion coûte"
-          suite={"34,90 € par personne et par mois."}
-          chapo={"Ce prix comprend les six modules de gestion, des ventes à la comptabilité, et il s'applique dès la première personne. Les automatisations font le travail répétitif, à la pièce. Les agents suivent chaque dossier jusqu'au bout, à partir de 199 € par mois. Prix hors taxes."}
+          titre="Un prix simple."
+          suite={"34,90 € par utilisateur et par mois."}
+          chapo={"Tout l'ERP est compris, des ventes à la comptabilité, dès le premier utilisateur. Les agents se paient à part, à partir de 199 € par mois. Les automatisations s'installent dès 49 € HT, puis l'IA se paie à la pièce. Prix hors taxes."}
           actions={
             <>
               <Bouton href="/reserver-un-audit" icone="calendrier">
@@ -637,7 +637,7 @@ export default function Grille() {
           chapo={
             devis
               ? GRANDE_STRUCTURE.chapo
-              : "Chaque agent suit un type de dossier jusqu'au bout. Son prix dépend du nombre de dossiers qu'il suit chaque mois, et il est écrit au devis avant que vous signiez."
+              : "Chaque agent traite une tâche de bout en bout. Son prix dépend du volume traité chaque mois. Il est écrit au devis, avant la signature."
           }
           actions={<SelecteurMonde monde={monde} choisir={choisirMonde} />}
         />
