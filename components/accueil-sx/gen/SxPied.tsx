@@ -29,7 +29,7 @@ export default function SxPied() {
                 </Link>
                 <div className={"px-3 pt-2 pb-8"}>
                   <h3 className={"mt-2 mb-4 text-xs font-medium tracking-wider uppercase opacity-75"}>
-                    {"Tâches récurrentes"}
+                    {"Le travail répétitif"}
                   </h3>
                   <ul className={"flex flex-col gap-1.5"}>
                     <li>

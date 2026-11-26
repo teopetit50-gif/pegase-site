@@ -10,18 +10,18 @@ export default function SxClients() {
         <header className={"platform-intro platform-intro-split ts-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Cas d'usage"}
+              {"Exemples"}
             </span>
             <h2>
-              {"Les opérations prises en charge."}
+              {"Ce qu'Omega fait concrètement."}
               <br />
               <span>
-                {"De la vente à la clôture, de la PME au groupe."}
+                {"De la vente à la clôture des comptes, pour une société comme pour un groupe."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Les modules de l'ERX et ses agents traitent ces opérations au quotidien, avec votre accord à chaque étape."}
+            {"Voici des tâches que les agents et les modules d'Omega prennent en charge chaque jour. Vous gardez toujours la décision finale."}
           </p>
         </header>
         <div className={"ts-grid"}>
@@ -31,7 +31,7 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque matin, les relances des devis en attente et des factures échues sont préparées, et une réponse est rédigée pour chaque demande reçue. Aucun envoi ne part sans votre validation."}
+                {"Chaque matin, les relances des devis en attente et des factures en retard sont prêtes, écrites dans votre ton, et chaque demande reçue a déjà sa réponse rédigée. Rien ne part sans votre validation."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
@@ -58,12 +58,12 @@ export default function SxClients() {
           <figure className={"ts-cell ts-quote is-short"} data-gutter-guide={"bottom"}>
             <blockquote>
               <p>
-                {"« Chaque action d'un agent est validée et tracée. »"}
+                {"« L'IA prépare le travail, vous le validez, et chaque action est enregistrée. »"}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
               <span>
-                {"Omega · principe de fonctionnement"}
+                {"Omega · notre méthode"}
               </span>
             </figcaption>
           </figure>

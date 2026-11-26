@@ -20,16 +20,16 @@ export default function SxFiche() {
               {"Configuration par l'IA"}
             </span>
             <h2>
-              {"Une mise en place guidée par l'IA."}
+              {"Une installation faite pour vous."}
               <br />
               <span>
-                {"Configuré pour votre activité."}
+                {"Vous décrivez votre activité, l'IA configure le logiciel."}
               </span>
             </h2>
           </div>
           <div>
             <p className={"platform-lede"}>
-              {"L'IA paramètre les modules, la TVA et le plan comptable à partir de la description de votre activité. Notre équipe reprend vos données existantes."}
+              {"Vous nous expliquez comment vous travaillez. L'IA en déduit les réglages : modules utiles, taux de TVA, plan comptable. Notre équipe reprend les données de votre ancien logiciel, et votre expert-comptable vérifie avant le démarrage."}
             </p>
             <div className={"sb-ctas"}>
               <Button asChild variant={"link"}>
@@ -1009,9 +1009,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Données centralisées."}
+                {"Tout est relié."}
               </strong>
-              {" Devis, stock et écritures se mettent à jour automatiquement."}
+              {" Un devis signé met à jour le stock, la facturation et la comptabilité."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1023,9 +1023,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Outils connectés."}
+                {"Votre banque est connectée."}
               </strong>
-              {" Banque et comptabilité mises à jour sans ressaisie."}
+              {" Les paiements reçus sont rapprochés des factures, sans saisie."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1036,9 +1036,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Règles fiscales intégrées."}
+                {"Les règles comptables sont intégrées."}
               </strong>
-              {" TVA et plan comptable paramétrés dès l'installation."}
+              {" TVA et plan comptable sont réglés dès l'installation."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1049,9 +1049,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Assistant intégré."}
+                {"Posez vos questions."}
               </strong>
-              {" Une fiche ou un chiffre retrouvé en quelques secondes."}
+              {" Une fiche client ou un chiffre s'affiche en quelques secondes."}
             </p>
           </li>
         </ul>

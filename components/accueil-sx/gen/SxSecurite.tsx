@@ -18,12 +18,12 @@ export default function SxSecurite() {
               {"Protégées et hébergées en Europe."}
               <br />
               <span>
-                {"Validation et traçabilité des actions."}
+                {"Chaque action d'un agent est enregistrée."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Chaque entreprise dispose d'un espace dédié et chiffré, hébergé dans l'Union européenne. Les actions des agents sont soumises à validation et enregistrées."}
+            {"Vos données sont stockées dans un espace réservé à votre entreprise, chiffré et hébergé dans l'Union européenne. Les agents attendent votre accord pour agir, et chaque action reste consultable dans un journal."}
           </p>
         </header>
         <div className={"sec-grid"}>
@@ -116,7 +116,7 @@ export default function SxSecurite() {
                 {"Quatre engagements écrits"}
               </h3>
               <p>
-                {"Base de données à Francfort, sans réplication hors de l'Union européenne. Vos données ne servent jamais à entraîner un modèle."}
+                {"Vos données sont stockées à Francfort et ne sortent pas de l'Union européenne. Elles ne servent jamais à entraîner un modèle d'IA."}
               </p>
             </div>
             <div className={"ft-actions"}>
@@ -298,7 +298,7 @@ export default function SxSecurite() {
                 <p className={"sec-uptime-foot"}>
                   <span>
                     <i />
-                    {"Journal d'activité"}
+                    {"Un historique complet"}
                   </span>
                   <span>
                     {"90 derniers jours"}
@@ -311,7 +311,7 @@ export default function SxSecurite() {
                 {"Chaque action est tracée"}
               </h3>
               <p>
-                {"Le journal enregistre chaque validation, avec son auteur, son objet et sa date. Hébergement, sauvegardes et supervision sont inclus."}
+                {"Le journal indique qui a validé quoi, et quand. L'hébergement, les sauvegardes et la surveillance sont compris dans le prix."}
               </p>
             </div>
             <div className={"ft-actions"}>
@@ -364,10 +364,10 @@ export default function SxSecurite() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Validation des envois"}
+                {"Vous décidez de ce qui part"}
               </h3>
               <p>
-                {"Par défaut, chaque envoi est soumis à votre validation. Vous pouvez ensuite autoriser un agent à envoyer certains messages automatiquement."}
+                {"Au départ, tout ce qui sort passe par votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages."}
               </p>
             </div>
             <div className={"ft-actions"}>

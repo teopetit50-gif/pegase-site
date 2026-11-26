@@ -20,16 +20,16 @@ export default function SxFaq() {
               {"Questions fréquentes."}
               <br />
               <span>
-                {"Ce qu'il faut savoir avant de commencer."}
+                {"Ce qu'on nous demande avant l'audit."}
               </span>
             </h2>
             <div className={"faq-aside"}>
               <p>
-                {"Vous ne trouvez pas votre réponse ? Notre équipe vous répond dans la journée."}
+                {"Une question manque ? Notre équipe vous répond le jour même."}
               </p>
               <Button asChild variant={"link"}>
                 <Link href={"/contact"}>
-                  {"Contacter l'équipe"}
+                  {"Écrire à l'équipe"}
                   <ChevronRight className={"ms-1 opacity-60"} size={16} strokeWidth={2} aria-hidden={"true"} />
                 </Link>
               </Button>
@@ -39,7 +39,26 @@ export default function SxFaq() {
         </header>
         <ul className={"faq-list"}>
           <li className={"faq-item is-open"} data-gutter-guide={"bottom"}>
-            <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q0"} aria-expanded={"true"} aria-controls={"_R_ltavb_-a0"}>
+            <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q7"} aria-expanded={"true"} aria-controls={"_R_ltavb_-a7"}>
+              <span>
+                {"Qu'est-ce qu'un ERX ?"}
+              </span>
+              <span className={"faq-icon"} aria-hidden={"true"}>
+                <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
+                  <path d={"M4.43057 8.5119C4.70014 8.19741 5.17361 8.16099 5.48811 8.43056L12 14.0122L18.5119 8.43056C18.8264 8.16099 19.2999 8.19741 19.5695 8.51191C19.839 8.8264 19.8026 9.29987 19.4881 9.56944L12.4881 15.5694C12.2072 15.8102 11.7928 15.8102 11.5119 15.5694L4.51192 9.56944C4.19743 9.29987 4.161 8.8264 4.43057 8.5119Z"} fillRule={"evenodd"} clipRule={"evenodd"} fill={"currentColor"} />
+                </svg>
+              </span>
+            </button>
+            <div className={"faq-panel"} id={"_R_ltavb_-a7"} role={"region"} aria-labelledby={"_R_ltavb_-q7"}>
+              <div>
+                <p>
+                  {"C'est le nom que le cabinet Gartner a donné en 2026 à la nouvelle génération d'ERP. Un ERP classique enregistre les ventes, les achats et la comptabilité. Un ERX fait aussi une partie du travail : ses agents IA relancent, saisissent les factures, contrôlent les paiements et répondent aux clients, toujours sous votre contrôle. Omega est construit sur ce modèle."}
+                </p>
+              </div>
+            </div>
+          </li>
+          <li className={"faq-item"} data-gutter-guide={"bottom"}>
+            <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q0"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a0"}>
               <span>
                 {"Combien coûte Omega ?"}
               </span>
@@ -49,7 +68,7 @@ export default function SxFaq() {
                 </svg>
               </span>
             </button>
-            <div className={"faq-panel"} id={"_R_ltavb_-a0"} role={"region"} aria-labelledby={"_R_ltavb_-q0"}>
+            <div className={"faq-panel"} id={"_R_ltavb_-a0"} role={"region"} aria-labelledby={"_R_ltavb_-q0"} inert={true}>
               <div>
                 <p>
                   {"Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 199 € HT par mois. L'installation se paie une seule fois. Une automatisation s'installe dès 49 € HT, une fois ; quand l'IA y travaille, chaque tâche se paie ensuite à la pièce, de 0,15 à 0,10 € HT selon la recharge."}
@@ -90,7 +109,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a2"} role={"region"} aria-labelledby={"_R_ltavb_-q2"} inert={true}>
               <div>
                 <p>
-                  {"Notre équipe vous accompagne du début à la fin. L'IA paramètre le logiciel à partir de la description de votre activité, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est facturé avant la fin de leur installation."}
+                  {"Notre équipe, du début à la fin. L'IA adapte le logiciel à partir de ce que vous lui décrivez, nous reprenons vos données, et votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation."}
                 </p>
               </div>
             </div>
@@ -98,7 +117,7 @@ export default function SxFaq() {
           <li className={"faq-item"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q3"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a3"}>
               <span>
-                {"Un agent peut-il envoyer un message sans mon accord ?"}
+                {"Un agent peut-il envoyer quelque chose sans mon accord ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -109,7 +128,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a3"} role={"region"} aria-labelledby={"_R_ltavb_-q3"} inert={true}>
               <div>
                 <p>
-                  {"Non, sauf si vous l'avez autorisé. Par défaut, chaque envoi (relance, réponse, e-mail) est soumis à votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages, et revenir sur ce choix à tout moment."}
+                  {"Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment."}
                 </p>
               </div>
             </div>
@@ -136,7 +155,7 @@ export default function SxFaq() {
           <li className={"faq-item"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q5"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a5"}>
               <span>
-                {"Faut-il remplacer nos outils actuels ?"}
+                {"Faut-il changer nos outils ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -147,7 +166,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a5"} role={"region"} aria-labelledby={"_R_ltavb_-q5"} inert={true}>
               <div>
                 <p>
-                  {"Pas nécessairement. Omega peut remplacer votre logiciel de gestion actuel, avec la reprise de vos données, ou démarrer par des agents connectés à vos outils : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot, entre autres."}
+                  {"Vous choisissez. Omega peut devenir votre logiciel de gestion, avec la reprise des données de votre logiciel actuel, ou commencer par des agents branchés sur ce que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et bien d'autres."}
                 </p>
               </div>
             </div>
@@ -155,7 +174,7 @@ export default function SxFaq() {
           <li className={"faq-item"} data-gutter-guide={"bottom"}>
             <button type={"button"} className={"faq-q"} id={"_R_ltavb_-q6"} aria-expanded={"false"} aria-controls={"_R_ltavb_-a6"}>
               <span>
-                {"Pouvez-vous développer un module spécifique ?"}
+                {"Pouvez-vous construire un module rien que pour nous ?"}
               </span>
               <span className={"faq-icon"} aria-hidden={"true"}>
                 <svg xmlns={"http://www.w3.org/2000/svg"} fill={"none"} viewBox={"0 0 24 24"} className={"solar solar-alt-arrow-down-outline"} style={{ "width": "16px", "height": "16px" } as CSSProperties} color={"var(--solar-color, currentColor)"} strokeWidth={"var(--solar-stroke-width, 1.5)"} aria-hidden={"true"}>
@@ -166,7 +185,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a6"} role={"region"} aria-labelledby={"_R_ltavb_-q6"} inert={true}>
               <div>
                 <p>
-                  {"Oui, c'est l'offre sur mesure. Pendant l'audit, nous étudions votre organisation : qui fait quoi, sur quels logiciels, et qui valide. Vous recevez ensuite une proposition écrite et chiffrée, avant tout engagement."}
+                  {"Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement."}
                 </p>
               </div>
             </div>

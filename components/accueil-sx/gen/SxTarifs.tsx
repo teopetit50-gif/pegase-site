@@ -17,14 +17,14 @@ export default function SxTarifs() {
               {"Tarifs"}
             </span>
             <h2>
-              {"Des tarifs clairs."}
+              {"Des prix simples à comprendre."}
               <br />
               <span>
-                {"Un prix par personne, un prix par agent."}
+                {"Le logiciel par personne, les agents selon leur travail."}
               </span>
             </h2>
             <p className={"platform-lede"}>
-              {"Le logiciel est facturé 34,90 € HT par personne et par mois, dès la première personne. Chaque agent a son propre prix mensuel, fixé à l'audit, à partir de 199 € HT. Une automatisation s'installe une seule fois, à partir de 49 € HT."}
+              {"Le logiciel coûte 34,90 € HT par mois pour chaque personne qui l'utilise, dès la première. Chaque agent a son propre prix, à partir de 199 € HT par mois, selon le nombre de dossiers qu'il traite. Une automatisation se paie une seule fois, à l'installation, dès 49 € HT."}
             </p>
           </div>
           <div className={"pr-controls"}>
@@ -60,7 +60,7 @@ export default function SxTarifs() {
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Un premier échange pour définir votre besoin et le chiffrer."}
+              {"Nous voyons ce qu'Omega peut faire chez vous, et à quel prix."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -128,7 +128,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2d9ktavb_)"} />
                   </svg>
                   <span>
-                    {"Analyse de votre organisation"}
+                    {"Votre activité, passée en revue"}
                   </span>
                 </li>
                 <li>
@@ -136,7 +136,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Modules et agents recommandés"}
+                    {"Les modules et agents utiles"}
                   </span>
                 </li>
                 <li>
@@ -144,7 +144,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Proposition écrite et chiffrée"}
+                    {"Une proposition écrite, prix compris"}
                   </span>
                 </li>
                 <li>
@@ -152,7 +152,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Planning de mise en service"}
+                    {"Le calendrier de démarrage"}
                   </span>
                 </li>
                 <li>
@@ -160,7 +160,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Tarif remis en fin d'audit"}
+                    {"Votre tarif, écrit à la fin"}
                   </span>
                 </li>
                 <li>
@@ -184,7 +184,7 @@ export default function SxTarifs() {
               </span>
             </div>
             <p className={"pr-desc"}>
-              {"Les six modules de gestion, configurés par l'IA pour votre activité."}
+              {"Toute votre gestion dans un seul logiciel, configuré pour votre activité."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -305,7 +305,7 @@ export default function SxTarifs() {
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Des agents IA configurés selon vos règles de gestion."}
+              {"Des agents qui prennent en charge vos tâches répétitives."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -373,7 +373,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2dbktavb_)"} />
                   </svg>
                   <span>
-                    {"Aucune commission sur vos encaissements"}
+                    {"Jamais un pourcentage de vos encaissements"}
                   </span>
                 </li>
                 <li>
@@ -426,7 +426,7 @@ export default function SxTarifs() {
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Un module ou un agent développé pour votre organisation."}
+              {"Nous construisons le module ou l'agent qui n'existe que chez vous."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
@@ -469,7 +469,7 @@ export default function SxTarifs() {
                     <path d={"M10 2c0 5-3 8-8 8 5 0 8 3 8 8 0-5 3-8 8-8-5 0-8-3-8-8Z"} fill={"url(#_R_2dcktavb_)"} />
                   </svg>
                   <span>
-                    {"Étude de votre organisation"}
+                    {"Votre organisation, étudiée avec vous"}
                   </span>
                 </li>
                 <li>
@@ -485,7 +485,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Raccordement à vos outils actuels"}
+                    {"Vos outils actuels raccordés"}
                   </span>
                 </li>
                 <li>
@@ -493,7 +493,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Reprise des données de votre ancien logiciel"}
+                    {"Données d'un autre logiciel reprises"}
                   </span>
                 </li>
                 <li>
@@ -501,7 +501,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Cahier des charges validé avant le développement"}
+                    {"Ce qu'il fait, écrit avant de commencer"}
                   </span>
                 </li>
                 <li>
