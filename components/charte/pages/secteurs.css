@@ -77,7 +77,7 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border: 1px solid #d9ddd3;
-  border-radius: 10px;
+  border-radius: 0;
   background: #fff;
   box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
 }
@@ -179,7 +179,7 @@
   aspect-ratio: 4 / 3;
   overflow: hidden;
   border: 1px solid #d9ddd3;
-  border-radius: 10px;
+  border-radius: 0;
   background: #fff;
   box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
 }
@@ -251,7 +251,7 @@
   overflow: hidden;
   padding: 8px;
   border: 1px solid #d9ddd3;
-  border-radius: 12px;
+  border-radius: 0;
   background: #fff;
   box-shadow: 0 3px 5px #2c342006, 0 20px 44px -26px #28362040;
 }
@@ -259,7 +259,7 @@
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: 0;
 }
 .charte .sc-page .sc-piliers {
   min-width: 0;

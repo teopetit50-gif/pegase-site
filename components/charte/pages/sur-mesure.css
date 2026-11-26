@@ -49,7 +49,7 @@
   overflow: hidden;
   height: clamp(240px, 36vw, 560px);
   border: 1px solid var(--ch-scene-bord);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--ch-scene);
 }
 .charte .sm-page .sm-photo__media {
@@ -215,7 +215,7 @@
 .charte .sm-page .sm-nappe {
   height: 100%;
   min-height: 260px;
-  border-radius: 12px;
+  border-radius: 0;
   aspect-ratio: auto;
 }
 @media (max-width: 1000px) {
@@ -267,7 +267,7 @@
 /* ─── 9 · les études de cas ────────────────────────────────────────── */
 .charte .sm-page .sm-exemples .cs-visuel {
   border: 1px solid var(--ch-scene-bord);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--ch-scene);
 }
 .charte .sm-page .sm-exemples .cs-titre {
@@ -299,7 +299,7 @@
 /* ─── 10 · les onglets des agents ──────────────────────────────────── */
 .charte .sm-page .sm-agents .f11-panneau {
   border-color: var(--ch-scene-bord);
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--ch-scene);
 }
 .charte .sm-page .sm-agents .f11-fiche__role {

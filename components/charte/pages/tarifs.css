@@ -191,7 +191,7 @@
   gap: 2px;
   padding: 3px;
   border: 1px solid #e3e3dd;
-  border-radius: 12px;
+  border-radius: 0;
   background: var(--ch-scene);
 }
 .charte .tf-page .tf-monde-btn {
@@ -420,7 +420,7 @@
   max-width: 760px;
   padding: 16px;
   border: 1px solid var(--ch-scene-bord);
-  border-radius: 12px;
+  border-radius: 0;
   background: #fff;
 }
 @media (max-width: 760px) {
