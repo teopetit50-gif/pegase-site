@@ -711,8 +711,8 @@ Export complet de vos données
 Sur mesure
 Nous construisons le module ou l'agent qui n'existe que chez vous.
 Sur devis
-Une automatisation dès 490 € HT, un agent dès
-1 190 € HT
+Une automatisation ou un agent,
+chiffré après diagnostic
 Découvrir le sur-mesure
 Construit pour vous
 Votre organisation, étudiée avec vous

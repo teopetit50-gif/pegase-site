@@ -55,8 +55,8 @@ const CAS = [
     ensuite: "À la pièce, s'il y a de l'IA",
     ensuite_vide: true,
     planchers: [
-      { quoi: "Une automatisation", prix: "dès 490 € HT" },
-      { quoi: "Un agent", prix: "dès 1 190 € HT" },
+      { quoi: "Une automatisation", prix: "Sur devis" },
+      { quoi: "Un agent", prix: "Sur devis" },
     ],
   },
 ];

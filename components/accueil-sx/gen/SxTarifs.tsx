@@ -435,9 +435,9 @@ export default function SxTarifs() {
                 </strong>
               </p>
               <p className={"pr-total"}>
-                {"Une automatisation dès 490 € HT, un agent dès "}
+                {"Une automatisation ou un agent, "}
                 <b>
-                  {"1 190 € HT"}
+                  {"chiffré après diagnostic"}
                 </b>
               </p>
             </div>
