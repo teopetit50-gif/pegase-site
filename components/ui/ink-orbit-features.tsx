@@ -642,6 +642,7 @@ const IB_CSS = `
 .ib-card h3{font-size:15px;font-weight:550;letter-spacing:-.01em}
 .ib-card p{font-size:13.5px;line-height:1.5;color:var(--ib-muted);max-width:44ch;margin-top:4px}
 .ib-diagram{width:100%;height:auto;overflow:visible}
+.ib-bento>.ib-frame:not(.ib-wide) .ib-diagram{max-width:320px;margin:8px auto 0}
 .ib-wide-copy{display:grid;grid-template-columns:1fr;gap:16px}
 @container (min-width:560px){.ib-wide-copy{grid-template-columns:1fr 1fr}}
 .ib-flow{stroke:var(--ib-line-strong);fill:none;stroke-width:1.2;transition:stroke .3s}
