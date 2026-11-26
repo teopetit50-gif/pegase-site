@@ -13,15 +13,15 @@ export default function SxClients() {
               {"Exemples"}
             </span>
             <h2>
-              {"L'ERP au quotidien."}
+              {"Ce qu'Omega fait chaque jour."}
               <br />
               <span>
-                {"De la vente à la clôture des comptes, pour une société comme pour un groupe."}
+                {"De la petite entreprise au groupe multi-sociétés."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Voici ce qu'Omega fait concrètement, chaque jour. Vous gardez toujours la décision finale."}
+            {"Ce qui change quand les relances, les factures et les demandes clients passent sur Omega."}
           </p>
         </header>
         <div className={"ts-grid"}>
@@ -31,7 +31,7 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque matin, les relances des devis en attente et des factures en retard sont prêtes, écrites dans votre ton, et chaque demande reçue a déjà sa réponse rédigée. Rien ne part sans votre validation."}
+                {"Chaque matin, l'agent reprend les devis sans réponse et les factures échues, rédige une relance dans votre ton et vous la présente. Vous la validez avant l'envoi."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>
@@ -102,7 +102,7 @@ export default function SxClients() {
                 <path d={"M0 30V18C0 8.6 5 2.4 14 0l2.2 4.2C11 6.4 9 9.6 9 14h7v16H0Zm22 0V18C22 8.6 27 2.4 36 0l2.2 4.2C33 6.4 31 9.6 31 14h7v16H22Z"} fill={"currentColor"} />
               </svg>
               <p>
-                {"Chaque facture reçue est lue et rapprochée de sa commande. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord."}
+                {"Chaque facture reçue est lue, rapprochée de sa commande et préparée pour la comptabilité. Un doublon est signalé, et un RIB modifié bloque le paiement jusqu'à votre accord."}
               </p>
             </blockquote>
             <figcaption className={"ts-who"}>

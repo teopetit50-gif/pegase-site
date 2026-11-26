@@ -21,10 +21,10 @@ export default function SxAgents() {
               </span>
             </span>
             <h2>
-              {"Les agents font le travail."}
+              {"Choisissez un agent, réglez-le, mettez-le au travail."}
             </h2>
             <p>
-              {"Vous fixez les règles et vous validez. Relances, factures fournisseurs, demandes clients, contrôle des paiements : chaque agent traite une tâche dans l'ERP et vous soumet ce qu'il envoie."}
+              {"Des agents prêts à l'emploi pour les tâches répétitives de la gestion. Chacun suit vos règles, demande avant d'agir et consigne chaque étape dans le dossier du client."}
             </p>
           </div>
           <div className={"ft-finder"}>
@@ -147,7 +147,7 @@ export default function SxAgents() {
                 {"Agent de relance"}
               </h3>
               <p>
-                {"Les devis sans réponse et les factures en retard sont relancés à J+3, J+7 et J+21, avec le ton que vous avez choisi. Chaque matin, vous validez la liste avant l'envoi."}
+                {"Les devis sans réponse et les factures en retard arrivent déjà triés selon vos règles. Vous tranchez les cas particuliers ; l'agent prépare le reste."}
               </p>
             </div>
             <div className={"ft-actions"}>
@@ -256,7 +256,7 @@ export default function SxAgents() {
                 {"Factures fournisseurs"}
               </h3>
               <p>
-                {"Factures, bons de livraison, attestations : chaque document reçu est lu, vérifié, classé, puis envoyé en comptabilité, sans que vous ayez à le recopier."}
+                {"Déposez factures, bons de livraison et attestations. Omega en extrait les champs utiles et les classe dans le bon dossier."}
               </p>
             </div>
             <div className={"ft-actions"}>
@@ -354,7 +354,7 @@ export default function SxAgents() {
                 {"Clients inactifs"}
               </h3>
               <p>
-                {"L'agent repère les clients qui n'ont pas commandé depuis longtemps, les contrats à renouveler et les commandes en suspens. Il prépare un message pour chacun, que vous validez."}
+                {"Demandez en langage courant qui recontacter, et recevez la liste des clients qui ne commandent plus et des contrats à renouveler, avec un message prêt pour chacun."}
               </p>
             </div>
             <div className={"ft-actions"}>
@@ -434,7 +434,7 @@ export default function SxAgents() {
                 {"Demandes clients"}
               </h3>
               <p>
-                {"Quand un client écrit par mail ou par WhatsApp, même le soir, l'agent rédige aussitôt la réponse. Elle part seule si vous l'avez autorisé, sinon elle attend votre accord."}
+                {"Un assistant sur WhatsApp et par mail qui prépare les réponses aux demandes de vos clients à partir de vos tarifs et de vos horaires, pour que votre équipe n'ait plus qu'à les valider."}
               </p>
             </div>
             <div className={"ft-actions"}>

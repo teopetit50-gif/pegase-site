@@ -43,23 +43,23 @@ export default function SxHero() {
                 <div className={"flex w-full flex-col items-center gap-[12px] desktop-sm:items-start"}>
                   <span className={"ft-eyebrow mb-0!"}>
                     <b>
-                      {"ERP IA"}
+                      {"Nouveau"}
                     </b>
                     <span>
-                      {"Pour les PME et les groupes"}
+                      {"Des agents sur mesure"}
                     </span>
                   </span>
                   <h1 className={"w-full desktop-sm:w-[550px] font-instrument-serif text-[42px] leading-[1.1] tracking-[-0.42px] text-black ipad:text-[62px] ipad:tracking-[-0.62px]"}>
-                    {"Toute votre gestion dans un seul ERP."}
+                    {"L'ERP IA pour toute votre gestion"}
                   </h1>
                 </div>
                 <p className={"font-tight text-[14px] leading-[25.5px] tracking-[-0.28px] text-[#121212] opacity-80 ipad:text-[17px] ipad:tracking-[-0.34px]"}>
-                  {"Remplacez votre logiciel de gestion et les outils autour par un seul ERP, pour chacune de vos sociétés. Les agents font le travail. Vous fixez les règles et vous validez."}
+                  {"Omega est l'ERP où des agents IA font le travail et où vous validez les décisions qui comptent."}
                 </p>
                 <p className={"font-tight -mt-[6px] text-[13px] leading-[20px] tracking-[-0.2px] text-[#121212] ipad:text-[15px] ipad:leading-[22px] ipad:tracking-[-0.3px]"}>
                   {"À partir de "}
                   <strong className={"font-bold"}>{"34,90 € HT"}</strong>
-                  {" par personne et par mois."}
+                  {" par utilisateur et par mois."}
                 </p>
                 <div className={"flex flex-wrap items-center justify-center gap-[16px] desktop-sm:flex-nowrap desktop-sm:justify-start"}>
                   <Button asChild variant={"link"}>

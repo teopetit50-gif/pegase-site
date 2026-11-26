@@ -15,15 +15,15 @@ export default function SxMarque() {
               {"Documents"}
             </span>
             <h2>
-              {"Des documents à votre image."}
+              {"Votre nom sur chaque document."}
               <br />
               <span>
-                {"Logo, couleurs et mentions légales sur chaque document."}
+                {"Votre marque sur chaque devis, facture et relance."}
               </span>
             </h2>
           </div>
           <p className={"platform-lede"}>
-            {"Devis, factures et relances partent au nom de la bonne société, avec ses mentions légales, ses conditions de paiement et sa numérotation."}
+            {"Gérez chaque société sous son propre nom. Chacune garde ses clients, sa numérotation et ses mentions légales, et ses documents partent sous son en-tête."}
           </p>
         </header>
         <div className={"wl-grid"} style={{ "--wl-brand": "#0f766e", "--wl-radius": "12px" } as CSSProperties}>
@@ -457,10 +457,10 @@ export default function SxMarque() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Une présentation par société."}
+                {"Réglez votre marque une fois."}
               </h3>
               <p>
-                {"Quand vous changez de société, ses devis, ses factures et ses relances prennent automatiquement son logo et ses couleurs."}
+                {"Ajoutez votre logo, vos couleurs et vos mentions légales, et vos devis, factures et relances suivent aussitôt."}
               </p>
             </div>
           </article>
@@ -615,10 +615,10 @@ export default function SxMarque() {
             </div>
             <div className={"ft-copy"}>
               <h3>
-                {"Plusieurs sociétés, un seul compte."}
+                {"Gérez toutes vos sociétés depuis un seul compte."}
               </h3>
               <p>
-                {"Chaque société garde ses clients, ses fournisseurs et ses contrats. Vous passez de l'une à l'autre sans vous reconnecter."}
+                {"Chaque société garde ses clients, ses fournisseurs et ses données. Passez de l'une à l'autre sans vous déconnecter."}
               </p>
             </div>
           </article>

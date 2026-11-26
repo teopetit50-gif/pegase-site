@@ -17,19 +17,19 @@ export default function SxFiche() {
         <header className={"platform-intro platform-intro-split sb-intro"} data-gutter-guide={"bottom"}>
           <div>
             <span className={"platform-eyebrow"}>
-              {"Déploiement par l'IA"}
+              {"Configuré par l'IA"}
             </span>
             <h2>
-              {"Déployer un ERP ne devrait pas prendre des mois."}
+              {"En service en quelques semaines."}
               <br />
               <span>
-                {"Omega est déployé par l'IA."}
+                {"Omega se construit autour de votre façon de travailler."}
               </span>
             </h2>
           </div>
           <div>
             <p className={"platform-lede"}>
-              {"Nos modèles d'IA paramètrent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre ERP est en service en deux semaines à un mois environ, pour bien moins cher qu'avec un intégrateur."}
+              {"Apportez vos fichiers et vos règles. Omega en tire des modules, des taux de TVA et un plan comptable réglés sur votre façon de travailler."}
             </p>
             <div className={"sb-ctas"}>
               <Button asChild variant={"link"}>
@@ -1009,9 +1009,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Données unifiées."}
+                {"Tout s'enregistre seul."}
               </strong>
-              {" Un devis signé met à jour le stock, la facturation et la comptabilité."}
+              {" Devis, factures, achats et stock sont enregistrés automatiquement."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1023,9 +1023,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Banque connectée."}
+                {"Vos outils travaillent ensemble."}
               </strong>
-              {" Les paiements reçus sont rapprochés des factures, sans saisie."}
+              {" Banque, comptabilité et messagerie restent synchronisées."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1036,9 +1036,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Fiscalité intégrée."}
+                {"Omega apprend vos règles."}
               </strong>
-              {" TVA et plan comptable sont réglés dès l'installation."}
+              {" Il lit vos taux de TVA, votre plan comptable et votre historique."}
             </p>
           </li>
           <li data-gutter-guide={"top"}>
@@ -1049,9 +1049,9 @@ export default function SxFiche() {
             </span>
             <p>
               <strong>
-                {"Assistant IA."}
+                {"Demandez, c'est là."}
               </strong>
-              {" Une fiche client ou un chiffre s'affiche en quelques secondes."}
+              {" Une fiche ou un chiffre en quelques secondes."}
             </p>
           </li>
         </ul>

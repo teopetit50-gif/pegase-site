@@ -37,10 +37,10 @@ Commencer
 Ouvrir le menu"""
 
 B["hero"] = """Audit de 30 minutes offert, sans engagement.
-ERP IA
-Pour les PME et les groupes
-Toute votre gestion dans un seul ERP.
-Remplacez votre logiciel de gestion et les outils autour par un seul ERP, pour chacune de vos sociétés. Les agents font le travail. Vous fixez les règles et vous validez.
+Nouveau
+Des agents sur mesure
+L'ERP IA pour toute votre gestion
+Omega est l'ERP où des agents IA font le travail et où vous validez les décisions qui comptent.
 Réserver un audit
 Voir le logiciel
 Les modules d'Omega
@@ -56,17 +56,17 @@ Les modules d'Omega
 =
 ="""
 
-B["s1 Plateforme"] = """Logiciel
-Remplacez l'ERP.
-Oubliez le patchwork d'outils.
-Les anciens ERP ont été conçus pour une autre époque, et les outils ajoutés autour n'ont fait que boucher les trous. Omega remplace les deux : ventes, achats, stock, banque et comptabilité dans un seul ERP, sur les mêmes données.
-Ce que fait le logiciel
+B["s1 Plateforme"] = """ERP
+Votre gestion, prise en charge.
+Les agents font le travail. Vous gardez la main.
+Un seul espace pour les ventes, les achats, le stock, la banque et la comptabilité. Les agents préparent les relances, traitent les factures et signalent ce qui demande votre attention, et rien ne part sans votre accord.
+Ce que fait l'ERP
 Relancer les impayés
 Traiter les factures
 Répondre aux demandes
 Contrôler les paiements
 Suivre la trésorerie
-Chaque matin, l'agent repère les devis restés sans réponse et les factures en retard, puis rédige les relances. Vous relisez la liste et vous validez en un clic.
+Les agents repèrent les devis sans réponse et les factures en retard, rédigent les relances et signalent ce qui sort de l'ordinaire. Vous relisez une courte liste et validez en un clic.
 Relances de novembre
 4 collaborateurs
 Adam Benali
@@ -133,7 +133,7 @@ Résumé de l'IA
 2 relances demandent un regard. Anne-Marie a réglé une partie de sa facture, et Fanny a ouvert un litige il y a 2 jours.
 Voir les 2 cas
 Valider les relances
-Quand une facture fournisseur arrive, l'agent la lit, retrouve la commande correspondante et vérifie les montants. Il prépare ensuite l'écriture comptable : il n'y a plus rien à recopier.
+Les factures fournisseurs entrent en comptabilité sans rien recopier. Les agents les lisent, les rapprochent de la commande et préparent l'écriture.
 Facture Papeteries Dumas
 =
 =
@@ -159,7 +159,7 @@ BC-0418
 12 déc. 2026
 Confiance
 Élevée
-Vos clients écrivent par mail ou par WhatsApp. L'agent rédige une réponse en tenant compte de l'historique du client et de l'agenda de l'équipe, puis vous la soumet.
+Les demandes arrivent par mail ou par WhatsApp et sont rapprochées de l'historique du client et de l'agenda de l'équipe. Vous validez la réponse avec tout le contexte sous les yeux.
 Demande client
 =
 Rendez-vous de mardi à jeudi : l'agenda de Maya est libre, et 3 personnes sur 4 restent disponibles.
@@ -180,7 +180,7 @@ Rendez-vous · 3 jours
 Paul
 Proposer d'autres dates
 Valider la réponse
-Avant chaque virement, l'agent compare la facture à la fiche du fournisseur et aux paiements passés. Si le RIB a changé ou si la facture est en double, le paiement attend votre accord.
+Chaque paiement est comparé à la fiche du fournisseur et aux paiements passés avant de partir. Un RIB modifié ou une facture en double attend votre accord.
 Paiements à venir
 Contrôles actifs
 Toutes les sociétés
@@ -211,7 +211,7 @@ Le RIB de la facture Loca Pro diffère de celui de la fiche. En 12 mois, aucun p
 12 mois comparés
 Voir le détail
 Vérifier le RIB
-Posez une question sur la trésorerie, les ventes ou les achats, comme vous la poseriez à un collaborateur. La réponse affiche les chiffres utilisés et le détail du calcul.
+Posez vos questions sur la trésorerie, les ventes ou les marges en langage courant. Chaque réponse montre les chiffres et le calcul sur lesquels elle repose.
 a demandé à
 Omega
 =
@@ -260,10 +260,10 @@ Du poste
 19 %
 70 %"""
 
-B["s2 Fiche"] = """Déploiement par l'IA
-Déployer un ERP ne devrait pas prendre des mois.
-Omega est déployé par l'IA.
-Nos modèles d'IA paramètrent les modules, la TVA et le plan comptable, puis reprennent les données de votre ancien logiciel. Votre ERP est en service en deux semaines à un mois environ, pour bien moins cher qu'avec un intégrateur.
+B["s2 Fiche"] = """Configuré par l'IA
+En service en quelques semaines.
+Omega se construit autour de votre façon de travailler.
+Apportez vos fichiers et vos règles. Omega en tire des modules, des taux de TVA et un plan comptable réglés sur votre façon de travailler.
 Audit offert
 Voir la gestion
 Navigation du logiciel
@@ -407,19 +407,19 @@ de 1 240 € validée et saisie
 Comptabilité · 5 nov.
 prévue le 3 fév.
 Agenda · 6 nov.
-Données unifiées.
-Un devis signé met à jour le stock, la facturation et la comptabilité.
-Banque connectée.
-Les paiements reçus sont rapprochés des factures, sans saisie.
-Fiscalité intégrée.
-TVA et plan comptable sont réglés dès l'installation.
-Assistant IA.
-Une fiche client ou un chiffre s'affiche en quelques secondes."""
+Tout s'enregistre seul.
+Devis, factures, achats et stock sont enregistrés automatiquement.
+Vos outils travaillent ensemble.
+Banque, comptabilité et messagerie restent synchronisées.
+Omega apprend vos règles.
+Il lit vos taux de TVA, votre plan comptable et votre historique.
+Demandez, c'est là.
+Une fiche ou un chiffre en quelques secondes."""
 
 B["s3 Agents"] = """Nouveau
 Des agents sur mesure
-Les agents font le travail.
-Vous fixez les règles et vous validez. Relances, factures fournisseurs, demandes clients, contrôle des paiements : chaque agent traite une tâche dans l'ERP et vous soumet ce qu'il envoie.
+Choisissez un agent, réglez-le, mettez-le au travail.
+Des agents prêts à l'emploi pour les tâches répétitives de la gestion. Chacun suit vos règles, demande avant d'agir et consigne chaque étape dans le dossier du client.
 Chercher un agent…
 Chercher
 Relances
@@ -441,7 +441,7 @@ Adam Benali
 Facture échue · 860 €
 3 h
 Agent de relance
-Les devis sans réponse et les factures en retard sont relancés à J+3, J+7 et J+21, avec le ton que vous avez choisi. Chaque matin, vous validez la liste avant l'envoi.
+Les devis sans réponse et les factures en retard arrivent déjà triés selon vos règles. Vous tranchez les cas particuliers ; l'agent prépare le reste.
 Découvrir
 Détails
 Détails
@@ -452,7 +452,7 @@ Ajouter l'agent de relance
 Numéro de TVA relevé
 RIB vérifié
 Factures fournisseurs
-Factures, bons de livraison, attestations : chaque document reçu est lu, vérifié, classé, puis envoyé en comptabilité, sans que vous ayez à le recopier.
+Déposez factures, bons de livraison et attestations. Omega en extrait les champs utiles et les classe dans le bon dossier.
 Régler l'agent des factures
 Ajouter l'agent des factures
 Quels clients faut-il recontacter ?
@@ -461,14 +461,14 @@ Contrats à renouveler ce mois-ci
 Commandes restées en plan
 Échéances de la semaine
 Clients inactifs
-L'agent repère les clients qui n'ont pas commandé depuis longtemps, les contrats à renouveler et les commandes en suspens. Il prépare un message pour chacun, que vous validez.
+Demandez en langage courant qui recontacter, et recevez la liste des clients qui ne commandent plus et des contrats à renouveler, avec un message prêt pour chacun.
 Régler l'agent des clients inactifs
 Ajouter l'agent des clients inactifs
 =
 Gabriel Meyer
 Pouvez-vous me rappeler cette semaine ?
 Demandes clients
-Quand un client écrit par mail ou par WhatsApp, même le soir, l'agent rédige aussitôt la réponse. Elle part seule si vous l'avez autorisé, sinon elle attend votre accord.
+Un assistant sur WhatsApp et par mail qui prépare les réponses aux demandes de vos clients à partir de vos tarifs et de vos horaires, pour que votre équipe n'ait plus qu'à les valider.
 Régler l'agent des demandes
 Ajouter l'agent des demandes"""
 
@@ -479,8 +479,8 @@ Anthropic
 Gemini
 OpenAI
 Les meilleurs modèles d'IA.
-Intégrés à votre ERP.
-Omega utilise les modèles des principaux laboratoires d'IA pour faire fonctionner ses agents.
+Rien à brancher.
+Omega fait travailler ses agents avec les modèles des principaux laboratoires d'IA, sans rien à configurer de votre côté.
 Voir les agents
 Parler à l'équipe
 Les laboratoires d'IA
@@ -491,9 +491,9 @@ DeepMind
 GPT"""
 
 B["s5 Marque"] = """Documents
-Des documents à votre image.
-Logo, couleurs et mentions légales sur chaque document.
-Devis, factures et relances partent au nom de la bonne société, avec ses mentions légales, ses conditions de paiement et sa numérotation.
+Votre nom sur chaque document.
+Votre marque sur chaque devis, facture et relance.
+Gérez chaque société sous son propre nom. Chacune garde ses clients, sa numérotation et ses mentions légales, et ses documents partent sous son en-tête.
 Votre société
 Aperçu
 Choisir une société
@@ -558,8 +558,8 @@ Reprise de l'ancien matériel
 −123,50 €
 Reste à payer
 Émis avec Omega. Une question sur ce devis ? Répondez simplement à ce mail.
-Une présentation par société.
-Quand vous changez de société, ses devis, ses factures et ses relances prennent automatiquement son logo et ses couleurs.
+Réglez votre marque une fois.
+Ajoutez votre logo, vos couleurs et vos mentions légales, et vos devis, factures et relances suivent aussitôt.
 4 sociétés
 Chercher une société
 H
@@ -579,8 +579,8 @@ Jura Services
 9 personnes
 Installation
 Ajouter une société
-Plusieurs sociétés, un seul compte.
-Chaque société garde ses clients, ses fournisseurs et ses contrats. Vous passez de l'une à l'autre sans vous reconnecter.
+Gérez toutes vos sociétés depuis un seul compte.
+Chaque société garde ses clients, ses fournisseurs et ses données. Passez de l'une à l'autre sans vous déconnecter.
 Votre proposition
 Ajouter
 Gestion
@@ -598,10 +598,10 @@ Envoyer
 Le prix est écrit avant de commencer.
 Après l'audit, vous recevez une proposition écrite, prix compris."""
 
-B["s6 Sécurité"] = """Vos données
-L'IA, sans perdre le contrôle de vos données.
-Chaque action d'un agent est enregistrée.
-Vos données sont stockées dans un espace réservé à votre entreprise, chiffré et hébergé dans l'Union européenne. Les agents attendent votre accord pour agir, et chaque action reste consultable dans un journal.
+B["s6 Sécurité"] = """Sécurité et conformité
+Une sécurité à la hauteur de vos comptes.
+Conformité et contrôle intégrés.
+Chaque donnée chiffrée, chaque modification enregistrée, et chaque action d'agent validée par une personne. Vos données sont hébergées dans l'Union européenne, à Francfort.
 Données chiffrées en transit et au repos
 TLS
 CHIFFRÉ
@@ -612,7 +612,7 @@ Hébergement dans l'Union européenne
 UE
 Journal des actions
 Quatre engagements écrits
-Vos données sont stockées à Francfort et ne sortent pas de l'Union européenne. Elles ne servent jamais à entraîner un modèle d'IA.
+Hébergées à Francfort, sans réplication hors de l'Union européenne. Jamais utilisées pour entraîner un modèle d'IA.
 Où vont vos données
 Où vont vos données
 Relances
@@ -623,7 +623,7 @@ Demandes clients
 Un historique complet
 90 derniers jours
 Chaque action est tracée
-Le journal indique qui a validé quoi, et quand. L'hébergement, les sauvegardes et la surveillance sont compris dans le prix.
+Sauvegardes automatiques et supervision comprises. Le journal indique qui a validé quoi, et quand.
 Voir l'espace client
 Voir l'espace client
 Validation humaine
@@ -631,16 +631,16 @@ Brouillons
 Journal
 Un compte par personne
 Export complet
-Vous décidez de ce qui part
-Au départ, tout ce qui sort passe par votre validation. Vous pouvez ensuite autoriser un agent à envoyer seul certains messages.
+Des accès contrôlés à chaque niveau
+Un compte par utilisateur, des droits par rôle, et une personne nommée pour valider chaque action d'agent.
 Voir les agents
 Voir les agents"""
 
 B["s7 Clients"] = """Exemples
-L'ERP au quotidien.
-De la vente à la clôture des comptes, pour une société comme pour un groupe.
-Voici ce qu'Omega fait concrètement, chaque jour. Vous gardez toujours la décision finale.
-Chaque matin, les relances des devis en attente et des factures en retard sont prêtes, écrites dans votre ton, et chaque demande reçue a déjà sa réponse rédigée. Rien ne part sans votre validation.
+Ce qu'Omega fait chaque jour.
+De la petite entreprise au groupe multi-sociétés.
+Ce qui change quand les relances, les factures et les demandes clients passent sur Omega.
+Chaque matin, l'agent reprend les devis sans réponse et les factures échues, rédige une relance dans votre ton et vous la présente. Vous la validez avant l'envoi.
 Relances
 Agent · relances et encaissements
 Ventes, le module des devis et des factures
@@ -653,14 +653,14 @@ BANQUE
 & TVA
 Stock, le module des articles
 STOCK
-Chaque facture reçue est lue et rapprochée de sa commande. Un RIB modifié ou un doublon suspend le paiement jusqu'à votre accord.
+Chaque facture reçue est lue, rapprochée de sa commande et préparée pour la comptabilité. Un doublon est signalé, et un RIB modifié bloque le paiement jusqu'à votre accord.
 Factures fournisseurs
 Agent · factures fournisseurs"""
 
 B["s8 Tarifs"] = """Tarifs
 Un prix par utilisateur.
-Rien de caché.
-Le logiciel coûte 34,90 € HT par mois pour chaque personne qui l'utilise, dès la première. Chaque agent a son propre prix, à partir de 199 € HT par mois, selon le nombre de dossiers qu'il traite. Une automatisation se paie une seule fois, à l'installation, dès 49 € HT.
+Ajoutez des agents quand vous le souhaitez.
+L'ERP comprend tous les modules, à 34,90 € HT par utilisateur et par mois. Les agents s'ajoutent à partir de 199 € HT par mois chacun, avec un prix fixé lors de l'audit selon le volume traité. Une automatisation s'installe dès 49 € HT, puis l'IA se paie à la pièce.
 Type de prix
 Chaque mois
 Installation
@@ -685,7 +685,7 @@ Votre tarif, écrit à la fin
 Aucun engagement
 Gestion
 Dès la première personne
-Toute votre gestion dans un seul logiciel, configuré pour votre activité.
+Toute votre gestion dans un seul ERP, configuré pour votre activité.
 34,90 €
 349,00 €
 Parler à l'équipe
@@ -725,29 +725,29 @@ Les six modules comme base"""
 B["s9 Bande"] = ""
 
 B["s10 FAQ"] = """FAQ
-Questions fréquentes.
-Ce qu'on nous demande avant l'audit.
-Une question manque ? Notre équipe vous répond le jour même.
+Vos questions, nos réponses.
+Ce qu'on nous demande avant de passer à Omega.
+Une question que nous n'avons pas abordée ? L'équipe qui construit Omega se fera un plaisir de vous répondre.
 Écrire à l'équipe
 Combien coûte Omega ?
-Le logiciel coûte 34,90 € HT par personne et par mois. Chaque agent coûte à partir de 199 € HT par mois. L'installation se paie une seule fois. Une automatisation s'installe dès 49 € HT, une fois ; quand l'IA y travaille, chaque tâche se paie ensuite à la pièce, de 0,15 à 0,10 € HT selon la recharge.
-Que se passe-t-il si l'offre ne convient pas ?
-Pour les agents, le remboursement est intégral pendant 30 jours à compter de la mise en service, sans justification à fournir. Au-delà, leur formule mensuelle reste résiliable à tout moment, et l'export complet de vos données vous est remis. Pour le logiciel de gestion, les conditions de sortie sont écrites dans votre devis, avant tout engagement.
-Qui s'occupe de l'installation ?
-Nos modèles d'IA, supervisés par notre équipe. Ils configurent le logiciel à partir de la description de votre activité et reprennent vos données. C'est pour cela que la mise en place est beaucoup plus rapide et beaucoup moins chère qu'un déploiement d'ERP classique. Votre expert-comptable vérifie les réglages comptables avant le démarrage. Pour les agents, rien n'est débité avant la fin de leur installation.
-Un agent peut-il envoyer quelque chose sans mon accord ?
-Pas sans que vous l'ayez décidé. Au départ, tout ce qui sort passe par votre validation : une relance, une réponse, un mail. Ensuite, vous pouvez autoriser un agent à envoyer seul certains messages, et revenir en arrière à tout moment.
-Où sont mes données ?
-Dans un espace dédié à votre entreprise, chiffré, hébergé dans l'Union européenne et jamais mélangé à celui d'un autre client. L'IA ne reçoit que le strict nécessaire à chaque tâche, et rien n'est réutilisé à d'autres fins.
-Faut-il changer nos outils ?
-Vous choisissez. Omega peut devenir votre logiciel de gestion, avec la reprise des données de votre logiciel actuel, ou commencer par des agents branchés sur ce que vous utilisez déjà : Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et bien d'autres.
+34,90 € HT par utilisateur et par mois pour l'ERP. Chaque agent coûte à partir de 199 € HT par mois ; son prix est fixé lors de l'audit, selon le volume traité. L'installation se paie une fois, au prix écrit dans votre devis.
+Peut-on changer d'offre plus tard ?
+Oui. Vous ajoutez ou retirez un agent à tout moment : les agents sont au mois, sans engagement. Pendant 30 jours après la mise en service, ils vous sont remboursés intégralement.
+Combien de temps faut-il pour passer sur Omega ?
+Comptez deux semaines à un mois. Nos modèles d'IA paramètrent l'ERP et reprennent vos clients, vos articles, vos factures en cours et vos soldes, puis votre expert-comptable vérifie le paramétrage avant le démarrage.
+Les agents font-ils quelque chose sans demander ?
+Non. Les agents préparent les relances, les réponses et les écritures, mais tout ce qui part attend la validation d'une personne nommée. Chaque action est enregistrée, avec qui l'a validée et quand.
+Où sont stockées nos données ?
+Chiffrées au repos et en transit, dans un espace réservé à votre entreprise et hébergé à Francfort. Si votre politique interne l'exige, elles peuvent rester dans vos locaux.
+Omega fonctionne-t-il avec nos outils ?
+Oui. Omega se branche sur Gmail, WhatsApp, Google Sheets, Google Drive, Sage, QuickBooks, HubSpot et d'autres. Vous pouvez aussi garder votre logiciel actuel et commencer par les agents.
 Pouvez-vous construire un module rien que pour nous ?
-Oui, c'est l'offre sur mesure. Pendant l'audit, nous regardons avec vous comment vous travaillez : qui fait quoi, sur quels logiciels, et qui valide. Vous repartez avec une proposition écrite, prix compris, avant tout engagement."""
+Oui. Pendant l'audit, nous regardons comment vous travaillez. Vous repartez avec une proposition écrite, prix compris, et le module s'ajoute à votre ERP."""
 
 B["s11 Appel"] = """Commencer
-Passez à Omega.
-Audit offert de 30 minutes, sans engagement.
-Nous regardons comment vous travaillez aujourd'hui, quels outils vous utilisez et ce qui vous prend le plus de temps. Vous recevez ensuite une proposition écrite, avec le prix.
+Passez votre gestion sur Omega.
+Vous validez chaque action.
+Réservez un audit de 30 minutes, apportez vos données actuelles, et laissez les agents préparer votre premier mois de gestion.
 Parler à l'équipe"""
 
 B["pied"] = """Agents
@@ -886,7 +886,7 @@ sortie["__curseur__"] = CURSEUR
 sortie["__mot_symbole__"] = "OMEGA"
 # Teo, 25/11 : le prix « dans la phrase, juste en dessous, en plus petit, mais
 # qu'il se voie ». Ligne ajoutée sous le chapô du héros (convertir.py).
-sortie["__prix_hero__"] = {"avant": typo("À partir de "), "prix": typo("34,90 € HT"), "apres": typo(" par personne et par mois.")}
+sortie["__prix_hero__"] = {"avant": typo("À partir de "), "prix": typo("34,90 € HT"), "apres": typo(" par utilisateur et par mois.")}
 if soucis:
     sys.exit("textes-fr.json NON écrit : %d bloc(s) décalé(s)" % soucis)
 json.dump(sortie, open(os.path.join(ICI, "textes-fr.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)

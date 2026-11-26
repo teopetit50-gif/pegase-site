@@ -20,11 +20,11 @@ export default function SxTarifs() {
               {"Un prix par utilisateur."}
               <br />
               <span>
-                {"Rien de caché."}
+                {"Ajoutez des agents quand vous le souhaitez."}
               </span>
             </h2>
             <p className={"platform-lede"}>
-              {"Le logiciel coûte 34,90 € HT par mois pour chaque personne qui l'utilise, dès la première. Chaque agent a son propre prix, à partir de 199 € HT par mois, selon le nombre de dossiers qu'il traite. Une automatisation se paie une seule fois, à l'installation, dès 49 € HT."}
+              {"L'ERP comprend tous les modules, à 34,90 € HT par utilisateur et par mois. Les agents s'ajoutent à partir de 199 € HT par mois chacun, avec un prix fixé lors de l'audit selon le volume traité. Une automatisation s'installe dès 49 € HT, puis l'IA se paie à la pièce."}
             </p>
           </div>
           <div className={"pr-controls"}>
@@ -184,7 +184,7 @@ export default function SxTarifs() {
               </span>
             </div>
             <p className={"pr-desc"}>
-              {"Toute votre gestion dans un seul logiciel, configuré pour votre activité."}
+              {"Toute votre gestion dans un seul ERP, configuré pour votre activité."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>

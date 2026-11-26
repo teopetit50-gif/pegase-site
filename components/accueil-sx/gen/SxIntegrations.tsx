@@ -47,10 +47,10 @@ export default function SxIntegrations() {
                   <h2 className={"text-[30px] ipad:text-[clamp(28px,3.2vw,40px)] font-[450] leading-[1.16] tracking-[-0.045em] whitespace-nowrap"}>
                     {"Les meilleurs modèles d'IA."}
                     <br />
-                    {"Intégrés à votre ERP."}
+                    {"Rien à brancher."}
                   </h2>
                   <p className={"w-[309.324px] font-tight text-[16px] leading-[normal] tracking-[-0.32px] opacity-60 ipad:w-[379.822px] ipad:text-[17px] ipad:leading-[21.95px] ipad:tracking-[-0.34px] desktop-sm:w-[398px] desktop-sm:text-[18px] desktop-sm:leading-[23px] desktop-sm:tracking-[-0.36px]"}>
-                    {"Omega utilise les modèles des principaux laboratoires d'IA pour faire fonctionner ses agents."}
+                    {"Omega fait travailler ses agents avec les modèles des principaux laboratoires d'IA, sans rien à configurer de votre côté."}
                   </p>
                 </div>
                 <div className={"flex items-center gap-[15.269px] desktop-sm:gap-[16px]"}>
