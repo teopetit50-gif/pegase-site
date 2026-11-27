@@ -480,6 +480,12 @@ export default function VosDonnees() {
 
               <p className="vd-small mx-auto mt-8 max-w-[42rem] text-center">
                 Aucun autre tiers n&apos;intervient. La liste nominative de nos prestataires, avec leur pays et leurs garanties, est annexée au contrat et communiquée sur demande.
+                {/* 27/11/2026 — le contrat que cette page annonçait existe : il est publié. */}
+                {" "}Les engagements de cette page sont écrits dans notre{" "}
+                <Link href="/sous-traitance-donnees" className="underline underline-offset-4">
+                  accord de sous-traitance des données
+                </Link>
+                .
               </p>
             </div>
           </section>

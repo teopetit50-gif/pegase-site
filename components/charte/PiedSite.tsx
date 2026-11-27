@@ -191,6 +191,16 @@ export default function PiedSite() {
                       </Link>
                     </li>
                     <li>
+                      <Link href={"/conditions-generales"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Conditions générales"}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={"/sous-traitance-donnees"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                        {"Sous-traitance des données"}
+                      </Link>
+                    </li>
+                    <li>
                       <Link href={"/vos-donnees"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
                         {"Où vont vos données"}
                       </Link>

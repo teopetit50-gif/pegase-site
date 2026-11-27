@@ -57,6 +57,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/vos-donnees", priorite: 0.8, frequence: "monthly" },
     { url: "/blog", priorite: 0.7, frequence: "weekly" },
     { url: "/mentions-legales", priorite: 0.2, frequence: "yearly" },
+    /* 27/11/2026 — les conditions générales et l'accord de sous-traitance (article 28 du RGPD). */
+    { url: "/conditions-generales", priorite: 0.2, frequence: "yearly" },
+    { url: "/sous-traitance-donnees", priorite: 0.2, frequence: "yearly" },
   ];
 
   /* 15/09/2026 — seuls les QUATRE paquets qui s'installent entrent au plan du

@@ -56,8 +56,10 @@ export type SectionLegale = {
   id: string;
   /** titre de section — fond juridique, recopié tel quel */
   h: string;
-  /** corps de section — fond juridique, recopié tel quel */
-  p: string;
+  /** corps de section — fond juridique, recopié tel quel.
+      27/11/2026 — une liste de chaînes donne un paragraphe par chaîne
+      (les conditions générales ont des articles de plusieurs alinéas). */
+  p: string | readonly string[];
   /** 23/11/2026 — fiche d'identité sous le corps : paires [libellé, valeur],
       recopiées telles quelles (l'éditeur : dénomination, SIREN, siège…) */
   fiche?: readonly (readonly [string, string])[];
@@ -107,7 +109,11 @@ export default function PageLegale({
                   <h2 id={s.id} className="r-h4 leg-titre">
                     {s.h}
                   </h2>
-                  <p className="leg-texte">{s.p}</p>
+                  {(typeof s.p === "string" ? [s.p] : s.p).map((alinea) => (
+                    <p key={alinea} className="leg-texte">
+                      {alinea}
+                    </p>
+                  ))}
                   {s.fiche && (
                     <dl className="leg-fiche">
                       {s.fiche.map(([libelle, valeur]) => (

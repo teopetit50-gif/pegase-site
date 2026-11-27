@@ -113,7 +113,7 @@ const REECRITURES_SITE_DEDIE = SECTEUR_DU_SITE ? [{ source: "/", destination: `/
    /signer, /installation, /reserver), qui font partie du logiciel. */
 /* 10/11, suite — Teo : « un site vitrine basique », une seule page : service
    client, données et réservation n'y existent pas non plus. */
-const PAGES_OMEGA = ["blog", "commencer", "contact", "espace3", "formation", "integrations", "mentions-legales", "modeles", "offres", "omega", "reserver", "tarifs", "vos-donnees"];
+const PAGES_OMEGA = ["blog", "commencer", "conditions-generales", "contact", "espace3", "formation", "integrations", "mentions-legales", "modeles", "offres", "omega", "reserver", "sous-traitance-donnees", "tarifs", "vos-donnees"];
 const REDIRECTIONS_SITE_DEDIE = SECTEUR_DU_SITE
   ? [
       { source: "/secteurs/:chemin*", destination: "/", permanent: false },
