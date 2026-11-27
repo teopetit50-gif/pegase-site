@@ -118,6 +118,9 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
      écrit, seuls les agents et l'installation sortent de l'audit. Le
      paiement à l'année n'est plus proposé tant que les associés ne l'ont
      pas tranché. */
+  /* 27/11/2026, soir — ALIGNÉ SUR /conditions-generales : l'analyse est la
+     seule chose payée avant l'installation, et son remboursement vaut pour un
+     devis signé dans les trois mois (article « Analyse préalable »). */
   /* 27/11/2026 — LES PACKS REMPLACENT LES AGENTS (pitch deck du 27/11 ;
      Teo : « tout remplacer »). Plus d'agent à 199 € par mois, plus de
      forfait ni de recharges. Le prix de la pièce n'est pas écrit : il se
@@ -140,7 +143,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
     q: "Comment se paie l'IA à la pièce\u00a0?",
     r: [
       "Une pièce, c'est une tâche faite par l'IA\u00a0: une relance envoyée, un message de reprise envoyé, une demande traitée, une facture lue. Vous ne payez que ce qui a été traité.",
-      "Le prix de la pièce se fixe pendant l'audit, sur vos volumes réels. Avant la signature, notre IA analyse vos fichiers et vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix de l'installation et celui de la pièce deviennent alors fermes.",
+      "Le prix de la pièce se fixe pendant l'audit, sur vos volumes réels. Avant la signature, notre IA analyse vos fichiers et vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez le devis dans les trois mois. Le prix de l'installation et celui de la pièce deviennent alors fermes.",
     ],
   },
   {
@@ -153,7 +156,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Quelles sont les modalités de paiement\u00a0?",
     r: [
-      "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée quand vous réservez l'installation. Rien n'est débité avant la fin de l'installation : la première échéance part le jour de la mise en service.",
+      "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée quand vous réservez l'installation. En dehors de l'analyse préalable, rien n'est débité avant la fin de l'installation : la première échéance part le jour de la mise en service.",
       "L'ERX est facturé au mois, et l'IA à la pièce, sur ce qui a été traité dans le mois. L'installation d'un pack se paie une seule fois. Prix hors taxes, TVA en sus au taux applicable.",
     ],
   },
@@ -214,7 +217,7 @@ const CHIFFRAGE: Regle[] = [
   {
     titre: "Un pack s'installe une fois",
     texte:
-      "À partir de 1\u00a0750\u00a0€ HT pour 3 automatisations, 2\u00a0900\u00a0€ HT pour 6, 4\u00a0000\u00a0€ HT pour les 10. Rien n'est débité avant la fin de l'installation.",
+      "À partir de 1\u00a0750\u00a0€ HT pour 3 automatisations, 2\u00a0900\u00a0€ HT pour 6, 4\u00a0000\u00a0€ HT pour les 10. L'installation n'est débitée qu'à la mise en service.",
     points: [
       "Installé par nos agents constructeurs, en 2 à 4 semaines",
       "L'installation peut relever du Chèque TIC, porté par la Région Guadeloupe",
@@ -234,7 +237,7 @@ const CHIFFRAGE: Regle[] = [
     texte:
       "L'audit fixe le palier de vos packs et le prix de la pièce sur vos volumes. Notre IA analyse ensuite vos fichiers et vos données\u00a0: le devis devient ferme.",
     points: [
-      "Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez",
+      "Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez dans les trois mois",
       "Le sur-mesure est chiffré au devis, avant tout engagement",
     ],
   },
