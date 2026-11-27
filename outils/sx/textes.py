@@ -9,7 +9,7 @@ D'où viennent ces phrases. Rien n'est inventé pour remplir une case :
   · titres, chapôs, situations, FAQ : components/accueil-v3/textes.ts
     (l'accueil précédent, validé par Teo) ;
   · prix : components/tarifs/TroisPrix.tsx (34,90 € HT / personne / mois ;
-    agents dès 199 € HT ; installation sur devis) ;
+    packs installés dès 1 750 € HT, puis l'IA à la pièce) ;
   · sécurité : app/vos-donnees/page.tsx — aucune certification n'est
     attribuée à Omega, jamais « hébergé en France » ;
   · noms d'agents : lib/content.ts (jamais les noms de code).
@@ -587,9 +587,9 @@ Gestion
 Les six modules de gestion
 34,90 €
 par personne, par mois
-Agent de relance
+Pack relances
 Devis et factures relancés
-dès 199 €
+dès 1 750 €
 Pour Maison Laurent
 12 personnes × 34,90 €
 418,80 €
@@ -659,8 +659,8 @@ Agent · factures fournisseurs"""
 
 B["s8 Tarifs"] = """Tarifs
 Un prix par utilisateur.
-Ajoutez des agents quand vous le souhaitez.
-L'ERP comprend tous les modules, à 34,90 € HT par utilisateur et par mois. Les agents s'ajoutent à partir de 199 € HT par mois chacun, avec un prix fixé lors de l'audit selon le volume traité. Une automatisation s'installe dès 49 € HT, puis l'IA se paie à la pièce.
+Ajoutez des automatisations quand vous le souhaitez.
+L'ERP comprend tous les modules, à 34,90 € HT par utilisateur et par mois. Les automatisations se prennent par pack : l'installation se paie une fois, à partir de 1 750 € HT, puis l'IA se paie à la pièce, au prix fixé lors de l'audit.
 Type de prix
 Chaque mois
 Installation
@@ -678,7 +678,7 @@ et sans engagement
 Réserver l'audit
 Ce qui est compris
 Votre activité, passée en revue
-Les modules et agents utiles
+Les modules et packs utiles
 Une proposition écrite, prix compris
 Le calendrier de démarrage
 Votre tarif, écrit à la fin
@@ -696,17 +696,17 @@ Vos données actuelles reprises
 Vérifié par votre expert-comptable
 50 Go de documents compris
 Un interlocuteur dans notre équipe
-Agents IA
-Des agents qui prennent en charge vos tâches répétitives.
-dès 199 €
+Packs d'automatisations
+Quatre packs de dix automatisations pour vos tâches répétitives.
+À la pièce
 Prix fixé
 Voir les tarifs
-Pour chaque agent
+Dans chaque pack
 Jamais un pourcentage de vos encaissements
-Remise de 10 % dès 3 agents, de 15 % dès 5
+3, 6 ou 10 automatisations au choix
 Aucun débit avant la fin de l'installation
-Mensuel, sans engagement
-Remboursé pendant 30 jours
+Installés en 2 à 4 semaines
+Un mois sans activité ne coûte rien
 Export complet de vos données
 Sur mesure
 Nous construisons le module ou l'agent qui n'existe que chez vous.
@@ -730,9 +730,9 @@ Ce qu'on nous demande avant de passer à Omega.
 Une question que nous n'avons pas abordée ? L'équipe qui construit Omega se fera un plaisir de vous répondre.
 Écrire à l'équipe
 Combien coûte Omega ?
-34,90 € HT par utilisateur et par mois pour l'ERP. Chaque agent coûte à partir de 199 € HT par mois ; son prix est fixé lors de l'audit, selon le volume traité. L'installation se paie une fois, au prix écrit dans votre devis.
+34,90 € HT par utilisateur et par mois pour l'ERP. Les automatisations se prennent par pack : l'installation se paie une fois, à partir de 1 750 € HT pour 3 automatisations, 2 900 € HT pour 6 et 4 000 € HT pour les 10. Ensuite, l'IA se paie à la pièce, au prix fixé lors de l'audit.
 Peut-on changer d'offre plus tard ?
-Oui. Vous ajoutez ou retirez un agent à tout moment : les agents sont au mois, sans engagement. Pendant 30 jours après la mise en service, ils vous sont remboursés intégralement.
+Oui. Vous commencez par un pack, ou par trois automatisations, et vous en ajoutez quand vous voulez. L'IA se paie à la pièce : un mois sans activité ne coûte rien.
 Combien de temps faut-il pour passer sur Omega ?
 Comptez deux semaines à un mois. Nos modèles d'IA paramètrent l'ERP et reprennent vos clients, vos articles, vos factures en cours et vos soldes, puis votre expert-comptable vérifie le paramétrage avant le démarrage.
 Les agents font-ils quelque chose sans demander ?
@@ -786,12 +786,12 @@ Réserver un audit"""
 # texte de la référence, quand elle doit se rendre autrement dans le bloc.
 PRECIS = {
     "s2 Fiche": {"Pay##2": "Prestation", "Payroll##2": "Envoi"},
-    "s5 Marque": {"M##2": "M", "a person, monthly##2": "par agent, par mois"},
+    "s5 Marque": {"M##2": "M", "a person, monthly##2": "par pack, une fois"},
     "s8 Tarifs": {
         "per employee##2": "HT par personne", "a month##2": "par mois",
         "a month for 50 people, billed yearly##2": "HT par mois pour 10 personnes",
-        "per employee##3": "HT par agent", "a month##3": "par mois",
-        "a month for 50 people, billed yearly##3": "à l'audit, selon les dossiers suivis",
+        "per employee##3": "l'IA, selon", "a month##3": "le volume traité",
+        "a month for 50 people, billed yearly##3": "à l'audit, sur vos volumes",
     },
     "s11 Appel": {"Get started##2": "Réserver un audit offert"},
 }
@@ -816,7 +816,7 @@ LIENS = {
         "Time off": "/offres/nouvelles-affaires", "Compliance": "/offres/factures-fournisseurs", "Insights": "/offres/sur-mesure",
         "X": "/gestion", "Agents": "/gestion#modules", "Integrations": "/gestion#modules", "White labelling": "/gestion#modules",
         "Security": "/gestion#modules", "Pricing": "/gestion#modules",
-        "YouTube": "/tarifs", "About": "/offres", "Customers": "/integrations", "Careers": "/modeles", "FAQs": "/blog", "Contact sales": "/tarifs#automatisations",
+        "YouTube": "/tarifs", "About": "/offres", "Customers": "/integrations", "Careers": "/modeles", "FAQs": "/blog", "Contact sales": "/tarifs#packs",
         "Instagram": AUDIT, "Terms of service": AUDIT, "Privacy policy": "/espace2", "Cookie policy": "/contact",
         "POPIA": "/mentions-legales", "Data processing": "/vos-donnees", "Get it on Mac": AUDIT,
     },

@@ -287,13 +287,15 @@ export const OFFRE: Colonne[] = [
     points: ["Relances", "Demandes clients", "Factures fournisseurs", "Clients inactifs"],
   },
   {
-    nom: "Automatisations",
-    valeur: "Une",
-    suffixe: "seule fois",
-    bouton: { libelle: "Voir les prix", href: "/tarifs#automatisations" },
-    lignes: ["Dès 49\u00a0€ HT d'installation", "L'IA payée à la tâche"],
-    intertitre: "Trois cas",
-    points: ["Sans IA", "Avec IA", "Sur mesure"],
+    /* 27/11/2026 — pitch deck du 27/11 : les packs d'automatisations
+       remplacent les automatisations à 49 € et les recharges. */
+    nom: "Packs",
+    valeur: "4",
+    suffixe: "packs",
+    bouton: { libelle: "Voir les prix", href: "/tarifs#packs" },
+    lignes: ["Dès 1\u00a0750\u00a0€ HT d'installation", "L'IA payée à la pièce"],
+    intertitre: "Dix automatisations chacun",
+    points: ["Relances d'impayés", "Clients dormants", "Demandes entrantes", "Factures fournisseurs"],
   },
   {
     nom: "Sur mesure",
@@ -347,7 +349,7 @@ export const QUESTIONS = {
     {
       id: "prix",
       q: "Combien coûte l'ERP\u00a0?",
-      r: "34,90\u00a0€ HT par utilisateur et par mois, dès le premier et sans minimum. Les six modules sont inclus. Aucun pourcentage sur vos encaissements. L'installation se paie une fois, au prix écrit au devis. Les agents ont leur propre prix, fixé à l'audit.",
+      r: "34,90\u00a0€ HT par utilisateur et par mois, dès le premier et sans minimum. Les six modules sont inclus. Aucun pourcentage sur vos encaissements. L'installation se paie une fois, au prix écrit au devis. Les automatisations se prennent par pack\u00a0: l'installation se paie une fois, à partir de 1\u00a0750\u00a0€ HT, puis l'IA se paie à la pièce, au prix fixé à l'audit.",
     },
   ],
 };

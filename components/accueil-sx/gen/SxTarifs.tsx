@@ -20,11 +20,11 @@ export default function SxTarifs() {
               {"Un prix par utilisateur."}
               <br />
               <span>
-                {"Ajoutez des agents quand vous le souhaitez."}
+                {"Ajoutez des automatisations quand vous le souhaitez."}
               </span>
             </h2>
             <p className={"platform-lede"}>
-              {"L'ERP comprend tous les modules, à 34,90 € HT par utilisateur et par mois. Les agents s'ajoutent à partir de 199 € HT par mois chacun, avec un prix fixé lors de l'audit selon le volume traité. Une automatisation s'installe dès 49 € HT, puis l'IA se paie à la pièce."}
+              {"L'ERP comprend tous les modules, à 34,90 € HT par utilisateur et par mois. Les automatisations se prennent par pack : l'installation se paie une fois, à partir de 1 750 € HT, puis l'IA se paie à la pièce, au prix fixé lors de l'audit."}
             </p>
           </div>
           <div className={"pr-controls"}>
@@ -136,7 +136,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Les modules et agents utiles"}
+                    {"Les modules et packs utiles"}
                   </span>
                 </li>
                 <li>
@@ -301,31 +301,31 @@ export default function SxTarifs() {
           <article className={"pr-tier"} data-gutter-guide={"bottom"}>
             <div className={"pr-name"}>
               <h3>
-                {"Agents IA"}
+                {"Packs d'automatisations"}
               </h3>
             </div>
             <p className={"pr-desc"}>
-              {"Des agents qui prennent en charge vos tâches répétitives."}
+              {"Quatre packs de dix automatisations pour vos tâches répétitives."}
             </p>
             <div className={"pr-price"}>
               <p className={"pr-amount"}>
                 <strong>
                   <span style={{ "display": "inline-grid", "fontVariantNumeric": "tabular-nums" } as CSSProperties}>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1", "visibility": "hidden" } as CSSProperties}>
-                      {"dès 199 €"}
+                      {"À la pièce"}
                     </span>
                     <span aria-hidden={"true"} style={{ "gridArea": "1 / 1" } as CSSProperties}>
-                      {"dès 199 €"}
+                      {"À la pièce"}
                     </span>
                     <span className={"sr-only"}>
-                      {"dès 199 €"}
+                      {"À la pièce"}
                     </span>
                   </span>
                 </strong>
                 <span>
-                  {"HT par agent"}
+                  {"l'IA, selon"}
                   <br />
-                  {"par mois"}
+                  {"le volume traité"}
                 </span>
               </p>
               <p className={"pr-total"}>
@@ -342,7 +342,7 @@ export default function SxTarifs() {
                     </span>
                   </span>
                 </b>
-                {" à l'audit, selon les dossiers suivis"}
+                {" à l'audit, sur vos volumes"}
               </p>
             </div>
             <div className={"pr-cta"} data-gutter-guide={"bottom"}>
@@ -355,7 +355,7 @@ export default function SxTarifs() {
             </div>
             <div className={"pr-features"}>
               <h4>
-                {"Pour chaque agent"}
+                {"Dans chaque pack"}
               </h4>
               <ul>
                 <li className={"is-ai"}>
@@ -381,7 +381,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Remise de 10 % dès 3 agents, de 15 % dès 5"}
+                    {"3, 6 ou 10 automatisations au choix"}
                   </span>
                 </li>
                 <li>
@@ -397,7 +397,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Mensuel, sans engagement"}
+                    {"Installés en 2 à 4 semaines"}
                   </span>
                 </li>
                 <li>
@@ -405,7 +405,7 @@ export default function SxTarifs() {
                     <path d={"M18.4697 6.46973C18.7626 6.17684 19.2373 6.17684 19.5302 6.46973C19.8231 6.76262 19.8231 7.23738 19.5302 7.53028L9.53022 17.5303C9.23732 17.8232 8.76256 17.8232 8.46967 17.5303L4.46967 13.5303C4.17678 13.2374 4.17678 12.7626 4.46967 12.4697C4.76256 12.1768 5.23732 12.1768 5.53022 12.4697L8.99994 15.9395L18.4697 6.46973Z"} fill={"currentColor"} />
                   </svg>
                   <span>
-                    {"Remboursé pendant 30 jours"}
+                    {"Un mois sans activité ne coûte rien"}
                   </span>
                 </li>
                 <li>

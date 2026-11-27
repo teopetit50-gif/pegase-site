@@ -24,7 +24,7 @@ import { cn } from "@/lib/cn";
 
 type Chiffre = { avant: string | null; entier: string; centimes: string | null };
 
-type Prix = {
+export type Prix = {
   nom: string;
   chiffre: Chiffre;
   unite: string | null;
@@ -46,13 +46,13 @@ export const PRIX_PUBLICS: Prix[] = [
     texte:
       "Nous passons votre activité en revue. Vous repartez avec un prix écrit.",
     points: [
-      "Les modules et les agents dont vous avez besoin",
+      "Les modules et les packs dont vous avez besoin",
       "Une proposition écrite, prix compris",
       "Le calendrier de mise en service",
     ],
   },
   {
-    nom: "ERP",
+    nom: "ERX",
     chiffre: { avant: null, entier: "34", centimes: ",90" },
     unite: "HT / personne / mois",
     lu: "34,90\u00a0€ HT par utilisateur et par mois",
@@ -67,24 +67,32 @@ export const PRIX_PUBLICS: Prix[] = [
     ],
     fort: true,
   },
+  /* 27/11/2026 — LES PACKS REMPLACENT LES AGENTS (pitch deck « Omega —
+     Pitch deck » du 27/11, slide 9 ; Teo : « tout remplacer »). Plus
+     d'agent à 199 € par mois ni de recharges : quatre packs de dix
+     automatisations, une installation « à partir de » par palier, puis
+     l'IA à la pièce. Le prix de la pièce n'est PAS écrit (Teo, 27/11 :
+     « on n'est pas sûr, c'est à l'audit qu'on verra ce que ça coûte
+     réellement au client »). */
   {
-    nom: "Agents IA",
-    chiffre: { avant: "dès", entier: "199", centimes: null },
-    unite: "HT / agent / mois",
-    lu: "À partir de 199\u00a0€ HT par agent et par mois",
-    sous: "Prix fixé à l'audit, selon les dossiers suivis",
-    texte: "Chaque agent traite une tâche de bout en bout\u00a0: une facture jusqu'au paiement, une demande jusqu'au devis signé.",
+    nom: "Packs d'automatisations",
+    chiffre: { avant: "dès", entier: "1\u00a0750", centimes: null },
+    unite: "HT / pack, une fois",
+    lu: "Installation d'un pack à partir de 1\u00a0750\u00a0€ HT, payée une seule fois",
+    sous: "Installation, puis l'IA à la pièce",
+    texte:
+      "Quatre packs de dix automatisations\u00a0: relances d'impayés, clients dormants, demandes entrantes, factures fournisseurs.",
     points: [
-      "−10\u00a0% dès 3 agents",
-      "Vous êtes prévenu à 75\u00a0%, puis à 90\u00a0% du forfait",
-      "Mensuel, sans engagement",
-      "Remboursé pendant 30 jours",
+      "3, 6 ou 10 automatisations au choix par pack",
+      "Installées par nos agents constructeurs",
+      "En place en 2 à 4 semaines",
+      "Le prix à la pièce est fixé à l'audit",
     ],
   },
 ];
 
 export const NOTE_INSTALLATION =
-  "L'installation se paie une seule fois, au prix écrit dans votre devis après l'audit. Pour les agents, rien n'est débité avant la fin de leur installation.";
+  "L'installation d'un pack se paie une seule fois\u00a0: à partir de 1\u00a0750\u00a0€ HT pour 3 automatisations, 2\u00a0900\u00a0€ HT pour 6, 4\u00a0000\u00a0€ HT pour les 10. Le prix ferme est écrit dans votre devis, après l'audit.";
 
 export const NOTE_TVA =
   "Prix hors taxes. La TVA s'y ajoute au taux qui s'applique à votre entreprise.";
@@ -93,7 +101,7 @@ export const NOTE_TVA =
    les centimes et l'euro en exposant, l'unité sous les centimes.
    25/11/2026 — charte de l'accueil : graisse 450 au lieu du gras, les
    cotes du prix de la grille de l'accueil (tarifs.css, `.tf-chiffre`). */
-function GrandChiffre({ p }: { p: Prix }) {
+export function GrandChiffre({ p }: { p: Prix }) {
   const c = p.chiffre;
   return (
     <p className="tf-chiffre">

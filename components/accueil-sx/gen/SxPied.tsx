@@ -141,7 +141,7 @@ export default function SxPied() {
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/tarifs#automatisations"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
+                      <Link href={"/tarifs#packs"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
                         {"Automatisations"}
                       </Link>
                     </li>

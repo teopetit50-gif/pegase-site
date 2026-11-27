@@ -71,7 +71,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a0"} role={"region"} aria-labelledby={"_R_ltavb_-q0"} inert={true}>
               <div>
                 <p>
-                  {"34,90 € HT par utilisateur et par mois pour l'ERP. Chaque agent coûte à partir de 199 € HT par mois ; son prix est fixé lors de l'audit, selon le volume traité. L'installation se paie une fois, au prix écrit dans votre devis."}
+                  {"34,90 € HT par utilisateur et par mois pour l'ERP. Les automatisations se prennent par pack : l'installation se paie une fois, à partir de 1 750 € HT pour 3 automatisations, 2 900 € HT pour 6 et 4 000 € HT pour les 10. Ensuite, l'IA se paie à la pièce, au prix fixé lors de l'audit."}
                 </p>
               </div>
             </div>
@@ -90,7 +90,7 @@ export default function SxFaq() {
             <div className={"faq-panel"} id={"_R_ltavb_-a1"} role={"region"} aria-labelledby={"_R_ltavb_-q1"} inert={true}>
               <div>
                 <p>
-                  {"Oui. Vous ajoutez ou retirez un agent à tout moment : les agents sont au mois, sans engagement. Pendant 30 jours après la mise en service, ils vous sont remboursés intégralement."}
+                  {"Oui. Vous commencez par un pack, ou par trois automatisations, et vous en ajoutez quand vous voulez. L'IA se paie à la pièce : un mois sans activité ne coûte rien."}
                 </p>
               </div>
             </div>

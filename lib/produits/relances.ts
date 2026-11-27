@@ -454,7 +454,7 @@ export const QUESTIONS = {
         },
         {
           q: "Quel est le tarif ?",
-          r: "À partir de 199 € HT par mois, selon le nombre de dossiers suivis. Le prix est fixé à l'audit, sur vos volumes réels, et écrit au devis. Rien n'est débité avant la fin de l'installation, et vous êtes remboursé pendant 30 jours.",
+          r: "L'installation du pack Relances d'impayés se paie une seule fois : à partir de 1 750 € HT pour 3 automatisations, 2 900 € HT pour 6, 4 000 € HT pour les 10. Ensuite, chaque relance envoyée se paie à la pièce, au prix fixé à l'audit sur vos volumes réels. Rien n'est débité avant la fin de l'installation.",
         },
       ],
     },

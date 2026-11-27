@@ -254,11 +254,14 @@ export default function SxComportements() {
       logiciel: 34.9,
       mois: {
         logiciel: { montant: "34,90 €", unite: ["HT par personne", "par mois"] },
-        agents: { montant: "dès 199 €", unite: ["HT par agent", "par mois"], gras: "Prix fixé", suite: " à l'audit, selon les dossiers suivis" },
+        /* 27/11/2026 — la carte « Agents » devient « Packs d'automatisations »
+           (pitch deck du 27/11) : rien au mois, l'IA à la pièce au prix fixé
+           à l'audit ; l'installation d'un pack dès 1 750 € HT. */
+        agents: { montant: "À la pièce", unite: ["l'IA, selon", "le volume traité"], gras: "Prix fixé", suite: " à l'audit, sur vos volumes" },
       },
       installation: {
         logiciel: { montant: "Sur devis", unite: ["après l'audit", "une seule fois"], gras: "Payée une fois", suite: ", à la mise en service du logiciel" },
-        agents: { montant: "Sur devis", unite: ["après l'audit, par agent", "une seule fois"], gras: "Aucun débit", suite: " avant la fin de l'installation" },
+        agents: { montant: "dès 1 750 €", unite: ["HT par pack", "une seule fois"], gras: "Aucun débit", suite: " avant la fin de l'installation" },
       },
     };
     const grille = racine.querySelector<HTMLElement>(".pr-grid");

@@ -5,7 +5,7 @@ import Grille from "@/components/tarifs/Grille";
 import AppelFinal from "@/components/tarifs/AppelFinal";
 import FaqTarifs from "@/components/tarifs/FaqTarifs";
 import ReglesFacturation, { type Regle } from "@/components/tarifs/ReglesFacturation";
-import Automatisations from "@/components/tarifs/Automatisations";
+import Packs from "@/components/tarifs/Packs";
 import { MondeProvider } from "@/components/tarifs/monde";
 import "@/components/charte/pages/tarifs.css";
 
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/tarifs" },
   title: "Tarifs | Omega.AI",
   description:
-    "L'ERP Omega coûte 34,90\u00a0€ HT par utilisateur et par mois, sans minimum. Chaque agent IA coûte à partir de 199\u00a0€ HT par mois, prix fixé à l'audit.",
+    "L'ERX Omega coûte 34,90\u00a0€ HT par utilisateur et par mois, sans minimum. Quatre packs d'automatisations, installés à partir de 1\u00a0750\u00a0€ HT, puis l'IA à la pièce.",
 };
 
 /* 03/09 (relecture de la formule annuelle) — la page disait encore
@@ -118,60 +118,57 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
      écrit, seuls les agents et l'installation sortent de l'audit. Le
      paiement à l'année n'est plus proposé tant que les associés ne l'ont
      pas tranché. */
+  /* 27/11/2026 — LES PACKS REMPLACENT LES AGENTS (pitch deck du 27/11 ;
+     Teo : « tout remplacer »). Plus d'agent à 199 € par mois, plus de
+     forfait ni de recharges. Le prix de la pièce n'est pas écrit : il se
+     fixe à l'audit (Teo, 27/11). L'ERP s'écrit « ERX », comme dans le deck. */
   {
     q: "Combien coûte Omega\u00a0?",
     r: [
-      "L'ERP et les agents se paient au mois, l'installation une seule fois. L'ERP coûte 34,90\u00a0€ HT par utilisateur et par mois, dès le premier. Chaque agent coûte à partir de 199\u00a0€ HT par mois, selon le volume traité. Une automatisation s'installe dès 49\u00a0€ HT, puis l'IA se paie à la pièce. L'installation se paie une fois, au prix écrit dans votre devis.",
-      "Exemple\u00a0: une entreprise de 10 utilisateurs paie 349\u00a0€ HT par mois pour l'ERP, plus le prix de ses agents, écrit au devis.",
+      "L'ERX se paie au mois, l'installation d'un pack une seule fois, et l'IA à la pièce. L'ERX coûte 34,90\u00a0€ HT par utilisateur et par mois, dès le premier. Un pack d'automatisations s'installe à partir de 1\u00a0750\u00a0€ HT pour 3 automatisations, 2\u00a0900\u00a0€ HT pour 6 et 4\u00a0000\u00a0€ HT pour les 10.",
+      "Exemple\u00a0: une entreprise de 10 utilisateurs paie 349\u00a0€ HT par mois pour l'ERX. Si elle installe trois automatisations du pack Relances, elle paie à partir de 1\u00a0750\u00a0€ HT une seule fois, puis chaque relance envoyée, au prix écrit dans son devis.",
     ],
   },
   {
-    q: "Quelle différence entre une automatisation et un agent\u00a0?",
+    q: "Que contient un pack\u00a0?",
     r: [
-      "Une automatisation fait toujours la même chose\u00a0: rédiger les relances du matin, lire les factures reçues, trier les e-mails. Elle s'installe une fois, puis chaque tâche de l'IA se paie à la pièce.",
-      "Un agent reçoit un objectif et traite chaque dossier jusqu'au bout\u00a0: il lit les réponses, relance au bon moment et vous prévient si un dossier bloque. Il se paie au mois, selon le volume traité.",
+      "Dix automatisations autour d'une même tâche. Il y a quatre packs\u00a0: relances d'impayés, clients dormants, demandes entrantes et factures fournisseurs.",
+      "Vous en choisissez 3, 6 ou les 10. Vous pouvez commencer par un seul pack, et même par trois automatisations, puis en ajouter. Un besoin hors de ces quatre packs se construit sur mesure, sur devis.",
     ],
   },
   {
-    q: "Quand connaîtrai-je le prix de mes agents\u00a0?",
+    q: "Comment se paie l'IA à la pièce\u00a0?",
     r: [
-      "Pendant l'audit. Le prix d'un agent dépend du nombre de dossiers traités chaque mois\u00a0: factures à recouvrer, factures fournisseurs, demandes clients. Il se fixe sur vos chiffres, pas sur votre taille.",
-      "Avant la signature, notre IA analyse vos fichiers et vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix des agents et de l'installation devient alors ferme.",
+      "Une pièce, c'est une tâche faite par l'IA\u00a0: une relance envoyée, un message de reprise envoyé, une demande traitée, une facture lue. Vous ne payez que ce qui a été traité.",
+      "Le prix de la pièce se fixe pendant l'audit, sur vos volumes réels. Avant la signature, notre IA analyse vos fichiers et vos données. Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez. Le prix de l'installation et celui de la pièce deviennent alors fermes.",
     ],
   },
   {
-    q: "Comment l'ERP est-il facturé\u00a0?",
+    q: "Comment l'ERX est-il facturé\u00a0?",
     r: [
       "34,90\u00a0€ HT par utilisateur et par mois, dès le premier et sans minimum. Les six modules sont inclus. Aucun pourcentage sur vos encaissements.",
       "Chaque utilisateur a son propre compte, pour savoir qui a validé chaque facture. 50 Go de documents sont inclus\u00a0; au-delà, 15\u00a0€ HT par mois par tranche de 25 Go.",
     ],
   },
   {
-    q: "Que se passe-t-il si un agent dépasse son forfait\u00a0?",
-    r: [
-      "Vous êtes prévenu à 75\u00a0%, puis à 90\u00a0% du forfait. Au-delà, chaque dossier supplémentaire est facturé au prix écrit dans votre devis.",
-      "Un agent ne change de palier qu'après trois mois de suite au-dessus de son forfait. Vous ajoutez un agent quand vous voulez, avec 10\u00a0% de remise dès 3 agents. Nos prix sont revus une fois par an, jamais en cours d'année.",
-    ],
-  },
-  {
     q: "Quelles sont les modalités de paiement\u00a0?",
     r: [
       "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée quand vous réservez l'installation. Rien n'est débité avant la fin de l'installation : la première échéance part le jour de la mise en service.",
-      "Les agents sont facturés au mois, sans engagement\u00a0: la résiliation prend effet à la fin du mois en cours. Prix hors taxes, TVA en sus au taux applicable.",
+      "L'ERX est facturé au mois, et l'IA à la pièce, sur ce qui a été traité dans le mois. L'installation d'un pack se paie une seule fois. Prix hors taxes, TVA en sus au taux applicable.",
     ],
   },
   {
-    q: "Que comprend l'abonnement des agents\u00a0?",
+    q: "Que comprend l'installation d'un pack\u00a0?",
     r: [
-      "Le fonctionnement des agents retenus, le rapport quotidien, les règles de validation avant envoi, la prise en compte de vos corrections et le suivi. La réunion d'installation est comprise dans l'installation : nous raccordons vos outils ensemble, en visioconférence.",
+      "Le paramétrage des automatisations choisies par nos agents constructeurs, vos règles de validation avant envoi, le raccordement de vos outils et la mise en service, en 2 à 4 semaines. La réunion d'installation se fait avec vous, en visioconférence.",
       "Un raccordement spécifique, comme un logiciel peu répandu ou une reprise d'historique, est chiffré au devis avant tout engagement. Jamais en cours de projet.",
     ],
   },
   {
     q: "Que se passe-t-il si l'offre ne convient pas ?",
     r: [
-      "Pendant 30 jours après la mise en service, vos agents vous sont remboursés intégralement, sans justification. Ensuite, ils restent résiliables à tout moment, et l'export complet de vos données vous est remis, sans frais.",
-      "Pour l'ERP, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
+      "L'IA se paie à la pièce\u00a0: un mois où rien n'est traité ne coûte rien. L'export complet de vos données vous est remis, sans frais.",
+      "Pour l'ERX, les conditions de sortie sont écrites dans votre devis, avant tout engagement.",
     ],
   },
   {
@@ -183,7 +180,7 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
   {
     q: "Plusieurs services valident chez nous : cette grille s'applique-t-elle ?",
     r: [
-      "En partie. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par utilisateur et par mois pour l'ERP, à partir de 199\u00a0€ HT par mois pour chaque agent. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
+      "En partie. Les prix sont les mêmes\u00a0: 34,90\u00a0€ HT par utilisateur et par mois pour l'ERX, et des packs installés à partir de 1\u00a0750\u00a0€ HT. Ce qui change, c'est l'installation. Quand l'accueil, la comptabilité et les opérations valident chacun sur leur périmètre, il y a autant de jeux de règles à écrire que de services, et cette charge ne s'estime pas depuis une page.",
       "Vous commencez par un diagnostic plus long : nous relevons vos volumes service par service, et le devis en découle. Il est gratuit dans ses deux premiers formats.",
     ],
   },
@@ -202,11 +199,11 @@ const FAQ_TARIFS: { q: string; r: string[] }[] = [
    chiffres de coût, pas ceux du client, et les publier inviterait à
    négocier sur une moyenne de marché plutôt que sur SA mesure. */
 const CHIFFRAGE: Regle[] = [
-  /* 25/11/2026 — les quatre règles suivent désormais les prix publics :
-     le logiciel par personne, les agents au travail fait, le prix ferme
-     avant de signer, l'installation payée une fois. */
+  /* 27/11/2026 — les quatre règles suivent le pitch deck du 27/11 :
+     l'ERX par personne, le pack payé une fois par palier, l'IA à la
+     pièce, le prix ferme avant de signer. */
   {
-    titre: "L'ERP se paie par utilisateur",
+    titre: "L'ERX se paie par utilisateur",
     texte:
       "34,90\u00a0€ HT par utilisateur et par mois, dès le premier et sans minimum. Le même prix pour tout le monde.",
     points: [
@@ -215,30 +212,30 @@ const CHIFFRAGE: Regle[] = [
     ],
   },
   {
-    titre: "Un agent se paie au volume traité",
+    titre: "Un pack s'installe une fois",
     texte:
-      "À partir de 199\u00a0€ HT par mois, selon le nombre de dossiers traités\u00a0: factures à recouvrer, factures fournisseurs, demandes clients.",
+      "À partir de 1\u00a0750\u00a0€ HT pour 3 automatisations, 2\u00a0900\u00a0€ HT pour 6, 4\u00a0000\u00a0€ HT pour les 10. Rien n'est débité avant la fin de l'installation.",
     points: [
-      "Deux entreprises de même taille n'ont pas le même volume",
-      "−10\u00a0% dès 3 agents",
+      "Installé par nos agents constructeurs, en 2 à 4 semaines",
+      "L'installation peut relever du Chèque TIC, porté par la Région Guadeloupe",
+    ],
+  },
+  {
+    titre: "L'IA se paie à la pièce",
+    texte:
+      "Une relance envoyée, une demande traitée, une facture lue\u00a0: vous ne payez que ce que l'IA a traité dans le mois.",
+    points: [
+      "Le prix de la pièce est fixé à l'audit, sur vos volumes",
+      "Un mois sans activité ne coûte rien",
     ],
   },
   {
     titre: "Un prix ferme avant la signature",
     texte:
-      "L'audit fixe le prix de vos agents sur vos volumes. Notre IA analyse ensuite vos fichiers et vos données\u00a0: le prix des agents et de l'installation devient ferme.",
+      "L'audit fixe le palier de vos packs et le prix de la pièce sur vos volumes. Notre IA analyse ensuite vos fichiers et vos données\u00a0: le devis devient ferme.",
     points: [
       "Cette analyse coûte 390\u00a0€ HT, remboursés si vous signez",
-      "Vous êtes prévenu quand un agent atteint 75\u00a0%, puis 90\u00a0% de son forfait",
-    ],
-  },
-  {
-    titre: "L'installation se paie une fois",
-    texte:
-      "Son prix dépend de votre taille, de l'état de vos données et des outils à raccorder. Il est écrit au devis, après l'audit. Pour les agents, rien n'est débité avant la fin de leur installation.",
-    points: [
-      "Elle peut relever du Chèque TIC, porté par la Région Guadeloupe, pour les entreprises qui y sont immatriculées",
-      "Agents au mois, sans engagement",
+      "Le sur-mesure est chiffré au devis, avant tout engagement",
     ],
   },
 ];
@@ -264,13 +261,14 @@ export default function TarifsPage() {
           (instantané serveur « pme »), donc /tarifs reste STATIQUE. */}
       <MondeProvider>
       <div className="resa tf-page">
-        {/* ═══ 1 et 2 — titre et prix publics, puis les agents ═══ */}
+        {/* ═══ 1 — titre et prix publics ═══ */}
         <Grille />
 
-        {/* ═══ 2 bis — les automatisations : installation une fois, puis
-               l'IA à la pièce en recharges (Teo, 25/11, document « Prix des
-               automatisations » ; détail dans le composant) ═══ */}
-        <Automatisations />
+        {/* ═══ 2 — les quatre packs d'automatisations (pitch deck du
+               27/11 : installation par palier, puis l'IA à la pièce ;
+               détail dans le composant). Les agents à 199 € par mois et
+               la section « Automatisations » (49 €, recharges) partent. ═══ */}
+        <Packs />
 
         {/* ═══ 3 — comment nous chiffrons : quatre règles, en grille de
                cartes jointives ═══ */}
