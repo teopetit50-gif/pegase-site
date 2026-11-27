@@ -46,13 +46,17 @@
   }
 }
 
-/* la carte du formulaire : blanche, rayon 12, liseré #dcdcda, sans ombre */
+/* la carte du formulaire : rayon 12, sans ombre.
+   27/11/2026 (Teo : « la couleur n'est pas adaptée au contour ») : le blanc
+   tranchait sur la page beige. Elle prend la scène des blocs E-mail et
+   Téléphone de droite (fond --ch-scene, liseré --ch-scene-bord) ; les
+   champs restent blancs dessus. */
 .charte .ct-page .ap-carte {
   max-width: 760px;
   padding: 28px;
-  border: 1px solid var(--ch-filet);
+  border: 1px solid var(--ch-scene-bord);
   border-radius: 12px;
-  background: #fff;
+  background: var(--ch-scene);
   box-shadow: none;
 }
 @media (max-width: 760px) {
