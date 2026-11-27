@@ -192,8 +192,8 @@ export const AGENTS: Agent[] = [
     titre: "L'IA prépare, vous décidez",
     texte:
       "Un seul écran vous montre ce qui est prêt, ce qui attend votre accord et ce qui a été fait. Vous validez ou vous corrigez en un clic. Un agent n'envoie seul que ce que vous avez autorisé d'avance, et chaque action est enregistrée.",
-    lien: "/espace2",
-    bouton: "Voir l'espace client",
+    lien: AUDIT,
+    bouton: "Réserver un audit",
     image: "/accueil/pilotage-clair.webp",
     alt: "Les validations du matin dans l'espace client",
   },
@@ -619,7 +619,6 @@ export const PIED = {
       titre: "Omega",
       liens: [
         { label: "Réserver un audit", href: AUDIT },
-        { label: "Espace client", href: "/espace2" },
         { label: "Service client", href: "/contact" },
         { label: "Où vont vos données", href: "/vos-donnees" },
       ],

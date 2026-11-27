@@ -176,11 +176,6 @@ export default function PiedSite() {
                       </Link>
                     </li>
                     <li>
-                      <Link href={"/espace2"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
-                        {"Espace client"}
-                      </Link>
-                    </li>
-                    <li>
                       <Link href={"/contact"} className={"text-xs opacity-55 transition-opacity hover:opacity-100"}>
                         {"Service client"}
                       </Link>
