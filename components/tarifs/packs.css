@@ -1,0 +1,294 @@
+/* ══════════════════════════════════════════════════════════════════════
+   Les packs d'automatisations (/tarifs) — 27/11/2026.
+   D'après 21st.dev, diarmuradi/pricing-7 « Toggle Pricing Cards »,
+   variante claire, relevée sur son rendu : piste segmentée sur fond gris,
+   carte blanche à grands rayons, liste cochée à gauche, offre à droite
+   séparée par un filet vertical. Couleurs et filets de la charte de
+   l'accueil (charte.css : --ch-encre-section, --ch-filet, --ch-gris).
+   Tout est sous `.charte .tf-page .pk`.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.charte .tf-page .pk {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 8px 24px 72px;
+}
+@media (max-width: 760px) {
+  .charte .tf-page .pk {
+    padding: 0 16px 56px;
+    gap: 24px;
+  }
+}
+
+/* ─── les deux pistes segmentées ─────────────────────────────────── */
+.charte .tf-page .pk-pistes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+}
+.charte .tf-page .pk-piste {
+  display: inline-flex;
+  max-width: 100%;
+  padding: 4px;
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #eeeee8;
+  scrollbar-width: none;
+}
+.charte .tf-page .pk-piste::-webkit-scrollbar {
+  display: none;
+}
+.charte .tf-page .pk-onglet {
+  position: relative;
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 9px;
+  color: #6b6f69;
+  font-size: 14px;
+  font-weight: 450;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+.charte .tf-page .pk-onglet--actif {
+  color: var(--ch-encre-section);
+}
+@media (hover: hover) and (pointer: fine) {
+  .charte .tf-page .pk-onglet:hover {
+    color: var(--ch-encre-section);
+  }
+}
+.charte .tf-page .pk-onglet:focus-visible {
+  outline: 2px solid var(--ch-encre-section);
+  outline-offset: 2px;
+}
+/* sous 761 px, plus de défilement : les packs en 2 × 2, les paliers en
+   trois colonnes, les libellés passent à la ligne */
+@media (max-width: 760px) {
+  .charte .tf-page .pk-pistes {
+    width: 100%;
+  }
+  .charte .tf-page .pk-piste {
+    display: grid;
+    width: 100%;
+    overflow: visible;
+  }
+  .charte .tf-page .pk-piste--packs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .charte .tf-page .pk-piste--paliers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .charte .tf-page .pk-onglet {
+    height: auto;
+    min-height: 36px;
+    padding: 6px 8px;
+    font-size: 13px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+}
+.charte .tf-page .pk-curseur {
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(32, 35, 34, 0.08),
+    0 0 0 1px rgba(32, 35, 34, 0.04);
+}
+.charte .tf-page .pk-onglet-texte {
+  position: relative;
+}
+
+/* ─── la carte ───────────────────────────────────────────────────── */
+.charte .tf-page .pk-carte {
+  display: grid;
+  width: 100%;
+  max-width: 960px;
+  grid-template-columns: minmax(0, 1fr);
+  border: 1px solid var(--ch-filet);
+  border-radius: 24px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(32, 35, 34, 0.04),
+    0 12px 32px -12px rgba(32, 35, 34, 0.12);
+}
+@media (min-width: 900px) {
+  .charte .tf-page .pk-carte {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  }
+}
+
+/* gauche : la liste */
+.charte .tf-page .pk-liste {
+  padding: 36px 40px;
+}
+.charte .tf-page .pk-legende {
+  margin-bottom: 18px;
+  color: var(--ch-gris);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.charte .tf-page .pk-liste ul {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.charte .tf-page .pk-liste li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #4c504b;
+  font-size: 15px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+.charte .tf-page .pk-coche {
+  display: grid;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -1px;
+  place-content: center;
+  border: 1.5px solid #c4c4bf;
+  border-radius: 999px;
+  color: var(--ch-encre-section);
+}
+.charte .tf-page .pk-coche svg {
+  width: 11px;
+  height: 11px;
+}
+.charte .tf-page .pk-coche--pleine {
+  border-color: var(--ch-encre-section);
+  background: var(--ch-encre-section);
+  color: #fff;
+}
+
+/* droite : l'offre, séparée par un filet (vertical dès 900 px) */
+.charte .tf-page .pk-offre {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 36px 40px;
+  border-top: 1px solid var(--ch-filet);
+}
+@media (min-width: 900px) {
+  .charte .tf-page .pk-offre {
+    margin: 28px 0;
+    padding: 8px 40px;
+    border-top: none;
+    border-left: 1px solid var(--ch-filet);
+  }
+}
+@media (max-width: 760px) {
+  .charte .tf-page .pk-liste,
+  .charte .tf-page .pk-offre {
+    padding: 28px 22px;
+  }
+}
+.charte .tf-page .pk-pack {
+  color: var(--ch-gris);
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+.charte .tf-page .pk-nom {
+  margin-top: 4px;
+  color: var(--ch-encre-section);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+.charte .tf-page .pk-texte {
+  margin-top: 10px;
+  color: #6b6f69;
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+.charte .tf-page .pk-prix {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 10px;
+  margin-top: 28px;
+  color: var(--ch-encre-section);
+}
+.charte .tf-page .pk-prix-des {
+  color: var(--ch-gris);
+  font-size: 16px;
+}
+.charte .tf-page .pk-prix-montant {
+  font-size: 56px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  white-space: nowrap;
+}
+.charte .tf-page .pk-prix-unite {
+  color: #6b6f69;
+  font-size: 15px;
+}
+@media (max-width: 760px) {
+  .charte .tf-page .pk-prix-montant {
+    font-size: 46px;
+  }
+}
+.charte .tf-page .pk-piece {
+  margin-top: 14px;
+  color: #777c76;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.charte .tf-page .pk-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.charte .tf-page .pk-detail,
+.charte .tf-page .pk-aide-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ch-encre-section);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.charte .tf-page .pk-detail svg,
+.charte .tf-page .pk-aide-lien svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .charte .tf-page .pk-detail:hover svg,
+  .charte .tf-page .pk-aide-lien:hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+
+/* sous la carte : la phrase d'aide et son lien */
+.charte .tf-page .pk-aide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+  text-align: center;
+}
+.charte .tf-page .pk-aide p {
+  color: #6b6f69;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}

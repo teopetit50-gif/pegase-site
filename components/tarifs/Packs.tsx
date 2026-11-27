@@ -1,68 +1,83 @@
+"use client";
+
 /* ══════════════════════════════════════════════════════════════════════
    Les quatre packs d'automatisations — 27/11/2026.
 
-   SOURCE : le pitch deck « Omega — Pitch deck » du 27/11 (slide 9, « Nos
-   packs d'automatisations : dix automatisations chacun, un prix
-   d'installation par palier »). Teo, le même jour : « tout remplacer ».
-   Les agents à 199 € par mois et les recharges de pièces quittent le site.
-
-   CE QUI EST ÉCRIT, mot pour mot depuis la slide :
+   CONTENU : le pitch deck « Omega — Pitch deck » du 27/11 (slide 9).
+   Teo, le même jour : « tout remplacer ». Les agents à 199 € par mois et
+   les recharges de pièces quittent le site.
    · l'installation d'un pack, « À PARTIR DE » : 1 750 € pour 3
      automatisations au choix, 2 900 € pour 6, 4 000 € pour les 10 ;
-   · les dix automatisations de chaque pack (libellés de la slide).
+   · les dix automatisations de chaque pack (libellés de la slide) ;
+   · le prix de la pièce n'est PAS écrit. Teo, 27/11 : « on n'est pas sûr,
+     c'est à l'audit qu'on verra combien ça coûte réellement au client ».
+     On écrit l'unité facturée, jamais le montant ;
+   · ni remise pilote, ni pourcentage de partage, ni nom de code de pack.
 
-   CE QUI N'EST PAS ÉCRIT :
-   · le prix de la pièce (1 € ou 2 € dans les notes du deck). Teo, 27/11 :
-     « on n'est pas sûr, c'est à l'audit qu'on verra combien ça coûte
-     réellement au client ». On écrit l'unité facturée, jamais le montant ;
-   · les remises pilotes et tout pourcentage de partage (notes internes) ;
-   · les noms de code des packs (sortis du site le 25/11, commit 02b83861).
+   DESSIN : 21st.dev, diarmuradi/pricing-7 « Toggle Pricing Cards », choisi
+   par Teo sur planche le 27/11 (« N »). Le registre demande un compte : le
+   code n'a pas été récupéré, le composant est REDESSINÉ d'après son rendu
+   (variante claire) : pastille, titre centré, piste segmentée, une carte
+   blanche à deux colonnes (liste cochée | nom, texte, prix, bouton), la
+   phrase d'aide et son lien sous la carte. Le prix, le texte et la liste
+   s'animent au changement d'onglet (motion).
+   Écarts voulus : DEUX pistes (le pack, puis 3 / 6 / 10), le bouton blanc
+   de la charte (25/11 : tous les boutons sont blancs), les couleurs de la
+   charte de l'accueil. Le dessin vit dans ./packs.css.
    ══════════════════════════════════════════════════════════════════════ */
 import Link from "next/link";
-import { Check } from "lucide-react";
+import { useId, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { ArrowUpRight, Check } from "lucide-react";
 import Section from "@/components/charte/Section";
 import EnTeteSection from "@/components/charte/EnTeteSection";
 import Bouton from "@/components/charte/Bouton";
-import { Scene } from "@/components/charte/Cartes";
 import { cn } from "@/lib/cn";
 import { lienContact } from "@/lib/reservation";
-import { GrandChiffre, NOTE_TVA, type Prix } from "@/components/tarifs/TroisPrix";
+import "./packs.css";
+
+type Palier = {
+  id: "3" | "6" | "10";
+  onglet: string;
+  nom: string;
+  prix: string;
+  /* la phrase entière, pour les lecteurs d'écran */
+  lu: string;
+  texte: string;
+};
 
 /* les trois paliers d'installation, identiques pour les quatre packs */
-const PALIERS_PACK: (Prix & { fort?: boolean })[] = [
+const PALIERS: Palier[] = [
   {
-    nom: "3 automatisations",
-    chiffre: { avant: "dès", entier: "1 750", centimes: null },
-    unite: "HT, une fois",
+    id: "3",
+    onglet: "3 automatisations",
+    nom: "3 automatisations au choix",
+    prix: "1 750",
     lu: "À partir de 1 750 € HT, payés une seule fois",
-    sous: "Au choix parmi les dix du pack",
-    texte: "Pour commencer par l'essentiel, par exemple les relances et la mise en demeure.",
-    points: [],
+    texte: "Pour commencer par l'essentiel. Vous choisissez trois automatisations parmi les dix du pack.",
   },
   {
-    nom: "6 automatisations",
-    chiffre: { avant: "dès", entier: "2 900", centimes: null },
-    unite: "HT, une fois",
+    id: "6",
+    onglet: "6 automatisations",
+    nom: "6 automatisations au choix",
+    prix: "2 900",
     lu: "À partir de 2 900 € HT, payés une seule fois",
-    sous: "Au choix parmi les dix du pack",
-    texte: "Pour couvrir la tâche presque entière, et garder la main sur le reste.",
-    points: [],
+    texte: "Pour couvrir la tâche presque entière. Vous choisissez six automatisations parmi les dix du pack.",
   },
   {
+    id: "10",
+    onglet: "Pack complet",
     nom: "Le pack complet",
-    chiffre: { avant: "dès", entier: "4 000", centimes: null },
-    unite: "HT, une fois",
+    prix: "4 000",
     lu: "À partir de 4 000 € HT, payés une seule fois",
-    sous: "Les dix automatisations du pack",
-    texte: "Toute la tâche est prise en charge. Vous ne gardez que la validation.",
-    points: [],
-    fort: true,
+    texte: "Les dix automatisations du pack. Toute la tâche est prise en charge, vous ne gardez que la validation.",
   },
 ];
 
 type Pack = {
+  id: string;
+  onglet: string;
   nom: string;
-  promesse: string;
   /* l'unité facturée à la pièce, sans montant (voir l'en-tête) */
   piece: string;
   href: string;
@@ -71,9 +86,9 @@ type Pack = {
 
 const PACKS: Pack[] = [
   {
+    id: "relances",
+    onglet: "Relances",
     nom: "Relances d'impayés",
-    promesse:
-      "Vos factures en retard sont relancées chaque matin, jusqu'à la mise en demeure soumise à votre signature.",
     piece: "la relance envoyée",
     href: "/offres/relances-impayes",
     automatisations: [
@@ -90,9 +105,9 @@ const PACKS: Pack[] = [
     ],
   },
   {
+    id: "dormants",
+    onglet: "Clients dormants",
     nom: "Clients dormants",
-    promesse:
-      "Les clients qui ne commandent plus reçoivent un message tiré de leur dernier achat, validé avant envoi.",
     piece: "le message de reprise envoyé",
     href: "/offres/nouvelles-affaires",
     automatisations: [
@@ -109,9 +124,9 @@ const PACKS: Pack[] = [
     ],
   },
   {
+    id: "demandes",
+    onglet: "Demandes",
     nom: "Demandes entrantes",
-    promesse:
-      "Chaque mail et chaque WhatsApp reçoit une réponse en moins d'une minute, tirée de votre base.",
     piece: "la demande traitée",
     href: "/offres/demandes-clients",
     automatisations: [
@@ -128,9 +143,9 @@ const PACKS: Pack[] = [
     ],
   },
   {
+    id: "factures",
+    onglet: "Factures fournisseurs",
     nom: "Factures fournisseurs",
-    promesse:
-      "Les factures reçues sont lues, contrôlées, classées et transmises au cabinet. Seules les anomalies vous reviennent.",
     piece: "la facture lue",
     href: "/offres/factures-fournisseurs",
     automatisations: [
@@ -148,95 +163,163 @@ const PACKS: Pack[] = [
   },
 ];
 
-function CartePack({ p }: { p: Pack }) {
+/* la piste segmentée de la référence : l'onglet actif est une pastille
+   blanche qui glisse d'un onglet à l'autre (layoutId) */
+function Piste<T extends string>({
+  label,
+  options,
+  valeur,
+  choisir,
+  className,
+}: {
+  label: string;
+  className?: string;
+  options: { id: T; libelle: string }[];
+  valeur: T;
+  choisir: (v: T) => void;
+}) {
+  const reduit = useReducedMotion();
+  const nom = useId();
   return (
-    <article className="tf-tier">
-      <div className="tf-tier-tete">
-        <div className="tf-tier-nom">
-          <h3>{p.nom}</h3>
-        </div>
-        <p className="tf-tier-desc">{p.promesse}</p>
-      </div>
-
-      <div className="tf-tier-prix">
-        <p className="tf-tier-ligne">Ensuite, à la pièce : {p.piece}.</p>
-        <p className="tf-tier-note">Le prix de la pièce est fixé à l&apos;audit, sur vos volumes.</p>
-      </div>
-
-      <div className="tf-tier-liste">
-        <h4 className="tf-tier-legende">Les dix automatisations</h4>
-        <ul className="space-y-2.5">
-          {p.automatisations.map((a) => (
-            <li key={a} className="flex items-start">
-              <span
-                aria-hidden
-                className="mr-2.5 mt-px grid size-[18px] flex-none place-content-center rounded-full bg-[#202322] text-white"
-              >
-                <Check className="size-3" strokeWidth={3} />
-              </span>
-              <span>{a}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="tf-tier-pied">
-        <Bouton href="/reserver-un-audit" plein>
-          Réserver un audit
-        </Bouton>
-        <p className="tf-tier-plus">
-          <Link href={p.href} className="ch-lien">
-            Voir le détail
-          </Link>
-        </p>
-      </div>
-    </article>
+    <div role="radiogroup" aria-label={label} className={cn("pk-piste", className)}>
+      {options.map((o) => {
+        const actif = o.id === valeur;
+        return (
+          <button
+            key={o.id}
+            type="button"
+            role="radio"
+            aria-checked={actif}
+            onClick={() => choisir(o.id)}
+            className={cn("pk-onglet", actif && "pk-onglet--actif")}
+          >
+            {actif ? (
+              <motion.span
+                layoutId={`pk-curseur-${nom}`}
+                className="pk-curseur"
+                transition={reduit ? { duration: 0 } : { type: "spring", bounce: 0.15, duration: 0.45 }}
+              />
+            ) : null}
+            <span className="pk-onglet-texte">{o.libelle}</span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 export default function Packs() {
+  const [packId, setPackId] = useState(PACKS[0].id);
+  const [palierId, setPalierId] = useState<Palier["id"]>("3");
+  const reduit = useReducedMotion();
+  const pack = PACKS.find((p) => p.id === packId) ?? PACKS[0];
+  const palier = PALIERS.find((p) => p.id === palierId) ?? PALIERS[0];
+  const complet = palier.id === "10";
+  const fondu = reduit
+    ? { initial: false as const, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0 } }
+    : {
+        initial: { opacity: 0, y: 6, filter: "blur(4px)" },
+        animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+        exit: { opacity: 0, y: -6, filter: "blur(4px)" },
+        transition: { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const },
+      };
+
   return (
     <Section id="packs">
       <EnTeteSection
+        disposition="centre"
         pastille="Packs d'automatisations"
-        titre="Quatre packs, dix automatisations chacun."
-        suite="Un prix d'installation par palier."
-        chapo="Dans chaque pack, vous choisissez 3, 6 ou 10 automatisations. L'installation se paie une seule fois et nos agents constructeurs la font en 2 à 4 semaines. Ensuite, l'IA se paie à la pièce, au prix fixé à l'audit."
+        titre="Choisissez votre pack."
+        chapo="Quatre packs de dix automatisations. Dans chacun, vous en prenez 3, 6 ou les 10. L'installation se paie une seule fois, puis l'IA se paie à la pièce."
       />
 
-      {/* les trois paliers, dans les colonnes à filets des prix publics */}
-      <div className="tf-prix">
-        <div className="tf-prix-grille">
-          {PALIERS_PACK.map((p) => (
-            <article key={p.nom} className={cn("tf-prix-col", p.fort && "tf-prix-col--fort")}>
-              <h3 className="tf-prix-nom">{p.nom}</h3>
-              <Scene basse trame={p.fort} className="tf-prix-scene">
-                <GrandChiffre p={p} />
-                <p className="tf-prix-sous">{p.sous}</p>
-              </Scene>
-              <p className="tf-prix-texte">{p.texte}</p>
-            </article>
-          ))}
+      <div className="pk">
+        <div className="pk-pistes">
+          <Piste
+            label="Le pack"
+            className="pk-piste--packs"
+            options={PACKS.map((p) => ({ id: p.id, libelle: p.onglet }))}
+            valeur={packId}
+            choisir={setPackId}
+          />
+          <Piste
+            label="Le nombre d'automatisations"
+            className="pk-piste--paliers"
+            options={PALIERS.map((p) => ({ id: p.id, libelle: p.onglet }))}
+            valeur={palierId}
+            choisir={setPalierId}
+          />
         </div>
-      </div>
 
-      <div id="grille" className="tf-agents scroll-mt-32">
-        {PACKS.map((p) => (
-          <CartePack key={p.nom} p={p} />
-        ))}
-      </div>
+        <div className="pk-carte">
+          {/* gauche : les dix automatisations du pack. Au palier 3 ou 6,
+              ce sont les dix CHOIX possibles (cercle vide) ; au pack complet,
+              les dix sont comprises (cercle plein). */}
+          <div className="pk-liste">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={`${pack.id}-${complet}`} {...fondu}>
+                <p className="pk-legende">
+                  {complet ? "Les dix automatisations comprises" : `${palier.id} au choix parmi ces dix`}
+                </p>
+                <ul>
+                  {pack.automatisations.map((a) => (
+                    <li key={a}>
+                      <span aria-hidden className={cn("pk-coche", complet && "pk-coche--pleine")}>
+                        <Check strokeWidth={3} />
+                      </span>
+                      <span>{a}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-      {/* le site n'est pas le catalogue : ce qui sort des quatre packs se
-          construit sur mesure, et la page le dit (CLAUDE.md, « Vente ») */}
-      <div className="tf-prix-notes">
-        <p>
-          Un besoin hors de ces quatre packs, un logiciel peu répandu à raccorder ou plusieurs services
-          aux règles distinctes ? Nous le construisons sur mesure, sur devis.{" "}
-          <Link href={lienContact("avant")} className="ch-lien">
+          {/* droite : le nom, le texte, le prix « dès », le bouton */}
+          <div className="pk-offre">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={`${pack.id}-${palier.id}`} className="pk-offre-corps" {...fondu}>
+                <p className="pk-pack">{pack.nom}</p>
+                <h3 className="pk-nom">{palier.nom}</h3>
+                <p className="pk-texte">{palier.texte}</p>
+                <p className="pk-prix">
+                  <span className="sr-only">{palier.lu}</span>
+                  <span aria-hidden className="pk-prix-des">
+                    dès
+                  </span>
+                  <span aria-hidden className="pk-prix-montant">
+                    {palier.prix}&nbsp;€
+                  </span>
+                  <span aria-hidden className="pk-prix-unite">
+                    HT, une fois
+                  </span>
+                </p>
+                <p className="pk-piece">
+                  Ensuite, à la pièce&nbsp;: {pack.piece}. Prix fixé à l&apos;audit, sur vos volumes.
+                </p>
+              </motion.div>
+            </AnimatePresence>
+            <div className="pk-actions">
+              <Bouton href="/reserver-un-audit" plein>
+                Réserver un audit
+              </Bouton>
+              <Link href={pack.href} className="pk-detail">
+                Voir le pack {pack.nom.toLowerCase()}
+                <ArrowUpRight aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* le site n'est pas le catalogue : ce qui sort des quatre packs se
+            construit sur mesure, et la page le dit (CLAUDE.md, « Vente ») */}
+        <div className="pk-aide">
+          <p>Un besoin hors de ces quatre packs&nbsp;? Nous le construisons sur mesure, sur devis.</p>
+          <Link href={lienContact("avant")} className="pk-aide-lien">
             Décrire votre besoin
+            <ArrowUpRight aria-hidden />
           </Link>
-        </p>
-        <p className="tf-prix-tva">{NOTE_TVA}</p>
+        </div>
       </div>
     </Section>
   );
