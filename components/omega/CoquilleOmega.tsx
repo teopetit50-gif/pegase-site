@@ -318,9 +318,6 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
             <ItemMenu id="pilotage" href={RACINE} textValue="Pilotage Omega" icone={<LayoutGrid {...I} />} suffixe={coche(true)}>
               Pilotage Omega
             </ItemMenu>
-            <ItemMenu id="client" href="/espace2" textValue="Espace client" icone={<ExternalLink {...I} />}>
-              Espace client (démonstration)
-            </ItemMenu>
           </SectionMenu>
         </MenuDeroulant>
         {fermer ? (
@@ -399,9 +396,6 @@ function BarreLaterale({ email, chemin, ouvrirPalette, fermer }: { email: string
           </SectionMenu>
           <SeparateurMenu />
           <SectionMenu>
-            <ItemMenu id="client" href="/espace2" icone={<ExternalLink {...I} />}>
-              Espace client (démonstration)
-            </ItemMenu>
             <ItemMenu id="site" href="/" icone={<ExternalLink {...I} />}>
               Retour au site
             </ItemMenu>
