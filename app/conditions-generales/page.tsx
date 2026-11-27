@@ -35,6 +35,13 @@ import { titreSite } from "@/components/espace2/portail";
      · L'analyse préalable est remboursée si le devis est signé dans les
        trois mois suivant sa remise.
      · Omega peut citer le client comme référence, sauf refus écrit.
+     · 27/11, soir — GARANTIE DE REMBOURSEMENT 30 JOURS (Teo : « mets-la
+       dans les CGV »). Elle était affichée par le module de réservation
+       (components/reservation/PriseDeCreneau.tsx, sous le prix de
+       l'abonnement) sans exister au contrat. Choix : elle couvre
+       l'abonnement (ERX et pièces, y compris l'annuel payé d'avance), une
+       fois par client ; l'installation et le sur-mesure en sont exclus sauf
+       devis contraire. Si Teo veut y inclure l'installation, c'est ici.
      · Omega peut arrêter l'abonnement ou un module avec trois mois de
        préavis ; une installation abandonnée se paie au prorata.
      · Prélèvement SEPA annoncé au moins deux jours avant l'échéance.
@@ -142,6 +149,14 @@ const SECTIONS: SectionLegale[] = [
       "Le moyen de paiement, carte ou prélèvement SEPA, est enregistré sur une page sécurisée lors de la réservation de l'installation. En dehors de l'analyse préalable, rien n'est débité avant la fin de l'installation. Le Client accepte que chaque prélèvement SEPA lui soit annoncé au moins deux jours avant son échéance, par la facture ou par e-mail.",
       "L'installation d'un pack est facturée une seule fois, à la mise en service. L'ERX est facturé chaque mois, d'avance, à partir de la mise en service, selon le nombre d'Utilisateurs actifs. Les pièces sont facturées chaque mois, à terme échu, selon ce que l'IA a traité dans le mois. Les factures sont payables à réception, par prélèvement sur le moyen de paiement enregistré.",
       "Tout retard de paiement entraîne de plein droit des pénalités égales à trois fois le taux d'intérêt légal et une indemnité forfaitaire de 40 € pour frais de recouvrement (article L. 441-10 du Code de commerce). Si une facture reste impayée quinze jours après une mise en demeure par e-mail, Omega peut suspendre l'accès au Service jusqu'au paiement, sans que les Données du Client soient effacées pendant la suspension.",
+    ],
+  },
+  {
+    id: "garantie-de-remboursement",
+    h: "Garantie de remboursement",
+    p: [
+      "Pendant les trente jours qui suivent la mise en service, le Client qui n'est pas satisfait peut demander par e-mail le remboursement intégral des sommes versées au titre de l'abonnement, c'est-à-dire l'ERX et les pièces, y compris une échéance annuelle payée d'avance. Omega rembourse sur le moyen de paiement utilisé, dans les quatorze jours qui suivent la demande.",
+      "La demande vaut résiliation du contrat. Le Client reçoit l'export de ses données dans les conditions de l'article «\u00a0Réversibilité et fin du contrat\u00a0». La garantie vaut une fois par Client, pour sa première souscription. Elle ne couvre pas l'installation des packs ni les développements sur mesure, sauf si le Devis le prévoit, ni l'analyse préalable.",
     ],
   },
   {
